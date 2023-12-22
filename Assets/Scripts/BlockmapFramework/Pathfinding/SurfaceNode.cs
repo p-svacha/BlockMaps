@@ -12,10 +12,12 @@ namespace BlockmapFramework
     /// </summary>
     public class SurfaceNode : BlockmapNode
     {
-        public override int Layer => World.Layer_Terrain;
+        public override int Layer => World.Layer_SurfaceNode;
 
         // Path
         public bool HasPath;
+
+        public SurfaceNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
 
         #region Connections
 
@@ -62,32 +64,30 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public override void Draw()
+        public override void Draw(MeshBuilder meshBuilder)
         {
-            Debug.Log("Drawing node on " + WorldCoordinates.ToString());
-
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
             DrawSurface(meshBuilder);
             DrawSides(meshBuilder);
             if(HasPath) DrawPath(meshBuilder);
-            meshBuilder.ApplyMesh();
-
-            transform.localPosition = new Vector3(LocalCoordinates.x, BaseHeight * World.TILE_HEIGHT, LocalCoordinates.y);
         }
 
         private void DrawSurface(MeshBuilder meshBuilder)
         {
-            int surfaceSubmesh = meshBuilder.AddNewSubmesh(BlockmapResourceManager.Singleton.DefaultMaterial, Surface.Color);
+            int surfaceSubmesh = 0;
 
             // Surface vertices
-            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[0] * World.TILE_HEIGHT, 0), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[0] * World.TILE_HEIGHT, 0), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[1] * World.TILE_HEIGHT, 0), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[1] * World.TILE_HEIGHT, 0), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[2] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[2] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[3] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
-            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[3] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
+            float xStart = LocalCoordinates.x * World.TILE_SIZE;
+            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
+            float yStart = LocalCoordinates.y * World.TILE_SIZE;
+            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, Height[1] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, Height[1] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, Height[2] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, Height[2] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, Height[3] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, Height[3] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
 
             switch (Shape)
             {
@@ -146,7 +146,7 @@ namespace BlockmapFramework
 
         private void DrawSides(MeshBuilder meshBuilder)
         {
-            int cliffSubmesh = meshBuilder.AddNewSubmesh(BlockmapResourceManager.Singleton.DefaultMaterial, new Color(0.2f, 0.2f, 0.2f));
+            int cliffSubmesh = 1;
             DrawEastSide(meshBuilder, cliffSubmesh);
             DrawWestSide(meshBuilder, cliffSubmesh);
             DrawSouthSide(meshBuilder, cliffSubmesh);
@@ -157,11 +157,17 @@ namespace BlockmapFramework
             SurfaceNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
             if (eastNode == null) return;
 
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[NE] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, (eastNode.Height[NW] - BaseHeight) * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, (eastNode.Height[SW] - BaseHeight) * World.TILE_HEIGHT, 0f), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[SE] * World.TILE_HEIGHT, 0f), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, World.TILE_HEIGHT * 0.5f, World.TILE_SIZE * 0.5f), new Vector2(0.5f, 0.5f));
+            float xStart = LocalCoordinates.x * World.TILE_SIZE;
+            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
+            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float yStart = LocalCoordinates.y * World.TILE_SIZE;
+            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, World.TILE_HEIGHT * 0.5f, yCenter), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NE] < eastNode.Height[NW] && Height[SE] < eastNode.Height[SW]) // Both corners are lower than next tile
@@ -190,11 +196,17 @@ namespace BlockmapFramework
             SurfaceNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
             if (southNode == null) return;
 
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[SE] * World.TILE_HEIGHT, 0f), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, (southNode.Height[NE] - BaseHeight) * World.TILE_HEIGHT, 0f), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(0, (southNode.Height[NW] - BaseHeight) * World.TILE_HEIGHT, 0f), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[SW] * World.TILE_HEIGHT, 0f), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE * 0.5f, World.TILE_HEIGHT * 0.5f, 0f), new Vector2(0.5f, 0.5f));
+            float xStart = LocalCoordinates.x * World.TILE_SIZE;
+            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
+            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float yStart = LocalCoordinates.y * World.TILE_SIZE;
+            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, World.TILE_HEIGHT * 0.5f, yStart), new Vector2(0.5f, 0.5f));
 
 
             if (Height[SE] < southNode.Height[NE] && Height[SW] < southNode.Height[NW]) // Both corners are lower than next tile
@@ -223,11 +235,17 @@ namespace BlockmapFramework
             SurfaceNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
             if (westNode == null) return;
 
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[NW] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(0, (westNode.Height[NE] - BaseHeight) * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(0, (westNode.Height[SE] - BaseHeight) * World.TILE_HEIGHT, 0f), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[SW] * World.TILE_HEIGHT, 0f), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(0, World.TILE_HEIGHT * 0.5f, World.TILE_SIZE * 0.5f), new Vector2(0.5f, 0.5f));
+            float xStart = LocalCoordinates.x * World.TILE_SIZE;
+            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
+            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float yStart = LocalCoordinates.y * World.TILE_SIZE;
+            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, World.TILE_HEIGHT * 0.5f, yCenter), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NW] < westNode.Height[NE] && Height[SW] < westNode.Height[SE]) // Both corners are lower than next tile
@@ -256,11 +274,17 @@ namespace BlockmapFramework
             SurfaceNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
             if (northNode == null) return;
 
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, RelativeHeight[NE] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE, (northNode.Height[SE] - BaseHeight) * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(0, (northNode.Height[SW] - BaseHeight) * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(0, RelativeHeight[NW] * World.TILE_HEIGHT, World.TILE_SIZE), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(World.TILE_SIZE * 0.5f, World.TILE_HEIGHT * 0.5f, World.TILE_SIZE), new Vector2(0.5f, 0.5f));
+            float xStart = LocalCoordinates.x * World.TILE_SIZE;
+            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
+            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float yStart = LocalCoordinates.y * World.TILE_SIZE;
+            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, World.TILE_HEIGHT * 0.5f, yEnd), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NE] < northNode.Height[SE] && Height[NW] < northNode.Height[SW]) // Both corners are lower than next tile

@@ -1,12 +1,10 @@
 Shader "Custom/SurfaceShader"
 {
-    // District Shader that supports blink and animated highlight but no borders. Mesh borders should be used with this shader
-    Properties
+    Properties // Exposed to editor in material insepctor
     {
-        _Color("Main Color", Color) = (1, 1, 1, 1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
 
-        _TintColor("Tint Color", Color) = (1,1,1,0)
+        _TintColor("Color Overlay", Color) = (1,1,1,0)
 
         _GridTex("Grid Texture", 2D) = "none" {}
         [Toggle] _ShowGrid("Show Grid", Float) = 1
@@ -21,7 +19,7 @@ Shader "Custom/SurfaceShader"
         _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
         _TileOverlayX("Overlay X Coord", Float) = 0
         _TileOverlayY("Overlay Y Coord", Float) = 0
-        
+
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
     }
@@ -38,7 +36,12 @@ Shader "Custom/SurfaceShader"
             #pragma target 3.0
 
 
+        float _ChunkSize;
         sampler2D _MainTex;
+
+        fixed4 _GrassColor;
+        fixed4 _SandColor;
+        fixed4 _TarmacColor;
 
         sampler2D _GridTex;
         fixed4 _GridColor;
@@ -47,6 +50,8 @@ Shader "Custom/SurfaceShader"
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
+        float _TileOverlayX;
+        float _TileOverlayY;
         
         float _ShowBlockOverlay;
         sampler2D _BlockOverlayTex;
@@ -63,28 +68,34 @@ Shader "Custom/SurfaceShader"
 
         half _Glossiness;
         half _Metallic;
-        fixed4 _Color;
         fixed4 _TintColor;
 
         float _TileSurfaces[1000];
 
-        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-        // #pragma instancing_options assumeuniformscaling
-        UNITY_INSTANCING_BUFFER_START(Props)
-            // put more per-instance properties here
-        UNITY_INSTANCING_BUFFER_END(Props)
-
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            // Find out where we exactly are on the chunk
+            float2 localPos = floor(IN.worldPos.xz % _ChunkSize);
+            int tileIndex = int(localPos.y + localPos.x * _ChunkSize);
+
+            // Take input texture as main color
+            fixed4 c = tex2D(_MainTex, IN.uv_MainTex); 
+
+            
+            // Tint depending on surface
+            if (_TileSurfaces[tileIndex] == 0) c *= _GrassColor;
+            if (_TileSurfaces[tileIndex] == 1) c *= _SandColor;
+            if (_TileSurfaces[tileIndex] == 2) c *= _TarmacColor;
+            
 
             // Selection Overlay
             if (_ShowTileOverlay == 1)
             {
-                fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
-                c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
+                if (localPos.x == _TileOverlayX && localPos.y == _TileOverlayY)
+                {
+                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
+                    c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
+                }
             }
 
             // Block Overlay

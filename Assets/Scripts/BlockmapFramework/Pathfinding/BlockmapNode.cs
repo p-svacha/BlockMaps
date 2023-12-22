@@ -10,7 +10,7 @@ namespace BlockmapFramework
     /// <br/> A BlockmapNode is on one specific world coordinate but can have different heights for its corners.
     /// <br/> All entities are tied to a BlockmapNode.
     /// </summary>
-    public abstract class BlockmapNode : MonoBehaviour
+    public abstract class BlockmapNode
     {
         private static int IdCounter = 0;
         public int Id;
@@ -19,11 +19,6 @@ namespace BlockmapFramework
         /// Height of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
         public int[] Height { get; protected set; }
-
-        /// <summary>
-        /// Relative height of the 4 corners relative to the BaseHeight of this node: {SW, SE, NE, NW}
-        /// </summary>
-        public int[] RelativeHeight { get; private set; }
 
         /// <summary>
         /// Height at which this node is starting at. (Its lowest point)
@@ -68,7 +63,7 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public virtual void Init(World world, Chunk chunk, NodeData data)
+        protected BlockmapNode(World world, Chunk chunk, NodeData data)
         {
             World = world;
             Chunk = chunk;
@@ -82,9 +77,6 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(data.Surface);
             Type = data.Type;
             ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
-
-            gameObject.layer = Layer;
-            transform.localPosition = new Vector3(LocalCoordinates.x, BaseHeight * World.TILE_HEIGHT, LocalCoordinates.y);
         }
 
         /// <summary>
@@ -93,14 +85,6 @@ namespace BlockmapFramework
         protected void RecalculateShape()
         {
             BaseHeight = Height.Min();
-            RelativeHeight = new int[]
-            {
-                Height[0] - BaseHeight,
-                Height[1] - BaseHeight,
-                Height[2] - BaseHeight,
-                Height[3] - BaseHeight,
-            };
-
             Shape = GetShape(Height);
         }
 
@@ -148,12 +132,12 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Mesh
+        #region Draw
 
         /// <summary>
-        /// Generate the mesh of this node.
+        /// Adds all of this nodes vertices and triangles to the given MeshBuilder.
         /// </summary>
-        public abstract void Draw();
+        public abstract void Draw(MeshBuilder meshBuilder);
 
         #endregion
 
@@ -231,25 +215,16 @@ namespace BlockmapFramework
 
         public static BlockmapNode Load(World world, Chunk chunk, NodeData data)
         {
-            GameObject nodeObject = new GameObject("Node");
-            nodeObject.transform.SetParent(chunk.transform);
-
             switch(data.Type)
             {
                 case NodeType.Surface:
-                    SurfaceNode surfaceNode = nodeObject.AddComponent<SurfaceNode>();
-                    surfaceNode.Init(world, chunk, data);
-                    return surfaceNode;
+                    return new SurfaceNode(world, chunk, data);
 
                 case NodeType.AirPath:
-                    AirPathNode airPathNode = nodeObject.AddComponent<AirPathNode>();
-                    airPathNode.Init(world, chunk, data);
-                    return airPathNode;
+                    return new AirPathNode(world, chunk, data);
 
                 case NodeType.AirPathSlope:
-                    AirPathSlopeNode airPathSlopeNode = nodeObject.AddComponent<AirPathSlopeNode>();
-                    airPathSlopeNode.Init(world, chunk, data);
-                    return airPathSlopeNode;
+                    return new AirPathSlopeNode(world, chunk, data);
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }

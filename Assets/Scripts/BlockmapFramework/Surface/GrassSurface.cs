@@ -6,6 +6,8 @@ namespace BlockmapFramework
 {
     public class GrassSurface : Surface
     {
+        public GrassSurface() : base() { }
+
         public override SurfaceId Id => SurfaceId.Grass;
         public override string Name => "Grass";
         public override float SpeedModifier => 0.5f;

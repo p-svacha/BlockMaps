@@ -14,7 +14,7 @@ namespace BlockmapFramework
         /// </summary>
         public static void BuildPath(World world, MeshBuilder meshBuilder, BlockmapNode node)
         {
-            int pathSubmesh = meshBuilder.AddNewSubmesh(BlockmapResourceManager.Singleton.DefaultMaterial, SurfaceManager.Instance.GetSurface(SurfaceId.Tarmac).Color);
+            int pathSubmesh = meshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial);
 
             // Center plane
             DrawShapePlane(node, meshBuilder, pathSubmesh, PATH_HEIGHT, PATH_SIDE_MARGIN, 1f - PATH_SIDE_MARGIN, PATH_SIDE_MARGIN, 1f - PATH_SIDE_MARGIN);
@@ -45,19 +45,19 @@ namespace BlockmapFramework
         /// </summary>
         private static void DrawShapePlane(BlockmapNode node, MeshBuilder meshBuilder, int pathSubmesh, float height, float xStart, float xEnd, float yStart, float yEnd)
         {
-            Vector3 v_SW_pos = new Vector3(xStart, node.GetRelativeHeightAt(new Vector2(xStart, yStart)) + height, yStart);
+            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, (node.BaseHeight * World.TILE_HEIGHT) + node.GetRelativeHeightAt(new Vector2(xStart, yStart)) + height, node.LocalCoordinates.y + yStart);
             Vector2 v_SW_uv = new Vector2(xStart, yStart);
             MeshVertex v_SW = meshBuilder.AddVertex(v_SW_pos, v_SW_uv);
 
-            Vector3 v_SE_pos = new Vector3(xEnd, node.GetRelativeHeightAt(new Vector2(xEnd, yStart)) + height, yStart);
+            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, (node.BaseHeight * World.TILE_HEIGHT) + node.GetRelativeHeightAt(new Vector2(xEnd, yStart)) + height, node.LocalCoordinates.y + yStart);
             Vector2 v_SE_uv = new Vector2(xEnd, yStart);
             MeshVertex v_SE = meshBuilder.AddVertex(v_SE_pos, v_SE_uv);
 
-            Vector3 v_NE_pos = new Vector3(xEnd, node.GetRelativeHeightAt(new Vector2(xEnd, yEnd)) + height, yEnd);
+            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, (node.BaseHeight * World.TILE_HEIGHT) + node.GetRelativeHeightAt(new Vector2(xEnd, yEnd)) + height, node.LocalCoordinates.y + yEnd);
             Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
             MeshVertex v_NE = meshBuilder.AddVertex(v_NE_pos, v_NE_uv);
 
-            Vector3 v_NW_pos = new Vector3(xStart, node.GetRelativeHeightAt(new Vector2(xStart, yEnd)) + height, yEnd);
+            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, (node.BaseHeight * World.TILE_HEIGHT) + node.GetRelativeHeightAt(new Vector2(xStart, yEnd)) + height, node.LocalCoordinates.y + yEnd);
             Vector2 v_NW_uv = new Vector2(xStart, yEnd);
             MeshVertex v_NW = meshBuilder.AddVertex(v_NW_pos, v_NW_uv);
 

@@ -12,7 +12,6 @@ public class MeshBuilder
     public int CurrentSubmesh = -1;
 
     private List<Material> Materials = new List<Material>(); // Stores the materials for each submesh
-    private List<Color> MaterialColors = new List<Color>(); // Stores material color for each submesh
 
     /// <summary>
     /// Create a mesh builder for a new game object
@@ -44,7 +43,7 @@ public class MeshBuilder
         MeshObject = meshObject;
     }
 
-    public GameObject ApplyMesh(bool applyMaterials = true)
+    public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true)
     {
         // Set index values for all vertices
         for (int i = 0; i < Vertices.Count; i++) Vertices[i].Id = i;
@@ -74,11 +73,10 @@ public class MeshBuilder
         meshFilter.mesh.RecalculateNormals();
 
         if(applyMaterials) meshRenderer.materials = Materials.ToArray(); // Set the material for each submesh
-        for (int i = 0; i < MaterialColors.Count; i++) meshRenderer.materials[i].color = MaterialColors[i];
 
         // Update collider
         GameObject.Destroy(MeshObject.GetComponent<MeshCollider>());
-        MeshObject.AddComponent<MeshCollider>();
+        if(addCollider) MeshObject.AddComponent<MeshCollider>();
 
         return MeshObject;
     }
@@ -114,12 +112,11 @@ public class MeshBuilder
         Triangles[triangle.SubmeshIndex].Remove(triangle);
     }
 
-    public int AddNewSubmesh(Material material, Color? c = null)
+    public int AddNewSubmesh(Material material)
     {
         Triangles.Add(new List<MeshTriangle>());
         CurrentSubmesh++;
         Materials.Add(material);
-        MaterialColors.Add(c ?? Color.white);
         return CurrentSubmesh;
     }
 

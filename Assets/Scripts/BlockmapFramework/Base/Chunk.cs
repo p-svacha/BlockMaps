@@ -15,7 +15,10 @@ namespace BlockmapFramework
         /// Each tile on the chunk has a list of nodes, whereas the first element is always the surface node and all possible further nodes are PathNodes.
         /// </summary>
         public List<BlockmapNode>[,] Nodes { get; private set; }
-        public bool IsOwned { get; private set; } // todo: remove from base class
+
+        // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
+        public GameObject SurfaceMesh;
+        public AirNodeMesh[] AirNodeMesh;
 
 
         /// <summary>
@@ -40,7 +43,18 @@ namespace BlockmapFramework
                 Nodes[nodeData.LocalCoordinateX, nodeData.LocalCoordinateY].Add(node);
             }
 
-            transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
+            // Init meshes
+            SurfaceMesh = new GameObject("SurfaceMesh");
+            SurfaceMesh.layer = World.Layer_SurfaceNode;
+            SurfaceMesh.transform.SetParent(transform);
+
+            AirNodeMesh = new AirNodeMesh[World.MAX_HEIGHT];
+            for(int i = 0; i < World.MAX_HEIGHT; i++)
+            {
+                GameObject obj = new GameObject("AirNodeMesh_" + i);
+                AirNodeMesh[i] = obj.AddComponent<AirNodeMesh>();
+                AirNodeMesh[i].Init(this, i);
+            }
         }
 
         /// <summary>
@@ -59,43 +73,45 @@ namespace BlockmapFramework
 
         #region Draw
 
+        /// <summary>
+        /// Generates a single mesh for this chunk
+        /// </summary>
         public void Draw()
         {
-            for (int y = 0; y < Size; y++)
+            // Surface mesh
+            MeshBuilder surfaceMeshBuilder = new MeshBuilder(SurfaceMesh);
+            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.SurfaceMaterial); // Submesh 0: surface
+            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial); // Submesh 1: cliffs
+            List<float> surfaceArray = new List<float>(); // for shader
+
+            foreach (SurfaceNode node in GetAllSurfaceNodes())
             {
-                for (int x = 0; x < Size; x++)
-                {
-                    foreach(BlockmapNode node in Nodes[x,y])
-                    {
-                        node.Draw();
-                    }
-                }
+                node.Draw(surfaceMeshBuilder);
+                surfaceArray.Add((int)node.Surface.Id);
             }
+            surfaceMeshBuilder.ApplyMesh();
+
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ChunkSize", Size);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileSurfaces", surfaceArray);
+
+            // Air node meshes
+            foreach (AirNodeMesh mesh in AirNodeMesh) mesh.Draw();
+
+            // Chunk position
+            transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
         }
 
-        #endregion
-
-        #region Ownership
-
-        public bool CanAquire()
+        public void ShowSurfaceTileOverlay(bool show)
         {
-            if (IsOwned) return false;
-            Vector2Int north = Coordinates + new Vector2Int(0, 1);
-            bool isNorthBlockOwned = (World.Chunks.ContainsKey(north) && World.Chunks[north].IsOwned);
-            Vector2Int south = Coordinates + new Vector2Int(0, -1);
-            bool isSouthBlockOwned = (World.Chunks.ContainsKey(south) && World.Chunks[south].IsOwned);
-            Vector2Int east = Coordinates + new Vector2Int(1, 0);
-            bool isEastBlockOwned = (World.Chunks.ContainsKey(east) && World.Chunks[east].IsOwned);
-            Vector2Int west = Coordinates + new Vector2Int(-1, 0);
-            bool isWestBlockOwned = (World.Chunks.ContainsKey(west) && World.Chunks[west].IsOwned);
-            if (!isNorthBlockOwned && !isSouthBlockOwned && !isEastBlockOwned && !isWestBlockOwned) return false;
-
-            return true;
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowTileOverlay", show ? 1 : 0);
         }
-
-        public void Aquire()
+        public void ShowSurfaceTileOverlay(Texture2D texture, Vector2Int localCoordinates, Color color)
         {
-            IsOwned = true;
+            ShowSurfaceTileOverlay(true);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetTexture("_TileOverlayTex", texture);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayX", localCoordinates.x);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayY", localCoordinates.y);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetColor("_TileOverlayColor", color);
         }
 
         #endregion
@@ -110,7 +126,7 @@ namespace BlockmapFramework
         {
             return GetNodes(localCoordinates.x, localCoordinates.y);
         }
-        public List<SurfaceNode> GetSurfaceNodes()
+        public List<SurfaceNode> GetAllSurfaceNodes()
         {
             List<SurfaceNode> nodes = new List<SurfaceNode>();
             for (int x = 0; x < Size; x++)
@@ -126,13 +142,23 @@ namespace BlockmapFramework
         {
             return GetSurfaceNode(localCoordinates.x, localCoordinates.y);
         }
-        public List<BlockmapNode> GetPathNodes(int x, int y)
+
+        public List<BlockmapNode> GetAllAirNodes()
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            for (int x = 0; x < Size; x++)
+                for (int y = 0; y < Size; y++)
+                    foreach (BlockmapNode node in GetAirNodes(x, y))
+                        nodes.Add(node);
+            return nodes;
+        }
+        public List<BlockmapNode> GetAirNodes(int x, int y)
         {
             return Nodes[x, y].Skip(1).ToList();
         }
-        public List<BlockmapNode> GetPathNodes(Vector2Int localCoordinates)
+        public List<BlockmapNode> GetAirNodes(Vector2Int localCoordinates)
         {
-            return GetPathNodes(localCoordinates.x, localCoordinates.y);
+            return GetAirNodes(localCoordinates.x, localCoordinates.y);
         }
         public List<AirPathSlopeNode> GetAirPathSlopeNodes(int x, int y)
         {
@@ -162,7 +188,7 @@ namespace BlockmapFramework
 
         public static Chunk Load(World world, ChunkData data)
         {
-            GameObject chunkObject = new GameObject("Chunk");
+            GameObject chunkObject = new GameObject("Chunk " + data.ChunkCoordinateX + "/" + data.ChunkCoordinateY);
             chunkObject.transform.SetParent(world.transform);
             Chunk chunk = chunkObject.AddComponent<Chunk>();
 

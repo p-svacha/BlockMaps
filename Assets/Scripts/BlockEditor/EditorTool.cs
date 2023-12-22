@@ -7,10 +7,8 @@ namespace WorldEditor
     public enum EditorTool
     {
         Terrain,
-        WorldExpand,
         SurfacePath,
         AirPath,
         Stairs,
-        Building
     }
 }

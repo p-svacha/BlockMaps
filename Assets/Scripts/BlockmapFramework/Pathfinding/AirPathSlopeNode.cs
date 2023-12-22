@@ -7,12 +7,10 @@ namespace BlockmapFramework
     public class AirPathSlopeNode : BlockmapNode
     {
         public Direction SlopeDirection;
-        public override int Layer => World.Layer_Path;
+        public override int Layer => World.Layer_AirNode;
 
-        public override void Init(World world, Chunk chunk, NodeData data)
+        public AirPathSlopeNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data)
         {
-            base.Init(world, chunk, data);
-
             SlopeDirection = GetDirectionFromShape(Shape);
         }
 
@@ -78,11 +76,9 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public override void Draw()
+        public override void Draw(MeshBuilder meshBuilder)
         {
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
             PathMeshBuilder.BuildPath(World, meshBuilder, this);
-            meshBuilder.ApplyMesh();
         }
 
         #endregion

@@ -6,6 +6,8 @@ namespace BlockmapFramework
 {
     public class SandSurface : Surface
     {
+        public SandSurface() : base() { }
+
         public override SurfaceId Id => SurfaceId.Sand;
         public override string Name => "Sand";
         public override float SpeedModifier => 0.2f;

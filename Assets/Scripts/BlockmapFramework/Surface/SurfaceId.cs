@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum SurfaceId
 {
-    Grass,
-    Sand,
-    Tarmac
+    Grass = 0,
+    Sand = 1,
+    Tarmac = 2
 }

@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace WorldEditor
+namespace BlockmapFramework
 {
-    public class EditorCamera : MonoBehaviour
+    public class BlockmapCamera : MonoBehaviour
     {
         public Camera Camera;
 

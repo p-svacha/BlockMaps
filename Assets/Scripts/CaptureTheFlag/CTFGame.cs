@@ -8,7 +8,7 @@ namespace CaptureTheFlag
     {
         private void Start()
         {
-            //WorldGenerator.GenerateWorld(100);
+            CTFWorldGenerator.GenerateWorld("CTFWorld", 10, 10);
         }
     }
 }

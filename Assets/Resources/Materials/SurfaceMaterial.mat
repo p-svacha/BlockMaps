@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DefaultMaterial
+  m_Name: SurfaceMaterial
   m_Shader: {fileID: 4800000, guid: df64fae4770771245b2cd79fcc4b341d, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
@@ -73,11 +73,12 @@ Material:
     m_Floats:
     - _BlockSize: 12
     - _BumpScale: 1
+    - _ChunkSize: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
@@ -95,12 +96,13 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BlockOverlayColor: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.3584906, g: 0.31283376, b: 0.31283376, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GrassColor: {r: 0, g: 1, b: 0, a: 1}
+    - _GrassColor: {r: 0.3, g: 0.7, b: 0.1, a: 1}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SandColor: {r: 1, g: 1, b: 0, a: 1}
+    - _SandColor: {r: 0.7, g: 0.5, b: 0, a: 1}
+    - _TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
     - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
     - _TintColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []

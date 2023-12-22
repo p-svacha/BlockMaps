@@ -6,7 +6,9 @@ namespace BlockmapFramework
 {
     public class AirPathNode : BlockmapNode
     {
-        public override int Layer => World.Layer_Path;
+        public override int Layer => World.Layer_AirNode;
+
+        public AirPathNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
 
         #region Connections
 
@@ -47,11 +49,9 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public override void Draw()
+        public override void Draw(MeshBuilder meshBuilder)
         {
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
             PathMeshBuilder.BuildPath(World, meshBuilder, this);
-            meshBuilder.ApplyMesh();
         }
 
         #endregion

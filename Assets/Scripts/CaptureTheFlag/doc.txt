@@ -1,0 +1,5 @@
+Big Features to Add:
+- Vision / Line of Sight / Fog of War
+- Static Entities
+- Water
+

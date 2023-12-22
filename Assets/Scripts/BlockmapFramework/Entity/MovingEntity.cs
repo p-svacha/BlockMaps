@@ -37,13 +37,13 @@ namespace BlockmapFramework
 
             // Update transform position and occupied tiles (for collisions) when moving
             Vector2 currentPosition2d = new Vector2(transform.position.x, transform.position.z);
-            Vector2Int currentWorldCoordinates = World.WorldPositionToWorldCoordinates(currentPosition2d);
+            Vector2Int currentWorldCoordinates = World.GetWorldCoordinates(currentPosition2d);
             Vector3 nextNodePosition = NextNode.GetCenterWorldPosition();
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
             if (IsMoving)
             {
                 Vector2 newPosition2d = Vector2.MoveTowards(currentPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.Surface.SpeedModifier);
-                Vector2Int newWorldCoordinates = World.WorldPositionToWorldCoordinates(newPosition2d);
+                Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
                 if (currentWorldCoordinates != newWorldCoordinates) OriginNode = TargetPath[0]; // Change origin node when passing over a node border
 
                 Vector3 newPosition = new Vector3(newPosition2d.x, World.GetTerrainHeightAt(newPosition2d), newPosition2d.y);

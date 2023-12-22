@@ -12,13 +12,9 @@ namespace BlockmapFramework
     public class World : MonoBehaviour
     {
         /// <summary>
-        /// Minimum y coordinate a tile can have.
-        /// </summary>
-        public const int MIN_HEIGHT = 0;
-        /// <summary>
         /// Maximum y coordiante a tile can have.
         /// </summary>
-        public const int MAX_HEIGHT = 100;
+        public const int MAX_HEIGHT = 30;
 
         /// <summary>
         /// Physical height (y) of a tile.
@@ -35,17 +31,54 @@ namespace BlockmapFramework
         public int ChunkSize { get; private set; }
         public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
         private int NodeIdCounter;
+        private BlockmapCamera Camera;
 
         // Layers
-        public int Layer_Terrain;
+        public int Layer_SurfaceNode;
         public int Layer_Entity;
-        public int Layer_Path;
+        public int Layer_AirNode;
+
+        /// <summary>
+        /// World coordinates that are currently being hovered.
+        /// </summary>
+        public Vector2Int HoveredWorldCoordinates { get; private set; }
+
+        /// <summary>
+        /// Node that is currently being hovered.
+        /// </summary>
+        public BlockmapNode HoveredNode { get; private set; }
+
+        /// <summary>
+        /// SurfaceNode that is currently being hovered.
+        /// </summary>
+        public SurfaceNode HoveredSurfaceNode { get; private set; }
+
+        /// <summary>
+        /// Chunk that is currently being hovered.
+        /// </summary>
+        public Chunk HoveredChunk { get; private set; }
+
+        /// <summary>
+        /// What area of the node is currently being hovered.
+        /// <br/> The returned value is the direction of the edge/corner that is being hovered.
+        /// <br/> Hovering the center part of a node will return Direction.None.
+        /// </summary>
+        public Direction NodeHoverMode { get; private set; }
+        private float HoverEdgeSensitivity = 0.3f; // sensitivity for NodeHoverMode
+
+        public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
+        public event System.Action<SurfaceNode, SurfaceNode> OnHoveredSurfaceNodeChanged;
+        public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
+
+        private bool IsShowingGrid;
+        private bool IsShowingPathfindingGraph;
+
 
         public void Init(WorldData data)
         {
-            Layer_Terrain = LayerMask.NameToLayer("Terrain");
+            Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
-            Layer_Path = LayerMask.NameToLayer("Path");
+            Layer_AirNode = LayerMask.NameToLayer("Path");
 
             Name = data.Name;
             ChunkSize = data.ChunkSize;
@@ -57,6 +90,17 @@ namespace BlockmapFramework
 
             // Init connections
             foreach (Chunk chunk in Chunks.Values) chunk.UpdateFullPathfindingGraph();
+
+            // Init camera
+            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
+            Camera.SetPosition(new Vector2(ChunkSize * 0.75f, ChunkSize * 0.75f));
+            Camera.SetZoom(10f);
+            Camera.SetAngle(45);
+        }
+
+        void Update()
+        {
+            UpdateHoveredObjects();
         }
 
         #region Actions
@@ -188,26 +232,123 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Redraws all nodes around the given coordiates.
+        /// Redraws all chunks around the given coordinates.
         /// </summary>
         public void RedrawNodesAround(Vector2Int worldCoordinates)
         {
+            List<Chunk> affectedChunks = new List<Chunk>();
+
             int range = 1;
             for (int y = worldCoordinates.y - range; y <= worldCoordinates.y + range; y++)
             {
                 for (int x = worldCoordinates.x - range; x <= worldCoordinates.x + range; x++)
                 {
-                    foreach(BlockmapNode node in GetNodes(new Vector2Int(x, y)))
+                    Chunk chunk = GetChunk((new Vector2Int(x, y)));
+                    if (chunk != null && !affectedChunks.Contains(chunk)) affectedChunks.Add(chunk);
+                }
+            }
+
+            foreach (Chunk chunk in affectedChunks) chunk.Draw();
+        }
+
+        public void ToggleGridOverlay()
+        {
+            IsShowingGrid = !IsShowingGrid;
+            UpdateGridOverlay();
+        }
+        private void UpdateGridOverlay()
+        {
+            foreach (Chunk chunk in Chunks.Values) chunk.GetComponent<MeshRenderer>().material.SetFloat("_ShowGrid", IsShowingGrid ? 1 : 0);
+        }
+
+        public void TogglePathfindingVisualization()
+        {
+            IsShowingPathfindingGraph = !IsShowingPathfindingGraph;
+            UpdatePathfindingVisualization();
+        }
+        private void UpdatePathfindingVisualization()
+        {
+            if (IsShowingPathfindingGraph) PathfindingGraphVisualizer.Singleton.VisualizeGraph(this);
+            else PathfindingGraphVisualizer.Singleton.ClearVisualization();
+        }
+
+        #endregion
+
+        #region Input Handling
+
+        /// <summary>
+        /// Updates all hovered objects and fires events if anything changed.
+        /// </summary>
+        private void UpdateHoveredObjects()
+        {
+            RaycastHit hit;
+            Ray ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
+
+            Chunk oldHoveredChunk = HoveredChunk;
+            Chunk newHoveredChunk = null;
+
+            SurfaceNode oldHoveredSurfaceNode = HoveredSurfaceNode;
+            SurfaceNode newHoveredSurfaceNode = null;
+
+            BlockmapNode oldHoveredNode = HoveredNode;
+            BlockmapNode newHoveredNode = null;
+
+            // Shoot a raycast on surface and air layer to detect hovered nodes
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
+            {
+                Transform objectHit = hit.transform;
+
+                if (objectHit != null)
+                {
+                    Vector3 hitPosition = hit.point;
+                    NodeHoverMode = GetNodeHoverMode(hitPosition);
+                    HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
+
+                    // Update chunk
+                    newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
+                    
+                    if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
                     {
-                        node.Draw();
+                        newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
+                        newHoveredNode = GetSurfaceNode(HoveredWorldCoordinates);
+                    }
+                    else if(objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
+                    {
+                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).First(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
                     }
                 }
             }
+
+            // Update currently hovered objects
+            HoveredNode = newHoveredNode;
+            HoveredSurfaceNode = newHoveredSurfaceNode;
+            HoveredChunk = newHoveredChunk;
+
+            // Fire update events
+            if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
+            if (newHoveredSurfaceNode != oldHoveredSurfaceNode) OnHoveredSurfaceNodeChanged?.Invoke(oldHoveredSurfaceNode, newHoveredSurfaceNode);
+            if (newHoveredChunk != oldHoveredChunk) OnHoveredChunkChanged?.Invoke(oldHoveredChunk, newHoveredChunk);
         }
-
-        public void ShowGrid(bool value)
+        private Direction GetNodeHoverMode(Vector3 worldPos)
         {
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+            if (worldPos.x < 0) posOnTile.x++;
+            if (worldPos.z < 0) posOnTile.y++;
 
+            bool north = posOnTile.y > (1f - HoverEdgeSensitivity);
+            bool south = posOnTile.y < HoverEdgeSensitivity;
+            bool west = posOnTile.x < HoverEdgeSensitivity;
+            bool east = posOnTile.x > (1f - HoverEdgeSensitivity);
+
+            if (north && east) return Direction.NE;
+            if (north && west) return Direction.NW;
+            if (north) return Direction.N;
+            if (south && east) return Direction.SE;
+            if (south && west) return Direction.SW;
+            if (south) return Direction.S;
+            if (east) return Direction.E;
+            if (west) return Direction.W;
+            return Direction.None;
         }
 
         #endregion
@@ -253,31 +394,24 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetSurfaceNode(chunk.GetLocalCoordinates(worldCoordinates));
         }
-        public List<BlockmapNode> GetPathNodes(Vector2Int worldCoordinates)
+        public List<BlockmapNode> GetAirNodes(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;
 
             Chunk chunk = GetChunk(worldCoordinates);
-            return chunk.GetPathNodes(chunk.GetLocalCoordinates(worldCoordinates));
-        }
-        public List<AirPathSlopeNode> GetAirPathSlopeNodes(Vector2Int worldCoordinates)
-        {
-            if (!IsInWorld(worldCoordinates)) return null;
-
-            Chunk chunk = GetChunk(worldCoordinates);
-            return chunk.GetAirPathSlopeNodes(chunk.GetLocalCoordinates(worldCoordinates));
+            return chunk.GetAirNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
 
-        public Vector2Int WorldPositionToWorldCoordinates(Vector3 worldPosition)
+        public Vector2Int GetWorldCoordinates(Vector3 worldPosition)
         {
             Vector2Int worldCoords = new Vector2Int((int)worldPosition.x, (int)worldPosition.z);
             if (worldPosition.x < 0) worldCoords.x -= 1;
             if (worldPosition.z < 0) worldCoords.y -= 1;
             return worldCoords;
         }
-        public Vector2Int WorldPositionToWorldCoordinates(Vector2 worldPosition2d)
+        public Vector2Int GetWorldCoordinates(Vector2 worldPosition2d)
         {
-            return WorldPositionToWorldCoordinates(new Vector3(worldPosition2d.x, 0f, worldPosition2d.y));
+            return GetWorldCoordinates(new Vector3(worldPosition2d.x, 0f, worldPosition2d.y));
         }
 
         public SurfaceNode GetAdjacentSurfaceNode(Vector2Int worldCoordinates, Direction dir)
@@ -290,7 +424,7 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetAdjacentPathNodes(Vector2Int worldCoordinates, Direction dir)
         {
-            return GetPathNodes(GetWorldCoordinatesInDirection(worldCoordinates, dir));
+            return GetAirNodes(GetWorldCoordinatesInDirection(worldCoordinates, dir));
         }
 
         public Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
@@ -314,7 +448,7 @@ namespace BlockmapFramework
         public float GetTerrainHeightAt(Vector2 worldPosition2d)
         {
             RaycastHit hit;
-            if (Physics.Raycast(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, out hit, 1000f, 1 << Layer_Terrain))
+            if (Physics.Raycast(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, out hit, 1000f, 1 << Layer_SurfaceNode))
             {
                 Transform objectHit = hit.transform;
 
@@ -328,7 +462,7 @@ namespace BlockmapFramework
         }
         public float GetPathHeightAt(Vector2 worldPosition2d, int baseHeight)
         {
-            RaycastHit[] hits = Physics.RaycastAll(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, 1000f, 1 << Layer_Path);
+            RaycastHit[] hits = Physics.RaycastAll(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, 1000f, 1 << Layer_AirNode);
             foreach (RaycastHit hit in hits)
             {
                 Transform objectHit = hit.transform;
@@ -359,7 +493,7 @@ namespace BlockmapFramework
 
         public static World Load(WorldData data)
         {
-            GameObject worldObject = new GameObject("World");
+            GameObject worldObject = new GameObject(data.Name);
             World world = worldObject.AddComponent<World>();
             world.Init(data);
             return world;

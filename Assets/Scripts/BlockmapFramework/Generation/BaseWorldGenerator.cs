@@ -6,14 +6,14 @@ namespace BlockmapFramework
 {
     public static class BaseWorldGenerator
     {
-        private static int NodeId;
+        private static int NodeIdCounter;
         private static WorldData WorldData;
         private static int[,] HeightMap;
 
         public static WorldData GenerateWorld(string name, int chunkSize, int numChunks)
         {
             int worldSize = chunkSize * numChunks;
-            NodeId = 0;
+            NodeIdCounter = 0;
 
             WorldData = new WorldData();
             WorldData.Name = name;
@@ -43,7 +43,7 @@ namespace BlockmapFramework
                 }
             }
 
-            WorldData.MaxNodeId = NodeId;
+            WorldData.MaxNodeId = NodeIdCounter;
             return WorldData;
         }
         
@@ -71,11 +71,11 @@ namespace BlockmapFramework
             int worldY = chunkCoordinates.y * WorldData.ChunkSize + localCoordinates.y;
 
             NodeData data = new NodeData();
-            data.Id = NodeId++;
+            data.Id = NodeIdCounter++;
             data.LocalCoordinateX = localCoordinates.x;
             data.LocalCoordinateY = localCoordinates.y;
             data.Height = new int[] { HeightMap[worldX, worldY], HeightMap[worldX + 1, worldY], HeightMap[worldX + 1, worldY + 1], HeightMap[worldX, worldY + 1] };
-            data.Surface = SurfaceId.Grass;
+            data.Surface = worldX * 10 * Random.value > 5f ? SurfaceId.Grass : SurfaceId.Sand;
             data.Type = NodeType.Surface;
 
             return data;

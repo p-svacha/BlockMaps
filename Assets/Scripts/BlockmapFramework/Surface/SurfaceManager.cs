@@ -7,7 +7,7 @@ namespace BlockmapFramework
     /// <summary>
     /// Singleton class to easily access all surface properties.
     /// </summary>
-    public class SurfaceManager : MonoBehaviour
+    public class SurfaceManager
     {
         private static SurfaceManager _Instance;
         private Dictionary<SurfaceId, Surface> Surfaces;
@@ -20,6 +20,10 @@ namespace BlockmapFramework
                 { SurfaceId.Sand, new SandSurface() },
                 { SurfaceId.Tarmac, new TarmacSurface() }
             };
+
+            ResourceManager.Singleton.SurfaceMaterial.SetColor("_GrassColor", Surfaces[SurfaceId.Grass].Color);
+            ResourceManager.Singleton.SurfaceMaterial.SetColor("_SandColor", Surfaces[SurfaceId.Sand].Color);
+            ResourceManager.Singleton.SurfaceMaterial.SetColor("_TarmacColor", Surfaces[SurfaceId.Tarmac].Color);
         }
 
         public static SurfaceManager Instance

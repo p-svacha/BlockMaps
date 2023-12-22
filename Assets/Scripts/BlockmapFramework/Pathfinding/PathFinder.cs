@@ -194,7 +194,7 @@ namespace BlockmapFramework
         /// </summary>
         public static BlockmapNode TryGetPathNode(Vector2Int worldCoordinates, int height)
         {
-            List<BlockmapNode> nodes = World.GetPathNodes(worldCoordinates);
+            List<BlockmapNode> nodes = World.GetAirNodes(worldCoordinates);
             if (nodes == null) return null;
             foreach (BlockmapNode node in nodes) if (node.BaseHeight == height) return node;
             return null;
