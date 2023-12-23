@@ -1,5 +1,20 @@
 Big Features to Add:
-- Vision / Line of Sight / Fog of War
-- Static Entities
-- Water
+- Showing / Hiding / Tinting individual tiles
+- Vision / Line of Sight
+	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
+	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
+
+- Static Entities 
+	> affect vision range (fully block or reduce)
+	> affect movement (fully block or reduce)
+- Procedural Static Entities
+- Water (or general liquid system) with unique properties
+	> placed in world by filling in hole: can only be 1 tile deep
+	> make own shader
+- Fences between tiles
+- Static entities types: Like high grass, maize, foliage, debris, puddle
+	> multiple static entities per node: one per type
+
+
+
 

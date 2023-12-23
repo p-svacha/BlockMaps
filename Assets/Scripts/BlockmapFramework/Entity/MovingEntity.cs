@@ -27,6 +27,7 @@ namespace BlockmapFramework
 
             NextNode = position;
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            TargetFlag.transform.SetParent(transform.parent);
             GoTo(World.GetRandomOwnedTerrainNode());
         }
 
@@ -42,7 +43,7 @@ namespace BlockmapFramework
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
             if (IsMoving)
             {
-                Vector2 newPosition2d = Vector2.MoveTowards(currentPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.Surface.SpeedModifier);
+                Vector2 newPosition2d = Vector2.MoveTowards(currentPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.GetSpeedModifier());
                 Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
                 if (currentWorldCoordinates != newWorldCoordinates) OriginNode = TargetPath[0]; // Change origin node when passing over a node border
 

@@ -52,7 +52,7 @@ namespace BlockmapFramework
         public Chunk Chunk { get; private set; }
         public Vector2Int WorldCoordinates { get; private set; }
         public Vector2Int LocalCoordinates { get; private set; }
-        public Surface Surface { get; protected set; }
+        public Surface Surface { get; private set; }
         public NodeType Type { get; protected set; }
 
         // Connections
@@ -157,6 +157,7 @@ namespace BlockmapFramework
 
         #region Getters
 
+        public virtual float GetSpeedModifier() => Surface.SpeedModifier;
         public abstract Vector3 GetCenterWorldPosition();
 
         /// <summary>
@@ -207,6 +208,15 @@ namespace BlockmapFramework
         public override string ToString()
         {
             return Type.ToString() + " " + WorldCoordinates.ToString();
+        }
+
+        #endregion
+
+        #region Setters
+
+        public void SetSurface(SurfaceId id)
+        {
+            Surface = SurfaceManager.Instance.GetSurface(id);
         }
 
         #endregion

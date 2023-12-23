@@ -5,66 +5,83 @@ using System.Linq;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using BlockmapFramework;
+using TMPro;
 
 namespace WorldEditor
 {
     public class BlockEditor : MonoBehaviour
     {
         [Header("Prefabs")]
+        public EditorToolButton EditorToolButtonPrefab;
         public MovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
-        public List<StaticEntity> BuildingPrefabs;
 
-        [Header("Textures")]
-        public Texture2D TileSelector;
-        public Texture2D TileSelectorN;
-        public Texture2D TileSelectorE;
-        public Texture2D TileSelectorS;
-        public Texture2D TileSelectorW;
-        public Texture2D TileSelectorNE;
-        public Texture2D TileSelectorNW;
-        public Texture2D TileSelectorSW;
-        public Texture2D TileSelectorSE;
+        [Header("Elements")]
+        public GameObject ToolButtonContainer;
+        public Dictionary<EditorToolId, EditorToolButton> ToolButtons;
+        public TextMeshProUGUI TileInfoText;
+        public UI_ToolWindow ToolWindow;
 
-        [Header("UI")]
-        public List<EditorToolButton> ToolButtons;
-        public Text TileInfoText;
+        [Header("Tools")]
+        public WorldGenTool WorldGenTool;
+        public TerrainTool TerrainTool;
+        public SurfacePaintTool SurfacePaintTool;
+        public SurfacePathTool SurfacePathTool;
+        public AirNodeTool AirNodeTool;
+        public AirSlopeNodeTool AirSlopeNodeTool;
 
         [Header("World")]
         public World World;
-
         public List<Entity> Entities = new List<Entity>();
 
-        
-
+        // Editor
+        float deltaTime; // for fps
+        private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
-
-        [Header("Build")]
-        public int BuildHeight;
-        public int BuildRotation;
-        public int BuildingIndex;
-        public Direction BuildRotationDirection;
-        public GameObject PathPreview;
-        public StaticEntity BuildingPreview;
 
         void Start()
         {
-            int chunkSize = 12;
+            // Init world
+            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 12, 3);
+            SetWorld(data);
 
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", chunkSize, 3);
+            // Init tools
+            Tools = new Dictionary<EditorToolId, EditorTool>()
+            {
+                { EditorToolId.WorldGen, WorldGenTool },
+                { EditorToolId.Terrain, TerrainTool },
+                { EditorToolId.SurfacePaint, SurfacePaintTool },
+                { EditorToolId.SurfacePath, SurfacePathTool },
+                { EditorToolId.AirNode, AirNodeTool },
+                { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
+            };
+            foreach (EditorTool tool in Tools.Values) tool.Init(this);
+
+            // Init tool buttons
+            ToolButtons = new Dictionary<EditorToolId, EditorToolButton>();  
+            foreach (EditorTool tool in Tools.Values)
+            {
+                EditorToolButton btn = Instantiate(EditorToolButtonPrefab, ToolButtonContainer.transform);
+                btn.Init(this, tool);
+                ToolButtons.Add(tool.Id, btn);
+            }
+
+            SelectTool(EditorToolId.WorldGen);
+        }
+
+        public void SetWorld(WorldData data)
+        {
+            // Clear old data
+            if (World != null) Destroy(World.gameObject);
+            Entities.Clear();
+
+            // Set new data
             World = World.Load(data);
             World.Draw();
 
-            CurrentTool = EditorTool.Terrain;
-
-            foreach (EditorToolButton btn in ToolButtons) btn.GetComponent<Button>().onClick.AddListener(() => SelectTool(btn.Tool));
-            SelectTool(EditorTool.Terrain);
-
-            BuildHeight = 3;
-            BuildRotation = 0;
-            BuildRotationDirection = GetDirectionFromRotation(BuildRotation);
-
-            // Hooks
+            // Init hooks
+            World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
+            World.OnHoveredNodeChanged += OnHoveredNodeChanged;
             World.OnHoveredChunkChanged += OnHoveredChunkChanged;
         }
 
@@ -72,20 +89,19 @@ namespace WorldEditor
 
         void Update()
         {
-            if (World.HoveredSurfaceNode != null) TileInfoText.text = World.HoveredWorldCoordinates.ToString() + " (" + World.HoveredSurfaceNode.Shape + ") " + World.HoveredSurfaceNode.Surface.Name;
-            else TileInfoText.text = World.HoveredWorldCoordinates.ToString();
+            UpdateTileInfoText();
 
-            // Hover
-            HandleHoveredObjects();
+            CurrentTool.UpdateTool();
 
             // Click
-            if (Input.GetMouseButtonDown(0)) HandleLeftClick();
-            if (Input.GetMouseButtonDown(1)) HandleRightClick();
+            bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
+            if (Input.GetMouseButtonDown(0) && !isMouseOverUi) CurrentTool.HandleLeftClick();
+            if (Input.GetMouseButtonDown(1) && !isMouseOverUi) CurrentTool.HandleRightClick();
 
             // New Pathfinding Entity
             if(Input.GetKeyDown(KeyCode.Space))
             {
-                MovingEntity newCharacter = Instantiate(CharacterPrefab);
+                MovingEntity newCharacter = Instantiate(CharacterPrefab, World.transform);
                 newCharacter.gameObject.layer = World.Layer_Entity;
                 Entities.Add(newCharacter);
                 BlockmapNode node = World.GetRandomOwnedTerrainNode();
@@ -98,221 +114,66 @@ namespace WorldEditor
             // Visualize Pathfinding
             if(Input.GetKeyDown(KeyCode.P)) World.TogglePathfindingVisualization();
 
-            // Raise/Lower
-            if (Input.GetKeyDown(KeyCode.R)) SetHeight(BuildHeight + 1);
-            if (Input.GetKeyDown(KeyCode.F)) SetHeight(BuildHeight - 1);
-
-            // Rotate
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                BuildRotation = (BuildRotation + 90) % 360;
-                BuildRotationDirection = GetDirectionFromRotation(BuildRotation);
-            }
-
-            // Next Building
-            if (Input.GetKeyDown(KeyCode.B)) SwitchBuildingIndex();
-
             // Tool Selection
-            if (Input.GetKeyDown(KeyCode.Alpha1)) SelectTool(EditorTool.Terrain);
-            if(Input.GetKeyDown(KeyCode.Alpha2)) SelectTool(EditorTool.SurfacePath);
-            if(Input.GetKeyDown(KeyCode.Alpha3)) SelectTool(EditorTool.AirPath);
-            if(Input.GetKeyDown(KeyCode.Alpha4)) SelectTool(EditorTool.Stairs);
+            foreach(EditorTool tool in Tools.Values)
+            {
+                if (Input.GetKeyDown(GetKeycodeForNumber(tool.HotkeyNumber)) && EventSystem.current.currentSelectedGameObject == null)
+                    SelectTool(tool.Id);
+            }
         }
 
+        private void UpdateTileInfoText()
+        {
+            string text = "";
+            if(World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
+            if(World.HoveredNode != null) text += "\n" + World.HoveredNode.Type.ToString() + " | " + World.HoveredNode.Surface.Name;
+
+            deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+            float fps = 1.0f / deltaTime;
+            text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
+
+            text = text.TrimStart('\n');
+            TileInfoText.text = text;
+        }
+
+        private void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode)
+        {
+            CurrentTool.OnHoveredSurfaceNodeChanged(oldNode, newNode);
+        }
+        private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
+        {
+            CurrentTool.OnHoveredNodeChanged(oldNode, newNode);
+        }
         private void OnHoveredChunkChanged(Chunk oldChunk, Chunk newChunk)
         {
-            switch (CurrentTool)
-            {
-                case EditorTool.Terrain:
-                case EditorTool.SurfacePath:
-                    if (oldChunk != null) oldChunk.ShowSurfaceTileOverlay(false);
-                    if (newChunk != null) newChunk.ShowSurfaceTileOverlay(true);
-                    break;
-            }
+            CurrentTool.OnHoveredChunkChanged(oldChunk, newChunk);
         }
 
-        /// <summary>
-        /// Handles hovered objects based on current tool.
-        /// </summary>
-        private void HandleHoveredObjects()
-        {
-            switch(CurrentTool)
-            {
-                case EditorTool.Terrain:
-                    if(World.HoveredChunk != null && World.HoveredSurfaceNode != null)
-                    {
-                        Texture2D overlayTexture = GetTextureForHoverMode(World.NodeHoverMode);
-                        bool canIncrease = World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: true, World.NodeHoverMode);
-                        bool canDecrease = World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: false, World.NodeHoverMode);
-                        Color c = Color.white;
-                        if (canIncrease && canDecrease) c = Color.white;
-                        else if (canIncrease) c = Color.green;
-                        else if (canDecrease) c = Color.yellow;
-                        else c = Color.red;
-                        World.HoveredChunk.ShowSurfaceTileOverlay(overlayTexture, World.HoveredSurfaceNode.LocalCoordinates, c);
-                    }
-                    break;
-
-                case EditorTool.SurfacePath:
-                    if (World.HoveredSurfaceNode != null)
-                    {
-                        Texture2D overlayTexture = GetTextureForHoverMode(Direction.None);
-                        Color c = World.CanBuildSurfacePath(World.HoveredSurfaceNode) ? Color.white : Color.red;
-                        World.HoveredChunk.ShowSurfaceTileOverlay(overlayTexture, World.HoveredSurfaceNode.LocalCoordinates, c);
-                    }
-                    break;
-
-                case EditorTool.AirPath:
-                    if(World.HoveredSurfaceNode != null)
-                    {
-                        Vector3 hoverPos = World.HoveredSurfaceNode.GetCenterWorldPosition();
-                        PathPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.5f, hoverPos.z);
-                        PathPreview.transform.rotation = Quaternion.Euler(0f, BuildRotation, 0f);
-                        PathPreview.GetComponentInChildren<MeshRenderer>().material.color = World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight) ? Color.white : Color.red;
-                    }
-                    break;
-
-                case EditorTool.Stairs:
-                    if (World.HoveredSurfaceNode != null)
-                    {
-                        Vector3 hoverPos = World.HoveredSurfaceNode.GetCenterWorldPosition();
-                        PathPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.5f, hoverPos.z);
-                        PathPreview.transform.rotation = Quaternion.Euler(0f, BuildRotation, 0f);
-                        PathPreview.GetComponentInChildren<MeshRenderer>().material.color = World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection) ? Color.white : Color.red;
-                    }
-                    break;
-
-            }
-        }
-
-        /// <summary>
-        /// Called every frame when left mouse button is pressed down.
-        /// </summary>
-        private void HandleLeftClick()
-        {
-            bool isUiClick = EventSystem.current.IsPointerOverGameObject();
-            switch(CurrentTool)
-            {
-                case EditorTool.Terrain:
-                    if(!isUiClick && World.HoveredSurfaceNode != null && World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: true, World.NodeHoverMode)) World.HoveredSurfaceNode.ChangeHeight(World.NodeHoverMode, isIncrease: true);
-                    break;
-                    
-                case EditorTool.SurfacePath:
-                    if (!isUiClick && World.HoveredSurfaceNode != null && World.CanBuildSurfacePath(World.HoveredSurfaceNode)) World.BuildSurfacePath(World.HoveredSurfaceNode);
-                    break;
-
-                case EditorTool.AirPath:
-                    if (!isUiClick && World.HoveredSurfaceNode != null && World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight)) World.BuildAirPath(World.HoveredWorldCoordinates, BuildHeight);
-                    break;
-
-                case EditorTool.Stairs:
-                    if (!isUiClick && World.HoveredSurfaceNode != null && World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection)) World.BuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Called every frame when right mouse button is pressed down.
-        /// </summary>
-        private void HandleRightClick()
-        {
-            bool isUiClick = EventSystem.current.IsPointerOverGameObject();
-            switch (CurrentTool)
-            {
-                case EditorTool.Terrain:
-                    if (World.HoveredSurfaceNode != null && !isUiClick && World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: false, World.NodeHoverMode)) World.HoveredSurfaceNode.ChangeHeight(World.NodeHoverMode, isIncrease: false);
-                    break;
-            }
-        }
-
-
-
-        private Texture2D GetTextureForHoverMode(Direction mode)
-        {
-            if (mode == Direction.None) return TileSelector;
-            if (mode == Direction.N) return TileSelectorN;
-            if (mode == Direction.E) return TileSelectorE;
-            if (mode == Direction.S) return TileSelectorS;
-            if (mode == Direction.W) return TileSelectorW;
-            if (mode == Direction.NE) return TileSelectorNE;
-            if (mode == Direction.NW) return TileSelectorNW;
-            if (mode == Direction.SW) return TileSelectorSW;
-            if (mode == Direction.SE) return TileSelectorSE;
-            return null;
-        }
-
-        private Direction GetDirectionFromRotation(int rotation)
-        {
-            if (rotation == 0) return Direction.N;
-            if (rotation == 90) return Direction.E;
-            if (rotation == 180) return Direction.S;
-            if (rotation == 270) return Direction.W;
-            return Direction.None;
-        }
+        private KeyCode GetKeycodeForNumber(int hotkeyNumber) => (KeyCode)(48 + hotkeyNumber);
 
         #endregion
 
         #region Tools
 
-        private void SetHeight(int value)
-        {
-            BuildHeight = value;
-            BuildHeight = Mathf.Clamp(BuildHeight, 0, World.MAX_HEIGHT);
-        }
-
-        private void SwitchBuildingIndex()
-        {
-            BuildingIndex = (BuildingIndex + 1) % BuildingPrefabs.Count;
-        }
-
-        public void SelectTool(EditorTool tool)
+        public void SelectTool(EditorToolId id)
         {
             EditorTool oldTool = CurrentTool;
-            EditorTool newTool = tool;
-
-            ToolButtons.First(x => x.Tool == oldTool).SetSelected(false);
-            CurrentTool = newTool;
-            ToolButtons.First(x => x.Tool == newTool).SetSelected(true);
+            EditorTool newTool = Tools[id];
 
             // Handle de-delection of previous tool
-            switch(oldTool)
+            if (oldTool != null)
             {
-                case EditorTool.Terrain:
-                case EditorTool.SurfacePath:
-                    if (World.HoveredSurfaceNode != null) World.HoveredChunk.ShowSurfaceTileOverlay(false);
-                    break;
-
-                case EditorTool.AirPath:
-                case EditorTool.Stairs:
-                    Destroy(PathPreview);
-                    PathPreview = null;
-                    break;
+                ToolButtons[oldTool.Id].SetSelected(false);
+                oldTool.OnDeselect();
             }
 
             // Handle selection of new tool
-            switch(newTool)
-            {
-                case EditorTool.Terrain:
-                case EditorTool.SurfacePath:
-                    break;
+            ToolButtons[newTool.Id].SetSelected(true);
+            newTool.OnSelect();
+            ToolWindow.SelectTool(newTool);
 
-                case EditorTool.AirPath:
-                    PathPreview = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    Destroy(PathPreview.GetComponent<BoxCollider>());
-                    PathPreview.transform.localScale = new Vector3(1f, World.TILE_HEIGHT, 1f);
-                    break;
-
-                case EditorTool.Stairs:
-                    PathPreview = new GameObject("ArrowContainer");
-                    GameObject arrowObject = Instantiate(ArrowPrefab, PathPreview.transform);
-                    arrowObject.transform.localPosition = new Vector3(-0.6f, -0.5f, -1.9f);
-                    arrowObject.transform.localRotation = Quaternion.Euler(20f, 180f, 0f);
-                    arrowObject.transform.localScale = new Vector3(1f, 1f, 1.8f);
-                    PathPreview.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
-                    break;
-            }
-
-            
+            // Set new tool as current
+            CurrentTool = newTool;
         }
 
         #endregion

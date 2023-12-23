@@ -104,7 +104,7 @@ namespace BlockmapFramework
         /// </summary>
         private static float GetCCost(BlockmapNode from, BlockmapNode to, Direction dir)
         {
-            float value = (0.5f * (1f / from.Surface.SpeedModifier)) + (0.5f * (1f / to.Surface.SpeedModifier));
+            float value = (0.5f * (1f / from.GetSpeedModifier())) + (0.5f * (1f / to.GetSpeedModifier()));
             if (dir == Direction.NE || dir == Direction.NW || dir == Direction.SE || dir == Direction.SW) value *= 1.4142f;
             return value;
         }

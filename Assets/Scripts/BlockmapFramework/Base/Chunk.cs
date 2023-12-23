@@ -101,17 +101,9 @@ namespace BlockmapFramework
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
         }
 
-        public void ShowSurfaceTileOverlay(bool show)
+        public void ShowGrid(bool show)
         {
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowTileOverlay", show ? 1 : 0);
-        }
-        public void ShowSurfaceTileOverlay(Texture2D texture, Vector2Int localCoordinates, Color color)
-        {
-            ShowSurfaceTileOverlay(true);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetTexture("_TileOverlayTex", texture);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayX", localCoordinates.x);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayY", localCoordinates.y);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetColor("_TileOverlayColor", color);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowGrid", show ? 1 : 0);
         }
 
         #endregion

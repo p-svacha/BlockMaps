@@ -39,6 +39,11 @@ namespace BlockmapFramework
         public int Layer_AirNode;
 
         /// <summary>
+        /// Flag if the cursor is currently inside the world.
+        /// </summary>
+        public bool IsHoveringWorld { get; private set; }
+
+        /// <summary>
         /// World coordinates that are currently being hovered.
         /// </summary>
         public Vector2Int HoveredWorldCoordinates { get; private set; }
@@ -93,9 +98,9 @@ namespace BlockmapFramework
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
-            Camera.SetPosition(new Vector2(ChunkSize * 0.75f, ChunkSize * 0.75f));
+            Camera.SetPosition(new Vector2(ChunkSize * 0.5f, ChunkSize * 0.5f));
             Camera.SetZoom(10f);
-            Camera.SetAngle(45);
+            Camera.SetAngle(225);
         }
 
         void Update()
@@ -143,10 +148,9 @@ namespace BlockmapFramework
 
             return true;
         }
-
-        public void BuildSurfacePath(SurfaceNode node)
+        public void BuildSurfacePath(SurfaceNode node, Surface pathSurface)
         {
-            node.BuildPath();
+            node.BuildPath(pathSurface);
             RedrawNodesAround(node.WorldCoordinates);
         }
 
@@ -219,6 +223,12 @@ namespace BlockmapFramework
             RedrawNodesAround(newNode.WorldCoordinates);
         }
 
+        public void SetSurface(SurfaceNode node, SurfaceId surface)
+        {
+            node.SetSurface(surface);
+            RedrawNodesAround(node.WorldCoordinates);
+        }
+
         #endregion
 
         #region Draw
@@ -229,6 +239,9 @@ namespace BlockmapFramework
         public void Draw()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.Draw();
+
+            UpdateGridOverlay();
+            UpdatePathfindingVisualization();
         }
 
         /// <summary>
@@ -249,6 +262,9 @@ namespace BlockmapFramework
             }
 
             foreach (Chunk chunk in affectedChunks) chunk.Draw();
+
+            UpdateGridOverlay();
+            UpdatePathfindingVisualization();
         }
 
         public void ToggleGridOverlay()
@@ -258,7 +274,7 @@ namespace BlockmapFramework
         }
         private void UpdateGridOverlay()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.GetComponent<MeshRenderer>().material.SetFloat("_ShowGrid", IsShowingGrid ? 1 : 0);
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowGrid(IsShowingGrid);
         }
 
         public void TogglePathfindingVisualization()
@@ -284,6 +300,8 @@ namespace BlockmapFramework
             RaycastHit hit;
             Ray ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
 
+            IsHoveringWorld = false;
+
             Chunk oldHoveredChunk = HoveredChunk;
             Chunk newHoveredChunk = null;
 
@@ -301,6 +319,8 @@ namespace BlockmapFramework
                 if (objectHit != null)
                 {
                     Vector3 hitPosition = hit.point;
+                    IsHoveringWorld = true;
+
                     NodeHoverMode = GetNodeHoverMode(hitPosition);
                     HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
 
@@ -479,12 +499,12 @@ namespace BlockmapFramework
 
         public SurfaceNode GetRandomOwnedTerrainNode()
         {
-            List<Chunk> candidateBlocks = Chunks.Values.ToList();
-            Chunk chosenBlock = candidateBlocks[Random.Range(0, candidateBlocks.Count)];
+            List<Chunk> candidateChunks = Chunks.Values.ToList();
+            Chunk chosenChunk = candidateChunks[Random.Range(0, candidateChunks.Count)];
 
             int x = Random.Range(0, ChunkSize);
             int y = Random.Range(0, ChunkSize);
-            return chosenBlock.GetSurfaceNode(x, y);
+            return chosenChunk.GetSurfaceNode(x, y);
         }
 
         #endregion

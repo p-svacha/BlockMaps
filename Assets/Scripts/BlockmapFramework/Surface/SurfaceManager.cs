@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -35,6 +36,7 @@ namespace BlockmapFramework
             }
         }
 
+        public List<Surface> GetAllSurfaces() => Surfaces.Values.ToList();
         public Surface GetSurface(SurfaceId id)
         {
             return Surfaces[id];

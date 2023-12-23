@@ -16,6 +16,7 @@ namespace BlockmapFramework
 
         // Path
         public bool HasPath;
+        public Surface PathSurface;
 
         public SurfaceNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
 
@@ -314,6 +315,19 @@ namespace BlockmapFramework
             PathMeshBuilder.BuildPath(World, meshBuilder, this);
         }
 
+        public void ShowOverlay(bool show)
+        {
+            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowTileOverlay", show ? 1 : 0);
+        }
+        public void ShowOverlay(Texture2D texture, Color color)
+        {
+            ShowOverlay(true);
+            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetTexture("_TileOverlayTex", texture);
+            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayX", LocalCoordinates.x);
+            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayY", LocalCoordinates.y);
+            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetColor("_TileOverlayColor", color);
+        }
+
         #endregion
 
         #region Actions
@@ -440,15 +454,21 @@ namespace BlockmapFramework
             Mathf.Abs(height[NE] - height[SE]) > 1);
         }
 
-        public void BuildPath()
+        public void BuildPath(Surface surface)
         {
             HasPath = true;
-            Surface = SurfaceManager.Instance.GetSurface(SurfaceId.Tarmac);
+            PathSurface = surface;
         }
 
         #endregion
 
         #region Getters
+
+        public override float GetSpeedModifier()
+        {
+            if (HasPath) return PathSurface.SpeedModifier;
+            else return Surface.SpeedModifier;
+        }
 
         public override Vector3 GetCenterWorldPosition()
         {
