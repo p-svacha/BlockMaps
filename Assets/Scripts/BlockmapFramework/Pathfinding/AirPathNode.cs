@@ -7,6 +7,7 @@ namespace BlockmapFramework
     public class AirPathNode : BlockmapNode
     {
         public override int Layer => World.Layer_AirNode;
+        public override bool IsPath => true;
 
         public AirPathNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
 
@@ -41,7 +42,8 @@ namespace BlockmapFramework
             BlockmapNode adjacentNodeBelow = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight - 1, dir);
             if (adjacentNodeBelow != null)
             {
-                if (adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == Pathfinder.GetOppositeDirection(dir)) ConnectedNodes[dir] = adjacentNodeBelow;
+                if (adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == Pathfinder.GetOppositeDirection(dir))
+                    ConnectedNodes[dir] = adjacentNodeBelow;
             }
         }
 
@@ -51,7 +53,7 @@ namespace BlockmapFramework
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(World, meshBuilder, this);
+            PathMeshBuilder.BuildPath(this, meshBuilder);
         }
 
         #endregion

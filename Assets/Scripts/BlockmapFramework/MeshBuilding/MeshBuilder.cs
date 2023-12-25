@@ -150,17 +150,27 @@ public class MeshBuilder
     /// Adds all meshvertices and meshtriangles to build a wall. Returns a MeshPlane containing all data.
     /// UV from first to second vector is uv-y-axis
     /// </summary>
-    public MeshPlane BuildPlane(int submeshIndex, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Vector2 uvStart, Vector2 uvEnd)
+    public MeshPlane BuildPlane(int submeshIndex, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Vector2 uvStart, Vector2 uvEnd, bool mirror = false)
     {
         MeshVertex mv1 = AddVertex(v1, uvStart);
         MeshVertex mv2 = AddVertex(v2, new Vector2(uvStart.x, uvEnd.y));
         MeshVertex mv3 = AddVertex(v3, uvEnd);
         MeshVertex mv4 = AddVertex(v4, new Vector2(uvEnd.x, uvStart.y));
 
-        MeshTriangle tri1 = AddTriangle(submeshIndex, mv1, mv3, mv2);
-        MeshTriangle tri2 = AddTriangle(submeshIndex, mv1, mv4, mv3);
+        if(mirror)
+        {
+            MeshTriangle tri1 = AddTriangle(submeshIndex, mv1, mv2, mv3);
+            MeshTriangle tri2 = AddTriangle(submeshIndex, mv1, mv3, mv4);
+            return new MeshPlane(mv1, mv2, mv3, mv4, tri1, tri2);
+        }
+        else
+        {
+            MeshTriangle tri1 = AddTriangle(submeshIndex, mv1, mv3, mv2);
+            MeshTriangle tri2 = AddTriangle(submeshIndex, mv1, mv4, mv3);
+            return new MeshPlane(mv1, mv2, mv3, mv4, tri1, tri2);
+        }
 
-        return new MeshPlane(mv1, mv2, mv3, mv4, tri1, tri2);
+        
     }
 
     #region Complex Functions

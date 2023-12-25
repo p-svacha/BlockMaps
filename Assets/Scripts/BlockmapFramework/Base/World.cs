@@ -334,6 +334,7 @@ namespace BlockmapFramework
                     }
                     else if(objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
                     {
+                        // Current bug: this only works from 2 sides when hovering the edge of an air node
                         newHoveredNode = GetAirNodes(HoveredWorldCoordinates).First(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
                     }
                 }

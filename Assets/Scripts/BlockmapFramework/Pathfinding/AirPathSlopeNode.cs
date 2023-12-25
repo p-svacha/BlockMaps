@@ -8,6 +8,7 @@ namespace BlockmapFramework
     {
         public Direction SlopeDirection;
         public override int Layer => World.Layer_AirNode;
+        public override bool IsPath => true;
 
         public AirPathSlopeNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data)
         {
@@ -78,7 +79,7 @@ namespace BlockmapFramework
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(World, meshBuilder, this);
+            PathMeshBuilder.BuildPath(this, meshBuilder);
         }
 
         #endregion

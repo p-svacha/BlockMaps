@@ -159,6 +159,7 @@ namespace BlockmapFramework
 
         public virtual float GetSpeedModifier() => Surface.SpeedModifier;
         public abstract Vector3 GetCenterWorldPosition();
+        public abstract bool IsPath { get; }
 
         /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.

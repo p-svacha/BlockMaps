@@ -13,6 +13,7 @@ namespace BlockmapFramework
     public class SurfaceNode : BlockmapNode
     {
         public override int Layer => World.Layer_SurfaceNode;
+        public override bool IsPath => HasPath;
 
         // Path
         public bool HasPath;
@@ -312,7 +313,7 @@ namespace BlockmapFramework
 
         private void DrawPath(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(World, meshBuilder, this);
+            PathMeshBuilder.BuildPath(this, meshBuilder);
         }
 
         public void ShowOverlay(bool show)

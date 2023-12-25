@@ -74,7 +74,43 @@ public static class HelperFunctions
         return v1 * s;
     }
 
-    #endregion   
+    #endregion
+
+    #region Direction
+
+    public static Direction GetNextClockwiseDirection8(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.N => Direction.NE,
+            Direction.NE => Direction.E,
+            Direction.E => Direction.SE,
+            Direction.SE => Direction.S,
+            Direction.S => Direction.SW,
+            Direction.SW => Direction.W,
+            Direction.W => Direction.NW,
+            Direction.NW => Direction.N,
+        };
+        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    public static Direction GetNextAnticlockwiseDirection8(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.N => Direction.NW,
+            Direction.NW => Direction.W,
+            Direction.W => Direction.SW,
+            Direction.SW => Direction.S,
+            Direction.S => Direction.SE,
+            Direction.SE => Direction.E,
+            Direction.E => Direction.NE,
+            Direction.NE => Direction.N,
+        };
+        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    #endregion
 
     #region UI
 
