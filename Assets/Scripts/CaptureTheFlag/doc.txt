@@ -1,10 +1,11 @@
 Big Features to Add:
 
-- Complete Path mesh generation, both surface and air.
-	> add fences to air path if no connection in that direction
+- Fix bug that moving entities flicker through air paths on slope edges.
 
 - Expand shader to allow surface textures
 	> add transitions
+
+- Fix bug that hovering an airnode only works in 2 directions
 
 - Showing / Hiding / Tinting individual tiles
 
@@ -28,6 +29,8 @@ Big Features to Add:
 	> multiple static entities per node: one per type
 
 - Different type of air nodes: path & terrain
+
+- Add fences to air paths if no connection in that direction
 
 
 

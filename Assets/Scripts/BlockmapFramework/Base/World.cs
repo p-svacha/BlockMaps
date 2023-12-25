@@ -47,7 +47,7 @@ namespace BlockmapFramework
         /// World coordinates that are currently being hovered.
         /// </summary>
         public Vector2Int HoveredWorldCoordinates { get; private set; }
-
+        
         /// <summary>
         /// Node that is currently being hovered.
         /// </summary>
@@ -335,7 +335,14 @@ namespace BlockmapFramework
                     else if(objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
                     {
                         // Current bug: this only works from 2 sides when hovering the edge of an air node
-                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).First(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+
+                        if(newHoveredNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+                        {
+                            Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
+                            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+                            newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                        }
                     }
                 }
             }
@@ -466,36 +473,33 @@ namespace BlockmapFramework
             return heightValue * TILE_HEIGHT;
         }
 
-        public float GetTerrainHeightAt(Vector2 worldPosition2d)
+        /// <summary>
+        /// Returns the exact world height (y-coordinate) at the given relative position.
+        /// <br/> Only works when that node is visible.
+        /// </summary>
+        public float GetWorldHeightAt(Vector2 worldPosition2d, BlockmapNode node)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, out hit, 1000f, 1 << Layer_SurfaceNode))
+            RaycastHit[] hits = Physics.RaycastAll(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, 1000f);
+            foreach (RaycastHit hit in hits)
             {
                 Transform objectHit = hit.transform;
 
-                if (objectHit != null)
+                // We hit the surface mesh we are looking for
+                if(node.Type == NodeType.Surface && objectHit.gameObject.layer == Layer_SurfaceNode)
+                {
+                    Vector3 hitPosition = hit.point;
+                    return hitPosition.y;
+                }
+
+                // We hit the air node mesh of the level we are looking for
+                if (node.Type != NodeType.Surface && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
                 }
             }
-            throw new System.Exception("Couldn't get height");
-        }
-        public float GetPathHeightAt(Vector2 worldPosition2d, int baseHeight)
-        {
-            RaycastHit[] hits = Physics.RaycastAll(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, 1000f, 1 << Layer_AirNode);
-            foreach (RaycastHit hit in hits)
-            {
-                Transform objectHit = hit.transform;
 
-                if (objectHit != null)
-                {
-                    Vector3 hitPosition = hit.point;
-                    if (hitPosition.y >= GetWorldHeight(baseHeight) && hitPosition.y <= GetWorldHeight(baseHeight + 1)) return hitPosition.y;
-                }
-            }
-
-            return GetTerrainHeightAt(worldPosition2d);
+            throw new System.Exception("World height not found for node of type " + node.Type.ToString());
         }
 
         public SurfaceNode GetRandomOwnedTerrainNode()

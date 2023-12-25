@@ -2075,7 +2075,7 @@ MonoBehaviour:
     Press G to show/hide grid.
 
     Press P to show/hide pathfinding
-    graph. (refresh to update)'
+    graph.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2949,6 +2949,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SurfaceMaterial: {fileID: 2100000, guid: 473924d3185d1b348929fdd221a92050, type: 2}
   CliffMaterial: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
+  PathCurbMaterial: {fileID: 2100000, guid: 58235ed3d55afdf419fd14c361ba5787, type: 2}
 --- !u!114 &1859474534
 MonoBehaviour:
   m_ObjectHideFlags: 0

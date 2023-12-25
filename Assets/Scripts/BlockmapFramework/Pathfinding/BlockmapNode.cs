@@ -25,6 +25,8 @@ namespace BlockmapFramework
         /// </summary>
         public int BaseHeight { get; private set; }
 
+        public float BaseWorldHeight => BaseHeight * World.TILE_HEIGHT;
+
         /// <summary>
         /// Shape is saved in a string with 4 chars, where each char is a corner (SW, SE, NE, NW) storing the height above the min height of the node.
         /// <br/> For example "1001" is a west-facing up-slope.

@@ -333,6 +333,23 @@ namespace BlockmapFramework
 
         #region Actions
 
+        public bool CanChangeHeight(SurfaceNode node, bool increase, Direction mode)
+        {
+            if (node == null) return false;
+            if (node.HasPath) return false;
+            if (node.Entities.Count > 0) return false;
+
+            int[] newHeights = new int[4];
+            for (int i = 0; i < 4; i++) newHeights[i] = node.Height[i];
+            foreach (int h in node.GetAffectedCorners(mode)) newHeights[h] += increase ? 1 : -1;
+            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min());
+            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min() + 1);
+            string newShape = GetShape(newHeights);
+            if (pathNodeOn != null) return false;
+            if (pathNodeAbove != null && !Pathfinder.CanNodesBeAboveEachOther(newShape, pathNodeAbove.Shape)) return false;
+
+            return true;
+        }
         public void ChangeHeight(Direction mode, bool isIncrease)
         {
             int[] preChange = new int[Height.Length];
@@ -385,27 +402,10 @@ namespace BlockmapFramework
             else UseAlternativeVariant = isIncrease;
 
             RecalculateShape();
-            World.RedrawNodesAround(WorldCoordinates);
             World.UpdatePathfindingGraphAround(WorldCoordinates);
+            World.RedrawNodesAround(WorldCoordinates);
         }
-
-        public bool CanChangeHeight(SurfaceNode node, bool increase, Direction mode)
-        {
-            if (node == null) return false;
-            if (node.HasPath) return false;
-            if (node.Entities.Count > 0) return false;
-
-            int[] newHeights = new int[4];
-            for (int i = 0; i < 4; i++) newHeights[i] = node.Height[i];
-            foreach (int h in node.GetAffectedCorners(mode)) newHeights[h] += increase ? 1 : -1;
-            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min());
-            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min() + 1);
-            string newShape = GetShape(newHeights);
-            if (pathNodeOn != null) return false;
-            if (pathNodeAbove != null && !Pathfinder.CanNodesBeAboveEachOther(newShape, pathNodeAbove.Shape)) return false;
-
-            return true;
-        }
+        
 
         public List<int> GetAffectedCorners(Direction mode)
         {
@@ -470,10 +470,10 @@ namespace BlockmapFramework
             if (HasPath) return PathSurface.SpeedModifier;
             else return Surface.SpeedModifier;
         }
-
+        
         public override Vector3 GetCenterWorldPosition()
         {
-            return new Vector3(WorldCoordinates.x + 0.5f, World.GetTerrainHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
+            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
         }
 
         #endregion

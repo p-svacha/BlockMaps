@@ -47,12 +47,10 @@ namespace BlockmapFramework
                 Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
                 if (currentWorldCoordinates != newWorldCoordinates) OriginNode = TargetPath[0]; // Change origin node when passing over a node border
 
-                Vector3 newPosition = new Vector3(newPosition2d.x, World.GetTerrainHeightAt(newPosition2d), newPosition2d.y);
-                if ((OriginNode.Type == NodeType.Surface && ((SurfaceNode)OriginNode).HasPath) || OriginNode.Type == NodeType.AirPath || OriginNode.Type == NodeType.AirPathSlope) newPosition = new Vector3(newPosition.x, World.GetPathHeightAt(newPosition2d, OriginNode.BaseHeight), newPosition.z);
+                Vector3 newPosition = new Vector3(newPosition2d.x, World.GetWorldHeightAt(newPosition2d, OriginNode), newPosition2d.y);
                 transform.position = newPosition;
                 UpdateOccupiedTerrainTiles();
 
-                // TODO: fix rotation
                 transform.rotation = Get2dRotationByDirection(CurrentDirection);
             }
 
