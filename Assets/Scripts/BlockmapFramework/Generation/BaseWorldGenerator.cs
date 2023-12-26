@@ -12,6 +12,8 @@ namespace BlockmapFramework
 
         public static WorldData GenerateWorld(string name, int chunkSize, int numChunks)
         {
+            if (chunkSize > 16) throw new System.Exception("Chunk size can't be bigger than 16 due to shader limitations.");
+
             int worldSize = chunkSize * numChunks;
             NodeIdCounter = 0;
 

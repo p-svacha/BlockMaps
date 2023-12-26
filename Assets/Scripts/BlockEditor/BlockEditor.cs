@@ -42,7 +42,7 @@ namespace WorldEditor
         void Start()
         {
             // Init world
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 12, 3);
+            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 10, 3);
             SetWorld(data);
 
             // Init tools
@@ -117,8 +117,11 @@ namespace WorldEditor
             // Texture mode
             if (Input.GetKeyDown(KeyCode.T)) World.ToggleTextureMode();
 
+            // Surface blending
+            if (Input.GetKeyDown(KeyCode.B)) World.ToggleTileBlending();
+
             // Tool Selection
-            foreach(EditorTool tool in Tools.Values)
+            foreach (EditorTool tool in Tools.Values)
             {
                 if (Input.GetKeyDown(GetKeycodeForNumber(tool.HotkeyNumber)) && EventSystem.current.currentSelectedGameObject == null)
                     SelectTool(tool.Id);

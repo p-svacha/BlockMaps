@@ -58,14 +58,21 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Updates the connected nodes in all nodes on this block
+        /// Updates the connected nodes in Directions W,E,S,N for all nodes in this chunk.
         /// </summary>
-        public void UpdateFullPathfindingGraph()
+        public void UpdatePathfindingGraphStraight()
         {
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
                     foreach (BlockmapNode node in Nodes[x, y]) node.UpdateConnectedNodesStraight();
+        }
 
+        /// <summary>
+        /// Updates the connected nodes in Directions NW,NE,SW,SE for all nodes in this chunk.
+        /// <br/> This function requires UpdatePathfindingGraphStraight() to be called on all chunks before. Else it won't work correctly
+        /// </summary>
+        public void UpdatePathfindingGraphDiagonal()
+        {
             for (int y = 0; y < Size; y++)
                 for (int x = 0; x < Size; x++)
                     foreach (BlockmapNode node in Nodes[x, y]) node.UpdateConnectedNodesDiagonal();
@@ -83,16 +90,62 @@ namespace BlockmapFramework
             surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.SurfaceMaterial); // Submesh 0: surface
             surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial); // Submesh 1: cliffs
             List<float> surfaceArray = new List<float>(); // for shader
+            List<float> surfaceBlend_W = new List<float>(); 
+            List<float> surfaceBlend_N = new List<float>(); 
+            List<float> surfaceBlend_S = new List<float>();
+            List<float> surfaceBlend_E = new List<float>();
+            List<float> surfaceBlend_NW = new List<float>();
+            List<float> surfaceBlend_NE = new List<float>();
+            List<float> surfaceBlend_SW = new List<float>();
+            List<float> surfaceBlend_SE = new List<float>();
 
             foreach (SurfaceNode node in GetAllSurfaceNodes())
             {
+                // Generate mesh
                 node.Draw(surfaceMeshBuilder);
-                surfaceArray.Add((int)node.Surface.Id);
+
+                // Get surface value for shader
+                int surfaceId = (int)node.Surface.Id;
+                surfaceArray.Add(surfaceId);
+
+                // Blend west
+                if (node.ConnectedNodes.TryGetValue(Direction.W, out BlockmapNode westNode)) surfaceBlend_W.Add((int)westNode.Surface.Id);
+                else surfaceBlend_W.Add(surfaceId);
+                // Blend north
+                if (node.ConnectedNodes.TryGetValue(Direction.N, out BlockmapNode northNode)) surfaceBlend_N.Add((int)northNode.Surface.Id);
+                else surfaceBlend_N.Add(surfaceId);
+                // Blend south
+                if (node.ConnectedNodes.TryGetValue(Direction.S, out BlockmapNode southNode)) surfaceBlend_S.Add((int)southNode.Surface.Id);
+                else surfaceBlend_S.Add(surfaceId);
+                // Blend east
+                if (node.ConnectedNodes.TryGetValue(Direction.E, out BlockmapNode eastNode)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
+                else surfaceBlend_E.Add(surfaceId);
+
+                // Blend nw
+                if (node.ConnectedNodes.TryGetValue(Direction.NW, out BlockmapNode nwNode)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
+                else surfaceBlend_NW.Add(surfaceId);
+                // Blend ne
+                if (node.ConnectedNodes.TryGetValue(Direction.NE, out BlockmapNode neNode)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
+                else surfaceBlend_NE.Add(surfaceId);
+                // Blend se
+                if (node.ConnectedNodes.TryGetValue(Direction.SE, out BlockmapNode seNode)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
+                else surfaceBlend_SE.Add(surfaceId);
+                // Blend sw
+                if (node.ConnectedNodes.TryGetValue(Direction.SW, out BlockmapNode swNode)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
+                else surfaceBlend_SW.Add(surfaceId);
             }
             surfaceMeshBuilder.ApplyMesh();
 
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ChunkSize", Size);
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileSurfaces", surfaceArray);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_W", surfaceBlend_W);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_E", surfaceBlend_E);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_N", surfaceBlend_N);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_S", surfaceBlend_S);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_NW", surfaceBlend_NW);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_NE", surfaceBlend_NE);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
 
             // Air node meshes
             foreach (AirNodeMesh mesh in AirNodeMesh) mesh.Draw();
@@ -108,6 +161,10 @@ namespace BlockmapFramework
         public void ShowTextures(bool show)
         {
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_UseTextures", show ? 1 : 0);
+        }
+        public void ShowTileBlending(bool show)
+        {
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_BlendThreshhold", show ? 0.4f : 0);
         }
 
         #endregion

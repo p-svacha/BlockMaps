@@ -4,6 +4,7 @@ Shader "Custom/SurfaceShader"
     {
         // Draw mode
         [Toggle] _UseTextures("Use Textures", Float) = 0
+        _BlendThreshhold("Blend Threshhold", Float) = 0.4
 
         // Terrain texture
         _TerrainTextures("Terrain Textures", 2DArray) = "" { }
@@ -47,9 +48,10 @@ Shader "Custom/SurfaceShader"
 
         // Draw mode
         float _UseTextures;
+        float _BlendThreshhold;
 
         // Terrain colors
-        fixed4 _TerrainColors[100];
+        fixed4 _TerrainColors[256];
 
         // Terrain textures (stored in an array)
         UNITY_DECLARE_TEX2DARRAY(_TerrainTextures);
@@ -85,39 +87,141 @@ Shader "Custom/SurfaceShader"
         half _Metallic;
         fixed4 _TintColor;
 
-        float _TileSurfaces[1000];
+        float _TileSurfaces[256];
+        float _TileBlend_W[256];
+        float _TileBlend_E[256];
+        float _TileBlend_N[256];
+        float _TileBlend_S[256];
+        float _TileBlend_NW[256];
+        float _TileBlend_NE[256];
+        float _TileBlend_SW[256];
+        float _TileBlend_SE[256];
+
+        // Returns the pixel color for the given surface and position depending on drawmode
+        fixed4 GetPixelColor(float2 worldPos2d, int surfaceIndex) {
+            if (_UseTextures == 1) {
+                return UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(worldPos2d.x * _TerrainTextureScale, worldPos2d.y * _TerrainTextureScale, surfaceIndex));
+            }
+            else {
+                return _TerrainColors[surfaceIndex];
+            }
+        }
+
+        // Returns the pixel color on a pixel near the corner of a surface tile where 4 tiles blend
+        fixed4 Get4BlendColor(float blendX, float blendY, fixed4 baseColor, fixed4 adjXColor, fixed4 adjYColor, fixed4 adjCornerColor) 
+        {
+            float blendBase = 0.25 + 0.25 * (max(1 - blendX, 1 - blendY)) + 0.5 * (1 - max(blendX, blendY)); // 1 in center, 0.5 on side, 0.25 in corner 
+            float blendCorner = min(blendX, blendY) * 0.25; // 0.25 in corner, 0 on side, 0 in center
+            float blendSideY = (blendY * 0.5) - blendCorner; //max((blendY * 0.5) - (blendX * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
+            float blendSideX = (blendX * 0.5) - blendCorner; // max((blendX * 0.5) - (blendY * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
+
+            return (blendBase * baseColor) + (blendCorner * adjCornerColor) + (blendSideY * adjYColor) + (blendSideX * adjXColor);
+        }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Find out where we exactly are on the chunk
-            float2 localPos = floor(IN.worldPos.xz % _ChunkSize);
-            int tileIndex = int(localPos.y + localPos.x * _ChunkSize);
+            float2 relativePos = frac(IN.worldPos.xz); // relative position on current tile (i.e. 13.4/14.8 => 0.4/0.8)
+            float2 localCoords = floor(IN.worldPos.xz % _ChunkSize); // Local coordinates of current position
+            int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
+
+            // c is the color of the current pixel
+            fixed4 c;
+
+            // Get base color
             int surfaceIndex = _TileSurfaces[tileIndex];
+            fixed4 baseColor = GetPixelColor(IN.worldPos.xz, surfaceIndex);
+            
+            
+            if (relativePos.x < _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend nw
+            {
+                fixed4 blendColor_nw = GetPixelColor(IN.worldPos.xz, _TileBlend_NW[tileIndex]);
+                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+
+                float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
+                float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+
+                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw);
+                /*
+                float blendBase = 0.25 + 0.25 * (max(1 - blendX, 1 - blendY)) + 0.5 * (1-max(blendX, blendY)); // 1 in center, 0.5 on side, 0.25 in corner 
+                float blendNW = min(blendX, blendY) * 0.25; // 0.25 in corner, 0 on side, 0 in center
+                float blendN = (blendY * 0.5) - blendNW; //max((blendY * 0.5) - (blendX * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
+                float blendW = (blendX * 0.5) - blendNW; // max((blendX * 0.5) - (blendY * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
+
+                c = (blendBase * baseColor) + (blendNW * blendColor_nw) +(blendN * blendColor_n) +(blendW * blendColor_w);
+                */
+            }
+
+            else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend ne
+            {
+                fixed4 blendColor_ne = GetPixelColor(IN.worldPos.xz, _TileBlend_NE[tileIndex]);
+                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+
+                float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+                float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+
+                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_n, blendColor_ne);
+            }
+            else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend se
+            {
+                fixed4 blendColor_se = GetPixelColor(IN.worldPos.xz, _TileBlend_SE[tileIndex]);
+                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+
+                float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+                float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
+
+                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_s, blendColor_se);
+            }
+            else if (relativePos.x < _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend sw
+            {
+                fixed4 blendColor_sw = GetPixelColor(IN.worldPos.xz, _TileBlend_SW[tileIndex]);
+                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+
+                float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
+                float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
+
+                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw);
+            }
+
 
             
-            // Take input texture as main color
-            fixed4 c; // = fixed4(1.0, 1.0, 1.0, 1.0); // white
 
-            /*
-            // Tint depending on surface
-            if (_TileSurfaces[tileIndex] == 0) c *= _GrassColor;
-            if (_TileSurfaces[tileIndex] == 1) c *= _SandColor;
-            if (_TileSurfaces[tileIndex] == 2) c *= _TarmacColor;
-            */
 
-            // Texture mode         
-            if (_UseTextures == 1) {
-                c = UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(IN.worldPos.x * _TerrainTextureScale, IN.worldPos.z * _TerrainTextureScale, surfaceIndex));
+            else if (relativePos.x < _BlendThreshhold) // Blend west
+            {
+                
+                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+                c = lerp(baseColor, blendColor_w, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.x));
             }
-            else {
-                c = _TerrainColors[surfaceIndex];
+            else if (relativePos.x > 1 - _BlendThreshhold) // Blend east
+            {
+                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+                c = lerp(baseColor, blendColor_e, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.x)));
             }
-            
+            else if (relativePos.y > 1 - _BlendThreshhold) // Blend north
+            {
+                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                c = lerp(baseColor, blendColor_n, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.y)));
+            }
+            else if (relativePos.y < _BlendThreshhold) // Blend south
+            {
+                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                c = lerp(baseColor, blendColor_s, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.y));
+            }
+            else // No blend
+            {
+                c = baseColor;
+            }
+
 
             // Selection Overlay
             if (_ShowTileOverlay == 1)
             {
-                if (localPos.x == _TileOverlayX && localPos.y == _TileOverlayY)
+                if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
                 {
                     fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
                     c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);

@@ -1,8 +1,5 @@
 Big Features to Add:
 
-- Expand shader to allow surface textures
-	> add transitions
-
 - Showing / Hiding / Tinting individual tiles
 
 - Vision / Line of Sight
@@ -28,8 +25,16 @@ Big Features to Add:
 
 - Add fences to air paths if no connection in that direction
 
+- Path & cliff textures
+
+- Improve Camera:
+	> Shift to increase speed
+	> Faster zoom (alt to decrease zoom speed)
+
 - Fix rare bug of air node not being selected exactly on edge
 
 - Fix bug that a color/texture line appears on chunk edges
 
-
+- In terrain transitions, only do corner transitions when the corner transition exists
+	> else pass -1 in the blend array and ignore in shader code
+	> also add (global perlin) noise to blending texture

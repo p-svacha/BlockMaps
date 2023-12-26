@@ -25,6 +25,11 @@ namespace BlockmapFramework
         /// </summary>
         public const float TILE_SIZE = 1f;
 
+        /// <summary>
+        /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
+        /// </summary>
+        public const float SURFACE_TILE_BLENDING = 0.4f;
+
 
         // Base
         public string Name { get; private set; }
@@ -75,10 +80,11 @@ namespace BlockmapFramework
         public event System.Action<SurfaceNode, SurfaceNode> OnHoveredSurfaceNodeChanged;
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
 
+        // Draw modes
         private bool IsShowingGrid;
         private bool IsShowingPathfindingGraph;
         private bool IsShowingTextures;
-
+        private bool IsShowingTileBlending;
 
         public void Init(WorldData data)
         {
@@ -95,7 +101,8 @@ namespace BlockmapFramework
             Pathfinder.Init(this);
 
             // Init connections
-            foreach (Chunk chunk in Chunks.Values) chunk.UpdateFullPathfindingGraph();
+            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
+            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
@@ -244,6 +251,7 @@ namespace BlockmapFramework
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
             UpdateTextureMode();
+            UpdateTileBlending();
         }
 
         /// <summary>
@@ -268,6 +276,7 @@ namespace BlockmapFramework
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
             UpdateTextureMode();
+            UpdateTileBlending();
         }
 
         public void ToggleGridOverlay()
@@ -299,6 +308,16 @@ namespace BlockmapFramework
         private void UpdateTextureMode()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.ShowTextures(IsShowingTextures);
+        }
+
+        public void ToggleTileBlending()
+        {
+            IsShowingTileBlending = !IsShowingTileBlending;
+            UpdateTileBlending();
+        }
+        private void UpdateTileBlending()
+        {
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(IsShowingTileBlending);
         }
 
         #endregion
