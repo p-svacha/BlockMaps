@@ -10,6 +10,7 @@ namespace BlockmapFramework
         public abstract string Name { get; }
         public abstract float SpeedModifier { get; }
         public abstract Color Color { get; }
+        public abstract Texture2D Texture { get; }
         public virtual void OnEnter() { }
         public virtual void OnExit() { }
     }

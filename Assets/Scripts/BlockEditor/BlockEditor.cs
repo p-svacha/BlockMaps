@@ -114,6 +114,9 @@ namespace WorldEditor
             // Visualize Pathfinding
             if(Input.GetKeyDown(KeyCode.P)) World.TogglePathfindingVisualization();
 
+            // Texture mode
+            if (Input.GetKeyDown(KeyCode.T)) World.ToggleTextureMode();
+
             // Tool Selection
             foreach(EditorTool tool in Tools.Values)
             {

@@ -1,11 +1,7 @@
 Big Features to Add:
 
-- Fix bug that moving entities flicker through air paths on slope edges.
-
 - Expand shader to allow surface textures
 	> add transitions
-
-- Fix bug that hovering an airnode only works in 2 directions
 
 - Showing / Hiding / Tinting individual tiles
 
@@ -32,6 +28,8 @@ Big Features to Add:
 
 - Add fences to air paths if no connection in that direction
 
+- Fix rare bug of air node not being selected exactly on edge
 
+- Fix bug that a color/texture line appears on chunk edges
 
 

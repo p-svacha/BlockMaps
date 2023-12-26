@@ -105,6 +105,10 @@ namespace BlockmapFramework
         {
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowGrid", show ? 1 : 0);
         }
+        public void ShowTextures(bool show)
+        {
+            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_UseTextures", show ? 1 : 0);
+        }
 
         #endregion
 

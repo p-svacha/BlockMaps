@@ -6,10 +6,21 @@ namespace BlockmapFramework
 {
     public class ResourceManager : MonoBehaviour
     {
+        private void Awake()
+        {
+            Singleton = GameObject.Find("ResourceManager").GetComponent<ResourceManager>();
+        }
+
+        [Header("Materials")]
         public Material SurfaceMaterial;
         public Material CliffMaterial;
         public Material PathCurbMaterial;
 
-        public static ResourceManager Singleton { get { return GameObject.Find("ResourceManager").GetComponent<ResourceManager>(); } }
+        [Header("Terrain Textures")]
+        public Texture2D GrassTexture;
+        public Texture2D SandTexture;
+        public Texture2D TarmacTexture;
+
+        public static ResourceManager Singleton;
     }
 }

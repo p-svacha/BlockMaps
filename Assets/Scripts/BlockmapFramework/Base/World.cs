@@ -77,6 +77,7 @@ namespace BlockmapFramework
 
         private bool IsShowingGrid;
         private bool IsShowingPathfindingGraph;
+        private bool IsShowingTextures;
 
 
         public void Init(WorldData data)
@@ -242,6 +243,7 @@ namespace BlockmapFramework
 
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
+            UpdateTextureMode();
         }
 
         /// <summary>
@@ -265,6 +267,7 @@ namespace BlockmapFramework
 
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
+            UpdateTextureMode();
         }
 
         public void ToggleGridOverlay()
@@ -286,6 +289,16 @@ namespace BlockmapFramework
         {
             if (IsShowingPathfindingGraph) PathfindingGraphVisualizer.Singleton.VisualizeGraph(this);
             else PathfindingGraphVisualizer.Singleton.ClearVisualization();
+        }
+
+        public void ToggleTextureMode()
+        {
+            IsShowingTextures = !IsShowingTextures;
+            UpdateTextureMode();
+        }
+        private void UpdateTextureMode()
+        {
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowTextures(IsShowingTextures);
         }
 
         #endregion

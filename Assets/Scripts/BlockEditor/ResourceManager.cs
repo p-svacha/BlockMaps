@@ -6,7 +6,7 @@ namespace WorldEditor
 {
     public class ResourceManager : MonoBehaviour
     {
-        [Header("Textures")]
+        [Header("Tile Selection Textures")]
         public Texture2D TileSelector;
         public Texture2D TileSelectorN;
         public Texture2D TileSelectorE;
