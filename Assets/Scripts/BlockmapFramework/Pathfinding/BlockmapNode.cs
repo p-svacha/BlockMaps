@@ -60,12 +60,17 @@ namespace BlockmapFramework
         // Connections
         public Dictionary<Direction, BlockmapNode> ConnectedNodes;
 
-        // Objects on node
         public HashSet<Entity> Entities = new HashSet<Entity>();
+
+        /// <summary>
+        /// List containing all players that have explored this node.
+        /// </summary>
+        private HashSet<Player> ExploredBy = new HashSet<Player>();
+
         /// <summary>
         /// List containing all entities that currently see this node.
         /// </summary>
-        public List<Entity> SeenBy = new List<Entity>();
+        private HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         #region Initialize
 
@@ -83,6 +88,12 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(data.Surface);
             Type = data.Type;
             ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
+
+            // Initialize which entities see this node
+            foreach (Entity e in world.Entities)
+            {
+                if (e.IsInVision(this)) AddVisionBy(e);
+            }
         }
 
         /// <summary>
@@ -147,7 +158,7 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Entities
+        #region Actions
 
         public void AddEntity(Entity e)
         {
@@ -157,6 +168,16 @@ namespace BlockmapFramework
         public void RemoveEntity(Entity e)
         {
             Entities.Remove(e);
+        }
+
+        public void AddVisionBy(Entity e)
+        {
+            ExploredBy.Add(e.Player);
+            SeenBy.Add(e);
+        }
+        public void RemoveVisionBy(Entity e)
+        {
+            SeenBy.Remove(e);
         }
 
         #endregion
@@ -215,12 +236,20 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if this node is visible for the specified player.
         /// </summary>
-        public bool IsVisible(Player player)
+        public bool IsVisibleBy(Player player)
         {
             if (World.IsAllVisible) return true; // Everything is visible
             if (SeenBy.FirstOrDefault(x => x.Player == player) != null) return true; // Node is seen by an entity of player
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns if the node has been explored by the specified player.
+        /// </summary>
+        public bool IsExploredBy(Player player)
+        {
+            return ExploredBy.Contains(player);
         }
 
         public override string ToString()

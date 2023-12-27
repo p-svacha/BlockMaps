@@ -28,13 +28,15 @@ namespace BlockmapFramework
             NextNode = position;
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             TargetFlag.transform.SetParent(transform.parent);
-            GoTo(World.GetRandomOwnedTerrainNode());
+
+
+            GoToRandomNode();
         }
 
         // Update is called once per frame
         private void Update()
         {
-            if (TargetPath == null) GoTo(World.GetRandomOwnedTerrainNode());
+            if (TargetPath == null) GoToRandomNode();
 
             // Update transform position and occupied tiles (for collisions) when moving
             Vector2 currentPosition2d = new Vector2(transform.position.x, transform.position.z);
@@ -61,6 +63,14 @@ namespace BlockmapFramework
             {
                 OnNextNodeReached();
             }
+        }
+
+        private void GoToRandomNode()
+        {
+            BlockmapNode targetNode = World.GetRandomOwnedTerrainNode();
+            while (Vector2.Distance(targetNode.WorldCoordinates, OriginNode.WorldCoordinates) > 100)
+                targetNode = World.GetRandomOwnedTerrainNode();
+            GoTo(targetNode);
         }
 
         /// <summary>
@@ -111,7 +121,7 @@ namespace BlockmapFramework
                     // TargetPath is no longer valid, find new path
                     else
                     {
-                        Debug.Log("Target path no longer valid, fidning new path");
+                        Debug.Log("Target path no longer valid, finding new path");
                         IsMoving = false;
                         UpdateTargetPath();
                     }
@@ -121,7 +131,7 @@ namespace BlockmapFramework
                 else
                 {
                     IsMoving = false;
-                    GoTo(World.GetRandomOwnedTerrainNode());
+                    GoToRandomNode();
                 }
             }
         }

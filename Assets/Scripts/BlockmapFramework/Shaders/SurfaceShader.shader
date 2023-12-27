@@ -11,7 +11,7 @@ Shader "Custom/SurfaceShader"
         _TerrainTextureScale("Terrain Texture Scale", Float) = 0.2
 
         // Overlays
-        _TintColor("Color Overlay", Color) = (1,1,1,0)
+        _FogOfWarColor("Fog of war Color", Color) = (0,0,0,0.5)
 
         _GridTex("Grid Texture", 2D) = "none" {}
         [Toggle] _ShowGrid("Show Grid", Float) = 1
@@ -76,18 +76,9 @@ Shader "Custom/SurfaceShader"
         sampler2D _BlockOverlayTex;
         fixed4 _BlockOverlayColor;
 
-        struct Input
-        {
-            float2 uv_BlockOverlayTex;
-            float2 uv_TerrainTextures;
-            float2 uv2_TileOverlayTex;
-            float2 uv2_GridTex;
-            float3 worldPos;
-        };
-
         half _Glossiness;
         half _Metallic;
-        fixed4 _TintColor;
+        fixed4 _FogOfWarColor;
 
         float _TileVisibility[324];
         float _TileSurfaces[256];
@@ -99,6 +90,15 @@ Shader "Custom/SurfaceShader"
         float _TileBlend_NE[256];
         float _TileBlend_SW[256];
         float _TileBlend_SE[256];
+
+        struct Input
+        {
+            float2 uv_BlockOverlayTex;
+            float2 uv_TerrainTextures;
+            float2 uv2_TileOverlayTex;
+            float2 uv2_GridTex;
+            float3 worldPos;
+        };
 
         // Returns the pixel color for the given surface and position depending on drawmode
         fixed4 GetPixelColor(float2 worldPos2d, int surfaceIndex) {
@@ -157,22 +157,36 @@ Shader "Custom/SurfaceShader"
 
             // Check visiblity
             float visEpsilon = 0.1; // Pixels are drawn by this value over tile edges
-            float drawPixel = (_TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)] == 1 ||
+            float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
+            float drawPixel = (tileVisibility > 0 ||
 
-                (relativePos.x < visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] == 1) || // extension ne
-                (relativePos.x > 1 - visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] == 1) || // extension nw
-                (relativePos.x > 1 - visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] == 1) || // extension sw
-                (relativePos.x < visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] == 1) || // extension se
+                (relativePos.x < visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 0) || // extension ne
+                (relativePos.x > 1 - visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 0) || // extension nw
+                (relativePos.x > 1 - visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] > 0) || // extension sw
+                (relativePos.x < visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 0) || // extension se
 
-                (relativePos.x < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] == 1) || // extension east
-                (relativePos.x > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] == 1) || // extension west
-                (relativePos.y < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] == 1) || // extension north
-                (relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] == 1)); // extension south
+                (relativePos.x < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] > 0) || // extension east
+                (relativePos.x > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] > 0) || // extension west
+                (relativePos.y < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 0) || // extension north
+                (relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 0)); // extension south
 
 
             if (drawPixel == 0) {
                 discard;
             }
+
+            float fowEpsilon = 0.01; // Fog of war epsilon
+            float fullVisible = (tileVisibility > 1 ||
+
+                (relativePos.x < fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
+                (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
+                (relativePos.x > 1 - fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] > 1) || // extension sw
+                (relativePos.x < fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 1) || // extension se
+
+                (relativePos.x < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] > 1) || // extension east
+                (relativePos.x > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] > 1) || // extension west
+                (relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
+                (relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 1)); // extension south
 
             // c is the color of the current pixel
             fixed4 c;
@@ -229,10 +243,6 @@ Shader "Custom/SurfaceShader"
                 c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw);
             }
 
-
-            
-
-
             else if (relativePos.x < _BlendThreshhold) // Blend west
             {
                 
@@ -284,8 +294,11 @@ Shader "Custom/SurfaceShader"
                 c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
             }
 
-            // Tint
-            c = (_TintColor.a * _TintColor) + ((1 - _TintColor.a) * c);
+            // Fog of war
+            if (fullVisible != 1)
+            {
+                c = (_FogOfWarColor.a * _FogOfWarColor) + ((1 - _FogOfWarColor.a) * c);
+            }
 
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables

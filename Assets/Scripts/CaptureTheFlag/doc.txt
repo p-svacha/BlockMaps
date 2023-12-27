@@ -1,13 +1,10 @@
 Big Features to Add:
 
-- Replace IsVisible with Vision-Enum (Unexplored, FogOfWar, Visible)
-	> Add FogOfWar-shading
+- Add editor tool to spawn test characters with editable movement and vision
 
 - Improve vision algorithm:
 	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
 	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
-
-- Add editor tool to spawn test characters with editable movement and vision
 
 - Static Entities 
 	> affect vision range (fully block or reduce)
@@ -41,5 +38,7 @@ Big Features to Add:
 - Save/Load Worlds in editor
 
 - Drag hold to paint surfaces in editor
+
+- Improve GitHub page with desc and screenshots
 
 

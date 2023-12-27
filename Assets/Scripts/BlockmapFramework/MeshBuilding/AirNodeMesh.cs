@@ -78,8 +78,13 @@ namespace BlockmapFramework
                     List<BlockmapNode> nodes = Chunk.World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y))).Where(x => x.BaseHeight == HeightLevel).ToList();
                     foreach (BlockmapNode node in nodes)
                     {
+                        int visibility;
+                        if (node.IsVisibleBy(player)) visibility = 2; // 2 = visible
+                        else if (node.IsExploredBy(player)) visibility = 1; // 1 = fog of war
+                        else visibility = 0; // 0 = unexplored
+
                         int arrayIndex = (node.LocalCoordinates.y + 1) + (Chunk.Size + 2) * (node.LocalCoordinates.x + 1);
-                        visibilityArray[arrayIndex] = node.IsVisible(player) ? 1 : 0;
+                        visibilityArray[arrayIndex] = visibility;
                     }
                 }
             }

@@ -306,6 +306,7 @@ namespace BlockmapFramework
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
+            UpdateVisibility(chunk);
         }
 
         public bool CanBuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
@@ -404,7 +405,7 @@ namespace BlockmapFramework
             foreach (Chunk c in Chunks.Values) UpdateVisibility(c);
         }
         /// <summary>
-        /// Updates the visibility for one chunk according to the current player vision.
+        /// Updates the visibility display for one chunk according to the current player vision.
         /// </summary>
         public void UpdateVisibility(Chunk c)
         {
@@ -497,7 +498,7 @@ namespace BlockmapFramework
 
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
-            if (!IsInWorld(worldCoordinates)) return null;
+            if (!IsInWorld(worldCoordinates)) return new List<BlockmapNode>();
 
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
@@ -529,6 +530,11 @@ namespace BlockmapFramework
             return GetWorldCoordinates(new Vector3(worldPosition2d.x, 0f, worldPosition2d.y));
         }
 
+        public List<BlockmapNode> GetAdjacentNodes(Vector2Int worldCoordinates, Direction dir)
+        {
+            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(worldCoordinates, dir);
+            return GetNodes(targetCoordinates);
+        }
         public SurfaceNode GetAdjacentSurfaceNode(Vector2Int worldCoordinates, Direction dir)
         {
             return GetSurfaceNode(GetWorldCoordinatesInDirection(worldCoordinates, dir));

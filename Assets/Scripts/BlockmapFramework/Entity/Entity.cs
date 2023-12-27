@@ -85,19 +85,30 @@ namespace BlockmapFramework
         {
             // Remove entity vision from previously visible nodes
             HashSet<BlockmapNode> previousVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
-            foreach (BlockmapNode n in previousVisibleNodes) n.SeenBy.Remove(this);
+            foreach (BlockmapNode n in previousVisibleNodes) n.RemoveVisionBy(this);
 
             // Update what nodes are visible from the current position
-            VisibleNodes = GetVisibleNodesFrom(OriginNode);
+            VisibleNodes = GetVisibleNodes();
 
             // Add entitiy vision to newly visible nodes
             HashSet<BlockmapNode> newVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
-            foreach (BlockmapNode n in newVisibleNodes) n.SeenBy.Add(this);
-
+            foreach (BlockmapNode n in newVisibleNodes) n.AddVisionBy(this);
 
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVisibleNodes);
             changedVisibilityNodes.SymmetricExceptWith(newVisibleNodes);
+
+            // Add all adjacent nodes as well because vision goes over node edge
+            HashSet<BlockmapNode> adjNodes = new HashSet<BlockmapNode>();
+            foreach(BlockmapNode n in changedVisibilityNodes)
+            {
+                foreach(Direction dir in HelperFunctions.GetAllDirections8())
+                {
+                    foreach (BlockmapNode adjNode in World.GetAdjacentNodes(n.WorldCoordinates, dir))
+                        adjNodes.Add(adjNode);
+                }
+            }
+            foreach (BlockmapNode adjNode in adjNodes) changedVisibilityNodes.Add(adjNode);
 
             // Get chunks where visibility changed
             HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
@@ -110,7 +121,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns a list of all visible nodes from the given position.
         /// </summary>
-        private List<BlockmapNode> GetVisibleNodesFrom(BlockmapNode node)
+        private List<BlockmapNode> GetVisibleNodes()
         {
             List<BlockmapNode> visibleNodes = new List<BlockmapNode>();
 
@@ -118,19 +129,27 @@ namespace BlockmapFramework
             {
                 for(int y = (int)(-VisionRange - 1); y <= VisionRange; y++)
                 {
-                    float distance = Vector2.Distance(Vector2.zero, new Vector2(x, y));
-                    if (distance > VisionRange) continue;
+                    Vector2Int targetWorldCoordinates = new Vector2Int(OriginNode.WorldCoordinates.x + x, OriginNode.WorldCoordinates.y + y);
 
-                    Vector2Int worldCoords = new Vector2Int(node.WorldCoordinates.x + x, node.WorldCoordinates.y + y);
-
-                    SurfaceNode surfaceNode = World.GetSurfaceNode(worldCoords);
-                    if(surfaceNode != null) visibleNodes.Add(surfaceNode);
-
-                    foreach (BlockmapNode airNode in World.GetAirNodes(worldCoords)) visibleNodes.Add(airNode);
+                    foreach(BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
+                    {
+                        if(IsInVision(targetNode)) visibleNodes.Add(targetNode);
+                    }
                 }
             }
 
             return visibleNodes;
+        }
+
+        /// <summary>
+        /// Returns if the given node is currently visible by this entity.
+        /// </summary>
+        public bool IsInVision(BlockmapNode node)
+        {
+            float distance = Vector2.Distance(OriginNode.WorldCoordinates, node.WorldCoordinates);
+            if (distance > VisionRange) return false;
+
+            return true;
         }
 
 
@@ -147,7 +166,7 @@ namespace BlockmapFramework
             return Quaternion.Euler(0f, 0f, 0f);
         }
 
-        public bool IsVisible(Player player) => OriginNode.IsVisible(player);
+        public bool IsVisible(Player player) => OriginNode.IsVisibleBy(player);
 
         protected void SetOriginNode(BlockmapNode node)
         {

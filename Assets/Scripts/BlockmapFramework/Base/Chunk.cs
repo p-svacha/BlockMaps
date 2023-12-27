@@ -180,7 +180,12 @@ namespace BlockmapFramework
                 for(int y = -1; y <= Size; y++)
                 {
                     SurfaceNode targetNode = World.GetSurfaceNode(GetWorldCoordinates(new Vector2Int(x, y)));
-                    surfaceVisibilityArray.Add((targetNode != null && targetNode.IsVisible(player)) ? 1 : 0);
+
+                    int visibility;
+                    if (targetNode != null && targetNode.IsVisibleBy(player)) visibility = 2; // 2 = visible
+                    else if (targetNode != null && targetNode.IsExploredBy(player)) visibility = 1; // 1 = fog of war
+                    else visibility = 0; // 0 = unexplored
+                    surfaceVisibilityArray.Add(visibility);
                 }
             }
 

@@ -110,6 +110,11 @@ public static class HelperFunctions
         throw new System.Exception("Direction " + dir.ToString() + " not handled");
     }
 
+    public static List<Direction> GetAllDirections8()
+    {
+        return new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
+    }
+
     #endregion
 
     #region UI
