@@ -44,6 +44,8 @@ Shader "Custom/SurfaceShader"
         #include "UnityCG.cginc"
 
         // Base values
+        float _ChunkCoordinatesX;
+        float _ChunkCoordinatesY;
         float _ChunkSize;
 
         // Draw mode
@@ -87,6 +89,7 @@ Shader "Custom/SurfaceShader"
         half _Metallic;
         fixed4 _TintColor;
 
+        float _TileVisibility[324];
         float _TileSurfaces[256];
         float _TileBlend_W[256];
         float _TileBlend_E[256];
@@ -118,17 +121,64 @@ Shader "Custom/SurfaceShader"
             return (blendBase * baseColor) + (blendCorner * adjCornerColor) + (blendSideY * adjYColor) + (blendSideX * adjXColor);
         }
 
+        int GetVisibilityArrayIndex(float x, float y)
+        {
+            return int((y + 1) + (x + 1) * (_ChunkSize + 2));
+        }
+
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Find out where we exactly are on the chunk
             float2 relativePos = frac(IN.worldPos.xz); // relative position on current tile (i.e. 13.4/14.8 => 0.4/0.8)
-            float2 localCoords = floor(IN.worldPos.xz % _ChunkSize); // Local coordinates of current position
-            int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
+            float2 localCoords = max(floor(IN.worldPos.xz % _ChunkSize), 0); // Local coordinates of current position
+
+            // Fix local coordinates when exactly on edge of chunk (else coordinates loop back around)
+            if (IN.worldPos.x <= _ChunkCoordinatesX * _ChunkSize)
+            {
+                localCoords.x = 0;
+                relativePos.x = 0;
+            }
+            if (IN.worldPos.z <= _ChunkCoordinatesY * _ChunkSize)
+            {
+                localCoords.y = 0;
+                relativePos.y = 0;
+            }
+            if (IN.worldPos.x >= ((_ChunkCoordinatesX + 1) * _ChunkSize))
+            {
+                localCoords.x = _ChunkSize - 1;
+                relativePos.x = 1;
+            }
+            if (IN.worldPos.z >= ((_ChunkCoordinatesY + 1) * _ChunkSize))
+            {
+                localCoords.y = _ChunkSize - 1;
+                relativePos.y = 1;
+            }
+            
+
+            // Check visiblity
+            float visEpsilon = 0.1; // Pixels are drawn by this value over tile edges
+            float drawPixel = (_TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)] == 1 ||
+
+                (relativePos.x < visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] == 1) || // extension ne
+                (relativePos.x > 1 - visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] == 1) || // extension nw
+                (relativePos.x > 1 - visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] == 1) || // extension sw
+                (relativePos.x < visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] == 1) || // extension se
+
+                (relativePos.x < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] == 1) || // extension east
+                (relativePos.x > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] == 1) || // extension west
+                (relativePos.y < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] == 1) || // extension north
+                (relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] == 1)); // extension south
+
+
+            if (drawPixel == 0) {
+                discard;
+            }
 
             // c is the color of the current pixel
             fixed4 c;
 
             // Get base color
+            int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
             int surfaceIndex = _TileSurfaces[tileIndex];
             fixed4 baseColor = GetPixelColor(IN.worldPos.xz, surfaceIndex);
             
@@ -143,14 +193,6 @@ Shader "Custom/SurfaceShader"
                 float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
 
                 c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw);
-                /*
-                float blendBase = 0.25 + 0.25 * (max(1 - blendX, 1 - blendY)) + 0.5 * (1-max(blendX, blendY)); // 1 in center, 0.5 on side, 0.25 in corner 
-                float blendNW = min(blendX, blendY) * 0.25; // 0.25 in corner, 0 on side, 0 in center
-                float blendN = (blendY * 0.5) - blendNW; //max((blendY * 0.5) - (blendX * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
-                float blendW = (blendX * 0.5) - blendNW; // max((blendX * 0.5) - (blendY * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
-
-                c = (blendBase * baseColor) + (blendNW * blendColor_nw) +(blendN * blendColor_n) +(blendW * blendColor_w);
-                */
             }
 
             else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend ne

@@ -79,7 +79,7 @@ namespace BlockmapFramework
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(this, meshBuilder);
+            PathMeshBuilder.BuildPath(this, meshBuilder, pathSubmesh: 0, pathCurbSubmesh: 1);
         }
 
         #endregion

@@ -1,10 +1,13 @@
 Big Features to Add:
 
-- Showing / Hiding / Tinting individual tiles
+- Replace IsVisible with Vision-Enum (Unexplored, FogOfWar, Visible)
+	> Add FogOfWar-shading
 
-- Vision / Line of Sight
+- Improve vision algorithm:
 	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
 	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
+
+- Add editor tool to spawn test characters with editable movement and vision
 
 - Static Entities 
 	> affect vision range (fully block or reduce)
@@ -25,16 +28,18 @@ Big Features to Add:
 
 - Add fences to air paths if no connection in that direction
 
-- Path & cliff textures
-
 - Improve Camera:
 	> Shift to increase speed
 	> Faster zoom (alt to decrease zoom speed)
 
 - Fix rare bug of air node not being selected exactly on edge
 
-- Fix bug that a color/texture line appears on chunk edges
-
 - In terrain transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code
 	> also add (global perlin) noise to blending texture
+
+- Save/Load Worlds in editor
+
+- Drag hold to paint surfaces in editor
+
+

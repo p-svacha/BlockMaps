@@ -31,12 +31,22 @@ namespace BlockmapFramework
         public const float SURFACE_TILE_BLENDING = 0.4f;
 
 
-        // Base
         public string Name { get; private set; }
         public int ChunkSize { get; private set; }
         public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+        public List<Entity> Entities = new List<Entity>();
+
         private int NodeIdCounter;
         private BlockmapCamera Camera;
+        /// <summary>
+        /// Neutral passive player
+        /// </summary>
+        public Player Gaia { get; private set; }
+        /// <summary>
+        /// The player that the vision is drawn for currently.
+        /// <br/> If null everything is drawn.
+        /// </summary>
+        public Player ActiveVisionPlayer { get; private set; }
 
         // Layers
         public int Layer_SurfaceNode;
@@ -81,16 +91,20 @@ namespace BlockmapFramework
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
 
         // Draw modes
+        public bool IsAllVisible => ActiveVisionPlayer == null;
         private bool IsShowingGrid;
         private bool IsShowingPathfindingGraph;
         private bool IsShowingTextures;
         private bool IsShowingTileBlending;
+        
 
         public void Init(WorldData data)
         {
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
             Layer_AirNode = LayerMask.NameToLayer("Path");
+
+            Gaia = new Player(-1, "Gaia");
 
             Name = data.Name;
             ChunkSize = data.ChunkSize;
@@ -111,12 +125,109 @@ namespace BlockmapFramework
             Camera.SetAngle(225);
         }
 
+        #region Update
+
         void Update()
         {
             UpdateHoveredObjects();
+            //UpdateVisibility();
         }
 
+        /// <summary>
+        /// Updates all hovered objects and fires events if anything changed.
+        /// </summary>
+        private void UpdateHoveredObjects()
+        {
+            RaycastHit hit;
+            Ray ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
+
+            IsHoveringWorld = false;
+
+            Chunk oldHoveredChunk = HoveredChunk;
+            Chunk newHoveredChunk = null;
+
+            SurfaceNode oldHoveredSurfaceNode = HoveredSurfaceNode;
+            SurfaceNode newHoveredSurfaceNode = null;
+
+            BlockmapNode oldHoveredNode = HoveredNode;
+            BlockmapNode newHoveredNode = null;
+
+            // Shoot a raycast on surface and air layer to detect hovered nodes
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
+            {
+                Transform objectHit = hit.transform;
+
+                if (objectHit != null)
+                {
+                    Vector3 hitPosition = hit.point;
+                    IsHoveringWorld = true;
+
+                    NodeHoverMode = GetNodeHoverMode(hitPosition);
+                    HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
+
+                    // Update chunk
+                    newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
+
+                    if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
+                    {
+                        newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
+                        newHoveredNode = GetSurfaceNode(HoveredWorldCoordinates);
+                    }
+                    else if (objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
+                    {
+                        // Current bug: this only works from 2 sides when hovering the edge of an air node
+                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+
+                        if (newHoveredNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+                        {
+                            Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
+                            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+                            newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                        }
+                    }
+                }
+            }
+
+            // Update currently hovered objects
+            HoveredNode = newHoveredNode;
+            HoveredSurfaceNode = newHoveredSurfaceNode;
+            HoveredChunk = newHoveredChunk;
+
+            // Fire update events
+            if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
+            if (newHoveredSurfaceNode != oldHoveredSurfaceNode) OnHoveredSurfaceNodeChanged?.Invoke(oldHoveredSurfaceNode, newHoveredSurfaceNode);
+            if (newHoveredChunk != oldHoveredChunk) OnHoveredChunkChanged?.Invoke(oldHoveredChunk, newHoveredChunk);
+        }
+        private Direction GetNodeHoverMode(Vector3 worldPos)
+        {
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+            if (worldPos.x < 0) posOnTile.x++;
+            if (worldPos.z < 0) posOnTile.y++;
+
+            bool north = posOnTile.y > (1f - HoverEdgeSensitivity);
+            bool south = posOnTile.y < HoverEdgeSensitivity;
+            bool west = posOnTile.x < HoverEdgeSensitivity;
+            bool east = posOnTile.x > (1f - HoverEdgeSensitivity);
+
+            if (north && east) return Direction.NE;
+            if (north && west) return Direction.NW;
+            if (north) return Direction.N;
+            if (south && east) return Direction.SE;
+            if (south && west) return Direction.SW;
+            if (south) return Direction.S;
+            if (east) return Direction.E;
+            if (west) return Direction.W;
+            return Direction.None;
+        }
+
+        #endregion
+
         #region Actions
+
+        public void AddEntity(Entity e)
+        {
+            Entities.Add(e);
+        }
 
         public void UpdatePathfindingGraphAround(Vector2Int worldCoordinates)
         {
@@ -242,11 +353,13 @@ namespace BlockmapFramework
         #region Draw
 
         /// <summary>
-        /// Generates all meshes of the world
+        /// Generates all meshes of the world.
         /// </summary>
         public void Draw()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.Draw();
+
+            SetActiveVisionPlayer(null);
 
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
@@ -271,12 +384,39 @@ namespace BlockmapFramework
                 }
             }
 
-            foreach (Chunk chunk in affectedChunks) chunk.Draw();
+            foreach (Chunk chunk in affectedChunks)
+            {
+                chunk.Draw();
+                chunk.SetVisibility(ActiveVisionPlayer);
+            }
 
             UpdateGridOverlay();
             UpdatePathfindingVisualization();
             UpdateTextureMode();
             UpdateTileBlending();
+        }
+
+        /// <summary>
+        /// Updates the visibility for the full map according to the current player vision.
+        /// </summary>
+        public void UpdateVisibility()
+        {
+            foreach (Chunk c in Chunks.Values) UpdateVisibility(c);
+        }
+        /// <summary>
+        /// Updates the visibility for one chunk according to the current player vision.
+        /// </summary>
+        public void UpdateVisibility(Chunk c)
+        {
+            c.SetVisibility(ActiveVisionPlayer);
+        }
+
+        /// <summary>
+        /// Gets called when the visibility of a node changes on the specified chunk for the specified player.
+        /// </summary>
+        public void OnVisibilityChanged(Chunk c, Player player)
+        {
+            if (player == ActiveVisionPlayer) UpdateVisibility(c);
         }
 
         public void ToggleGridOverlay()
@@ -320,95 +460,10 @@ namespace BlockmapFramework
             foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(IsShowingTileBlending);
         }
 
-        #endregion
-
-        #region Input Handling
-
-        /// <summary>
-        /// Updates all hovered objects and fires events if anything changed.
-        /// </summary>
-        private void UpdateHoveredObjects()
+        public void SetActiveVisionPlayer(Player player)
         {
-            RaycastHit hit;
-            Ray ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
-
-            IsHoveringWorld = false;
-
-            Chunk oldHoveredChunk = HoveredChunk;
-            Chunk newHoveredChunk = null;
-
-            SurfaceNode oldHoveredSurfaceNode = HoveredSurfaceNode;
-            SurfaceNode newHoveredSurfaceNode = null;
-
-            BlockmapNode oldHoveredNode = HoveredNode;
-            BlockmapNode newHoveredNode = null;
-
-            // Shoot a raycast on surface and air layer to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
-            {
-                Transform objectHit = hit.transform;
-
-                if (objectHit != null)
-                {
-                    Vector3 hitPosition = hit.point;
-                    IsHoveringWorld = true;
-
-                    NodeHoverMode = GetNodeHoverMode(hitPosition);
-                    HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
-
-                    // Update chunk
-                    newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
-                    
-                    if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
-                    {
-                        newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
-                        newHoveredNode = GetSurfaceNode(HoveredWorldCoordinates);
-                    }
-                    else if(objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
-                    {
-                        // Current bug: this only works from 2 sides when hovering the edge of an air node
-                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-
-                        if(newHoveredNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-                        {
-                            Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
-                            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                            newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-                        }
-                    }
-                }
-            }
-
-            // Update currently hovered objects
-            HoveredNode = newHoveredNode;
-            HoveredSurfaceNode = newHoveredSurfaceNode;
-            HoveredChunk = newHoveredChunk;
-
-            // Fire update events
-            if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
-            if (newHoveredSurfaceNode != oldHoveredSurfaceNode) OnHoveredSurfaceNodeChanged?.Invoke(oldHoveredSurfaceNode, newHoveredSurfaceNode);
-            if (newHoveredChunk != oldHoveredChunk) OnHoveredChunkChanged?.Invoke(oldHoveredChunk, newHoveredChunk);
-        }
-        private Direction GetNodeHoverMode(Vector3 worldPos)
-        {
-            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
-            if (worldPos.x < 0) posOnTile.x++;
-            if (worldPos.z < 0) posOnTile.y++;
-
-            bool north = posOnTile.y > (1f - HoverEdgeSensitivity);
-            bool south = posOnTile.y < HoverEdgeSensitivity;
-            bool west = posOnTile.x < HoverEdgeSensitivity;
-            bool east = posOnTile.x > (1f - HoverEdgeSensitivity);
-
-            if (north && east) return Direction.NE;
-            if (north && west) return Direction.NW;
-            if (north) return Direction.N;
-            if (south && east) return Direction.SE;
-            if (south && west) return Direction.SW;
-            if (south) return Direction.S;
-            if (east) return Direction.E;
-            if (west) return Direction.W;
-            return Direction.None;
+            ActiveVisionPlayer = player;
+            UpdateVisibility();
         }
 
         #endregion
@@ -456,7 +511,7 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetAirNodes(Vector2Int worldCoordinates)
         {
-            if (!IsInWorld(worldCoordinates)) return null;
+            if (!IsInWorld(worldCoordinates)) return new List<BlockmapNode>();
 
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetAirNodes(chunk.GetLocalCoordinates(worldCoordinates));

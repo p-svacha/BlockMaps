@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CliffMaterial
+  m_Name: PathMaterial
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -41,7 +41,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a22a7e513fd26444483b8d8e05ebe466, type: 3}
+        m_Texture: {fileID: 2800000, guid: 06eabdea3cfa00b4f86be31908bb0d6d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -76,6 +76,6 @@ Material:
     - _UseTextures: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+    - _Color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

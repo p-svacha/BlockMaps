@@ -837,7 +837,6 @@ MonoBehaviour:
   AirNodeTool: {fileID: 296450346}
   AirSlopeNodeTool: {fileID: 553564777}
   World: {fileID: 0}
-  Entities: []
   CurrentTool: {fileID: 0}
 --- !u!4 &200395898
 Transform:
@@ -2079,7 +2078,10 @@ MonoBehaviour:
 
     Press T to toggle textures.
 
-    Press B to toggle surface blending.'
+    Press B to toggle surface blending.
+
+    Press
+    V to toggle visibility.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2953,10 +2955,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SurfaceMaterial: {fileID: 2100000, guid: 473924d3185d1b348929fdd221a92050, type: 2}
   CliffMaterial: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
-  PathCurbMaterial: {fileID: 2100000, guid: 58235ed3d55afdf419fd14c361ba5787, type: 2}
+  PathMaterial: {fileID: 2100000, guid: 4353fff21cc3e3d4eb48ce816f2ad349, type: 2}
+  PathCurbMaterial: {fileID: 2100000, guid: ad6ca2c58f08a9b4bb44dd44a648dec7, type: 2}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
-  TarmacTexture: {fileID: 2800000, guid: a33e732f85c2ef14e99575f374408332, type: 3}
+  TarmacTexture: {fileID: 2800000, guid: f496d54c6bd45ca49a6ca92eecd7b290, type: 3}
 --- !u!114 &1859474534
 MonoBehaviour:
   m_ObjectHideFlags: 0

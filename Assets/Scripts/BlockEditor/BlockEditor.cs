@@ -32,7 +32,6 @@ namespace WorldEditor
 
         [Header("World")]
         public World World;
-        public List<Entity> Entities = new List<Entity>();
 
         // Editor
         float deltaTime; // for fps
@@ -42,7 +41,7 @@ namespace WorldEditor
         void Start()
         {
             // Init world
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 10, 3);
+            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 4);
             SetWorld(data);
 
             // Init tools
@@ -73,7 +72,6 @@ namespace WorldEditor
         {
             // Clear old data
             if (World != null) Destroy(World.gameObject);
-            Entities.Clear();
 
             // Set new data
             World = World.Load(data);
@@ -101,11 +99,14 @@ namespace WorldEditor
             // New Pathfinding Entity
             if(Input.GetKeyDown(KeyCode.Space))
             {
-                MovingEntity newCharacter = Instantiate(CharacterPrefab, World.transform);
-                newCharacter.gameObject.layer = World.Layer_Entity;
-                Entities.Add(newCharacter);
-                BlockmapNode node = World.GetRandomOwnedTerrainNode();
-                newCharacter.Init(World, node, new bool[,,] { { { true } } });
+                BlockmapNode spawnNode = World.GetRandomOwnedTerrainNode();
+
+                GameObject characterContainer = new GameObject("Character");
+                characterContainer.transform.SetParent(World.transform);
+
+                MovingEntity newCharacter = Instantiate(CharacterPrefab, characterContainer.transform);
+                newCharacter.Init(World, spawnNode, new bool[,,] { { { true } } }, World.Gaia, visionRange: 10.6f);
+                World.AddEntity(newCharacter);
             }
 
             // Show/Hide Grid
@@ -119,6 +120,13 @@ namespace WorldEditor
 
             // Surface blending
             if (Input.GetKeyDown(KeyCode.B)) World.ToggleTileBlending();
+
+            // Visibility
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                if (World.IsAllVisible) World.SetActiveVisionPlayer(World.Gaia);
+                else World.SetActiveVisionPlayer(null);
+            }
 
             // Tool Selection
             foreach (EditorTool tool in Tools.Values)

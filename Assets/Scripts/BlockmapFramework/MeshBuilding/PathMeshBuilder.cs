@@ -20,13 +20,13 @@ namespace BlockmapFramework
         /// <summary>
         /// Builds the path mesh on this node according to the node shape. Adds the mesh to an existing MeshBuilder.
         /// </summary>
-        public static void BuildPath(BlockmapNode node, MeshBuilder meshBuilder)
+        public static void BuildPath(BlockmapNode node, MeshBuilder meshBuilder, int pathSubmesh, int pathCurbSubmesh)
         {
             Node = node;
             MeshBuilder = meshBuilder;
 
-            PathSubmesh = meshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial);
-            CurbSubmesh = meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial);
+            PathSubmesh = pathSubmesh;
+            CurbSubmesh = pathCurbSubmesh;
 
             BaseWorldHeight = Node.BaseHeight * World.TILE_HEIGHT;
 

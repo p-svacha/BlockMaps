@@ -33,7 +33,7 @@ namespace WorldEditor
             if (NumChunksInput.text == "") return;
             int numChunks = int.Parse(NumChunksInput.text);
 
-            if (chunkSize * numChunks > 300) return;
+            if (chunkSize * numChunks > 512) return;
 
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", chunkSize, numChunks);
             Editor.SetWorld(data);

@@ -18,7 +18,7 @@ namespace BlockmapFramework
 
         // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
         public GameObject SurfaceMesh;
-        public AirNodeMesh[] AirNodeMesh;
+        public AirNodeMesh[] AirNodeMeshes;
 
 
         /// <summary>
@@ -48,12 +48,12 @@ namespace BlockmapFramework
             SurfaceMesh.layer = World.Layer_SurfaceNode;
             SurfaceMesh.transform.SetParent(transform);
 
-            AirNodeMesh = new AirNodeMesh[World.MAX_HEIGHT];
+            AirNodeMeshes = new AirNodeMesh[World.MAX_HEIGHT];
             for(int i = 0; i < World.MAX_HEIGHT; i++)
             {
                 GameObject obj = new GameObject("AirNodeMesh_" + i);
-                AirNodeMesh[i] = obj.AddComponent<AirNodeMesh>();
-                AirNodeMesh[i].Init(this, i);
+                AirNodeMeshes[i] = obj.AddComponent<AirNodeMesh>();
+                AirNodeMeshes[i].Init(this, i);
             }
         }
 
@@ -89,7 +89,11 @@ namespace BlockmapFramework
             MeshBuilder surfaceMeshBuilder = new MeshBuilder(SurfaceMesh);
             surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.SurfaceMaterial); // Submesh 0: surface
             surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial); // Submesh 1: cliffs
-            List<float> surfaceArray = new List<float>(); // for shader
+            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathMaterial); // Submesh 2: path
+            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial); // Submesh 3: pathCurb
+
+            // Shader values
+            List<float> surfaceArray = new List<float>();
             List<float> surfaceBlend_W = new List<float>(); 
             List<float> surfaceBlend_N = new List<float>(); 
             List<float> surfaceBlend_S = new List<float>();
@@ -104,7 +108,7 @@ namespace BlockmapFramework
                 // Generate mesh
                 node.Draw(surfaceMeshBuilder);
 
-                // Get surface value for shader
+                // Base surface
                 int surfaceId = (int)node.Surface.Id;
                 surfaceArray.Add(surfaceId);
 
@@ -134,24 +138,61 @@ namespace BlockmapFramework
                 if (node.ConnectedNodes.TryGetValue(Direction.SW, out BlockmapNode swNode)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
                 else surfaceBlend_SW.Add(surfaceId);
             }
-            surfaceMeshBuilder.ApplyMesh();
+            surfaceMeshBuilder.ApplyMesh(castShadows: false);
+            MeshRenderer surfaceRenderer = SurfaceMesh.GetComponent<MeshRenderer>();
 
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ChunkSize", Size);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileSurfaces", surfaceArray);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_W", surfaceBlend_W);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_E", surfaceBlend_E);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_N", surfaceBlend_N);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_S", surfaceBlend_S);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_NW", surfaceBlend_NW);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_NE", surfaceBlend_NE);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
+            // Set chunk values for all materials
+            for (int i = 0; i < surfaceRenderer.materials.Length; i++)
+            {
+                surfaceRenderer.materials[i].SetFloat("_ChunkSize", Size);
+                surfaceRenderer.materials[i].SetFloat("_ChunkCoordinatesX", Coordinates.x);
+                surfaceRenderer.materials[i].SetFloat("_ChunkCoordinatesY", Coordinates.y);
+            }
+
+            // Set blend values for surface material
+            Material surfaceMaterial = SurfaceMesh.GetComponent<MeshRenderer>().material;
+            surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
+            surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlend_W);
+            surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlend_E);
+            surfaceMaterial.SetFloatArray("_TileBlend_N", surfaceBlend_N);
+            surfaceMaterial.SetFloatArray("_TileBlend_S", surfaceBlend_S);
+            surfaceMaterial.SetFloatArray("_TileBlend_NW", surfaceBlend_NW);
+            surfaceMaterial.SetFloatArray("_TileBlend_NE", surfaceBlend_NE);
+            surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
+            surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
 
             // Air node meshes
-            foreach (AirNodeMesh mesh in AirNodeMesh) mesh.Draw();
+            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.Draw();
 
             // Chunk position
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
+        }
+
+        /// <summary>
+        /// Updates the visible nodes on this chunk according to the vision of the specified player.
+        /// </summary>
+        public void SetVisibility(Player player)
+        {
+            // Define surface visibility array based on node visibility
+            List<float> surfaceVisibilityArray = new List<float>();
+            for(int x = -1; x <= Size; x++)
+            {
+                for(int y = -1; y <= Size; y++)
+                {
+                    SurfaceNode targetNode = World.GetSurfaceNode(GetWorldCoordinates(new Vector2Int(x, y)));
+                    surfaceVisibilityArray.Add((targetNode != null && targetNode.IsVisible(player)) ? 1 : 0);
+                }
+            }
+
+            // Set visibility in all surface mesh materials
+            MeshRenderer surfaceRenderer = SurfaceMesh.GetComponent<MeshRenderer>();
+            for (int i = 0; i < surfaceRenderer.materials.Length; i++)
+            {
+                surfaceRenderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
+            }
+
+            // Set visibility in all air node mesh materials
+            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.SetVisibility(player);
         }
 
         public void ShowGrid(bool show)
@@ -160,7 +201,12 @@ namespace BlockmapFramework
         }
         public void ShowTextures(bool show)
         {
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_UseTextures", show ? 1 : 0);
+            for (int i = 0; i < SurfaceMesh.GetComponent<MeshRenderer>().materials.Length; i++)
+            {
+                SurfaceMesh.GetComponent<MeshRenderer>().materials[i].SetFloat("_UseTextures", show ? 1 : 0);
+            }
+
+            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowTextures(show);
         }
         public void ShowTileBlending(bool show)
         {
@@ -171,6 +217,14 @@ namespace BlockmapFramework
 
         #region Getters
 
+        public List<BlockmapNode> GetAllNodes()
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            for (int x = 0; x < Size; x++)
+                for (int y = 0; y < Size; y++)
+                    nodes.AddRange(GetNodes(x, y));
+            return nodes;
+        }
         public List<BlockmapNode> GetNodes(int x, int y)
         {
             return Nodes[x, y];
@@ -179,6 +233,7 @@ namespace BlockmapFramework
         {
             return GetNodes(localCoordinates.x, localCoordinates.y);
         }
+
         public List<SurfaceNode> GetAllSurfaceNodes()
         {
             List<SurfaceNode> nodes = new List<SurfaceNode>();

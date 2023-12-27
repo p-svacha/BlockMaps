@@ -43,7 +43,7 @@ public class MeshBuilder
         MeshObject = meshObject;
     }
 
-    public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true)
+    public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true, bool castShadows = true)
     {
         // Set index values for all vertices
         for (int i = 0; i < Vertices.Count; i++) Vertices[i].Id = i;
@@ -73,10 +73,11 @@ public class MeshBuilder
         meshFilter.mesh.RecalculateNormals();
 
         if(applyMaterials) meshRenderer.materials = Materials.ToArray(); // Set the material for each submesh
+        if(!castShadows) meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
         // Update collider
         GameObject.Destroy(MeshObject.GetComponent<MeshCollider>());
-        if(addCollider) MeshObject.AddComponent<MeshCollider>();
+        if(addCollider && Vertices.Count > 0) MeshObject.AddComponent<MeshCollider>();
 
         return MeshObject;
     }

@@ -62,6 +62,10 @@ namespace BlockmapFramework
 
         // Objects on node
         public HashSet<Entity> Entities = new HashSet<Entity>();
+        /// <summary>
+        /// List containing all entities that currently see this node.
+        /// </summary>
+        public List<Entity> SeenBy = new List<Entity>();
 
         #region Initialize
 
@@ -208,6 +212,17 @@ namespace BlockmapFramework
             throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height should never be used.");
         }
 
+        /// <summary>
+        /// Returns if this node is visible for the specified player.
+        /// </summary>
+        public bool IsVisible(Player player)
+        {
+            if (World.IsAllVisible) return true; // Everything is visible
+            if (SeenBy.FirstOrDefault(x => x.Player == player) != null) return true; // Node is seen by an entity of player
+
+            return false;
+        }
+
         public override string ToString()
         {
             return Type.ToString() + " " + WorldCoordinates.ToString();
@@ -217,6 +232,9 @@ namespace BlockmapFramework
 
         #region Setters
 
+        /// <summary>
+        /// Sets the base surface of this node. Chunk has to be redrawn to see change.
+        /// </summary>
         public void SetSurface(SurfaceId id)
         {
             Surface = SurfaceManager.Instance.GetSurface(id);

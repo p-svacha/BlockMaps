@@ -313,7 +313,7 @@ namespace BlockmapFramework
 
         private void DrawPath(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(this, meshBuilder);
+            PathMeshBuilder.BuildPath(this, meshBuilder, pathSubmesh: 2, pathCurbSubmesh: 3);
         }
 
         public void ShowOverlay(bool show)

@@ -14,6 +14,7 @@ namespace BlockmapFramework
         [Header("Materials")]
         public Material SurfaceMaterial;
         public Material CliffMaterial;
+        public Material PathMaterial;
         public Material PathCurbMaterial;
 
         [Header("Terrain Textures")]

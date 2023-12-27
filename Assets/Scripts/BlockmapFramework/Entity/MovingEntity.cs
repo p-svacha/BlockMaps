@@ -19,10 +19,10 @@ namespace BlockmapFramework
         public GameObject TargetFlag;
         private float TargetFlagScale = 0.1f;
 
-        public override void Init(World world, BlockmapNode position, bool[,,] shape)
+        public override void Init(World world, BlockmapNode position, bool[,,] shape, Player player, float visionRange)
         {
             if (shape.GetLength(0) != 1 || shape.GetLength(1) != 1) throw new System.Exception("Characters can't be bigger than 1x1");
-            base.Init(world, position, shape);
+            base.Init(world, position, shape, player, visionRange);
             IsMoving = false;
 
             NextNode = position;
@@ -32,7 +32,7 @@ namespace BlockmapFramework
         }
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             if (TargetPath == null) GoTo(World.GetRandomOwnedTerrainNode());
 
@@ -43,14 +43,16 @@ namespace BlockmapFramework
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
             if (IsMoving)
             {
+                // Calculate new world position and coordinates
                 Vector2 newPosition2d = Vector2.MoveTowards(currentPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.GetSpeedModifier());
                 Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
-                if (currentWorldCoordinates != newWorldCoordinates) OriginNode = TargetPath[0]; // Change origin node when passing over a node border
 
+                // Change origin node when passing over a node border
+                if (currentWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]); 
+
+                // Set new position/rotation
                 Vector3 newPosition = new Vector3(newPosition2d.x, World.GetWorldHeightAt(newPosition2d, OriginNode), newPosition2d.y);
                 transform.position = newPosition;
-                UpdateOccupiedTerrainTiles();
-
                 transform.rotation = Get2dRotationByDirection(CurrentDirection);
             }
 

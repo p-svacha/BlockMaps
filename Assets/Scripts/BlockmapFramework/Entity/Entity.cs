@@ -7,31 +7,51 @@ namespace BlockmapFramework
     public class Entity : MonoBehaviour
     {
         public World World;
-        //public List<Block> OccupiedBlocks;  // Block that the entity is on at this frame
-        public BlockmapNode OriginNode;       // Tile that the entity is currently on (the origin of the entity (southwest corner) is on)
-        public List<SurfaceNode> OccupiedTerrainNodes = new List<SurfaceNode>();    // Tile that the entity is on at this frame
 
+        /// <summary>
+        /// Node that the southwest corner of this entity is on at this moment.
+        /// </summary>
+        protected BlockmapNode OriginNode { get; private set; }
+
+        /// <summary>
+        /// List of tiles that this entity is currently on.
+        /// </summary>
+        public List<SurfaceNode> OccupiedTerrainNodes { get; private set; }
+
+        /// <summary>
+        /// List of all nodes that this entity currently sees.
+        /// </summary>
+        public List<BlockmapNode> VisibleNodes { get; private set; }
+
+        /// <summary>
+        /// Who this entity belongs to.
+        /// </summary>
+        public Player Player { get; private set; }
+        /// <summary>
+        /// How far this entity can see.
+        /// </summary>
+        public float VisionRange { get; private set; }
         public bool[,,] Shape;   // Size and shape of the entity, starting from southwest bottom corner
 
-        public virtual void Init(World world, BlockmapNode position, bool[,,] shape)
+        public virtual void Init(World world, BlockmapNode position, bool[,,] shape, Player player, float visionRange)
         {
+            OccupiedTerrainNodes = new List<SurfaceNode>();
+            VisibleNodes = new List<BlockmapNode>();
+
             World = world;
             Shape = shape;
-            OriginNode = position;
+            VisionRange = visionRange;
+            Player = player;
+            SetOriginNode(position);
+
+            gameObject.layer = World.Layer_Entity;
             transform.position = position.GetCenterWorldPosition();
-            UpdateOccupiedTerrainTiles();
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
 
         /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode of the entity. 
         /// </summary>
-        protected void UpdateOccupiedTerrainTiles()
+        private void UpdateOccupiedTerrainTiles()
         {
             // Remove entity from all currently occupied tiles
             foreach (SurfaceNode t in OccupiedTerrainNodes) t.RemoveEntity(this);
@@ -58,6 +78,61 @@ namespace BlockmapFramework
             }
         }
 
+        /// <summary>
+        /// Sets VisibleNodes according to vision and line of sight rules.
+        /// </summary>
+        private void UpdateVisibleNodes()
+        {
+            // Remove entity vision from previously visible nodes
+            HashSet<BlockmapNode> previousVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
+            foreach (BlockmapNode n in previousVisibleNodes) n.SeenBy.Remove(this);
+
+            // Update what nodes are visible from the current position
+            VisibleNodes = GetVisibleNodesFrom(OriginNode);
+
+            // Add entitiy vision to newly visible nodes
+            HashSet<BlockmapNode> newVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
+            foreach (BlockmapNode n in newVisibleNodes) n.SeenBy.Add(this);
+
+
+            // Find nodes where the visibility changed
+            HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVisibleNodes);
+            changedVisibilityNodes.SymmetricExceptWith(newVisibleNodes);
+
+            // Get chunks where visibility changed
+            HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
+            foreach (BlockmapNode n in changedVisibilityNodes) changedVisibilityChunks.Add(n.Chunk);
+
+            // Redraw visibility of affected chunks
+            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Player);
+        }
+
+        /// <summary>
+        /// Returns a list of all visible nodes from the given position.
+        /// </summary>
+        private List<BlockmapNode> GetVisibleNodesFrom(BlockmapNode node)
+        {
+            List<BlockmapNode> visibleNodes = new List<BlockmapNode>();
+
+            for(int x = (int)(-VisionRange - 1); x <= VisionRange; x++)
+            {
+                for(int y = (int)(-VisionRange - 1); y <= VisionRange; y++)
+                {
+                    float distance = Vector2.Distance(Vector2.zero, new Vector2(x, y));
+                    if (distance > VisionRange) continue;
+
+                    Vector2Int worldCoords = new Vector2Int(node.WorldCoordinates.x + x, node.WorldCoordinates.y + y);
+
+                    SurfaceNode surfaceNode = World.GetSurfaceNode(worldCoords);
+                    if(surfaceNode != null) visibleNodes.Add(surfaceNode);
+
+                    foreach (BlockmapNode airNode in World.GetAirNodes(worldCoords)) visibleNodes.Add(airNode);
+                }
+            }
+
+            return visibleNodes;
+        }
+
 
         public static Quaternion Get2dRotationByDirection(Direction dir)
         {
@@ -70,6 +145,15 @@ namespace BlockmapFramework
             if (dir == Direction.W) return Quaternion.Euler(0f, 0f, 0f);
             if (dir == Direction.NW) return Quaternion.Euler(0f, 45f, 0f);
             return Quaternion.Euler(0f, 0f, 0f);
+        }
+
+        public bool IsVisible(Player player) => OriginNode.IsVisible(player);
+
+        protected void SetOriginNode(BlockmapNode node)
+        {
+            OriginNode = node;
+            UpdateVisibleNodes();
+            UpdateOccupiedTerrainTiles();
         }
 
     }
