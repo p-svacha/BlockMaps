@@ -21,7 +21,9 @@ namespace WorldEditor
 
         public virtual void UpdateTool() { }
         public virtual void HandleLeftClick() { }
+        public virtual void HandleLeftDrag() { }
         public virtual void HandleRightClick() { }
+        public virtual void HandleRightDrag() { }
 
         public virtual void OnDeselect() { }
         public virtual void OnSelect() { }

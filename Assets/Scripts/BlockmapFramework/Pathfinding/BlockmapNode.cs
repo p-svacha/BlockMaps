@@ -12,8 +12,7 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class BlockmapNode
     {
-        private static int IdCounter = 0;
-        public int Id;
+        public int Id { get; private set; }
 
         /// <summary>
         /// Height of the 4 corners of the node: {SW, SE, NE, NW}
@@ -39,7 +38,7 @@ namespace BlockmapFramework
         public abstract int Layer { get; }
 
         /// <summary>
-        /// Shapes with the format "1010" or "0101" have to possible variants (center high or center low). This flag decides which variant is used in that case.
+        /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
         /// </summary>
         public bool UseAlternativeVariant;
 
@@ -71,6 +70,11 @@ namespace BlockmapFramework
         /// List containing all entities that currently see this node.
         /// </summary>
         private HashSet<Entity> SeenBy = new HashSet<Entity>();
+
+        /// <summary>
+        /// The mesh in the world that this node is drawn on.
+        /// </summary>
+        protected ChunkMesh Mesh;
 
         #region Initialize
 
@@ -155,6 +159,27 @@ namespace BlockmapFramework
         /// Adds all of this nodes vertices and triangles to the given MeshBuilder.
         /// </summary>
         public abstract void Draw(MeshBuilder meshBuilder);
+
+        /// <summary>
+        /// Shows or hides the currently set tile overlay.
+        /// </summary>
+        public void ShowOverlay(bool show)
+        {
+            Mesh.ShowOverlay(show);
+        }
+
+        /// <summary>
+        /// Shows the given texture as the tile overlay.
+        /// </summary>
+        public void ShowOverlay(Texture2D texture, Color color)
+        {
+            Mesh.ShowOverlay(LocalCoordinates, texture, color);
+        }
+
+        public void SetMesh(ChunkMesh mesh)
+        {
+            Mesh = mesh;
+        }
 
         #endregion
 

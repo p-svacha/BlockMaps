@@ -17,10 +17,6 @@ Shader "Custom/SurfaceShader"
         [Toggle] _ShowGrid("Show Grid", Float) = 1
         _GridColor("Grid Color", Color) = (0,0,0,1)
 
-        [Toggle] _ShowBlockOverlay("Show Block Overlay", Float) = 0
-        _BlockOverlayTex("Block Overlay Texture", 2D) = "none" {}
-        _BlockOverlayColor("Block Overlay Color", Color) = (0,0,0,0)
-
         [Toggle] _ShowTileOverlay("Show Tile Overlay", Float) = 0
         _TileOverlayTex("Overlay Texture", 2D) = "none" {}
         _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
@@ -59,26 +55,23 @@ Shader "Custom/SurfaceShader"
         UNITY_DECLARE_TEX2DARRAY(_TerrainTextures);
         float _TerrainTextureScale;
 
-        // Grid overlay
+        // Overlays
+        fixed4 _FogOfWarColor;
+
         sampler2D _GridTex;
         fixed4 _GridColor;
         float _ShowGrid;
 
-        // Tile selection Overlay
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
         float _TileOverlayX;
         float _TileOverlayY;
-        
-        // Chunk selection overlay
-        float _ShowBlockOverlay;
-        sampler2D _BlockOverlayTex;
-        fixed4 _BlockOverlayColor;
 
+        // Material attributes
         half _Glossiness;
         half _Metallic;
-        fixed4 _FogOfWarColor;
+        
 
         float _TileVisibility[324];
         float _TileSurfaces[256];
@@ -93,7 +86,6 @@ Shader "Custom/SurfaceShader"
 
         struct Input
         {
-            float2 uv_BlockOverlayTex;
             float2 uv_TerrainTextures;
             float2 uv2_TileOverlayTex;
             float2 uv2_GridTex;
@@ -269,7 +261,6 @@ Shader "Custom/SurfaceShader"
                 c = baseColor;
             }
 
-
             // Selection Overlay
             if (_ShowTileOverlay == 1)
             {
@@ -278,13 +269,6 @@ Shader "Custom/SurfaceShader"
                     fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
                     c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
                 }
-            }
-
-            // Block Overlay
-            if (_ShowBlockOverlay == 1) 
-            {
-                fixed4 blockOverlayColor = tex2D(_BlockOverlayTex, IN.uv_BlockOverlayTex) * _BlockOverlayColor;
-                c = (blockOverlayColor.a * blockOverlayColor) + ((1 - blockOverlayColor.a) * c);
             }
 
             // Grid

@@ -17,7 +17,7 @@ namespace BlockmapFramework
         public List<BlockmapNode>[,] Nodes { get; private set; }
 
         // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
-        public GameObject SurfaceMesh;
+        public SurfaceMesh SurfaceMesh;
         public AirNodeMesh[] AirNodeMeshes;
 
 
@@ -44,9 +44,9 @@ namespace BlockmapFramework
             }
 
             // Init meshes
-            SurfaceMesh = new GameObject("SurfaceMesh");
-            SurfaceMesh.layer = World.Layer_SurfaceNode;
-            SurfaceMesh.transform.SetParent(transform);
+            GameObject surfaceMeshObject = new GameObject("SurfaceMesh");
+            SurfaceMesh = surfaceMeshObject.AddComponent<SurfaceMesh>();
+            SurfaceMesh.Init(this);
 
             AirNodeMeshes = new AirNodeMesh[World.MAX_HEIGHT];
             for(int i = 0; i < World.MAX_HEIGHT; i++)
@@ -86,80 +86,7 @@ namespace BlockmapFramework
         public void Draw()
         {
             // Surface mesh
-            MeshBuilder surfaceMeshBuilder = new MeshBuilder(SurfaceMesh);
-            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.SurfaceMaterial); // Submesh 0: surface
-            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial); // Submesh 1: cliffs
-            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathMaterial); // Submesh 2: path
-            surfaceMeshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial); // Submesh 3: pathCurb
-
-            // Shader values
-            List<float> surfaceArray = new List<float>();
-            List<float> surfaceBlend_W = new List<float>(); 
-            List<float> surfaceBlend_N = new List<float>(); 
-            List<float> surfaceBlend_S = new List<float>();
-            List<float> surfaceBlend_E = new List<float>();
-            List<float> surfaceBlend_NW = new List<float>();
-            List<float> surfaceBlend_NE = new List<float>();
-            List<float> surfaceBlend_SW = new List<float>();
-            List<float> surfaceBlend_SE = new List<float>();
-
-            foreach (SurfaceNode node in GetAllSurfaceNodes())
-            {
-                // Generate mesh
-                node.Draw(surfaceMeshBuilder);
-
-                // Base surface
-                int surfaceId = (int)node.Surface.Id;
-                surfaceArray.Add(surfaceId);
-
-                // Blend west
-                if (node.ConnectedNodes.TryGetValue(Direction.W, out BlockmapNode westNode)) surfaceBlend_W.Add((int)westNode.Surface.Id);
-                else surfaceBlend_W.Add(surfaceId);
-                // Blend north
-                if (node.ConnectedNodes.TryGetValue(Direction.N, out BlockmapNode northNode)) surfaceBlend_N.Add((int)northNode.Surface.Id);
-                else surfaceBlend_N.Add(surfaceId);
-                // Blend south
-                if (node.ConnectedNodes.TryGetValue(Direction.S, out BlockmapNode southNode)) surfaceBlend_S.Add((int)southNode.Surface.Id);
-                else surfaceBlend_S.Add(surfaceId);
-                // Blend east
-                if (node.ConnectedNodes.TryGetValue(Direction.E, out BlockmapNode eastNode)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
-                else surfaceBlend_E.Add(surfaceId);
-
-                // Blend nw
-                if (node.ConnectedNodes.TryGetValue(Direction.NW, out BlockmapNode nwNode)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
-                else surfaceBlend_NW.Add(surfaceId);
-                // Blend ne
-                if (node.ConnectedNodes.TryGetValue(Direction.NE, out BlockmapNode neNode)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
-                else surfaceBlend_NE.Add(surfaceId);
-                // Blend se
-                if (node.ConnectedNodes.TryGetValue(Direction.SE, out BlockmapNode seNode)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
-                else surfaceBlend_SE.Add(surfaceId);
-                // Blend sw
-                if (node.ConnectedNodes.TryGetValue(Direction.SW, out BlockmapNode swNode)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
-                else surfaceBlend_SW.Add(surfaceId);
-            }
-            surfaceMeshBuilder.ApplyMesh(castShadows: false);
-            MeshRenderer surfaceRenderer = SurfaceMesh.GetComponent<MeshRenderer>();
-
-            // Set chunk values for all materials
-            for (int i = 0; i < surfaceRenderer.materials.Length; i++)
-            {
-                surfaceRenderer.materials[i].SetFloat("_ChunkSize", Size);
-                surfaceRenderer.materials[i].SetFloat("_ChunkCoordinatesX", Coordinates.x);
-                surfaceRenderer.materials[i].SetFloat("_ChunkCoordinatesY", Coordinates.y);
-            }
-
-            // Set blend values for surface material
-            Material surfaceMaterial = SurfaceMesh.GetComponent<MeshRenderer>().material;
-            surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
-            surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlend_W);
-            surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlend_E);
-            surfaceMaterial.SetFloatArray("_TileBlend_N", surfaceBlend_N);
-            surfaceMaterial.SetFloatArray("_TileBlend_S", surfaceBlend_S);
-            surfaceMaterial.SetFloatArray("_TileBlend_NW", surfaceBlend_NW);
-            surfaceMaterial.SetFloatArray("_TileBlend_NE", surfaceBlend_NE);
-            surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
-            surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
+            SurfaceMesh.Draw();
 
             // Air node meshes
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.Draw();
@@ -170,49 +97,25 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Updates the visible nodes on this chunk according to the vision of the specified player.
+        /// <br/> Does not change the vision values (SeenBy, ExploredBy) of the nodes, only accesses them.
         /// </summary>
         public void SetVisibility(Player player)
         {
-            // Define surface visibility array based on node visibility
-            List<float> surfaceVisibilityArray = new List<float>();
-            for(int x = -1; x <= Size; x++)
-            {
-                for(int y = -1; y <= Size; y++)
-                {
-                    SurfaceNode targetNode = World.GetSurfaceNode(GetWorldCoordinates(new Vector2Int(x, y)));
-
-                    int visibility;
-                    if (targetNode != null && targetNode.IsVisibleBy(player)) visibility = 2; // 2 = visible
-                    else if (targetNode != null && targetNode.IsExploredBy(player)) visibility = 1; // 1 = fog of war
-                    else visibility = 0; // 0 = unexplored
-                    surfaceVisibilityArray.Add(visibility);
-                }
-            }
-
-            // Set visibility in all surface mesh materials
-            MeshRenderer surfaceRenderer = SurfaceMesh.GetComponent<MeshRenderer>();
-            for (int i = 0; i < surfaceRenderer.materials.Length; i++)
-            {
-                surfaceRenderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
-            }
-
-            // Set visibility in all air node mesh materials
+            SurfaceMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.SetVisibility(player);
         }
 
         public void ShowGrid(bool show)
         {
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowGrid", show ? 1 : 0);
+            SurfaceMesh.ShowGrid(show);
+            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowGrid(show);
         }
         public void ShowTextures(bool show)
         {
-            for (int i = 0; i < SurfaceMesh.GetComponent<MeshRenderer>().materials.Length; i++)
-            {
-                SurfaceMesh.GetComponent<MeshRenderer>().materials[i].SetFloat("_UseTextures", show ? 1 : 0);
-            }
-
+            SurfaceMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowTextures(show);
         }
+
         public void ShowTileBlending(bool show)
         {
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_BlendThreshhold", show ? 0.4f : 0);
@@ -263,6 +166,16 @@ namespace BlockmapFramework
                 for (int y = 0; y < Size; y++)
                     foreach (BlockmapNode node in GetAirNodes(x, y))
                         nodes.Add(node);
+            return nodes;
+        }
+        public List<BlockmapNode> GetAllAirNodes(int heightLevel)
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            for (int x = 0; x < Size; x++)
+                for (int y = 0; y < Size; y++)
+                    foreach (BlockmapNode node in GetAirNodes(x, y))
+                        if (node.BaseHeight == heightLevel)
+                            nodes.Add(node);
             return nodes;
         }
         public List<BlockmapNode> GetAirNodes(int x, int y)

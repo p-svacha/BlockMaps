@@ -55,7 +55,7 @@ namespace WorldEditor
                 World.HoveredSurfaceNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
         }
 
-        public override void HandleLeftClick()
+        public override void HandleLeftDrag()
         {
             if (World.HoveredSurfaceNode != null) World.SetSurface(World.HoveredSurfaceNode, SelectedSurface);
         }

@@ -316,19 +316,6 @@ namespace BlockmapFramework
             PathMeshBuilder.BuildPath(this, meshBuilder, pathSubmesh: 2, pathCurbSubmesh: 3);
         }
 
-        public void ShowOverlay(bool show)
-        {
-            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_ShowTileOverlay", show ? 1 : 0);
-        }
-        public void ShowOverlay(Texture2D texture, Color color)
-        {
-            ShowOverlay(true);
-            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetTexture("_TileOverlayTex", texture);
-            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayX", LocalCoordinates.x);
-            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_TileOverlayY", LocalCoordinates.y);
-            Chunk.SurfaceMesh.GetComponent<MeshRenderer>().material.SetColor("_TileOverlayColor", color);
-        }
-
         #endregion
 
         #region Actions

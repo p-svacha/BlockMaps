@@ -150,13 +150,14 @@ public class MeshBuilder
     /// <summary>
     /// Adds all meshvertices and meshtriangles to build a wall. Returns a MeshPlane containing all data.
     /// UV from first to second vector is uv-y-axis
+    /// <br/> UV2 is forced to 0.5/0.5 so it doesn't interfere with shader (BlockMap-specific).
     /// </summary>
     public MeshPlane BuildPlane(int submeshIndex, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Vector2 uvStart, Vector2 uvEnd, bool mirror = false)
     {
-        MeshVertex mv1 = AddVertex(v1, uvStart);
-        MeshVertex mv2 = AddVertex(v2, new Vector2(uvStart.x, uvEnd.y));
-        MeshVertex mv3 = AddVertex(v3, uvEnd);
-        MeshVertex mv4 = AddVertex(v4, new Vector2(uvEnd.x, uvStart.y));
+        MeshVertex mv1 = AddVertex(v1, uvStart, new Vector2(0.5f, 0.5f));
+        MeshVertex mv2 = AddVertex(v2, new Vector2(uvStart.x, uvEnd.y), new Vector2(0.5f, 0.5f));
+        MeshVertex mv3 = AddVertex(v3, uvEnd, new Vector2(0.5f, 0.5f));
+        MeshVertex mv4 = AddVertex(v4, new Vector2(uvEnd.x, uvStart.y), new Vector2(0.5f, 0.5f));
 
         if(mirror)
         {

@@ -11,6 +11,7 @@ namespace WorldEditor
         SurfacePaint,
         SurfacePath,
         AirNode,
-        AirSlopeNode
+        AirSlopeNode,
+        SpawnEntity
     }
 }

@@ -9,6 +9,16 @@ Shader "Custom/NodeMaterialShader"
         // Overlays
         _FogOfWarColor("Fog of war Color", Color) = (0,0,0,0.5)
 
+        _GridTex("Grid Texture", 2D) = "none" {}
+        [Toggle] _ShowGrid("Show Grid", Float) = 1
+        _GridColor("Grid Color", Color) = (0,0,0,1)
+
+        [Toggle] _ShowTileOverlay("Show Tile Overlay", Float) = 0
+        _TileOverlayTex("Overlay Texture", 2D) = "none" {}
+        _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
+        _TileOverlayX("Overlay X Coord", Float) = 0
+        _TileOverlayY("Overlay Y Coord", Float) = 0
+
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
     }
@@ -33,8 +43,20 @@ Shader "Custom/NodeMaterialShader"
         fixed4 _Color;
         float _UseTextures;
 
+        // Overlays
         fixed4 _FogOfWarColor;
 
+        sampler2D _GridTex;
+        fixed4 _GridColor;
+        float _ShowGrid;
+
+        float _ShowTileOverlay;
+        sampler2D _TileOverlayTex;
+        fixed4 _TileOverlayColor;
+        float _TileOverlayX;
+        float _TileOverlayY;
+
+        // Material attributes
         half _Glossiness;
         half _Metallic;
 
@@ -43,6 +65,8 @@ Shader "Custom/NodeMaterialShader"
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv2_TileOverlayTex;
+            float2 uv2_GridTex;
             float3 worldPos;
         };
 
@@ -114,11 +138,29 @@ Shader "Custom/NodeMaterialShader"
                 (relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
                 (relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 1)); // extension south
 
-            // Set color
+            // Base color
             fixed4 c;
 
             if (_UseTextures == 1) c = tex2D(_MainTex, IN.uv_MainTex);
             else c = _Color;
+
+
+            // Selection Overlay
+            if (_ShowTileOverlay == 1)
+            {
+                if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
+                {
+                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
+                    c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
+                }
+            }
+
+            // Grid
+            if (_ShowGrid == 1)
+            {
+                fixed4 gridColor = tex2D(_GridTex, IN.uv2_GridTex) * _GridColor;
+                c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
+            }
 
             // Fog of war
             if (fullVisible != 1)

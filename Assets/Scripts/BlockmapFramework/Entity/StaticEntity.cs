@@ -6,6 +6,6 @@ namespace BlockmapFramework
 {
     public class StaticEntity : Entity
     {
-
+        public override void UpdateEntity() { }
     }
 }

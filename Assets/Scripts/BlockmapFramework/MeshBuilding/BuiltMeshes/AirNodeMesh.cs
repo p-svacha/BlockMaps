@@ -8,26 +8,24 @@ namespace BlockmapFramework
     /// <summary>
     /// A mesh that contains all geometry for all nodes within one height level in a chunk.
     /// </summary>
-    public class AirNodeMesh : MonoBehaviour
+    public class AirNodeMesh : ChunkMesh
     {
-        private Chunk Chunk;
         public int HeightLevel { get; private set; }
 
         public void Init(Chunk chunk, int level)
         {
-            Chunk = chunk;
-            HeightLevel = level;
+            OnInit(chunk);
 
+            HeightLevel = level;
             gameObject.layer = chunk.World.Layer_AirNode;
-            transform.SetParent(chunk.transform);
         }
 
         /// <summary>
         /// Builds the mesh of this height level
         /// </summary>
-        public void Draw()
+        public override void Draw()
         {
-            List<BlockmapNode> nodesToDraw = GetNodes();
+            List<BlockmapNode> nodesToDraw = Chunk.GetAllAirNodes(HeightLevel);
 
             if (nodesToDraw.Count == 0) // Deactivate self if nothing there to draw
             {
@@ -40,7 +38,11 @@ namespace BlockmapFramework
             MeshBuilder meshBuilder = new MeshBuilder(gameObject);
             meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathMaterial); // Submesh 0: path
             meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial); // Submesh 1: path curb
-            foreach (BlockmapNode airNode in nodesToDraw) airNode.Draw(meshBuilder);
+            foreach (BlockmapNode airNode in nodesToDraw)
+            {
+                airNode.Draw(meshBuilder);
+                airNode.SetMesh(this);
+            }
 
             meshBuilder.ApplyMesh();
 
@@ -54,18 +56,7 @@ namespace BlockmapFramework
             }
         }
 
-        public void ShowTextures(bool show)
-        {
-            if (!gameObject.activeSelf) return;
-
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
-            {
-                renderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
-            }
-        }
-
-        public void SetVisibility(Player player)
+        public override void SetVisibility(Player player)
         {
             if (!gameObject.activeSelf) return;
 
@@ -96,14 +87,5 @@ namespace BlockmapFramework
                 renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
             }
         }
-
-        /// <summary>
-        /// Returns all air nodes belonging to the height level of this AirNodeMesh.
-        /// </summary>
-        private List<BlockmapNode> GetNodes()
-        {
-            return Chunk.GetAllAirNodes().Where(x => x.BaseHeight == HeightLevel).ToList();
-        }
-
     }
 }

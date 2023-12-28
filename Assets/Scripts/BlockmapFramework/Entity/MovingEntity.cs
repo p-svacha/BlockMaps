@@ -7,37 +7,26 @@ namespace BlockmapFramework
     public class MovingEntity : Entity
     {
         // Current movement
-        private float MovementSpeed = 2f;
-        public bool IsMoving;
-        public Direction CurrentDirection;
-        public BlockmapNode NextNode;
+        public float MovementSpeed { get; protected set; }
+        public bool IsMoving { get; private set; }
+        public Direction CurrentDirection { get; private set; }
+        public BlockmapNode NextNode { get; private set; }
 
         // Pathfinding
-        public BlockmapNode Target;
-        public List<BlockmapNode> TargetPath;
+        public BlockmapNode Target { get; private set; }
+        public List<BlockmapNode> TargetPath { get; private set; }
 
-        public GameObject TargetFlag;
-        private float TargetFlagScale = 0.1f;
-
-        public override void Init(World world, BlockmapNode position, bool[,,] shape, Player player, float visionRange)
+        protected override void Init(World world, BlockmapNode position, bool[,,] shape, Player player)
         {
             if (shape.GetLength(0) != 1 || shape.GetLength(1) != 1) throw new System.Exception("Characters can't be bigger than 1x1");
-            base.Init(world, position, shape, player, visionRange);
+            base.Init(world, position, shape, player);
             IsMoving = false;
 
             NextNode = position;
-            TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            TargetFlag.transform.SetParent(transform.parent);
-
-
-            GoToRandomNode();
         }
 
-        // Update is called once per frame
-        private void Update()
+        public override void UpdateEntity()
         {
-            if (TargetPath == null) GoToRandomNode();
-
             // Update transform position and occupied tiles (for collisions) when moving
             Vector2 currentPosition2d = new Vector2(transform.position.x, transform.position.z);
             Vector2Int currentWorldCoordinates = World.GetWorldCoordinates(currentPosition2d);
@@ -61,31 +50,25 @@ namespace BlockmapFramework
             // Character is near the destination get the next movement command
             if (Vector2.Distance(currentPosition2d, nextNodePosition2d) <= 0.03f)
             {
-                OnNextNodeReached();
+                ReachNextNode();
             }
-        }
-
-        private void GoToRandomNode()
-        {
-            BlockmapNode targetNode = World.GetRandomOwnedTerrainNode();
-            while (Vector2.Distance(targetNode.WorldCoordinates, OriginNode.WorldCoordinates) > 100)
-                targetNode = World.GetRandomOwnedTerrainNode();
-            GoTo(targetNode);
         }
 
         /// <summary>
         /// Finds and walks towards the target node
         /// </summary>
-        private void GoTo(BlockmapNode target)
+        public void GoTo(BlockmapNode target)
         {
             Target = target;
-
-            TargetFlag.transform.position = Target.GetCenterWorldPosition();
-            TargetFlag.transform.localScale = new Vector3(TargetFlagScale, 1f, TargetFlagScale);
-            TargetFlag.GetComponent<MeshRenderer>().material.color = Color.red;
-
             TargetPath = Pathfinder.GetPath(NextNode, Target);
+            OnNewTarget();
         }
+
+
+        /// <summary>
+        /// Gets triggered when the entity starts moving to a new target.
+        /// </summary>
+        protected virtual void OnNewTarget() { }
 
         private void UpdateTargetPath()
         {
@@ -95,8 +78,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Gets triggered when a node of the target path is reached. Updates the NextNode and MoveDirection
         /// </summary>
-        /// <returns></returns>
-        protected void OnNextNodeReached()
+        private void ReachNextNode()
         {
             // No target path => no movement expected
             if (TargetPath == null || TargetPath.Count == 0) IsMoving = false;
@@ -131,9 +113,11 @@ namespace BlockmapFramework
                 else
                 {
                     IsMoving = false;
-                    GoToRandomNode();
+                    OnTargetReached();
                 }
             }
         }
+
+        protected virtual void OnTargetReached() { }
     }
 }

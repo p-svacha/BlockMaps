@@ -130,7 +130,7 @@ namespace BlockmapFramework
         void Update()
         {
             UpdateHoveredObjects();
-            //UpdateVisibility();
+            foreach (Entity e in Entities) e.UpdateEntity();
         }
 
         /// <summary>
@@ -595,7 +595,7 @@ namespace BlockmapFramework
             throw new System.Exception("World height not found for node of type " + node.Type.ToString());
         }
 
-        public SurfaceNode GetRandomOwnedTerrainNode()
+        public SurfaceNode GetRandomSurfaceNode()
         {
             List<Chunk> candidateChunks = Chunks.Values.ToList();
             Chunk chosenChunk = candidateChunks[Random.Range(0, candidateChunks.Count)];
@@ -603,6 +603,12 @@ namespace BlockmapFramework
             int x = Random.Range(0, ChunkSize);
             int y = Random.Range(0, ChunkSize);
             return chosenChunk.GetSurfaceNode(x, y);
+        }
+        public BlockmapNode GetRandomNode()
+        {
+            List<BlockmapNode> candidateNodes = new List<BlockmapNode>();
+            foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes());
+            return candidateNodes[Random.Range(0, candidateNodes.Count)];
         }
 
         #endregion

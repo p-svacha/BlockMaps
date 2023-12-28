@@ -13,7 +13,7 @@ namespace WorldEditor
     {
         [Header("Prefabs")]
         public EditorToolButton EditorToolButtonPrefab;
-        public MovingEntity CharacterPrefab;
+        public EditorEntity CharacterPrefab;
         public GameObject ArrowPrefab;
 
         [Header("Elements")]
@@ -29,6 +29,7 @@ namespace WorldEditor
         public SurfacePathTool SurfacePathTool;
         public AirNodeTool AirNodeTool;
         public AirSlopeNodeTool AirSlopeNodeTool;
+        public SpawnEntityTool SpawnEntityTool;
 
         [Header("World")]
         public World World;
@@ -53,6 +54,7 @@ namespace WorldEditor
                 { EditorToolId.SurfacePath, SurfacePathTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
+                { EditorToolId.SpawnEntity, SpawnEntityTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
@@ -94,20 +96,10 @@ namespace WorldEditor
             // Click
             bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
             if (Input.GetMouseButtonDown(0) && !isMouseOverUi) CurrentTool.HandleLeftClick();
+            if (Input.GetMouseButton(0) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
+
             if (Input.GetMouseButtonDown(1) && !isMouseOverUi) CurrentTool.HandleRightClick();
-
-            // New Pathfinding Entity
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                BlockmapNode spawnNode = World.GetRandomOwnedTerrainNode();
-
-                GameObject characterContainer = new GameObject("Character");
-                characterContainer.transform.SetParent(World.transform);
-
-                MovingEntity newCharacter = Instantiate(CharacterPrefab, characterContainer.transform);
-                newCharacter.Init(World, spawnNode, new bool[,,] { { { true } } }, World.Gaia, visionRange: 10.6f);
-                World.AddEntity(newCharacter);
-            }
+            if (Input.GetMouseButton(1) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
 
             // Show/Hide Grid
             if (Input.GetKeyDown(KeyCode.G)) World.ToggleGridOverlay();

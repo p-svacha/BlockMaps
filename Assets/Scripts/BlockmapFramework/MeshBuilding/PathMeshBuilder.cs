@@ -144,19 +144,19 @@ namespace BlockmapFramework
         {
             Vector3 v_SW_pos = new Vector3(Node.LocalCoordinates.x + xStart, GetVertexHeight(xStart, yStart) + height, Node.LocalCoordinates.y + yStart);
             Vector2 v_SW_uv = new Vector2(xStart, yStart);
-            MeshVertex v_SW = MeshBuilder.AddVertex(v_SW_pos, v_SW_uv);
+            MeshVertex v_SW = MeshBuilder.AddVertex(v_SW_pos, v_SW_uv, v_SW_uv);
 
             Vector3 v_SE_pos = new Vector3(Node.LocalCoordinates.x + xEnd, GetVertexHeight(xEnd, yStart) + height, Node.LocalCoordinates.y + yStart);
             Vector2 v_SE_uv = new Vector2(xEnd, yStart);
-            MeshVertex v_SE = MeshBuilder.AddVertex(v_SE_pos, v_SE_uv);
+            MeshVertex v_SE = MeshBuilder.AddVertex(v_SE_pos, v_SE_uv, v_SE_uv);
 
             Vector3 v_NE_pos = new Vector3(Node.LocalCoordinates.x + xEnd, GetVertexHeight(xEnd, yEnd) + height, Node.LocalCoordinates.y + yEnd);
             Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
-            MeshVertex v_NE = MeshBuilder.AddVertex(v_NE_pos, v_NE_uv);
+            MeshVertex v_NE = MeshBuilder.AddVertex(v_NE_pos, v_NE_uv, v_NE_uv);
 
             Vector3 v_NW_pos = new Vector3(Node.LocalCoordinates.x + xStart, GetVertexHeight(xStart, yEnd) + height, Node.LocalCoordinates.y + yEnd);
             Vector2 v_NW_uv = new Vector2(xStart, yEnd);
-            MeshVertex v_NW = MeshBuilder.AddVertex(v_NW_pos, v_NW_uv);
+            MeshVertex v_NW = MeshBuilder.AddVertex(v_NW_pos, v_NW_uv, v_NW_uv);
 
             if(mirror) MeshBuilder.AddPlane(submesh, v_SW, v_NW, v_NE, v_SE);
             else MeshBuilder.AddPlane(submesh, v_SW, v_SE, v_NE, v_NW);

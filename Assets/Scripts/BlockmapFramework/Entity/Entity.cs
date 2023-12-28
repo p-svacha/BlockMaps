@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class Entity : MonoBehaviour
+    public abstract class Entity : MonoBehaviour
     {
         public World World;
 
@@ -30,23 +30,24 @@ namespace BlockmapFramework
         /// <summary>
         /// How far this entity can see.
         /// </summary>
-        public float VisionRange { get; private set; }
+        public float VisionRange { get; protected set; }
         public bool[,,] Shape;   // Size and shape of the entity, starting from southwest bottom corner
 
-        public virtual void Init(World world, BlockmapNode position, bool[,,] shape, Player player, float visionRange)
+        protected virtual void Init(World world, BlockmapNode position, bool[,,] shape, Player player)
         {
             OccupiedTerrainNodes = new List<SurfaceNode>();
             VisibleNodes = new List<BlockmapNode>();
 
             World = world;
             Shape = shape;
-            VisionRange = visionRange;
             Player = player;
             SetOriginNode(position);
 
             gameObject.layer = World.Layer_Entity;
             transform.position = position.GetCenterWorldPosition();
         }
+
+        public abstract void UpdateEntity();
 
         /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode of the entity. 
