@@ -18,8 +18,8 @@ namespace WorldEditor
             if (World.HoveredSurfaceNode != null)
             {
                 Texture2D overlayTexture = GetTextureForHoverMode(World.NodeHoverMode);
-                bool canIncrease = World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: true, World.NodeHoverMode);
-                bool canDecrease = World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: false, World.NodeHoverMode);
+                bool canIncrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
+                bool canDecrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
                 Color c = Color.white;
                 if (canIncrease && canDecrease) c = Color.white;
                 else if (canIncrease) c = Color.green;
@@ -31,17 +31,17 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredSurfaceNode != null && World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: true, World.NodeHoverMode))
+            if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true))
             {
-                World.HoveredSurfaceNode.ChangeHeight(World.NodeHoverMode, isIncrease: true);
+                World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
             }
         }
 
         public override void HandleRightClick()
         {
-            if (World.HoveredSurfaceNode != null && World.HoveredSurfaceNode.CanChangeHeight(World.HoveredSurfaceNode, increase: false, World.NodeHoverMode))
+            if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false))
             {
-                World.HoveredSurfaceNode.ChangeHeight(World.NodeHoverMode, isIncrease: false);
+                World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
             }
         }
 

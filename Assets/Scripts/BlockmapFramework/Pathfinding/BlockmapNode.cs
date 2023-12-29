@@ -96,14 +96,6 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(data.Surface);
             Type = data.Type;
             ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
-
-            // Initialize which entities see/explore this node
-            foreach (Entity e in world.Entities)
-            {
-                VisionType vision = e.GetVisionType(this);
-                if (vision == VisionType.Visible) AddVisionBy(e);
-                else if (vision == VisionType.FogOfWar) AddExploredBy(e.Player);
-            }
         }
 
         /// <summary>

@@ -78,7 +78,8 @@ namespace BlockmapFramework
             data.LocalCoordinateX = localCoordinates.x;
             data.LocalCoordinateY = localCoordinates.y;
             data.Height = new int[] { HeightMap[worldX, worldY], HeightMap[worldX + 1, worldY], HeightMap[worldX + 1, worldY + 1], HeightMap[worldX, worldY + 1] };
-            if (Random.value < 0.01f) data.Height = new int[] { 8, 8, 8, 8 };
+            if (Random.value < 0.001f) data.Height = new int[] { 8, 8, 8, 8 };
+            //data.Height = new int[] { 5, 5, 5, 5 };
             data.Surface = worldX * 10 * Random.value > 5f ? SurfaceId.Grass : SurfaceId.Sand;
             data.Type = NodeType.Surface;
 

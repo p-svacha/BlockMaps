@@ -17,7 +17,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &471828
 Transform:
@@ -97,6 +97,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Dimensions: {x: 1, y: 3, z: 1}
-  IsPassable: 1
-  BlocksVision: 0
+  IsPassable: 0
+  BlocksVision: 1
   RequiresFlatTerrain: 0

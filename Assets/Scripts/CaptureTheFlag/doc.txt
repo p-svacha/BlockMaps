@@ -3,14 +3,12 @@ Big Features to Add:
 
 make editor entity 2 tall
 
-make placing an entity update the vision of all entities that see it
-
 improve pathfinding for moving entites that are tall
 	> Make pathfinding take an entity as an input and modify canTransition
 
-- correctly implement !blocksvision of entities
-
 - Make vision radius of entities based on their dimensions
+
+- Make profiler performance tests with high speed, high vision entities in editor
 
 - Shoot multiple rays at a node to check vision (if performance allows)
 	> also at entities on node
@@ -19,15 +17,9 @@ improve pathfinding for moving entites that are tall
 
 - Show entity stats in static entity tool in editor
 
-- Get rid of World.TILE_SIZE
-
 - Water (or general liquid system) with unique properties
 	> placed in world by filling in hole: can only be 1 tile deep
 	> make own shader
-
-- Move helper functions in Pathfinder to World
-
-- Make Selection UI thing for editor a general UI prefab
 
 - Fences/Walls between tiles
 

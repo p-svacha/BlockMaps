@@ -35,10 +35,10 @@ namespace BlockmapFramework
             int surfaceSubmesh = 0;
 
             // Surface vertices
-            float xStart = LocalCoordinates.x * World.TILE_SIZE;
-            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
-            float yStart = LocalCoordinates.y * World.TILE_SIZE;
-            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
+            float xStart = LocalCoordinates.x;
+            float xEnd = LocalCoordinates.x + 1;
+            float yStart = LocalCoordinates.y;
+            float yEnd = LocalCoordinates.y + 1;
             MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
             MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
             MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, Height[1] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
@@ -116,12 +116,12 @@ namespace BlockmapFramework
             SurfaceNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
             if (eastNode == null) return;
 
-            float xStart = LocalCoordinates.x * World.TILE_SIZE;
-            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
-            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
-            float yStart = LocalCoordinates.y * World.TILE_SIZE;
-            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
-            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float xStart = LocalCoordinates.x;
+            float xEnd = LocalCoordinates.x + 1f;
+            float xCenter = LocalCoordinates.x + 0.5f;
+            float yStart = LocalCoordinates.y;
+            float yEnd = LocalCoordinates.y + 1f;
+            float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
@@ -155,12 +155,12 @@ namespace BlockmapFramework
             SurfaceNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
             if (southNode == null) return;
 
-            float xStart = LocalCoordinates.x * World.TILE_SIZE;
-            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
-            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
-            float yStart = LocalCoordinates.y * World.TILE_SIZE;
-            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
-            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float xStart = LocalCoordinates.x;
+            float xEnd = LocalCoordinates.x + 1f;
+            float xCenter = LocalCoordinates.x + 0.5f;
+            float yStart = LocalCoordinates.y;
+            float yEnd = LocalCoordinates.y + 1f;
+            float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
@@ -194,12 +194,12 @@ namespace BlockmapFramework
             SurfaceNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
             if (westNode == null) return;
 
-            float xStart = LocalCoordinates.x * World.TILE_SIZE;
-            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
-            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
-            float yStart = LocalCoordinates.y * World.TILE_SIZE;
-            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
-            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float xStart = LocalCoordinates.x;
+            float xEnd = LocalCoordinates.x + 1f;
+            float xCenter = LocalCoordinates.x + 0.5f;
+            float yStart = LocalCoordinates.y;
+            float yEnd = LocalCoordinates.y + 1f;
+            float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
@@ -233,12 +233,12 @@ namespace BlockmapFramework
             SurfaceNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
             if (northNode == null) return;
 
-            float xStart = LocalCoordinates.x * World.TILE_SIZE;
-            float xEnd = (LocalCoordinates.x * World.TILE_SIZE) + World.TILE_SIZE;
-            float xCenter = (LocalCoordinates.x * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
-            float yStart = LocalCoordinates.y * World.TILE_SIZE;
-            float yEnd = (LocalCoordinates.y * World.TILE_SIZE) + World.TILE_SIZE;
-            float yCenter = (LocalCoordinates.y * World.TILE_SIZE) + (World.TILE_SIZE * 0.5f);
+            float xStart = LocalCoordinates.x;
+            float xEnd = LocalCoordinates.x + 1f;
+            float xCenter = LocalCoordinates.x + 0.5f;
+            float yStart = LocalCoordinates.y;
+            float yEnd = LocalCoordinates.y + 1f;
+            float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
@@ -277,17 +277,16 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public bool CanChangeHeight(SurfaceNode node, bool increase, Direction mode)
+        public bool CanChangeHeight(Direction mode, bool increase)
         {
-            if (node == null) return false;
-            if (node.HasPath) return false;
-            if (node.Entities.Count > 0) return false;
+            if (HasPath) return false;
+            if (Entities.Count > 0) return false;
 
             int[] newHeights = new int[4];
-            for (int i = 0; i < 4; i++) newHeights[i] = node.Height[i];
-            foreach (int h in node.GetAffectedCorners(mode)) newHeights[h] += increase ? 1 : -1;
-            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min());
-            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(node.WorldCoordinates, newHeights.Min() + 1);
+            for (int i = 0; i < 4; i++) newHeights[i] = Height[i];
+            foreach (int h in GetAffectedCorners(mode)) newHeights[h] += increase ? 1 : -1;
+            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min());
+            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min() + 1);
             string newShape = GetShape(newHeights);
             if (pathNodeOn != null) return false;
             if (pathNodeAbove != null && !Pathfinder.CanNodesBeAboveEachOther(newShape, pathNodeAbove.Shape)) return false;
@@ -346,8 +345,6 @@ namespace BlockmapFramework
             else UseAlternativeVariant = isIncrease;
 
             RecalculateShape();
-            World.UpdatePathfindingGraphAround(WorldCoordinates);
-            World.RedrawNodesAround(WorldCoordinates);
         }
         
 

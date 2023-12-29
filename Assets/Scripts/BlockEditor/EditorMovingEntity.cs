@@ -13,7 +13,6 @@ namespace WorldEditor
         public void PreInit(float speed, float visionRange)
         {
             IsPassable = true;
-            Dimensions = new Vector3Int(1, 1, 1);
             MovementSpeed = speed;
             VisionRange = visionRange;
         }
@@ -22,10 +21,12 @@ namespace WorldEditor
         {
             base.OnInitialized();
 
-            TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            TargetFlag.transform.SetParent(transform.parent);
-
-            if(MovementSpeed > 0) GoToRandomNode();
+            if (MovementSpeed > 0)
+            {
+                TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                TargetFlag.transform.SetParent(transform.parent);
+                GoToRandomNode();
+            }
         }
 
         public override void UpdateEntity()

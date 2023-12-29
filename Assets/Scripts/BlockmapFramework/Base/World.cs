@@ -20,10 +20,6 @@ namespace BlockmapFramework
         /// Physical height (y) of a tile.
         /// </summary>
         public const float TILE_HEIGHT = 0.5f;
-        /// <summary>
-        /// Physical width and length (x & z) of a tile.
-        /// </summary>
-        public const float TILE_SIZE = 1f;
 
         /// <summary>
         /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
@@ -251,6 +247,19 @@ namespace BlockmapFramework
             }
         }
 
+        public bool CanChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
+        {
+            return node.CanChangeHeight(mode, isIncrease);
+        }
+        public void ChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
+        {
+            node.ChangeHeight(mode, isIncrease);
+
+            UpdatePathfindingGraphAround(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition()); // might not work because rays are shot before new mesh is drawn sometimes
+        }
+
         public bool CanBuildSurfacePath(SurfaceNode node)
         {
             if (node == null) return false;
@@ -308,7 +317,7 @@ namespace BlockmapFramework
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisibility(chunk);
+            UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
 
         public bool CanBuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
@@ -350,6 +359,7 @@ namespace BlockmapFramework
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
+            UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
 
         public void SetSurface(SurfaceNode node, SurfaceId surface)
@@ -380,11 +390,21 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity entity, BlockmapNode node, Player player)
+        public void SpawnEntity(Entity newEntity, BlockmapNode node, Player player)
         {
-            entity.Init(this, node, player);
-            Entities.Add(entity);
-            UpdatePathfindingGraphAround(node.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            newEntity.Init(this, node, player);
+
+            // Update if the new entity is currently visible
+            newEntity.UpdateVisiblity(ActiveVisionPlayer);
+
+            // Update vision of all other entities near this new entity
+            UpdateVisionOfNearbyEntities(newEntity.GetWorldCenter());
+
+            // Register new entity
+            Entities.Add(newEntity);
+
+            // Update pathfinding navmesh
+            UpdatePathfindingGraphAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
             UpdatePathfindingVisualization();
         }
 
@@ -457,6 +477,15 @@ namespace BlockmapFramework
         public void OnVisibilityChanged(Chunk c, Player player)
         {
             if (player == ActiveVisionPlayer) UpdateVisibility(c);
+        }
+
+        /// <summary>
+        /// Recalculates the vision of all entities that have the given position within their vision range.
+        /// </summary>
+        private void UpdateVisionOfNearbyEntities(Vector3 position)
+        {
+            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange))
+                e.UpdateVisibleNodes();
         }
 
         public void ToggleGridOverlay()

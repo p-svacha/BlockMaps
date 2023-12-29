@@ -158,6 +158,9 @@ namespace BlockmapFramework
             return null;
         }
 
+        /// <summary>
+        /// Returns true if the two shapes don't touch each other.
+        /// </summary>
         public static bool CanNodesBeAboveEachOther(string botShape, string topShape)
         {
             for (int i = 0; i < 4; i++) if (int.Parse(botShape[i].ToString()) > int.Parse(topShape[i].ToString())) return false;
