@@ -1,12 +1,25 @@
 Big Features to Add:
 
-- Make static entities affect vision
 
-- Improve vision algorithm:
-	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
-	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
+make editor entity 2 tall
+
+make placing an entity update the vision of all entities that see it
+
+improve pathfinding for moving entites that are tall
+	> Make pathfinding take an entity as an input and modify canTransition
+
+- correctly implement !blocksvision of entities
 
 - Make vision radius of entities based on their dimensions
+
+- Shoot multiple rays at a node to check vision (if performance allows)
+	> also at entities on node
+
+- Make editor moving entities selectable and manually movable, also auto-move
+
+- Show entity stats in static entity tool in editor
+
+- Get rid of World.TILE_SIZE
 
 - Water (or general liquid system) with unique properties
 	> placed in world by filling in hole: can only be 1 tile deep

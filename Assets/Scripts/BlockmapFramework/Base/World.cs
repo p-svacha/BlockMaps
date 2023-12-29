@@ -278,7 +278,7 @@ namespace BlockmapFramework
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
             foreach (BlockmapNode node in belowNodes)
                 foreach (Entity e in node.Entities)
-                    if (node.MaxHeight + e.Dimensions.y >= height)
+                    if (node.MaxHeight + e.Dimensions.y > height)
                         return false;
 
             if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
@@ -380,9 +380,9 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity entity, BlockmapNode node)
+        public void SpawnEntity(Entity entity, BlockmapNode node, Player player)
         {
-            entity.Init(this, node, Gaia);
+            entity.Init(this, node, player);
             Entities.Add(entity);
             UpdatePathfindingGraphAround(node.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
             UpdatePathfindingVisualization();

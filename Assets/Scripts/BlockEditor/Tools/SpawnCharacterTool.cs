@@ -38,7 +38,7 @@ namespace WorldEditor
             float speed = float.Parse(SpeedInput.text);
             float vision = float.Parse(VisionInput.text);
             newCharacter.PreInit(speed, vision);
-            World.SpawnEntity(newCharacter, spawnNode);
+            World.SpawnEntity(newCharacter, spawnNode, Editor.EditorPlayer);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

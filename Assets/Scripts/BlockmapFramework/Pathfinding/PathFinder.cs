@@ -44,6 +44,7 @@ namespace BlockmapFramework
                 foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in currentNode.ConnectedNodes)
                 {
                     if (closedList.Contains(connectedNode.Value)) continue;
+                    if (!CanTransition(currentNode, connectedNode.Value)) continue;
 
                     float tentativeGCost = gCosts[currentNode] + GetCCost(currentNode, connectedNode.Value, connectedNode.Key);
                     if (!gCosts.ContainsKey(connectedNode.Value) || tentativeGCost < gCosts[connectedNode.Value])
@@ -140,56 +141,10 @@ namespace BlockmapFramework
 
         #region Transitions
 
+        // todo: expand this to make per-entity check based on abilities etc
         public static bool CanTransition(BlockmapNode from, BlockmapNode to)
         {
             return from.ConnectedNodes.ContainsValue(to);
-        }
-
-        /// <summary>
-        /// Checks and returns if the transition between two adjacent SurfaceNodes is possible.
-        /// </summary>
-        public static bool CanTransitionFromSurfaceToSurface(SurfaceNode source, Direction dir)
-        {
-            if (!source.IsPassable()) return false;
-
-            Vector2Int targetWorldCoordinates = World.GetWorldCoordinatesInDirection(source.WorldCoordinates, dir);
-            SurfaceNode target = World.GetSurfaceNode(targetWorldCoordinates);
-            if (target == null) return false;
-            if (!target.IsPassable()) return false;
-
-            BlockmapNode pathNodeOnSource = TryGetPathNode(source.WorldCoordinates, source.BaseHeight);
-            BlockmapNode pathNodeOnTarget = TryGetPathNode(targetWorldCoordinates, target.BaseHeight);
-            BlockmapNode pathNodeAboveSource = TryGetPathNode(source.WorldCoordinates, source.BaseHeight + 1);
-            BlockmapNode pathNodeAboveTarget = TryGetPathNode(targetWorldCoordinates, target.BaseHeight + 1);
-
-            if (pathNodeOnSource != null) return false;
-            if (pathNodeOnTarget != null) return false;
-            if (pathNodeAboveSource != null && !CanNodesBeAboveEachOther(source.Shape, pathNodeAboveSource.Shape)) return false;
-            if (pathNodeAboveTarget != null && !CanNodesBeAboveEachOther(target.Shape, pathNodeAboveTarget.Shape)) return false;
-
-            switch (dir)
-            {
-                case Direction.N:
-                case Direction.E:
-                case Direction.S:
-                case Direction.W:
-                    return DoAdjacentHeightsMatch(source, target, dir);
-
-                case Direction.NW:
-                    return CanTransitionFromSurfaceToSurface(source, Direction.N) && CanTransitionFromSurfaceToSurface(source, Direction.W) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.W), Direction.N) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.N), Direction.W) && DoAdjacentHeightsMatch(source, target, dir);
-
-                case Direction.NE:
-                    return CanTransitionFromSurfaceToSurface(source, Direction.N) && CanTransitionFromSurfaceToSurface(source, Direction.E) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.E), Direction.N) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.N), Direction.E) && DoAdjacentHeightsMatch(source, target, dir);
-
-                case Direction.SW:
-                    return CanTransitionFromSurfaceToSurface(source, Direction.S) && CanTransitionFromSurfaceToSurface(source, Direction.W) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.W), Direction.S) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.S), Direction.W) && DoAdjacentHeightsMatch(source, target, dir);
-
-                case Direction.SE:
-                    return CanTransitionFromSurfaceToSurface(source, Direction.S) && CanTransitionFromSurfaceToSurface(source, Direction.E) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.E), Direction.S) && CanTransitionFromSurfaceToSurface(World.GetAdjacentSurfaceNode(source, Direction.S), Direction.E) && DoAdjacentHeightsMatch(source, target, dir);
-
-                default:
-                    return false;
-            }
         }
 
         /// <summary>
@@ -201,74 +156,6 @@ namespace BlockmapFramework
             if (nodes == null) return null;
             foreach (BlockmapNode node in nodes) if (node.BaseHeight == height) return node;
             return null;
-        }
-        /// <summary>
-        /// Returns the adjacent airpath node from an airpath node if there is one. Else returns null
-        /// </summary>
-        public static BlockmapNode TryGetAdjacentPathNode(Vector2Int worldCoordinates, int height, Direction dir)
-        {
-            List<BlockmapNode> nodes = World.GetAdjacentPathNodes(worldCoordinates, dir);
-            if (nodes == null) return null;
-            foreach (BlockmapNode node in nodes) if (node.BaseHeight == height) return node;
-            return null;
-        }
-
-
-        public static bool CanTransitionFromAirPathToSurface(AirPathNode source, Direction dir)
-        {
-            if (!source.IsPassable()) return false;
-
-            SurfaceNode target = World.GetAdjacentSurfaceNode(source, dir);
-            if (target == null) return false;
-            if (!target.IsPassable()) return false;
-
-            switch (dir)
-            {
-                case Direction.N:
-                    return (source.BaseHeight == target.Height[SE]) && (source.BaseHeight == target.Height[SW]);
-
-                case Direction.S:
-                    return (source.BaseHeight == target.Height[NE]) && (source.BaseHeight == target.Height[NW]);
-
-                case Direction.E:
-                    return (source.BaseHeight == target.Height[SW]) && (source.BaseHeight == target.Height[NW]);
-
-                case Direction.W:
-                    return (source.BaseHeight == target.Height[SE]) && (source.BaseHeight == target.Height[NE]);
-
-                default:
-                    return false;
-            }
-        }
-
-        public static bool CanTransitionFromAirSlopeToSurface(AirPathSlopeNode source, Direction dir)
-        {
-            if (!source.IsPassable()) return false;
-            if (dir != source.SlopeDirection && dir != GetOppositeDirection(source.SlopeDirection)) return false; // Can only connect two sides
-
-            SurfaceNode target = World.GetAdjacentSurfaceNode(source, dir);
-            if (target == null) return false;
-            if (!target.IsPassable()) return false;
-
-            int targetHeight = source.SlopeDirection == dir ? source.BaseHeight + 1 : source.BaseHeight;
-
-            switch (dir)
-            {
-                case Direction.N:
-                    return (targetHeight == target.Height[SE]) && (targetHeight == target.Height[SW]);
-
-                case Direction.S:
-                    return (targetHeight == target.Height[NE]) && (targetHeight == target.Height[NW]);
-
-                case Direction.E:
-                    return (targetHeight == target.Height[SW]) && (targetHeight == target.Height[NW]);
-
-                case Direction.W:
-                    return (targetHeight == target.Height[SE]) && (targetHeight == target.Height[NE]);
-
-                default:
-                    return false;
-            }
         }
 
         public static bool CanNodesBeAboveEachOther(string botShape, string topShape)

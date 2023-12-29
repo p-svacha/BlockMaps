@@ -97,10 +97,12 @@ namespace BlockmapFramework
             Type = data.Type;
             ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
 
-            // Initialize which entities see this node
+            // Initialize which entities see/explore this node
             foreach (Entity e in world.Entities)
             {
-                if (e.IsInVision(this)) AddVisionBy(e);
+                VisionType vision = e.GetVisionType(this);
+                if (vision == VisionType.Visible) AddVisionBy(e);
+                else if (vision == VisionType.FogOfWar) AddExploredBy(e.Player);
             }
         }
 
@@ -148,15 +150,16 @@ namespace BlockmapFramework
         /// </summary>
         private void UpdateConnectedNodesStraight(Direction dir)
         {
-            List<BlockmapNode> adjNodes = World.GetNodes(World.GetWorldCoordinatesInDirection(WorldCoordinates, dir));
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
                 if (!adjNode.IsPassable()) continue;
 
                 if (Pathfinder.DoAdjacentHeightsMatch(this, adjNode, dir))
                 {
-                    // Surface node connections can be override by air path slopes built on a surface. In that case we remove the surface connection first
-                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && adjNode.Type == NodeType.AirPathSlope) ConnectedNodes.Remove(dir);
+                    // Surface node connections can be override by air nodes built on a surface. In that case we remove the surface connection first
+                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && (adjNode.Type == NodeType.AirPathSlope || adjNode.Type == NodeType.AirPath))
+                        ConnectedNodes.Remove(dir);
 
                     // Connect node as a neighbour
                     ConnectedNodes.Add(dir, adjNode);
@@ -234,7 +237,6 @@ namespace BlockmapFramework
         {
             Entities.Add(e);
         }
-
         public void RemoveEntity(Entity e)
         {
             Entities.Remove(e);
@@ -248,6 +250,11 @@ namespace BlockmapFramework
         public void RemoveVisionBy(Entity e)
         {
             SeenBy.Remove(e);
+        }
+
+        public void AddExploredBy(Player p)
+        {
+            ExploredBy.Add(p);
         }
 
         #endregion
@@ -327,6 +334,7 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsExploredBy(Player player)
         {
+            if (World.IsAllVisible) return true; // Everything is visible
             return ExploredBy.Contains(player);
         }
 
@@ -336,11 +344,31 @@ namespace BlockmapFramework
         public bool IsPassable()
         {
             if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
+            if (IsBlockedByNodeAbove(this)) return false; // Another node above this one is blocking this (by overlapping in at least 1 corner)
 
             return true;
         }
 
         public bool IsFlat => Height.All(x => x == Height[0]);
+
+        /// <summary>
+        /// Checks and returns if there is another node above the given node that overlaps in height on one of the corners.
+        /// <br/> Can for example happen when stairs are built on flat nodes.
+        /// </summary>
+        private bool IsBlockedByNodeAbove(BlockmapNode source)
+        {
+            List<BlockmapNode> nodesAbove = World.GetNodes(source.WorldCoordinates, source.BaseHeight, World.MAX_HEIGHT);
+
+            foreach (BlockmapNode node in nodesAbove)
+            {
+                if (node == source) continue;
+
+                if (node.Height[NE] == source.Height[NE] || node.Height[NW] == source.Height[NW] || node.Height[SE] == source.Height[SE] || node.Height[SW] == source.Height[SW])
+                    return true;
+            }
+
+            return false;
+        }
         #endregion
 
         #region Setters

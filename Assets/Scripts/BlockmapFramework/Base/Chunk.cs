@@ -16,6 +16,11 @@ namespace BlockmapFramework
         /// </summary>
         public List<BlockmapNode>[,] Nodes { get; private set; }
 
+        /// <summary>
+        /// All entities that currently occupy at least one node on this chunk.
+        /// </summary>
+        public HashSet<Entity> Entities = new HashSet<Entity>();
+
         // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
         public SurfaceMesh SurfaceMesh;
         public AirNodeMesh[] AirNodeMeshes;
@@ -101,8 +106,15 @@ namespace BlockmapFramework
         /// </summary>
         public void SetVisibility(Player player)
         {
+            // Node visibility
             SurfaceMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.SetVisibility(player);
+
+            // Entity visibility
+            foreach(Entity e in Entities)
+            {
+                e.UpdateVisiblity(player);
+            }
         }
 
         public void ShowGrid(bool show)

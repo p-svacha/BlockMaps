@@ -94,7 +94,7 @@ namespace BlockmapFramework
         /// </summary>
         private static bool HasPathConnection(Direction dir)
         {
-            List<BlockmapNode> adjNodes = World.GetNodes(World.GetWorldCoordinatesInDirection(Node.WorldCoordinates, dir));
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(Node.WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
                 if (adjNode.IsPath && Pathfinder.DoAdjacentHeightsMatch(Node, adjNode, dir))
                     return true;

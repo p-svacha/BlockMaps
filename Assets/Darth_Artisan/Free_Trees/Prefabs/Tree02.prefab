@@ -96,5 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca4016ed45aa7d148b795d115f86fc25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Dimensions: {x: 2, y: 6, z: 2}
+  Dimensions: {x: 2, y: 7, z: 2}
+  IsPassable: 0
+  BlocksVision: 0
   RequiresFlatTerrain: 1

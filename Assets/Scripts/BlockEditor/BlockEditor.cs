@@ -40,12 +40,14 @@ namespace WorldEditor
         float deltaTime; // for fps
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
+        public Player EditorPlayer { get; private set; }
 
         void Start()
         {
             // Init world
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 4);
             SetWorld(data);
+            EditorPlayer = new Player(0, "Player");
 
             // Init tools
             Tools = new Dictionary<EditorToolId, EditorTool>()
@@ -119,7 +121,7 @@ namespace WorldEditor
             // Visibility
             if (Input.GetKeyDown(KeyCode.V))
             {
-                if (World.IsAllVisible) World.SetActiveVisionPlayer(World.Gaia);
+                if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer);
                 else World.SetActiveVisionPlayer(null);
             }
 

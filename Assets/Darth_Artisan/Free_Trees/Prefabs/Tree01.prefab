@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 192044}
   m_LocalRotation: {x: 0.000000021855694, y: 0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -98,4 +98,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Dimensions: {x: 1, y: 3, z: 1}
   IsPassable: 1
+  BlocksVision: 0
   RequiresFlatTerrain: 0

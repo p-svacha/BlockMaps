@@ -68,7 +68,7 @@ namespace WorldEditor
             if (!World.CanPlaceEntity(SelectedEntity, World.HoveredNode)) return;
 
             StaticEntity newEntity = Instantiate(SelectedEntity, World.transform);
-            World.SpawnEntity(newEntity, World.HoveredNode);
+            World.SpawnEntity(newEntity, World.HoveredNode, World.Gaia);
         }
 
         public void SelectEntity(StaticEntity e)

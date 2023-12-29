@@ -25,14 +25,14 @@ namespace WorldEditor
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             TargetFlag.transform.SetParent(transform.parent);
 
-            GoToRandomNode();
+            if(MovementSpeed > 0) GoToRandomNode();
         }
 
         public override void UpdateEntity()
         {
             base.UpdateEntity();
 
-            if (TargetPath == null) GoToRandomNode();
+            if (TargetPath == null && MovementSpeed > 0) GoToRandomNode();
         }
 
         private void GoToRandomNode()
