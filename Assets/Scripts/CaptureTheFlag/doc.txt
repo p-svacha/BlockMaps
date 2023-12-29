@@ -1,14 +1,12 @@
 Big Features to Add:
 
-- Fix bug that ConnectedNodes is used for both logic and drawing:
-	> Removing a connected node also affects drawing like path mesh or surface blending
-	> Maybe keep connected node but add an attribute if its passable seperately
-
 - Make static entities affect vision
 
 - Improve vision algorithm:
 	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
 	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
+
+- Make vision radius of entities based on their dimensions
 
 - Water (or general liquid system) with unique properties
 	> placed in world by filling in hole: can only be 1 tile deep

@@ -126,10 +126,46 @@ namespace BlockmapFramework
 
         #region Connections
 
-        public abstract void UpdateConnectedNodesStraight();
+        /// <summary>
+        /// Updates the straight neighbours by applying the general rule:
+        /// If there is an adjacent passable node in the direction with matching heights, connect it as a neighbour.
+        /// </summary>
+        public void UpdateConnectedNodesStraight()
+        {
+            ConnectedNodes.Clear();
+
+            if (!IsPassable()) return;
+
+            UpdateConnectedNodesStraight(Direction.N);
+            UpdateConnectedNodesStraight(Direction.E);
+            UpdateConnectedNodesStraight(Direction.S);
+            UpdateConnectedNodesStraight(Direction.W);
+        }
 
         /// <summary>
-        /// Updates diagonal neighbours by applying the rule:
+        /// Searches if there is a node in the given straight direction that matches the corner heights of this node.
+        /// <br/> If so, it is added as a connection.
+        /// </summary>
+        private void UpdateConnectedNodesStraight(Direction dir)
+        {
+            List<BlockmapNode> adjNodes = World.GetNodes(World.GetWorldCoordinatesInDirection(WorldCoordinates, dir));
+            foreach (BlockmapNode adjNode in adjNodes)
+            {
+                if (!adjNode.IsPassable()) continue;
+
+                if (Pathfinder.DoAdjacentHeightsMatch(this, adjNode, dir))
+                {
+                    // Surface node connections can be override by air path slopes built on a surface. In that case we remove the surface connection first
+                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && adjNode.Type == NodeType.AirPathSlope) ConnectedNodes.Remove(dir);
+
+                    // Connect node as a neighbour
+                    ConnectedNodes.Add(dir, adjNode);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates diagonal neighbours by applying the genereal rule:
         /// If the path N>E results in the same node as E>N, then connect NE to that node
         /// </summary>
         public void UpdateConnectedNodesDiagonal()

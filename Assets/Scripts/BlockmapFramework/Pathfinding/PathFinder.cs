@@ -146,7 +146,7 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Checks and returns if the transition between two adjacent TerrainNodes is possible.
+        /// Checks and returns if the transition between two adjacent SurfaceNodes is possible.
         /// </summary>
         public static bool CanTransitionFromSurfaceToSurface(SurfaceNode source, Direction dir)
         {
@@ -277,8 +277,14 @@ namespace BlockmapFramework
             return true;
         }
 
-        public static bool DoAdjacentHeightsMatch(SurfaceNode fromNode, SurfaceNode toNode, Direction dir)
+        /// <summary>
+        /// Checks and returns if two adjacent nodes match seamlessly in the given direction.
+        /// </summary>
+        public static bool DoAdjacentHeightsMatch(BlockmapNode fromNode, BlockmapNode toNode, Direction dir)
         {
+            if (toNode.WorldCoordinates != World.GetWorldCoordinatesInDirection(fromNode.WorldCoordinates, dir))
+                throw new System.Exception("toNode is not adjacent to fromNode in the given direction. fromNode = " + fromNode.WorldCoordinates.ToString() + ", toNode = " + toNode.WorldCoordinates.ToString() + ", direction = " + dir.ToString());
+
             switch (dir)
             {
                 case Direction.N:

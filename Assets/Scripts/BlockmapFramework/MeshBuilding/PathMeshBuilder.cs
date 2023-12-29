@@ -10,6 +10,7 @@ namespace BlockmapFramework
         private const float PATH_CURB_HEIGHT = 0.02f;
         private const float PATH_HEIGHT = 0.05f;
 
+        private static World World;
         private static BlockmapNode Node;
         private static MeshBuilder MeshBuilder;
         private static int PathSubmesh;
@@ -22,6 +23,7 @@ namespace BlockmapFramework
         /// </summary>
         public static void BuildPath(BlockmapNode node, MeshBuilder meshBuilder, int pathSubmesh, int pathCurbSubmesh)
         {
+            World = node.World;
             Node = node;
             MeshBuilder = meshBuilder;
 
@@ -49,9 +51,33 @@ namespace BlockmapFramework
 
         private static void DrawEdge(Direction dir, float xStart, float xEnd, float yStart, float yEnd)
         {
-            Node.ConnectedNodes.TryGetValue(dir, out BlockmapNode connectedNode);
+            // Check if a path is connected in that direction
+            bool hasPathConnection = HasPathConnection(dir);
 
-            if(connectedNode != null && connectedNode.IsPath) // Draw connection to adjacent path
+            // Draw connection to adjacent path
+            if (hasPathConnection) 
+            {
+                DrawShapePlane(PathSubmesh, PATH_HEIGHT, xStart, xEnd, yStart, yEnd);
+            }
+
+            // Draw curb
+            else
+            {
+                DrawShapePlane(CurbSubmesh, PATH_HEIGHT + PATH_CURB_HEIGHT, xStart, xEnd, yStart, yEnd); // curb top
+                DrawCurbSides(dir, xStart, xEnd, yStart, yEnd);
+            }
+        }
+
+        private static void DrawCorner(Direction dir, float xStart, float xEnd, float yStart, float yEnd)
+        {
+            // Check if a path is connected in that direction
+            bool hasPathConnection = (
+                HasPathConnection(HelperFunctions.GetNextAnticlockwiseDirection8(dir)) &&
+                HasPathConnection(dir) &&
+                HasPathConnection(HelperFunctions.GetNextClockwiseDirection8(dir)));
+
+            // Draw connection to adjacent path corner
+            if (hasPathConnection)
             {
                 DrawShapePlane(PathSubmesh, PATH_HEIGHT, xStart, xEnd, yStart, yEnd);
             }
@@ -63,23 +89,16 @@ namespace BlockmapFramework
             }
         }
 
-        private static void DrawCorner(Direction dir, float xStart, float xEnd, float yStart, float yEnd)
+        /// <summary>
+        /// Checks and returns if a node with a path exists in the given direction with a matching height to the current node.
+        /// </summary>
+        private static bool HasPathConnection(Direction dir)
         {
-            Node.ConnectedNodes.TryGetValue(HelperFunctions.GetNextAnticlockwiseDirection8(dir), out BlockmapNode preEdgeNode);
-            Node.ConnectedNodes.TryGetValue(dir, out BlockmapNode edgeNode);
-            Node.ConnectedNodes.TryGetValue(HelperFunctions.GetNextClockwiseDirection8(dir), out BlockmapNode postEdgeNode);
-
-            // Draw connection to adjacent path corner
-            if (preEdgeNode != null && preEdgeNode.IsPath && edgeNode != null && edgeNode.IsPath && postEdgeNode != null && postEdgeNode.IsPath)
-            {
-                DrawShapePlane(PathSubmesh, PATH_HEIGHT, xStart, xEnd, yStart, yEnd);
-            }
-
-            else // Draw curb
-            {
-                DrawShapePlane(CurbSubmesh, PATH_HEIGHT + PATH_CURB_HEIGHT, xStart, xEnd, yStart, yEnd); // curb top
-                DrawCurbSides(dir, xStart, xEnd, yStart, yEnd);
-            }
+            List<BlockmapNode> adjNodes = World.GetNodes(World.GetWorldCoordinatesInDirection(Node.WorldCoordinates, dir));
+            foreach (BlockmapNode adjNode in adjNodes)
+                if (adjNode.IsPath && Pathfinder.DoAdjacentHeightsMatch(Node, adjNode, dir))
+                    return true;
+            return false;
         }
 
         private static void DrawCurbSides(Direction dir, float xStart, float xEnd, float yStart, float yEnd)

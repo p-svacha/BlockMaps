@@ -890,7 +890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EditorToolButtonPrefab: {fileID: 6160251407042136687, guid: b512d749a10597a48983083723b16766, type: 3}
-  CharacterPrefab: {fileID: 2315723336829259713, guid: 2de0e1d9fdf4a154d870fbae246081f0, type: 3}
+  CharacterPrefab: {fileID: 8775280700281714778, guid: 2de0e1d9fdf4a154d870fbae246081f0, type: 3}
   ArrowPrefab: {fileID: 919132149155446097, guid: 6f69892969657d445bd8e50bdfc27b66, type: 3}
   StaticEntities:
   - {fileID: -6911241458543174536, guid: 19682540d8a014522a319b1cf788aee2, type: 3}

@@ -99,7 +99,7 @@ namespace BlockmapFramework
         private void UpdateOccupiedTerrainTiles()
         {
             // Remove entity from all currently occupied tiles
-            foreach (SurfaceNode t in OccupiedNodes) t.RemoveEntity(this);
+            foreach (BlockmapNode t in OccupiedNodes) t.RemoveEntity(this);
 
             OccupiedNodes = GetOccupiedNodes(OriginNode);
             foreach (BlockmapNode node in OccupiedNodes) node.AddEntity(this);

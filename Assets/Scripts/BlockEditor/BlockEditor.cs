@@ -13,7 +13,7 @@ namespace WorldEditor
     {
         [Header("Prefabs")]
         public EditorToolButton EditorToolButtonPrefab;
-        public EditorEntity CharacterPrefab;
+        public EditorMovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
         public List<StaticEntity> StaticEntities;
 

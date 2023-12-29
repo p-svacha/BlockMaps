@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace WorldEditor
 {
-    public class EditorEntity : MovingEntity
+    public class EditorMovingEntity : MovingEntity
     {
         public GameObject TargetFlag;
         private float TargetFlagScale = 0.1f;
@@ -26,6 +26,13 @@ namespace WorldEditor
             TargetFlag.transform.SetParent(transform.parent);
 
             GoToRandomNode();
+        }
+
+        public override void UpdateEntity()
+        {
+            base.UpdateEntity();
+
+            if (TargetPath == null) GoToRandomNode();
         }
 
         private void GoToRandomNode()

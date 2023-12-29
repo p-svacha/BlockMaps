@@ -34,7 +34,7 @@ namespace WorldEditor
             GameObject characterContainer = new GameObject("Character");
             characterContainer.transform.SetParent(World.transform);
 
-            EditorEntity newCharacter = Instantiate(Editor.CharacterPrefab, characterContainer.transform);
+            EditorMovingEntity newCharacter = Instantiate(Editor.CharacterPrefab, characterContainer.transform);
             float speed = float.Parse(SpeedInput.text);
             float vision = float.Parse(VisionInput.text);
             newCharacter.PreInit(speed, vision);

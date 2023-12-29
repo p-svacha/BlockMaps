@@ -21,49 +21,6 @@ namespace BlockmapFramework
 
         public SurfaceNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
 
-        #region Connections
-
-        public override void UpdateConnectedNodesStraight()
-        {
-            ConnectedNodes.Clear();
-
-            // Connection to other surface nodes
-            if (Pathfinder.CanTransitionFromSurfaceToSurface(this, Direction.N)) ConnectedNodes.Add(Direction.N, World.GetAdjacentSurfaceNode(WorldCoordinates, Direction.N));
-            if (Pathfinder.CanTransitionFromSurfaceToSurface(this, Direction.E)) ConnectedNodes.Add(Direction.E, World.GetAdjacentSurfaceNode(WorldCoordinates, Direction.E));
-            if (Pathfinder.CanTransitionFromSurfaceToSurface(this, Direction.S)) ConnectedNodes.Add(Direction.S, World.GetAdjacentSurfaceNode(WorldCoordinates, Direction.S));
-            if (Pathfinder.CanTransitionFromSurfaceToSurface(this, Direction.W)) ConnectedNodes.Add(Direction.W, World.GetAdjacentSurfaceNode(WorldCoordinates, Direction.W));
-
-
-            // Straight connections to air path nodes (can overwrite connections to surface nodes)
-            TryConnectAdjacentPathNodes(Direction.N, Height[NE], Height[NW]);
-            TryConnectAdjacentPathNodes(Direction.E, Height[NE], Height[SE]);
-            TryConnectAdjacentPathNodes(Direction.S, Height[SW], Height[SE]);
-            TryConnectAdjacentPathNodes(Direction.W, Height[SW], Height[NW]);
-        }
-
-        private void TryConnectAdjacentPathNodes(Direction dir, int cornerHeight1, int cornerHeight2)
-        {
-            if (cornerHeight1 != cornerHeight2) return;
-
-            BlockmapNode pathNodeOnSurface = Pathfinder.TryGetPathNode(WorldCoordinates, cornerHeight1);
-            if (pathNodeOnSurface != null) return;
-
-            BlockmapNode adjacentNodeSameLevel = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, cornerHeight1, dir);
-            if (adjacentNodeSameLevel != null && adjacentNodeSameLevel.IsPassable())
-            {
-                if (adjacentNodeSameLevel.Type == NodeType.AirPath) ConnectedNodes[dir] = adjacentNodeSameLevel;
-                else if (adjacentNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeSameLevel).SlopeDirection == dir) ConnectedNodes[dir] = adjacentNodeSameLevel;
-            }
-
-            BlockmapNode adjacentNodeBelow = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, cornerHeight1 - 1, dir);
-            if (adjacentNodeBelow != null && adjacentNodeBelow.IsPassable())
-            {
-                if (adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == Pathfinder.GetOppositeDirection(dir)) ConnectedNodes[dir] = adjacentNodeBelow;
-            }
-        }
-
-        #endregion
-
         #region Draw
 
         public override void Draw(MeshBuilder meshBuilder)
