@@ -6,7 +6,7 @@ namespace BlockmapFramework
 {
     public abstract class Entity : MonoBehaviour
     {
-        public World World;
+        public World World { get; protected set; }
 
         /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
@@ -16,7 +16,7 @@ namespace BlockmapFramework
         /// <summary>
         /// List of tiles that this entity is currently on.
         /// </summary>
-        public List<SurfaceNode> OccupiedTerrainNodes { get; private set; }
+        public List<BlockmapNode> OccupiedNodes { get; private set; }
 
         /// <summary>
         /// List of all nodes that this entity currently sees.
@@ -31,53 +31,112 @@ namespace BlockmapFramework
         /// How far this entity can see.
         /// </summary>
         public float VisionRange { get; protected set; }
-        public bool[,,] Shape;   // Size and shape of the entity, starting from southwest bottom corner
 
-        protected virtual void Init(World world, BlockmapNode position, bool[,,] shape, Player player)
+        /// <summary>
+        /// Size of this entity in all 3 dimensions.
+        /// </summary>
+        public Vector3Int Dimensions;
+
+        /// <summary>
+        /// Flag if other entities can move through this entity.
+        /// </summary>
+        public bool IsPassable;
+
+        public void Init(World world, BlockmapNode position, Player player)
         {
-            OccupiedTerrainNodes = new List<SurfaceNode>();
+            OccupiedNodes = new List<BlockmapNode>();
             VisibleNodes = new List<BlockmapNode>();
 
             World = world;
-            Shape = shape;
             Player = player;
             SetOriginNode(position);
 
             gameObject.layer = World.Layer_Entity;
-            transform.position = position.GetCenterWorldPosition();
+            transform.position = GetWorldPosition(World, position);
+
+            OnInitialized();
+        }
+
+        protected virtual void OnInitialized() { }
+
+        /// <summary>
+        /// Returns the world position of this entity when placed on the given originNode.
+        /// </summary>
+        public Vector3 GetWorldPosition(World world, BlockmapNode originNode)
+        {
+            if (Dimensions.x == 1 && Dimensions.z == 1) return originNode.GetCenterWorldPosition();
+
+            float relX = (Dimensions.x % 2 == 0) ? 0f : 0.5f;
+            float relY = (Dimensions.z % 2 == 0) ? 0f : 0.5f;
+
+            BlockmapNode targetNode = originNode;
+            for (int i = 0; i < (int)(Dimensions.x / 2); i++)
+            {
+                if (!targetNode.ConnectedNodes.ContainsKey(Direction.E))
+                    return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
+
+                targetNode = targetNode.ConnectedNodes[Direction.E];
+            }
+            for (int i = 0; i < (int)(Dimensions.z / 2); i++)
+            {
+                if (!targetNode.ConnectedNodes.ContainsKey(Direction.N))
+                    return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
+
+                targetNode = targetNode.ConnectedNodes[Direction.N];
+            }
+
+            
+
+            float y = world.GetWorldHeightAt(new Vector2(targetNode.WorldCoordinates.x + relX, targetNode.WorldCoordinates.y + relY), targetNode);
+            return new Vector3(targetNode.WorldCoordinates.x + relX, y, targetNode.WorldCoordinates.y + relY);
         }
 
         public abstract void UpdateEntity();
 
         /// <summary>
-        /// Sets OccupiedNodes according to the current OriginNode of the entity. 
+        /// Sets OccupiedNodes according to the current OriginNode and Dimensions of the entity. 
         /// </summary>
         private void UpdateOccupiedTerrainTiles()
         {
             // Remove entity from all currently occupied tiles
-            foreach (SurfaceNode t in OccupiedTerrainNodes) t.RemoveEntity(this);
-            OccupiedTerrainNodes.Clear();
+            foreach (SurfaceNode t in OccupiedNodes) t.RemoveEntity(this);
 
-            if (OriginNode.Type == NodeType.Surface)
+            OccupiedNodes = GetOccupiedNodes(OriginNode);
+            foreach (BlockmapNode node in OccupiedNodes) node.AddEntity(this);
+        }
+
+        /// <summary>
+        /// Returns all nodes that would be occupied by this entity when placed on the given originNode.
+        /// <br/> Returns null if entity can't be placed on that null.
+        /// </summary>
+        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode)
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            for (int x = 0; x < Dimensions.x; x++)
             {
-                // Set new occupied tiles and add entity to them
-                for (int x = 0; x < Shape.GetLength(0); x++)
+                for (int z = 0; z < Dimensions.z; z++)
                 {
-                    for (int y = 0; y < Shape.GetLength(1); y++)
+                    BlockmapNode targetNode = originNode;
+
+                    for (int i = 0; i < x; i++)
                     {
-                        for (int z = 0; z < Shape.GetLength(2); z++)
-                        {
-                            if (Shape[x, y, z])
-                            {
-                                SurfaceNode occupiedTile = World.GetSurfaceNode(OriginNode.WorldCoordinates + new Vector2Int(x, y));
-                                OccupiedTerrainNodes.Add(occupiedTile);
-                                occupiedTile.AddEntity(this);
-                            }
-                        }
+                        if (!targetNode.ConnectedNodes.ContainsKey(Direction.E)) return null;
+                        targetNode = targetNode.ConnectedNodes[Direction.E];
                     }
+
+                    for (int i = 0; i < z; i++)
+                    {
+                        if (!targetNode.ConnectedNodes.ContainsKey(Direction.N)) return null;
+                        targetNode = targetNode.ConnectedNodes[Direction.N];
+                    }
+
+                    nodes.Add(targetNode);
                 }
             }
+            return nodes;
         }
+
+        public bool CanBePlacedOn(BlockmapNode node) => GetOccupiedNodes(node) != null;
 
         /// <summary>
         /// Sets VisibleNodes according to vision and line of sight rules.
@@ -118,6 +177,8 @@ namespace BlockmapFramework
             // Redraw visibility of affected chunks
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Player);
         }
+
+        #region Getters
 
         /// <summary>
         /// Returns a list of all visible nodes from the given position.
@@ -169,12 +230,18 @@ namespace BlockmapFramework
 
         public bool IsVisible(Player player) => OriginNode.IsVisibleBy(player);
 
+        #endregion
+
+        #region Setters
+
         protected void SetOriginNode(BlockmapNode node)
         {
             OriginNode = node;
             UpdateVisibleNodes();
             UpdateOccupiedTerrainTiles();
         }
+
+        #endregion
 
     }
 }

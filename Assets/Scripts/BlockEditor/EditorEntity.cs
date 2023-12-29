@@ -10,11 +10,17 @@ namespace WorldEditor
         public GameObject TargetFlag;
         private float TargetFlagScale = 0.1f;
 
-        public void Init(World world, BlockmapNode position, bool[,,] shape, Player player, float speed, float visionRange)
+        public void PreInit(float speed, float visionRange)
         {
+            IsPassable = true;
+            Dimensions = new Vector3Int(1, 1, 1);
             MovementSpeed = speed;
             VisionRange = visionRange;
-            base.Init(world, position, shape, player);
+        }
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
 
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             TargetFlag.transform.SetParent(transform.parent);
@@ -24,10 +30,10 @@ namespace WorldEditor
 
         private void GoToRandomNode()
         {
-            BlockmapNode targetNode = World.GetRandomNode();
+            BlockmapNode targetNode = World.GetRandomPassableNode();
             while (Vector2.Distance(targetNode.WorldCoordinates, OriginNode.WorldCoordinates) > 100 || targetNode == OriginNode)
             {
-                targetNode = World.GetRandomNode();
+                targetNode = World.GetRandomPassableNode();
             }
             GoTo(targetNode);
         }

@@ -15,6 +15,7 @@ namespace WorldEditor
         public EditorToolButton EditorToolButtonPrefab;
         public EditorEntity CharacterPrefab;
         public GameObject ArrowPrefab;
+        public List<StaticEntity> StaticEntities;
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
@@ -29,7 +30,8 @@ namespace WorldEditor
         public SurfacePathTool SurfacePathTool;
         public AirNodeTool AirNodeTool;
         public AirSlopeNodeTool AirSlopeNodeTool;
-        public SpawnEntityTool SpawnEntityTool;
+        public SpawnCharacterTool SpawnEntityTool;
+        public SpawnObjectTool SpawnObjectTool;
 
         [Header("World")]
         public World World;
@@ -54,7 +56,8 @@ namespace WorldEditor
                 { EditorToolId.SurfacePath, SurfacePathTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
-                { EditorToolId.SpawnEntity, SpawnEntityTool },
+                { EditorToolId.SpawnCharacter, SpawnEntityTool },
+                { EditorToolId.SpawnObject, SpawnObjectTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 

@@ -49,14 +49,14 @@ namespace BlockmapFramework
             if (pathNodeOnSurface != null) return;
 
             BlockmapNode adjacentNodeSameLevel = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, cornerHeight1, dir);
-            if (adjacentNodeSameLevel != null)
+            if (adjacentNodeSameLevel != null && adjacentNodeSameLevel.IsPassable())
             {
                 if (adjacentNodeSameLevel.Type == NodeType.AirPath) ConnectedNodes[dir] = adjacentNodeSameLevel;
                 else if (adjacentNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeSameLevel).SlopeDirection == dir) ConnectedNodes[dir] = adjacentNodeSameLevel;
             }
 
             BlockmapNode adjacentNodeBelow = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, cornerHeight1 - 1, dir);
-            if (adjacentNodeBelow != null)
+            if (adjacentNodeBelow != null && adjacentNodeBelow.IsPassable())
             {
                 if (adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == Pathfinder.GetOppositeDirection(dir)) ConnectedNodes[dir] = adjacentNodeBelow;
             }
@@ -169,7 +169,7 @@ namespace BlockmapFramework
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, World.TILE_HEIGHT * 0.5f, yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NE] < eastNode.Height[NW] && Height[SE] < eastNode.Height[SW]) // Both corners are lower than next tile
@@ -208,7 +208,7 @@ namespace BlockmapFramework
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, World.TILE_HEIGHT * 0.5f, yStart), new Vector2(0.5f, 0.5f));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
 
             if (Height[SE] < southNode.Height[NE] && Height[SW] < southNode.Height[NW]) // Both corners are lower than next tile
@@ -247,7 +247,7 @@ namespace BlockmapFramework
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, World.TILE_HEIGHT * 0.5f, yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NW] < westNode.Height[NE] && Height[SW] < westNode.Height[SE]) // Both corners are lower than next tile
@@ -286,7 +286,7 @@ namespace BlockmapFramework
             MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
             MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, World.TILE_HEIGHT * 0.5f, yEnd), new Vector2(0.5f, 0.5f));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 
 
             if (Height[NE] < northNode.Height[SE] && Height[NW] < northNode.Height[SW]) // Both corners are lower than next tile

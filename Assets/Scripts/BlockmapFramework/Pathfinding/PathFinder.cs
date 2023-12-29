@@ -150,9 +150,12 @@ namespace BlockmapFramework
         /// </summary>
         public static bool CanTransitionFromSurfaceToSurface(SurfaceNode source, Direction dir)
         {
+            if (!source.IsPassable()) return false;
+
             Vector2Int targetWorldCoordinates = World.GetWorldCoordinatesInDirection(source.WorldCoordinates, dir);
             SurfaceNode target = World.GetSurfaceNode(targetWorldCoordinates);
             if (target == null) return false;
+            if (!target.IsPassable()) return false;
 
             BlockmapNode pathNodeOnSource = TryGetPathNode(source.WorldCoordinates, source.BaseHeight);
             BlockmapNode pathNodeOnTarget = TryGetPathNode(targetWorldCoordinates, target.BaseHeight);
@@ -213,8 +216,11 @@ namespace BlockmapFramework
 
         public static bool CanTransitionFromAirPathToSurface(AirPathNode source, Direction dir)
         {
+            if (!source.IsPassable()) return false;
+
             SurfaceNode target = World.GetAdjacentSurfaceNode(source, dir);
             if (target == null) return false;
+            if (!target.IsPassable()) return false;
 
             switch (dir)
             {
@@ -237,10 +243,12 @@ namespace BlockmapFramework
 
         public static bool CanTransitionFromAirSlopeToSurface(AirPathSlopeNode source, Direction dir)
         {
+            if (!source.IsPassable()) return false;
             if (dir != source.SlopeDirection && dir != GetOppositeDirection(source.SlopeDirection)) return false; // Can only connect two sides
 
             SurfaceNode target = World.GetAdjacentSurfaceNode(source, dir);
             if (target == null) return false;
+            if (!target.IsPassable()) return false;
 
             int targetHeight = source.SlopeDirection == dir ? source.BaseHeight + 1 : source.BaseHeight;
 

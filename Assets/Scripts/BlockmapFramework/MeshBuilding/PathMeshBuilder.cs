@@ -167,7 +167,7 @@ namespace BlockmapFramework
         /// </summary>
         private static float GetVertexHeight(float x, float y)
         {
-            return BaseWorldHeight + Node.GetRelativeHeightAt(new Vector2(x, y));
+            return Node.GetWorldHeightAt(new Vector2(x, y));
         }
 
     }

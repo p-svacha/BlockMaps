@@ -345,7 +345,7 @@ GameObject:
   - component: {fileID: 580925791010520799}
   - component: {fileID: 7768343854930941500}
   m_Layer: 5
-  m_Name: SurfaceElement
+  m_Name: SelectionElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

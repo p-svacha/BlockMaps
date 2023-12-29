@@ -20,11 +20,15 @@ namespace BlockmapFramework
         public int[] Height { get; protected set; }
 
         /// <summary>
-        /// Height at which this node is starting at. (Its lowest point)
+        /// Lowest point of this node.
         /// </summary>
         public int BaseHeight { get; private set; }
-
         public float BaseWorldHeight => BaseHeight * World.TILE_HEIGHT;
+
+        /// <summary>
+        /// Highest point of this node.
+        /// </summary>
+        public int MaxHeight { get; private set; }
 
         /// <summary>
         /// Shape is saved in a string with 4 chars, where each char is a corner (SW, SE, NE, NW) storing the height above the min height of the node.
@@ -106,6 +110,7 @@ namespace BlockmapFramework
         protected void RecalculateShape()
         {
             BaseHeight = Height.Min();
+            MaxHeight = Height.Max();
             Shape = GetShape(Height);
         }
 
@@ -136,19 +141,23 @@ namespace BlockmapFramework
 
             if (northNode != null && eastNode != null &&
                 northNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.N) &&
-                northNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.N]) ConnectedNodes[Direction.NE] = northNode.ConnectedNodes[Direction.E];
+                northNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.N] &&
+                northNode.ConnectedNodes[Direction.E].IsPassable()) ConnectedNodes[Direction.NE] = northNode.ConnectedNodes[Direction.E];
 
             if (northNode != null && westNode != null &&
                 northNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.N) &&
-                northNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.N]) ConnectedNodes[Direction.NW] = northNode.ConnectedNodes[Direction.W];
+                northNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.N] &&
+                northNode.ConnectedNodes[Direction.W].IsPassable()) ConnectedNodes[Direction.NW] = northNode.ConnectedNodes[Direction.W];
 
             if (southNode != null && eastNode != null &&
                 southNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.S) &&
-                southNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.S]) ConnectedNodes[Direction.SE] = southNode.ConnectedNodes[Direction.E];
+                southNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.S] &&
+                southNode.ConnectedNodes[Direction.E].IsPassable()) ConnectedNodes[Direction.SE] = southNode.ConnectedNodes[Direction.E];
 
             if (southNode != null && westNode != null &&
                 southNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.S) &&
-                southNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.S]) ConnectedNodes[Direction.SW] = southNode.ConnectedNodes[Direction.W];
+                southNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.S] &&
+                southNode.ConnectedNodes[Direction.W].IsPassable()) ConnectedNodes[Direction.SW] = southNode.ConnectedNodes[Direction.W];
         }
 
         #endregion
@@ -216,17 +225,17 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
         /// </summary>
-        public float GetRelativeHeightAt(Vector2 relativePosition)
+        private float GetRelativeHeightAt(Vector2 relativePosition)
         {
             if (relativePosition.x < 0 || relativePosition.x > 1 || relativePosition.y < 0 || relativePosition.y > 1) throw new System.Exception("Given position must be relative. It's currently " + relativePosition.x + "/" + relativePosition.y);
 
             switch (Shape)
             {
                 case "0000": return 0;
-                case "0011": return relativePosition.y * World.TILE_HEIGHT;
-                case "1001": return (1f - relativePosition.x) * World.TILE_HEIGHT;
-                case "1100": return (1f - relativePosition.y) * World.TILE_HEIGHT;
-                case "0110": return relativePosition.x * World.TILE_HEIGHT;
+                case "0011": return relativePosition.y;
+                case "1001": return (1f - relativePosition.x);
+                case "1100": return (1f - relativePosition.y);
+                case "0110": return relativePosition.x;
 
                 case "0001":
                     if (relativePosition.x > relativePosition.y) return 0f;
@@ -254,8 +263,16 @@ namespace BlockmapFramework
                     if (relativePosition.x + relativePosition.y > 1) return 1f;
                     else return relativePosition.y + relativePosition.x;
             }
-
+            //todo
             throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height should never be used.");
+        }
+
+        /// <summary>
+        /// Returns the world y position for the relative position (0f-1f) on this node.
+        /// </summary>
+        public float GetWorldHeightAt(Vector2 relativePosition)
+        {
+            return BaseWorldHeight + (World.TILE_HEIGHT * GetRelativeHeightAt(relativePosition));
         }
 
         /// <summary>
@@ -277,11 +294,17 @@ namespace BlockmapFramework
             return ExploredBy.Contains(player);
         }
 
-        public override string ToString()
+        /// <summary>
+        /// Returns if moving entities can pass through this node.
+        /// </summary>
+        public bool IsPassable()
         {
-            return Type.ToString() + " " + WorldCoordinates.ToString();
+            if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
+
+            return true;
         }
 
+        public bool IsFlat => Height.All(x => x == Height[0]);
         #endregion
 
         #region Setters

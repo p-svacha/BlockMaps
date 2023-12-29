@@ -13,10 +13,10 @@ namespace WorldEditor
         public override int HotkeyNumber => 3;
 
         private SurfaceId SelectedSurface;
-        private Dictionary<SurfaceId, UI_SurfaceElement> SurfaceButtons;
+        private Dictionary<SurfaceId, UI_SelectionElement> SurfaceButtons;
 
         [Header("Prefabs")]
-        public UI_SurfaceElement SurfacePrefab;
+        public UI_SelectionElement SurfacePrefab;
 
         [Header("Elements")]
         public GameObject SurfaceContainer;
@@ -27,14 +27,14 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            SurfaceButtons = new Dictionary<SurfaceId, UI_SurfaceElement>();
+            SurfaceButtons = new Dictionary<SurfaceId, UI_SelectionElement>();
 
             int counter = 0;
             foreach(Surface s in SurfaceManager.Instance.GetAllSurfaces())
             {
                 int childIndex = counter / ELEMENTS_PER_ROW;
-                UI_SurfaceElement elem = Instantiate(SurfacePrefab, SurfaceContainer.transform.GetChild(childIndex));
-                elem.Init(this, s.Id);
+                UI_SelectionElement elem = Instantiate(SurfacePrefab, SurfaceContainer.transform.GetChild(childIndex));
+                elem.Init(null, s.Color, s.Name, () => SelectSurface(s.Id));
                 SurfaceButtons.Add(s.Id, elem);
                 counter++;
             }

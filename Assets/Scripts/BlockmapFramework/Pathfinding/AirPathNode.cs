@@ -33,14 +33,14 @@ namespace BlockmapFramework
         private void TryConnectToAdjacentPathNodes(Direction dir)
         {
             BlockmapNode adjacentNodeSameLevel = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight, dir);
-            if (adjacentNodeSameLevel != null)
+            if (adjacentNodeSameLevel != null && adjacentNodeSameLevel.IsPassable())
             {
                 if (adjacentNodeSameLevel.Type == NodeType.AirPath) ConnectedNodes[dir] = adjacentNodeSameLevel;
                 else if (adjacentNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeSameLevel).SlopeDirection == dir) ConnectedNodes[dir] = adjacentNodeSameLevel;
             }
 
             BlockmapNode adjacentNodeBelow = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight - 1, dir);
-            if (adjacentNodeBelow != null)
+            if (adjacentNodeBelow != null && adjacentNodeBelow.IsPassable())
             {
                 if (adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == Pathfinder.GetOppositeDirection(dir))
                     ConnectedNodes[dir] = adjacentNodeBelow;

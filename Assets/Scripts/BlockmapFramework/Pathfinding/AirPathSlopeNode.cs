@@ -56,21 +56,21 @@ namespace BlockmapFramework
 
             // Try to connect to PathNode in downwards direction (can override surface connection)
             BlockmapNode adjacentNodeBelow = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight - 1, Pathfinder.GetOppositeDirection(SlopeDirection));
-            if (adjacentNodeBelow != null && adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == SlopeDirection) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentNodeBelow;
+            if (adjacentNodeBelow != null && adjacentNodeBelow.IsPassable() && adjacentNodeBelow.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeBelow).SlopeDirection == SlopeDirection) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentNodeBelow;
 
             // Try to connect to PathNode on same level in downwards direction (can override surface connection)
             BlockmapNode adjacentFromNodeSameLevel = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight, Pathfinder.GetOppositeDirection(SlopeDirection));
-            if (adjacentFromNodeSameLevel != null && adjacentFromNodeSameLevel.Type == NodeType.AirPath) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentFromNodeSameLevel;
-            if (adjacentFromNodeSameLevel != null && adjacentFromNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentFromNodeSameLevel).SlopeDirection == Pathfinder.GetOppositeDirection(SlopeDirection)) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentFromNodeSameLevel;
+            if (adjacentFromNodeSameLevel != null && adjacentFromNodeSameLevel.IsPassable() && adjacentFromNodeSameLevel.Type == NodeType.AirPath) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentFromNodeSameLevel;
+            if (adjacentFromNodeSameLevel != null && adjacentFromNodeSameLevel.IsPassable() && adjacentFromNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentFromNodeSameLevel).SlopeDirection == Pathfinder.GetOppositeDirection(SlopeDirection)) ConnectedNodes[Pathfinder.GetOppositeDirection(SlopeDirection)] = adjacentFromNodeSameLevel;
 
             // Try to connect to PathNode on same level in downwards direction (can override surface connection)
             BlockmapNode adjacentToNodeSameLevel = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight, SlopeDirection);
-            if (adjacentToNodeSameLevel != null && adjacentToNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentToNodeSameLevel).SlopeDirection == Pathfinder.GetOppositeDirection(SlopeDirection)) ConnectedNodes[SlopeDirection] = adjacentToNodeSameLevel;
+            if (adjacentToNodeSameLevel != null && adjacentToNodeSameLevel.IsPassable() && adjacentToNodeSameLevel.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentToNodeSameLevel).SlopeDirection == Pathfinder.GetOppositeDirection(SlopeDirection)) ConnectedNodes[SlopeDirection] = adjacentToNodeSameLevel;
 
             // Try to connect to PathNode in upwards direction (can override surface connection)
             BlockmapNode adjacentNodeAbove = Pathfinder.TryGetAdjacentPathNode(WorldCoordinates, BaseHeight + 1, SlopeDirection);
-            if (adjacentNodeAbove != null && adjacentNodeAbove.Type == NodeType.AirPath) ConnectedNodes[SlopeDirection] = adjacentNodeAbove;
-            if (adjacentNodeAbove != null && adjacentNodeAbove.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeAbove).SlopeDirection == SlopeDirection) ConnectedNodes[SlopeDirection] = adjacentNodeAbove;
+            if (adjacentNodeAbove != null && adjacentNodeAbove.IsPassable() && adjacentNodeAbove.Type == NodeType.AirPath) ConnectedNodes[SlopeDirection] = adjacentNodeAbove;
+            if (adjacentNodeAbove != null && adjacentNodeAbove.IsPassable() && adjacentNodeAbove.Type == NodeType.AirPathSlope && ((AirPathSlopeNode)adjacentNodeAbove).SlopeDirection == SlopeDirection) ConnectedNodes[SlopeDirection] = adjacentNodeAbove;
         }
 
         #endregion

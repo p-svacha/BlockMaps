@@ -224,17 +224,12 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public void AddEntity(Entity e)
-        {
-            Entities.Add(e);
-        }
-
-        public void UpdatePathfindingGraphAround(Vector2Int worldCoordinates)
+        public void UpdatePathfindingGraphAround(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
         {
             int redrawRadius = 1;
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius; y++)
+            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + (rangeY - 1); y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius; x++)
+                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + (rangeX - 1); x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
@@ -279,6 +274,13 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
 
+            // Check if an entity below is blocking this space
+            List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
+            foreach (BlockmapNode node in belowNodes)
+                foreach (Entity e in node.Entities)
+                    if (node.MaxHeight + e.Dimensions.y >= height)
+                        return false;
+
             if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && pathNodeBelow.Type == NodeType.AirPathSlope) return false; // Can't build with slope underneath
@@ -315,6 +317,13 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
 
+            // Check if an entity below is blocking this space
+            List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
+            foreach (BlockmapNode node in belowNodes)
+                foreach (Entity e in node.Entities)
+                    if (node.MaxHeight + e.Dimensions.y >= height)
+                        return false;
+
             if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && !Pathfinder.CanNodesBeAboveEachOther(pathNodeBelow.Shape, AirPathSlopeNode.GetShapeFromDirection(dir))) return false;
@@ -347,6 +356,36 @@ namespace BlockmapFramework
         {
             node.SetSurface(surface);
             RedrawNodesAround(node.WorldCoordinates);
+        }
+
+        public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node)
+        {
+            // Check if terrain below entity is fully connected (as in is the surface below big enough to support the whole footprint of the entity)
+            if (!entity.CanBePlacedOn(node)) return false; 
+
+            int minHeight = GetNodeHeight(entity.GetWorldPosition(this, node).y);
+            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node); // get nodes that would be occupied when placing the entity on the given node
+            foreach (BlockmapNode occupiedNode in occupiedNodes)
+            {
+                // Check if any occupied nodes exist above entity that would block space
+                List<BlockmapNode> aboveNodes = GetNodes(occupiedNode.WorldCoordinates, minHeight + 1, minHeight + entity.Dimensions.y);
+                if (aboveNodes.Where(x => !occupiedNodes.Contains(x)).Count() > 0) return false;
+
+                // Check if any occupied nodes already have an entity
+                if (occupiedNode.Entities.Count > 0) return false;
+
+                // Check if any occupied node is not flat while requiring flat terrain
+                if (entity.RequiresFlatTerrain && !occupiedNode.IsFlat) return false;
+            }
+
+            return true;
+        }
+        public void SpawnEntity(Entity entity, BlockmapNode node)
+        {
+            entity.Init(this, node, Gaia);
+            Entities.Add(entity);
+            UpdatePathfindingGraphAround(node.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            UpdatePathfindingVisualization();
         }
 
         #endregion
@@ -496,6 +535,10 @@ namespace BlockmapFramework
             else return null;
         }
 
+        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
+        {
+            return GetNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
+        }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return new List<BlockmapNode>();
@@ -565,6 +608,10 @@ namespace BlockmapFramework
         {
             return heightValue * TILE_HEIGHT;
         }
+        public int GetNodeHeight(float worldHeight)
+        {
+            return (int)(worldHeight / TILE_HEIGHT);
+        }
 
         /// <summary>
         /// Returns the exact world height (y-coordinate) at the given relative position.
@@ -604,10 +651,10 @@ namespace BlockmapFramework
             int y = Random.Range(0, ChunkSize);
             return chosenChunk.GetSurfaceNode(x, y);
         }
-        public BlockmapNode GetRandomNode()
+        public BlockmapNode GetRandomPassableNode()
         {
             List<BlockmapNode> candidateNodes = new List<BlockmapNode>();
-            foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes());
+            foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes().Where(x => x.IsPassable()).ToList());
             return candidateNodes[Random.Range(0, candidateNodes.Count)];
         }
 

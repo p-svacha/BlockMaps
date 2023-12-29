@@ -6,10 +6,10 @@ using TMPro;
 
 namespace WorldEditor
 {
-    public class SpawnEntityTool : EditorTool
+    public class SpawnCharacterTool : EditorTool
     {
-        public override EditorToolId Id => EditorToolId.SpawnEntity;
-        public override string Name => "Spawn Entity";
+        public override EditorToolId Id => EditorToolId.SpawnCharacter;
+        public override string Name => "Spawn Character";
         public override Sprite Icon => ResourceManager.Singleton.MovingEntitySprite;
         public override int HotkeyNumber => 7;
 
@@ -37,8 +37,8 @@ namespace WorldEditor
             EditorEntity newCharacter = Instantiate(Editor.CharacterPrefab, characterContainer.transform);
             float speed = float.Parse(SpeedInput.text);
             float vision = float.Parse(VisionInput.text);
-            newCharacter.Init(World, spawnNode, new bool[,,] { { { true } } }, World.Gaia, speed, vision);
-            World.AddEntity(newCharacter);
+            newCharacter.PreInit(speed, vision);
+            World.SpawnEntity(newCharacter, spawnNode);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

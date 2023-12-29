@@ -16,13 +16,12 @@ namespace BlockmapFramework
         public BlockmapNode Target { get; private set; }
         public List<BlockmapNode> TargetPath { get; private set; }
 
-        protected override void Init(World world, BlockmapNode position, bool[,,] shape, Player player)
+        protected override void OnInitialized()
         {
-            if (shape.GetLength(0) != 1 || shape.GetLength(1) != 1) throw new System.Exception("Characters can't be bigger than 1x1");
-            base.Init(world, position, shape, player);
-            IsMoving = false;
+            if (Dimensions.x != 1 || Dimensions.y != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1x1 for now.");
 
-            NextNode = position;
+            IsMoving = false;
+            NextNode = OriginNode;
         }
 
         public override void UpdateEntity()
@@ -119,5 +118,6 @@ namespace BlockmapFramework
         }
 
         protected virtual void OnTargetReached() { }
+
     }
 }

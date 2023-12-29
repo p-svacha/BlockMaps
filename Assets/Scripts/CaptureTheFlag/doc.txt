@@ -1,25 +1,33 @@
 Big Features to Add:
 
+- Fix bug that ConnectedNodes is used for both logic and drawing:
+	> Removing a connected node also affects drawing like path mesh or surface blending
+	> Maybe keep connected node but add an attribute if its passable seperately
+
+- Make static entities affect vision
+
 - Improve vision algorithm:
 	> Variant 1: Fixed rules based on vision range + height. Static entities block vision based on hitbox
 	> Variant 2: Line of sight based on shooting rays to all nodes within vision range. if ray hits node or entity on node it is visible.
-
-- Static Entities 
-	> affect vision range (fully block or reduce)
-	> affect movement (fully block or reduce)
-
-- Procedural Static Entities
 
 - Water (or general liquid system) with unique properties
 	> placed in world by filling in hole: can only be 1 tile deep
 	> make own shader
 
-- Fences between tiles
+- Move helper functions in Pathfinder to World
+
+- Make Selection UI thing for editor a general UI prefab
+
+- Fences/Walls between tiles
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
 
-- Different type of air nodes: path & terrain
+- Allow movingentities bigger than 1x1x1
+
+- impelemnt SurfaceAirNodes:	
+	> Rendered like surface nodes (1x1x1 in size)
+	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1}
 
 - Add fences to air paths if no connection in that direction
 
@@ -39,5 +47,9 @@ Big Features to Add:
 
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change, surface change and air path
+
+- Fix bug with cliff mesh generation when adjacent slopes overlap (test in high altitude)
+
+- Procedural Static Entities
 
 

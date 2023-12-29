@@ -6,6 +6,8 @@ namespace BlockmapFramework
 {
     public class StaticEntity : Entity
     {
+        public bool RequiresFlatTerrain;
+
         public override void UpdateEntity() { }
     }
 }

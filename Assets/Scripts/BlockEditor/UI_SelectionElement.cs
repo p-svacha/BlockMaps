@@ -7,7 +7,7 @@ using BlockmapFramework;
 
 namespace WorldEditor
 {
-    public class UI_SurfaceElement : MonoBehaviour
+    public class UI_SelectionElement : MonoBehaviour
     {
         [Header("Elements")]
         public Image Icon;
@@ -15,13 +15,13 @@ namespace WorldEditor
         public GameObject SelectionFrame;
         public TextMeshProUGUI Text;
 
-        public void Init(SurfacePaintTool tool, SurfaceId surfaceId)
+        public void Init(Sprite iconSprite, Color iconColor, string text, System.Action onSelectAction)
         {
-            Surface surface = SurfaceManager.Instance.GetSurface(surfaceId);
-            Icon.color = surface.Color;
+            Icon.sprite = iconSprite;
+            Icon.color = iconColor;
             SelectionFrame.SetActive(false);
-            Text.text = surface.Name;
-            Button.onClick.AddListener(() => tool.SelectSurface(surface.Id));
+            Text.text = text;
+            Button.onClick.AddListener(onSelectAction.Invoke);
         }
 
         public void SetSelected(bool value)
