@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -18,7 +19,7 @@ namespace BlockmapFramework
 
         protected override void OnInitialized()
         {
-            if (Dimensions.x != 1 || Dimensions.y != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1x1 for now.");
+            if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");
 
             IsMoving = false;
             NextNode = OriginNode;
@@ -27,18 +28,19 @@ namespace BlockmapFramework
         public override void UpdateEntity()
         {
             // Update transform position and occupied tiles (for collisions) when moving
-            Vector2 currentPosition2d = new Vector2(transform.position.x, transform.position.z);
-            Vector2Int currentWorldCoordinates = World.GetWorldCoordinates(currentPosition2d);
+            Vector2 oldPosition2d = new Vector2(transform.position.x, transform.position.z);
+            Vector2Int oldWorldCoordinates = World.GetWorldCoordinates(oldPosition2d);
+
             Vector3 nextNodePosition = NextNode.GetCenterWorldPosition();
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
             if (IsMoving)
             {
                 // Calculate new world position and coordinates
-                Vector2 newPosition2d = Vector2.MoveTowards(currentPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.GetSpeedModifier());
+                Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.GetSpeedModifier());
                 Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
 
                 // Change origin node when passing over a node border
-                if (currentWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]); 
+                if (oldWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]); 
 
                 // Set new position/rotation
                 Vector3 newPosition = new Vector3(newPosition2d.x, World.GetWorldHeightAt(newPosition2d, OriginNode), newPosition2d.y);
@@ -47,7 +49,7 @@ namespace BlockmapFramework
             }
 
             // Character is near the destination get the next movement command
-            if (Vector2.Distance(currentPosition2d, nextNodePosition2d) <= 0.03f)
+            if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= 0.03f)
             {
                 ReachNextNode();
             }
@@ -59,7 +61,16 @@ namespace BlockmapFramework
         public void GoTo(BlockmapNode target)
         {
             Target = target;
-            TargetPath = Pathfinder.GetPath(NextNode, Target);
+            TargetPath = Pathfinder.GetPath(this, NextNode, Target);
+            OnNewTarget();
+        }
+
+        public void SetTargetPath(List<BlockmapNode> targetPath)
+        {
+            if (targetPath[0] != OriginNode) throw new System.Exception("TargetPath needs to start at current entity location.");
+            Target = targetPath.Last();
+            NextNode = targetPath[0];
+            TargetPath = targetPath;
             OnNewTarget();
         }
 
@@ -71,7 +82,7 @@ namespace BlockmapFramework
 
         private void UpdateTargetPath()
         {
-            TargetPath = Pathfinder.GetPath(NextNode, Target);
+            TargetPath = Pathfinder.GetPath(this, NextNode, Target);
         }
 
         /// <summary>
@@ -92,10 +103,10 @@ namespace BlockmapFramework
                 if (TargetPath.Count > 0)
                 {
                     // TargetPath is still valid => take that path
-                    if (Pathfinder.CanTransition(NextNode, TargetPath[0]))
+                    if (Pathfinder.CanTransition(this, NextNode, TargetPath[0]))
                     {
                         IsMoving = true;
-                        CurrentDirection = Pathfinder.GetDirection(lastNode, TargetPath[0]);
+                        CurrentDirection = HelperFunctions.GetDirection(lastNode.WorldCoordinates, TargetPath[0].WorldCoordinates);
                         NextNode = TargetPath[0];
                         NextNode.AddEntity(this);
                     }
@@ -105,6 +116,7 @@ namespace BlockmapFramework
                         Debug.Log("Target path no longer valid, finding new path");
                         IsMoving = false;
                         UpdateTargetPath();
+                        if(TargetPath == null) OnTargetReached();
                     }
 
                 }

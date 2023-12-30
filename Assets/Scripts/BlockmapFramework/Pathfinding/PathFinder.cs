@@ -15,10 +15,12 @@ namespace BlockmapFramework
             World = world;
         }
 
+        #region A*
+
         // A* algorithm implementation. https://pavcreations.com/tilemap-based-a-star-algorithm-implementation-in-unity-game/
-        public static List<BlockmapNode> GetPath(BlockmapNode from, BlockmapNode to)
+        public static List<BlockmapNode> GetPath(Entity entity, BlockmapNode from, BlockmapNode to)
         {
-            if (from == to) return null;
+            if (from == to || !to.IsPassable(entity)) return null;
 
             List<BlockmapNode> openList = new List<BlockmapNode>() { from }; // tiles that are queued for searching
             List<BlockmapNode> closedList = new List<BlockmapNode>(); // tiles that have already been searched
@@ -44,7 +46,7 @@ namespace BlockmapFramework
                 foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in currentNode.ConnectedNodes)
                 {
                     if (closedList.Contains(connectedNode.Value)) continue;
-                    if (!CanTransition(currentNode, connectedNode.Value)) continue;
+                    if (!CanTransition(entity, currentNode, connectedNode.Value)) continue;
 
                     float tentativeGCost = gCosts[currentNode] + GetCCost(currentNode, connectedNode.Value, connectedNode.Key);
                     if (!gCosts.ContainsKey(connectedNode.Value) || tentativeGCost < gCosts[connectedNode.Value])
@@ -60,36 +62,6 @@ namespace BlockmapFramework
 
             // Out of tiles -> no path
             return null;
-        }
-
-        public static Direction GetDirection(BlockmapNode from, BlockmapNode to)
-        {
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(1, 0)) return Direction.E;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(-1, 0)) return Direction.W;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(0, 1)) return Direction.N;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(0, -1)) return Direction.S;
-
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(1, 1)) return Direction.NE;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(-1, 1)) return Direction.NW;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(1, -1)) return Direction.SE;
-            if (to.WorldCoordinates == from.WorldCoordinates + new Vector2Int(-1, -1)) return Direction.SW;
-            throw new System.Exception("Position is not adjacent to character position.");
-        }
-
-        public static Direction GetOppositeDirection(Direction dir)
-        {
-            switch (dir)
-            {
-                case Direction.N: return Direction.S;
-                case Direction.E: return Direction.W;
-                case Direction.S: return Direction.N;
-                case Direction.W: return Direction.E;
-                case Direction.NE: return Direction.SW;
-                case Direction.NW: return Direction.SE;
-                case Direction.SW: return Direction.NE;
-                case Direction.SE: return Direction.NW;
-                default: return Direction.None;
-            }
         }
 
         /// <summary>
@@ -139,13 +111,39 @@ namespace BlockmapFramework
             return path;
         }
 
+        /// <summary>
+        /// Checks and returns if the given entity can move from one node to another.
+        /// </summary>
+        public static bool CanTransition(Entity entity, BlockmapNode from, BlockmapNode to)
+        {
+            return from.ConnectedNodes.ContainsValue(to) && from.IsPassable(entity) && to.IsPassable(entity);
+        }
+
+        #endregion
+
+        #region Preview
+
+        public static void ShowPathPreview(LineRenderer line, List<BlockmapNode> path, float width, Color color)
+        {
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.startWidth = width;
+            line.endWidth = width;
+            line.startColor = color;
+            line.endColor = color;
+            line.positionCount = path.Count;
+            for (int i = 0; i < path.Count; i++)
+            {
+                line.SetPosition(i, path[i].GetCenterWorldPosition() + new Vector3(0f, World.TILE_HEIGHT * 0.5f, 0f));
+            }
+        }
+
+        #endregion
+
+
+
         #region Transitions
 
-        // todo: expand this to make per-entity check based on abilities etc
-        public static bool CanTransition(BlockmapNode from, BlockmapNode to)
-        {
-            return from.ConnectedNodes.ContainsValue(to);
-        }
+
 
         /// <summary>
         /// If existing, returns the PathNode (non-surface-node) at the given position

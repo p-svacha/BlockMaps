@@ -19,7 +19,7 @@ namespace BlockmapFramework
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
         /// </summary>
-        public HashSet<Entity> Entities = new HashSet<Entity>();
+        private HashSet<Entity> Entities = new HashSet<Entity>();
 
         // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
         public SurfaceMesh SurfaceMesh;
@@ -62,6 +62,8 @@ namespace BlockmapFramework
             }
         }
 
+        #region Actions
+
         /// <summary>
         /// Updates the connected nodes in Directions W,E,S,N for all nodes in this chunk.
         /// </summary>
@@ -82,6 +84,17 @@ namespace BlockmapFramework
                 for (int x = 0; x < Size; x++)
                     foreach (BlockmapNode node in Nodes[x, y]) node.UpdateConnectedNodesDiagonal();
         }
+
+        public void AddEntity(Entity e)
+        {
+            Entities.Add(e);
+        }
+        public void RemoveEntity(Entity e)
+        {
+            Entities.Remove(e);
+        }
+
+        #endregion
 
         #region Draw
 

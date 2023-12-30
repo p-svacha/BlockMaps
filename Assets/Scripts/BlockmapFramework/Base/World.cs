@@ -70,6 +70,11 @@ namespace BlockmapFramework
         public SurfaceNode HoveredSurfaceNode { get; private set; }
 
         /// <summary>
+        /// Entity that is currently being hovered.
+        /// </summary>
+        public Entity HoveredEntity { get; private set; }
+
+        /// <summary>
         /// Chunk that is currently being hovered.
         /// </summary>
         public Chunk HoveredChunk { get; private set; }
@@ -85,6 +90,7 @@ namespace BlockmapFramework
         public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
         public event System.Action<SurfaceNode, SurfaceNode> OnHoveredSurfaceNodeChanged;
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
+        public event System.Action<Entity, Entity> OnHoveredEntityChanged;
 
         // Draw modes
         public bool IsAllVisible => ActiveVisionPlayer == null;
@@ -148,51 +154,65 @@ namespace BlockmapFramework
             BlockmapNode oldHoveredNode = HoveredNode;
             BlockmapNode newHoveredNode = null;
 
+            Entity oldHoveredEntity = HoveredEntity;
+            Entity newHoveredEntity = null;
+
             // Shoot a raycast on surface and air layer to detect hovered nodes
             if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
             {
                 Transform objectHit = hit.transform;
 
-                if (objectHit != null)
+                Vector3 hitPosition = hit.point;
+                IsHoveringWorld = true;
+
+                NodeHoverMode = GetNodeHoverMode(hitPosition);
+                HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
+
+                // Update chunk
+                newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
+
+                if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
                 {
-                    Vector3 hitPosition = hit.point;
-                    IsHoveringWorld = true;
+                    newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
+                    newHoveredNode = GetSurfaceNode(HoveredWorldCoordinates);
+                }
+                else if (objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
+                {
+                    // Current bug: this only works from 2 sides when hovering the edge of an air node
+                    newHoveredNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
 
-                    NodeHoverMode = GetNodeHoverMode(hitPosition);
-                    HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
-
-                    // Update chunk
-                    newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
-
-                    if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
+                    if (newHoveredNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
                     {
-                        newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
-                        newHoveredNode = GetSurfaceNode(HoveredWorldCoordinates);
-                    }
-                    else if (objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
-                    {
-                        // Current bug: this only works from 2 sides when hovering the edge of an air node
-                        newHoveredNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-
-                        if (newHoveredNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-                        {
-                            Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
-                            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                            newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-                        }
+                        Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
+                        Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+                        newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
                     }
                 }
+                else if(objectHit.gameObject.layer == Layer_Entity)
+                {
+                    newHoveredEntity = objectHit.GetComponent<Entity>(); 
+                }
+
+            }
+
+            // Ray to detect entity
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_Entity))
+            {
+                Transform objectHit = hit.transform;
+                newHoveredEntity = hit.transform.GetComponent<Entity>();
             }
 
             // Update currently hovered objects
             HoveredNode = newHoveredNode;
             HoveredSurfaceNode = newHoveredSurfaceNode;
             HoveredChunk = newHoveredChunk;
+            HoveredEntity = newHoveredEntity;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
             if (newHoveredSurfaceNode != oldHoveredSurfaceNode) OnHoveredSurfaceNodeChanged?.Invoke(oldHoveredSurfaceNode, newHoveredSurfaceNode);
             if (newHoveredChunk != oldHoveredChunk) OnHoveredChunkChanged?.Invoke(oldHoveredChunk, newHoveredChunk);
+            if (newHoveredEntity != oldHoveredEntity) OnHoveredEntityChanged?.Invoke(oldHoveredEntity, newHoveredEntity);
         }
         private Direction GetNodeHoverMode(Vector3 worldPos)
         {
@@ -406,6 +426,33 @@ namespace BlockmapFramework
             // Update pathfinding navmesh
             UpdatePathfindingGraphAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
             UpdatePathfindingVisualization();
+        }
+        public void RemoveEntity(Entity entity)
+        {
+            // De-register entity
+            Entities.Remove(entity);
+
+            // Remove seen by on all nodes
+            foreach (BlockmapNode node in entity.VisibleNodes) node.RemoveVisionBy(entity);
+
+            // Remove node & chunk occupation
+            foreach (BlockmapNode node in entity.OccupiedNodes)
+            {
+                node.RemoveEntity(entity);
+                node.Chunk.RemoveEntity(entity);
+            }
+
+            // Update pathfinding navmesh
+            UpdatePathfindingGraphAround(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            UpdatePathfindingVisualization();
+
+            if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
+
+            // Destroy
+            GameObject.Destroy(entity.gameObject);
+
+            // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
+            UpdateVisionOfNearbyEntities(entity.GetWorldCenter());
         }
 
         #endregion
@@ -680,10 +727,10 @@ namespace BlockmapFramework
             int y = Random.Range(0, ChunkSize);
             return chosenChunk.GetSurfaceNode(x, y);
         }
-        public BlockmapNode GetRandomPassableNode()
+        public BlockmapNode GetRandomPassableNode(Entity entity) // very not performant
         {
             List<BlockmapNode> candidateNodes = new List<BlockmapNode>();
-            foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes().Where(x => x.IsPassable()).ToList());
+            foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes().Where(x => x.IsPassable(entity)).ToList());
             return candidateNodes[Random.Range(0, candidateNodes.Count)];
         }
 

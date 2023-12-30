@@ -1,25 +1,41 @@
 Big Features to Add:
 
 
-make editor entity 2 tall
+- add entities to save data
+- improve world gen tool
+	=> allow save / load world
+	=> add dropdown for different generators
 
-improve pathfinding for moving entites that are tall
-	> Make pathfinding take an entity as an input and modify canTransition
+- add generators
+	=> flat
+	=> current perlin with some trees and cliffs
 
 - Make vision radius of entities based on their dimensions
-
-- Make profiler performance tests with high speed, high vision entities in editor
-
-- Shoot multiple rays at a node to check vision (if performance allows)
-	> also at entities on node
 
 - Make editor moving entities selectable and manually movable, also auto-move
 
 - Show entity stats in static entity tool in editor
 
+- Static entities with weird shapes
+	=> adjust collider generation accordingly
+	=> occupiednodes turns into footprint
+	=> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
+	=> keep dimensions as a general entity attribute, add shape to static entity
+
+- decouple entity visibility from node visiblity
+
+- Allow moving entities with bigger x and y than 1
+
+- Fix shadow rendering bug with shader discard and re-enable shadows of terrain
+
+- Add static entities that include navmesh nodes (like a container or bridge)
+
+
 - Water (or general liquid system) with unique properties
 	> placed in world by filling in hole: can only be 1 tile deep
 	> make own shader
+	> waternode
+	> movingentity canswim attribute
 
 - Fences/Walls between tiles
 
@@ -34,13 +50,18 @@ improve pathfinding for moving entites that are tall
 
 - Add fences to air paths if no connection in that direction
 
+- Shoot multiple rays at a node to check vision (if performance allows)
+	> also at entities on node
+
+- Make profiler performance tests with high speed, high vision entities in editor
+
 - Improve Camera:
 	> Shift to increase speed
 	> Faster zoom (alt to decrease zoom speed)
 
 - Fix rare bug of air node not being selected exactly on edge
 
-- In terrain transitions, only do corner transitions when the corner transition exists
+- In terrain blend transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code
 	> also add (global perlin) noise to blending texture
 
@@ -50,8 +71,6 @@ improve pathfinding for moving entites that are tall
 
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change, surface change and air path
-
-- Fix bug with cliff mesh generation when adjacent slopes overlap (test in high altitude)
 
 - Procedural Static Entities
 

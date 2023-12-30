@@ -22,6 +22,9 @@ namespace BlockmapFramework
         public Texture2D SandTexture;
         public Texture2D TarmacTexture;
 
+        [Header("Prefabs")]
+        public Projector SelectionIndicator;
+
         public static ResourceManager Singleton;
     }
 }

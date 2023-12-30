@@ -31,6 +31,7 @@ namespace WorldEditor
         public virtual void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode) { }
         public virtual void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode) { }
         public virtual void OnHoveredChunkChanged(Chunk oldChunk, Chunk newChunk) { }
+        public virtual void OnHoveredEntityChanged(Entity oldEntity, Entity newEntity) { }
 
     }
 }

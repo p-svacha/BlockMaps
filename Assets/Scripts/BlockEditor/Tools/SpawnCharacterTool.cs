@@ -16,6 +16,7 @@ namespace WorldEditor
         [Header("Elements")]
         public TMP_InputField SpeedInput;
         public TMP_InputField VisionInput;
+        public TMP_InputField HeightInput;
 
         public override void UpdateTool()
         {
@@ -37,7 +38,8 @@ namespace WorldEditor
             EditorMovingEntity newCharacter = Instantiate(Editor.CharacterPrefab, characterContainer.transform);
             float speed = float.Parse(SpeedInput.text);
             float vision = float.Parse(VisionInput.text);
-            newCharacter.PreInit(speed, vision);
+            int height = int.Parse(HeightInput.text);
+            newCharacter.PreInit(speed, vision, height);
             World.SpawnEntity(newCharacter, spawnNode, Editor.EditorPlayer);
         }
 

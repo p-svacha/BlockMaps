@@ -12,7 +12,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
         /// </summary>
-        protected BlockmapNode OriginNode { get; private set; }
+        public BlockmapNode OriginNode { get; private set; }
 
         /// <summary>
         /// List of tiles that this entity is currently on.
@@ -48,6 +48,8 @@ namespace BlockmapFramework
         /// </summary>
         public bool BlocksVision;
 
+        private Projector SelectionIndicator;
+
         #region Initialize
 
         public void Init(World world, BlockmapNode position, Player player)
@@ -62,9 +64,17 @@ namespace BlockmapFramework
             gameObject.layer = World.Layer_Entity;
             transform.position = GetWorldPosition(World, position);
 
+            // Collider
             BoxCollider collider = gameObject.AddComponent<BoxCollider>();
             collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
             collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+
+            // Selection indicator
+            SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
+            SelectionIndicator.transform.SetParent(transform);
+            SelectionIndicator.transform.localPosition = new Vector3(0f, 5f, 0f);
+            SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;
+            SetSelected(false);
 
             OnInitialized();
         }
@@ -86,7 +96,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode t in OccupiedNodes)
             {
                 t.RemoveEntity(this);
-                t.Chunk.Entities.Remove(this);
+                t.Chunk.RemoveEntity(this);
             }
 
             // Get list of nodes that are currently occupied
@@ -96,7 +106,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in OccupiedNodes)
             {
                 node.AddEntity(this);
-                node.Chunk.Entities.Add(this);
+                node.Chunk.AddEntity(this);
             }
         }
 
@@ -122,8 +132,7 @@ namespace BlockmapFramework
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVisibleNodes);
             changedVisibilityNodes.SymmetricExceptWith(newVisibleNodes);
-
-            Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
+            //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
 
             // Add all adjacent nodes as well because vision goes over node edge
             HashSet<BlockmapNode> adjNodes = new HashSet<BlockmapNode>();
@@ -276,7 +285,7 @@ namespace BlockmapFramework
             if (distance > VisionRange) return VisionType.Unexplored;
 
             // Shoot ray from eye to the node with infinite range and check if we hit the correct node
-            RaycastHit? nodeHit = Look(node.GetCenterWorldPosition());  
+            RaycastHit? nodeHit = Look(node.GetCenterWorldPosition());
 
             if (nodeHit != null)
             {
@@ -354,7 +363,7 @@ namespace BlockmapFramework
                 // If the thing we hit is an entity that doesn't block vision, go to the next thing we hit
                 if (objectHit.layer == World.Layer_Entity && !objectHit.GetComponent<Entity>().BlocksVision) continue;
 
-                Debug.DrawRay(source, hit.point - source, Color.red, 60f);
+                //Debug.DrawRay(source, hit.point - source, Color.red, 60f);
 
                 // Return it since it's the first thing that we actually see
                 return hit;
@@ -370,7 +379,7 @@ namespace BlockmapFramework
         /// </summary>
         public Vector3 GetEyePosition()
         {
-            if (Dimensions.x != 1 || Dimensions.y != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
+            if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
             return OriginNode.GetCenterWorldPosition() + new Vector3(0f, (Dimensions.y * World.TILE_HEIGHT) - (World.TILE_HEIGHT * 0.5f), 0f);
         }
@@ -420,6 +429,14 @@ namespace BlockmapFramework
             OriginNode = node;
             UpdateOccupiedNodes();
             UpdateVisibleNodes();
+        }
+
+        /// <summary>
+        /// Shows/hides the selection indicator of this entity.
+        /// </summary>
+        public void SetSelected(bool value)
+        {
+            SelectionIndicator.gameObject.SetActive(value);
         }
 
         #endregion

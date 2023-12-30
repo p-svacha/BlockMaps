@@ -26,6 +26,7 @@ namespace WorldEditor
         public Sprite WorldGenSprite;
         public Sprite StaticEntitySprite;
         public Sprite MovingEntitySprite;
+        public Sprite MoveEntityToolSprite;
 
         public static ResourceManager Singleton { get { return GameObject.Find("ResourceManager").GetComponent<ResourceManager>(); } }
     }

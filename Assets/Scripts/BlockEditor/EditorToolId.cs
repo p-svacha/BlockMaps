@@ -13,6 +13,7 @@ namespace WorldEditor
         AirNode,
         AirSlopeNode,
         SpawnCharacter,
-        SpawnObject
+        SpawnObject,
+        MoveEntity
     }
 }

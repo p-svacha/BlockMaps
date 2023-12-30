@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34b67e21889d91345b1205a6d4a71557, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Dimensions: {x: 1, y: 1, z: 1}
+  Dimensions: {x: 1, y: 2, z: 1}
   IsPassable: 1
+  BlocksVision: 0
   TargetFlag: {fileID: 0}

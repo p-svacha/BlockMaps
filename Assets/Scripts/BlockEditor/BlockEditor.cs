@@ -32,6 +32,7 @@ namespace WorldEditor
         public AirSlopeNodeTool AirSlopeNodeTool;
         public SpawnCharacterTool SpawnEntityTool;
         public SpawnObjectTool SpawnObjectTool;
+        public MoveEntityTool MoveEntityTool;
 
         [Header("World")]
         public World World;
@@ -60,6 +61,7 @@ namespace WorldEditor
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
                 { EditorToolId.SpawnCharacter, SpawnEntityTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
+                { EditorToolId.MoveEntity, MoveEntityTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
@@ -88,6 +90,7 @@ namespace WorldEditor
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
             World.OnHoveredChunkChanged += OnHoveredChunkChanged;
+            World.OnHoveredEntityChanged += OnHoveredEntityChanged;
         }
 
         #region Controls
@@ -158,6 +161,10 @@ namespace WorldEditor
         private void OnHoveredChunkChanged(Chunk oldChunk, Chunk newChunk)
         {
             CurrentTool.OnHoveredChunkChanged(oldChunk, newChunk);
+        }
+        private void OnHoveredEntityChanged(Entity oldEntity, Entity newEntity)
+        {
+            CurrentTool.OnHoveredEntityChanged(oldEntity, newEntity);
         }
 
         private KeyCode GetKeycodeForNumber(int hotkeyNumber) => (KeyCode)(48 + hotkeyNumber);

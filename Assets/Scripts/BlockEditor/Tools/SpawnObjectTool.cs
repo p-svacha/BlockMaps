@@ -71,6 +71,11 @@ namespace WorldEditor
             World.SpawnEntity(newEntity, World.HoveredNode, World.Gaia);
         }
 
+        public override void HandleRightClick()
+        {
+            if (World.HoveredEntity != null) World.RemoveEntity(World.HoveredEntity);
+        }
+
         public void SelectEntity(StaticEntity e)
         {
             // Update button

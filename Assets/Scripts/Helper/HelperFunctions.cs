@@ -38,7 +38,6 @@ public static class HelperFunctions
         }
         throw new System.Exception();
     }
-
     public static T GetWeightedRandomElement<T>(Dictionary<T, float> weightDictionary)
     {
         float probabilitySum = weightDictionary.Sum(x => x.Value);
@@ -59,7 +58,6 @@ public static class HelperFunctions
     {
         return mean + NextGaussian() * standard_deviation;
     }
-
     private static float NextGaussian()
     {
         float v1, v2, s;
@@ -90,8 +88,8 @@ public static class HelperFunctions
             Direction.SW => Direction.W,
             Direction.W => Direction.NW,
             Direction.NW => Direction.N,
+            _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
-        throw new System.Exception("Direction " + dir.ToString() + " not handled");
     }
 
     public static Direction GetNextAnticlockwiseDirection8(Direction dir)
@@ -106,8 +104,38 @@ public static class HelperFunctions
             Direction.SE => Direction.E,
             Direction.E => Direction.NE,
             Direction.NE => Direction.N,
+            _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
-        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    public static Direction GetDirection(Vector2Int from, Vector2Int to)
+    {
+        if (to == from + new Vector2Int(1, 0)) return Direction.E;
+        if (to == from + new Vector2Int(-1, 0)) return Direction.W;
+        if (to == from + new Vector2Int(0, 1)) return Direction.N;
+        if (to == from + new Vector2Int(0, -1)) return Direction.S;
+
+        if (to == from + new Vector2Int(1, 1)) return Direction.NE;
+        if (to == from + new Vector2Int(-1, 1)) return Direction.NW;
+        if (to == from + new Vector2Int(1, -1)) return Direction.SE;
+        if (to == from + new Vector2Int(-1, -1)) return Direction.SW;
+        throw new System.Exception("Position is not adjacent to character position.");
+    }
+
+    public static Direction GetOppositeDirection(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.N => Direction.S,
+            Direction.E => Direction.W,
+            Direction.S => Direction.N,
+            Direction.W => Direction.E,
+            Direction.NE => Direction.SW,
+            Direction.NW => Direction.SE,
+            Direction.SW => Direction.NE,
+            Direction.SE => Direction.NW,
+            _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
+        };
     }
 
     public static List<Direction> GetAllDirections8()

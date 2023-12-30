@@ -249,6 +249,14 @@ namespace BlockmapFramework
             ExploredBy.Add(p);
         }
 
+        /// <summary>
+        /// Sets the base surface of this node. Chunk has to be redrawn to see change.
+        /// </summary>
+        public void SetSurface(SurfaceId id)
+        {
+            Surface = SurfaceManager.Instance.GetSurface(id);
+        }
+
         #endregion
 
         #region Getters
@@ -330,13 +338,19 @@ namespace BlockmapFramework
             return ExploredBy.Contains(player);
         }
 
+        public bool IsSeenBy(Entity e) => SeenBy.Contains(e);
+
         /// <summary>
-        /// Returns if moving entities can pass through this node.
+        /// Returns if an entity can stand on this node.
+        /// <br/> If entity is null a general check will be made for the navmesh.
         /// </summary>
-        public bool IsPassable()
+        public bool IsPassable(Entity entity = null)
         {
             if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
-            if (IsBlockedByNodeAbove(this)) return false; // Another node above this one is blocking this (by overlapping in at least 1 corner)
+
+            int headSpace = GetFreeHeadSpace();
+            if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)
+            if (entity != null && entity.Dimensions.y > headSpace) return false; // A node above is blocking the space for the entity
 
             return true;
         }
@@ -344,35 +358,29 @@ namespace BlockmapFramework
         public bool IsFlat => Height.All(x => x == Height[0]);
 
         /// <summary>
-        /// Checks and returns if there is another node above the given node that overlaps in height on one of the corners.
-        /// <br/> Can for example happen when stairs are built on flat nodes.
+        /// Returns the amount of space (in amount of tiles) that is free above this node.
+        /// <br/> For example a flat node right above this flat node would be 1.
+        /// <br/> If any corner of an above node overlaps with this node 0 is returned.
         /// </summary>
-        private bool IsBlockedByNodeAbove(BlockmapNode source)
+        private int GetFreeHeadSpace()
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(source.WorldCoordinates, source.BaseHeight, World.MAX_HEIGHT);
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT);
+
+            int minHeight = int.MaxValue;
 
             foreach (BlockmapNode node in nodesAbove)
             {
-                if (node == source) continue;
+                if (node == this) continue;
 
-                if (node.Height[NE] == source.Height[NE] || node.Height[NW] == source.Height[NW] || node.Height[SE] == source.Height[SE] || node.Height[SW] == source.Height[SW])
-                    return true;
+                for(int i = 0; i < 4; i++)
+                {
+                    int diff = node.Height[i] - Height[i];
+                    if (diff < minHeight) minHeight = diff;
+                }
             }
 
-            return false;
+            return minHeight;
         }
-        #endregion
-
-        #region Setters
-
-        /// <summary>
-        /// Sets the base surface of this node. Chunk has to be redrawn to see change.
-        /// </summary>
-        public void SetSurface(SurfaceId id)
-        {
-            Surface = SurfaceManager.Instance.GetSurface(id);
-        }
-
         #endregion
 
         #region Save / Load

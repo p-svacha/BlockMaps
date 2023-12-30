@@ -12,7 +12,12 @@ namespace BlockmapFramework
         private const float ARROW_SCALE = 0.05f;
         private const float ARROW_HEIGHT = 0.2f;
 
-        public void VisualizeGraph(World world)
+
+        /// <summary>
+        /// Shows the navmesh of the world.
+        /// <br/> If an entity is provided the navmesh will be visualized for that entity.
+        /// </summary>
+        public void VisualizeGraph(World world, Entity entity = null)
         {
             ClearVisualization();
 
@@ -35,6 +40,8 @@ namespace BlockmapFramework
 
                             foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in node.ConnectedNodes)
                             {
+                                if (entity != null && !Pathfinder.CanTransition(entity, node, connectedNode.Value)) continue;
+
                                 GameObject arrow = Instantiate(ArrowPrefab, transform);
                                 arrow.transform.localPosition = node.GetCenterWorldPosition();
                                 arrow.transform.localScale = new Vector3(ARROW_SCALE, ARROW_SCALE, 0.3f * Vector3.Distance(node.GetCenterWorldPosition(), connectedNode.Value.GetCenterWorldPosition()));
