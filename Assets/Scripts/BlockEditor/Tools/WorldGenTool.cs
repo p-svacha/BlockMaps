@@ -19,10 +19,17 @@ namespace WorldEditor
         public TMP_InputField NumChunksInput;
         public Button GenerateButton;
 
+        public TMP_InputField WorldNameInput;
+        public Button LoadButton;
+        public Button SaveButton;
+
+
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
             GenerateButton.onClick.AddListener(GenerateButton_OnClick);
+            LoadButton.onClick.AddListener(LoadButton_OnClick);
+            SaveButton.onClick.AddListener(SaveButton_OnClick);
         }
 
         private void GenerateButton_OnClick()
@@ -36,6 +43,24 @@ namespace WorldEditor
             if (chunkSize * numChunks > 512) return;
 
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", chunkSize, numChunks);
+            Editor.SetWorld(data);
+        }
+
+        private void SaveButton_OnClick()
+        {
+            if (WorldNameInput.text == "") return;
+
+            WorldData data = Editor.World.Save();
+            data.Name = WorldNameInput.text;
+            JsonUtilities.SaveWorld(data);
+        }
+
+        private void LoadButton_OnClick()
+        {
+            if (WorldNameInput.text == "") return;
+
+            WorldData data = JsonUtilities.LoadWorld(WorldNameInput.text);
+            if (data == null) return;
             Editor.SetWorld(data);
         }
     }

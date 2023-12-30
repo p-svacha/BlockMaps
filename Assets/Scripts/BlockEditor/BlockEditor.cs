@@ -48,7 +48,6 @@ namespace WorldEditor
             // Init world
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 4);
             SetWorld(data);
-            EditorPlayer = new Player(0, "Player");
 
             // Init tools
             Tools = new Dictionary<EditorToolId, EditorTool>()
@@ -83,8 +82,15 @@ namespace WorldEditor
             if (World != null) Destroy(World.gameObject);
 
             // Set new data
-            World = World.Load(data);
+            World = World.Load(data, new EditorEntityLibrary());
             World.Draw();
+
+            // Add editor player
+            if (!World.Players.ContainsKey(0))
+            {
+                EditorPlayer = new Player(World, 0, "Player");
+                World.AddPlayer(EditorPlayer);
+            }
 
             // Init hooks
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -103,11 +109,16 @@ namespace WorldEditor
 
             // Click
             bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
+            bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
+
             if (Input.GetMouseButtonDown(0) && !isMouseOverUi) CurrentTool.HandleLeftClick();
             if (Input.GetMouseButton(0) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
 
             if (Input.GetMouseButtonDown(1) && !isMouseOverUi) CurrentTool.HandleRightClick();
             if (Input.GetMouseButton(1) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
+
+
+            if (isUiElementFocussed) return; // no input key checks when a ui element is focussed
 
             // Show/Hide Grid
             if (Input.GetKeyDown(KeyCode.G)) World.ToggleGridOverlay();
@@ -131,7 +142,7 @@ namespace WorldEditor
             // Tool Selection
             foreach (EditorTool tool in Tools.Values)
             {
-                if (Input.GetKeyDown(GetKeycodeForNumber(tool.HotkeyNumber)) && EventSystem.current.currentSelectedGameObject == null)
+                if (Input.GetKeyDown(GetKeycodeForNumber(tool.HotkeyNumber)))
                     SelectTool(tool.Id);
             }
         }

@@ -252,7 +252,7 @@ namespace BlockmapFramework
             List<NodeData> nodeData = new List<NodeData>();
             for(int x = 0; x < Nodes.GetLength(0); x++)
             {
-                for(int y = 0; y < Nodes.GetLength(1); x++)
+                for(int y = 0; y < Nodes.GetLength(1); y++)
                 {
                     foreach (BlockmapNode node in Nodes[x, y]) nodeData.Add(node.Save());
                 }

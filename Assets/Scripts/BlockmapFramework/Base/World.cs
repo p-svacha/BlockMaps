@@ -28,11 +28,18 @@ namespace BlockmapFramework
 
 
         public string Name { get; private set; }
+        private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
+        private bool IsInitialized;
         public int ChunkSize { get; private set; }
         public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+
+        public Dictionary<int, Player> Players = new Dictionary<int, Player>();
+
+        public EntityLibrary EntityLibrary { get; private set; }
         public List<Entity> Entities = new List<Entity>();
 
         private int NodeIdCounter;
+        private int EntityIdCounter;
         private BlockmapCamera Camera;
         /// <summary>
         /// Neutral passive player
@@ -100,39 +107,81 @@ namespace BlockmapFramework
         private bool IsShowingTileBlending;
         
 
-        public void Init(WorldData data)
+        public void Init(WorldData data, EntityLibrary entityLibrary)
         {
+            EntityLibrary = entityLibrary;
+
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
             Layer_AirNode = LayerMask.NameToLayer("Path");
 
-            Gaia = new Player(-1, "Gaia");
-
+            // Init nodes
             Name = data.Name;
             ChunkSize = data.ChunkSize;
             foreach(ChunkData chunkData in data.Chunks)
                 Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), Chunk.Load(this, chunkData));
             NodeIdCounter = data.MaxNodeId + 1;
+            EntityIdCounter = data.MaxEntityId + 1;
 
+            // Init players
+            foreach (PlayerData playerData in data.Players) AddPlayer(Player.Load(this, playerData));
+
+            if (!Players.ContainsKey(-1)) AddPlayer(new Player(this, -1, "Gaia"));
+            Gaia = Players[-1];
+
+            // Init pathfinder
             Pathfinder.Init(this);
 
             // Init connections
             foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
             foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
 
+            // Init entities
+            foreach (EntityData entityData in data.Entities) Entities.Add(Entity.Load(this, entityData));
+
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
             Camera.SetPosition(new Vector2(ChunkSize * 0.5f, ChunkSize * 0.5f));
             Camera.SetZoom(10f);
             Camera.SetAngle(225);
+
+            InitializeStep = 1;
         }
 
         #region Update
 
         void Update()
         {
+            // Check if world is done initializing
+            UpdateInitialization();
+            if (!IsInitialized) return;
+
+            // Regular updates
             UpdateHoveredObjects();
             foreach (Entity e in Entities) e.UpdateEntity();
+        }
+
+        private void UpdateInitialization()
+        {
+            // Frame 1 after initialization: Readjust entities based on drawn terrain.
+            if(InitializeStep == 1)
+            {
+                foreach (Entity e in Entities) e.SetToCurrentWorldPosition();
+
+                InitializeStep++;
+                return;
+            }
+
+            // Frame 1 after initialization: Calculate visibility of all entities.
+            if (InitializeStep == 2)
+            {
+                foreach (Entity e in Entities) e.UpdateVisibleNodes();
+
+                InitializeStep++;
+                return;
+            }
+
+            if (InitializeStep == 3) IsInitialized = true;
         }
 
         /// <summary>
@@ -239,6 +288,8 @@ namespace BlockmapFramework
         #endregion
 
         #region Actions
+
+        public void AddPlayer(Player player) => Players.Add(player.Id, player);
 
         public void UpdatePathfindingGraphAround(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
         {
@@ -412,7 +463,7 @@ namespace BlockmapFramework
         }
         public void SpawnEntity(Entity newEntity, BlockmapNode node, Player player)
         {
-            newEntity.Init(this, node, player);
+            newEntity.Init(EntityIdCounter++, this, node, player);
 
             // Update if the new entity is currently visible
             newEntity.UpdateVisiblity(ActiveVisionPlayer);
@@ -611,6 +662,11 @@ namespace BlockmapFramework
             else return null;
         }
 
+        public BlockmapNode GetNode(Vector2Int worldCoordinates, int id)
+        {
+            return GetNodes(worldCoordinates).First(x => x.Id == id);
+        }
+
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
             return GetNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
@@ -738,11 +794,11 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static World Load(WorldData data)
+        public static World Load(WorldData data, EntityLibrary entityLibrary)
         {
             GameObject worldObject = new GameObject(data.Name);
             World world = worldObject.AddComponent<World>();
-            world.Init(data);
+            world.Init(data, entityLibrary);
             return world;
         }
 
@@ -753,7 +809,10 @@ namespace BlockmapFramework
                 Name = Name,
                 ChunkSize = ChunkSize,
                 MaxNodeId = NodeIdCounter,
-                Chunks = Chunks.Values.Select(x => x.Save()).ToList()
+                MaxEntityId = EntityIdCounter,
+                Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
+                Players = Players.Values.Select(x => x.Save()).ToList(),
+                Entities = Entities.Select(x => x.Save()).ToList()
             };
         }
 

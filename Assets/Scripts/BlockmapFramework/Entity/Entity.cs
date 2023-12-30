@@ -10,6 +10,17 @@ namespace BlockmapFramework
         public World World { get; protected set; }
 
         /// <summary>
+        /// Unique identifier of this specific entity.
+        /// </summary>
+        public int Id { get; private set; }
+
+        /// <summary>
+        /// Unique identifier of an entity type.
+        /// <br/> The same id will always result in the same entity attributes (mesh, size, shape, vision, etc.)
+        /// </summary>
+        public string TypeId;
+
+        /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
         /// </summary>
         public BlockmapNode OriginNode { get; private set; }
@@ -52,8 +63,10 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public void Init(World world, BlockmapNode position, Player player)
+        public void Init(int id, World world, BlockmapNode position, Player player)
         {
+            Id = id;
+
             OccupiedNodes = new List<BlockmapNode>();
             VisibleNodes = new List<BlockmapNode>();
 
@@ -62,7 +75,7 @@ namespace BlockmapFramework
             SetOriginNode(position);
 
             gameObject.layer = World.Layer_Entity;
-            transform.position = GetWorldPosition(World, position);
+            SetToCurrentWorldPosition();
 
             // Collider
             BoxCollider collider = gameObject.AddComponent<BoxCollider>();
@@ -203,8 +216,6 @@ namespace BlockmapFramework
 
                 targetNode = targetNode.ConnectedNodes[Direction.N];
             }
-
-
 
             float y = world.GetWorldHeightAt(new Vector2(targetNode.WorldCoordinates.x + relX, targetNode.WorldCoordinates.y + relY), targetNode);
             return new Vector3(targetNode.WorldCoordinates.x + relX, y, targetNode.WorldCoordinates.y + relY);
@@ -432,11 +443,45 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Moves the entity to the current world position based on its origin node.
+        /// </summary>
+        public void SetToCurrentWorldPosition()
+        {
+            transform.position = GetWorldPosition(World, OriginNode);
+        }
+
+        /// <summary>
         /// Shows/hides the selection indicator of this entity.
         /// </summary>
         public void SetSelected(bool value)
         {
             SelectionIndicator.gameObject.SetActive(value);
+        }
+
+        #endregion
+
+        #region Save / Load
+
+        public static Entity Load(World world, EntityData data)
+        {
+            Entity prefab = world.EntityLibrary.GetEntity(data.TypeId);
+            if (prefab == null) throw new System.Exception("Entity with TypeId = " + data.TypeId + " not found in library.");
+            Entity instance = Instantiate(prefab, world.transform);
+            instance.Init(data.Id, world, world.GetNode(new Vector2Int(data.OriginNodeX, data.OriginNodeY), data.OriginNodeId), world.Players[data.PlayerId]);
+            return instance;
+        }
+
+        public EntityData Save()
+        {
+            return new EntityData
+            {
+                Id = Id,
+                TypeId = TypeId,
+                OriginNodeId = OriginNode.Id,
+                OriginNodeX = OriginNode.WorldCoordinates.x,
+                OriginNodeY = OriginNode.WorldCoordinates.y,
+                PlayerId = Player.Id
+            };
         }
 
         #endregion

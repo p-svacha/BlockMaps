@@ -1,20 +1,15 @@
 Big Features to Add:
 
-
-- add entities to save data
-- improve world gen tool
-	=> allow save / load world
-	=> add dropdown for different generators
-
 - add generators
 	=> flat
 	=> current perlin with some trees and cliffs
+	=> add dropdown for different generators
 
 - Make vision radius of entities based on their dimensions
 
 - Make editor moving entities selectable and manually movable, also auto-move
 
-- Show entity stats in static entity tool in editor
+- Show entity stats in static entity tool in editor1
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly

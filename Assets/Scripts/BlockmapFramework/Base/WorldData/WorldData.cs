@@ -11,6 +11,9 @@ namespace BlockmapFramework
         public string Name;
         public int ChunkSize { get; set; }
         public int MaxNodeId { get; set; }
+        public int MaxEntityId { get; set; }
         public List<ChunkData> Chunks { get; set; }
+        public List<PlayerData> Players { get; set; }
+        public List<EntityData> Entities { get; set; }
     }
 }

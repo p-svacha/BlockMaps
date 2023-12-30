@@ -46,7 +46,7 @@ namespace CaptureTheFlag
             }
             WorldData.MaxNodeId = NodeIdCounter;
 
-            World world = World.Load(WorldData);
+            World world = World.Load(WorldData, new CTF_EntityLibrary());
             world.Draw();
             return world;
         }

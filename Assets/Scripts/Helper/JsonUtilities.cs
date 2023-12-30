@@ -21,6 +21,13 @@ public static class JsonUtilities
     public static WorldData LoadWorld(string name)
     {
         string jsonFilePath = DATA_FILES_PATH + name + ".json";
+
+        if (!File.Exists(jsonFilePath))
+        {
+            Debug.Log("No save file with name " + name + " exists. (" + jsonFilePath + ")");
+            return null;
+        }
+
         WorldData data = null;
 
         using (StreamReader r = new StreamReader(jsonFilePath))

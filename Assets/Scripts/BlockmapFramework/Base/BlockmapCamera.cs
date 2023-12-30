@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace BlockmapFramework
 {
@@ -28,6 +29,9 @@ namespace BlockmapFramework
 
         private void HandleInputs()
         {
+            bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
+            if (isUiElementFocussed) return;
+
             if (Input.GetKey(KeyCode.Q)) // Q - Rotate camera anti-clockwise
             {
                 CurrentAngle = CurrentAngle += TURN_SPEED * Time.deltaTime;
