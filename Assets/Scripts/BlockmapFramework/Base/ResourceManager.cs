@@ -16,6 +16,8 @@ namespace BlockmapFramework
         public Material CliffMaterial;
         public Material PathMaterial;
         public Material PathCurbMaterial;
+        public Material WaterMaterial;
+        public Material WaterPreviewMaterial;
 
         [Header("Terrain Textures")]
         public Texture2D GrassTexture;
@@ -24,7 +26,6 @@ namespace BlockmapFramework
 
         [Header("Prefabs")]
         public Projector SelectionIndicator;
-        public GameObject WaterPlane;
 
         public static ResourceManager Singleton;
     }

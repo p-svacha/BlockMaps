@@ -467,7 +467,7 @@ namespace BlockmapFramework
             Entity prefab = world.EntityLibrary.GetEntity(data.TypeId);
             if (prefab == null) throw new System.Exception("Entity with TypeId = " + data.TypeId + " not found in library.");
             Entity instance = Instantiate(prefab, world.transform);
-            instance.Init(data.Id, world, world.GetNode(new Vector2Int(data.OriginNodeX, data.OriginNodeY), data.OriginNodeId), world.Players[data.PlayerId]);
+            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), world.Players[data.PlayerId]);
             return instance;
         }
 
@@ -478,8 +478,6 @@ namespace BlockmapFramework
                 Id = Id,
                 TypeId = TypeId,
                 OriginNodeId = OriginNode.Id,
-                OriginNodeX = OriginNode.WorldCoordinates.x,
-                OriginNodeY = OriginNode.WorldCoordinates.y,
                 PlayerId = Player.Id
             };
         }

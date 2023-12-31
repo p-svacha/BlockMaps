@@ -76,6 +76,11 @@ namespace BlockmapFramework
         private HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
+        /// The water body covering this node.
+        /// </summary>
+        public WaterBody WaterBody { get; private set; }
+
+        /// <summary>
         /// The mesh in the world that this node is drawn on.
         /// </summary>
         protected ChunkMesh Mesh;
@@ -255,6 +260,11 @@ namespace BlockmapFramework
         public void SetSurface(SurfaceId id)
         {
             Surface = SurfaceManager.Instance.GetSurface(id);
+        }
+
+        public void SetWaterBody(WaterBody waterBody)
+        {
+            WaterBody = waterBody;
         }
 
         #endregion

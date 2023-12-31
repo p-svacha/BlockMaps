@@ -5128,11 +5128,11 @@ MonoBehaviour:
   CliffMaterial: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
   PathMaterial: {fileID: 2100000, guid: 4353fff21cc3e3d4eb48ce816f2ad349, type: 2}
   PathCurbMaterial: {fileID: 2100000, guid: ad6ca2c58f08a9b4bb44dd44a648dec7, type: 2}
+  WaterMaterial: {fileID: 2100000, guid: d488dfc2c72ee9149a81bc1ae2f6f749, type: 2}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
   TarmacTexture: {fileID: 2800000, guid: f496d54c6bd45ca49a6ca92eecd7b290, type: 3}
   SelectionIndicator: {fileID: 1841773600738071307, guid: 20b217845ce3c4e4397dcdcfbf4e6935, type: 3}
-  WaterPlane: {fileID: 3690564004153045804, guid: 0623e21e3b3f98140af4d7ab185f6bbd, type: 3}
 --- !u!114 &1859474534
 MonoBehaviour:
   m_ObjectHideFlags: 0

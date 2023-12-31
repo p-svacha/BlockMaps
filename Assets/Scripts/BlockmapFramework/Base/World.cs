@@ -42,6 +42,7 @@ namespace BlockmapFramework
         private bool IsInitialized;
         public int ChunkSize { get; private set; }
         public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+        private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>(); // nodes by id
 
         public Dictionary<int, Player> Players = new Dictionary<int, Player>();
 
@@ -65,6 +66,7 @@ namespace BlockmapFramework
         public int Layer_SurfaceNode;
         public int Layer_Entity;
         public int Layer_AirNode;
+        public int Layer_Water;
 
         /// <summary>
         /// Flag if the cursor is currently inside the world.
@@ -124,12 +126,17 @@ namespace BlockmapFramework
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
             Layer_AirNode = LayerMask.NameToLayer("Path");
+            Layer_Water = LayerMask.NameToLayer("Water");
 
             // Init nodes
             Name = data.Name;
             ChunkSize = data.ChunkSize;
-            foreach(ChunkData chunkData in data.Chunks)
-                Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), Chunk.Load(this, chunkData));
+            foreach (ChunkData chunkData in data.Chunks)
+            {
+                Chunk chunk = Chunk.Load(this, chunkData);
+                Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
+                foreach (BlockmapNode node in chunk.GetAllNodes()) Nodes.Add(node.Id, node);
+            }
             NodeIdCounter = data.MaxNodeId + 1;
             EntityIdCounter = data.MaxEntityId + 1;
 
@@ -326,6 +333,8 @@ namespace BlockmapFramework
                     foreach (BlockmapNode node in nodes) node.UpdateConnectedNodesDiagonal();
                 }
             }
+
+            UpdatePathfindingVisualization();
         }
 
         public bool CanChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
@@ -356,6 +365,7 @@ namespace BlockmapFramework
         {
             node.BuildPath(pathSurface);
             RedrawNodesAround(node.WorldCoordinates);
+            UpdatePathfindingVisualization();
         }
 
         public bool CanBuildAirPath(Vector2Int worldCoordinates, int height)
@@ -395,6 +405,7 @@ namespace BlockmapFramework
             };
             BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
+            Nodes.Add(newNode.Id, newNode);
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -437,6 +448,7 @@ namespace BlockmapFramework
             };
             BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
+            Nodes.Add(newNode.Id, newNode);
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -486,7 +498,6 @@ namespace BlockmapFramework
 
             // Update pathfinding navmesh
             UpdatePathfindingGraphAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
-            UpdatePathfindingVisualization();
         }
         public void RemoveEntity(Entity entity)
         {
@@ -505,7 +516,6 @@ namespace BlockmapFramework
 
             // Update pathfinding navmesh
             UpdatePathfindingGraphAround(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
-            UpdatePathfindingVisualization();
 
             if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
 
@@ -516,11 +526,13 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntities(entity.GetWorldCenter());
         }
 
-        public bool CanAddWater(SurfaceNode node, int maxDepth, out List<SurfaceNode> coveredNodes)
+        public WaterBody CanAddWater(SurfaceNode node, int maxDepth) // returns null when cannot
         {
-            int shoreDepth = node.BaseHeight + 1;
+            int shoreHeight = node.BaseHeight + 1;
+            WaterBody waterBody = new WaterBody();
+            waterBody.ShoreHeight = shoreHeight;
+            waterBody.CoveredNodes = new List<BlockmapNode>();
 
-            coveredNodes = new List<SurfaceNode>(); // nodes that will be covered with water
             List<System.Tuple<SurfaceNode, Direction>> checkedNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that were already checked for water expansion in one direction
             List<System.Tuple<SurfaceNode, Direction>> expansionNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
             expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(node, Direction.None));
@@ -537,33 +549,46 @@ namespace BlockmapFramework
                 expansionNodes.RemoveAt(0);
 
                 if (checkNode == null) continue;
-                if (coveredNodes.Contains(checkNode)) continue;
+                if (waterBody.CoveredNodes.Contains(checkNode)) continue;
                 if (checkedNodes.Contains(check)) continue;
 
                 checkedNodes.Add(check);
 
-                bool isTooDeep = checkNode.BaseHeight < shoreDepth - maxDepth;
-                if (isTooDeep) return false;
+                bool isTooDeep = checkNode.BaseHeight < shoreHeight - maxDepth;
+                if (isTooDeep) return null; // too deep
+                if (checkNode.WaterBody != null) return null; // already has water here
 
                 bool isUnderwater = (
-                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[NW] < shoreDepth || checkNode.Height[NE] < shoreDepth)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[NE] < shoreDepth || checkNode.Height[SE] < shoreDepth)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[SW] < shoreDepth || checkNode.Height[SE] < shoreDepth)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[SW] < shoreDepth || checkNode.Height[NW] < shoreDepth))
+                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[NE] < shoreHeight || checkNode.Height[SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[SW] < shoreHeight || checkNode.Height[SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[SW] < shoreHeight || checkNode.Height[NW] < shoreHeight))
                     );
                 if (isUnderwater) // underwater
                 {
-                    coveredNodes.Add(checkNode);
+                    waterBody.CoveredNodes.Add(checkNode);
 
-                    if (checkNode.Height[NW] < shoreDepth || checkNode.Height[NE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
-                    if (checkNode.Height[NE] < shoreDepth || checkNode.Height[SE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
-                    if (checkNode.Height[SW] < shoreDepth || checkNode.Height[SE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
-                    if (checkNode.Height[NW] < shoreDepth || checkNode.Height[SW] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
+                    if (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Height[NE] < shoreHeight || checkNode.Height[SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Height[SW] < shoreHeight || checkNode.Height[SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Height[NW] < shoreHeight || checkNode.Height[SW] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
                 }
                 else { } // above water
             }
 
-            return true;
+            return waterBody;
+        }
+        public void AddWaterBody(WaterBody water)
+        {
+            // Get chunks that will have nodes covered in new water body
+            HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
+            foreach (BlockmapNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
+
+            // Set waterbody on all covered nodes
+            foreach (BlockmapNode node in water.CoveredNodes) node.SetWaterBody(water);
+
+            // Redraw affected chunks
+            foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
         #endregion
@@ -575,7 +600,7 @@ namespace BlockmapFramework
         /// </summary>
         public void Draw()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.Draw();
+            foreach (Chunk chunk in Chunks.Values) chunk.DrawMesh();
 
             SetActiveVisionPlayer(null);
 
@@ -602,16 +627,19 @@ namespace BlockmapFramework
                 }
             }
 
-            foreach (Chunk chunk in affectedChunks)
-            {
-                chunk.Draw();
-                chunk.SetVisibility(ActiveVisionPlayer);
-            }
+            foreach (Chunk chunk in affectedChunks) RedrawChunk(chunk);
+        }
 
-            UpdateGridOverlay();
-            UpdatePathfindingVisualization();
-            UpdateTextureMode();
-            UpdateTileBlending();
+        /// <summary>
+        /// Fully redraws a single chunk.
+        /// </summary>
+        private void RedrawChunk(Chunk chunk)
+        {
+            chunk.DrawMesh();
+            chunk.SetVisibility(ActiveVisionPlayer);
+            chunk.ShowGrid(IsShowingGrid);
+            chunk.ShowTextures(IsShowingTextures);
+            chunk.ShowTileBlending(IsShowingTileBlending);
         }
 
         /// <summary>
@@ -722,10 +750,7 @@ namespace BlockmapFramework
             else return null;
         }
 
-        public BlockmapNode GetNode(Vector2Int worldCoordinates, int id)
-        {
-            return GetNodes(worldCoordinates).First(x => x.Id == id);
-        }
+        public BlockmapNode GetNode(int id) => Nodes[id];
 
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {

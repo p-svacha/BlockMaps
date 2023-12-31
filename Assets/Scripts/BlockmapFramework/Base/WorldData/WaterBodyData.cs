@@ -6,9 +6,9 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     [Serializable]
-    public class PlayerData
+    public class WaterBodyData
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public int ShoreHeight { get; set; }
+        public List<int> CoveredNodes { get; set; }
     }
 }

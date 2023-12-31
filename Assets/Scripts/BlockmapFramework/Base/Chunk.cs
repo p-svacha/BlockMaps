@@ -24,7 +24,7 @@ namespace BlockmapFramework
         // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
         public SurfaceMesh SurfaceMesh;
         public AirNodeMesh[] AirNodeMeshes;
-
+        public WaterMesh WaterMesh;
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -60,6 +60,10 @@ namespace BlockmapFramework
                 AirNodeMeshes[i] = obj.AddComponent<AirNodeMesh>();
                 AirNodeMeshes[i].Init(this, i);
             }
+
+            GameObject waterMeshObject = new GameObject("WaterMesh");
+            WaterMesh = waterMeshObject.AddComponent<WaterMesh>();
+            WaterMesh.Init(this);
         }
 
         #region Actions
@@ -101,13 +105,16 @@ namespace BlockmapFramework
         /// <summary>
         /// Generates a single mesh for this chunk
         /// </summary>
-        public void Draw()
+        public void DrawMesh()
         {
             // Surface mesh
             SurfaceMesh.Draw();
 
             // Air node meshes
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.Draw();
+
+            // Water mesh
+            WaterMesh.Draw();
 
             // Chunk position
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
@@ -122,6 +129,7 @@ namespace BlockmapFramework
             // Node visibility
             SurfaceMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.SetVisibility(player);
+            WaterMesh.SetVisibility(player);
 
             // Entity visibility
             foreach(Entity e in Entities)
@@ -134,11 +142,13 @@ namespace BlockmapFramework
         {
             SurfaceMesh.ShowGrid(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowGrid(show);
+            //WaterMesh.ShowGrid(show); // water should never show grid
         }
         public void ShowTextures(bool show)
         {
             SurfaceMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowTextures(show);
+            WaterMesh.ShowTextures(show);
         }
 
         public void ShowTileBlending(bool show)
