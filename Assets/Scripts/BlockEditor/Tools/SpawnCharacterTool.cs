@@ -11,7 +11,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.SpawnCharacter;
         public override string Name => "Spawn Character";
         public override Sprite Icon => ResourceManager.Singleton.MovingEntitySprite;
-        public override int HotkeyNumber => 7;
 
         [Header("Elements")]
         public TMP_InputField SpeedInput;

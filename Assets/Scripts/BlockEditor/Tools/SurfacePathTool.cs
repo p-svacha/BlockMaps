@@ -10,7 +10,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.SurfacePath;
         public override string Name => "Build Paths";
         public override Sprite Icon => ResourceManager.Singleton.PathToolSprite;
-        public override int HotkeyNumber => 4;
 
         #region Update
 

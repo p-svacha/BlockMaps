@@ -10,7 +10,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.MoveEntity;
         public override string Name => "Move Entity";
         public override Sprite Icon => ResourceManager.Singleton.MoveEntityToolSprite;
-        public override int HotkeyNumber => 9;
 
         private EditorMovingEntity SelectedEntity;
 

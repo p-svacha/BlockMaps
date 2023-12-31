@@ -1,9 +1,40 @@
 Big Features to Add:
 
+- Encode editorentity data in typeid (vision, movement, height)
+
+- Water (or general liquid system) with unique properties
+	> placed in world by filling in hole: can only be 1 tile deep
+	> make own shader
+	> waternode
+	> movingentity canswim attribute
+
+- Fences/Walls
+	=> need to placed on a node edge of one node
+	=> take hovermode like when changing height
+	=> drawn as one mesh
+	=> visible depending on node they stand on
+	=> have height
+	=> might block vision
+	=> not passable
+	=> might be climbable
+	=> different types (fence and wall to start)
+
+- rework invisible tile drawing
+	=> redraw mesh when visiblity changes
+	=> always generate full mesh for collider
+	=> revert shader visibility discard
+	=> should fix shadow-bug
+
 - add generators
-	=> flat
+	=> flat empty grass
 	=> current perlin with some trees and cliffs
 	=> add dropdown for different generators
+
+- remove nodes
+
+- make a dropdown for load world
+
+- make detailed example map
 
 - Make vision radius of entities based on their dimensions
 
@@ -17,42 +48,23 @@ Big Features to Add:
 	=> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
 	=> keep dimensions as a general entity attribute, add shape to static entity
 
-- decouple entity visibility from node visiblity
-
-- Allow moving entities with bigger x and y than 1
+- Allow movingentities bigger than 1x1
 
 - Fix shadow rendering bug with shader discard and re-enable shadows of terrain
-
-- Add static entities that include navmesh nodes (like a container or bridge)
-
-
-- Water (or general liquid system) with unique properties
-	> placed in world by filling in hole: can only be 1 tile deep
-	> make own shader
-	> waternode
-	> movingentity canswim attribute
-
-- Fences/Walls between tiles
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
 
-- Allow movingentities bigger than 1x1x1
+- Make editor script for static entity that allows defining shape and previewing box colliders
 
-- impelemnt SurfaceAirNodes:	
-	> Rendered like surface nodes (1x1x1 in size)
-	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1}
-
-- Add fences to air paths if no connection in that direction
-
-- Shoot multiple rays at a node to check vision (if performance allows)
-	> also at entities on node
+- Add static entities that include navmesh nodes (like a container or bridge)
 
 - Make profiler performance tests with high speed, high vision entities in editor
 
 - Improve Camera:
 	> Shift to increase speed
 	> Faster zoom (alt to decrease zoom speed)
+	> Fix zoom speed on low fps
 
 - Fix rare bug of air node not being selected exactly on edge
 
@@ -68,5 +80,16 @@ Big Features to Add:
 	> Add feature to height change, surface change and air path
 
 - Procedural Static Entities
+
+- START CTF
+
+(- decouple entity visibility from node visiblity)
+
+(- impelemnt SurfaceAirNodes:	
+	> Rendered like surface nodes (1x1x1 in size)
+	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1})
+
+(- Shoot multiple rays at a node to check vision (if performance allows)
+	> also at entities on node)
 
 

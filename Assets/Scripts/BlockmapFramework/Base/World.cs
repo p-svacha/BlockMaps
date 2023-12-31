@@ -26,6 +26,16 @@ namespace BlockmapFramework
         /// </summary>
         public const float SURFACE_TILE_BLENDING = 0.4f;
 
+        /// <summary>
+        /// How much height of a tile water covers.
+        /// </summary>
+        public const float WATER_HEIGHT = 0.9f;
+
+        // Indices for node corners
+        private const int SW = 0;
+        private const int SE = 1;
+        private const int NE = 2;
+        private const int NW = 3;
 
         public string Name { get; private set; }
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
@@ -504,6 +514,56 @@ namespace BlockmapFramework
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
             UpdateVisionOfNearbyEntities(entity.GetWorldCenter());
+        }
+
+        public bool CanAddWater(SurfaceNode node, int maxDepth, out List<SurfaceNode> coveredNodes)
+        {
+            int shoreDepth = node.BaseHeight + 1;
+
+            coveredNodes = new List<SurfaceNode>(); // nodes that will be covered with water
+            List<System.Tuple<SurfaceNode, Direction>> checkedNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that were already checked for water expansion in one direction
+            List<System.Tuple<SurfaceNode, Direction>> expansionNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
+            expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(node, Direction.None));
+
+            // Check the following:
+            // > If the node goes deeper than maxDepth, return false
+            // > If the node is below shoreDepth (meaning also underwater), mark it to check
+            // > If the node is above shoreDepth, do nothing
+            while (expansionNodes.Count > 0)
+            {
+                System.Tuple<SurfaceNode, Direction> check = expansionNodes[0];
+                SurfaceNode checkNode = check.Item1;
+                Direction checkDir = check.Item2;
+                expansionNodes.RemoveAt(0);
+
+                if (checkNode == null) continue;
+                if (coveredNodes.Contains(checkNode)) continue;
+                if (checkedNodes.Contains(check)) continue;
+
+                checkedNodes.Add(check);
+
+                bool isTooDeep = checkNode.BaseHeight < shoreDepth - maxDepth;
+                if (isTooDeep) return false;
+
+                bool isUnderwater = (
+                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[NW] < shoreDepth || checkNode.Height[NE] < shoreDepth)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[NE] < shoreDepth || checkNode.Height[SE] < shoreDepth)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[SW] < shoreDepth || checkNode.Height[SE] < shoreDepth)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[SW] < shoreDepth || checkNode.Height[NW] < shoreDepth))
+                    );
+                if (isUnderwater) // underwater
+                {
+                    coveredNodes.Add(checkNode);
+
+                    if (checkNode.Height[NW] < shoreDepth || checkNode.Height[NE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Height[NE] < shoreDepth || checkNode.Height[SE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Height[SW] < shoreDepth || checkNode.Height[SE] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Height[NW] < shoreDepth || checkNode.Height[SW] < shoreDepth) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
+                }
+                else { } // above water
+            }
+
+            return true;
         }
 
         #endregion

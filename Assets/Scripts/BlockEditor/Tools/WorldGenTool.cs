@@ -12,7 +12,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.WorldGen;
         public override string Name => "World Generation";
         public override Sprite Icon => ResourceManager.Singleton.WorldGenSprite;
-        public override int HotkeyNumber => 1;
 
         [Header("Elements")]
         public TMP_InputField ChunkSizeInput;

@@ -12,7 +12,6 @@ namespace WorldEditor
         public abstract EditorToolId Id { get; }
         public abstract string Name { get; }
         public abstract Sprite Icon { get; }
-        public abstract int HotkeyNumber { get; }
 
         public virtual void Init(BlockEditor editor)
         {

@@ -10,7 +10,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.AirNode;
         public override string Name => "Build Air Node";
         public override Sprite Icon => ResourceManager.Singleton.AirNodeSprite;
-        public override int HotkeyNumber => 5;
 
         private GameObject BuildPreview;
         private int BuildHeight;

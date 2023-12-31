@@ -14,6 +14,7 @@ namespace WorldEditor
         AirSlopeNode,
         SpawnCharacter,
         SpawnObject,
-        MoveEntity
+        MoveEntity,
+        Water
     }
 }

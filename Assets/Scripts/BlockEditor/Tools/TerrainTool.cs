@@ -11,7 +11,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.Terrain;
         public override string Name => "Edit Terrain";
         public override Sprite Icon => ResourceManager.Singleton.TerrainToolSprite;
-        public override int HotkeyNumber => 2;
 
         public override void UpdateTool()
         {

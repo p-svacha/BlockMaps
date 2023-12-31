@@ -24,6 +24,7 @@ namespace BlockmapFramework
 
         [Header("Prefabs")]
         public Projector SelectionIndicator;
+        public GameObject WaterPlane;
 
         public static ResourceManager Singleton;
     }

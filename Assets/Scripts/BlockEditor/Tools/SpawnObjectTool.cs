@@ -11,7 +11,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.SpawnObject;
         public override string Name => "Spawn Object";
         public override Sprite Icon => ResourceManager.Singleton.StaticEntitySprite;
-        public override int HotkeyNumber => 8;
 
         private StaticEntity BuildPreview;
 

@@ -33,6 +33,7 @@ namespace WorldEditor
         public SpawnCharacterTool SpawnEntityTool;
         public SpawnObjectTool SpawnObjectTool;
         public MoveEntityTool MoveEntityTool;
+        public WaterTool WaterTool;
 
         [Header("World")]
         public World World;
@@ -61,6 +62,7 @@ namespace WorldEditor
                 { EditorToolId.SpawnCharacter, SpawnEntityTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.MoveEntity, MoveEntityTool },
+                { EditorToolId.Water, WaterTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
@@ -109,6 +111,10 @@ namespace WorldEditor
 
             // Click
             bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
+
+            if (EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<Button>() != null)
+                EventSystem.current.SetSelectedGameObject(null); // Unfocus any focussed button so it doesn't block input controls
+
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
 
             if (Input.GetMouseButtonDown(0) && !isMouseOverUi) CurrentTool.HandleLeftClick();
@@ -137,13 +143,6 @@ namespace WorldEditor
             {
                 if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer);
                 else World.SetActiveVisionPlayer(null);
-            }
-
-            // Tool Selection
-            foreach (EditorTool tool in Tools.Values)
-            {
-                if (Input.GetKeyDown(GetKeycodeForNumber(tool.HotkeyNumber)))
-                    SelectTool(tool.Id);
             }
         }
 

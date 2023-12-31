@@ -10,7 +10,6 @@ namespace WorldEditor
         public override EditorToolId Id => EditorToolId.SurfacePaint;
         public override string Name => "Surface Painting";
         public override Sprite Icon => ResourceManager.Singleton.SurfaceToolSprite;
-        public override int HotkeyNumber => 3;
 
         private SurfaceId SelectedSurface;
         private Dictionary<SurfaceId, UI_SelectionElement> SurfaceButtons;

@@ -13,13 +13,13 @@ namespace WorldEditor
         [Header("Elements")]
         public GameObject SelectedFrame;
         public Image Icon;
-        public TextMeshProUGUI HotkeyText;
+        public TextMeshProUGUI TitleText;
 
         public void Init(BlockEditor editor, EditorTool tool)
         {
+            TitleText.text = tool.Name;
             Tool = tool;
             Icon.sprite = tool.Icon;
-            HotkeyText.text = tool.HotkeyNumber.ToString();
             GetComponent<Button>().onClick.AddListener(() => editor.SelectTool(Tool.Id));
         }
 
