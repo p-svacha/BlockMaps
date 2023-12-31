@@ -318,12 +318,12 @@ namespace BlockmapFramework
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
 
-        public void UpdatePathfindingGraphAround(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
+        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
         {
             int redrawRadius = 1;
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + (rangeY - 1); y++)
+            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeY; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + (rangeX - 1); x++)
+                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeX; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
@@ -333,9 +333,9 @@ namespace BlockmapFramework
                 }
             }
 
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius; y++)
+            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeY; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius; x++)
+                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeX; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
@@ -355,7 +355,7 @@ namespace BlockmapFramework
         {
             node.ChangeHeight(mode, isIncrease);
 
-            UpdatePathfindingGraphAround(node.WorldCoordinates);
+            UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition()); // might not work because rays are shot before new mesh is drawn sometimes
         }
@@ -417,7 +417,7 @@ namespace BlockmapFramework
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
             Nodes.Add(newNode.Id, newNode); // Register new node
 
-            UpdatePathfindingGraphAround(newNode.WorldCoordinates);
+            UpdateNavmesh(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
             UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
@@ -460,7 +460,7 @@ namespace BlockmapFramework
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
             Nodes.Add(newNode.Id, newNode); // Register new node
 
-            UpdatePathfindingGraphAround(newNode.WorldCoordinates);
+            UpdateNavmesh(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
             UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
@@ -507,7 +507,7 @@ namespace BlockmapFramework
             Entities.Add(newEntity);
 
             // Update pathfinding navmesh
-            UpdatePathfindingGraphAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
+            UpdateNavmesh(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
         }
         public void RemoveEntity(Entity entity)
         {
@@ -525,7 +525,7 @@ namespace BlockmapFramework
             }
 
             // Update pathfinding navmesh
-            UpdatePathfindingGraphAround(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            UpdateNavmesh(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
 
             if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
 
@@ -600,6 +600,9 @@ namespace BlockmapFramework
             // Set waterbody on all covered nodes
             foreach (BlockmapNode node in newWaterBody.CoveredNodes) node.SetWaterBody(newWaterBody);
 
+            // Update navmesh
+            UpdateNavmesh(new Vector2Int(newWaterBody.MinWorldX, newWaterBody.MinWorldY), newWaterBody.MaxWorldX - newWaterBody.MinWorldX, newWaterBody.MaxWorldY - newWaterBody.MinWorldY);
+
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
 
@@ -617,6 +620,9 @@ namespace BlockmapFramework
 
             // Remove waterbody from all covered nodes
             foreach (BlockmapNode node in water.CoveredNodes) node.SetWaterBody(null);
+
+            // Update navmesh
+            UpdateNavmesh(new Vector2Int(water.MinWorldX, water.MinWorldY), water.MaxWorldX - water.MinWorldX, water.MaxWorldY - water.MinWorldY);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);

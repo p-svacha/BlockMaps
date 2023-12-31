@@ -28,6 +28,16 @@ namespace BlockmapFramework
             CoveredNodes = coveredNodes;
         }
 
+        #region Getters
+
+        public float WaterSurfaceWorldHeight => ((ShoreHeight - 1) * World.TILE_HEIGHT) + (World.WATER_HEIGHT * World.TILE_HEIGHT);
+        public int MinWorldX => CoveredNodes.Min(x => x.WorldCoordinates.x);
+        public int MaxWorldX => CoveredNodes.Max(x => x.WorldCoordinates.x);
+        public int MinWorldY => CoveredNodes.Min(x => x.WorldCoordinates.y);
+        public int MaxWorldY => CoveredNodes.Max(x => x.WorldCoordinates.y);
+
+        #endregion
+
         #region Save / Load
 
         public static WaterBody Load(World world, WaterBodyData data)

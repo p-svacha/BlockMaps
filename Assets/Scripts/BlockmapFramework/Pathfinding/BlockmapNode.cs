@@ -354,8 +354,9 @@ namespace BlockmapFramework
         /// Returns if an entity can stand on this node.
         /// <br/> If entity is null a general check will be made for the navmesh.
         /// </summary>
-        public bool IsPassable(Entity entity = null)
+        public bool IsPassable(Direction dir, Entity entity = null)
         {
+            if (WaterBody != null) return false; // Is underwater
             if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
 
             int headSpace = GetFreeHeadSpace();

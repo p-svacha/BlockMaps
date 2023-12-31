@@ -1,12 +1,16 @@
 Big Features to Add:
 
-- Encode editorentity data in typeid (vision, movement, height)
+- Navmesh upgrade:
+	> Split IsPassable into general and per-direction4 function.
+	> per-direction will be used when connecting straight nodes
+	> headspace, water/height and fences will affect direction-based passability
 
 - Water (or general liquid system) with unique properties
-	> placed in world by filling in hole: can only be 1 tile deep
 	> make own shader
-	> waternode
+	> spawn waternodes on water
 	> movingentity canswim attribute
+
+- Encode editorentity data in typeid (vision, movement, height)
 
 - Fences/Walls
 	=> need to placed on a node edge of one node
@@ -24,29 +28,29 @@ Big Features to Add:
 	=> always generate full mesh for collider
 	=> revert shader visibility discard
 	=> should fix shadow-bug
+OR
+- add custom shadowcaster that ignored discarded pixels
 
 - add generators
 	=> flat empty grass
 	=> current perlin with some trees and cliffs
 	=> add dropdown for different generators
 
-- remove nodes
+- removable air nodes
 
 - make a dropdown for load world
 
 - make detailed example map
 
-- Make vision radius of entities based on their dimensions
-
-- Make editor moving entities selectable and manually movable, also auto-move
-
-- Show entity stats in static entity tool in editor1
+- Show entity stats in static entity tool in editor
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly
 	=> occupiednodes turns into footprint
 	=> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
 	=> keep dimensions as a general entity attribute, add shape to static entity
+
+- Make vision radius of entities based on their dimensions
 
 - Allow movingentities bigger than 1x1
 
@@ -56,6 +60,10 @@ Big Features to Add:
 	> multiple static entities per node: one per type
 
 - Make editor script for static entity that allows defining shape and previewing box colliders
+
+- Add different air path types
+	> each has their own mesh generator
+	> each has their own attribute how many tiles they block above and below
 
 - Add static entities that include navmesh nodes (like a container or bridge)
 
@@ -71,8 +79,6 @@ Big Features to Add:
 - In terrain blend transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code
 	> also add (global perlin) noise to blending texture
-
-- Save/Load Worlds in editor
 
 - Improve GitHub page with desc and screenshots
 

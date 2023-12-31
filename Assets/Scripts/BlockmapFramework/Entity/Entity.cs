@@ -295,8 +295,9 @@ namespace BlockmapFramework
             float distance = Vector2.Distance(OriginNode.WorldCoordinates, node.WorldCoordinates);
             if (distance > VisionRange) return VisionType.Unexplored;
 
+            Vector3 nodeCenter = node.GetCenterWorldPosition();
             // Shoot ray from eye to the node with infinite range and check if we hit the correct node
-            RaycastHit? nodeHit = Look(node.GetCenterWorldPosition());
+            RaycastHit? nodeHit = Look(nodeCenter);
 
             if (nodeHit != null)
             {
@@ -328,11 +329,35 @@ namespace BlockmapFramework
                     else if (yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(0, 1)) == node.WorldCoordinates) return VisionType.Visible; // N
                     else if (yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(0, -1)) == node.WorldCoordinates) return VisionType.Visible; // S
                 }
+
+                // Check if we hit the waterbody that covers the node. if so => visible
+                if(hit.transform.gameObject.layer == World.Layer_Water)
+                {
+                    if(World.GetSurfaceNode(hitWorldCoordinates).WaterBody == node.WaterBody) return VisionType.Visible;
+                }
             }
 
+            // If the node has a water body, shoot a ray at the water surface as well
+            if(node.WaterBody != null)
+            {
+                Vector3 targetPos = new Vector3(nodeCenter.x, node.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
+                RaycastHit? waterHit = Look(targetPos);
+
+                if (waterHit != null)
+                {
+                    RaycastHit hit = (RaycastHit)waterHit;
+
+                    if (hit.transform.gameObject.layer == World.Layer_Water)
+                    {
+                        Vector3 hitPosition = hit.point;
+                        Vector2Int hitWorldCoordinates = World.GetWorldCoordinates(hitPosition);
+                        if(World.GetSurfaceNode(hitWorldCoordinates).WaterBody == node.WaterBody) return VisionType.Visible;
+                    }
+                }
+            }
 
             // If the node has entities shoot a ray at them. If we hit one, mark the node as Fog of War (because we can't see the node directly but the entity that's on it.)
-            foreach(Entity e in node.Entities)
+            foreach (Entity e in node.Entities)
             {
                 RaycastHit? entityHit = Look(e.GetWorldCenter());
 
@@ -345,6 +370,8 @@ namespace BlockmapFramework
                         return VisionType.FogOfWar;
                 }
             }
+
+            
 
             // No check was successful => unexplored
             return VisionType.Unexplored;
@@ -361,7 +388,8 @@ namespace BlockmapFramework
             Vector3 source = GetEyePosition();
             Vector3 direction = targetPosition - source;
 
-            RaycastHit[] hits = Physics.RaycastAll(source, direction, VisionRange);
+            Ray ray = new Ray(source, direction);
+            RaycastHit[] hits = Physics.RaycastAll(ray, VisionRange);
             System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
 
             foreach (RaycastHit hit in hits)
@@ -374,7 +402,7 @@ namespace BlockmapFramework
                 // If the thing we hit is an entity that doesn't block vision, go to the next thing we hit
                 if (objectHit.layer == World.Layer_Entity && !objectHit.GetComponent<Entity>().BlocksVision) continue;
 
-                //Debug.DrawRay(source, hit.point - source, Color.red, 60f);
+                // Debug.DrawRay(source, hit.point - source, Color.red, 60f);
 
                 // Return it since it's the first thing that we actually see
                 return hit;
