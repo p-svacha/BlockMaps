@@ -24,6 +24,7 @@ namespace BlockmapFramework
             WorldData.Chunks = new List<ChunkData>();
             WorldData.Players = new List<PlayerData>();
             WorldData.Entities = new List<EntityData>();
+            WorldData.WaterBodies = new List<WaterBodyData>();
 
             // Create height map
             Vector2Int perlinOffset = new Vector2Int(Random.Range(0, 20000), Random.Range(0, 20000));

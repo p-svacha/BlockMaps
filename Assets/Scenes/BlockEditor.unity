@@ -464,7 +464,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Leftclick on a node to fill that space with water.
+  m_text: 'Leftclick on a node to fill that space with water.
+
+    Rightclick on
+    an existing water body to remove it.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5129,6 +5132,7 @@ MonoBehaviour:
   PathMaterial: {fileID: 2100000, guid: 4353fff21cc3e3d4eb48ce816f2ad349, type: 2}
   PathCurbMaterial: {fileID: 2100000, guid: ad6ca2c58f08a9b4bb44dd44a648dec7, type: 2}
   WaterMaterial: {fileID: 2100000, guid: d488dfc2c72ee9149a81bc1ae2f6f749, type: 2}
+  WaterPreviewMaterial: {fileID: 2100000, guid: fce72e1cd0ae2474285375fdd80b50b5, type: 2}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
   TarmacTexture: {fileID: 2800000, guid: f496d54c6bd45ca49a6ca92eecd7b290, type: 3}

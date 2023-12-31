@@ -41,16 +41,20 @@ namespace BlockmapFramework
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         private bool IsInitialized;
         public int ChunkSize { get; private set; }
-        public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
-        private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>(); // nodes by id
-
-        public Dictionary<int, Player> Players = new Dictionary<int, Player>();
-
         public EntityLibrary EntityLibrary { get; private set; }
+
+
+        // Database
+        private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
+        public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+        public Dictionary<int, Player> Players = new Dictionary<int, Player>();
         public List<Entity> Entities = new List<Entity>();
+        public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
+        private int WaterBodyIdCounter;
+        
         private BlockmapCamera Camera;
         /// <summary>
         /// Neutral passive player
@@ -68,35 +72,14 @@ namespace BlockmapFramework
         public int Layer_AirNode;
         public int Layer_Water;
 
-        /// <summary>
-        /// Flag if the cursor is currently inside the world.
-        /// </summary>
+        // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
-
-        /// <summary>
-        /// World coordinates that are currently being hovered.
-        /// </summary>
-        public Vector2Int HoveredWorldCoordinates { get; private set; }
-        
-        /// <summary>
-        /// Node that is currently being hovered.
-        /// </summary>
+        public Vector2Int HoveredWorldCoordinates { get; private set; }       
         public BlockmapNode HoveredNode { get; private set; }
-
-        /// <summary>
-        /// SurfaceNode that is currently being hovered.
-        /// </summary>
         public SurfaceNode HoveredSurfaceNode { get; private set; }
-
-        /// <summary>
-        /// Entity that is currently being hovered.
-        /// </summary>
         public Entity HoveredEntity { get; private set; }
-
-        /// <summary>
-        /// Chunk that is currently being hovered.
-        /// </summary>
         public Chunk HoveredChunk { get; private set; }
+        public WaterBody HoveredWaterBody { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
@@ -139,6 +122,7 @@ namespace BlockmapFramework
             }
             NodeIdCounter = data.MaxNodeId + 1;
             EntityIdCounter = data.MaxEntityId + 1;
+            WaterBodyIdCounter = data.MaxWaterBodyId + 1;
 
             // Init players
             foreach (PlayerData playerData in data.Players) AddPlayer(Player.Load(this, playerData));
@@ -155,6 +139,14 @@ namespace BlockmapFramework
 
             // Init entities
             foreach (EntityData entityData in data.Entities) Entities.Add(Entity.Load(this, entityData));
+
+            // Init water bodies
+            foreach (WaterBodyData waterData in data.WaterBodies)
+            {
+                WaterBody water = WaterBody.Load(this, waterData);
+                WaterBodies.Add(waterData.Id, water);
+                foreach (SurfaceNode node in water.CoveredNodes) node.SetWaterBody(water);
+            }
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
@@ -223,6 +215,9 @@ namespace BlockmapFramework
             Entity oldHoveredEntity = HoveredEntity;
             Entity newHoveredEntity = null;
 
+            WaterBody oldHoveredWaterBody = HoveredWaterBody;
+            WaterBody newHoveredWaterBody = null;
+
             // Shoot a raycast on surface and air layer to detect hovered nodes
             if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
             {
@@ -262,10 +257,24 @@ namespace BlockmapFramework
             }
 
             // Ray to detect entity
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_Entity))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Entity))
             {
-                Transform objectHit = hit.transform;
-                newHoveredEntity = hit.transform.GetComponent<Entity>();
+                if (hit.transform.gameObject.layer == Layer_Entity)
+                {
+                    Transform objectHit = hit.transform;
+                    newHoveredEntity = hit.transform.GetComponent<Entity>();
+                }
+            }
+
+            // Ray to detect water body
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water))
+            {
+                if (hit.transform.gameObject.layer == Layer_Water)
+                {
+                    Vector3 hitPosition = hit.point;
+                    Vector2Int hitWorldCoordinates = GetWorldCoordinates(hitPosition);
+                    newHoveredWaterBody = GetSurfaceNode(hitWorldCoordinates).WaterBody;
+                }
             }
 
             // Update currently hovered objects
@@ -273,6 +282,7 @@ namespace BlockmapFramework
             HoveredSurfaceNode = newHoveredSurfaceNode;
             HoveredChunk = newHoveredChunk;
             HoveredEntity = newHoveredEntity;
+            HoveredWaterBody = newHoveredWaterBody;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -405,7 +415,7 @@ namespace BlockmapFramework
             };
             BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
-            Nodes.Add(newNode.Id, newNode);
+            Nodes.Add(newNode.Id, newNode); // Register new node
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -448,7 +458,7 @@ namespace BlockmapFramework
             };
             BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
             chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
-            Nodes.Add(newNode.Id, newNode);
+            Nodes.Add(newNode.Id, newNode); // Register new node
 
             UpdatePathfindingGraphAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -578,14 +588,35 @@ namespace BlockmapFramework
 
             return waterBody;
         }
-        public void AddWaterBody(WaterBody water)
+        public void AddWaterBody(WaterBody data)
         {
+            // Make a new water body instance with a unique id
+            WaterBody newWaterBody = new WaterBody(WaterBodyIdCounter++, data);
+
+            // Get chunks that will have nodes covered in new water body
+            HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
+            foreach (BlockmapNode node in newWaterBody.CoveredNodes) affectedChunks.Add(node.Chunk);
+
+            // Set waterbody on all covered nodes
+            foreach (BlockmapNode node in newWaterBody.CoveredNodes) node.SetWaterBody(newWaterBody);
+
+            // Redraw affected chunks
+            foreach (Chunk c in affectedChunks) RedrawChunk(c);
+
+            // Register
+            WaterBodies.Add(newWaterBody.Id, newWaterBody);
+        }
+        public void RemoveWaterBody(WaterBody water)
+        {
+            // De-register
+            WaterBodies.Remove(water.Id);
+
             // Get chunks that will have nodes covered in new water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
             foreach (BlockmapNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
 
-            // Set waterbody on all covered nodes
-            foreach (BlockmapNode node in water.CoveredNodes) node.SetWaterBody(water);
+            // Remove waterbody from all covered nodes
+            foreach (BlockmapNode node in water.CoveredNodes) node.SetWaterBody(null);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
@@ -897,7 +928,8 @@ namespace BlockmapFramework
                 MaxEntityId = EntityIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Players = Players.Values.Select(x => x.Save()).ToList(),
-                Entities = Entities.Select(x => x.Save()).ToList()
+                Entities = Entities.Select(x => x.Save()).ToList(),
+                WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList()
             };
         }
 

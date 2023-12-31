@@ -87,8 +87,16 @@ namespace WorldEditor
         {
             if (CurrentWaterBody == null) return;
 
-            WaterBody waterBodyToAdd = new WaterBody(CurrentWaterBody);
-            World.AddWaterBody(waterBodyToAdd);
+            World.AddWaterBody(CurrentWaterBody);
+
+            Cache.Clear();
+        }
+
+        public override void HandleRightClick()
+        {
+            if (World.HoveredWaterBody == null) return;
+
+            World.RemoveWaterBody(World.HoveredWaterBody);
 
             Cache.Clear();
         }
