@@ -20,7 +20,7 @@ namespace BlockmapFramework
             }
         }
 
-        public static void BuildWaterMeshForSingleNode(MeshBuilder meshBuilder, BlockmapNode node)
+        public static void BuildWaterMeshForSingleNode(MeshBuilder meshBuilder, WaterNode node)
         {
             float waterWorldHeight = node.WaterBody.WaterSurfaceWorldHeight;
 

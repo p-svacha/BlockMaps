@@ -21,13 +21,8 @@ namespace BlockmapFramework
             MeshBuilder meshBuilder = new MeshBuilder(gameObject);
             meshBuilder.AddNewSubmesh(ResourceManager.Singleton.WaterMaterial); // Submesh 0: water
 
-            foreach (SurfaceNode node in Chunk.GetAllSurfaceNodes())
-            {
-                if(node.WaterBody != null)
-                {
-                    WaterMeshGenerator.BuildWaterMeshForSingleNode(meshBuilder, node);
-                }
-            }
+            foreach (WaterNode node in Chunk.GetAllWaterNodes())
+                WaterMeshGenerator.BuildWaterMeshForSingleNode(meshBuilder, node);
             meshBuilder.ApplyMesh(castShadows: false);
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();

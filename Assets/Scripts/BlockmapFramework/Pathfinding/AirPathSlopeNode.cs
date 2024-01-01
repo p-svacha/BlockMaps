@@ -6,11 +6,12 @@ namespace BlockmapFramework
 {
     public class AirPathSlopeNode : BlockmapNode
     {
-        public Direction SlopeDirection;
-        public override int Layer => World.Layer_AirNode;
+        public override NodeType Type => NodeType.AirPathSlope;
         public override bool IsPath => true;
 
-        public AirPathSlopeNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data)
+        public Direction SlopeDirection;
+
+        public AirPathSlopeNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface)
         {
             SlopeDirection = GetDirectionFromShape(Shape);
         }

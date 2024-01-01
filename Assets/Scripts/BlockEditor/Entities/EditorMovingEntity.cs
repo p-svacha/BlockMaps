@@ -11,7 +11,7 @@ namespace WorldEditor
         public GameObject TargetFlag;
         private float TargetFlagScale = 0.1f;
 
-        public void PreInit(float speed, float visionRange, int height)
+        public void PreInit(float speed, float visionRange, int height, bool canSwim)
         {
             if (height < 0) throw new System.Exception("Height can't be smaller than 1");
 
@@ -19,6 +19,7 @@ namespace WorldEditor
             MovementSpeed = speed;
             VisionRange = visionRange;
             Dimensions = new Vector3Int(1, height, 1);
+            CanSwim = canSwim;
 
             transform.localScale = new Vector3(0.2f, 0.15f * Dimensions.y, 0.2f);
         }

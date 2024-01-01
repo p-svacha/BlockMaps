@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class PathfindingGraphVisualizer : MonoBehaviour
+    public class NavmeshVisualizer : MonoBehaviour
     {
         public GameObject ArrowPrefab;
 
@@ -17,7 +17,7 @@ namespace BlockmapFramework
         /// Shows the navmesh of the world.
         /// <br/> If an entity is provided the navmesh will be visualized for that entity.
         /// </summary>
-        public void VisualizeGraph(World world, Entity entity = null)
+        public void Visualize(World world, Entity entity = null)
         {
             ClearVisualization();
 
@@ -33,10 +33,10 @@ namespace BlockmapFramework
                             sphere.transform.SetParent(transform);
                             sphere.transform.localPosition = node.GetCenterWorldPosition();
                             sphere.transform.localScale = new Vector3(NODE_SCALE, NODE_SCALE, NODE_SCALE);
-                            if (node.Type == NodeType.Surface && ((SurfaceNode)node).HasPath) sphere.GetComponent<MeshRenderer>().material.color = Color.cyan;
-                            if (node.Type == NodeType.Surface && !((SurfaceNode)node).HasPath) sphere.GetComponent<MeshRenderer>().material.color = Color.green;
+                            if (node.Type == NodeType.Surface) sphere.GetComponent<MeshRenderer>().material.color = Color.green;
                             if (node.Type == NodeType.AirPath) sphere.GetComponent<MeshRenderer>().material.color = Color.blue;
                             if (node.Type == NodeType.AirPathSlope) sphere.GetComponent<MeshRenderer>().material.color = new Color(1f, 0f, 1f);
+                            if (node.Type == NodeType.Water) sphere.GetComponent<MeshRenderer>().material.color = Color.cyan;
 
                             foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in node.ConnectedNodes)
                             {
@@ -60,6 +60,6 @@ namespace BlockmapFramework
             foreach (Transform t in transform) Destroy(t.gameObject);
         }
 
-        public static PathfindingGraphVisualizer Singleton { get { return GameObject.Find("PathfindingGraphVisualizer").GetComponent<PathfindingGraphVisualizer>(); } }
+        public static NavmeshVisualizer Singleton { get { return GameObject.Find("NavmeshVisualizer").GetComponent<NavmeshVisualizer>(); } }
     }
 }

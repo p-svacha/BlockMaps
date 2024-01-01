@@ -10,6 +10,7 @@ namespace BlockmapFramework
     {
         public int Id { get; set; }
         public int ShoreHeight { get; set; }
-        public List<int> CoveredNodes { get; set; }
+        public List<int> WaterNodes { get; set; }
+        public List<int> CoveredNodes { get; set; } // index 0 here refers to the SurfaceNode that WaterNodes[0] covers, etc.
     }
 }

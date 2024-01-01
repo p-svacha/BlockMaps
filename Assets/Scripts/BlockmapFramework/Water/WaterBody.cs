@@ -12,29 +12,29 @@ namespace BlockmapFramework
         /// The first y coordinate where nodes are not covered anymore by this water body.
         /// </summary>
         public int ShoreHeight;
-        public List<BlockmapNode> CoveredNodes;
+        public List<WaterNode> WaterNodes;
+        public List<SurfaceNode> CoveredNodes;
 
         public WaterBody() { }
-        public WaterBody(int id, WaterBody source)
-        {
-            Id = id;
-            ShoreHeight = source.ShoreHeight;
-            CoveredNodes = new List<BlockmapNode>(source.CoveredNodes);
-        }
-        public WaterBody(int id, int shoreHeight, List<BlockmapNode> coveredNodes)
+        public WaterBody(int id, int shoreHeight, List<WaterNode> waterNodes, List<SurfaceNode> coveredNodes)
         {
             Id = id;
             ShoreHeight = shoreHeight;
-            CoveredNodes = coveredNodes;
+            WaterNodes = new List<WaterNode>(waterNodes);
+            CoveredNodes = new List<SurfaceNode>(coveredNodes);
+
+            // Init references
+            for (int i = 0; i < waterNodes.Count; i++) WaterNodes[i].Init(this, coveredNodes[i]);
+            CoveredNodes = WaterNodes.Select(x => x.SurfaceNode).ToList();
         }
 
         #region Getters
 
         public float WaterSurfaceWorldHeight => ((ShoreHeight - 1) * World.TILE_HEIGHT) + (World.WATER_HEIGHT * World.TILE_HEIGHT);
-        public int MinWorldX => CoveredNodes.Min(x => x.WorldCoordinates.x);
-        public int MaxWorldX => CoveredNodes.Max(x => x.WorldCoordinates.x);
-        public int MinWorldY => CoveredNodes.Min(x => x.WorldCoordinates.y);
-        public int MaxWorldY => CoveredNodes.Max(x => x.WorldCoordinates.y);
+        public int MinWorldX => WaterNodes.Min(x => x.WorldCoordinates.x);
+        public int MaxWorldX => WaterNodes.Max(x => x.WorldCoordinates.x);
+        public int MinWorldY => WaterNodes.Min(x => x.WorldCoordinates.y);
+        public int MaxWorldY => WaterNodes.Max(x => x.WorldCoordinates.y);
 
         #endregion
 
@@ -42,7 +42,7 @@ namespace BlockmapFramework
 
         public static WaterBody Load(World world, WaterBodyData data)
         {
-            return new WaterBody(data.Id, data.ShoreHeight, data.CoveredNodes.Select(x => world.GetNode(x)).ToList());
+            return new WaterBody(data.Id, data.ShoreHeight, data.WaterNodes.Select(x => world.GetNode(x) as WaterNode).ToList(), data.CoveredNodes.Select(x => world.GetNode(x) as SurfaceNode).ToList());
         }
 
         public WaterBodyData Save()
@@ -51,7 +51,8 @@ namespace BlockmapFramework
             {
                 Id = Id,
                 ShoreHeight = ShoreHeight,
-                CoveredNodes = CoveredNodes.Select(x => x.Id).ToList()
+                WaterNodes = WaterNodes.Select(x => x.Id).ToList(),
+                CoveredNodes = WaterNodes.Select(x => x.SurfaceNode.Id).ToList()
             };
         }
 

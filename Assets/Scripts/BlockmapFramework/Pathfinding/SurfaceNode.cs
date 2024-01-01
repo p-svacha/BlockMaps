@@ -12,14 +12,19 @@ namespace BlockmapFramework
     /// </summary>
     public class SurfaceNode : BlockmapNode
     {
-        public override int Layer => World.Layer_SurfaceNode;
+        public override NodeType Type => NodeType.Surface;
         public override bool IsPath => HasPath;
+
+        /// <summary>
+        /// The water node covering this node.
+        /// </summary>
+        public WaterNode WaterNode { get; private set; }
 
         // Path
         public bool HasPath;
         public Surface PathSurface;
 
-        public SurfaceNode(World world, Chunk chunk, NodeData data) : base(world, chunk, data) { }
+        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
 
         #region Draw
 
@@ -281,10 +286,11 @@ namespace BlockmapFramework
         {
             if (HasPath) return false;
             if (Entities.Count > 0) return false;
+            if (WaterNode != null) return false;
 
             int[] newHeights = new int[4];
             for (int i = 0; i < 4; i++) newHeights[i] = Height[i];
-            foreach (int h in GetAffectedCorners(mode)) newHeights[h] += increase ? 1 : -1;
+            foreach (int h in GetAffectedCornerIds(mode)) newHeights[h] += increase ? 1 : -1;
             BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min());
             BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min() + 1);
             string newShape = GetShape(newHeights);
@@ -346,22 +352,6 @@ namespace BlockmapFramework
 
             RecalculateShape();
         }
-        
-
-        public List<int> GetAffectedCorners(Direction mode)
-        {
-            if (mode == Direction.None) return new List<int>() { NE, NW, SW, SE };
-            if (mode == Direction.N) return new List<int>() { NE, NW };
-            if (mode == Direction.E) return new List<int>() { NE, SE };
-            if (mode == Direction.S) return new List<int>() { SW, SE };
-            if (mode == Direction.W) return new List<int>() { NW, SW };
-            if (mode == Direction.NW) return new List<int>() { NW };
-            if (mode == Direction.NE) return new List<int>() { NE };
-            if (mode == Direction.SE) return new List<int>() { SE };
-            if (mode == Direction.SW) return new List<int>() { SW };
-            return null;
-        }
-
         private void ChangeFullHeight(bool increase)
         {
             if (Height.All(x => x == Height[0]))
@@ -373,7 +363,6 @@ namespace BlockmapFramework
                 for (int i = 0; i < Height.Length; i++) Height[i] = increase ? Height.Max(x => x) : Height.Min(x => x);
             }
         }
-
         private void ChangeSideHeight(bool increase, int i1, int i2)
         {
             if (Height[i1] != Height[i2])
@@ -388,6 +377,22 @@ namespace BlockmapFramework
             }
         }
 
+        
+        public void BuildPath(Surface surface)
+        {
+            HasPath = true;
+            PathSurface = surface;
+        }
+
+        public void SetWaterNode(WaterNode waterNode)
+        {
+            WaterNode = waterNode;
+        }
+
+        #endregion
+
+        #region Getters
+
         private bool IsValid(int[] height)
         {
             return !(Mathf.Abs(height[SE] - height[SW]) > 1 ||
@@ -395,16 +400,6 @@ namespace BlockmapFramework
             Mathf.Abs(height[NW] - height[NE]) > 1 ||
             Mathf.Abs(height[NE] - height[SE]) > 1);
         }
-
-        public void BuildPath(Surface surface)
-        {
-            HasPath = true;
-            PathSurface = surface;
-        }
-
-        #endregion
-
-        #region Getters
 
         public override float GetSpeedModifier()
         {
@@ -416,6 +411,24 @@ namespace BlockmapFramework
         {
             return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
         }
+
+        public override bool IsPassable(Entity entity = null)
+        {
+            if (IsCenterUnderWater) return false;
+
+            return base.IsPassable(entity);
+        }
+        public override bool IsPassable(Direction dir, Entity entity = null)
+        {
+            // Check if the side has a corner underwater
+            if (WaterNode != null)
+            {
+                if (GetAffectedCornerIds(dir).Any(x => Height[x] < WaterNode.WaterBody.ShoreHeight)) return false;
+            }
+
+            return base.IsPassable(dir, entity);
+        }
+        public bool IsCenterUnderWater => (WaterNode != null && GetCenterWorldPosition().y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
 
         #endregion
 

@@ -95,8 +95,8 @@ namespace WorldEditor
         }
         private void UpdateNavmeshVisualization()
         {
-            if (IsShowingNavmesh && SelectedEntity != null) PathfindingGraphVisualizer.Singleton.VisualizeGraph(World, SelectedEntity);
-            else PathfindingGraphVisualizer.Singleton.ClearVisualization();
+            if (IsShowingNavmesh && SelectedEntity != null) NavmeshVisualizer.Singleton.Visualize(World, SelectedEntity);
+            else NavmeshVisualizer.Singleton.ClearVisualization();
         }
     }
 }

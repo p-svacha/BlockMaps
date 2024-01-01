@@ -191,6 +191,9 @@ namespace BlockmapFramework
 
         #region Getters
 
+        public int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode).y);
+        public int MaxHeight => MinHeight + Dimensions.y;
+
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
         /// </summary>
@@ -232,6 +235,8 @@ namespace BlockmapFramework
         /// </summary>
         public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode)
         {
+            // todo: fix to work with water
+
             List<BlockmapNode> nodes = new List<BlockmapNode>();
             for (int x = 0; x < Dimensions.x; x++)
             {
@@ -291,6 +296,9 @@ namespace BlockmapFramework
         /// </summary>
         public VisionType GetNodeVision(BlockmapNode node)
         {
+            // Ignore water since its rendered based on its surface node anyway
+            if (node is WaterNode) return VisionType.Visible;
+
             // Check if node is out of 2d vision range (quick check to increase performance)
             float distance = Vector2.Distance(OriginNode.WorldCoordinates, node.WorldCoordinates);
             if (distance > VisionRange) return VisionType.Unexplored;
@@ -331,16 +339,16 @@ namespace BlockmapFramework
                 }
 
                 // Check if we hit the waterbody that covers the node. if so => visible
-                if(hit.transform.gameObject.layer == World.Layer_Water)
+                if(hit.transform.gameObject.layer == World.Layer_Water && node is SurfaceNode _surfaceNode)
                 {
-                    if(World.GetSurfaceNode(hitWorldCoordinates).WaterBody == node.WaterBody) return VisionType.Visible;
+                    if(World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                 }
             }
 
             // If the node has a water body, shoot a ray at the water surface as well
-            if(node.WaterBody != null)
+            if(node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
             {
-                Vector3 targetPos = new Vector3(nodeCenter.x, node.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
+                Vector3 targetPos = new Vector3(nodeCenter.x, surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
                 RaycastHit? waterHit = Look(targetPos);
 
                 if (waterHit != null)
@@ -351,7 +359,7 @@ namespace BlockmapFramework
                     {
                         Vector3 hitPosition = hit.point;
                         Vector2Int hitWorldCoordinates = World.GetWorldCoordinates(hitPosition);
-                        if(World.GetSurfaceNode(hitWorldCoordinates).WaterBody == node.WaterBody) return VisionType.Visible;
+                        if(World.GetWaterNode(hitWorldCoordinates).WaterBody == surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                     }
                 }
             }

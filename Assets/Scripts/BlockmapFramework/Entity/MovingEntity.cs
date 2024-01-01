@@ -17,6 +17,9 @@ namespace BlockmapFramework
         public BlockmapNode Target { get; private set; }
         public List<BlockmapNode> TargetPath { get; private set; }
 
+        // Movement Attributes
+        public bool CanSwim { get; protected set; }
+
         protected override void OnInitialized()
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");

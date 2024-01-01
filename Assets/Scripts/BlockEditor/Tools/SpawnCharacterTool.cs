@@ -2,6 +2,7 @@ using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 namespace WorldEditor
@@ -16,18 +17,21 @@ namespace WorldEditor
         public TMP_InputField SpeedInput;
         public TMP_InputField VisionInput;
         public TMP_InputField HeightInput;
+        public Toggle CanSwimToggle;
 
         public override void UpdateTool()
         {
             if (World.HoveredNode != null)
             {
-                World.HoveredNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
+                bool canSpawn = World.HoveredNode.IsPassable(Editor.CharacterPrefab);
+                World.HoveredNode.ShowOverlay(ResourceManager.Singleton.TileSelector, canSpawn ? Color.white : Color.red);
             }
         }
 
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
+            if (!World.HoveredNode.IsPassable(Editor.CharacterPrefab)) return;
 
             BlockmapNode spawnNode = World.HoveredNode;
 
@@ -38,7 +42,9 @@ namespace WorldEditor
             float speed = float.Parse(SpeedInput.text);
             float vision = float.Parse(VisionInput.text);
             int height = int.Parse(HeightInput.text);
-            newCharacter.PreInit(speed, vision, height);
+            bool canSwim = CanSwimToggle.isOn;
+            newCharacter.PreInit(speed, vision, height, canSwim);
+
             World.SpawnEntity(newCharacter, spawnNode, Editor.EditorPlayer);
         }
 

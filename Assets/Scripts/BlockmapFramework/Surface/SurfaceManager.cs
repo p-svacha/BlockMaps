@@ -19,7 +19,8 @@ namespace BlockmapFramework
             {
                 { SurfaceId.Grass, new GrassSurface() },
                 { SurfaceId.Sand, new SandSurface() },
-                { SurfaceId.Tarmac, new TarmacSurface() }
+                { SurfaceId.Tarmac, new TarmacSurface() },
+                { SurfaceId.Water, new WaterSurface() }
             };
 
             // Pass terrain colors to surface material
@@ -29,7 +30,7 @@ namespace BlockmapFramework
             ResourceManager.Singleton.SurfaceMaterial.SetColorArray("_TerrainColors", terrainColors);
             
             // Pass terrain textures to surface material
-            Texture2DArray terrainTexArray = new Texture2DArray(1024, 1024, 3, TextureFormat.RGBA32, true);
+            Texture2DArray terrainTexArray = new Texture2DArray(1024, 1024, Surfaces.Count, TextureFormat.RGBA32, true);
             counter = 0;
             foreach (Surface s in Surfaces.Values) terrainTexArray.SetPixels32(s.Texture.GetPixels32(), counter++);
             terrainTexArray.Apply();

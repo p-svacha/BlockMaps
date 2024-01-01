@@ -11,10 +11,11 @@ namespace BlockmapFramework
         public World World { get; private set; }
         public Vector2Int Coordinates { get; private set; }
 
-        /// <summary>
-        /// Each tile on the chunk has a list of nodes, whereas the first element is always the surface node and all possible further nodes are PathNodes.
-        /// </summary>
-        public List<BlockmapNode>[,] Nodes { get; private set; }
+        public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
+
+        public SurfaceNode[,] SurfaceNodes { get; private set; }
+        public List<BlockmapNode>[,] AirNodes { get; private set; }
+        public WaterNode[,] WaterNodes { get; private set; }
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
@@ -38,14 +39,23 @@ namespace BlockmapFramework
 
             // Init  nodes
             Nodes = new List<BlockmapNode>[Size, Size];
+            AirNodes = new List<BlockmapNode>[Size, Size];
+            SurfaceNodes = new SurfaceNode[Size, Size];
+            WaterNodes = new WaterNode[Size, Size];
+
             for (int x = 0; x < Size; x++)
+            {
                 for (int y = 0; y < Size; y++)
+                {
                     Nodes[x, y] = new List<BlockmapNode>();
+                    AirNodes[x, y] = new List<BlockmapNode>();
+                }
+            }
 
             foreach (NodeData nodeData in data.Nodes)
             {
                 BlockmapNode node = BlockmapNode.Load(world, this, nodeData);
-                Nodes[nodeData.LocalCoordinateX, nodeData.LocalCoordinateY].Add(node);
+                World.RegisterNode(node);
             }
 
             // Init meshes
@@ -187,11 +197,29 @@ namespace BlockmapFramework
         }
         public SurfaceNode GetSurfaceNode(int x, int y)
         {
-            return (SurfaceNode)Nodes[x, y][0];
+            return SurfaceNodes[x, y];
         }
         public SurfaceNode GetSurfaceNode(Vector2Int localCoordinates)
         {
             return GetSurfaceNode(localCoordinates.x, localCoordinates.y);
+        }
+
+        public List<WaterNode> GetAllWaterNodes()
+        {
+            List<WaterNode> nodes = new List<WaterNode>();
+            for (int x = 0; x < Size; x++)
+                for (int y = 0; y < Size; y++)
+                    if(WaterNodes[x,y] != null)
+                        nodes.Add(WaterNodes[x, y]);
+            return nodes;
+        }
+        public WaterNode GetWaterNode(int x, int y)
+        {
+            return WaterNodes[x, y];
+        }
+        public WaterNode GetWaterNode(Vector2Int localCoordinates)
+        {
+            return GetWaterNode(localCoordinates.x, localCoordinates.y);
         }
 
         public List<BlockmapNode> GetAllAirNodes()
@@ -215,19 +243,11 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetAirNodes(int x, int y)
         {
-            return Nodes[x, y].Skip(1).ToList();
+            return AirNodes[x, y];
         }
         public List<BlockmapNode> GetAirNodes(Vector2Int localCoordinates)
         {
             return GetAirNodes(localCoordinates.x, localCoordinates.y);
-        }
-        public List<AirPathSlopeNode> GetAirPathSlopeNodes(int x, int y)
-        {
-            return Nodes[x, y].Where(x => x.Type == NodeType.AirPathSlope).Select(x => (AirPathSlopeNode)x).ToList();
-        }
-        public List<AirPathSlopeNode> GetAirPathSlopeNodes(Vector2Int localCoordinates)
-        {
-            return GetAirPathSlopeNodes(localCoordinates.x, localCoordinates.y);
         }
 
         public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)

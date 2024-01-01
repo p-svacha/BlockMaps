@@ -1,11 +1,14 @@
 Big Features to Add:
 
-- Water (or general liquid system) with unique properties
-	> make own shader
-	> spawn waternodes on water
-	> movingentity canswim attribute
+- Fix navmesh around diagonal shores
+- Fix placing big entities around water canplace check
+- FIX MOVING through water
+- fix selection indicator in water
+- fix hovered node water
 
-- Encode editorentity data in typeid (vision, movement, height)
+- Encode editorentity data in typeid (vision, movement, height, swim)
+
+- Make air nodes removable
 
 - Fences/Walls
 	=> placed in one direction on one node
@@ -37,11 +40,15 @@ OR
 
 - removable air nodes
 
+- Ladders
+
 - make a dropdown for load world
 
 - make detailed example map
 
 - Show entity stats in static entity tool in editor
+
+- combine airpathsloe and airpath into 1 type
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly
@@ -85,6 +92,8 @@ OR
 	> Add feature to height change, surface change and air path
 
 - Procedural Static Entities
+
+- Water shader (very small transparency, moving, foam when hitting terrain)
 
 - START CTF
 

@@ -118,7 +118,6 @@ namespace BlockmapFramework
             {
                 Chunk chunk = Chunk.Load(this, chunkData);
                 Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
-                foreach (BlockmapNode node in chunk.GetAllNodes()) Nodes.Add(node.Id, node);
             }
             NodeIdCounter = data.MaxNodeId + 1;
             EntityIdCounter = data.MaxEntityId + 1;
@@ -144,7 +143,6 @@ namespace BlockmapFramework
             {
                 WaterBody water = WaterBody.Load(this, waterData);
                 WaterBodies.Add(waterData.Id, water);
-                foreach (SurfaceNode node in water.CoveredNodes) node.SetWaterBody(water);
             }
 
             // Init camera
@@ -279,7 +277,8 @@ namespace BlockmapFramework
                 {
                     Vector3 hitPosition = hit.point;
                     Vector2Int hitWorldCoordinates = GetWorldCoordinates(hitPosition);
-                    newHoveredWaterBody = GetSurfaceNode(hitWorldCoordinates).WaterBody;
+                    WaterNode hitWaterNode = GetWaterNode(hitWorldCoordinates);
+                    if (hitWaterNode != null) newHoveredWaterBody = hitWaterNode.WaterBody;
                 }
             }
 
@@ -321,6 +320,27 @@ namespace BlockmapFramework
         #endregion
 
         #region Actions
+
+        public void RegisterNode(BlockmapNode node)
+        {
+            Nodes.Add(node.Id, node); // Global registry
+
+            // Chunk registry
+            node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
+            if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = surfaceNode;
+            else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
+            else node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
+        }
+        private void DeregisterNode(BlockmapNode node)
+        {
+            Nodes.Remove(node.Id); // Global registry
+
+            // Chunk registry
+            node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
+            if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
+            else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
+            else node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
+        }
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
 
@@ -403,6 +423,11 @@ namespace BlockmapFramework
                     if (node.MaxHeight + e.Dimensions.y > height)
                         return false;
 
+            // Check if underwater
+            WaterNode water = GetWaterNode(worldCoordinates);
+            if (water != null && water.WaterBody.ShoreHeight > height) return false;
+
+
             if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && pathNodeBelow.Type == NodeType.AirPathSlope) return false; // Can't build with slope underneath
@@ -416,18 +441,8 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            NodeData newNodeData = new NodeData()
-            {
-                Id = NodeIdCounter++,
-                LocalCoordinateX = localCoordinates.x,
-                LocalCoordinateY = localCoordinates.y,
-                Height = new int[] { height, height, height, height },
-                Surface = SurfaceId.Tarmac,
-                Type = NodeType.AirPath
-            };
-            BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
-            chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
-            Nodes.Add(newNode.Id, newNode); // Register new node
+            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, new int[] { height, height, height, height }, SurfaceId.Tarmac);
+            RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -447,6 +462,10 @@ namespace BlockmapFramework
                     if (node.MaxHeight + e.Dimensions.y >= height)
                         return false;
 
+            // Check if underwater
+            WaterNode water = GetWaterNode(worldCoordinates);
+            if (water != null && water.WaterBody.ShoreHeight > height) return false;
+
             if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && !Pathfinder.CanNodesBeAboveEachOther(pathNodeBelow.Shape, AirPathSlopeNode.GetShapeFromDirection(dir))) return false;
@@ -459,18 +478,8 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            NodeData newNodeData = new NodeData()
-            {
-                Id = NodeIdCounter++,
-                LocalCoordinateX = localCoordinates.x,
-                LocalCoordinateY = localCoordinates.y,
-                Height = AirPathSlopeNode.GetHeightsFromDirection(height, dir),
-                Surface = SurfaceId.Tarmac,
-                Type = NodeType.AirPathSlope
-            };
-            BlockmapNode newNode = BlockmapNode.Load(this, chunk, newNodeData);
-            chunk.Nodes[localCoordinates.x, localCoordinates.y].Add(newNode);
-            Nodes.Add(newNode.Id, newNode); // Register new node
+            AirPathSlopeNode newNode = new AirPathSlopeNode(this, chunk, NodeIdCounter++, localCoordinates, AirPathSlopeNode.GetHeightsFromDirection(height, dir), SurfaceId.Tarmac);
+            RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
@@ -486,7 +495,11 @@ namespace BlockmapFramework
         public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node)
         {
             // Check if terrain below entity is fully connected (as in is the surface below big enough to support the whole footprint of the entity)
-            if (!entity.CanBePlacedOn(node)) return false; 
+            if (!entity.CanBePlacedOn(node)) return false;
+
+            // Check if underwater - todo: fix 
+            if (node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null && surfaceNode.GetCenterWorldPosition().y < surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight)
+                return false;
 
             int minHeight = GetNodeHeight(entity.GetWorldPosition(this, node).y);
             List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node); // get nodes that would be occupied when placing the entity on the given node
@@ -551,9 +564,9 @@ namespace BlockmapFramework
         public WaterBody CanAddWater(SurfaceNode node, int maxDepth) // returns null when cannot
         {
             int shoreHeight = node.BaseHeight + 1;
-            WaterBody waterBody = new WaterBody();
+            WaterBody waterBody = new WaterBody(); // dummy water body to store data that can later be used to create a real water body
             waterBody.ShoreHeight = shoreHeight;
-            waterBody.CoveredNodes = new List<BlockmapNode>();
+            waterBody.CoveredNodes = new List<SurfaceNode>();
 
             List<System.Tuple<SurfaceNode, Direction>> checkedNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that were already checked for water expansion in one direction
             List<System.Tuple<SurfaceNode, Direction>> expansionNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
@@ -578,7 +591,7 @@ namespace BlockmapFramework
 
                 bool isTooDeep = checkNode.BaseHeight < shoreHeight - maxDepth;
                 if (isTooDeep) return null; // too deep
-                if (checkNode.WaterBody != null) return null; // already has water here
+                if (checkNode.WaterNode != null) return null; // already has water here
 
                 bool isUnderwater = (
                     ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight)) ||
@@ -588,6 +601,12 @@ namespace BlockmapFramework
                     );
                 if (isUnderwater) // underwater
                 {
+                    // Check if we're drowing entities
+                    if (GetEntities(checkNode.WorldCoordinates, shoreHeight - maxDepth, shoreHeight - 1).Count > 0) return null;
+
+                    // Check if we're drowing air nodes
+                    if (GetAirNodes(checkNode.WorldCoordinates, shoreHeight - maxDepth, shoreHeight - 1).Count > 0) return null;
+
                     waterBody.CoveredNodes.Add(checkNode);
 
                     if (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
@@ -602,15 +621,21 @@ namespace BlockmapFramework
         }
         public void AddWaterBody(WaterBody data)
         {
+            // Create a new water nodes for each covered surface node
+            List<WaterNode> waterNodes = new List<WaterNode>();
+            foreach (SurfaceNode node in data.CoveredNodes)
+            {
+                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, new int[] { data.ShoreHeight, data.ShoreHeight, data.ShoreHeight, data.ShoreHeight }, SurfaceId.Water);
+                waterNodes.Add(waterNode);
+                RegisterNode(waterNode);
+            }
+
             // Make a new water body instance with a unique id
-            WaterBody newWaterBody = new WaterBody(WaterBodyIdCounter++, data);
+            WaterBody newWaterBody = new WaterBody(WaterBodyIdCounter++, data.ShoreHeight, waterNodes, data.CoveredNodes);
 
             // Get chunks that will have nodes covered in new water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
             foreach (BlockmapNode node in newWaterBody.CoveredNodes) affectedChunks.Add(node.Chunk);
-
-            // Set waterbody on all covered nodes
-            foreach (BlockmapNode node in newWaterBody.CoveredNodes) node.SetWaterBody(newWaterBody);
 
             // Update navmesh
             UpdateNavmesh(new Vector2Int(newWaterBody.MinWorldX, newWaterBody.MinWorldY), newWaterBody.MaxWorldX - newWaterBody.MinWorldX, newWaterBody.MaxWorldY - newWaterBody.MinWorldY);
@@ -618,7 +643,7 @@ namespace BlockmapFramework
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
 
-            // Register
+            // Register water bofy
             WaterBodies.Add(newWaterBody.Id, newWaterBody);
         }
         public void RemoveWaterBody(WaterBody water)
@@ -626,12 +651,15 @@ namespace BlockmapFramework
             // De-register
             WaterBodies.Remove(water.Id);
 
-            // Get chunks that will have nodes covered in new water body
+            // Get chunks that will had nodes covered in water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
-            foreach (BlockmapNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
+            foreach (SurfaceNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
 
-            // Remove waterbody from all covered nodes
-            foreach (BlockmapNode node in water.CoveredNodes) node.SetWaterBody(null);
+            // Remove water node reference from all covered surface nodes
+            foreach (SurfaceNode node in water.CoveredNodes) node.SetWaterNode(null);
+
+            // Deregister deleted water nodes
+            foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
             // Update navmesh
             UpdateNavmesh(new Vector2Int(water.MinWorldX, water.MinWorldY), water.MaxWorldX - water.MinWorldX, water.MaxWorldY - water.MinWorldY);
@@ -639,6 +667,7 @@ namespace BlockmapFramework
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
+
 
         #endregion
 
@@ -740,8 +769,8 @@ namespace BlockmapFramework
         }
         private void UpdatePathfindingVisualization()
         {
-            if (IsShowingPathfindingGraph) PathfindingGraphVisualizer.Singleton.VisualizeGraph(this);
-            else PathfindingGraphVisualizer.Singleton.ClearVisualization();
+            if (IsShowingPathfindingGraph) NavmeshVisualizer.Singleton.Visualize(this);
+            else NavmeshVisualizer.Singleton.ClearVisualization();
         }
 
         public void ToggleTextureMode()
@@ -819,12 +848,23 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetSurfaceNode(chunk.GetLocalCoordinates(worldCoordinates));
         }
+        public WaterNode GetWaterNode(Vector2Int worldCoordinates)
+        {
+            if (!IsInWorld(worldCoordinates)) return null;
+
+            Chunk chunk = GetChunk(worldCoordinates);
+            return chunk.GetWaterNode(chunk.GetLocalCoordinates(worldCoordinates));
+        }
         public List<BlockmapNode> GetAirNodes(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return new List<BlockmapNode>();
 
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetAirNodes(chunk.GetLocalCoordinates(worldCoordinates));
+        }
+        public List<BlockmapNode> GetAirNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
+        {
+            return GetAirNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
         }
 
         public Vector2Int GetWorldCoordinates(Vector3 worldPosition)
@@ -855,6 +895,16 @@ namespace BlockmapFramework
         public List<BlockmapNode> GetAdjacentPathNodes(Vector2Int worldCoordinates, Direction dir)
         {
             return GetAirNodes(GetWorldCoordinatesInDirection(worldCoordinates, dir));
+        }
+
+        public List<Entity> GetEntities(Vector2Int worldCoordinates, int minHeight, int maxHeight)
+        {
+            List<Entity> entities = new List<Entity>();
+            foreach (BlockmapNode node in GetNodes(worldCoordinates))
+                foreach (Entity e in node.Entities)
+                    if (e.MinHeight <= maxHeight && e.MaxHeight >= minHeight)
+                        entities.Add(e);
+            return entities;
         }
 
         public Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
@@ -898,7 +948,14 @@ namespace BlockmapFramework
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if (node.Type != NodeType.Surface && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
+                if ((node.Type == NodeType.AirPath || node.Type == NodeType.AirPathSlope) && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
+                {
+                    Vector3 hitPosition = hit.point;
+                    return hitPosition.y;
+                }
+
+                // We hit the water mesh we are looking for
+                if(node.Type == NodeType.Water && objectHit.gameObject.layer == Layer_Water)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;

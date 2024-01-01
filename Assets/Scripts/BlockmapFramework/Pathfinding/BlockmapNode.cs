@@ -37,11 +37,6 @@ namespace BlockmapFramework
         public string Shape { get; protected set; }
 
         /// <summary>
-        /// To what layer this node belongs to in the world.
-        /// </summary>
-        public abstract int Layer { get; }
-
-        /// <summary>
         /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
         /// </summary>
         public bool UseAlternativeVariant;
@@ -58,7 +53,7 @@ namespace BlockmapFramework
         public Vector2Int WorldCoordinates { get; private set; }
         public Vector2Int LocalCoordinates { get; private set; }
         public Surface Surface { get; private set; }
-        public NodeType Type { get; protected set; }
+        public abstract NodeType Type { get; }
 
         // Connections
         public Dictionary<Direction, BlockmapNode> ConnectedNodes;
@@ -76,30 +71,24 @@ namespace BlockmapFramework
         private HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
-        /// The water body covering this node.
-        /// </summary>
-        public WaterBody WaterBody { get; private set; }
-
-        /// <summary>
         /// The mesh in the world that this node is drawn on.
         /// </summary>
         protected ChunkMesh Mesh;
 
         #region Initialize
 
-        protected BlockmapNode(World world, Chunk chunk, NodeData data)
+        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface)
         {
             World = world;
             Chunk = chunk;
-            Id = data.Id;
-            LocalCoordinates = new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY);
+            Id = id;
+
+            LocalCoordinates = new Vector2Int(localCoordinates.x, localCoordinates.y);
             WorldCoordinates = chunk.GetWorldCoordinates(LocalCoordinates);
+            Height = height;
 
-            Height = data.Height;
             RecalculateShape();
-
-            Surface = SurfaceManager.Instance.GetSurface(data.Surface);
-            Type = data.Type;
+            Surface = SurfaceManager.Instance.GetSurface(surface);
             ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
         }
 
@@ -274,11 +263,6 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(id);
         }
 
-        public void SetWaterBody(WaterBody waterBody)
-        {
-            WaterBody = waterBody;
-        }
-
         #endregion
 
         #region Getters
@@ -366,10 +350,9 @@ namespace BlockmapFramework
         /// Returns if an entity can stand on this node.
         /// <br/> If entity is null a general check will be made for the navmesh.
         /// </summary>
-        public bool IsPassable(Entity entity = null)
+        public virtual bool IsPassable(Entity entity = null)
         {
             if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
-            if (WaterBody != null && GetCenterWorldPosition().y < WaterBody.WaterSurfaceWorldHeight) return false; // node center is under water
 
             return true;
         }
@@ -377,16 +360,15 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
         /// </summary>
-        public bool IsPassable(Direction dir, Entity entity = null)
+        public virtual bool IsPassable(Direction dir, Entity entity = null)
         {
             // Check if node is generally passable
             if (!IsPassable(entity)) return false;
 
-            // Check if the side has a corner underwater
-            if (WaterBody != null)
-            {
-                if (GetAffectedCornerIds(dir).Any(x => Height[x] < WaterBody.ShoreHeight)) return false;
-            }
+            if (dir == Direction.NW) return IsPassable(Direction.N, entity) && IsPassable(Direction.W, entity);
+            if (dir == Direction.NE) return IsPassable(Direction.N, entity) && IsPassable(Direction.E, entity);
+            if (dir == Direction.SW) return IsPassable(Direction.S, entity) && IsPassable(Direction.W, entity);
+            if (dir == Direction.SE) return IsPassable(Direction.S, entity) && IsPassable(Direction.E, entity);
 
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);
@@ -411,7 +393,8 @@ namespace BlockmapFramework
 
             foreach (BlockmapNode node in nodesAbove)
             {
-                if (node == this) continue;
+                if (node == this) continue; // ignore ourselves
+                if (node.Type == NodeType.Water) continue; // ignore water
 
                 foreach(int i in GetAffectedCornerIds(dir))
                 {
@@ -426,12 +409,17 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the corner heights that are relevant for a given direction.
         /// </summary>
-        private List<int> GetAffectedCornerIds(Direction dir)
+        protected List<int> GetAffectedCornerIds(Direction dir)
         {
+            if (dir == Direction.None) return new List<int> { NE, NW, SW, SE };
             if (dir == Direction.N) return new List<int> { NE, NW };
             if (dir == Direction.E) return new List<int> { NE, SE };
             if (dir == Direction.S) return new List<int> { SW, SE };
             if (dir == Direction.W) return new List<int> { SW, NW };
+            if (dir == Direction.NW) return new List<int>() { NW };
+            if (dir == Direction.NE) return new List<int>() { NE };
+            if (dir == Direction.SE) return new List<int>() { SE };
+            if (dir == Direction.SW) return new List<int>() { SW };
             throw new System.Exception("Direction " + dir.ToString() + " not handled");
         }
 
@@ -444,13 +432,16 @@ namespace BlockmapFramework
             switch(data.Type)
             {
                 case NodeType.Surface:
-                    return new SurfaceNode(world, chunk, data);
+                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
 
                 case NodeType.AirPath:
-                    return new AirPathNode(world, chunk, data);
+                    return new AirPathNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
 
                 case NodeType.AirPathSlope:
-                    return new AirPathSlopeNode(world, chunk, data);
+                    return new AirPathSlopeNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
+
+                case NodeType.Water:
+                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }
