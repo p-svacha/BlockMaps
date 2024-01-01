@@ -1,0 +1,1318 @@
+{
+  "Name": "paradise",
+  "ChunkSize": 3,
+  "MaxNodeId": 91,
+  "MaxEntityId": 7,
+  "MaxWaterBodyId": 0,
+  "Chunks": [
+    {
+      "ChunkCoordinateX": 0,
+      "ChunkCoordinateY": 0,
+      "Nodes": [
+        {
+          "Id": 0,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 3,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 6,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 1,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 4,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 7,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 2,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 5,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            2,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 8,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 0,
+      "ChunkCoordinateY": 1,
+      "Nodes": [
+        {
+          "Id": 9,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            3,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 12,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 15,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 10,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 13,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 16,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 11,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 14,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 17,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 0,
+      "ChunkCoordinateY": 2,
+      "Nodes": [
+        {
+          "Id": 18,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            1,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 21,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 24,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 19,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 22,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            2,
+            2,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 25,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            1,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 20,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 23,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 26,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 1,
+      "ChunkCoordinateY": 0,
+      "Nodes": [
+        {
+          "Id": 27,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 30,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 33,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            2,
+            2,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 28,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 90,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPathSlope"
+        },
+        {
+          "Id": 31,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 34,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 29,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            1,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 89,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 32,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            1,
+            1,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 35,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            1,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 1,
+      "ChunkCoordinateY": 1,
+      "Nodes": [
+        {
+          "Id": 36,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 39,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 42,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 37,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 40,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 43,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 38,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 41,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 44,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 1,
+      "ChunkCoordinateY": 2,
+      "Nodes": [
+        {
+          "Id": 45,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 48,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 51,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 46,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 49,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 52,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 47,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 50,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 53,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 2,
+      "ChunkCoordinateY": 0,
+      "Nodes": [
+        {
+          "Id": 54,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 88,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 57,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 60,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            1,
+            1,
+            1,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 55,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 87,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 58,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 61,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 56,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            1,
+            2,
+            1,
+            1
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 86,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 59,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 85,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 62,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 84,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 2,
+      "ChunkCoordinateY": 1,
+      "Nodes": [
+        {
+          "Id": 63,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            1,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 66,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 69,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 64,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            1,
+            1,
+            1,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 67,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            2,
+            1,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 70,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 65,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 83,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 68,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            1,
+            1,
+            2,
+            2
+          ],
+          "Surface": "Sand",
+          "Type": "Surface"
+        },
+        {
+          "Id": 82,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 71,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    },
+    {
+      "ChunkCoordinateX": 2,
+      "ChunkCoordinateY": 2,
+      "Nodes": [
+        {
+          "Id": 72,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 75,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 78,
+          "LocalCoordinateX": 0,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 73,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 0,
+          "Height": [
+            2,
+            2,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 76,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 79,
+          "LocalCoordinateX": 1,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 74,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 0,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 77,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 1,
+          "Height": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        },
+        {
+          "Id": 80,
+          "LocalCoordinateX": 2,
+          "LocalCoordinateY": 2,
+          "Height": [
+            3,
+            3,
+            2,
+            3
+          ],
+          "Surface": "Grass",
+          "Type": "Surface"
+        }
+      ]
+    }
+  ],
+  "Players": [
+    {
+      "Id": -1,
+      "Name": "Gaia"
+    },
+    {
+      "Id": 0,
+      "Name": "Player"
+    }
+  ],
+  "Entities": [
+    {
+      "Id": 1,
+      "TypeId": "tree01",
+      "OriginNodeId": 26,
+      "PlayerId": -1
+    },
+    {
+      "Id": 2,
+      "TypeId": "tree01",
+      "OriginNodeId": 45,
+      "PlayerId": -1
+    },
+    {
+      "Id": 3,
+      "TypeId": "tree02",
+      "OriginNodeId": 75,
+      "PlayerId": -1
+    },
+    {
+      "Id": 4,
+      "TypeId": "tree01",
+      "OriginNodeId": 66,
+      "PlayerId": -1
+    },
+    {
+      "Id": 5,
+      "TypeId": "tree01",
+      "OriginNodeId": 30,
+      "PlayerId": -1
+    },
+    {
+      "Id": 6,
+      "TypeId": "tree01",
+      "OriginNodeId": 8,
+      "PlayerId": -1
+    }
+  ],
+  "WaterBodies": [
+    {
+      "Id": 1,
+      "ShoreHeight": 2,
+      "CoveredNodes": [
+        19,
+        22,
+        18,
+        25,
+        21,
+        24
+      ]
+    },
+    {
+      "Id": 2,
+      "ShoreHeight": 2,
+      "CoveredNodes": [
+        35,
+        60,
+        32,
+        63,
+        61,
+        57,
+        29,
+        64,
+        62,
+        58,
+        54,
+        67,
+        65,
+        59,
+        55,
+        68,
+        56
+      ]
+    }
+  ]
+}

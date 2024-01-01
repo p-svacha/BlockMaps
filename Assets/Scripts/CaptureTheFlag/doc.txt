@@ -1,10 +1,5 @@
 Big Features to Add:
 
-- Navmesh upgrade:
-	> Split IsPassable into general and per-direction4 function.
-	> per-direction will be used when connecting straight nodes
-	> headspace, water/height and fences will affect direction-based passability
-
 - Water (or general liquid system) with unique properties
 	> make own shader
 	> spawn waternodes on water
@@ -13,15 +8,19 @@ Big Features to Add:
 - Encode editorentity data in typeid (vision, movement, height)
 
 - Fences/Walls
-	=> need to placed on a node edge of one node
+	=> placed in one direction on one node
 	=> take hovermode like when changing height
 	=> drawn as one mesh
 	=> visible depending on node they stand on
 	=> have height
 	=> might block vision
-	=> not passable
+	=> might make node impassable in direction they are placed
 	=> might be climbable
 	=> different types (fence and wall to start)
+
+- Render walls on map edge
+	=> from node height
+	=> or water height on water bodies
 
 - rework invisible tile drawing
 	=> redraw mesh when visiblity changes

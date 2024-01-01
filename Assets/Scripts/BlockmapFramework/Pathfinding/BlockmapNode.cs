@@ -133,8 +133,6 @@ namespace BlockmapFramework
         {
             ConnectedNodes.Clear();
 
-            if (!IsPassable()) return;
-
             UpdateConnectedNodesStraight(Direction.N);
             UpdateConnectedNodesStraight(Direction.E);
             UpdateConnectedNodesStraight(Direction.S);
@@ -147,10 +145,12 @@ namespace BlockmapFramework
         /// </summary>
         private void UpdateConnectedNodesStraight(Direction dir)
         {
+            if (!IsPassable(dir)) return;
+
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
-                if (!adjNode.IsPassable()) continue;
+                if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
 
                 if (Pathfinder.DoAdjacentHeightsMatch(this, adjNode, dir))
                 {
@@ -175,25 +175,37 @@ namespace BlockmapFramework
             BlockmapNode southNode = ConnectedNodes.ContainsKey(Direction.S) ? ConnectedNodes[Direction.S] : null;
             BlockmapNode westNode = ConnectedNodes.ContainsKey(Direction.W) ? ConnectedNodes[Direction.W] : null;
 
+            // NE
             if (northNode != null && eastNode != null &&
                 northNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.N) &&
                 northNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.N] &&
-                northNode.ConnectedNodes[Direction.E].IsPassable()) ConnectedNodes[Direction.NE] = northNode.ConnectedNodes[Direction.E];
+                northNode.ConnectedNodes[Direction.E].IsPassable(Direction.S) &&
+                northNode.ConnectedNodes[Direction.E].IsPassable(Direction.W)) 
+                ConnectedNodes[Direction.NE] = northNode.ConnectedNodes[Direction.E];
 
+            // NW
             if (northNode != null && westNode != null &&
                 northNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.N) &&
                 northNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.N] &&
-                northNode.ConnectedNodes[Direction.W].IsPassable()) ConnectedNodes[Direction.NW] = northNode.ConnectedNodes[Direction.W];
+                northNode.ConnectedNodes[Direction.W].IsPassable(Direction.S) && 
+                northNode.ConnectedNodes[Direction.W].IsPassable(Direction.E)) 
+                ConnectedNodes[Direction.NW] = northNode.ConnectedNodes[Direction.W];
 
+            // SE
             if (southNode != null && eastNode != null &&
                 southNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.S) &&
                 southNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.S] &&
-                southNode.ConnectedNodes[Direction.E].IsPassable()) ConnectedNodes[Direction.SE] = southNode.ConnectedNodes[Direction.E];
+                southNode.ConnectedNodes[Direction.E].IsPassable(Direction.N) &&
+                southNode.ConnectedNodes[Direction.E].IsPassable(Direction.W))
+                ConnectedNodes[Direction.SE] = southNode.ConnectedNodes[Direction.E];
 
+            // SW
             if (southNode != null && westNode != null &&
                 southNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.S) &&
                 southNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.S] &&
-                southNode.ConnectedNodes[Direction.W].IsPassable()) ConnectedNodes[Direction.SW] = southNode.ConnectedNodes[Direction.W];
+                southNode.ConnectedNodes[Direction.W].IsPassable(Direction.N) &&
+                southNode.ConnectedNodes[Direction.W].IsPassable(Direction.E))
+                ConnectedNodes[Direction.SW] = southNode.ConnectedNodes[Direction.W];
         }
 
         #endregion
@@ -354,12 +366,30 @@ namespace BlockmapFramework
         /// Returns if an entity can stand on this node.
         /// <br/> If entity is null a general check will be made for the navmesh.
         /// </summary>
+        public bool IsPassable(Entity entity = null)
+        {
+            if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
+            if (WaterBody != null && GetCenterWorldPosition().y < WaterBody.WaterSurfaceWorldHeight) return false; // node center is under water
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
+        /// </summary>
         public bool IsPassable(Direction dir, Entity entity = null)
         {
-            if (WaterBody != null) return false; // Is underwater
-            if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
+            // Check if node is generally passable
+            if (!IsPassable(entity)) return false;
 
-            int headSpace = GetFreeHeadSpace();
+            // Check if the side has a corner underwater
+            if (WaterBody != null)
+            {
+                if (GetAffectedCornerIds(dir).Any(x => Height[x] < WaterBody.ShoreHeight)) return false;
+            }
+
+            // Check if the side has enough head space for the entity
+            int headSpace = GetFreeHeadSpace(dir);
             if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)
             if (entity != null && entity.Dimensions.y > headSpace) return false; // A node above is blocking the space for the entity
 
@@ -373,7 +403,7 @@ namespace BlockmapFramework
         /// <br/> For example a flat node right above this flat node would be 1.
         /// <br/> If any corner of an above node overlaps with this node 0 is returned.
         /// </summary>
-        private int GetFreeHeadSpace()
+        private int GetFreeHeadSpace(Direction dir)
         {
             List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT);
 
@@ -383,7 +413,7 @@ namespace BlockmapFramework
             {
                 if (node == this) continue;
 
-                for(int i = 0; i < 4; i++)
+                foreach(int i in GetAffectedCornerIds(dir))
                 {
                     int diff = node.Height[i] - Height[i];
                     if (diff < minHeight) minHeight = diff;
@@ -392,6 +422,19 @@ namespace BlockmapFramework
 
             return minHeight;
         }
+
+        /// <summary>
+        /// Returns the corner heights that are relevant for a given direction.
+        /// </summary>
+        private List<int> GetAffectedCornerIds(Direction dir)
+        {
+            if (dir == Direction.N) return new List<int> { NE, NW };
+            if (dir == Direction.E) return new List<int> { NE, SE };
+            if (dir == Direction.S) return new List<int> { SW, SE };
+            if (dir == Direction.W) return new List<int> { SW, NW };
+            throw new System.Exception("Direction " + dir.ToString() + " not handled");
+        }
+
         #endregion
 
         #region Save / Load

@@ -133,9 +133,8 @@ namespace BlockmapFramework
             // Init pathfinder
             Pathfinder.Init(this);
 
-            // Init connections
-            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
-            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
+            // Generate initial navmesh so we have node connections that we need for entity node occupation
+            GenerateFullNavmesh();
 
             // Init entities
             foreach (EntityData entityData in data.Entities) Entities.Add(Entity.Load(this, entityData));
@@ -172,6 +171,8 @@ namespace BlockmapFramework
 
         private void UpdateInitialization()
         {
+            if (IsInitialized) return;
+
             // Frame 1 after initialization: Readjust entities based on drawn terrain.
             if(InitializeStep == 1)
             {
@@ -190,7 +191,12 @@ namespace BlockmapFramework
                 return;
             }
 
-            if (InitializeStep == 3) IsInitialized = true;
+            // When all post-initialization steps are done, regenerate navmesh and we're good to go
+            if (InitializeStep == 3)
+            {
+                GenerateFullNavmesh();
+                IsInitialized = true;
+            }
         }
 
         /// <summary>
@@ -318,6 +324,12 @@ namespace BlockmapFramework
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
 
+        private void GenerateFullNavmesh()
+        {
+            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
+            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
+            UpdatePathfindingVisualization();
+        }
         public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
         {
             int redrawRadius = 1;

@@ -116,7 +116,8 @@ namespace BlockmapFramework
         /// </summary>
         public static bool CanTransition(Entity entity, BlockmapNode from, BlockmapNode to)
         {
-            return from.ConnectedNodes.ContainsValue(to) && from.IsPassable(entity) && to.IsPassable(entity);
+            Direction dir = HelperFunctions.GetDirection(from.WorldCoordinates, to.WorldCoordinates);
+            return from.ConnectedNodes.ContainsValue(to) && from.IsPassable(dir, entity) && to.IsPassable(HelperFunctions.GetOppositeDirection(dir), entity);
         }
 
         #endregion
