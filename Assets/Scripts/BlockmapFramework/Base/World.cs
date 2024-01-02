@@ -217,7 +217,7 @@ namespace BlockmapFramework
             WaterBody newHoveredWaterBody = null;
 
             // Shoot a raycast on surface and air layer to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water))
             {
                 Transform objectHit = hit.transform;
 
@@ -247,6 +247,17 @@ namespace BlockmapFramework
                         newHoveredNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
                     }
                 }
+                else if (objectHit.gameObject.layer == Layer_Water)
+                {
+                    WaterNode hitWaterNode = GetWaterNode(HoveredWorldCoordinates);
+                    if (hitWaterNode.SurfaceNode.IsCenterUnderWater)
+                    {
+                        newHoveredNode = hitWaterNode;
+                        newHoveredWaterBody = hitWaterNode.WaterBody;
+                    }
+                    else newHoveredNode = hitWaterNode.SurfaceNode;
+                }
+
                 else if(objectHit.gameObject.layer == Layer_Entity)
                 {
                     newHoveredEntity = objectHit.GetComponent<Entity>(); 
@@ -261,18 +272,6 @@ namespace BlockmapFramework
                 {
                     Transform objectHit = hit.transform;
                     newHoveredEntity = hit.transform.GetComponent<Entity>();
-                }
-            }
-
-            // Ray to detect water body
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water))
-            {
-                if (hit.transform.gameObject.layer == Layer_Water)
-                {
-                    Vector3 hitPosition = hit.point;
-                    Vector2Int hitWorldCoordinates = GetWorldCoordinates(hitPosition);
-                    WaterNode hitWaterNode = GetWaterNode(hitWorldCoordinates);
-                    if (hitWaterNode != null) newHoveredWaterBody = hitWaterNode.WaterBody;
                 }
             }
 
@@ -488,25 +487,29 @@ namespace BlockmapFramework
 
         public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node)
         {
-            // Check if terrain below entity is fully connected (as in is the surface below big enough to support the whole footprint of the entity)
-            if (!entity.CanBePlacedOn(node)) return false;
+            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(this, node); // get nodes that would be occupied when placing the entity on the given node
 
-            // Check if underwater - todo: fix 
-            if (node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null && surfaceNode.GetCenterWorldPosition().y < surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight)
-                return false;
+            if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
 
-            int minHeight = GetNodeHeight(entity.GetWorldPosition(this, node).y);
-            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node); // get nodes that would be occupied when placing the entity on the given node
+            Vector3 placePos = entity.GetWorldPosition(this, node);
+            int minHeight = GetNodeHeight(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
+            int maxHeight = minHeight + entity.Dimensions.y; // max y coordinate that this entity will occupy on all occupied tiles
+
+            // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
             {
-                // Check if any occupied nodes exist above entity that would block space
-                List<BlockmapNode> aboveNodes = GetNodes(occupiedNode.WorldCoordinates, minHeight + 1, minHeight + entity.Dimensions.y);
-                if (aboveNodes.Where(x => !occupiedNodes.Contains(x)).Count() > 0) return false;
+                // Check if the place position is on water
+                if (occupiedNode is WaterNode waterNode && placePos.y <= waterNode.WaterBody.WaterSurfaceWorldHeight) return false;
+                if (occupiedNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null &&  placePos.y <= surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
 
-                // Check if any occupied nodes already have an entity
+                // Check if anything above that blocks space
+                int headSpace = occupiedNode.GetFreeHeadSpace(Direction.None);
+                if (occupiedNode.BaseHeight + headSpace < maxHeight) return false;
+
+                // Check if alredy has an entity
                 if (occupiedNode.Entities.Count > 0) return false;
 
-                // Check if any occupied node is not flat while requiring flat terrain
+                // Check if flat
                 if (entity.RequiresFlatTerrain && !occupiedNode.IsFlat) return false;
             }
 

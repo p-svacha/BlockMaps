@@ -1,11 +1,10 @@
 Big Features to Add:
 
-- Fix placing big entities around water canplace check
-- FIX MOVING through water
+- FIX MOVING through water (half entity should be below water)
 - fix selection indicator in water
-- fix hovered node water
-- fix change height below water
+- fix change height below water when next to water
 - get rid of shape node attribute
+	> combine airnode and airpathnode
 
 - Encode editorentity data in typeid (vision, movement, height, swim)
 

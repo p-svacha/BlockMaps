@@ -13,6 +13,7 @@ namespace BlockmapFramework
     public class SurfaceNode : BlockmapNode
     {
         public override NodeType Type => NodeType.Surface;
+        public override bool IsSolid => true;
         public override bool IsPath => HasPath;
 
         /// <summary>

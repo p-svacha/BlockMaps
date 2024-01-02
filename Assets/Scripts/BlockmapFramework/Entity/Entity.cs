@@ -113,7 +113,7 @@ namespace BlockmapFramework
             }
 
             // Get list of nodes that are currently occupied
-            OccupiedNodes = GetOccupiedNodes(OriginNode);
+            OccupiedNodes = GetOccupiedNodes(World, OriginNode);
 
             // Add entity to all newly occupies nodes and chunks
             foreach (BlockmapNode node in OccupiedNodes)
@@ -220,6 +220,8 @@ namespace BlockmapFramework
                 targetNode = targetNode.ConnectedNodes[Direction.N];
             }
 
+            if (targetNode is WaterNode waterNode && waterNode.SurfaceNode.MaxHeight >= waterNode.MaxHeight) targetNode = waterNode.SurfaceNode;
+
             float y = world.GetWorldHeightAt(new Vector2(targetNode.WorldCoordinates.x + relX, targetNode.WorldCoordinates.y + relY), targetNode);
             return new Vector3(targetNode.WorldCoordinates.x + relX, y, targetNode.WorldCoordinates.y + relY);
         }
@@ -233,10 +235,8 @@ namespace BlockmapFramework
         /// Returns all nodes that would be occupied by this entity when placed on the given originNode.
         /// <br/> Returns null if entity can't be placed on that null.
         /// </summary>
-        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode)
+        public List<BlockmapNode> GetOccupiedNodes(World world, BlockmapNode originNode)
         {
-            // todo: fix to work with water
-
             List<BlockmapNode> nodes = new List<BlockmapNode>();
             for (int x = 0; x < Dimensions.x; x++)
             {
@@ -430,8 +430,6 @@ namespace BlockmapFramework
 
             return OriginNode.GetCenterWorldPosition() + new Vector3(0f, (Dimensions.y * World.TILE_HEIGHT) - (World.TILE_HEIGHT * 0.5f), 0f);
         }
-
-        public bool CanBePlacedOn(BlockmapNode node) => GetOccupiedNodes(node) != null;
 
         /// <summary>
         /// Returns if the given player can see this entity.

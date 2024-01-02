@@ -7,6 +7,7 @@ namespace BlockmapFramework
     public class WaterNode : BlockmapNode
     {
         public override NodeType Type => NodeType.Water;
+        public override bool IsSolid => false;
         public override bool IsPath => false;
 
         public WaterBody WaterBody { get; private set; }

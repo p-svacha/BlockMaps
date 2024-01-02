@@ -48,6 +48,8 @@ namespace BlockmapFramework
         public Vector2Int LocalCoordinates { get; private set; }
         public Surface Surface { get; private set; }
         public abstract NodeType Type { get; }
+        public abstract bool IsPath { get; }
+        public abstract bool IsSolid { get; } // Flag if entities can (generally) be placed on top of this node
 
         // Connections
         public Dictionary<Direction, BlockmapNode> ConnectedNodes;
@@ -67,7 +69,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The mesh in the world that this node is drawn on.
         /// </summary>
-        protected ChunkMesh Mesh;
+        protected ChunkMesh Mesh { get; private set; }
 
         #region Initialize
 
@@ -213,7 +215,7 @@ namespace BlockmapFramework
         /// </summary>
         public void ShowOverlay(bool show)
         {
-            Mesh.ShowOverlay(show);
+            if(Mesh != null) Mesh.ShowOverlay(show);
         }
 
         /// <summary>
@@ -221,7 +223,7 @@ namespace BlockmapFramework
         /// </summary>
         public void ShowOverlay(Texture2D texture, Color color)
         {
-            Mesh.ShowOverlay(LocalCoordinates, texture, color);
+            if (Mesh != null) Mesh.ShowOverlay(LocalCoordinates, texture, color);
         }
 
         public void SetMesh(ChunkMesh mesh)
@@ -271,7 +273,6 @@ namespace BlockmapFramework
 
         public virtual float GetSpeedModifier() => Surface.SpeedModifier;
         public abstract Vector3 GetCenterWorldPosition();
-        public abstract bool IsPath { get; }
 
         /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
@@ -386,18 +387,17 @@ namespace BlockmapFramework
         /// Returns the amount of space (in amount of tiles) that is free above this node.
         /// <br/> For example a flat node right above this flat node would be 1.
         /// <br/> If any corner of an above node overlaps with this node 0 is returned.
+        /// <br/> Direction.None can be passed to check all corners.
         /// </summary>
-        private int GetFreeHeadSpace(Direction dir)
+        public int GetFreeHeadSpace(Direction dir)
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT);
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x.IsSolid).ToList();
 
-            int minHeight = int.MaxValue;
+            int minHeight = World.MAX_HEIGHT;
 
             foreach (BlockmapNode node in nodesAbove)
             {
                 if (node == this) continue; // ignore ourselves
-                if (node.Type == NodeType.Water) continue; // ignore water
-                if (Type == NodeType.Water && node.Type == NodeType.Surface) Debug.Log("ignroe " + WorldCoordinates.ToString() + "/" + dir.ToString()); // ignore surface as water
 
                 foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {

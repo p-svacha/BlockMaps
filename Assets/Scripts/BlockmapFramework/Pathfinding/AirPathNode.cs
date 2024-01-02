@@ -7,6 +7,7 @@ namespace BlockmapFramework
     public class AirPathNode : BlockmapNode
     {
         public override NodeType Type => NodeType.AirPath;
+        public override bool IsSolid => true;
         public override bool IsPath => true;
 
         public AirPathNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
