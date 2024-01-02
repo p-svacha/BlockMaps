@@ -166,45 +166,6 @@ namespace BlockmapFramework
             return true;
         }
 
-        /// <summary>
-        /// Checks and returns if two adjacent nodes match seamlessly in the given direction.
-        /// </summary>
-        public static bool DoAdjacentHeightsMatch(BlockmapNode fromNode, BlockmapNode toNode, Direction dir)
-        {
-            if (toNode.WorldCoordinates != World.GetWorldCoordinatesInDirection(fromNode.WorldCoordinates, dir))
-                throw new System.Exception("toNode is not adjacent to fromNode in the given direction. fromNode = " + fromNode.WorldCoordinates.ToString() + ", toNode = " + toNode.WorldCoordinates.ToString() + ", direction = " + dir.ToString());
-
-            switch (dir)
-            {
-                case Direction.N:
-                    return (fromNode.Height[NE] == toNode.Height[SE]) && (fromNode.Height[NW] == toNode.Height[SW]);
-
-                case Direction.S:
-                    return (fromNode.Height[SE] == toNode.Height[NE]) && (fromNode.Height[SW] == toNode.Height[NW]);
-
-                case Direction.E:
-                    return (fromNode.Height[SE] == toNode.Height[SW]) && (fromNode.Height[NE] == toNode.Height[NW]);
-
-                case Direction.W:
-                    return (fromNode.Height[SW] == toNode.Height[SE]) && (fromNode.Height[NW] == toNode.Height[NE]);
-
-                case Direction.NW:
-                    return fromNode.Height[NW] == toNode.Height[SE];
-
-                case Direction.NE:
-                    return fromNode.Height[NE] == toNode.Height[SW];
-
-                case Direction.SW:
-                    return fromNode.Height[SW] == toNode.Height[NE];
-
-                case Direction.SE:
-                    return fromNode.Height[SE] == toNode.Height[NW];
-
-                default:
-                    return false;
-            }
-        }
-
         #endregion
     }
 }

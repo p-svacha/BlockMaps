@@ -9,11 +9,13 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class ChunkMesh : MonoBehaviour
     {
+        protected World World { get; private set; }
         protected Chunk Chunk { get; private set; }
 
         protected void OnInit(Chunk chunk)
         {
             Chunk = chunk;
+            World = chunk.World;
             transform.SetParent(chunk.transform);
         }
 

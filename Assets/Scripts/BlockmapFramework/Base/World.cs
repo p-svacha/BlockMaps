@@ -31,12 +31,6 @@ namespace BlockmapFramework
         /// </summary>
         public const float WATER_HEIGHT = 0.9f;
 
-        // Indices for node corners
-        private const int SW = 0;
-        private const int SE = 1;
-        private const int NE = 2;
-        private const int NW = 3;
-
         public string Name { get; private set; }
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         private bool IsInitialized;
@@ -432,16 +426,16 @@ namespace BlockmapFramework
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && pathNodeBelow.Type == NodeType.AirPathSlope) return false; // Can't build with slope underneath
 
-            if (surfaceNode.Shape == "0000") return height > surfaceNode.Height[0];
-            if (surfaceNode.HasPath || surfaceNode.Shape == "1110" || surfaceNode.Shape == "1101" || surfaceNode.Shape == "1011" || surfaceNode.Shape == "0111") return height > surfaceNode.Height.Max(x => x);
-            else return surfaceNode.Height.All(x => height >= x);
+            if (surfaceNode.IsFlat) return height > surfaceNode.BaseHeight;
+            if (surfaceNode.HasPath || surfaceNode.Shape == "1110" || surfaceNode.Shape == "1101" || surfaceNode.Shape == "1011" || surfaceNode.Shape == "0111") return height > surfaceNode.MaxHeight;
+            else return surfaceNode.Height.Values.All(x => height >= x);
         }
         public void BuildAirPath(Vector2Int worldCoordinates, int height)
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, new int[] { height, height, height, height }, SurfaceId.Tarmac);
+            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
@@ -470,15 +464,15 @@ namespace BlockmapFramework
             BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
             if (pathNodeBelow != null && !Pathfinder.CanNodesBeAboveEachOther(pathNodeBelow.Shape, AirPathSlopeNode.GetShapeFromDirection(dir))) return false;
 
-            if (surfaceNode.HasPath) return height > surfaceNode.Height.Max(x => x);
-            else return surfaceNode.Height.All(x => height >= x);
+            if (surfaceNode.HasPath) return height > surfaceNode.MaxHeight;
+            else return surfaceNode.Height.Values.All(x => height >= x);
         }
         public void BuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirPathSlopeNode newNode = new AirPathSlopeNode(this, chunk, NodeIdCounter++, localCoordinates, AirPathSlopeNode.GetHeightsFromDirection(height, dir), SurfaceId.Tarmac);
+            AirPathSlopeNode newNode = new AirPathSlopeNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
@@ -594,10 +588,10 @@ namespace BlockmapFramework
                 if (checkNode.WaterNode != null) return null; // already has water here
 
                 bool isUnderwater = (
-                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[NE] < shoreHeight || checkNode.Height[SE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[SW] < shoreHeight || checkNode.Height[SE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[SW] < shoreHeight || checkNode.Height[NW] < shoreHeight))
+                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.NW] < shoreHeight))
                     );
                 if (isUnderwater) // underwater
                 {
@@ -609,10 +603,10 @@ namespace BlockmapFramework
 
                     waterBody.CoveredNodes.Add(checkNode);
 
-                    if (checkNode.Height[NW] < shoreHeight || checkNode.Height[NE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
-                    if (checkNode.Height[NE] < shoreHeight || checkNode.Height[SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
-                    if (checkNode.Height[SW] < shoreHeight || checkNode.Height[SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
-                    if (checkNode.Height[NW] < shoreHeight || checkNode.Height[SW] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
+                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
                 }
                 else { } // above water
             }
@@ -625,7 +619,7 @@ namespace BlockmapFramework
             List<WaterNode> waterNodes = new List<WaterNode>();
             foreach (SurfaceNode node in data.CoveredNodes)
             {
-                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, new int[] { data.ShoreHeight, data.ShoreHeight, data.ShoreHeight, data.ShoreHeight }, SurfaceId.Water);
+                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight), SurfaceId.Water);
                 waterNodes.Add(waterNode);
                 RegisterNode(waterNode);
             }
@@ -930,8 +924,8 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the exact world height (y-coordinate) at the given relative position.
-        /// <br/> Only works when that node is visible.
+        /// Returns the exact world height (y-coordinate) of the given node at the given position.
+        /// <br/> Only works when the node mesh is drawn.
         /// </summary>
         public float GetWorldHeightAt(Vector2 worldPosition2d, BlockmapNode node)
         {
@@ -979,6 +973,46 @@ namespace BlockmapFramework
             List<BlockmapNode> candidateNodes = new List<BlockmapNode>();
             foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes().Where(x => x.IsPassable(entity)).ToList());
             return candidateNodes[Random.Range(0, candidateNodes.Count)];
+        }
+
+        /// <summary>
+        /// Checks and returns if two adjacent nodes match seamlessly in the given direction.
+        /// <br/> 
+        /// </summary>
+        public bool DoAdjacentHeightsMatch(BlockmapNode fromNode, BlockmapNode toNode, Direction dir)
+        {
+            if (toNode.WorldCoordinates != GetWorldCoordinatesInDirection(fromNode.WorldCoordinates, dir))
+                throw new System.Exception("toNode is not adjacent to fromNode in the given direction. fromNode = " + fromNode.WorldCoordinates.ToString() + ", toNode = " + toNode.WorldCoordinates.ToString() + ", direction = " + dir.ToString());
+
+            switch (dir)
+            {
+                case Direction.N:
+                    return (fromNode.Height[Direction.NE] == toNode.Height[Direction.SE]) && (fromNode.Height[Direction.NW] == toNode.Height[Direction.SW]);
+
+                case Direction.S:
+                    return (fromNode.Height[Direction.SE] == toNode.Height[Direction.NE]) && (fromNode.Height[Direction.SW] == toNode.Height[Direction.NW]);
+
+                case Direction.E:
+                    return (fromNode.Height[Direction.SE] == toNode.Height[Direction.SW]) && (fromNode.Height[Direction.NE] == toNode.Height[Direction.NW]);
+
+                case Direction.W:
+                    return (fromNode.Height[Direction.SW] == toNode.Height[Direction.SE]) && (fromNode.Height[Direction.NW] == toNode.Height[Direction.NE]);
+
+                case Direction.NW:
+                    return fromNode.Height[Direction.NW] == toNode.Height[Direction.SE];
+
+                case Direction.NE:
+                    return fromNode.Height[Direction.NE] == toNode.Height[Direction.SW];
+
+                case Direction.SW:
+                    return fromNode.Height[Direction.SW] == toNode.Height[Direction.NE];
+
+                case Direction.SE:
+                    return fromNode.Height[Direction.SE] == toNode.Height[Direction.NW];
+
+                default:
+                    return false;
+            }
         }
 
         #endregion

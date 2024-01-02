@@ -47,7 +47,7 @@ namespace WorldEditor
         void Start()
         {
             // Init world
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 4);
+            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 2);
             SetWorld(data);
 
             // Init tools

@@ -24,7 +24,15 @@ namespace BlockmapFramework
         public bool HasPath;
         public Surface PathSurface;
 
-        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
+        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
+
+        protected override bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
+        {
+            // Always connect to water if this has water as well.
+            if (WaterNode != null && adjNode.Type == NodeType.Water) return true;
+
+            return base.ShouldConnectToNode(adjNode, dir);
+        }
 
         #region Draw
 
@@ -44,14 +52,14 @@ namespace BlockmapFramework
             float xEnd = LocalCoordinates.x + 1;
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1;
-            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, Height[0] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, Height[1] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, Height[1] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, Height[2] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, Height[2] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, Height[3] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
-            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, Height[3] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
 
             switch (Shape)
             {
@@ -127,28 +135,28 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
 
-            if (Height[NE] < eastNode.Height[NW] && Height[SE] < eastNode.Height[SW]) // Both corners are lower than next tile
+            if (Height[Direction.NE] < eastNode.Height[Direction.NW] && Height[Direction.SE] < eastNode.Height[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
-            else if (Height[NE] < eastNode.Height[NW]) // Only NE corner is lower
+            else if (Height[Direction.NE] < eastNode.Height[Direction.NW]) // Only NE corner is lower
             {
-                if (Height[SE] == eastNode.Height[SW])
+                if (Height[Direction.SE] == eastNode.Height[Direction.SW])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, cc);
             }
 
-            else if (Height[SE] < eastNode.Height[SW]) // Only SE corner is lower
+            else if (Height[Direction.SE] < eastNode.Height[Direction.SW]) // Only SE corner is lower
             {
-                if (Height[NE] == eastNode.Height[NW])
+                if (Height[Direction.NE] == eastNode.Height[Direction.NW])
                     meshBuilder.AddTriangle(cliffSubmesh, v3, v4, v1);
 
                 else
@@ -166,28 +174,28 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
 
-            if (Height[SE] < southNode.Height[NE] && Height[SW] < southNode.Height[NW]) // Both corners are lower than next tile
+            if (Height[Direction.SE] < southNode.Height[Direction.NE] && Height[Direction.SW] < southNode.Height[Direction.NW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
-            else if (Height[SE] < southNode.Height[NE]) // Only SE corner is lower
+            else if (Height[Direction.SE] < southNode.Height[Direction.NE]) // Only SE corner is lower
             {
-                if (Height[SW] == southNode.Height[NW])
+                if (Height[Direction.SW] == southNode.Height[Direction.NW])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, cc);
             }
 
-            else if (Height[SW] < southNode.Height[NW]) // Only SW corner is lower
+            else if (Height[Direction.SW] < southNode.Height[Direction.NW]) // Only SW corner is lower
             {
-                if (Height[SE] == southNode.Height[NE])
+                if (Height[Direction.SE] == southNode.Height[Direction.NE])
                     meshBuilder.AddTriangle(cliffSubmesh, v3, v4, v1);
 
                 else
@@ -205,28 +213,28 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
 
-            if (Height[NW] < westNode.Height[NE] && Height[SW] < westNode.Height[SE]) // Both corners are lower than next tile
+            if (Height[Direction.NW] < westNode.Height[Direction.NE] && Height[Direction.SW] < westNode.Height[Direction.SE]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
-            else if (Height[NW] < westNode.Height[NE]) // Only NE corner is lower
+            else if (Height[Direction.NW] < westNode.Height[Direction.NE]) // Only NE corner is lower
             {
-                if (Height[SW] == westNode.Height[SE])
+                if (Height[Direction.SW] == westNode.Height[Direction.SE])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v3, v2);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, cc);
             }
 
-            else if (Height[SW] < westNode.Height[SE]) // Only SE corner is lower
+            else if (Height[Direction.SW] < westNode.Height[Direction.SE]) // Only SE corner is lower
             {
-                if (Height[NW] == westNode.Height[NE])
+                if (Height[Direction.NW] == westNode.Height[Direction.NE])
                     meshBuilder.AddTriangle(cliffSubmesh, v4, v3, v1);
 
                 else
@@ -244,28 +252,28 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 
 
-            if (Height[NE] < northNode.Height[SE] && Height[NW] < northNode.Height[SW]) // Both corners are lower than next tile
+            if (Height[Direction.NE] < northNode.Height[Direction.SE] && Height[Direction.NW] < northNode.Height[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
-            else if (Height[NE] < northNode.Height[SE]) // Only SE corner is lower
+            else if (Height[Direction.NE] < northNode.Height[Direction.SE]) // Only SE corner is lower
             {
-                if (Height[NW] == northNode.Height[SW])
+                if (Height[Direction.NW] == northNode.Height[Direction.SW])
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, cc);
             }
 
-            else if (Height[NW] < northNode.Height[SW]) // Only SW corner is lower
+            else if (Height[Direction.NW] < northNode.Height[Direction.SW]) // Only SW corner is lower
             {
-                if (Height[NE] == northNode.Height[SE])
+                if (Height[Direction.NE] == northNode.Height[Direction.SE])
                     meshBuilder.AddTriangle(cliffSubmesh, v4, v3, v1);
 
                 else
@@ -288,11 +296,11 @@ namespace BlockmapFramework
             if (Entities.Count > 0) return false;
             if (WaterNode != null) return false;
 
-            int[] newHeights = new int[4];
-            for (int i = 0; i < 4; i++) newHeights[i] = Height[i];
-            foreach (int h in GetAffectedCornerIds(mode)) newHeights[h] += increase ? 1 : -1;
-            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min());
-            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Min() + 1);
+            Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
+            foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
+            foreach (Direction dir in Height.Keys) newHeights[dir] += increase ? 1 : -1;
+            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Values.Min());
+            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Values.Min() + 1);
             string newShape = GetShape(newHeights);
             if (pathNodeOn != null) return false;
             if (pathNodeAbove != null && !Pathfinder.CanNodesBeAboveEachOther(newShape, pathNodeAbove.Shape)) return false;
@@ -301,8 +309,8 @@ namespace BlockmapFramework
         }
         public void ChangeHeight(Direction mode, bool isIncrease)
         {
-            int[] preChange = new int[Height.Length];
-            for (int i = 0; i < preChange.Length; i++) preChange[i] = Height[i];
+            Dictionary<Direction, int> preChange = new Dictionary<Direction, int>();
+            foreach (Direction dir in Height.Keys) preChange[dir] = Height[dir];
 
             switch (mode)
             {
@@ -311,42 +319,42 @@ namespace BlockmapFramework
                     break;
 
                 case Direction.N:
-                    ChangeSideHeight(isIncrease, NW, NE);
+                    ChangeSideHeight(isIncrease, Direction.NW, Direction.NE);
                     break;
 
                 case Direction.E:
-                    ChangeSideHeight(isIncrease, SE, NE);
+                    ChangeSideHeight(isIncrease, Direction.SE, Direction.NE);
                     break;
 
                 case Direction.S:
-                    ChangeSideHeight(isIncrease, SW, SE);
+                    ChangeSideHeight(isIncrease, Direction.SW, Direction.SE);
                     break;
 
                 case Direction.W:
-                    ChangeSideHeight(isIncrease, SW, NW);
+                    ChangeSideHeight(isIncrease, Direction.SW, Direction.NW);
                     break;
 
                 case Direction.NE:
-                    Height[NE] += isIncrease ? 1 : -1;
+                    Height[Direction.NE] += isIncrease ? 1 : -1;
                     break;
 
                 case Direction.NW:
-                    Height[NW] += isIncrease ? 1 : -1;
+                    Height[Direction.NW] += isIncrease ? 1 : -1;
                     break;
 
                 case Direction.SW:
-                    Height[SW] += isIncrease ? 1 : -1;
+                    Height[Direction.SW] += isIncrease ? 1 : -1;
                     break;
 
                 case Direction.SE:
-                    Height[SE] += isIncrease ? 1 : -1;
+                    Height[Direction.SE] += isIncrease ? 1 : -1;
                     break;
             }
 
             // Don't apply change if resulting shape is not valid
             if (!IsValid(Height))
             {
-                for (int i = 0; i < preChange.Length; i++) Height[i] = preChange[i];
+                foreach (Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] = preChange[dir];
             }
             else UseAlternativeVariant = isIncrease;
 
@@ -354,16 +362,16 @@ namespace BlockmapFramework
         }
         private void ChangeFullHeight(bool increase)
         {
-            if (Height.All(x => x == Height[0]))
+            if (IsFlat)
             {
-                for (int i = 0; i < Height.Length; i++) Height[i] += increase ? 1 : -1;
+                foreach(Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] += increase ? 1 : -1;
             }
             else
             {
-                for (int i = 0; i < Height.Length; i++) Height[i] = increase ? Height.Max(x => x) : Height.Min(x => x);
+                foreach (Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] = increase ? MaxHeight : BaseHeight;
             }
         }
-        private void ChangeSideHeight(bool increase, int i1, int i2)
+        private void ChangeSideHeight(bool increase, Direction i1, Direction i2)
         {
             if (Height[i1] != Height[i2])
             {
@@ -393,12 +401,12 @@ namespace BlockmapFramework
 
         #region Getters
 
-        private bool IsValid(int[] height)
+        private bool IsValid(Dictionary<Direction,int> height)
         {
-            return !(Mathf.Abs(height[SE] - height[SW]) > 1 ||
-            Mathf.Abs(height[SW] - height[NW]) > 1 ||
-            Mathf.Abs(height[NW] - height[NE]) > 1 ||
-            Mathf.Abs(height[NE] - height[SE]) > 1);
+            return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||
+            Mathf.Abs(height[Direction.SW] - height[Direction.NW]) > 1 ||
+            Mathf.Abs(height[Direction.NW] - height[Direction.NE]) > 1 ||
+            Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
         }
 
         public override float GetSpeedModifier()
@@ -418,16 +426,7 @@ namespace BlockmapFramework
 
             return base.IsPassable(entity);
         }
-        public override bool IsPassable(Direction dir, Entity entity = null)
-        {
-            // Check if the side has a corner underwater
-            if (WaterNode != null)
-            {
-                if (GetAffectedCornerIds(dir).Any(x => Height[x] < WaterNode.WaterBody.ShoreHeight)) return false;
-            }
 
-            return base.IsPassable(dir, entity);
-        }
         public bool IsCenterUnderWater => (WaterNode != null && GetCenterWorldPosition().y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
 
         #endregion

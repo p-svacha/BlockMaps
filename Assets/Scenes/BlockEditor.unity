@@ -3807,6 +3807,7 @@ MonoBehaviour:
   SpeedInput: {fileID: 1382881766}
   VisionInput: {fileID: 1880049992}
   HeightInput: {fileID: 410716395}
+  CanSwimToggle: {fileID: 1200605373}
 --- !u!114 &1069857243
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Height of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
-        public int[] Height { get; protected set; }
+        public Dictionary<Direction, int> Height { get; protected set; }
 
         /// <summary>
         /// Lowest point of this node.
@@ -40,12 +40,6 @@ namespace BlockmapFramework
         /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
         /// </summary>
         public bool UseAlternativeVariant;
-
-        // Indices for shape
-        public const int SW = 0;
-        public const int SE = 1;
-        public const int NE = 2;
-        public const int NW = 3;
 
         // Node attributes
         public World World { get; private set; }
@@ -77,7 +71,7 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface)
+        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface)
         {
             World = world;
             Chunk = chunk;
@@ -97,16 +91,16 @@ namespace BlockmapFramework
         /// </summary>
         protected void RecalculateShape()
         {
-            BaseHeight = Height.Min();
-            MaxHeight = Height.Max();
+            BaseHeight = Height.Values.Min();
+            MaxHeight = Height.Values.Max();
             Shape = GetShape(Height);
         }
 
-        protected string GetShape(int[] height)
+        protected string GetShape(Dictionary<Direction, int> height)
         {
-            int baseHeight = height.Min();
+            int baseHeight = height.Values.Min();
             string binaryShape = "";
-            for (int i = 0; i < 4; i++) binaryShape += (height[i] - baseHeight);
+            foreach (Direction dir in Height.Keys) binaryShape += (height[dir] - baseHeight);
             return binaryShape;
         }
 
@@ -141,7 +135,7 @@ namespace BlockmapFramework
             {
                 if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
 
-                if (Pathfinder.DoAdjacentHeightsMatch(this, adjNode, dir))
+                if(ShouldConnectToNode(adjNode, dir))
                 {
                     // Surface node connections can be override by air nodes built on a surface. In that case we remove the surface connection first
                     if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && (adjNode.Type == NodeType.AirPathSlope || adjNode.Type == NodeType.AirPath))
@@ -151,6 +145,14 @@ namespace BlockmapFramework
                     ConnectedNodes.Add(dir, adjNode);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns if this node should be connected to the given node (that is adjacent in the given direction)
+        /// </summary>
+        protected virtual bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
+        {
+            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
         }
 
         /// <summary>
@@ -378,7 +380,7 @@ namespace BlockmapFramework
             return true;
         }
 
-        public bool IsFlat => Height.All(x => x == Height[0]);
+        public bool IsFlat => Height.Values.All(x => x == Height[Direction.SW]);
 
         /// <summary>
         /// Returns the amount of space (in amount of tiles) that is free above this node.
@@ -395,32 +397,16 @@ namespace BlockmapFramework
             {
                 if (node == this) continue; // ignore ourselves
                 if (node.Type == NodeType.Water) continue; // ignore water
+                if (Type == NodeType.Water && node.Type == NodeType.Surface) Debug.Log("ignroe " + WorldCoordinates.ToString() + "/" + dir.ToString()); // ignore surface as water
 
-                foreach(int i in GetAffectedCornerIds(dir))
+                foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {
-                    int diff = node.Height[i] - Height[i];
+                    int diff = node.Height[corner] - Height[corner];
                     if (diff < minHeight) minHeight = diff;
                 }
             }
 
             return minHeight;
-        }
-
-        /// <summary>
-        /// Returns the corner heights that are relevant for a given direction.
-        /// </summary>
-        protected List<int> GetAffectedCornerIds(Direction dir)
-        {
-            if (dir == Direction.None) return new List<int> { NE, NW, SW, SE };
-            if (dir == Direction.N) return new List<int> { NE, NW };
-            if (dir == Direction.E) return new List<int> { NE, SE };
-            if (dir == Direction.S) return new List<int> { SW, SE };
-            if (dir == Direction.W) return new List<int> { SW, NW };
-            if (dir == Direction.NW) return new List<int>() { NW };
-            if (dir == Direction.NE) return new List<int>() { NE };
-            if (dir == Direction.SE) return new List<int>() { SE };
-            if (dir == Direction.SW) return new List<int>() { SW };
-            throw new System.Exception("Direction " + dir.ToString() + " not handled");
         }
 
         #endregion
@@ -432,18 +418,29 @@ namespace BlockmapFramework
             switch(data.Type)
             {
                 case NodeType.Surface:
-                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
+                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.AirPath:
-                    return new AirPathNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
+                    return new AirPathNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.AirPathSlope:
-                    return new AirPathSlopeNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
+                    return new AirPathSlopeNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.Water:
-                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height, data.Surface);
+                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
+        }
+
+        private static Dictionary<Direction, int> LoadHeight(int[] height)
+        {
+            return new Dictionary<Direction, int>()
+            {
+                { Direction.SW, height[0] },
+                { Direction.SE, height[1] },
+                { Direction.NE, height[2] },
+                { Direction.NW, height[3] },
+            };
         }
 
         public NodeData Save()
@@ -453,7 +450,7 @@ namespace BlockmapFramework
                 Id = Id,
                 LocalCoordinateX = LocalCoordinates.x,
                 LocalCoordinateY = LocalCoordinates.y,
-                Height = Height,
+                Height = new int[] { Height[Direction.SW], Height[Direction.SE], Height[Direction.NE], Height[Direction.NW] },
                 Surface = Surface.Id,
                 Type = Type
             };

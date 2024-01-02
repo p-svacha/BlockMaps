@@ -9,12 +9,7 @@ namespace BlockmapFramework
         public override NodeType Type => NodeType.AirPathSlope;
         public override bool IsPath => true;
 
-        public Direction SlopeDirection;
-
-        public AirPathSlopeNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface)
-        {
-            SlopeDirection = GetDirectionFromShape(Shape);
-        }
+        public AirPathSlopeNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
 
         public static string GetShapeFromDirection(Direction dir)
         {
@@ -23,24 +18,6 @@ namespace BlockmapFramework
             else if (dir == Direction.S) return "1100";
             else if (dir == Direction.W) return "1001";
             else throw new System.Exception("Invalid directions for slope");
-        }
-
-        public static int[] GetHeightsFromDirection(int height, Direction dir)
-        {
-            if (dir == Direction.N) return new int[] { height, height, height + 1, height + 1 };
-            else if (dir == Direction.E) return new int[] { height, height + 1, height + 1, height };
-            else if (dir == Direction.S) return new int[] { height + 1, height + 1, height, height };
-            else if (dir == Direction.W) return new int[] { height + 1, height, height, height + 1 };
-            else throw new System.Exception("Invalid direction for slope");
-        }
-
-        private Direction GetDirectionFromShape(string shape)
-        {
-            if (shape == "0011") return Direction.N;
-            if (shape == "0110") return Direction.E;
-            if (shape == "1100") return Direction.S;
-            if (shape == "1001") return Direction.W;
-            throw new System.Exception("Unhandled heights");
         }
 
         #region Draw

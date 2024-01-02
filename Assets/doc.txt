@@ -1,10 +1,11 @@
 Big Features to Add:
 
-- Fix navmesh around diagonal shores
 - Fix placing big entities around water canplace check
 - FIX MOVING through water
 - fix selection indicator in water
 - fix hovered node water
+- fix change height below water
+- get rid of shape node attribute
 
 - Encode editorentity data in typeid (vision, movement, height, swim)
 
@@ -49,6 +50,8 @@ OR
 - Show entity stats in static entity tool in editor
 
 - combine airpathsloe and airpath into 1 type
+
+- interface for world with documentation
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly

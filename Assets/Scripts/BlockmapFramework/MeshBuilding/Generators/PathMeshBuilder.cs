@@ -96,7 +96,7 @@ namespace BlockmapFramework
         {
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(Node.WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
-                if (adjNode.IsPath && Pathfinder.DoAdjacentHeightsMatch(Node, adjNode, dir))
+                if (adjNode.IsPath && World.DoAdjacentHeightsMatch(Node, adjNode, dir))
                     return true;
             return false;
         }

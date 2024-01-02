@@ -12,13 +12,24 @@ namespace BlockmapFramework
         public WaterBody WaterBody { get; private set; }
         public SurfaceNode SurfaceNode { get; private set; }
 
-        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int[] height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
+        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
 
         public void Init(WaterBody waterBody, SurfaceNode surfaceNode)
         {
             WaterBody = waterBody;
             SurfaceNode = surfaceNode;
             SurfaceNode.SetWaterNode(this);
+        }
+
+        protected override bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
+        {
+            // Always connect to diagonal shore
+            if(adjNode is SurfaceNode surfaceNode)
+            {
+                if(surfaceNode.WaterNode != null && !surfaceNode.IsCenterUnderWater) return true;
+            }
+
+            return base.ShouldConnectToNode(adjNode, dir);
         }
 
         #region Getters
@@ -31,7 +42,7 @@ namespace BlockmapFramework
         public override bool IsPassable(Entity entity = null)
         {
             if (!SurfaceNode.IsCenterUnderWater) return false; // Surface node on same spot is passable
-            if (entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
+            if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
             
             return base.IsPassable(entity);
         }

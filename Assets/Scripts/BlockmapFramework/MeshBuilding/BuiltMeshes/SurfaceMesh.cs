@@ -46,37 +46,37 @@ namespace BlockmapFramework
                 surfaceArray.Add(surfaceId);
 
                 // Blend west
-                SurfaceNode westNode = node.World.GetAdjacentSurfaceNode(node, Direction.W);
-                if (westNode != null && Pathfinder.DoAdjacentHeightsMatch(node, westNode, Direction.W)) surfaceBlend_W.Add((int)westNode.Surface.Id);
+                SurfaceNode westNode = World.GetAdjacentSurfaceNode(node, Direction.W);
+                if (westNode != null && World.DoAdjacentHeightsMatch(node, westNode, Direction.W)) surfaceBlend_W.Add((int)westNode.Surface.Id);
                 else surfaceBlend_W.Add(surfaceId);
                 // Blend north
-                SurfaceNode northNode = node.World.GetAdjacentSurfaceNode(node, Direction.N);
-                if (northNode != null && Pathfinder.DoAdjacentHeightsMatch(node, northNode, Direction.N)) surfaceBlend_N.Add((int)northNode.Surface.Id);
+                SurfaceNode northNode = World.GetAdjacentSurfaceNode(node, Direction.N);
+                if (northNode != null && World.DoAdjacentHeightsMatch(node, northNode, Direction.N)) surfaceBlend_N.Add((int)northNode.Surface.Id);
                 else surfaceBlend_N.Add(surfaceId);
                 // Blend south
-                SurfaceNode southNode = node.World.GetAdjacentSurfaceNode(node, Direction.S);
-                if (southNode != null && Pathfinder.DoAdjacentHeightsMatch(node, southNode, Direction.S)) surfaceBlend_S.Add((int)southNode.Surface.Id);
+                SurfaceNode southNode = World.GetAdjacentSurfaceNode(node, Direction.S);
+                if (southNode != null && World.DoAdjacentHeightsMatch(node, southNode, Direction.S)) surfaceBlend_S.Add((int)southNode.Surface.Id);
                 else surfaceBlend_S.Add(surfaceId);
                 // Blend east
-                SurfaceNode eastNode = node.World.GetAdjacentSurfaceNode(node, Direction.E);
-                if (eastNode != null && Pathfinder.DoAdjacentHeightsMatch(node, eastNode, Direction.E)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
+                SurfaceNode eastNode = World.GetAdjacentSurfaceNode(node, Direction.E);
+                if (eastNode != null && World.DoAdjacentHeightsMatch(node, eastNode, Direction.E)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
                 else surfaceBlend_E.Add(surfaceId);
 
                 // Blend nw
-                SurfaceNode nwNode = node.World.GetAdjacentSurfaceNode(node, Direction.NW);
-                if (nwNode != null && Pathfinder.DoAdjacentHeightsMatch(node, nwNode, Direction.NW)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
+                SurfaceNode nwNode = World.GetAdjacentSurfaceNode(node, Direction.NW);
+                if (nwNode != null && World.DoAdjacentHeightsMatch(node, nwNode, Direction.NW)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
                 else surfaceBlend_NW.Add(surfaceId);
                 // Blend ne
-                SurfaceNode neNode = node.World.GetAdjacentSurfaceNode(node, Direction.NE);
-                if (neNode != null && Pathfinder.DoAdjacentHeightsMatch(node, neNode, Direction.NE)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
+                SurfaceNode neNode = World.GetAdjacentSurfaceNode(node, Direction.NE);
+                if (neNode != null && World.DoAdjacentHeightsMatch(node, neNode, Direction.NE)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
                 else surfaceBlend_NE.Add(surfaceId);
                 // Blend se
-                SurfaceNode seNode = node.World.GetAdjacentSurfaceNode(node, Direction.SE);
-                if (seNode != null && Pathfinder.DoAdjacentHeightsMatch(node, seNode, Direction.SE)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
+                SurfaceNode seNode = World.GetAdjacentSurfaceNode(node, Direction.SE);
+                if (seNode != null && World.DoAdjacentHeightsMatch(node, seNode, Direction.SE)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
                 else surfaceBlend_SE.Add(surfaceId);
                 // Blend sw
-                SurfaceNode swNode = node.World.GetAdjacentSurfaceNode(node, Direction.SW);
-                if (swNode != null && Pathfinder.DoAdjacentHeightsMatch(node, swNode, Direction.SW)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
+                SurfaceNode swNode = World.GetAdjacentSurfaceNode(node, Direction.SW);
+                if (swNode != null && World.DoAdjacentHeightsMatch(node, swNode, Direction.SW)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
                 else surfaceBlend_SW.Add(surfaceId);
             }
             meshBuilder.ApplyMesh(castShadows: false);

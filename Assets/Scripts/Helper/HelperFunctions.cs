@@ -142,6 +142,48 @@ public static class HelperFunctions
     {
         return new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     }
+    public static List<Direction> GetCornerDirections() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NW, Direction.NE };
+
+    /// <summary>
+    /// Returns the corner directions that are relevant for a given direction.
+    /// </summary>
+    public static List<Direction> GetAffectedCorners(Direction dir)
+    {
+        if (dir == Direction.None) return new List<Direction> { Direction.NE, Direction.NW, Direction.SW, Direction.SE };
+        if (dir == Direction.N) return new List<Direction> { Direction.NE, Direction.NW };
+        if (dir == Direction.E) return new List<Direction> { Direction.NE, Direction.SE };
+        if (dir == Direction.S) return new List<Direction> { Direction.SW, Direction.SE };
+        if (dir == Direction.W) return new List<Direction> { Direction.SW, Direction.NW };
+        if (dir == Direction.NW) return new List<Direction>() { Direction.NW };
+        if (dir == Direction.NE) return new List<Direction>() { Direction.NE };
+        if (dir == Direction.SE) return new List<Direction>() { Direction.SE };
+        if (dir == Direction.SW) return new List<Direction>() { Direction.SW };
+        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    /// <summary>
+    /// Returns the heights for a flat surface based on its height.
+    /// </summary>
+    public static Dictionary<Direction, int> GetFlatHeights(int height)
+    {
+        Dictionary<Direction, int> heights = new Dictionary<Direction, int>();
+        foreach (Direction dir in GetCornerDirections()) heights.Add(dir, height);
+        return heights;
+    }
+
+    /// <summary>
+    /// Returns the heights for a sloped surface based on its upwards direction and base height.
+    /// </summary>
+    public static Dictionary<Direction, int> GetSlopeHeights(int baseHeight, Direction dir)
+    {
+        Dictionary<Direction, int> heights = new Dictionary<Direction, int>();
+        foreach (Direction corner in GetAffectedCorners(dir))
+        {
+            heights.Add(corner, baseHeight + 1);
+            heights.Add(GetOppositeDirection(corner), baseHeight);
+        }
+        return heights;
+    }
 
     #endregion
 
