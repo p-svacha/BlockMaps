@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class CTF_EntityLibrary : EntityLibrary
+    public class CTF_ContentLibrary : WorldContentLibrary
     {
         private const string ENTITY_PREFAB_PATH = "CTF/Entities/";
 
@@ -14,6 +14,11 @@ namespace CaptureTheFlag
             return Resources.Load<StaticEntity>(ENTITY_PREFAB_PATH + id + ".prefab");
 
             throw new System.Exception("Id " + id + " does not exist.");
+        }
+
+        public override Wall GetWallInstance(World world, WallData data)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

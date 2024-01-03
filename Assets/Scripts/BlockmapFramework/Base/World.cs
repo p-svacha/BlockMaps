@@ -37,7 +37,7 @@ namespace BlockmapFramework
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         private bool IsInitialized;
         public int ChunkSize { get; private set; }
-        public EntityLibrary EntityLibrary { get; private set; }
+        public WorldContentLibrary ContentLibrary { get; private set; }
 
 
         // Database
@@ -46,6 +46,7 @@ namespace BlockmapFramework
         public Dictionary<int, Player> Players = new Dictionary<int, Player>();
         public List<Entity> Entities = new List<Entity>();
         public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
+        public List<Wall> Walls = new List<Wall>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
@@ -67,6 +68,7 @@ namespace BlockmapFramework
         public int Layer_Entity;
         public int Layer_AirNode;
         public int Layer_Water;
+        public int Layer_Wall;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -84,6 +86,7 @@ namespace BlockmapFramework
         /// <br/> Hovering the center part of a node will return Direction.None.
         /// </summary>
         public Direction NodeHoverMode { get; private set; }
+        public Direction NodeSideHoverMode { get; private set; }
         private float HoverEdgeSensitivity = 0.3f; // sensitivity for NodeHoverMode
 
         public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
@@ -100,18 +103,19 @@ namespace BlockmapFramework
 
         #region Init
 
-        public void Init(WorldData data, EntityLibrary entityLibrary)
+        public void Init(WorldData data, WorldContentLibrary entityLibrary)
         {
             // Init general
             Name = data.Name;
             ChunkSize = data.ChunkSize;
-            EntityLibrary = entityLibrary;
+            ContentLibrary = entityLibrary;
             WorldData = data;
 
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
+            Layer_Wall = LayerMask.NameToLayer("Wall");
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
@@ -121,6 +125,12 @@ namespace BlockmapFramework
 
             // Init pathfinder
             Pathfinder.Init(this);
+
+            // Init players
+            foreach (PlayerData playerData in data.Players) AddPlayer(Player.Load(this, playerData));
+
+            if (!Players.ContainsKey(-1)) AddPlayer(new Player(this, -1, "Gaia"));
+            Gaia = Players[-1];
 
             // Init nodes
             foreach (ChunkData chunkData in data.Chunks)
@@ -132,11 +142,14 @@ namespace BlockmapFramework
             EntityIdCounter = data.MaxEntityId + 1;
             WaterBodyIdCounter = data.MaxWaterBodyId + 1;
 
-            // Init players
-            foreach (PlayerData playerData in data.Players) AddPlayer(Player.Load(this, playerData));
+            // Init walls
+            foreach(WallData wallData in data.Walls)
+            {
+                Wall wall = Wall.Load(this, wallData);
 
-            if (!Players.ContainsKey(-1)) AddPlayer(new Player(this, -1, "Gaia"));
-            Gaia = Players[-1];
+                wall.Node.Walls[wall.Side] = wall;
+                Walls.Add(wall);
+            }
 
             // Init water bodies
             foreach (WaterBodyData waterData in data.WaterBodies)
@@ -150,7 +163,6 @@ namespace BlockmapFramework
 
             InitializeStep = 1;
         }
-
         private void UpdateInitialization()
         {
             if (IsInitialized) return;
@@ -238,6 +250,7 @@ namespace BlockmapFramework
                 IsHoveringWorld = true;
 
                 NodeHoverMode = GetNodeHoverMode(hitPosition);
+                NodeSideHoverMode = GetNodeSideHoverMode(hitPosition);
                 HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
 
                 // Update chunk
@@ -328,6 +341,23 @@ namespace BlockmapFramework
             if (east) return Direction.E;
             if (west) return Direction.W;
             return Direction.None;
+        }
+        private Direction GetNodeSideHoverMode(Vector3 worldPos)
+        {
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+            if (worldPos.x < 0) posOnTile.x++;
+            if (worldPos.z < 0) posOnTile.y++;
+
+            if(posOnTile.x > posOnTile.y)
+            {
+                if (1f - posOnTile.x > posOnTile.y) return Direction.S;
+                else return Direction.E;
+            }
+            else
+            {
+                if (1f - posOnTile.x > posOnTile.y) return Direction.W;
+                else return Direction.N;
+            }
         }
 
         #endregion
@@ -698,6 +728,29 @@ namespace BlockmapFramework
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
+        }
+
+        public bool CanBuildWall(BlockmapNode node, Direction side)
+        {
+            return true;
+        }
+        public void PlaceWall(Wall wall, BlockmapNode node, Direction side)
+        {
+            node.Walls[side] = wall;
+            Walls.Add(wall);
+
+            UpdateNavmesh(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+        }
+        public void RemoveWall(Wall wall)
+        {
+            BlockmapNode node = wall.Node;
+            node.Walls[wall.Side] = null;
+
+            UpdateNavmesh(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
 
 
@@ -1072,7 +1125,7 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static World Load(WorldData data, EntityLibrary entityLibrary)
+        public static World Load(WorldData data, WorldContentLibrary entityLibrary)
         {
             GameObject worldObject = new GameObject(data.Name);
             World world = worldObject.AddComponent<World>();
@@ -1092,7 +1145,8 @@ namespace BlockmapFramework
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Players = Players.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Select(x => x.Save()).ToList(),
-                WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList()
+                WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
+                Walls = Walls.Select(x => x.Save()).ToList()
             };
         }
 

@@ -12,30 +12,19 @@ namespace WorldEditor
         public override Sprite Icon => ResourceManager.Singleton.SurfaceToolSprite;
 
         private SurfaceId SelectedSurface;
-        private Dictionary<SurfaceId, UI_SelectionElement> SurfaceButtons;
-
-        [Header("Prefabs")]
-        public UI_SelectionElement SurfacePrefab;
 
         [Header("Elements")]
-        public GameObject SurfaceContainer;
-
-        private const int ELEMENTS_PER_ROW = 6;
+        public UI_SelectionPanel SelectionPanel;
 
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
 
-            SurfaceButtons = new Dictionary<SurfaceId, UI_SelectionElement>();
+            SelectionPanel.Clear();
 
-            int counter = 0;
-            foreach(Surface s in SurfaceManager.Instance.GetAllSurfaces())
+            foreach(Surface s in SurfaceManager.Instance.GetPaintableSurfaces())
             {
-                int childIndex = counter / ELEMENTS_PER_ROW;
-                UI_SelectionElement elem = Instantiate(SurfacePrefab, SurfaceContainer.transform.GetChild(childIndex));
-                elem.Init(null, s.Color, s.Name, () => SelectSurface(s.Id));
-                SurfaceButtons.Add(s.Id, elem);
-                counter++;
+                SelectionPanel.AddElement(null, s.Color, s.Name, () => SelectSurface(s.Id));
             }
 
             SelectSurface(SurfaceId.Grass);
@@ -43,9 +32,7 @@ namespace WorldEditor
 
         public void SelectSurface(SurfaceId surface)
         {
-            SurfaceButtons[SelectedSurface].SetSelected(false);
             SelectedSurface = surface;
-            SurfaceButtons[SelectedSurface].SetSelected(true);
         }
 
         public override void UpdateTool()

@@ -45,7 +45,7 @@ namespace WorldEditor
 
         public override void OnDeselect()
         {
-            World.HoveredSurfaceNode.ShowOverlay(false);
+            if(World.HoveredSurfaceNode != null) World.HoveredSurfaceNode.ShowOverlay(false);
         }
 
         #endregion

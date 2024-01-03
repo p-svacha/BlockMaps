@@ -46,7 +46,7 @@ namespace BlockmapFramework
             }
         }
 
-        public List<Surface> GetAllSurfaces() => Surfaces.Values.ToList();
+        public List<Surface> GetPaintableSurfaces() => Surfaces.Values.Where(x => x.IsPaintable).ToList();
         public Surface GetSurface(SurfaceId id)
         {
             return Surfaces[id];

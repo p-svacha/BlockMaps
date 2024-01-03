@@ -15,13 +15,12 @@ namespace WorldEditor
         public GameObject SelectionFrame;
         public TextMeshProUGUI Text;
 
-        public void Init(Sprite iconSprite, Color iconColor, string text, System.Action onSelectAction)
+        public void Init(Sprite iconSprite, Color iconColor, string text)
         {
             Icon.sprite = iconSprite;
             Icon.color = iconColor;
             SelectionFrame.SetActive(false);
             Text.text = text;
-            Button.onClick.AddListener(onSelectAction.Invoke);
         }
 
         public void SetSelected(bool value)

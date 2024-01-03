@@ -504,7 +504,7 @@ namespace BlockmapFramework
 
         public static Entity Load(World world, EntityData data)
         {
-            Entity instance = world.EntityLibrary.GetEntityInstance(world, data.TypeId);
+            Entity instance = world.ContentLibrary.GetEntityInstance(world, data.TypeId);
             instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), world.Players[data.PlayerId]);
             return instance;
         }

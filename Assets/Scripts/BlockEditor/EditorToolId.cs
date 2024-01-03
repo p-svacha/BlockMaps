@@ -15,6 +15,7 @@ namespace WorldEditor
         SpawnCharacter,
         SpawnObject,
         MoveEntity,
-        Water
+        Water,
+        Wall
     }
 }

@@ -10,10 +10,21 @@ Big Features to Add:
 	=> might make node impassable in direction they are placed
 	=> might be climbable
 	=> different types (fence and wall to start)
+	=> preview
+	=> canplace
+	=> canplace affect of other things
+	=> visiblity affect
+	=> navmesh affect
+	=> mesh generation
+	=> visibility (based on origin node)
+	=> height, height change?
+	=> remove
 
 - Render walls on map edge
 	=> from node height
 	=> or water height on water bodies
+
+- Fix cliff UV's
 
 - rework invisible tile drawing
 	=> redraw mesh when visiblity changes
@@ -23,12 +34,13 @@ Big Features to Add:
 OR
 - add custom shadowcaster that ignored discarded pixels
 
+- Add selection over multiple tiles (2x2, 3x3 etc.)
+	> Add feature to height change (only full) and surface paint
+
 - add generators
 	=> flat empty grass
 	=> current perlin with some trees and cliffs
 	=> add dropdown for different generators
-
-- removable air nodes
 
 - Ladders
 	> add nonsolid laddernodes with Direction.UP and Direction.DOWN
@@ -78,9 +90,6 @@ OR
 	> also add (global perlin) noise to blending texture
 
 - Improve GitHub page with desc and screenshots
-
-- Add selection over multiple tiles (2x2, 3x3 etc.)
-	> Add feature to height change, surface change and air path
 
 - Procedural Static Entities
 

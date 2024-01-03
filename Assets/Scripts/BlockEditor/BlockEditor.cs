@@ -12,14 +12,15 @@ namespace WorldEditor
     public class BlockEditor : MonoBehaviour
     {
         [Header("Prefabs")]
-        public EditorToolButton EditorToolButtonPrefab;
+        public UI_EditorToolButton EditorToolButtonPrefab;
         public EditorMovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
         public List<StaticEntity> StaticEntities;
+        public List<WallType> WallTypes;
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
-        public Dictionary<EditorToolId, EditorToolButton> ToolButtons;
+        public Dictionary<EditorToolId, UI_EditorToolButton> ToolButtons;
         public TextMeshProUGUI TileInfoText;
         public UI_ToolWindow ToolWindow;
 
@@ -34,11 +35,13 @@ namespace WorldEditor
         public SpawnObjectTool SpawnObjectTool;
         public MoveEntityTool MoveEntityTool;
         public WaterTool WaterTool;
+        public WallTool WallTool;
 
         [Header("World")]
         public World World;
 
         // Editor
+        private EditorContentLibrary ContentLibrary;
         float deltaTime; // for fps
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
@@ -46,6 +49,10 @@ namespace WorldEditor
 
         void Start()
         {
+            // Init editor content
+            ContentLibrary = new EditorContentLibrary();
+            ContentLibrary.Init(this);
+
             // Init world
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 2);
             SetWorld(data);
@@ -63,14 +70,15 @@ namespace WorldEditor
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.MoveEntity, MoveEntityTool },
                 { EditorToolId.Water, WaterTool },
+                { EditorToolId.Wall, WallTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
             // Init tool buttons
-            ToolButtons = new Dictionary<EditorToolId, EditorToolButton>();  
+            ToolButtons = new Dictionary<EditorToolId, UI_EditorToolButton>();  
             foreach (EditorTool tool in Tools.Values)
             {
-                EditorToolButton btn = Instantiate(EditorToolButtonPrefab, ToolButtonContainer.transform);
+                UI_EditorToolButton btn = Instantiate(EditorToolButtonPrefab, ToolButtonContainer.transform);
                 btn.Init(this, tool);
                 ToolButtons.Add(tool.Id, btn);
             }
@@ -84,7 +92,7 @@ namespace WorldEditor
             if (World != null) Destroy(World.gameObject);
 
             // Set new data
-            World = World.Load(data, new EditorEntityLibrary());
+            World = World.Load(data, ContentLibrary);
 
             // Add editor player
             if (!World.Players.ContainsKey(0))

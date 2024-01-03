@@ -19,17 +19,21 @@ namespace BlockmapFramework
         public Material WaterMaterial;
         public Material WaterPreviewMaterial;
 
-        [Header("Terrain Colors")]
+        [Header("Colors")]
         public Color GrassColor;
         public Color SandColor;
         public Color TarmacColor;
         public Color WaterColor;
+        public Color SolidWallColor;
 
         [Header("Terrain Textures")]
         public Texture2D GrassTexture;
         public Texture2D SandTexture;
         public Texture2D TarmacTexture;
         public Texture2D WaterTexture;
+
+        [Header("Sprites")]
+        public Sprite SolidWallSprite;
 
         [Header("Prefabs")]
         public Projector SelectionIndicator;

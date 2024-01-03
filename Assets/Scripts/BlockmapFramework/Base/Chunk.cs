@@ -22,10 +22,11 @@ namespace BlockmapFramework
         /// </summary>
         private HashSet<Entity> Entities = new HashSet<Entity>();
 
-        // Meshes (each chunk consists of a surface mesh and one air node mesh per level.
+        // Meshes (many types of things like nodes and walls are combined into one mesh per chunk to increase performance)
         public SurfaceMesh SurfaceMesh;
         public AirNodeMesh[] AirNodeMeshes;
         public WaterMesh WaterMesh;
+        public WallMesh WallMesh;
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -74,6 +75,10 @@ namespace BlockmapFramework
             GameObject waterMeshObject = new GameObject("WaterMesh");
             WaterMesh = waterMeshObject.AddComponent<WaterMesh>();
             WaterMesh.Init(this);
+
+            GameObject wallMeshObject = new GameObject("WallMesh");
+            WallMesh = wallMeshObject.AddComponent<WallMesh>();
+            WallMesh.Init(this);
         }
 
         #region Actions

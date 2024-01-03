@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace WorldEditor
 {
-    public class EditorToolButton : MonoBehaviour
+    public class UI_EditorToolButton : MonoBehaviour
     {
         public EditorTool Tool { get; private set; }
 

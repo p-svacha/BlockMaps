@@ -14,36 +14,23 @@ namespace WorldEditor
 
         private StaticEntity BuildPreview;
 
-        private const int ELEMENTS_PER_ROW = 6;
         private StaticEntity SelectedEntity;
-        private Dictionary<StaticEntity, UI_SelectionElement> EntityButtons;
-
-        [Header("Prefabs")]
-        public UI_SelectionElement SelectionElement;
 
         [Header("Elements")]
-        public GameObject ObjectContainer;
+        public UI_SelectionPanel EntitySelection;
 
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
 
-            // Init selection buttons
-            EntityButtons = new Dictionary<StaticEntity, UI_SelectionElement>();
-            int counter = 0;
+            EntitySelection.Clear();
             foreach (StaticEntity e in editor.StaticEntities)
             {
-                int childIndex = counter / ELEMENTS_PER_ROW;
-                UI_SelectionElement elem = Instantiate(SelectionElement, ObjectContainer.transform.GetChild(childIndex));
-
                 Texture2D previewThumbnail = AssetPreview.GetAssetPreview(e.gameObject);
                 Sprite icon = null;
-                if(previewThumbnail != null)
+                if (previewThumbnail != null)
                     icon = Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
-
-                elem.Init(icon, Color.white, e.name, () => SelectEntity(e));
-                EntityButtons.Add(e, elem);
-                counter++;
+                EntitySelection.AddElement(icon, Color.white, e.name, () => SelectEntity(e));
             }
             SelectEntity(editor.StaticEntities[0]);
         }
@@ -77,10 +64,7 @@ namespace WorldEditor
 
         public void SelectEntity(StaticEntity e)
         {
-            // Update button
-            if(SelectedEntity != null) EntityButtons[SelectedEntity].SetSelected(false);
             SelectedEntity = e;
-            EntityButtons[SelectedEntity].SetSelected(true);
 
             // Update preview
             if(BuildPreview != null) GameObject.Destroy(BuildPreview.gameObject);

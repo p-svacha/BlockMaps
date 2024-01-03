@@ -55,6 +55,7 @@ namespace BlockmapFramework
         public Dictionary<Direction, BlockmapNode> ConnectedNodes;
 
         public HashSet<Entity> Entities = new HashSet<Entity>();
+        public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
 
         /// <summary>
         /// List containing all players that have explored this node.
@@ -253,15 +254,11 @@ namespace BlockmapFramework
         {
             SeenBy.Remove(e);
         }
-
         public void AddExploredBy(Player p)
         {
             ExploredBy.Add(p);
         }
 
-        /// <summary>
-        /// Sets the base surface of this node. Chunk has to be redrawn to see change.
-        /// </summary>
         public void SetSurface(SurfaceId id)
         {
             Surface = SurfaceManager.Instance.GetSurface(id);

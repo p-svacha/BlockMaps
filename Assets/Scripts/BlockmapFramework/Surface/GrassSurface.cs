@@ -13,5 +13,6 @@ namespace BlockmapFramework
         public override float SpeedModifier => 0.5f;
         public override Color Color => ResourceManager.Singleton.GrassColor;
         public override Texture2D Texture => ResourceManager.Singleton.GrassTexture;
+        public override bool IsPaintable => true;
     }
 }

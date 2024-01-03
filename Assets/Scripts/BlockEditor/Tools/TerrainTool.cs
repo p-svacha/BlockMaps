@@ -16,7 +16,7 @@ namespace WorldEditor
         {
             if (World.HoveredSurfaceNode != null)
             {
-                Texture2D overlayTexture = GetTextureForHoverMode(World.NodeHoverMode);
+                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode);
                 bool canIncrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
                 bool canDecrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
                 Color c = Color.white;
@@ -53,20 +53,6 @@ namespace WorldEditor
         public override void OnDeselect()
         {
             if (World.HoveredSurfaceNode != null) World.HoveredSurfaceNode.ShowOverlay(false);
-        }
-
-        private Texture2D GetTextureForHoverMode(Direction mode)
-        {
-            if (mode == Direction.None) return ResourceManager.Singleton.TileSelector;
-            if (mode == Direction.N) return ResourceManager.Singleton.TileSelectorN;
-            if (mode == Direction.E) return ResourceManager.Singleton.TileSelectorE;
-            if (mode == Direction.S) return ResourceManager.Singleton.TileSelectorS;
-            if (mode == Direction.W) return ResourceManager.Singleton.TileSelectorW;
-            if (mode == Direction.NE) return ResourceManager.Singleton.TileSelectorNE;
-            if (mode == Direction.NW) return ResourceManager.Singleton.TileSelectorNW;
-            if (mode == Direction.SW) return ResourceManager.Singleton.TileSelectorSW;
-            if (mode == Direction.SE) return ResourceManager.Singleton.TileSelectorSE;
-            return null;
         }
     }
 }

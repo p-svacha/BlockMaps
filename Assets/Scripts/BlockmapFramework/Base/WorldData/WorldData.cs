@@ -17,5 +17,6 @@ namespace BlockmapFramework
         public List<PlayerData> Players { get; set; }
         public List<EntityData> Entities { get; set; }
         public List<WaterBodyData> WaterBodies { get; set; }
+        public List<WallData> Walls { get; set; }
     }
 }

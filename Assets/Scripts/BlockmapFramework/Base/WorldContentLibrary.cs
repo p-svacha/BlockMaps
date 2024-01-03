@@ -8,11 +8,16 @@ namespace BlockmapFramework
     /// A collection of all entities that can be used inside a world, including procedural ones.
     /// <br/> Maps entity id's to entity objects.
     /// </summary>
-    public abstract class EntityLibrary
+    public abstract class WorldContentLibrary
     {
         /// <summary>
         /// Returns an uninitialized entity instance according to the given id.
         /// </summary>
         public abstract Entity GetEntityInstance(World world, string id);
+
+        /// <summary>
+        /// Returns an initialized wall instance according to the given id.
+        /// </summary>
+        public abstract Wall GetWallInstance(World world, WallData data);
     }
 }

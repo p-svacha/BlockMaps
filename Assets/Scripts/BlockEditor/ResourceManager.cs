@@ -28,6 +28,21 @@ namespace WorldEditor
         public Sprite MovingEntitySprite;
         public Sprite MoveEntityToolSprite;
         public Sprite WaterToolSprite;
+        public Sprite WallToolSprite;
+
+        public Texture2D GetTileSelector(Direction dir)
+        {
+            if (dir == Direction.None) return TileSelector;
+            if (dir == Direction.N) return TileSelectorN;
+            if (dir == Direction.E) return TileSelectorE;
+            if (dir == Direction.S) return TileSelectorS;
+            if (dir == Direction.W) return TileSelectorW;
+            if (dir == Direction.NE) return TileSelectorNE;
+            if (dir == Direction.NW) return TileSelectorNW;
+            if (dir == Direction.SW) return TileSelectorSW;
+            if (dir == Direction.SE) return TileSelectorSE;
+            return null;
+        }
 
         public static ResourceManager Singleton { get { return GameObject.Find("ResourceManager").GetComponent<ResourceManager>(); } }
     }

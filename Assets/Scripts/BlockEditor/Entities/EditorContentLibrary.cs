@@ -1,13 +1,20 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace WorldEditor
 {
-    public class EditorEntityLibrary : EntityLibrary
+    public class EditorContentLibrary : WorldContentLibrary
     {
         private const string ENTITY_PREFAB_PATH = "Editor/Entities/";
+        private BlockEditor Editor;
+
+        public void Init(BlockEditor editor)
+        {
+            Editor = editor;
+        }
 
         public override Entity GetEntityInstance(World world, string id)
         {
@@ -35,6 +42,12 @@ namespace WorldEditor
             return GameObject.Instantiate(staticEntity, world.transform);
 
             throw new System.Exception("Id " + id + " does not exist.");
+        }
+
+        public override Wall GetWallInstance(World world, WallData data)
+        {
+            WallType type = Editor.WallTypes.First(x => x.Id == data.TypeId);
+            return new Wall(type, world.GetNode(data.NodeId), (Direction)data.Side, data.Height);
         }
     }
 }
