@@ -379,6 +379,11 @@ namespace BlockmapFramework
             HasPath = true;
             PathSurface = surface;
         }
+        public void RemovePath()
+        {
+            HasPath = false;
+            PathSurface = null;
+        }
 
         public void SetWaterNode(WaterNode waterNode)
         {

@@ -25,7 +25,7 @@ namespace BlockmapFramework
         /// </summary>
         public override void Draw()
         {
-            List<BlockmapNode> nodesToDraw = Chunk.GetAllAirNodes(HeightLevel);
+            List<AirPathNode> nodesToDraw = Chunk.GetAllAirNodes(HeightLevel);
 
             if (nodesToDraw.Count == 0) // Deactivate self if nothing there to draw
             {
@@ -66,8 +66,8 @@ namespace BlockmapFramework
             {
                 for (int y = -1; y <= Chunk.Size; y++)
                 {
-                    List<BlockmapNode> nodes = Chunk.World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y))).Where(x => x.BaseHeight == HeightLevel).ToList();
-                    foreach (BlockmapNode node in nodes)
+                    List<AirPathNode> nodes = Chunk.World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y))).Where(x => x.BaseHeight == HeightLevel).ToList();
+                    foreach (AirPathNode node in nodes)
                     {
                         int visibility;
                         if (node.IsVisibleBy(player)) visibility = 2; // 2 = visible

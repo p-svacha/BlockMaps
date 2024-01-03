@@ -38,7 +38,12 @@ namespace WorldEditor
                 Vector3 hoverPos = World.HoveredNode.GetCenterWorldPosition();
                 BuildPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.5f, hoverPos.z);
                 BuildPreview.transform.rotation = Quaternion.Euler(0f, BuildRotation, 0f);
-                BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection) ? Color.white : Color.red;
+
+                Color previewColor = Color.white;
+                if (!World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection)) previewColor = Color.red;
+                if (World.HoveredAirNode != null && World.CanRemoveAirNode(World.HoveredAirNode)) previewColor = new Color(1f, 0.5f, 0f);
+
+                BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
             }
         }
 
@@ -60,6 +65,11 @@ namespace WorldEditor
         {
             if (World.HoveredNode != null && World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection))
                 World.BuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection);
+        }
+
+        public override void HandleRightClick()
+        {
+            if (World.HoveredAirNode != null && World.CanRemoveAirNode(World.HoveredAirNode)) World.RemoveAirNode(World.HoveredAirNode);
         }
 
         public override void OnSelect()

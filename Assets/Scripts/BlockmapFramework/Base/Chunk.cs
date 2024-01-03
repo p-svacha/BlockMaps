@@ -14,7 +14,7 @@ namespace BlockmapFramework
         public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
 
         public SurfaceNode[,] SurfaceNodes { get; private set; }
-        public List<BlockmapNode>[,] AirNodes { get; private set; }
+        public List<AirPathNode>[,] AirNodes { get; private set; }
         public WaterNode[,] WaterNodes { get; private set; }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace BlockmapFramework
 
             // Init  nodes
             Nodes = new List<BlockmapNode>[Size, Size];
-            AirNodes = new List<BlockmapNode>[Size, Size];
+            AirNodes = new List<AirPathNode>[Size, Size];
             SurfaceNodes = new SurfaceNode[Size, Size];
             WaterNodes = new WaterNode[Size, Size];
 
@@ -48,7 +48,7 @@ namespace BlockmapFramework
                 for (int y = 0; y < Size; y++)
                 {
                     Nodes[x, y] = new List<BlockmapNode>();
-                    AirNodes[x, y] = new List<BlockmapNode>();
+                    AirNodes[x, y] = new List<AirPathNode>();
                 }
             }
 
@@ -222,30 +222,30 @@ namespace BlockmapFramework
             return GetWaterNode(localCoordinates.x, localCoordinates.y);
         }
 
-        public List<BlockmapNode> GetAllAirNodes()
+        public List<AirPathNode> GetAllAirNodes()
         {
-            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            List<AirPathNode> nodes = new List<AirPathNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    foreach (BlockmapNode node in GetAirNodes(x, y))
+                    foreach (AirPathNode node in GetAirNodes(x, y))
                         nodes.Add(node);
             return nodes;
         }
-        public List<BlockmapNode> GetAllAirNodes(int heightLevel)
+        public List<AirPathNode> GetAllAirNodes(int heightLevel)
         {
-            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            List<AirPathNode> nodes = new List<AirPathNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    foreach (BlockmapNode node in GetAirNodes(x, y))
+                    foreach (AirPathNode node in GetAirNodes(x, y))
                         if (node.BaseHeight == heightLevel)
                             nodes.Add(node);
             return nodes;
         }
-        public List<BlockmapNode> GetAirNodes(int x, int y)
+        public List<AirPathNode> GetAirNodes(int x, int y)
         {
             return AirNodes[x, y];
         }
-        public List<BlockmapNode> GetAirNodes(Vector2Int localCoordinates)
+        public List<AirPathNode> GetAirNodes(Vector2Int localCoordinates)
         {
             return GetAirNodes(localCoordinates.x, localCoordinates.y);
         }

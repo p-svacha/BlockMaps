@@ -32,6 +32,11 @@ namespace WorldEditor
                 World.BuildSurfacePath(World.HoveredSurfaceNode, SurfaceManager.Instance.GetSurface(SurfaceId.Tarmac));
         }
 
+        public override void HandleRightClick()
+        {
+            if (World.HoveredSurfaceNode != null && World.HoveredSurfaceNode.HasPath) World.RemoveSurfacePath(World.HoveredSurfaceNode);
+        }
+
         public override void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode)
         {
             if (oldNode != null) oldNode.ShowOverlay(false);

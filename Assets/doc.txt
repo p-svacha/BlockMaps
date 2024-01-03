@@ -1,8 +1,5 @@
 Big Features to Add:
 
-- make surface paths removable
-- Make air nodes removable
-
 - Fences/Walls
 	=> placed in one direction on one node
 	=> take hovermode like when changing height
@@ -42,9 +39,7 @@ OR
 
 - Show entity stats in static entity tool in editor
 
-- combine airpathsloe and airpath into 1 type
-
-- interface for world with documentation
+- interface IWorld for world with documentation
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly
