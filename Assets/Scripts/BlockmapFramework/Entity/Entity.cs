@@ -18,7 +18,12 @@ namespace BlockmapFramework
         /// Unique identifier of an entity type.
         /// <br/> The same id will always result in the same entity attributes (mesh, size, shape, vision, etc.)
         /// </summary>
-        public string TypeId;
+        public string TypeId { get; protected set; }
+
+        /// <summary>
+        /// Display name.
+        /// </summary>
+        public string Name;
 
         /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
@@ -66,6 +71,7 @@ namespace BlockmapFramework
         public void Init(int id, World world, BlockmapNode position, Player player)
         {
             Id = id;
+            TypeId = Name;
 
             OccupiedNodes = new List<BlockmapNode>();
             VisibleNodes = new List<BlockmapNode>();
@@ -113,7 +119,7 @@ namespace BlockmapFramework
             }
 
             // Get list of nodes that are currently occupied
-            OccupiedNodes = GetOccupiedNodes(World, OriginNode);
+            OccupiedNodes = GetOccupiedNodes(OriginNode);
 
             // Add entity to all newly occupies nodes and chunks
             foreach (BlockmapNode node in OccupiedNodes)
@@ -235,7 +241,7 @@ namespace BlockmapFramework
         /// Returns all nodes that would be occupied by this entity when placed on the given originNode.
         /// <br/> Returns null if entity can't be placed on that null.
         /// </summary>
-        public List<BlockmapNode> GetOccupiedNodes(World world, BlockmapNode originNode)
+        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode)
         {
             List<BlockmapNode> nodes = new List<BlockmapNode>();
             for (int x = 0; x < Dimensions.x; x++)
@@ -498,9 +504,7 @@ namespace BlockmapFramework
 
         public static Entity Load(World world, EntityData data)
         {
-            Entity prefab = world.EntityLibrary.GetEntity(data.TypeId);
-            if (prefab == null) throw new System.Exception("Entity with TypeId = " + data.TypeId + " not found in library.");
-            Entity instance = Instantiate(prefab, world.transform);
+            Entity instance = world.EntityLibrary.GetEntityInstance(world, data.TypeId);
             instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), world.Players[data.PlayerId]);
             return instance;
         }

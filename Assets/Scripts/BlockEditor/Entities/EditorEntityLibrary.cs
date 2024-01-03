@@ -9,12 +9,30 @@ namespace WorldEditor
     {
         private const string ENTITY_PREFAB_PATH = "Editor/Entities/";
 
-        public override Entity GetEntity(string id)
+        public override Entity GetEntityInstance(World world, string id)
         {
-            string fullPath = ENTITY_PREFAB_PATH + id;
-            if (id == "character") return Resources.Load<EditorMovingEntity>(fullPath);
+            string[] attributes = id.Split('_');
+            id = attributes[0];
 
-            return Resources.Load<StaticEntity>(fullPath);
+            string fullPath = ENTITY_PREFAB_PATH + id;
+
+            // Editor character
+            if (id == "character")
+            {
+                EditorMovingEntity prefab = Resources.Load<EditorMovingEntity>(fullPath);
+                EditorMovingEntity instance = GameObject.Instantiate(prefab, world.transform);
+                float movementSpeed = float.Parse(attributes[1]);
+                float vision = float.Parse(attributes[2]);
+                int height = int.Parse(attributes[3]);
+                bool canSwim = bool.Parse(attributes[4]);
+                instance.PreInit(movementSpeed, vision, height, canSwim);
+
+                return instance;
+            }
+
+            // Default
+            StaticEntity staticEntity = Resources.Load<StaticEntity>(fullPath);
+            return GameObject.Instantiate(staticEntity, world.transform);
 
             throw new System.Exception("Id " + id + " does not exist.");
         }

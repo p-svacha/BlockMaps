@@ -1,7 +1,5 @@
 Big Features to Add:
 
-- Encode editorentity data in typeid (vision, movement, height, swim)
-
 - make surface paths removable
 - Make air nodes removable
 

@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca4016ed45aa7d148b795d115f86fc25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TypeId: tree03
+  Name: tree03
   Dimensions: {x: 3, y: 10, z: 3}
   IsPassable: 0
   BlocksVision: 1

@@ -85,7 +85,6 @@ namespace WorldEditor
 
             // Set new data
             World = World.Load(data, new EditorEntityLibrary());
-            World.Draw();
 
             // Add editor player
             if (!World.Players.ContainsKey(0))

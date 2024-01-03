@@ -28,6 +28,8 @@ namespace WorldEditor
         {
             base.OnInitialized();
 
+            TypeId = Name + "_" + MovementSpeed + "_" + VisionRange + "_" + Dimensions.y + "_" + CanSwim;
+
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             TargetFlag.transform.SetParent(transform.parent);
             TargetFlag.gameObject.SetActive(false);

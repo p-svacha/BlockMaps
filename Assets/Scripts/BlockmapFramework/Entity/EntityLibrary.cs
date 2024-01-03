@@ -11,8 +11,8 @@ namespace BlockmapFramework
     public abstract class EntityLibrary
     {
         /// <summary>
-        /// Returns an uninitialized entity according to the given id.
+        /// Returns an uninitialized entity instance according to the given id.
         /// </summary>
-        public abstract Entity GetEntity(string id);
+        public abstract Entity GetEntityInstance(World world, string id);
     }
 }

@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     {
         private const string ENTITY_PREFAB_PATH = "CTF/Entities/";
 
-        public override Entity GetEntity(string id)
+        public override Entity GetEntityInstance(World world, string id)
         {
             return Resources.Load<StaticEntity>(ENTITY_PREFAB_PATH + id + ".prefab");
 

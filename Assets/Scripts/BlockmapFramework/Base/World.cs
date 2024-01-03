@@ -11,6 +11,8 @@ namespace BlockmapFramework
     /// </summary>
     public class World : MonoBehaviour
     {
+        private WorldData WorldData;
+
         /// <summary>
         /// Maximum y coordiante a tile can have.
         /// </summary>
@@ -98,16 +100,27 @@ namespace BlockmapFramework
 
         public void Init(WorldData data, EntityLibrary entityLibrary)
         {
+            // Init general
+            Name = data.Name;
+            ChunkSize = data.ChunkSize;
             EntityLibrary = entityLibrary;
+            WorldData = data;
 
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
             Layer_Entity = LayerMask.NameToLayer("Entity");
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
 
+            // Init camera
+            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
+            Camera.SetPosition(new Vector2(ChunkSize * 0.5f, ChunkSize * 0.5f));
+            Camera.SetZoom(10f);
+            Camera.SetAngle(225);
+
+            // Init pathfinder
+            Pathfinder.Init(this);
+
             // Init nodes
-            Name = data.Name;
-            ChunkSize = data.ChunkSize;
             foreach (ChunkData chunkData in data.Chunks)
             {
                 Chunk chunk = Chunk.Load(this, chunkData);
@@ -123,15 +136,6 @@ namespace BlockmapFramework
             if (!Players.ContainsKey(-1)) AddPlayer(new Player(this, -1, "Gaia"));
             Gaia = Players[-1];
 
-            // Init pathfinder
-            Pathfinder.Init(this);
-
-            // Generate initial navmesh so we have node connections that we need for entity node occupation
-            GenerateFullNavmesh();
-
-            // Init entities
-            foreach (EntityData entityData in data.Entities) Entities.Add(Entity.Load(this, entityData));
-
             // Init water bodies
             foreach (WaterBodyData waterData in data.WaterBodies)
             {
@@ -139,11 +143,8 @@ namespace BlockmapFramework
                 WaterBodies.Add(waterData.Id, water);
             }
 
-            // Init camera
-            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
-            Camera.SetPosition(new Vector2(ChunkSize * 0.5f, ChunkSize * 0.5f));
-            Camera.SetZoom(10f);
-            Camera.SetAngle(225);
+            // Draw node meshes because we need to shoot rays to generate navmesh
+            DrawNodes();
 
             InitializeStep = 1;
         }
@@ -165,16 +166,21 @@ namespace BlockmapFramework
         {
             if (IsInitialized) return;
 
-            // Frame 1 after initialization: Readjust entities based on drawn terrain.
+            // Frame 1 after initilaization: Do stuff that requires drawn node meshes.
             if(InitializeStep == 1)
             {
+                // Generate initial navmesh so we have node connections that we need for entity node occupation
+                GenerateFullNavmesh();
+
+                // Init entities
+                foreach (EntityData entityData in WorldData.Entities) Entities.Add(Entity.Load(this, entityData));
                 foreach (Entity e in Entities) e.SetToCurrentWorldPosition();
 
                 InitializeStep++;
                 return;
             }
 
-            // Frame 1 after initialization: Calculate visibility of all entities.
+            // Frame 2 after initialization: Do stuff that requires entities to be at the correct world position
             if (InitializeStep == 2)
             {
                 foreach (Entity e in Entities) e.UpdateVisibleNodes();
@@ -488,7 +494,7 @@ namespace BlockmapFramework
 
         public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node)
         {
-            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(this, node); // get nodes that would be occupied when placing the entity on the given node
+            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node); // get nodes that would be occupied when placing the entity on the given node
 
             if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
 
@@ -674,7 +680,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Generates all meshes of the world.
         /// </summary>
-        public void Draw()
+        public void DrawNodes()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.DrawMesh();
 
@@ -1058,6 +1064,7 @@ namespace BlockmapFramework
                 ChunkSize = ChunkSize,
                 MaxNodeId = NodeIdCounter,
                 MaxEntityId = EntityIdCounter,
+                MaxWaterBodyId = WaterBodyIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Players = Players.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Select(x => x.Save()).ToList(),
