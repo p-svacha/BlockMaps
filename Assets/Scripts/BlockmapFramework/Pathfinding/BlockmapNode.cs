@@ -102,7 +102,7 @@ namespace BlockmapFramework
         {
             int baseHeight = height.Values.Min();
             string binaryShape = "";
-            foreach (Direction dir in Height.Keys) binaryShape += (height[dir] - baseHeight);
+            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += (height[dir] - baseHeight);
             return binaryShape;
         }
 
@@ -140,7 +140,7 @@ namespace BlockmapFramework
                 if(ShouldConnectToNode(adjNode, dir))
                 {
                     // Surface node connections can be override by air nodes built on a surface. In that case we remove the surface connection first
-                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && (adjNode.Type == NodeType.AirPathSlope || adjNode.Type == NodeType.AirPath))
+                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && adjNode.Type == NodeType.AirPath)
                         ConnectedNodes.Remove(dir);
 
                     // Connect node as a neighbour
@@ -382,6 +382,12 @@ namespace BlockmapFramework
         }
 
         public bool IsFlat => Height.Values.All(x => x == Height[Direction.SW]);
+        public bool IsSlope()
+        {
+            if (Height[Direction.NW] == Height[Direction.NE] && Height[Direction.SW] == Height[Direction.SE] && Height[Direction.NW] != Height[Direction.SW]) return true;
+            if (Height[Direction.NW] == Height[Direction.SW] && Height[Direction.NE] == Height[Direction.SE] && Height[Direction.NW] != Height[Direction.NE]) return true;
+            return false;
+        }
 
         /// <summary>
         /// Returns the amount of space (in amount of tiles) that is free above this node.
@@ -422,9 +428,6 @@ namespace BlockmapFramework
 
                 case NodeType.AirPath:
                     return new AirPathNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
-
-                case NodeType.AirPathSlope:
-                    return new AirPathSlopeNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.Water:
                     return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);

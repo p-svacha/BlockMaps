@@ -29,9 +29,9 @@ namespace WorldEditor
 
         private void UpdatePreview()
         {
-            if (World.HoveredSurfaceNode != null)
+            if (World.HoveredNode != null)
             {
-                Vector3 hoverPos = World.HoveredSurfaceNode.GetCenterWorldPosition();
+                Vector3 hoverPos = World.HoveredNode.GetCenterWorldPosition();
                 BuildPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.1f, hoverPos.z);
                 BuildPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
                 BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight) ? Color.white : Color.red;
@@ -47,7 +47,7 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredSurfaceNode != null && World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight))
+            if (World.HoveredNode != null && World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight))
                 World.BuildAirPath(World.HoveredWorldCoordinates, BuildHeight);
         }
 

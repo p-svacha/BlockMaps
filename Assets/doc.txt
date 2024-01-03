@@ -1,13 +1,8 @@
 Big Features to Add:
 
-- FIX MOVING through water (half entity should be below water)
-- fix selection indicator in water
-- fix change height below water when next to water
-- get rid of shape node attribute
-	> combine airnode and airpathnode
-
 - Encode editorentity data in typeid (vision, movement, height, swim)
 
+- make surface paths removable
 - Make air nodes removable
 
 - Fences/Walls
@@ -41,6 +36,7 @@ OR
 - removable air nodes
 
 - Ladders
+	> add nonsolid laddernodes with Direction.UP and Direction.DOWN
 
 - make a dropdown for load world
 

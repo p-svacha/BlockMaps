@@ -8,7 +8,6 @@ namespace BlockmapFramework
     {
         Surface,
         AirPath,
-        AirPathSlope,
         Water
     }
 }

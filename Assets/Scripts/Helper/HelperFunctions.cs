@@ -142,7 +142,7 @@ public static class HelperFunctions
     {
         return new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     }
-    public static List<Direction> GetCornerDirections() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NW, Direction.NE };
+    public static List<Direction> GetCorners() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NE, Direction.NW };
 
     /// <summary>
     /// Returns the corner directions that are relevant for a given direction.
@@ -161,13 +161,46 @@ public static class HelperFunctions
         throw new System.Exception("Direction " + dir.ToString() + " not handled");
     }
 
+    public static List<Direction> GetAffectedSides(Direction dir)
+    {
+        if (dir == Direction.None) return new List<Direction> { Direction.N, Direction.E, Direction.S, Direction.W };
+        if (dir == Direction.N) return new List<Direction> { Direction.N };
+        if (dir == Direction.E) return new List<Direction> { Direction.E };
+        if (dir == Direction.S) return new List<Direction> { Direction.S };
+        if (dir == Direction.W) return new List<Direction> { Direction.W };
+        if (dir == Direction.NW) return new List<Direction>() { Direction.N, Direction.W };
+        if (dir == Direction.NE) return new List<Direction>() { Direction.N, Direction.E };
+        if (dir == Direction.SE) return new List<Direction>() { Direction.S, Direction.E };
+        if (dir == Direction.SW) return new List<Direction>() { Direction.S, Direction.W };
+        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    public static Direction GetMirroredCorner(Direction dir, Direction axis)
+    {
+        if(axis == Direction.N || axis == Direction.S) // east,west stays the same
+        {
+            if (dir == Direction.NE) return Direction.SE;
+            if (dir == Direction.NW) return Direction.SW;
+            if (dir == Direction.SW) return Direction.NW;
+            if (dir == Direction.SE) return Direction.NE;
+        }
+        if (axis == Direction.E || axis == Direction.W) // north,south stays the same
+        {
+            if (dir == Direction.NE) return Direction.NW;
+            if (dir == Direction.NW) return Direction.NE;
+            if (dir == Direction.SW) return Direction.SE;
+            if (dir == Direction.SE) return Direction.SW;
+        }
+        throw new System.Exception("axis " + axis.ToString() + " not handled or direction " + dir.ToString() + " not handled");
+    }
+
     /// <summary>
     /// Returns the heights for a flat surface based on its height.
     /// </summary>
     public static Dictionary<Direction, int> GetFlatHeights(int height)
     {
         Dictionary<Direction, int> heights = new Dictionary<Direction, int>();
-        foreach (Direction dir in GetCornerDirections()) heights.Add(dir, height);
+        foreach (Direction dir in GetCorners()) heights.Add(dir, height);
         return heights;
     }
 

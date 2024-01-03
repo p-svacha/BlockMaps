@@ -33,9 +33,9 @@ namespace WorldEditor
 
         private void UpdatePreview()
         {
-            if (World.HoveredSurfaceNode != null)
+            if (World.HoveredNode != null)
             {
-                Vector3 hoverPos = World.HoveredSurfaceNode.GetCenterWorldPosition();
+                Vector3 hoverPos = World.HoveredNode.GetCenterWorldPosition();
                 BuildPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.5f, hoverPos.z);
                 BuildPreview.transform.rotation = Quaternion.Euler(0f, BuildRotation, 0f);
                 BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection) ? Color.white : Color.red;
@@ -58,7 +58,7 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredSurfaceNode != null && World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection))
+            if (World.HoveredNode != null && World.CanBuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection))
                 World.BuildAirSlope(World.HoveredWorldCoordinates, BuildHeight, BuildRotationDirection);
         }
 

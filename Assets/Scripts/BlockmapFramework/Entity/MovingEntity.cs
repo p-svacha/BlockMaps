@@ -43,10 +43,14 @@ namespace BlockmapFramework
                 Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
 
                 // Change origin node when passing over a node border
-                if (oldWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]); 
+                if (oldWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]);
+
+                // Calculate altitude (y-coordinate) on new position
+                float y = World.GetWorldHeightAt(newPosition2d, OriginNode);
+                if (OriginNode.Type == NodeType.Water) y -= (Dimensions.y * World.TILE_HEIGHT) / 2f;
 
                 // Set new position/rotation
-                Vector3 newPosition = new Vector3(newPosition2d.x, World.GetWorldHeightAt(newPosition2d, OriginNode), newPosition2d.y);
+                Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
                 transform.position = newPosition;
                 transform.rotation = Get2dRotationByDirection(CurrentDirection);
             }

@@ -250,12 +250,16 @@ namespace BlockmapFramework
                 else if (objectHit.gameObject.layer == Layer_Water)
                 {
                     WaterNode hitWaterNode = GetWaterNode(HoveredWorldCoordinates);
-                    if (hitWaterNode.SurfaceNode.IsCenterUnderWater)
+
+                    if (hitWaterNode != null)
                     {
-                        newHoveredNode = hitWaterNode;
-                        newHoveredWaterBody = hitWaterNode.WaterBody;
+                        if (hitWaterNode.SurfaceNode.IsCenterUnderWater)
+                        {
+                            newHoveredNode = hitWaterNode;
+                            newHoveredWaterBody = hitWaterNode.WaterBody;
+                        }
+                        else newHoveredNode = hitWaterNode.SurfaceNode;
                     }
-                    else newHoveredNode = hitWaterNode.SurfaceNode;
                 }
 
                 else if(objectHit.gameObject.layer == Layer_Entity)
@@ -388,11 +392,9 @@ namespace BlockmapFramework
         public bool CanBuildSurfacePath(SurfaceNode node)
         {
             if (node == null) return false;
-            if (!(node.Shape == "0000" || node.Shape == "1001" || node.Shape == "1100" || node.Shape == "0110" || node.Shape == "0011")) return false;
+            if (!(node.IsFlat || node.IsSlope())) return false;
             if (node.HasPath) return false;
-
-            BlockmapNode nodeAbovePath = Pathfinder.TryGetPathNode(node.WorldCoordinates, node.BaseHeight + 1);
-            if (nodeAbovePath != null && !Pathfinder.CanNodesBeAboveEachOther(node.Shape, nodeAbovePath.Shape)) return false;
+            if (node.GetFreeHeadSpace(Direction.None) <= 0) return false;
 
             return true;
         }
@@ -420,14 +422,14 @@ namespace BlockmapFramework
             WaterNode water = GetWaterNode(worldCoordinates);
             if (water != null && water.WaterBody.ShoreHeight > height) return false;
 
+            // Check overlapping with existing node
+            List<BlockmapNode> sameLevelNodes = GetNodes(worldCoordinates, height);
+            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetFlatHeights(height), x.Height))) return false;
 
-            if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
-            BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
-            if (pathNodeBelow != null && pathNodeBelow.Type == NodeType.AirPathSlope) return false; // Can't build with slope underneath
+            // Check if overlap with surface
+            if (!IsAbove(HelperFunctions.GetFlatHeights(height), surfaceNode.Height)) return false;
 
-            if (surfaceNode.IsFlat) return height > surfaceNode.BaseHeight;
-            if (surfaceNode.HasPath || surfaceNode.Shape == "1110" || surfaceNode.Shape == "1101" || surfaceNode.Shape == "1011" || surfaceNode.Shape == "0111") return height > surfaceNode.MaxHeight;
-            else return surfaceNode.Height.Values.All(x => height >= x);
+            return true;
         }
         public void BuildAirPath(Vector2Int worldCoordinates, int height)
         {
@@ -459,19 +461,18 @@ namespace BlockmapFramework
             WaterNode water = GetWaterNode(worldCoordinates);
             if (water != null && water.WaterBody.ShoreHeight > height) return false;
 
-            if (Pathfinder.TryGetPathNode(worldCoordinates, height) != null) return false; // Can't build when path node on same level
-            BlockmapNode pathNodeBelow = Pathfinder.TryGetPathNode(worldCoordinates, height - 1);
-            if (pathNodeBelow != null && !Pathfinder.CanNodesBeAboveEachOther(pathNodeBelow.Shape, AirPathSlopeNode.GetShapeFromDirection(dir))) return false;
+            // Check overlapping with existing node
+            List<BlockmapNode> sameLevelNodes = GetNodes(worldCoordinates, height);
+            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetSlopeHeights(height, dir), x.Height))) return false;
 
-            if (surfaceNode.HasPath) return height > surfaceNode.MaxHeight;
-            else return surfaceNode.Height.Values.All(x => height >= x);
+            return true;
         }
         public void BuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirPathSlopeNode newNode = new AirPathSlopeNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
+            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
@@ -827,6 +828,10 @@ namespace BlockmapFramework
 
         public BlockmapNode GetNode(int id) => Nodes[id];
 
+        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int height)
+        {
+            return GetNodes(worldCoordinates, height, height);
+        }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
             return GetNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
@@ -893,6 +898,10 @@ namespace BlockmapFramework
         {
             return GetAirNodes(GetWorldCoordinatesInDirection(worldCoordinates, dir));
         }
+        public WaterNode GetAdjacentWaterNode(Vector2Int worldCoordinates, Direction dir)
+        {
+            return GetWaterNode(GetWorldCoordinatesInDirection(worldCoordinates, dir));
+        }
 
         public List<Entity> GetEntities(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
@@ -945,7 +954,7 @@ namespace BlockmapFramework
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if ((node.Type == NodeType.AirPath || node.Type == NodeType.AirPathSlope) && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
+                if (node.Type == NodeType.AirPath && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
@@ -1016,6 +1025,17 @@ namespace BlockmapFramework
                 default:
                     return false;
             }
+        }
+
+        public bool IsAbove(Dictionary<Direction, int> topHeight, Dictionary<Direction, int> botHeight) // returns true if at least one corner of topHeight is above botHeight and none of them are below botHeight
+        {
+            bool isAbove = false;
+            foreach (Direction dir in HelperFunctions.GetCorners())
+            {
+                if (topHeight[dir] > botHeight[dir]) isAbove = true;
+                if (topHeight[dir] < botHeight[dir]) return false;
+            }
+            return isAbove;
         }
 
         #endregion

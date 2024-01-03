@@ -139,33 +139,5 @@ namespace BlockmapFramework
         }
 
         #endregion
-
-
-
-        #region Transitions
-
-
-
-        /// <summary>
-        /// If existing, returns the PathNode (non-surface-node) at the given position
-        /// </summary>
-        public static BlockmapNode TryGetPathNode(Vector2Int worldCoordinates, int height)
-        {
-            List<BlockmapNode> nodes = World.GetAirNodes(worldCoordinates);
-            if (nodes == null) return null;
-            foreach (BlockmapNode node in nodes) if (node.BaseHeight == height) return node;
-            return null;
-        }
-
-        /// <summary>
-        /// Returns true if the two shapes don't touch each other.
-        /// </summary>
-        public static bool CanNodesBeAboveEachOther(string botShape, string topShape)
-        {
-            for (int i = 0; i < 4; i++) if (int.Parse(botShape[i].ToString()) > int.Parse(topShape[i].ToString())) return false;
-            return true;
-        }
-
-        #endregion
     }
 }

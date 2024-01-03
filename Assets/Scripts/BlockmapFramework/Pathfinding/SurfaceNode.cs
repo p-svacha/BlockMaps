@@ -78,7 +78,7 @@ namespace BlockmapFramework
                 case "2101":
                 case "1210":
                     meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4a, v3b);
+                    meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
                     break;
 
                 case "1000":
@@ -86,19 +86,19 @@ namespace BlockmapFramework
                 case "0111":
                 case "1101":
                     meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3a);
+                    meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
                     break;
 
                 case "1010":
                     if (UseAlternativeVariant)
                     {
                         meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3a);
+                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
                     }
                     else
                     {
                         meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4a, v3b);
+                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
                     }
                     break;
 
@@ -106,11 +106,11 @@ namespace BlockmapFramework
                     if (UseAlternativeVariant)
                     {
                         meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4a, v3b);
+                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
                     }
                     else
                     {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
+                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4b, v2a);
                         meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3a);
                     }
                     break;
@@ -291,20 +291,46 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public bool CanChangeHeight(Direction mode, bool increase)
+        public bool CanChangeHeight(Direction mode, bool isIncrease)
         {
             if (HasPath) return false;
             if (Entities.Count > 0) return false;
             if (WaterNode != null) return false;
 
-            Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
-            foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
-            foreach (Direction dir in Height.Keys) newHeights[dir] += increase ? 1 : -1;
-            BlockmapNode pathNodeOn = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Values.Min());
-            BlockmapNode pathNodeAbove = Pathfinder.TryGetPathNode(WorldCoordinates, newHeights.Values.Min() + 1);
-            string newShape = GetShape(newHeights);
-            if (pathNodeOn != null) return false;
-            if (pathNodeAbove != null && !Pathfinder.CanNodesBeAboveEachOther(newShape, pathNodeAbove.Shape)) return false;
+            // Calculate new heights
+            Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
+            int newBaseHeight = newHeights.Values.Min();
+            int newMaxHeight = newHeights.Values.Max();
+
+            // Check if a node above would block increase
+            if (isIncrease)
+            {
+                List<BlockmapNode> nodesBelow = World.GetNodes(WorldCoordinates, 0, newBaseHeight);
+                if (nodesBelow.Any(x => x != this && !World.IsAbove(x.Height, newHeights))) return false;
+            }
+
+            // Check if decreasing height would leave node under water of adjacent water body
+            if (!isIncrease)
+            {
+                foreach (Direction corner1 in HelperFunctions.GetAffectedCorners(mode))
+                {
+                    foreach (Direction side in HelperFunctions.GetAffectedSides(corner1))
+                    {
+                        WaterNode adjWater = World.GetAdjacentWaterNode(WorldCoordinates, side);
+                        if (adjWater == null) continue;
+                        bool ownSideUnderwater = false;
+                        bool otherSideUnderwater = false;
+                        foreach (Direction corner2 in HelperFunctions.GetAffectedCorners(side))
+                        {
+                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight) ownSideUnderwater = true;
+                            if (adjWater.SurfaceNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) otherSideUnderwater = true;
+
+                            if (ownSideUnderwater && adjWater.SurfaceNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
+                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
+                        }
+                    }
+                }
+            }
 
             return true;
         }
@@ -313,80 +339,41 @@ namespace BlockmapFramework
             Dictionary<Direction, int> preChange = new Dictionary<Direction, int>();
             foreach (Direction dir in Height.Keys) preChange[dir] = Height[dir];
 
-            switch (mode)
-            {
-                case Direction.None:
-                    ChangeFullHeight(isIncrease);
-                    break;
-
-                case Direction.N:
-                    ChangeSideHeight(isIncrease, Direction.NW, Direction.NE);
-                    break;
-
-                case Direction.E:
-                    ChangeSideHeight(isIncrease, Direction.SE, Direction.NE);
-                    break;
-
-                case Direction.S:
-                    ChangeSideHeight(isIncrease, Direction.SW, Direction.SE);
-                    break;
-
-                case Direction.W:
-                    ChangeSideHeight(isIncrease, Direction.SW, Direction.NW);
-                    break;
-
-                case Direction.NE:
-                    Height[Direction.NE] += isIncrease ? 1 : -1;
-                    break;
-
-                case Direction.NW:
-                    Height[Direction.NW] += isIncrease ? 1 : -1;
-                    break;
-
-                case Direction.SW:
-                    Height[Direction.SW] += isIncrease ? 1 : -1;
-                    break;
-
-                case Direction.SE:
-                    Height[Direction.SE] += isIncrease ? 1 : -1;
-                    break;
-            }
+            Height = GetNewHeights(mode, isIncrease);
 
             // Don't apply change if resulting shape is not valid
             if (!IsValid(Height))
             {
-                foreach (Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] = preChange[dir];
+                foreach (Direction dir in HelperFunctions.GetCorners()) Height[dir] = preChange[dir];
             }
             else UseAlternativeVariant = isIncrease;
 
             RecalculateShape();
         }
-        private void ChangeFullHeight(bool increase)
+        private Dictionary<Direction, int> GetNewHeights(Direction mode, bool isIncrease)
         {
-            if (IsFlat)
+            Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
+            foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
+
+            // Calculate min and max height of affected corners
+            int minHeight = World.MAX_HEIGHT;
+            int maxHeight = 0;
+            foreach(Direction dir in HelperFunctions.GetAffectedCorners(mode))
             {
-                foreach(Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] += increase ? 1 : -1;
+                if (Height[dir] < minHeight) minHeight = Height[dir];
+                if (Height[dir] > maxHeight) maxHeight = Height[dir];
             }
-            else
+
+            // Calculate new heights
+            foreach (Direction dir in HelperFunctions.GetAffectedCorners(mode))
             {
-                foreach (Direction dir in HelperFunctions.GetCornerDirections()) Height[dir] = increase ? MaxHeight : BaseHeight;
+                if (newHeights[dir] == minHeight && isIncrease) newHeights[dir] += 1;
+                if (newHeights[dir] == maxHeight && !isIncrease) newHeights[dir] -= 1;
             }
-        }
-        private void ChangeSideHeight(bool increase, Direction i1, Direction i2)
-        {
-            if (Height[i1] != Height[i2])
-            {
-                Height[i1] = increase ? Mathf.Max(Height[i1], Height[i2]) : Mathf.Min(Height[i1], Height[i2]);
-                Height[i2] = increase ? Mathf.Max(Height[i1], Height[i2]) : Mathf.Min(Height[i1], Height[i2]);
-            }
-            else
-            {
-                Height[i1] += increase ? 1 : -1;
-                Height[i2] += increase ? 1 : -1;
-            }
+
+            return newHeights;
         }
 
-        
         public void BuildPath(Surface surface)
         {
             HasPath = true;

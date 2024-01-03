@@ -35,7 +35,6 @@ namespace BlockmapFramework
                             sphere.transform.localScale = new Vector3(NODE_SCALE, NODE_SCALE, NODE_SCALE);
                             if (node.Type == NodeType.Surface) sphere.GetComponent<MeshRenderer>().material.color = Color.green;
                             if (node.Type == NodeType.AirPath) sphere.GetComponent<MeshRenderer>().material.color = Color.blue;
-                            if (node.Type == NodeType.AirPathSlope) sphere.GetComponent<MeshRenderer>().material.color = new Color(1f, 0f, 1f);
                             if (node.Type == NodeType.Water) sphere.GetComponent<MeshRenderer>().material.color = Color.cyan;
 
                             foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in node.ConnectedNodes)
