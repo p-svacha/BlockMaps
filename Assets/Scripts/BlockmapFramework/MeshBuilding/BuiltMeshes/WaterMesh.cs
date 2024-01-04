@@ -16,24 +16,10 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_Water;
         }
 
-        public override void Draw()
+        public override void OnDraw()
         {
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.WaterMaterial); // Submesh 0: water
-
             foreach (WaterNode node in Chunk.GetAllWaterNodes())
-                WaterMeshGenerator.BuildWaterMeshForSingleNode(meshBuilder, node);
-            meshBuilder.ApplyMesh(castShadows: false);
-
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-
-            // Set chunk values for all materials
-            for (int i = 0; i < renderer.materials.Length; i++)
-            {
-                renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
-            }
+                WaterMeshGenerator.BuildWaterMeshForSingleNode(MeshBuilder, node);
         }
 
 

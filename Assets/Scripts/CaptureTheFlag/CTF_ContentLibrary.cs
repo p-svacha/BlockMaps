@@ -16,7 +16,7 @@ namespace CaptureTheFlag
             throw new System.Exception("Id " + id + " does not exist.");
         }
 
-        public override Wall GetWallInstance(World world, WallData data)
+        public override Wall GetWallInstance(World world, string id)
         {
             throw new System.NotImplementedException();
         }

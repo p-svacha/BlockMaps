@@ -138,11 +138,9 @@ public static class HelperFunctions
         };
     }
 
-    public static List<Direction> GetAllDirections8()
-    {
-        return new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
-    }
+    public static List<Direction> GetAllDirections8() => new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     public static List<Direction> GetCorners() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NE, Direction.NW };
+    public static List<Direction> GetSides() => new List<Direction>() { Direction.N, Direction.E, Direction.S, Direction.W };
 
     /// <summary>
     /// Returns the corner directions that are relevant for a given direction.

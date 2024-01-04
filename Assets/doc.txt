@@ -20,6 +20,8 @@ Big Features to Add:
 	=> height, height change?
 	=> remove
 
+- press R to reset exploration
+
 - Render walls on map edge
 	=> from node height
 	=> or water height on water bodies

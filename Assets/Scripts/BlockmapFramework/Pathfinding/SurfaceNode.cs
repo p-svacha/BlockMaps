@@ -41,12 +41,16 @@ namespace BlockmapFramework
         {
             DrawSurface(meshBuilder);
             DrawSides(meshBuilder);
-            if(HasPath) DrawPath(meshBuilder);
+            if (HasPath) DrawPath(meshBuilder);
+
+            foreach (Direction side in HelperFunctions.GetSides())
+                if (Walls.ContainsKey(side))
+                    WallMeshBuilder.DrawWall(meshBuilder, Walls[side]);
         }
 
         private void DrawSurface(MeshBuilder meshBuilder)
         {
-            int surfaceSubmesh = 0;
+            int surfaceSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
 
             // Surface vertices
             float xStart = LocalCoordinates.x;
@@ -119,7 +123,7 @@ namespace BlockmapFramework
 
         private void DrawSides(MeshBuilder meshBuilder)
         {
-            int cliffSubmesh = 1;
+            int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.CliffMaterial);
             DrawEastSide(meshBuilder, cliffSubmesh);
             DrawWestSide(meshBuilder, cliffSubmesh);
             DrawSouthSide(meshBuilder, cliffSubmesh);
@@ -284,7 +288,7 @@ namespace BlockmapFramework
 
         private void DrawPath(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(this, meshBuilder, pathSubmesh: 2, pathCurbSubmesh: 3);
+            PathMeshBuilder.BuildPath(this, meshBuilder);
         }
 
         #endregion

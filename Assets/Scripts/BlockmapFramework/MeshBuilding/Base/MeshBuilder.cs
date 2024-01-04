@@ -10,8 +10,9 @@ public class MeshBuilder
     public List<MeshVertex> Vertices = new List<MeshVertex>(); // Vertices and uv's are shared across all submeshes
     private List<List<MeshTriangle>> Triangles = new List<List<MeshTriangle>>(); // Each list contains the triangles of one submesh
     public int CurrentSubmesh = -1;
+    private Dictionary<Material, int> Submeshes; // Stores the materials for each submesh
 
-    private List<Material> Materials = new List<Material>(); // Stores the materials for each submesh
+    private List<Material> Materials = new List<Material>(); 
 
     /// <summary>
     /// Create a mesh builder for a new game object
@@ -24,15 +25,8 @@ public class MeshBuilder
         MeshObject.AddComponent<MeshFilter>();
         MeshRenderer renderer = MeshObject.AddComponent<MeshRenderer>();
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.TwoSided;
-    }
 
-    /// <summary>
-    /// Create a mesh builder for an existing object you want to add/modify the mesh. Material is given for the first submesh (submeshId = 0)
-    /// </summary>
-    public MeshBuilder(GameObject meshObject, Material material)
-    {
-        MeshObject = meshObject;
-        AddNewSubmesh(material);
+        Submeshes = new Dictionary<Material, int>();
     }
 
     /// <summary>
@@ -41,6 +35,8 @@ public class MeshBuilder
     public MeshBuilder(GameObject meshObject)
     {
         MeshObject = meshObject;
+
+        Submeshes = new Dictionary<Material, int>();
     }
 
     public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true, bool castShadows = true)
@@ -113,11 +109,19 @@ public class MeshBuilder
         Triangles[triangle.SubmeshIndex].Remove(triangle);
     }
 
-    public int AddNewSubmesh(Material material)
+    public int GetSubmesh(Material material)
+    {
+        if (Submeshes.ContainsKey(material)) return Submeshes[material];
+        return AddNewSubmesh(material);
+    }
+    private int AddNewSubmesh(Material material)
     {
         Triangles.Add(new List<MeshTriangle>());
         CurrentSubmesh++;
+
         Materials.Add(material);
+        Submeshes.Add(material, CurrentSubmesh);
+
         return CurrentSubmesh;
     }
 
@@ -171,8 +175,35 @@ public class MeshBuilder
             MeshTriangle tri2 = AddTriangle(submeshIndex, mv1, mv4, mv3);
             return new MeshPlane(mv1, mv2, mv3, mv4, tri1, tri2);
         }
+    }
 
-        
+    /// <summary>
+    /// Adds all MeshVertices and MeshTriangles to build a cube.
+    /// UV from first to second vector is uv-y-axis
+    /// </summary>
+    public void BuildCube(int submeshIndex, Vector3 startPos, Vector3 dimensions)
+    {
+        float xStart = startPos.x;
+        float xEnd = startPos.x + dimensions.x;
+        float yStart = startPos.y;
+        float yEnd = startPos.y + dimensions.y;
+        float zStart = startPos.z;
+        float zEnd = startPos.z + dimensions.z;
+
+        // bot
+        BuildPlane(submeshIndex, new Vector3(xStart, yStart, zStart), new Vector3(xStart, yStart, zEnd), new Vector3(xEnd, yStart, zEnd), new Vector3(xEnd, yStart, zStart), Vector2.zero, Vector2.one);
+        // top
+        BuildPlane(submeshIndex, new Vector3(xStart, yEnd, zStart), new Vector3(xEnd, yEnd, zStart), new Vector3(xEnd, yEnd, zEnd), new Vector3(xStart, yEnd, zEnd), Vector2.zero, Vector2.one);
+
+        // south
+        BuildPlane(submeshIndex, new Vector3(xStart, yStart, zStart), new Vector3(xEnd, yStart, zStart), new Vector3(xEnd, yEnd, zStart), new Vector3(xStart, yEnd, zStart), Vector2.zero, Vector2.one);
+        // north
+        BuildPlane(submeshIndex, new Vector3(xStart, yStart, zEnd), new Vector3(xStart, yEnd, zEnd), new Vector3(xEnd, yEnd, zEnd), new Vector3(xEnd, yStart, zEnd), Vector2.zero, Vector2.one);
+
+        // west
+        BuildPlane(submeshIndex, new Vector3(xStart, yStart, zStart), new Vector3(xStart, yEnd, zStart), new Vector3(xStart, yEnd, zEnd), new Vector3(xStart, yStart, zEnd), Vector2.zero, Vector2.one);
+        // east
+        BuildPlane(submeshIndex, new Vector3(xEnd, yStart, zStart), new Vector3(xEnd, yStart, zEnd), new Vector3(xEnd, yEnd, zEnd), new Vector3(xEnd, yEnd, zStart), Vector2.zero, Vector2.one);
     }
 
     #region Complex Functions

@@ -66,8 +66,7 @@ namespace WorldEditor
 
                 // Preview
                 MeshBuilder waterMeshBuilder = new MeshBuilder(WaterPreview);
-                waterMeshBuilder.AddNewSubmesh(BlockmapFramework.ResourceManager.Singleton.WaterPreviewMaterial);
-                WaterMeshGenerator.BuildFullWaterMesh(waterMeshBuilder, CurrentWaterBody, World);
+                WaterMeshGenerator.BuildFullWaterMesh(waterMeshBuilder, CurrentWaterBody);
                 waterMeshBuilder.ApplyMesh();
 
                 WaterPreview.gameObject.SetActive(true);

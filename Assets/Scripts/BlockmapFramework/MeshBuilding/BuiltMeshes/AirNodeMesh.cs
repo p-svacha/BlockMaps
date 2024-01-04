@@ -23,7 +23,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Builds the mesh of this height level
         /// </summary>
-        public override void Draw()
+        public override void OnDraw()
         {
             List<AirPathNode> nodesToDraw = Chunk.GetAllAirNodes(HeightLevel);
 
@@ -35,24 +35,10 @@ namespace BlockmapFramework
 
             // Generate mesh
             gameObject.SetActive(true);
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathMaterial); // Submesh 0: path
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial); // Submesh 1: path curb
             foreach (BlockmapNode airNode in nodesToDraw)
             {
-                airNode.Draw(meshBuilder);
+                airNode.Draw(MeshBuilder);
                 airNode.SetMesh(this);
-            }
-
-            meshBuilder.ApplyMesh();
-
-            // Set chunk values for all materials
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
-            {
-                renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
             }
         }
 

@@ -16,7 +16,11 @@ namespace BlockmapFramework
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            PathMeshBuilder.BuildPath(this, meshBuilder, pathSubmesh: 0, pathCurbSubmesh: 1);
+            PathMeshBuilder.BuildPath(this, meshBuilder);
+
+            foreach (Direction side in HelperFunctions.GetSides())
+                if (Walls.ContainsKey(side))
+                    WallMeshBuilder.DrawWall(meshBuilder, Walls[side]);
         }
 
         #endregion

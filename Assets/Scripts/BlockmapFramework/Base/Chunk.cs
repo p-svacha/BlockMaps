@@ -26,7 +26,6 @@ namespace BlockmapFramework
         public SurfaceMesh SurfaceMesh;
         public AirNodeMesh[] AirNodeMeshes;
         public WaterMesh WaterMesh;
-        public WallMesh WallMesh;
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -75,10 +74,6 @@ namespace BlockmapFramework
             GameObject waterMeshObject = new GameObject("WaterMesh");
             WaterMesh = waterMeshObject.AddComponent<WaterMesh>();
             WaterMesh.Init(this);
-
-            GameObject wallMeshObject = new GameObject("WallMesh");
-            WallMesh = wallMeshObject.AddComponent<WallMesh>();
-            WallMesh.Init(this);
         }
 
         #region Actions

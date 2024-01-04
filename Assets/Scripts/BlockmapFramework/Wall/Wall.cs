@@ -9,7 +9,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Type containing general properties about the wall.
         /// </summary>
-        public WallType Properties { get; private set; }
+        public WallType Type { get; private set; }
 
         /// <summary>
         /// Node that this wall piece is placed on.
@@ -25,21 +25,32 @@ namespace BlockmapFramework
         /// How many tiles high this wall is, starting at OriginNode.BaseHeight.
         /// </summary>
         public int Height { get; protected set; }
-        
-        public Wall(WallType type, BlockmapNode originNode, Direction side, int height)
+
+        #region Init
+
+        public Wall(WallType type)
         {
-            Properties = type;
-            Node = originNode;
+            Type = type;
+        }
+
+        public void Init(BlockmapNode node, Direction side, int height)
+        {
+            Node = node;
             Side = side;
             Height = height;
+
+            node.Walls.Add(side, this);
+            node.World.Walls.Add(this);
         }
+
+        #endregion
 
         #region Save / Load
 
         public static Wall Load(World world, WallData data)
         {
-            Wall wall = world.ContentLibrary.GetWallInstance(world, data);
-
+            Wall wall = world.ContentLibrary.GetWallInstance(world, data.TypeId);
+            wall.Init(world.GetNode(data.NodeId), (Direction)data.Side, data.Height);
             return wall;
         }
 
@@ -47,7 +58,7 @@ namespace BlockmapFramework
         {
             return new WallData
             {
-                TypeId = Properties.Id,
+                TypeId = Type.Id,
                 NodeId = Node.Id,
                 Side = (int)Side,
                 Height = Height

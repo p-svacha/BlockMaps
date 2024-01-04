@@ -16,8 +16,8 @@ namespace BlockmapFramework
         public abstract Entity GetEntityInstance(World world, string id);
 
         /// <summary>
-        /// Returns an initialized wall instance according to the given id.
+        /// Returns an uninitialized wall instance according to the given id.
         /// </summary>
-        public abstract Wall GetWallInstance(World world, WallData data);
+        public abstract Wall GetWallInstance(World world, string id);
     }
 }

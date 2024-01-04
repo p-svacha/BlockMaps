@@ -12,6 +12,8 @@ namespace BlockmapFramework
         protected World World { get; private set; }
         protected Chunk Chunk { get; private set; }
 
+        protected MeshBuilder MeshBuilder;
+
         protected void OnInit(Chunk chunk)
         {
             Chunk = chunk;
@@ -19,7 +21,27 @@ namespace BlockmapFramework
             transform.SetParent(chunk.transform);
         }
 
-        public abstract void Draw();
+        public void Draw()
+        {
+            MeshBuilder = new MeshBuilder(gameObject);
+
+            OnDraw();
+
+            MeshBuilder.ApplyMesh();
+
+            // Set chunk values for all materials
+            MeshRenderer renderer = GetComponent<MeshRenderer>();
+            for (int i = 0; i < renderer.materials.Length; i++)
+            {
+                renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
+                renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
+                renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
+            }
+
+            OnMeshApplied();
+        }
+        public abstract void OnDraw();
+        public virtual void OnMeshApplied() { }
         public abstract void SetVisibility(Player player);
 
         public void ShowTextures(bool show)

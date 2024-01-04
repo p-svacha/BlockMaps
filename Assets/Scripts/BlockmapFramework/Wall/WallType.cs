@@ -10,7 +10,6 @@ namespace BlockmapFramework
         public string Id;
         public string Name;
         public bool BlocksVision;
-        public Color Color;
         public Sprite PreviewSprite;
     }
 }

@@ -370,6 +370,9 @@ namespace BlockmapFramework
             if (dir == Direction.SW) return IsPassable(Direction.S, entity) && IsPassable(Direction.W, entity);
             if (dir == Direction.SE) return IsPassable(Direction.S, entity) && IsPassable(Direction.E, entity);
 
+            // Check if wall blocking this side
+            if (Walls.ContainsKey(dir)) return false;
+
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);
             if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)

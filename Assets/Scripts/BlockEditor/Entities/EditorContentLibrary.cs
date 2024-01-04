@@ -44,10 +44,10 @@ namespace WorldEditor
             throw new System.Exception("Id " + id + " does not exist.");
         }
 
-        public override Wall GetWallInstance(World world, WallData data)
+        public override Wall GetWallInstance(World world, string id)
         {
-            WallType type = Editor.WallTypes.First(x => x.Id == data.TypeId);
-            return new Wall(type, world.GetNode(data.NodeId), (Direction)data.Side, data.Height);
+            WallType type = Editor.WallTypes.First(x => x.Id == id);
+            return new Wall(type);
         }
     }
 }

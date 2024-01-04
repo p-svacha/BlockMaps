@@ -146,9 +146,6 @@ namespace BlockmapFramework
             foreach(WallData wallData in data.Walls)
             {
                 Wall wall = Wall.Load(this, wallData);
-
-                wall.Node.Walls[wall.Side] = wall;
-                Walls.Add(wall);
             }
 
             // Init water bodies
@@ -730,14 +727,18 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
-        public bool CanBuildWall(BlockmapNode node, Direction side)
+        public bool CanBuildWall(WallType type, BlockmapNode node, Direction side, int height)
         {
+            // Check if wall already has a wall on that side
+            if (node.Walls.ContainsKey(side)) return false;
+
+
             return true;
         }
-        public void PlaceWall(Wall wall, BlockmapNode node, Direction side)
+        public void PlaceWall(WallType type, BlockmapNode node, Direction side, int height)
         {
-            node.Walls[side] = wall;
-            Walls.Add(wall);
+            Wall wall = new Wall(type);
+            wall.Init(node, side, height);
 
             UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
@@ -746,7 +747,7 @@ namespace BlockmapFramework
         public void RemoveWall(Wall wall)
         {
             BlockmapNode node = wall.Node;
-            node.Walls[wall.Side] = null;
+            node.Walls.Remove(wall.Side);
 
             UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);

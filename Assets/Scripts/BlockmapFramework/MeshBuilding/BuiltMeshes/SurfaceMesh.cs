@@ -16,14 +16,18 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_SurfaceNode;
         }
 
-        public override void Draw()
+        public override void OnDraw()
         {
-            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.SurfaceMaterial); // Submesh 0: surface
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.CliffMaterial); // Submesh 1: cliffs
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathMaterial); // Submesh 2: path
-            meshBuilder.AddNewSubmesh(ResourceManager.Singleton.PathCurbMaterial); // Submesh 3: pathCurb
+            foreach (SurfaceNode node in Chunk.GetAllSurfaceNodes())
+            {
+                // Generate mesh
+                node.Draw(MeshBuilder);
+                node.SetMesh(this);
+            }
+        }
 
+        public override void OnMeshApplied()
+        {
             // Shader values
             List<float> surfaceArray = new List<float>();
             List<float> surfaceBlend_W = new List<float>();
@@ -37,10 +41,6 @@ namespace BlockmapFramework
 
             foreach (SurfaceNode node in Chunk.GetAllSurfaceNodes())
             {
-                // Generate mesh
-                node.Draw(meshBuilder);
-                node.SetMesh(this);
-
                 // Base surface
                 int surfaceId = (int)node.Surface.Id;
                 surfaceArray.Add(surfaceId);
@@ -79,17 +79,8 @@ namespace BlockmapFramework
                 if (swNode != null && World.DoAdjacentHeightsMatch(node, swNode, Direction.SW)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
                 else surfaceBlend_SW.Add(surfaceId);
             }
-            meshBuilder.ApplyMesh(castShadows: false);
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();
-
-            // Set chunk values for all materials
-            for (int i = 0; i < renderer.materials.Length; i++)
-            {
-                renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
-            }
 
             // Set blend values for surface material only
             Material surfaceMaterial = renderer.materials[0];
@@ -103,6 +94,7 @@ namespace BlockmapFramework
             surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
             surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
         }
+
         public override void SetVisibility(Player player)
         {
             // Define surface visibility array based on node visibility
