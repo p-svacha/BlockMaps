@@ -11,7 +11,7 @@ namespace BlockmapFramework
     {
         public void Init(Chunk chunk)
         {
-            base.OnInit(chunk);
+            OnInit(chunk);
 
             gameObject.layer = chunk.World.Layer_SurfaceNode;
         }

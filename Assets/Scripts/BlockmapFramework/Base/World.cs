@@ -74,11 +74,12 @@ namespace BlockmapFramework
         public bool IsHoveringWorld { get; private set; }
         public Vector2Int HoveredWorldCoordinates { get; private set; }       
         public BlockmapNode HoveredNode { get; private set; }
-        public AirPathNode HoveredAirNode { get; private set; }
+        public AirNode HoveredAirNode { get; private set; }
         public SurfaceNode HoveredSurfaceNode { get; private set; }
         public Entity HoveredEntity { get; private set; }
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
+        public Wall HoveredWall { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
@@ -100,6 +101,10 @@ namespace BlockmapFramework
         private bool IsShowingPathfindingGraph;
         private bool IsShowingTextures;
         private bool IsShowingTileBlending;
+
+        // Variables for delayed updated
+        private bool DoUpdateVisionNextFrame;
+        private Vector3 VisionUpdatePosition;
 
         #region Init
 
@@ -210,6 +215,11 @@ namespace BlockmapFramework
             foreach (Entity e in Entities) e.UpdateEntity();
         }
 
+        private void LateUpdate()
+        {
+            if (DoUpdateVisionNextFrame) _UpdateVisionOfNearbyEntities();
+        }
+
         /// <summary>
         /// Updates all hovered objects and fires events if anything changed.
         /// </summary>
@@ -229,8 +239,8 @@ namespace BlockmapFramework
             SurfaceNode oldHoveredSurfaceNode = HoveredSurfaceNode;
             SurfaceNode newHoveredSurfaceNode = null;
 
-            AirPathNode oldHoveredAirNode = HoveredAirNode;
-            AirPathNode newHoveredAirNode = null;
+            AirNode oldHoveredAirNode = HoveredAirNode;
+            AirNode newHoveredAirNode = null;
 
             Entity oldHoveredEntity = HoveredEntity;
             Entity newHoveredEntity = null;
@@ -238,8 +248,11 @@ namespace BlockmapFramework
             WaterBody oldHoveredWaterBody = HoveredWaterBody;
             WaterBody newHoveredWaterBody = null;
 
+            Wall oldHoveredWall = HoveredWall;
+            Wall newHoveredWall = null;
+
             // Shoot a raycast on surface and air layer to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall))
             {
                 Transform objectHit = hit.transform;
 
@@ -253,12 +266,15 @@ namespace BlockmapFramework
                 // Update chunk
                 newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
 
-                if (objectHit.gameObject.layer == Layer_SurfaceNode) // Hit a surface node
+                // Hit surface node
+                if (objectHit.gameObject.layer == Layer_SurfaceNode)
                 {
                     newHoveredSurfaceNode = GetSurfaceNode(HoveredWorldCoordinates);
                     newHoveredNode = newHoveredSurfaceNode;
                 }
-                else if (objectHit.gameObject.layer == Layer_AirNode) // Hit an air node
+
+                // Hit air node
+                else if (objectHit.gameObject.layer == Layer_AirNode)
                 {
                     newHoveredAirNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
 
@@ -268,10 +284,15 @@ namespace BlockmapFramework
                         Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
 
                         newHoveredAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                        
                     }
 
                     newHoveredNode = newHoveredAirNode;
+
+                    if (newHoveredAirNode != null) HoveredWorldCoordinates = newHoveredAirNode.WorldCoordinates;
                 }
+
+                // Hit water node
                 else if (objectHit.gameObject.layer == Layer_Water)
                 {
                     WaterNode hitWaterNode = GetWaterNode(HoveredWorldCoordinates);
@@ -287,11 +308,23 @@ namespace BlockmapFramework
                     }
                 }
 
-                else if(objectHit.gameObject.layer == Layer_Entity)
+                else if(objectHit.gameObject.layer == Layer_Wall)
                 {
-                    newHoveredEntity = objectHit.GetComponent<Entity>(); 
-                }
+                    BlockmapNode hitNode = GetNodes(HoveredWorldCoordinates, objectHit.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+                    if(hitNode != null && hitNode.Walls.ContainsKey(NodeSideHoverMode)) newHoveredWall = hitNode.Walls[NodeSideHoverMode];
 
+                    if (hitNode == null || !hitNode.Walls.ContainsKey(NodeHoverMode)) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+                    {
+                        Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
+                        Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+                        Direction offsetSide = GetNodeSideHoverMode(offsetHitPosition);
+
+                        hitNode = GetNodes(offsetCoordinates, objectHit.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+                        if (hitNode != null && hitNode.Walls.ContainsKey(offsetSide)) newHoveredWall = hitNode.Walls[offsetSide];
+                    }
+
+                    if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.Node.WorldCoordinates;
+                }
             }
 
             // Ray to detect entity
@@ -311,6 +344,7 @@ namespace BlockmapFramework
             HoveredChunk = newHoveredChunk;
             HoveredEntity = newHoveredEntity;
             HoveredWaterBody = newHoveredWaterBody;
+            HoveredWall = newHoveredWall;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -369,7 +403,7 @@ namespace BlockmapFramework
             node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
             if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = surfaceNode;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
-            else if(node is AirPathNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
+            else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
         }
         private void DeregisterNode(BlockmapNode node)
         {
@@ -379,7 +413,7 @@ namespace BlockmapFramework
             node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
             if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
-            else if(node is AirPathNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
+            else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
         }
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
@@ -429,7 +463,7 @@ namespace BlockmapFramework
 
             UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition()); // might not work because rays are shot before new mesh is drawn sometimes
+            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
 
         public bool CanBuildSurfacePath(SurfaceNode node)
@@ -483,7 +517,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), SurfaceId.Tarmac);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
@@ -518,7 +552,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirPathNode newNode = new AirPathNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
             UpdateNavmesh(newNode.WorldCoordinates);
@@ -526,13 +560,13 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
 
-        public bool CanRemoveAirNode(AirPathNode node)
+        public bool CanRemoveAirNode(AirNode node)
         {
             if (node.Entities.Count > 0) return false;
 
             return true;
         }
-        public void RemoveAirNode(AirPathNode node)
+        public void RemoveAirNode(AirNode node)
         {
             DeregisterNode(node);
 
@@ -831,11 +865,19 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Recalculates the vision of all entities that have the given position within their vision range.
+        /// <br/> Is delayed by one frame so all draw calls can be completed before shooting the vision rays.
         /// </summary>
         private void UpdateVisionOfNearbyEntities(Vector3 position)
         {
-            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange))
+            DoUpdateVisionNextFrame = true;
+            VisionUpdatePosition = position;
+        }
+        private void _UpdateVisionOfNearbyEntities() // never call this directly
+        {
+            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange))
                 e.UpdateVisibleNodes();
+
+            DoUpdateVisionNextFrame = false;
         }
 
         public void ToggleGridOverlay()
@@ -945,14 +987,18 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetWaterNode(chunk.GetLocalCoordinates(worldCoordinates));
         }
-        public List<AirPathNode> GetAirNodes(Vector2Int worldCoordinates)
+        public List<AirNode> GetAirNodes(Vector2Int worldCoordinates)
         {
-            if (!IsInWorld(worldCoordinates)) return new List<AirPathNode>();
+            if (!IsInWorld(worldCoordinates)) return new List<AirNode>();
 
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetAirNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
-        public List<AirPathNode> GetAirNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
+        public List<AirNode> GetAirNodes(Vector2Int worldCoordinates, int height)
+        {
+            return GetAirNodes(worldCoordinates, height, height);
+        }
+        public List<AirNode> GetAirNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
             return GetAirNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
         }

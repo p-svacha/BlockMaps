@@ -51,9 +51,17 @@ namespace WorldEditor
         {
             if (World.HoveredNode == null) return;
             if (HeightInput.text == "") return;
-
             int height = int.Parse(HeightInput.text);
+            if (!World.CanBuildWall(SelectedWallType, World.HoveredNode, World.NodeSideHoverMode, height)) return;
+
             World.PlaceWall(SelectedWallType, World.HoveredNode, World.NodeSideHoverMode, height);
+        }
+
+        public override void HandleRightClick()
+        {
+            if (World.HoveredWall == null) return;
+
+            World.RemoveWall(World.HoveredWall);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

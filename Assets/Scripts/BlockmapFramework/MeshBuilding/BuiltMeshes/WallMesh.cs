@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    /// <summary>
-    /// A mesh that contains all geometry for all nodes within one height level in a chunk.
-    /// </summary>
-    public class AirNodeMesh : ChunkMesh
+    public class WallMesh : ChunkMesh
     {
         public int HeightLevel { get; private set; }
 
@@ -17,7 +14,7 @@ namespace BlockmapFramework
             OnInit(chunk);
 
             HeightLevel = level;
-            gameObject.layer = chunk.World.Layer_AirNode;
+            gameObject.layer = chunk.World.Layer_Wall;
         }
 
         public override void SetVisibility(Player player)
@@ -33,7 +30,7 @@ namespace BlockmapFramework
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
 
-                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, HeightLevel).ToList();
+                    List<BlockmapNode> nodes = Chunk.World.GetNodes(worldCoordiantes, HeightLevel).ToList();
 
                     if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
                     else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war

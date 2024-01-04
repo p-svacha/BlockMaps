@@ -156,8 +156,11 @@ namespace WorldEditor
         private void UpdateTileInfoText()
         {
             string text = "";
-            if(World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
-            if(World.HoveredNode != null) text += "\n" + World.HoveredNode.Type.ToString() + " | " + World.HoveredNode.Surface.Name;
+            if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
+            if (World.HoveredNode != null) text += "\n" + World.HoveredNode.Type.ToString() + " | " + World.HoveredNode.Surface.Name;
+            if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
+            if (World.HoveredWaterBody != null) text += "\nWaterbody";
+            if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.Node.WorldCoordinates.ToString() + " " + World.HoveredWall.Node.BaseHeight + " " + World.HoveredWall.Side.ToString();
 
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;

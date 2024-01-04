@@ -3707,6 +3707,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1535696861}
     m_Modifications:
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_Text
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2384849101450839501, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_text
       value: "\u200B"
@@ -6717,6 +6721,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1535696861}
     m_Modifications:
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_Text
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_Placeholder
       value: 

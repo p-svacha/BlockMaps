@@ -268,6 +268,7 @@ namespace BlockmapFramework
 
         #region Getters
 
+        public bool HasWall => Walls.Count > 0;
         public virtual float GetSpeedModifier() => Surface.SpeedModifier;
         public abstract Vector3 GetCenterWorldPosition();
 
@@ -427,7 +428,7 @@ namespace BlockmapFramework
                     return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.AirPath:
-                    return new AirPathNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
+                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.Water:
                     return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);

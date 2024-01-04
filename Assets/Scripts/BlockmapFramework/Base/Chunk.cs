@@ -14,7 +14,7 @@ namespace BlockmapFramework
         public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
 
         public SurfaceNode[,] SurfaceNodes { get; private set; }
-        public List<AirPathNode>[,] AirNodes { get; private set; }
+        public List<AirNode>[,] AirNodes { get; private set; }
         public WaterNode[,] WaterNodes { get; private set; }
 
         /// <summary>
@@ -24,8 +24,9 @@ namespace BlockmapFramework
 
         // Meshes (many types of things like nodes and walls are combined into one mesh per chunk to increase performance)
         public SurfaceMesh SurfaceMesh;
-        public AirNodeMesh[] AirNodeMeshes;
+        public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
+        public Dictionary<int, WallMesh> WallMeshes;
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -39,7 +40,7 @@ namespace BlockmapFramework
 
             // Init  nodes
             Nodes = new List<BlockmapNode>[Size, Size];
-            AirNodes = new List<AirPathNode>[Size, Size];
+            AirNodes = new List<AirNode>[Size, Size];
             SurfaceNodes = new SurfaceNode[Size, Size];
             WaterNodes = new WaterNode[Size, Size];
 
@@ -48,7 +49,7 @@ namespace BlockmapFramework
                 for (int y = 0; y < Size; y++)
                 {
                     Nodes[x, y] = new List<BlockmapNode>();
-                    AirNodes[x, y] = new List<AirPathNode>();
+                    AirNodes[x, y] = new List<AirNode>();
                 }
             }
 
@@ -63,17 +64,12 @@ namespace BlockmapFramework
             SurfaceMesh = surfaceMeshObject.AddComponent<SurfaceMesh>();
             SurfaceMesh.Init(this);
 
-            AirNodeMeshes = new AirNodeMesh[World.MAX_HEIGHT];
-            for(int i = 0; i < World.MAX_HEIGHT; i++)
-            {
-                GameObject obj = new GameObject("AirNodeMesh_" + i);
-                AirNodeMeshes[i] = obj.AddComponent<AirNodeMesh>();
-                AirNodeMeshes[i].Init(this, i);
-            }
-
             GameObject waterMeshObject = new GameObject("WaterMesh");
             WaterMesh = waterMeshObject.AddComponent<WaterMesh>();
             WaterMesh.Init(this);
+
+            AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
+            WallMeshes = new Dictionary<int, WallMesh>();
         }
 
         #region Actions
@@ -120,11 +116,15 @@ namespace BlockmapFramework
             // Surface mesh
             SurfaceMesh.Draw();
 
-            // Air node meshes
-            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.Draw();
-
             // Water mesh
             WaterMesh.Draw();
+
+            // Meshes per height level
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) Destroy(mesh.gameObject);
+            AirNodeMeshes = AirNodeMeshGenerator.GenerateMeshes(this);
+
+            foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
+            WallMeshes = WallMeshGenerator.GenerateMeshes(this);
 
             // Chunk position
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
@@ -138,7 +138,8 @@ namespace BlockmapFramework
         {
             // Node visibility
             SurfaceMesh.SetVisibility(player);
-            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.SetVisibility(player);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
             WaterMesh.SetVisibility(player);
 
             // Entity visibility
@@ -151,13 +152,14 @@ namespace BlockmapFramework
         public void ShowGrid(bool show)
         {
             SurfaceMesh.ShowGrid(show);
-            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowGrid(show);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowGrid(show);
             //WaterMesh.ShowGrid(show); // water should never show grid
         }
         public void ShowTextures(bool show)
         {
             SurfaceMesh.ShowTextures(show);
-            foreach (AirNodeMesh mesh in AirNodeMeshes) mesh.ShowTextures(show);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
 
@@ -176,6 +178,16 @@ namespace BlockmapFramework
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                     nodes.AddRange(GetNodes(x, y));
+            return nodes;
+        }
+        public List<BlockmapNode> GetNodes(int heightLevel)
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            for (int x = 0; x < Size; x++)
+                for (int y = 0; y < Size; y++)
+                    foreach (BlockmapNode node in GetNodes(x, y))
+                        if (node.BaseHeight == heightLevel)
+                            nodes.Add(node);
             return nodes;
         }
         public List<BlockmapNode> GetNodes(int x, int y)
@@ -222,30 +234,30 @@ namespace BlockmapFramework
             return GetWaterNode(localCoordinates.x, localCoordinates.y);
         }
 
-        public List<AirPathNode> GetAllAirNodes()
+        public List<AirNode> GetAllAirNodes()
         {
-            List<AirPathNode> nodes = new List<AirPathNode>();
+            List<AirNode> nodes = new List<AirNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    foreach (AirPathNode node in GetAirNodes(x, y))
+                    foreach (AirNode node in GetAirNodes(x, y))
                         nodes.Add(node);
             return nodes;
         }
-        public List<AirPathNode> GetAllAirNodes(int heightLevel)
+        public List<AirNode> GetAirNodes(int heightLevel)
         {
-            List<AirPathNode> nodes = new List<AirPathNode>();
+            List<AirNode> nodes = new List<AirNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    foreach (AirPathNode node in GetAirNodes(x, y))
+                    foreach (AirNode node in GetAirNodes(x, y))
                         if (node.BaseHeight == heightLevel)
                             nodes.Add(node);
             return nodes;
         }
-        public List<AirPathNode> GetAirNodes(int x, int y)
+        public List<AirNode> GetAirNodes(int x, int y)
         {
             return AirNodes[x, y];
         }
-        public List<AirPathNode> GetAirNodes(Vector2Int localCoordinates)
+        public List<AirNode> GetAirNodes(Vector2Int localCoordinates)
         {
             return GetAirNodes(localCoordinates.x, localCoordinates.y);
         }

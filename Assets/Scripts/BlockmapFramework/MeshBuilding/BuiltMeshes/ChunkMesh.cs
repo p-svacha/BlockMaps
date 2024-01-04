@@ -19,6 +19,7 @@ namespace BlockmapFramework
             Chunk = chunk;
             World = chunk.World;
             transform.SetParent(chunk.transform);
+            transform.localPosition = Vector3.zero;
         }
 
         public void Draw()
@@ -40,22 +41,18 @@ namespace BlockmapFramework
 
             OnMeshApplied();
         }
-        public abstract void OnDraw();
+        public virtual void OnDraw() { }
         public virtual void OnMeshApplied() { }
         public abstract void SetVisibility(Player player);
 
         public void ShowTextures(bool show)
         {
-            if (!gameObject.activeSelf) return;
-
             MeshRenderer renderer = GetComponent<MeshRenderer>();
             for (int i = 0; i < renderer.materials.Length; i++)
                 renderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
         }
         public void ShowGrid(bool show)
         {
-            if (!gameObject.activeSelf) return;
-
             MeshRenderer renderer = GetComponent<MeshRenderer>();
             for (int i = 0; i < renderer.materials.Length; i++)
                 renderer.materials[i].SetFloat("_ShowGrid", show ? 1 : 0);
@@ -63,16 +60,12 @@ namespace BlockmapFramework
 
         public void ShowOverlay(bool show)
         {
-            if (!gameObject.activeSelf) return;
-
             MeshRenderer renderer = GetComponent<MeshRenderer>();
             for (int i = 0; i < renderer.materials.Length; i++)
                 renderer.materials[i].SetFloat("_ShowTileOverlay", show ? 1 : 0);
         }
         public void ShowOverlay(Vector2Int localCoordinates, Texture2D texture, Color color)
         {
-            if (!gameObject.activeSelf) return;
-
             ShowOverlay(true);
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();

@@ -1,26 +1,19 @@
 Big Features to Add:
 
 - Fences/Walls
-	=> placed in one direction on one node
-	=> take hovermode like when changing height
-	=> drawn as one mesh
-	=> visible depending on node they stand on
-	=> have height
-	=> might block vision
-	=> might make node impassable in direction they are placed
-	=> might be climbable
-	=> different types (fence and wall to start)
-	=> preview
-	=> canplace
-	=> canplace affect of other things
-	=> visiblity affect
-	=> navmesh affect
-	=> mesh generation
-	=> visibility (based on origin node)
-	=> height, height change?
-	=> remove
+	=> seeing a wall but not the node center should mark the tile as explored but not visible
+	=> CanPlace check with headspace
+	=> See-through walls (new type: window - might be hard, but maybe possible with check on hit position in entity.Look())
+	=> Passthrough-walls (new type: hedge)
+	=> Climbable wall (new type: fence)
+	=> Affect CanChangeHeight
+	=> Affect CanPlaceEntity
+	=> Affect CanBuildAirPath
+	=> Affect CanBuildAirPathSlope
+	=> height, height changeable
+	=> Fix uv's in mesh generator
 
-- press R to reset exploration
+- press R to reset exploration in editor
 
 - Render walls on map edge
 	=> from node height
@@ -61,6 +54,8 @@ OR
 	=> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
 	=> keep dimensions as a general entity attribute, add shape to static entity
 
+- fix entity moving backwards when giving new GoTo command while moving already
+
 - Make vision radius of entities based on their dimensions
 
 - Allow movingentities bigger than 1x1
@@ -86,6 +81,8 @@ OR
 	> Fix zoom speed on low fps
 
 - Fix rare bug of air node not being selected exactly on edge
+
+- fix: water fill algorithm should stop after a while (like 1000 tiles?)
 
 - In terrain blend transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code

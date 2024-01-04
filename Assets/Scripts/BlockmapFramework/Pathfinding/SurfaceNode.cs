@@ -42,10 +42,6 @@ namespace BlockmapFramework
             DrawSurface(meshBuilder);
             DrawSides(meshBuilder);
             if (HasPath) DrawPath(meshBuilder);
-
-            foreach (Direction side in HelperFunctions.GetSides())
-                if (Walls.ContainsKey(side))
-                    WallMeshBuilder.DrawWall(meshBuilder, Walls[side]);
         }
 
         private void DrawSurface(MeshBuilder meshBuilder)

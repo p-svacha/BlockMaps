@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2782c77f8aa4bcd4184c7794cf9bdb12, type: 3}
   m_Name: Solid Wall
   m_EditorClassIdentifier: 
-  Id: solidWall
-  Name: Solid Wall
+  Id: brickWall
+  Name: Brick Wall
   BlocksVision: 1
-  Color: {r: 0.3, g: 0.2, b: 0.2, a: 1}
   PreviewSprite: {fileID: 21300000, guid: 4e3dda92530e832469a16b6e1d1bc3e4, type: 3}

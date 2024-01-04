@@ -106,7 +106,7 @@ Shader "Custom/NodeMaterialShader"
             int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
 
             // Check visiblity
-            float visEpsilon = 0.1; // Pixels are drawn by this value over tile edges
+            float visEpsilon = 0.101; // Pixels are drawn by this value over tile edges
             float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
                 float drawPixel = (tileVisibility > 0 ||
 
