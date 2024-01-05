@@ -37,7 +37,7 @@ namespace BlockmapFramework
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         private bool IsInitialized;
         public int ChunkSize { get; private set; }
-        public WorldContentLibrary ContentLibrary { get; private set; }
+        public WorldEntityLibrary ContentLibrary { get; private set; }
 
 
         // Database
@@ -108,7 +108,7 @@ namespace BlockmapFramework
 
         #region Init
 
-        public void Init(WorldData data, WorldContentLibrary entityLibrary)
+        public void Init(WorldData data, WorldEntityLibrary entityLibrary)
         {
             // Init general
             Name = data.Name;
@@ -310,19 +310,7 @@ namespace BlockmapFramework
 
                 else if(objectHit.gameObject.layer == Layer_Wall)
                 {
-                    BlockmapNode hitNode = GetNodes(HoveredWorldCoordinates, objectHit.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
-                    if(hitNode != null && hitNode.Walls.ContainsKey(NodeSideHoverMode)) newHoveredWall = hitNode.Walls[NodeSideHoverMode];
-
-                    if (hitNode == null || !hitNode.Walls.ContainsKey(NodeHoverMode)) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-                    {
-                        Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
-                        Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                        Direction offsetSide = GetNodeSideHoverMode(offsetHitPosition);
-
-                        hitNode = GetNodes(offsetCoordinates, objectHit.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
-                        if (hitNode != null && hitNode.Walls.ContainsKey(offsetSide)) newHoveredWall = hitNode.Walls[offsetSide];
-                    }
-
+                    newHoveredWall = GetWallFromRaycastHit(hit);
                     if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.Node.WorldCoordinates;
                 }
             }
@@ -389,6 +377,57 @@ namespace BlockmapFramework
                 if (1f - posOnTile.x > posOnTile.y) return Direction.W;
                 else return Direction.N;
             }
+        }
+        private List<Direction> GetNodeSideHoverModes(Vector3 worldPos)
+        {
+            List<Direction> sides = new List<Direction>();
+
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+            if (worldPos.x < 0) posOnTile.x++;
+            if (worldPos.z < 0) posOnTile.y++;
+
+            float epsilon = 0.2f;
+
+            if (posOnTile.x < epsilon) sides.Add(Direction.W);
+            if (posOnTile.x > 1f - epsilon) sides.Add(Direction.E);
+            if (posOnTile.y < epsilon) sides.Add(Direction.S);
+            if (posOnTile.y > 1f - epsilon) sides.Add(Direction.N);
+
+            return sides;
+        }
+
+        public Wall GetWallFromRaycastHit(RaycastHit hit)
+        {
+            Wall hitWall = null;
+
+            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
+            BlockmapNode hitNode = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+
+            Direction primaryHitSide = GetNodeSideHoverMode(hit.point);
+            List<Direction> otherPossibleHitSides = GetNodeSideHoverModes(hit.point);
+
+            if (hitNode != null && hitNode.Walls.ContainsKey(primaryHitSide)) hitWall = hitNode.Walls[primaryHitSide];
+            else
+                foreach (Direction hitSide in otherPossibleHitSides)
+                    if (hitNode != null && hitNode.Walls.ContainsKey(hitSide)) hitWall = hitNode.Walls[hitSide];
+
+
+            if (hitWall == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+            {
+                Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+                Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+                BlockmapNode offsetHitNode = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+
+                Direction primaryOffsetSide = GetNodeSideHoverMode(offsetHitPosition);
+                List<Direction> otherPossibleOffsetSides = GetNodeSideHoverModes(offsetHitPosition);
+
+                if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(primaryOffsetSide)) hitWall = offsetHitNode.Walls[primaryOffsetSide];
+                else
+                    foreach (Direction hitSide in otherPossibleOffsetSides)
+                        if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(hitSide)) hitWall = offsetHitNode.Walls[hitSide];
+            }
+
+            return hitWall;
         }
 
         #endregion
@@ -773,7 +812,7 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
-        public bool CanBuildWall(WallType type, BlockmapNode node, Direction side, int height)
+        public bool CanBuildWall(BlockmapNode node, Direction side, int height)
         {
             // Check if wall already has a wall on that side
             if (node.Walls.ContainsKey(side)) return false;
@@ -797,6 +836,7 @@ namespace BlockmapFramework
         {
             BlockmapNode node = wall.Node;
             node.Walls.Remove(wall.Side);
+            Walls.Remove(wall);
 
             UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
@@ -1187,7 +1227,7 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static World Load(WorldData data, WorldContentLibrary entityLibrary)
+        public static World Load(WorldData data, WorldEntityLibrary entityLibrary)
         {
             GameObject worldObject = new GameObject(data.Name);
             World world = worldObject.AddComponent<World>();

@@ -1,10 +1,18 @@
 Big Features to Add:
 
 - Fences/Walls
-	=> See-through walls (new type: window - might be hard, but maybe possible with check on hit position in entity.Look())
 	=> Passthrough-walls (new type: hedge)
 	=> Climbable wall (new type: fence)
 	=> Fix uv's in mesh generator
+
+- Add rotation and scale to NodeMaterialShader
+
+- no walls on water
+- no water on walls
+
+- corner walls
+	- maybe not worth the effort since it requires big rework
+	- alternatively an automated corner drawing could be made by checking over-corner connections when drawing a wall piece
 
 - press R to reset exploration in editor
 

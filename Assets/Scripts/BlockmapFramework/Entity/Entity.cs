@@ -425,7 +425,14 @@ namespace BlockmapFramework
                 // If the thing we hit is an entity that doesn't block vision, go to the next thing we hit
                 if (objectHit.layer == World.Layer_Entity && !objectHit.GetComponent<Entity>().BlocksVision) continue;
 
-                // Debug.DrawRay(source, hit.point - source, Color.red, 60f);
+                // If the thing we hit is a wall that doesn't block vision, go to the next thing we hit
+                if (objectHit.layer == World.Layer_Wall)
+                {
+                    Wall hitWall = World.GetWallFromRaycastHit(hit);
+                    if (hitWall != null && !hitWall.Type.BlocksVision) continue;
+                }
+
+                Debug.DrawRay(source, hit.point - source, Color.red, 60f);
 
                 // Return it since it's the first thing that we actually see
                 return hit;

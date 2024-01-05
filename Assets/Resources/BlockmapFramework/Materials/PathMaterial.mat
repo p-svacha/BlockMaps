@@ -87,6 +87,7 @@ Material:
     - _TileOverlayY: 0
     - _UVSec: 0
     - _UseTextures: 0
+    - _ZPriority: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.78823537, g: 0.78823537, b: 0.78823537, a: 1}

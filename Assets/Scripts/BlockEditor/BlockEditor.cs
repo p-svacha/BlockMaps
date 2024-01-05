@@ -16,7 +16,6 @@ namespace WorldEditor
         public EditorMovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
         public List<StaticEntity> StaticEntities;
-        public List<WallType> WallTypes;
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
@@ -41,7 +40,7 @@ namespace WorldEditor
         public World World;
 
         // Editor
-        private EditorContentLibrary ContentLibrary;
+        private EditorEntityLibrary ContentLibrary;
         float deltaTime; // for fps
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
@@ -50,7 +49,7 @@ namespace WorldEditor
         void Start()
         {
             // Init editor content
-            ContentLibrary = new EditorContentLibrary();
+            ContentLibrary = new EditorEntityLibrary();
             ContentLibrary.Init(this);
 
             // Init world

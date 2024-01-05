@@ -74,8 +74,9 @@ namespace BlockmapFramework
 
         public static Wall Load(World world, WallData data)
         {
-            Wall wall = world.ContentLibrary.GetWallInstance(world, data.TypeId);
-            wall.Init(world.GetNode(data.NodeId), (Direction)data.Side, data.Height);
+            WallType type = WallTypeManager.Instance.GetWallType(data.TypeId);
+            Wall wall = new Wall(type);
+            wall.Init(world.GetNode(data.NodeId), data.Side, data.Height);
             return wall;
         }
 
@@ -85,7 +86,7 @@ namespace BlockmapFramework
             {
                 TypeId = Type.Id,
                 NodeId = Node.Id,
-                Side = (int)Side,
+                Side = Side,
                 Height = Height
             };
         }
