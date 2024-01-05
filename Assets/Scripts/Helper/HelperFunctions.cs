@@ -158,6 +158,7 @@ public static class HelperFunctions
         if (dir == Direction.SW) return new List<Direction>() { Direction.SW };
         throw new System.Exception("Direction " + dir.ToString() + " not handled");
     }
+    public static bool DoAffectedCornersOverlap(Direction dir1, Direction dir2) => GetAffectedCorners(dir1).Intersect(GetAffectedCorners(dir2)).Any();
 
     public static List<Direction> GetAffectedSides(Direction dir)
     {

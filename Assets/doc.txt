@@ -1,16 +1,9 @@
 Big Features to Add:
 
 - Fences/Walls
-	=> seeing a wall but not the node center should mark the tile as explored but not visible
-	=> CanPlace check with headspace
 	=> See-through walls (new type: window - might be hard, but maybe possible with check on hit position in entity.Look())
 	=> Passthrough-walls (new type: hedge)
 	=> Climbable wall (new type: fence)
-	=> Affect CanChangeHeight
-	=> Affect CanPlaceEntity
-	=> Affect CanBuildAirPath
-	=> Affect CanBuildAirPathSlope
-	=> height, height changeable
 	=> Fix uv's in mesh generator
 
 - press R to reset exploration in editor
@@ -20,14 +13,6 @@ Big Features to Add:
 	=> or water height on water bodies
 
 - Fix cliff UV's
-
-- rework invisible tile drawing
-	=> redraw mesh when visiblity changes
-	=> always generate full mesh for collider
-	=> revert shader visibility discard
-	=> should fix shadow-bug
-OR
-- add custom shadowcaster that ignored discarded pixels
 
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change (only full) and surface paint
@@ -62,6 +47,8 @@ OR
 
 - Fix shadow rendering bug with shader discard and re-enable shadows of terrain
 
+- moving entity jumping/climbing attribute (int jumpHeight, bool canClimb)
+
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
 
@@ -93,6 +80,11 @@ OR
 - Procedural Static Entities
 
 - Water shader (very small transparency, moving, foam when hitting terrain)
+
+- decouple entity vision from node vision
+	=> mainly so newly placed entities outside of a players vision are not automatically rendered
+
+- add system to draw entities on last seen position from that players perspective
 
 - START CTF
 

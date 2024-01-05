@@ -391,21 +391,19 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the amount of space (in amount of tiles) that is free above this node.
+        /// Returns the minimun amount of space (in amount of tiles) that is free above this node.
         /// <br/> For example a flat node right above this flat node would be 1.
         /// <br/> If any corner of an above node overlaps with this node 0 is returned.
         /// <br/> Direction.None can be passed to check all corners.
         /// </summary>
         public int GetFreeHeadSpace(Direction dir)
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x.IsSolid).ToList();
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid).ToList();
 
             int minHeight = World.MAX_HEIGHT;
 
             foreach (BlockmapNode node in nodesAbove)
             {
-                if (node == this) continue; // ignore ourselves
-
                 foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {
                     int diff = node.Height[corner] - Height[corner];
@@ -415,6 +413,32 @@ namespace BlockmapFramework
 
             return minHeight;
         }
+        /// <summary>
+        /// Like GetFreeHeadSpace but returns the maximum amount of space for a given side.
+        /// </summary>
+        public int GetMaxFreeHeadSpace(Direction dir)
+        {
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid).ToList();
+            if (nodesAbove.Count == 0) return World.MAX_HEIGHT;
+
+            int maxHeight = 0;
+
+            foreach (BlockmapNode node in nodesAbove)
+            {
+                foreach (Direction corner in HelperFunctions.GetAffectedCorners(dir))
+                {
+                    int diff = node.Height[corner] - Height[corner];
+                    if (diff > maxHeight) maxHeight = diff;
+                }
+            }
+
+            return maxHeight;
+        }
+
+        /// <summary>
+        /// Returns the minimum y coordinate of the affected corners of the given direction.
+        /// </summary>
+        public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
 
         #endregion
 

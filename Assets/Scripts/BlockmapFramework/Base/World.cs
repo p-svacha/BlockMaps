@@ -492,12 +492,18 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
 
-            // Check if an entity below is blocking this space
+            // Check if an entity or wall below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
             foreach (BlockmapNode node in belowNodes)
+            {
                 foreach (Entity e in node.Entities)
-                    if (node.MaxHeight + e.Dimensions.y > height)
+                    if (e.MaxHeight > height)
                         return false;
+
+                foreach (Wall wall in node.Walls.Values)
+                    if (wall.MaxHeight > height)
+                        return false;
+            }
 
             // Check if underwater
             WaterNode water = GetWaterNode(worldCoordinates);
@@ -530,12 +536,18 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
 
-            // Check if an entity below is blocking this space
+            // Check if an entity or wall below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
             foreach (BlockmapNode node in belowNodes)
+            {
                 foreach (Entity e in node.Entities)
-                    if (node.MaxHeight + e.Dimensions.y >= height)
+                    if (e.MaxHeight > height)
                         return false;
+
+                foreach (Wall wall in node.Walls.Values)
+                    if (wall.MaxHeight > height)
+                        return false;
+            }
 
             // Check if underwater
             WaterNode water = GetWaterNode(worldCoordinates);
@@ -766,6 +778,9 @@ namespace BlockmapFramework
             // Check if wall already has a wall on that side
             if (node.Walls.ContainsKey(side)) return false;
 
+            // Check if enough space above node to place wall of that height
+            int freeHeadSpace = node.GetMaxFreeHeadSpace(side);
+            if (freeHeadSpace < height) return false;
 
             return true;
         }

@@ -64,8 +64,7 @@ namespace BlockmapFramework
 
         private static Vector3 GetWallStartPos(BlockmapNode node, Direction side)
         {
-            List<Direction> relevantCorners = HelperFunctions.GetAffectedCorners(side);
-            int startHeightCoordinate = node.Height.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
+            int startHeightCoordinate = Wall.GetWallStartY(node, side);
             float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
 
             return side switch

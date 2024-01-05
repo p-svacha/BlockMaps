@@ -296,6 +296,9 @@ namespace BlockmapFramework
             if (HasPath) return false;
             if (Entities.Count > 0) return false;
             if (WaterNode != null) return false;
+            foreach (Direction wallDir in Walls.Keys)
+                if (HelperFunctions.DoAffectedCornersOverlap(mode, wallDir))
+                    return false;
 
             // Calculate new heights
             Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);

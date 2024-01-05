@@ -34,7 +34,7 @@ Shader "Custom/SurfaceShader"
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows addshadow
 
         #pragma target 3.5
         #include "UnityCG.cginc"

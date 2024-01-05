@@ -302,12 +302,14 @@ namespace BlockmapFramework
         /// </summary>
         public VisionType GetNodeVision(BlockmapNode node)
         {
-            // Ignore water since its rendered based on its surface node anyway
+            // Ignore water since its rendered based on its surface node anyway - so this value is discarded
             if (node is WaterNode) return VisionType.Visible;
 
             // Check if node is out of 2d vision range (quick check to increase performance)
             float distance = Vector2.Distance(OriginNode.WorldCoordinates, node.WorldCoordinates);
             if (distance > VisionRange) return VisionType.Unexplored;
+
+            bool markAsExplored = false;
 
             Vector3 nodeCenter = node.GetCenterWorldPosition();
             // Shoot ray from eye to the node with infinite range and check if we hit the correct node
@@ -325,23 +327,29 @@ namespace BlockmapFramework
                 int seenYCoordinate = (int)(hitPosition.y / World.TILE_HEIGHT);
                 if (seenYCoordinate >= node.BaseHeight || seenYCoordinate <= node.MaxHeight)
                 {
-
-                    // If the position we hit matches the position of the node we are checking, mark it as visible
-                    if (hitWorldCoordinates == node.WorldCoordinates) return VisionType.Visible;
-
-                    // Also mark it as visible when we are very close to hitting the correct node (needed for cliffs)
                     float epsilon = 0.01f;
                     float xFrac = hitPosition.x % 1f;
                     float yFrac = hitPosition.z % 1f;
 
-                    if (xFrac < epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, -1)) == node.WorldCoordinates) return VisionType.Visible; // SW
-                    else if (xFrac > 1f - epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(1, -1)) == node.WorldCoordinates) return VisionType.Visible; // SE
-                    else if (xFrac > 1f - epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 1)) == node.WorldCoordinates) return VisionType.Visible; // NE
-                    else if (xFrac < epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(-1, 1)) == node.WorldCoordinates) return VisionType.Visible; // NW
-                    else if (xFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, 0)) == node.WorldCoordinates) return VisionType.Visible; // W
-                    else if (xFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 0)) == node.WorldCoordinates) return VisionType.Visible; // E
-                    else if (yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(0, 1)) == node.WorldCoordinates) return VisionType.Visible; // N
-                    else if (yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(0, -1)) == node.WorldCoordinates) return VisionType.Visible; // S
+                    // Position we hit matches the position of the node we are checking
+                    if (hitWorldCoordinates == node.WorldCoordinates)
+                    {
+                        // If we are not close to hitting an edge, mark the node as visible
+                        if (xFrac > epsilon && xFrac < 1f - epsilon && yFrac > epsilon && yFrac < 1f - epsilon) return VisionType.Visible;
+
+                        // If we are on node edge, mark it as explored but not visible (i.e. cliffs)
+                        else markAsExplored = true;
+                    }
+
+                    // Also make checks for hitting a node edge on nodes adjacent to the one we are checking. 
+                    if (xFrac < epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, -1)) == node.WorldCoordinates) markAsExplored = true; // SW
+                    else if (xFrac > 1f - epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(1, -1)) == node.WorldCoordinates) markAsExplored = true; // SE
+                    else if (xFrac > 1f - epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 1)) == node.WorldCoordinates) markAsExplored = true; // NE
+                    else if (xFrac < epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(-1, 1)) == node.WorldCoordinates) markAsExplored = true; // NW
+                    else if (xFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, 0)) == node.WorldCoordinates) markAsExplored = true; // W
+                    else if (xFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 0)) == node.WorldCoordinates) markAsExplored = true; // E
+                    else if (yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(0, 1)) == node.WorldCoordinates) markAsExplored = true; // N
+                    else if (yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(0, -1)) == node.WorldCoordinates) markAsExplored = true; // S
                 }
 
                 // Check if we hit the waterbody that covers the node. if so => visible
@@ -381,13 +389,14 @@ namespace BlockmapFramework
                     GameObject objectHit = hit.transform.gameObject;
 
                     if (objectHit.layer == World.Layer_Entity && objectHit.GetComponent<Entity>() == e)
-                        return VisionType.FogOfWar;
+                        markAsExplored = true;
                 }
             }
 
-            
+
 
             // No check was successful => unexplored
+            if (markAsExplored) return VisionType.FogOfWar;
             return VisionType.Unexplored;
         }
 

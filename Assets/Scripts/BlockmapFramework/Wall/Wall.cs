@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -24,7 +25,17 @@ namespace BlockmapFramework
         /// <summary>
         /// How many tiles high this wall is, starting at OriginNode.BaseHeight.
         /// </summary>
-        public int Height { get; protected set; }
+        public int Height { get; private set; }
+
+        /// <summary>
+        /// The minimum y coordinate that this wall is taking up.
+        /// </summary>
+        public int MinHeight { get; private set; }
+
+        /// <summary>
+        /// The maximum y coordinate that this wall is taking up.
+        /// </summary>
+        public int MaxHeight => MinHeight + Height;
 
         #region Init
 
@@ -38,9 +49,23 @@ namespace BlockmapFramework
             Node = node;
             Side = side;
             Height = height;
+            MinHeight = GetWallStartY(node, side);
 
             node.Walls.Add(side, this);
             node.World.Walls.Add(this);
+        }
+
+        #endregion
+
+        #region Getters
+
+        /// <summary>
+        /// Returns the y coordinate of where the wall would start when placing on the given node & side.
+        /// </summary>
+        public static int GetWallStartY(BlockmapNode node, Direction side)
+        {
+            List<Direction> relevantCorners = HelperFunctions.GetAffectedCorners(side);
+            return node.Height.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
         }
 
         #endregion
