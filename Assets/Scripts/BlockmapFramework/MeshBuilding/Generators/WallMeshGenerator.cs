@@ -24,13 +24,7 @@ namespace BlockmapFramework
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (BlockmapNode node in nodesToDraw)
                 {
-                    foreach (Direction side in HelperFunctions.GetSides())
-                    {
-                        if (node.Walls.ContainsKey(side))
-                        {
-                            DrawWall(meshBuilder, node.Walls[side]);
-                        }
-                    }
+                    foreach (Wall wall in node.Walls.Values) DrawWall(meshBuilder, wall);
                 }
                 meshBuilder.ApplyMesh();
 
@@ -51,7 +45,9 @@ namespace BlockmapFramework
 
         public static void DrawWall(MeshBuilder meshBuilder, Wall wall)
         {
-            wall.Type.GenerateMesh(meshBuilder, wall);
+            if (HelperFunctions.IsSide(wall.Side)) wall.Type.GenerateSideMesh(meshBuilder, wall);
+            else if (HelperFunctions.IsCorner(wall.Side)) wall.Type.GenerateCornerMesh(meshBuilder, wall);
+            else throw new System.Exception("Walls can only be drawn when on side or corner of a node");
         }
     }
 }

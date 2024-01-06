@@ -1,9 +1,5 @@
 Big Features to Add:
 
-- corner walls
-	- maybe not worth the effort since it requires big rework
-	- alternatively an automated corner drawing could be made by checking over-corner connections when drawing a wall piece
-
 - press R to reset exploration in editor
 
 - Render walls on map edge

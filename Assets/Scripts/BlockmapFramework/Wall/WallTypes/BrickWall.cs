@@ -14,10 +14,33 @@ namespace BlockmapFramework
 
 
         private const float WALL_WIDTH = 0.1f;
-        public override void GenerateMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall)
         {
             int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BrickWallMaterial);
-            meshBuilder.BuildCube(submesh, GetWallStartPos(wall.Node, wall.Side, WALL_WIDTH), GetWallDimensions(wall.Node, wall.Side, wall.Height, WALL_WIDTH));
+
+            float startX = 0;
+            float dimX = 1f;
+            float startY = 0f;
+            float dimY = World.TILE_HEIGHT * wall.Height;
+            float startZ = 0f;
+            float dimZ = WALL_WIDTH;
+            Vector3 pos = new Vector3(startX, startY, startZ);
+            Vector3 dim = new Vector3(dimX, dimY, dimZ);
+            BuildCube(wall, meshBuilder, submesh, pos, dim);
+        }
+        public override void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall)
+        {
+            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BrickWallMaterial);
+
+            float startX = 0;
+            float dimX = WALL_WIDTH;
+            float startY = 0f;
+            float dimY = World.TILE_HEIGHT * wall.Height;
+            float startZ = 0f;
+            float dimZ = WALL_WIDTH;
+            Vector3 pos = new Vector3(startX, startY, startZ);
+            Vector3 dim = new Vector3(dimX, dimY, dimZ);
+            BuildCube(wall, meshBuilder, submesh, pos, dim);
         }
     }
 }

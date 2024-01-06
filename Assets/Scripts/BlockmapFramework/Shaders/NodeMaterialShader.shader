@@ -20,11 +20,15 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _ShowGrid("Show Grid", Float) = 1
         _GridColor("Grid Color", Color) = (0,0,0,1)
 
+        [Toggle] _CanShowTileOverlay("Can Show Tile Overlay", Float) = 1
+
+        /* Should not be set in inspector
         [Toggle] _ShowTileOverlay("Show Tile Overlay", Float) = 0
         _TileOverlayTex("Overlay Texture", 2D) = "none" {}
         _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
         _TileOverlayX("Overlay X Coord", Float) = 0
         _TileOverlayY("Overlay Y Coord", Float) = 0
+        */
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0        
@@ -62,6 +66,7 @@ Shader "Custom/NodeMaterialShader"
         fixed4 _GridColor;
         float _ShowGrid;
 
+        float _CanShowTileOverlay;
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
@@ -200,7 +205,7 @@ Shader "Custom/NodeMaterialShader"
 
 
             // Selection Overlay
-            if (_ShowTileOverlay == 1)
+            if (_CanShowTileOverlay == 1 && _ShowTileOverlay == 1)
             {
                 if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
                 {

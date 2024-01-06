@@ -14,7 +14,8 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public abstract void GenerateMesh(MeshBuilder meshBuilder, Wall wall);
+        public abstract void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall);
+        public abstract void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall);
 
         protected Vector3 GetWallStartPos(BlockmapNode node, Direction side, float wallWidth)
         {
@@ -47,7 +48,7 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// When building a cube for wall, define the values for building it to the south on 0/0 and then pass those values into this function to translate the values to the correct node and direction.
+        /// When building a cube for wall, define the values for building it from the south-west corner on 0/0 and then pass those values into this function to translate the values to the correct node and direction.
         /// </summary>
         protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, Vector3 pos, Vector3 dimensions)
         {
@@ -75,6 +76,26 @@ namespace BlockmapFramework
                 case Direction.N:
                     translatedPos = new Vector3(1 - pos.x, pos.y, 1 - pos.z);
                     translatedDimensions = new Vector3(-dimensions.x, dimensions.y, -dimensions.z);
+                    break;
+
+                case Direction.SW:
+                    translatedPos = pos;
+                    translatedDimensions = dimensions;
+                    break;
+
+                case Direction.SE:
+                    translatedPos = new Vector3(1 - dimensions.x, pos.y, pos.z);
+                    translatedDimensions = dimensions;
+                    break;
+
+                case Direction.NE:
+                    translatedPos = new Vector3(1 - pos.x, pos.y, 1 - pos.z);
+                    translatedDimensions = new Vector3(-dimensions.x, dimensions.y, -dimensions.z);
+                    break;
+
+                case Direction.NW:
+                    translatedPos = new Vector3(pos.x, pos.y, 1 - dimensions.z);
+                    translatedDimensions = dimensions;
                     break;
 
             }

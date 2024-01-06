@@ -366,6 +366,10 @@ namespace BlockmapFramework
         }
         private Direction GetNodeSideHoverMode(Vector3 worldPos)
         {
+            Direction fullHoverMode = GetNodeHoverMode(worldPos);
+            if (fullHoverMode == Direction.NW || fullHoverMode == Direction.NE || fullHoverMode == Direction.SW || fullHoverMode == Direction.SE)
+                return fullHoverMode;
+
             Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
             if (worldPos.x < 0) posOnTile.x++;
             if (worldPos.z < 0) posOnTile.y++;
@@ -385,6 +389,10 @@ namespace BlockmapFramework
         {
             List<Direction> sides = new List<Direction>();
 
+            Direction fullHoverMode = GetNodeHoverMode(worldPos);
+            if (fullHoverMode == Direction.NW || fullHoverMode == Direction.NE || fullHoverMode == Direction.SW || fullHoverMode == Direction.SE)
+                sides.Add(fullHoverMode);
+
             Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
             if (worldPos.x < 0) posOnTile.x++;
             if (worldPos.z < 0) posOnTile.y++;
@@ -401,36 +409,50 @@ namespace BlockmapFramework
 
         public Wall GetWallFromRaycastHit(RaycastHit hit)
         {
-            Wall hitWall = null;
-
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            BlockmapNode hitNode = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).FirstOrDefault();
-
+            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
             Direction primaryHitSide = GetNodeSideHoverMode(hit.point);
             List<Direction> otherPossibleHitSides = GetNodeSideHoverModes(hit.point);
 
-            if (hitNode != null && hitNode.Walls.ContainsKey(primaryHitSide)) hitWall = hitNode.Walls[primaryHitSide];
-            else
-                foreach (Direction hitSide in otherPossibleHitSides)
-                    if (hitNode != null && hitNode.Walls.ContainsKey(hitSide)) hitWall = hitNode.Walls[hitSide];
-
-
-            if (hitWall == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+            foreach (BlockmapNode hitNode in hitNodes)
             {
+                if (hitNode != null && hitNode.Walls.ContainsKey(primaryHitSide)) return hitNode.Walls[primaryHitSide];
+                else
+                {
+                    foreach (Direction hitSide in otherPossibleHitSides)
+                    {
+                        if (hitNode != null && hitNode.Walls.ContainsKey(hitSide))
+                        {
+                            return hitNode.Walls[hitSide];
+                        }
+                    }
+                }
+
+                // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+                // Do the same detection stuff again with the offset position
                 Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
                 Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                BlockmapNode offsetHitNode = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).FirstOrDefault();
-
+                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
                 Direction primaryOffsetSide = GetNodeSideHoverMode(offsetHitPosition);
                 List<Direction> otherPossibleOffsetSides = GetNodeSideHoverModes(offsetHitPosition);
 
-                if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(primaryOffsetSide)) hitWall = offsetHitNode.Walls[primaryOffsetSide];
-                else
-                    foreach (Direction hitSide in otherPossibleOffsetSides)
-                        if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(hitSide)) hitWall = offsetHitNode.Walls[hitSide];
+                foreach (BlockmapNode offsetHitNode in offsetHitNodes)
+                {
+                    if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(primaryOffsetSide)) return offsetHitNode.Walls[primaryOffsetSide];
+                    else
+                    {
+                        foreach (Direction hitSide in otherPossibleOffsetSides)
+                        {
+                            if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(hitSide))
+                            {
+                                return offsetHitNode.Walls[hitSide];
+                            }
+                        }
+                    }
+                }
             }
 
-            return hitWall;
+            return null;
         }
 
         #endregion
@@ -831,7 +853,8 @@ namespace BlockmapFramework
             if (height > type.MaxHeight) height = type.MaxHeight;
 
             // Check if wall already has a wall on that side
-            if (node.Walls.ContainsKey(side)) return false;
+            foreach(Direction dir in HelperFunctions.GetAffectedDirections(side))
+                if (node.Walls.ContainsKey(dir)) return false;
 
             // Check if enough space above node to place wall of that height
             int freeHeadSpace = node.GetFreeHeadSpace(side, Wall.GetWallStartY(node, side));

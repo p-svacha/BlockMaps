@@ -22,7 +22,7 @@ namespace BlockmapFramework
         private const float CROSS_BRACE_HEIGHT = 0.1f;
         private const float CROSS_BRACE_WIDTH = 0.05f;
 
-        public override void GenerateMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall)
         {
             int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WoodenFenceMaterial);
 
@@ -51,6 +51,20 @@ namespace BlockmapFramework
             Vector3 cbPos = new Vector3(cb_x, cb_y, cb_z);
             Vector3 cbDims = new Vector3(cb_dimX, cb_dimY, cb_dimZ);
             BuildCube(wall, meshBuilder, submesh, cbPos, cbDims);
+        }
+        public override void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall)
+        {
+            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WoodenFenceMaterial);
+
+            float startX = 0;
+            float dimX = POLE_WIDTH;
+            float startY = 0f;
+            float dimY = POLE_HEIGHT;
+            float startZ = 0f;
+            float dimZ = POLE_WIDTH;
+            Vector3 pos = new Vector3(startX, startY, startZ);
+            Vector3 dim = new Vector3(dimX, dimY, dimZ);
+            BuildCube(wall, meshBuilder, submesh, pos, dim);
         }
 
         #endregion

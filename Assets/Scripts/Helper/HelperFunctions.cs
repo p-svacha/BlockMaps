@@ -141,6 +141,8 @@ public static class HelperFunctions
     public static List<Direction> GetAllDirections8() => new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     public static List<Direction> GetCorners() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NE, Direction.NW };
     public static List<Direction> GetSides() => new List<Direction>() { Direction.N, Direction.E, Direction.S, Direction.W };
+    public static bool IsCorner(Direction dir) => GetCorners().Contains(dir);
+    public static bool IsSide(Direction dir) => GetSides().Contains(dir);
 
     /// <summary>
     /// Returns the corner directions that are relevant for a given direction.
@@ -171,6 +173,20 @@ public static class HelperFunctions
         if (dir == Direction.NE) return new List<Direction>() { Direction.N, Direction.E };
         if (dir == Direction.SE) return new List<Direction>() { Direction.S, Direction.E };
         if (dir == Direction.SW) return new List<Direction>() { Direction.S, Direction.W };
+        throw new System.Exception("Direction " + dir.ToString() + " not handled");
+    }
+
+    public static List<Direction> GetAffectedDirections(Direction dir)
+    {
+        if (dir == Direction.None) return GetAllDirections8();
+        if (dir == Direction.N) return new List<Direction> { Direction.NW, Direction.N, Direction.NE };
+        if (dir == Direction.E) return new List<Direction> { Direction.NE, Direction.E, Direction.SE };
+        if (dir == Direction.S) return new List<Direction> { Direction.SW, Direction.S, Direction.SE };
+        if (dir == Direction.W) return new List<Direction> { Direction.NW, Direction.W, Direction.SW };
+        if (dir == Direction.NW) return new List<Direction>() { Direction.NW, Direction.N, Direction.W };
+        if (dir == Direction.NE) return new List<Direction>() { Direction.NE, Direction.N, Direction.E };
+        if (dir == Direction.SE) return new List<Direction>() { Direction.SE, Direction.S, Direction.E };
+        if (dir == Direction.SW) return new List<Direction>() { Direction.SW, Direction.S, Direction.W };
         throw new System.Exception("Direction " + dir.ToString() + " not handled");
     }
 
