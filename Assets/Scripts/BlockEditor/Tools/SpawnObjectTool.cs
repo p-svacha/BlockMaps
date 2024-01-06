@@ -32,7 +32,8 @@ namespace WorldEditor
                     icon = Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
                 EntitySelection.AddElement(icon, Color.white, e.name, () => SelectEntity(e));
             }
-            SelectEntity(editor.StaticEntities[0]);
+
+            EntitySelection.SelectFirstElement();
         }
 
         public override void UpdateTool()

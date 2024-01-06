@@ -8,6 +8,7 @@ namespace BlockmapFramework
     {
         public abstract WallTypeId Id { get; }
         public abstract string Name { get; }
+        public abstract int MaxHeight { get; }
         public abstract bool BlocksVision { get; }
         public abstract Sprite PreviewSprite { get; }
 

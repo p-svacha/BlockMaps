@@ -305,9 +305,12 @@ namespace BlockmapFramework
                             newHoveredWaterBody = hitWaterNode.WaterBody;
                         }
                         else newHoveredNode = hitWaterNode.SurfaceNode;
+
+                        newHoveredSurfaceNode = hitWaterNode.SurfaceNode;
                     }
                 }
 
+                // Hit wall
                 else if(objectHit.gameObject.layer == Layer_Wall)
                 {
                     newHoveredWall = GetWallFromRaycastHit(hit);
@@ -401,7 +404,7 @@ namespace BlockmapFramework
             Wall hitWall = null;
 
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            BlockmapNode hitNode = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+            BlockmapNode hitNode = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).FirstOrDefault();
 
             Direction primaryHitSide = GetNodeSideHoverMode(hit.point);
             List<Direction> otherPossibleHitSides = GetNodeSideHoverModes(hit.point);
@@ -416,7 +419,7 @@ namespace BlockmapFramework
             {
                 Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
                 Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                BlockmapNode offsetHitNode = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).FirstOrDefault();
+                BlockmapNode offsetHitNode = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).FirstOrDefault();
 
                 Direction primaryOffsetSide = GetNodeSideHoverMode(offsetHitPosition);
                 List<Direction> otherPossibleOffsetSides = GetNodeSideHoverModes(offsetHitPosition);
@@ -446,6 +449,10 @@ namespace BlockmapFramework
         }
         private void DeregisterNode(BlockmapNode node)
         {
+            // Walls on node
+            while(node.Walls.Count > 0) DeregisterWall(node.Walls.Values.ToList()[0]);
+
+            // Node
             Nodes.Remove(node.Id); // Global registry
 
             // Chunk registry
@@ -453,6 +460,12 @@ namespace BlockmapFramework
             if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
+        }
+        private void DeregisterWall(Wall wall)
+        {
+            BlockmapNode node = wall.Node;
+            node.Walls.Remove(wall.Side);
+            Walls.Remove(wall);
         }
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
@@ -812,19 +825,25 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
-        public bool CanBuildWall(BlockmapNode node, Direction side, int height)
+        public bool CanBuildWall(WallType type, BlockmapNode node, Direction side, int height)
         {
+            // Adjust height if it's higher than wall type allows
+            if (height > type.MaxHeight) height = type.MaxHeight;
+
             // Check if wall already has a wall on that side
             if (node.Walls.ContainsKey(side)) return false;
 
             // Check if enough space above node to place wall of that height
-            int freeHeadSpace = node.GetMaxFreeHeadSpace(side);
+            int freeHeadSpace = node.GetFreeHeadSpace(side, Wall.GetWallStartY(node, side));
             if (freeHeadSpace < height) return false;
 
             return true;
         }
         public void PlaceWall(WallType type, BlockmapNode node, Direction side, int height)
         {
+            // Adjust height if it's higher than wall type allows
+            if (height > type.MaxHeight) height = type.MaxHeight;
+
             Wall wall = new Wall(type);
             wall.Init(node, side, height);
 
@@ -835,8 +854,7 @@ namespace BlockmapFramework
         public void RemoveWall(Wall wall)
         {
             BlockmapNode node = wall.Node;
-            node.Walls.Remove(wall.Side);
-            Walls.Remove(wall);
+            DeregisterWall(wall);
 
             UpdateNavmesh(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);

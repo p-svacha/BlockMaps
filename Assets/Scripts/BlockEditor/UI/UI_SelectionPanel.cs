@@ -36,6 +36,10 @@ namespace WorldEditor
             Elements.Add(elem);
         }
 
+        public void SelectFirstElement()
+        {
+            Elements[0].Button.onClick.Invoke();
+        }
         private void SelectElement(UI_SelectionElement elem)
         {
             if(SelectedElement != null) SelectedElement.SetSelected(false);

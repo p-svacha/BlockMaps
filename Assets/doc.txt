@@ -1,15 +1,5 @@
 Big Features to Add:
 
-- Fences/Walls
-	=> Passthrough-walls (new type: hedge)
-	=> Climbable wall (new type: fence)
-	=> Fix uv's in mesh generator
-
-- Add rotation and scale to NodeMaterialShader
-
-- no walls on water
-- no water on walls
-
 - corner walls
 	- maybe not worth the effort since it requires big rework
 	- alternatively an automated corner drawing could be made by checking over-corner connections when drawing a wall piece
@@ -19,8 +9,6 @@ Big Features to Add:
 - Render walls on map edge
 	=> from node height
 	=> or water height on water bodies
-
-- Fix cliff UV's
 
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change (only full) and surface paint
@@ -51,11 +39,13 @@ Big Features to Add:
 
 - Make vision radius of entities based on their dimensions
 
+- Add door WallType (Passable, but not seethrough)
+
 - Allow movingentities bigger than 1x1
 
 - Fix shadow rendering bug with shader discard and re-enable shadows of terrain
 
-- moving entity jumping/climbing attribute (int jumpHeight, bool canClimb)
+- moving entity jumping/climbing attribute (int jumpHeight, enum climbing (none, basic, advanced) for (nothing, ladders+fences, cliffs))
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type

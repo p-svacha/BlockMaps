@@ -19,7 +19,10 @@ namespace BlockmapFramework
         public override void OnDraw()
         {
             foreach (WaterNode node in Chunk.GetAllWaterNodes())
+            {
                 WaterMeshGenerator.BuildWaterMeshForSingleNode(MeshBuilder, node);
+                node.SetMesh(this);
+            }
         }
 
 

@@ -80,6 +80,7 @@ public class MeshBuilder
 
     public MeshVertex AddVertex(Vector3 position, Vector2 uv, Vector2? uv2 = null)
     {
+        if (uv2 == null) uv2 = uv;
         MeshVertex vertex = new MeshVertex(position, uv, uv2);
         Vertices.Add(vertex);
         return vertex;

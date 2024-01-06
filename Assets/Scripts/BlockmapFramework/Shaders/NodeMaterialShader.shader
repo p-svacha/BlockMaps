@@ -2,9 +2,16 @@ Shader "Custom/NodeMaterialShader"
 {
     Properties // Exposed to editor in material insepctor
     {
+        [Toggle] _UseTextures("Use Textures", Float) = 0
         _MainTex("Texture", 2D) = "none" {}
         _Color("Color", Color) = (1,1,1,1)
-        [Toggle] _UseTextures("Use Textures", Float) = 0
+        _ZPriority("Z-Priority", Float) = 0
+
+        // Texture mode values
+        _TextureScale("Texture Scale", Float) = 1
+        _TriplanarBlendSharpness("Blend Sharpness",float) = 1
+        _SideStartSteepness("Side Texture Start Steepness",float) = 0.3 // The steepness where side texture starts to show through
+        _SideOnlySteepness("Side Texture Only Steepness",float) = 0.7 // The steepness where only side texture is shown
 
         // Overlays
         _FogOfWarColor("Fog of war Color", Color) = (0,0,0,0.5)
@@ -20,10 +27,7 @@ Shader "Custom/NodeMaterialShader"
         _TileOverlayY("Overlay Y Coord", Float) = 0
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
-        _Metallic("Metallic", Range(0,1)) = 0.0
-
-        // Z-Fighting-Priority
-        _ZPriority("Z-Priority", Float) = 0
+        _Metallic("Metallic", Range(0,1)) = 0.0        
     }
 
         SubShader
@@ -45,6 +49,11 @@ Shader "Custom/NodeMaterialShader"
         sampler2D _MainTex;
         fixed4 _Color;
         float _UseTextures;
+        float _ZPriority;
+        float _TextureScale;
+        float _TriplanarBlendSharpness;
+        float _SideStartSteepness;
+        float _SideOnlySteepness;
 
         // Overlays
         fixed4 _FogOfWarColor;
@@ -65,15 +74,13 @@ Shader "Custom/NodeMaterialShader"
 
         float _TileVisibility[324];
 
-        // Z-Fighting fix
-        float _ZPriority;
-
         struct Input
         {
             float2 uv_MainTex;
             float2 uv2_TileOverlayTex;
             float2 uv2_GridTex;
             float3 worldPos;
+            float3 worldNormal;
         };
 
         int GetVisibilityArrayIndex(float x, float y)
@@ -154,7 +161,41 @@ Shader "Custom/NodeMaterialShader"
             // Base color
             fixed4 c;
 
-            if (_UseTextures == 1) c = tex2D(_MainTex, IN.uv_MainTex);
+            if (_UseTextures == 1)
+            {
+                //c = tex2D(_MainTex, IN.uv_MainTex);
+
+                // Find our UVs for each axis based on world position of the fragment.
+                half2 yUV = IN.worldPos.xz / _TextureScale;
+                half2 xUV = IN.worldPos.zy / _TextureScale;
+                half2 zUV = IN.worldPos.xy / _TextureScale;
+
+                // Get the absolute value of the world normal.
+                // Put the blend weights to the power of BlendSharpness: The higher the value, the sharper the transition between the planar maps will be.
+                half3 blendWeights = pow(abs(IN.worldNormal), _TriplanarBlendSharpness);
+
+                // ----- TRIPLANAR ------
+                // Divide our blend mask by the sum of it's components, this will make x+y+z=1
+                blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
+
+                // Define how much of alpha is top texture
+                float steepness = 1 - blendWeights.y;
+                float topTextureStrength;
+                if (steepness < _SideStartSteepness)
+                    topTextureStrength = 1;
+                else if (steepness < _SideOnlySteepness)
+                    topTextureStrength = 1 - ((steepness - _SideStartSteepness) * (1 / (_SideOnlySteepness - _SideStartSteepness)));
+                else
+                    topTextureStrength = 0;
+
+                // Now do texture samples from our diffuse maps with each of the 3 UV set's we've just made.
+                // Blend top with side texture according to how much the surface normal points vertically (y-direction)
+                half3 yDiff = (1 - topTextureStrength) * tex2D(_MainTex, yUV) + topTextureStrength * tex2D(_MainTex, yUV);
+                half3 xDiff = (1 - topTextureStrength) * tex2D(_MainTex, xUV) + topTextureStrength * tex2D(_MainTex, xUV);
+                half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV) + topTextureStrength * tex2D(_MainTex, zUV);
+
+                c.rgb = xDiff * blendWeights.x + yDiff * blendWeights.y + zDiff * blendWeights.z;
+            }
             else c = _Color;
 
 

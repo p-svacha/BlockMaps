@@ -26,7 +26,7 @@ namespace WorldEditor
             foreach (WallType wall in WallTypeManager.Instance.GetAllWallTypes())
                 WallSelection.AddElement(wall.PreviewSprite, Color.white, wall.Name, () => SelectWallType(wall.Id));
 
-            SelectWallType(WallTypeId.BrickWall);
+            WallSelection.SelectFirstElement();
         }
 
         private void SelectWallType(WallTypeId wall) => SelectedWallType = wall;
@@ -41,7 +41,7 @@ namespace WorldEditor
                 Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeSideHoverMode);
 
                 Color c = Color.white;
-                if (!World.CanBuildWall(World.HoveredNode, World.NodeSideHoverMode, height)) c = Color.red;
+                if (!World.CanBuildWall(WallTypeManager.Instance.GetWallType(SelectedWallType), World.HoveredNode, World.NodeSideHoverMode, height)) c = Color.red;
 
                 World.HoveredNode.ShowOverlay(overlayTexture, c);
             }
@@ -52,9 +52,10 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (HeightInput.text == "") return;
             int height = int.Parse(HeightInput.text);
-            if (!World.CanBuildWall(World.HoveredNode, World.NodeSideHoverMode, height)) return;
+            WallType type = WallTypeManager.Instance.GetWallType(SelectedWallType);
+            if (!World.CanBuildWall(type, World.HoveredNode, World.NodeSideHoverMode, height)) return;
 
-            World.PlaceWall(WallTypeManager.Instance.GetWallType(SelectedWallType), World.HoveredNode, World.NodeSideHoverMode, height);
+            World.PlaceWall(type, World.HoveredNode, World.NodeSideHoverMode, height);
         }
 
         public override void HandleRightClick()

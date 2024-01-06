@@ -216,7 +216,7 @@ namespace BlockmapFramework
         /// </summary>
         public void ShowOverlay(bool show)
         {
-            if(Mesh != null) Mesh.ShowOverlay(show);
+            Mesh.ShowOverlay(show);
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace BlockmapFramework
         /// </summary>
         public void ShowOverlay(Texture2D texture, Color color)
         {
-            if (Mesh != null) Mesh.ShowOverlay(LocalCoordinates, texture, color);
+            Mesh.ShowOverlay(LocalCoordinates, texture, color);
         }
 
         public void SetMesh(ChunkMesh mesh)
@@ -394,9 +394,10 @@ namespace BlockmapFramework
         /// Returns the minimun amount of space (in amount of tiles) that is free above this node.
         /// <br/> For example a flat node right above this flat node would be 1.
         /// <br/> If any corner of an above node overlaps with this node 0 is returned.
+        /// <br/> forcedBaseHeight can be passed to check free head space from a specific height instead of node corner.
         /// <br/> Direction.None can be passed to check all corners.
         /// </summary>
-        public int GetFreeHeadSpace(Direction dir)
+        public int GetFreeHeadSpace(Direction dir, int forcedBaseHeight = -1)
         {
             List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid).ToList();
 
@@ -407,32 +408,13 @@ namespace BlockmapFramework
                 foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {
                     int diff = node.Height[corner] - Height[corner];
+                    if (forcedBaseHeight != -1) diff = node.Height[corner] - forcedBaseHeight;
+
                     if (diff < minHeight) minHeight = diff;
                 }
             }
 
             return minHeight;
-        }
-        /// <summary>
-        /// Like GetFreeHeadSpace but returns the maximum amount of space for a given side.
-        /// </summary>
-        public int GetMaxFreeHeadSpace(Direction dir)
-        {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid).ToList();
-            if (nodesAbove.Count == 0) return World.MAX_HEIGHT;
-
-            int maxHeight = 0;
-
-            foreach (BlockmapNode node in nodesAbove)
-            {
-                foreach (Direction corner in HelperFunctions.GetAffectedCorners(dir))
-                {
-                    int diff = node.Height[corner] - Height[corner];
-                    if (diff > maxHeight) maxHeight = diff;
-                }
-            }
-
-            return maxHeight;
         }
 
         /// <summary>

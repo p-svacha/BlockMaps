@@ -153,7 +153,7 @@ namespace BlockmapFramework
         {
             SurfaceMesh.ShowGrid(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowGrid(show);
-            //WaterMesh.ShowGrid(show); // water should never show grid
+            WaterMesh.ShowGrid(show);
         }
         public void ShowTextures(bool show)
         {

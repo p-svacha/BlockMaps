@@ -27,7 +27,7 @@ namespace WorldEditor
                 SelectionPanel.AddElement(null, s.Color, s.Name, () => SelectSurface(s.Id));
             }
 
-            SelectSurface(SurfaceId.Grass);
+            SelectionPanel.SelectFirstElement();
         }
 
         public void SelectSurface(SurfaceId surface)
