@@ -164,42 +164,40 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateConnectedNodesDiagonal()
         {
-            BlockmapNode northNode = ConnectedNodes.ContainsKey(Direction.N) ? ConnectedNodes[Direction.N] : null;
-            BlockmapNode eastNode = ConnectedNodes.ContainsKey(Direction.E) ? ConnectedNodes[Direction.E] : null;
-            BlockmapNode southNode = ConnectedNodes.ContainsKey(Direction.S) ? ConnectedNodes[Direction.S] : null;
-            BlockmapNode westNode = ConnectedNodes.ContainsKey(Direction.W) ? ConnectedNodes[Direction.W] : null;
+            UpdateConnectedNodeDiagonal(Direction.NE);
+            UpdateConnectedNodeDiagonal(Direction.NW);
+            UpdateConnectedNodeDiagonal(Direction.SE);
+            UpdateConnectedNodeDiagonal(Direction.SW);
+        }
+        private void UpdateConnectedNodeDiagonal(Direction dir)
+        {
+            if (!IsPassable(dir)) return;
 
-            // NE
-            if (northNode != null && eastNode != null &&
-                northNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.N) &&
-                northNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.N] &&
-                northNode.ConnectedNodes[Direction.E].IsPassable(Direction.S) &&
-                northNode.ConnectedNodes[Direction.E].IsPassable(Direction.W)) 
-                ConnectedNodes[Direction.NE] = northNode.ConnectedNodes[Direction.E];
+            Direction preDirection = HelperFunctions.GetNextAnticlockwiseDirection8(dir);
+            Direction postDirection = HelperFunctions.GetNextClockwiseDirection8(dir);
+            BlockmapNode sideConnectedNodePre = ConnectedNodes.ContainsKey(preDirection) ? ConnectedNodes[preDirection] : null;
+            BlockmapNode sideConnectedNodePost = ConnectedNodes.ContainsKey(postDirection) ? ConnectedNodes[postDirection] : null;
 
-            // NW
-            if (northNode != null && westNode != null &&
-                northNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.N) &&
-                northNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.N] &&
-                northNode.ConnectedNodes[Direction.W].IsPassable(Direction.S) && 
-                northNode.ConnectedNodes[Direction.W].IsPassable(Direction.E)) 
-                ConnectedNodes[Direction.NW] = northNode.ConnectedNodes[Direction.W];
+            if (sideConnectedNodePre == null) return;
+            if (sideConnectedNodePost == null) return;
+            if (!sideConnectedNodePre.IsPassable(HelperFunctions.GetMirroredCorner(dir, preDirection))) return;
+            if (!sideConnectedNodePost.IsPassable(HelperFunctions.GetMirroredCorner(dir, postDirection))) return;
 
-            // SE
-            if (southNode != null && eastNode != null &&
-                southNode.ConnectedNodes.ContainsKey(Direction.E) && eastNode.ConnectedNodes.ContainsKey(Direction.S) &&
-                southNode.ConnectedNodes[Direction.E] == eastNode.ConnectedNodes[Direction.S] &&
-                southNode.ConnectedNodes[Direction.E].IsPassable(Direction.N) &&
-                southNode.ConnectedNodes[Direction.E].IsPassable(Direction.W))
-                ConnectedNodes[Direction.SE] = southNode.ConnectedNodes[Direction.E];
+            // Check if the path N>E results in the same node as E>N - prerequisite to connect diagonal nodes (N & E are examples)
+            if (sideConnectedNodePre.ConnectedNodes.ContainsKey(postDirection) && sideConnectedNodePost.ConnectedNodes.ContainsKey(preDirection) &&
+                sideConnectedNodePre.ConnectedNodes[postDirection] == sideConnectedNodePost.ConnectedNodes[preDirection])
+            {
+                // We have a target node
+                BlockmapNode targetNode = sideConnectedNodePre.ConnectedNodes[postDirection];
+                bool canConnect = true;
 
-            // SW
-            if (southNode != null && westNode != null &&
-                southNode.ConnectedNodes.ContainsKey(Direction.W) && westNode.ConnectedNodes.ContainsKey(Direction.S) &&
-                southNode.ConnectedNodes[Direction.W] == westNode.ConnectedNodes[Direction.S] &&
-                southNode.ConnectedNodes[Direction.W].IsPassable(Direction.N) &&
-                southNode.ConnectedNodes[Direction.W].IsPassable(Direction.E))
-                ConnectedNodes[Direction.SW] = southNode.ConnectedNodes[Direction.W];
+                // Check if the target node is passable in all relevant directions
+                if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(preDirection))) canConnect = false;
+                if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(postDirection))) canConnect = false;
+                if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) canConnect = false;
+
+                if (canConnect) ConnectedNodes[dir] = targetNode;
+            }
         }
 
         #endregion
@@ -370,13 +368,13 @@ namespace BlockmapFramework
             // Check if node is generally passable
             if (!IsPassable(entity)) return false;
 
+            // Check if wall blocking this side (including corners)
+            if (Walls.ContainsKey(dir)) return false;
+
             if (dir == Direction.NW) return IsPassable(Direction.N, entity) && IsPassable(Direction.W, entity);
             if (dir == Direction.NE) return IsPassable(Direction.N, entity) && IsPassable(Direction.E, entity);
             if (dir == Direction.SW) return IsPassable(Direction.S, entity) && IsPassable(Direction.W, entity);
             if (dir == Direction.SE) return IsPassable(Direction.S, entity) && IsPassable(Direction.E, entity);
-
-            // Check if wall blocking this side
-            if (Walls.ContainsKey(dir)) return false;
 
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);

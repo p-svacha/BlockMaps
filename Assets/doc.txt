@@ -3,13 +3,27 @@ Big Features to Add:
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change (only full) and surface paint
 
+- Also add some way of cliff climbing
+	- either with new nodes
+	- or with some special animation
+
+- Ladders
+	- can be built on the side of a node when there is an adjacent node higher up in that directions
+
+- Implement MovingEntity ClimbingSkill attribute
+	=> None: Fences, ladders and cliffs always block
+	=> Basic: Ladders and easy fences
+	=> Advanced: Cliffs and advanced fences too
+
+- Implement animation system for climbing fences
+- walls should not generally block movement, but based on entity climbing skill
+
 - add generators
 	=> flat empty grass
 	=> current perlin with some trees and cliffs
 	=> add dropdown for different generators
 
-- Ladders
-	> add nonsolid laddernodes with Direction.UP and Direction.DOWN
+
 
 - make a dropdown for load world
 
@@ -35,7 +49,7 @@ Big Features to Add:
 
 - Fix shadow rendering bug with shader discard and re-enable shadows of terrain
 
-- moving entity jumping/climbing attribute (int jumpHeight, enum climbing (none, basic, advanced) for (nothing, ladders+fences, cliffs))
+
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
