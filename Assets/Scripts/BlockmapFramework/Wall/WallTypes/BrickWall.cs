@@ -9,6 +9,7 @@ namespace BlockmapFramework
         public override WallTypeId Id => WallTypeId.BrickWall;
         public override string Name => "Brick Wall";
         public override int MaxHeight => World.MAX_HEIGHT;
+        public override bool FollowSlopes => false;
         public override bool BlocksVision => true;
         public override Sprite PreviewSprite => ResourceManager.Singleton.BrickWallSprite;
 

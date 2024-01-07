@@ -19,11 +19,12 @@ namespace WorldEditor
                 Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode);
                 bool canIncrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
                 bool canDecrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
-                Color c = Color.white;
+
+                Color c;
                 if (canIncrease && canDecrease) c = Color.white;
-                else if (canIncrease) c = Color.green;
-                else if (canDecrease) c = Color.yellow;
+                else if (canIncrease || canDecrease) c = Color.yellow;
                 else c = Color.red;
+
                 World.HoveredSurfaceNode.ShowOverlay(overlayTexture, c);
             }
         }

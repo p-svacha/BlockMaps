@@ -258,6 +258,10 @@ namespace BlockmapFramework
         {
             ExploredBy.Add(p);
         }
+        public void RemoveExploredBy(Player p)
+        {
+            ExploredBy.Remove(p);
+        }
 
         public void SetSurface(SurfaceId id)
         {

@@ -9,6 +9,7 @@ namespace BlockmapFramework
         public override WallTypeId Id => WallTypeId.WoodenFence;
         public override string Name => "Wooden Fence";
         public override int MaxHeight => 1;
+        public override bool FollowSlopes => true;
         public override bool BlocksVision => false;
         public override Sprite PreviewSprite => ResourceManager.Singleton.WoodenFenceSprite;
 

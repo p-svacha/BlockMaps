@@ -207,6 +207,32 @@ public class MeshBuilder
         BuildPlane(submeshIndex, new Vector3(xEnd, yStart, zStart), new Vector3(xEnd, yStart, zEnd), new Vector3(xEnd, yEnd, zEnd), new Vector3(xEnd, yEnd, zStart), Vector2.zero, Vector2.one);
     }
 
+    /// <summary>
+    /// Adds all MeshVertices and MeshTriangles to build a cube given a footprint (4 vertices) and a height.
+    /// </summary>
+    public void BuildCube(int submeshIndex, Vector3 vb1, Vector3 vb2, Vector3 vb3, Vector3 vb4, float height)
+    {
+        Vector3 vt1 = vb1 + new Vector3(0f, height, 0f);
+        Vector3 vt2 = vb2 + new Vector3(0f, height, 0f);
+        Vector3 vt3 = vb3 + new Vector3(0f, height, 0f);
+        Vector3 vt4 = vb4 + new Vector3(0f, height, 0f);
+
+        // bot
+        BuildPlane(submeshIndex, vb4, vb3, vb2, vb1, Vector2.zero, Vector2.one);
+        // top
+        BuildPlane(submeshIndex, vt1, vt2, vt3, vt4, Vector2.zero, Vector2.one);
+
+        // south
+        BuildPlane(submeshIndex, vb1, vb2, vt2, vt1, Vector2.zero, Vector2.one);
+        // north
+        BuildPlane(submeshIndex, vb3, vb4, vt4, vt3, Vector2.zero, Vector2.one);
+
+        // west
+        BuildPlane(submeshIndex, vb2, vb3, vt3, vt2, Vector2.zero, Vector2.one);
+        // east
+        BuildPlane(submeshIndex, vb4, vb1, vt1, vt4, Vector2.zero, Vector2.one);
+    }
+
     #region Complex Functions
 
     /// <summary>

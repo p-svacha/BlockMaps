@@ -128,7 +128,6 @@ namespace BlockmapFramework
         private void DrawEastSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
             SurfaceNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
-            if (eastNode == null) return;
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -137,13 +136,14 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? 0f : eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? 0f : eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
+            if(eastNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
-            if (Height[Direction.NE] < eastNode.Height[Direction.NW] && Height[Direction.SE] < eastNode.Height[Direction.SW]) // Both corners are lower than next tile
+            else if (Height[Direction.NE] < eastNode.Height[Direction.NW] && Height[Direction.SE] < eastNode.Height[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
             else if (Height[Direction.NE] < eastNode.Height[Direction.NW]) // Only NE corner is lower
@@ -167,7 +167,6 @@ namespace BlockmapFramework
         private void DrawSouthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
             SurfaceNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
-            if (southNode == null) return;
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -176,13 +175,14 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? 0f : southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? 0f : southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
+            if (southNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
-            if (Height[Direction.SE] < southNode.Height[Direction.NE] && Height[Direction.SW] < southNode.Height[Direction.NW]) // Both corners are lower than next tile
+            else if (Height[Direction.SE] < southNode.Height[Direction.NE] && Height[Direction.SW] < southNode.Height[Direction.NW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
             else if (Height[Direction.SE] < southNode.Height[Direction.NE]) // Only SE corner is lower
@@ -206,7 +206,6 @@ namespace BlockmapFramework
         private void DrawWestSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
             SurfaceNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
-            if (westNode == null) return;
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -215,13 +214,14 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? 0f : westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? 0f : westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
+            if (westNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 
-            if (Height[Direction.NW] < westNode.Height[Direction.NE] && Height[Direction.SW] < westNode.Height[Direction.SE]) // Both corners are lower than next tile
+            else if (Height[Direction.NW] < westNode.Height[Direction.NE] && Height[Direction.SW] < westNode.Height[Direction.SE]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
             else if (Height[Direction.NW] < westNode.Height[Direction.NE]) // Only NE corner is lower
@@ -245,7 +245,6 @@ namespace BlockmapFramework
         private void DrawNorthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
             SurfaceNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
-            if (northNode == null) return;
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -254,13 +253,14 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? 0f : northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? 0f : northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 
+            if (northNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 
-            if (Height[Direction.NE] < northNode.Height[Direction.SE] && Height[Direction.NW] < northNode.Height[Direction.SW]) // Both corners are lower than next tile
+            else if (Height[Direction.NE] < northNode.Height[Direction.SE] && Height[Direction.NW] < northNode.Height[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
             else if (Height[Direction.NE] < northNode.Height[Direction.SE]) // Only SE corner is lower
@@ -304,6 +304,10 @@ namespace BlockmapFramework
             Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
             int newBaseHeight = newHeights.Values.Min();
             int newMaxHeight = newHeights.Values.Max();
+
+            // Check if all heights are within allowed values
+            if (newHeights.Values.Any(x => x < 0)) return false;
+            if (newHeights.Values.Any(x => x > World.MAX_HEIGHT)) return false;
 
             // Check if a node above would block increase
             if (isIncrease)
@@ -399,6 +403,9 @@ namespace BlockmapFramework
 
         private bool IsValid(Dictionary<Direction,int> height)
         {
+            if (height.Values.Any(x => x < 0)) return false;
+            if (height.Values.Any(x => x > World.MAX_HEIGHT)) return false;
+
             return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||
             Mathf.Abs(height[Direction.SW] - height[Direction.NW]) > 1 ||
             Mathf.Abs(height[Direction.NW] - height[Direction.NE]) > 1 ||

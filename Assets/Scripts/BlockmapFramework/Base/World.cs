@@ -491,6 +491,13 @@ namespace BlockmapFramework
         }
 
         public void AddPlayer(Player player) => Players.Add(player.Id, player);
+        public void ResetExploration(Player player)
+        {
+            foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(player);
+            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVisibleNodes();
+
+            UpdateVisibility();
+        }
 
         private void GenerateFullNavmesh()
         {

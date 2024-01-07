@@ -132,24 +132,27 @@ namespace WorldEditor
 
             if (isUiElementFocussed) return; // no input key checks when a ui element is focussed
 
-            // Show/Hide Grid
+            // G - Show/Hide Grid
             if (Input.GetKeyDown(KeyCode.G)) World.ToggleGridOverlay();
 
-            // Visualize Pathfinding
+            // P - Visualize Pathfinding
             if(Input.GetKeyDown(KeyCode.P)) World.TogglePathfindingVisualization();
 
-            // Texture mode
+            // T - Texture mode
             if (Input.GetKeyDown(KeyCode.T)) World.ToggleTextureMode();
 
-            // Surface blending
+            // B - Surface blending
             if (Input.GetKeyDown(KeyCode.B)) World.ToggleTileBlending();
 
-            // Visibility
+            // V - Visibility
             if (Input.GetKeyDown(KeyCode.V))
             {
                 if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer);
                 else World.SetActiveVisionPlayer(null);
             }
+
+            // R - Reset explored nodes
+            if (Input.GetKeyDown(KeyCode.R)) World.ResetExploration(EditorPlayer);
         }
 
         private void UpdateTileInfoText()

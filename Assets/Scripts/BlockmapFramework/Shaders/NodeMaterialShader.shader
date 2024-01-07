@@ -5,7 +5,7 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _UseTextures("Use Textures", Float) = 0
         _MainTex("Texture", 2D) = "none" {}
         _Color("Color", Color) = (1,1,1,1)
-        _ZPriority("Z-Priority", Float) = 0
+        _Offset("Render Priority (lowest renders first)", float) = 0
 
         // Texture mode values
         _TextureScale("Texture Scale", Float) = 1
@@ -31,17 +31,18 @@ Shader "Custom/NodeMaterialShader"
         */
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
-        _Metallic("Metallic", Range(0,1)) = 0.0        
+        _Metallic("Metallic", Range(0,1)) = 0.0
     }
 
         SubShader
-    {
+        {
         Tags { "RenderType" = "Opaque" }
+        Offset [_Offset], [_Offset]
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows addshadow vertex:vert
+        #pragma surface surf Standard fullforwardshadows addshadow
 
         #pragma target 3.5
 
@@ -53,7 +54,6 @@ Shader "Custom/NodeMaterialShader"
         sampler2D _MainTex;
         fixed4 _Color;
         float _UseTextures;
-        float _ZPriority;
         float _TextureScale;
         float _TriplanarBlendSharpness;
         float _SideStartSteepness;
@@ -91,13 +91,6 @@ Shader "Custom/NodeMaterialShader"
         int GetVisibilityArrayIndex(float x, float y)
         {
             return int((y + 1) + (x + 1) * (_ChunkSize + 2));
-        }
-
-        void vert(inout appdata_full v, out Input o) {
-            UNITY_INITIALIZE_OUTPUT(Input, o);
-
-            // Add a small offset to the vertex position in the view direction
-            v.vertex.xyz += -_ZPriority * 0.00001 * _WorldSpaceCameraPos.xyz;
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)

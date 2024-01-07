@@ -9,6 +9,7 @@ namespace BlockmapFramework
         public abstract WallTypeId Id { get; }
         public abstract string Name { get; }
         public abstract int MaxHeight { get; }
+        public abstract bool FollowSlopes { get; }
         public abstract bool BlocksVision { get; }
         public abstract Sprite PreviewSprite { get; }
 
@@ -108,7 +109,40 @@ namespace BlockmapFramework
             translatedPos += nodeOffsetPos;
 
             // Build cube
-            meshBuilder.BuildCube(submesh, translatedPos, translatedDimensions);
+            if(HelperFunctions.IsSide(wall.Side) &&  wall.Type.FollowSlopes) // Adjust for slope
+            {
+                float slope = World.TILE_HEIGHT * (wall.Node.Height[HelperFunctions.GetNextAnticlockwiseDirection8(wall.Side)] - wall.Node.Height[HelperFunctions.GetNextClockwiseDirection8(wall.Side)]);
+                float startY = 0;
+                if (slope < 0)
+                {
+                    startY = -slope;
+                    slope = 0;
+                }
+                Debug.Log(slope);
+
+                Vector3 vb1 = new Vector3(translatedPos.x, translatedPos.y, translatedPos.z);
+                Vector3 vb2 = new Vector3(translatedPos.x + translatedDimensions.x, translatedPos.y, translatedPos.z);
+                Vector3 vb3 = new Vector3(translatedPos.x + translatedDimensions.x, translatedPos.y, translatedPos.z + translatedDimensions.z);
+                Vector3 vb4 = new Vector3(translatedPos.x, translatedPos.y, translatedPos.z + translatedDimensions.z);
+
+                if (wall.Side == Direction.S || wall.Side == Direction.N)
+                {
+                    vb1 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x), 0f);
+                    vb2 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x + dimensions.x), 0f);
+                    vb3 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x + dimensions.x), 0f);
+                    vb4 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x), 0f);
+                }
+                if (wall.Side == Direction.E || wall.Side == Direction.W)
+                {
+                    vb1 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z), 0f);
+                    vb2 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z + dimensions.z), 0f);
+                    vb3 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z + dimensions.z), 0f);
+                    vb4 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z), 0f);
+                }
+
+                meshBuilder.BuildCube(submesh, vb1, vb2, vb3, vb4, dimensions.y);
+            }
+            else meshBuilder.BuildCube(submesh, translatedPos, translatedDimensions);
         }
         protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, float startX, float endX, float startY, float endY, float startZ, float endZ)
         {

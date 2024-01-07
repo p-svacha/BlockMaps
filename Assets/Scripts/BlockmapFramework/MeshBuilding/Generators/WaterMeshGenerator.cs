@@ -35,6 +35,16 @@ namespace BlockmapFramework
 
             meshBuilder.AddTriangle(waterSubmesh, sw, ne, se);
             meshBuilder.AddTriangle(waterSubmesh, sw, nw, ne);
+
+            // Map edge plane
+            if (node.World.GetAdjacentSurfaceNode(node, Direction.N) == null)
+                meshBuilder.BuildPlane(waterSubmesh, nw.Position, ne.Position, new Vector3(ne.Position.x, 0f, ne.Position.z), new Vector3(nw.Position.x, 0f, nw.Position.z), Vector2.zero, Vector2.one);
+            if (node.World.GetAdjacentSurfaceNode(node, Direction.E) == null)
+                meshBuilder.BuildPlane(waterSubmesh, ne.Position, se.Position, new Vector3(se.Position.x, 0f, se.Position.z), new Vector3(ne.Position.x, 0f, ne.Position.z), Vector2.zero, Vector2.one);
+            if (node.World.GetAdjacentSurfaceNode(node, Direction.S) == null)
+                meshBuilder.BuildPlane(waterSubmesh, se.Position, sw.Position, new Vector3(sw.Position.x, 0f, sw.Position.z), new Vector3(se.Position.x, 0f, se.Position.z), Vector2.zero, Vector2.one);
+            if (node.World.GetAdjacentSurfaceNode(node, Direction.W) == null)
+                meshBuilder.BuildPlane(waterSubmesh, sw.Position, nw.Position, new Vector3(nw.Position.x, 0f, nw.Position.z), new Vector3(sw.Position.x, 0f, sw.Position.z), Vector2.zero, Vector2.one);
         }
     }
 }
