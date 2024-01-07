@@ -1,11 +1,5 @@
 Big Features to Add:
 
-- press R to reset exploration in editor
-
-- Render walls on map edge
-	=> from node height
-	=> or water height on water bodies
-
 - Add selection over multiple tiles (2x2, 3x3 etc.)
 	> Add feature to height change (only full) and surface paint
 

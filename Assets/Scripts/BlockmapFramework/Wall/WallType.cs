@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -53,63 +54,11 @@ namespace BlockmapFramework
         /// </summary>
         protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, Vector3 pos, Vector3 dimensions)
         {
-            Vector3 translatedPos = pos;
-            Vector3 translatedDimensions = dimensions;
+            List<float> heightOffsets = new List<float>() { 0f, 0f, 0f, 0f };
 
-            // Translate position and dimension based on wall side
-            switch(wall.Side)
-            {
-                case Direction.S:
-                    translatedPos = pos;
-                    translatedDimensions = dimensions;
-                    break;
-
-                case Direction.W:
-                    translatedPos = new Vector3(pos.z, pos.y, pos.x);
-                    translatedDimensions = new Vector3(dimensions.z, dimensions.y, dimensions.x);
-                    break;
-
-                case Direction.E:
-                    translatedPos = new Vector3(1 - pos.z, pos.y, 1 - pos.x);
-                    translatedDimensions = new Vector3(-dimensions.z, dimensions.y, -dimensions.x);
-                    break;
-
-                case Direction.N:
-                    translatedPos = new Vector3(1 - pos.x, pos.y, 1 - pos.z);
-                    translatedDimensions = new Vector3(-dimensions.x, dimensions.y, -dimensions.z);
-                    break;
-
-                case Direction.SW:
-                    translatedPos = pos;
-                    translatedDimensions = dimensions;
-                    break;
-
-                case Direction.SE:
-                    translatedPos = new Vector3(1 - dimensions.x, pos.y, pos.z);
-                    translatedDimensions = dimensions;
-                    break;
-
-                case Direction.NE:
-                    translatedPos = new Vector3(1 - pos.x, pos.y, 1 - pos.z);
-                    translatedDimensions = new Vector3(-dimensions.x, dimensions.y, -dimensions.z);
-                    break;
-
-                case Direction.NW:
-                    translatedPos = new Vector3(pos.x, pos.y, 1 - dimensions.z);
-                    translatedDimensions = dimensions;
-                    break;
-
-            }
-
-            // Apply offset based on node position on chunk
-            int startHeightCoordinate = Wall.GetWallStartY(wall.Node, wall.Side);
-            float worldHeight = wall.Node.World.GetWorldHeight(startHeightCoordinate);
-
-            Vector3 nodeOffsetPos = new Vector3(wall.Node.LocalCoordinates.x, worldHeight, wall.Node.LocalCoordinates.y);
-            translatedPos += nodeOffsetPos;
-
-            // Build cube
-            if(HelperFunctions.IsSide(wall.Side) &&  wall.Type.FollowSlopes) // Adjust for slope
+            // Calculate vertex height offsets if built on a slope
+            bool adjustHeightsToSlope = (HelperFunctions.IsSide(wall.Side) && wall.Type.FollowSlopes);
+            if (adjustHeightsToSlope)
             {
                 float slope = World.TILE_HEIGHT * (wall.Node.Height[HelperFunctions.GetNextAnticlockwiseDirection8(wall.Side)] - wall.Node.Height[HelperFunctions.GetNextClockwiseDirection8(wall.Side)]);
                 float startY = 0;
@@ -118,37 +67,60 @@ namespace BlockmapFramework
                     startY = -slope;
                     slope = 0;
                 }
-                Debug.Log(slope);
 
-                Vector3 vb1 = new Vector3(translatedPos.x, translatedPos.y, translatedPos.z);
-                Vector3 vb2 = new Vector3(translatedPos.x + translatedDimensions.x, translatedPos.y, translatedPos.z);
-                Vector3 vb3 = new Vector3(translatedPos.x + translatedDimensions.x, translatedPos.y, translatedPos.z + translatedDimensions.z);
-                Vector3 vb4 = new Vector3(translatedPos.x, translatedPos.y, translatedPos.z + translatedDimensions.z);
-
-                if (wall.Side == Direction.S || wall.Side == Direction.N)
-                {
-                    vb1 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x), 0f);
-                    vb2 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x + dimensions.x), 0f);
-                    vb3 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x + dimensions.x), 0f);
-                    vb4 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.x), 0f);
-                }
-                if (wall.Side == Direction.E || wall.Side == Direction.W)
-                {
-                    vb1 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z), 0f);
-                    vb2 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z + dimensions.z), 0f);
-                    vb3 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z + dimensions.z), 0f);
-                    vb4 += new Vector3(0f, Mathf.Lerp(startY, slope, pos.z), 0f);
-                }
-
-                meshBuilder.BuildCube(submesh, vb1, vb2, vb3, vb4, dimensions.y);
+                float startYOffset = Mathf.Lerp(startY, slope, pos.x);
+                float endYOffset = Mathf.Lerp(startY, slope, pos.x + dimensions.x);
+                heightOffsets[0] = startYOffset;
+                heightOffsets[1] = endYOffset;
+                heightOffsets[2] = endYOffset;
+                heightOffsets[3] = startYOffset;
             }
-            else meshBuilder.BuildCube(submesh, translatedPos, translatedDimensions);
+
+            // Calculate footprint vertex positions
+            List<Vector3> footprint = new List<Vector3>() {
+                new Vector3(pos.x, pos.y, pos.z),
+                new Vector3(pos.x + dimensions.x, pos.y, pos.z),
+                new Vector3(pos.x + dimensions.x, pos.y, pos.z + dimensions.z),
+                new Vector3(pos.x, pos.y, pos.z + dimensions.z),
+            };
+
+            // Translate footprint positions based on direction
+            footprint = footprint.Select(x => TranslatePosition(x, wall.Side)).ToList();
+
+            // Apply height offsets from slope
+            for (int i = 0; i < 4; i++) footprint[i] += new Vector3(0f, heightOffsets[i], 0f);
+
+            // Apply offset based on node position on chunk to footprint
+            int startHeightCoordinate = Wall.GetWallStartY(wall.Node, wall.Side);
+            float worldHeight = wall.Node.World.GetWorldHeight(startHeightCoordinate);
+            Vector3 nodeOffsetPos = new Vector3(wall.Node.LocalCoordinates.x, worldHeight, wall.Node.LocalCoordinates.y);
+
+            for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
+
+            // Build cube
+            meshBuilder.BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], dimensions.y);
         }
         protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, float startX, float endX, float startY, float endY, float startZ, float endZ)
         {
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dimensions = new Vector3(endX - startX, endY - startY, endZ - startZ);
             BuildCube(wall, meshBuilder, submesh, pos, dimensions);
+        }
+
+        private Vector3 TranslatePosition(Vector3 pos, Direction dir)
+        {
+            return dir switch
+            {
+                Direction.S => pos,
+                Direction.W => new Vector3(pos.z, pos.y, 1 - pos.x),
+                Direction.N => new Vector3(1 - pos.x, pos.y, 1 - pos.z),
+                Direction.E => new Vector3(1 - pos.z, pos.y, pos.x),
+                Direction.SW => pos,
+                Direction.SE => new Vector3(1 - pos.z, pos.y, pos.x),
+                Direction.NE => new Vector3(1 - pos.x, pos.y, 1 - pos.z),
+                Direction.NW => new Vector3(pos.z, pos.y, 1 - pos.x),
+                _ => throw new System.Exception("not handled")
+            };
         }
 
         #endregion
