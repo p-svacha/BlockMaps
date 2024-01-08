@@ -219,10 +219,32 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Shows the given texture as the tile overlay.
+        /// <br/> Areas bigger than 1 only work for surface nodes.
         /// </summary>
-        public void ShowOverlay(Texture2D texture, Color color)
+        public void ShowOverlay(Texture2D texture, Color color, int size = 1)
         {
-            Mesh.ShowOverlay(LocalCoordinates, texture, color);
+            Mesh.ShowOverlay(LocalCoordinates, texture, color, size);
+            if(LocalCoordinates.x + size >= Chunk.Size && LocalCoordinates.y + size >= Chunk.Size)
+            {
+                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y + 1), out Chunk chunk_NE);
+                if(chunk_NE != null) chunk_NE.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y - Chunk.Size), texture, color, size);
+
+                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
+                if(chunk_E != null) chunk_E.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
+
+                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
+                if(chunk_N != null) chunk_N.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+            }
+            else if (LocalCoordinates.x + size >= Chunk.Size)
+            {
+                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
+                if (chunk_E != null) chunk_E.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
+            }
+            else if (LocalCoordinates.y + size >= Chunk.Size)
+            {
+                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
+                if (chunk_N != null) chunk_N.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+            }
         }
 
         public void SetMesh(ChunkMesh mesh)
@@ -443,7 +465,6 @@ namespace BlockmapFramework
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }
-
         private static Dictionary<Direction, int> LoadHeight(int[] height)
         {
             return new Dictionary<Direction, int>()

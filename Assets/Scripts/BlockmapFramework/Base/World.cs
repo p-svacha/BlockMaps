@@ -105,6 +105,8 @@ namespace BlockmapFramework
         // Variables for delayed updated
         private bool DoUpdateVisionNextFrame;
         private Vector3 VisionUpdatePosition;
+        private int VisionUpdateRangeEast;
+        private int VisionUpdateRangeNorth;
 
         #region Init
 
@@ -217,7 +219,7 @@ namespace BlockmapFramework
 
         private void LateUpdate()
         {
-            if (DoUpdateVisionNextFrame) _UpdateVisionOfNearbyEntities();
+            if (DoUpdateVisionNextFrame) DoUpdateVisionOfNearbyEntities();
         }
 
         /// <summary>
@@ -505,12 +507,12 @@ namespace BlockmapFramework
             foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
             UpdatePathfindingVisualization();
         }
-        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeX = 1, int rangeY = 1) // RangeX is in Direction E, RangeY in Direction N
+        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1) // RangeX is in Direction E, RangeY in Direction N
         {
             int redrawRadius = 1;
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeY; y++)
+            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeNorth; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeX; x++)
+                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeEast; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
@@ -520,9 +522,9 @@ namespace BlockmapFramework
                 }
             }
 
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeY; y++)
+            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeNorth; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeX; x++)
+                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeEast; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
@@ -670,6 +672,8 @@ namespace BlockmapFramework
 
         public void SetSurface(SurfaceNode node, SurfaceId surface)
         {
+            if (node.Surface.Id == surface) return;
+
             node.SetSurface(surface);
             RedrawNodesAround(node.WorldCoordinates);
         }
@@ -914,14 +918,13 @@ namespace BlockmapFramework
         /// <summary>
         /// Redraws all chunks around the given coordinates.
         /// </summary>
-        public void RedrawNodesAround(Vector2Int worldCoordinates)
+        public void RedrawNodesAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
             List<Chunk> affectedChunks = new List<Chunk>();
 
-            int range = 1;
-            for (int y = worldCoordinates.y - range; y <= worldCoordinates.y + range; y++)
+            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeEast ; y++)
             {
-                for (int x = worldCoordinates.x - range; x <= worldCoordinates.x + range; x++)
+                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeNorth; x++)
                 {
                     Chunk chunk = GetChunk((new Vector2Int(x, y)));
                     if (chunk != null && !affectedChunks.Contains(chunk)) affectedChunks.Add(chunk);
@@ -934,7 +937,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Fully redraws a single chunk.
         /// </summary>
-        private void RedrawChunk(Chunk chunk)
+        public void RedrawChunk(Chunk chunk)
         {
             chunk.DrawMesh();
             chunk.SetVisibility(ActiveVisionPlayer);
@@ -970,14 +973,16 @@ namespace BlockmapFramework
         /// Recalculates the vision of all entities that have the given position within their vision range.
         /// <br/> Is delayed by one frame so all draw calls can be completed before shooting the vision rays.
         /// </summary>
-        private void UpdateVisionOfNearbyEntities(Vector3 position)
+        public void UpdateVisionOfNearbyEntities(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
         {
             DoUpdateVisionNextFrame = true;
             VisionUpdatePosition = position;
+            VisionUpdateRangeEast = rangeEast;
+            VisionUpdateRangeNorth = rangeNorth;
         }
-        private void _UpdateVisionOfNearbyEntities() // never call this directly
+        private void DoUpdateVisionOfNearbyEntities() // never call this directly
         {
-            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange))
+            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange + (VisionUpdateRangeEast - 1) + (VisionUpdateRangeNorth - 1)))
                 e.UpdateVisibleNodes();
 
             DoUpdateVisionNextFrame = false;
@@ -1058,6 +1063,19 @@ namespace BlockmapFramework
             if (Chunks.TryGetValue(chunkCoordinates, out Chunk value)) return value;
             else return null;
         }
+        public List<Chunk> GetChunks(Vector2Int chunkCoordinates, int rangeEast, int rangeNorth)
+        {
+            List<Chunk> chunks = new List<Chunk>();
+            for(int x = 0; x <= rangeEast; x++)
+            {
+                for(int y = 0; y <= rangeNorth; y++)
+                {
+                    Vector2Int coordinates = chunkCoordinates + new Vector2Int(x, y);
+                    if(Chunks.ContainsKey(coordinates)) chunks.Add(Chunks[coordinates]);
+                }
+            }
+            return chunks;
+        }
 
         public BlockmapNode GetNode(int id) => Nodes[id];
 
@@ -1076,6 +1094,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
+
         public SurfaceNode GetSurfaceNode(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;
@@ -1083,6 +1102,21 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetSurfaceNode(chunk.GetLocalCoordinates(worldCoordinates));
         }
+        public List<SurfaceNode> GetSurfaceNodes(Vector2Int worldCoordinates, int rangeEast, int rangeNorth)
+        {
+            List<SurfaceNode> nodes = new List<SurfaceNode>();
+            for(int x = 0; x < rangeEast; x++)
+            {
+                for(int y = 0; y < rangeNorth; y++)
+                {
+                    Vector2Int coordinates = worldCoordinates + new Vector2Int(x, y);
+                    SurfaceNode node = GetSurfaceNode(coordinates);
+                    if (node != null) nodes.Add(node);
+                }
+            }
+            return nodes;
+        }
+
         public WaterNode GetWaterNode(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;

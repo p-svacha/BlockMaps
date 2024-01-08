@@ -1,8 +1,5 @@
 Big Features to Add:
 
-- Add selection over multiple tiles (2x2, 3x3 etc.)
-	> Add feature to height change (only full) and surface paint
-
 - Also add some way of cliff climbing
 	- either with new nodes
 	- or with some special animation
@@ -23,7 +20,7 @@ Big Features to Add:
 	=> current perlin with some trees and cliffs
 	=> add dropdown for different generators
 
-
+- check why it takes so long to generate big (16*32) worlds
 
 - make a dropdown for load world
 
@@ -47,9 +44,11 @@ Big Features to Add:
 
 - Allow movingentities bigger than 1x1
 
-- Fix shadow rendering bug with shader discard and re-enable shadows of terrain
+- improve water shader
 
-
+- dont allow suface nodes with walls in water
+	- affect canplacewater
+	- affect canbuildwall
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
@@ -87,6 +86,14 @@ Big Features to Add:
 	=> mainly so newly placed entities outside of a players vision are not automatically rendered
 
 - add system to draw entities on last seen position from that players perspective
+
+- add new item framework
+	- items behave like static entities on map, but way more limited
+	- only one 1 tile, no vision, movement etc.
+
+- add inventory system
+	- entities can pick up and carry items
+	- add carry capacity attribute to entities
 
 - START CTF
 

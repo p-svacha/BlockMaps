@@ -64,7 +64,7 @@ namespace BlockmapFramework
             for (int i = 0; i < renderer.materials.Length; i++)
                 renderer.materials[i].SetFloat("_ShowTileOverlay", show ? 1 : 0);
         }
-        public void ShowOverlay(Vector2Int localCoordinates, Texture2D texture, Color color)
+        public void ShowOverlay(Vector2Int localCoordinates, Texture2D texture, Color color, int size)
         {
             ShowOverlay(true);
 
@@ -74,6 +74,7 @@ namespace BlockmapFramework
                 renderer.materials[i].SetTexture("_TileOverlayTex", texture);
                 renderer.materials[i].SetFloat("_TileOverlayX", localCoordinates.x);
                 renderer.materials[i].SetFloat("_TileOverlayY", localCoordinates.y);
+                renderer.materials[i].SetFloat("_TileOverlaySize", size);
                 renderer.materials[i].SetColor("_TileOverlayColor", color);
             }
 

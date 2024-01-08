@@ -22,6 +22,7 @@ Shader "Custom/SurfaceShader"
         _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
         _TileOverlayX("Overlay X Coord", Float) = 0
         _TileOverlayY("Overlay Y Coord", Float) = 0
+        _TileOverlaySize("Overlay Size", Float) = 1
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
@@ -67,6 +68,7 @@ Shader "Custom/SurfaceShader"
         fixed4 _TileOverlayColor;
         float _TileOverlayX;
         float _TileOverlayY;
+        float _TileOverlaySize;
 
         // Material attributes
         half _Glossiness;
@@ -264,9 +266,31 @@ Shader "Custom/SurfaceShader"
             // Selection Overlay
             if (_ShowTileOverlay == 1)
             {
-                if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
+                float adjustedWorldPosX = IN.worldPos.x;
+                if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                float exactLocalCoordinatesX = (adjustedWorldPosX % _ChunkSize);
+
+                float adjustedWorldPosY = IN.worldPos.z;
+                if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                float exactLocalCoordinatesY = (adjustedWorldPosY % _ChunkSize);
+
+                if (exactLocalCoordinatesX >= _TileOverlayX && exactLocalCoordinatesX < _TileOverlayX + _TileOverlaySize && exactLocalCoordinatesY >= _TileOverlayY && exactLocalCoordinatesY < _TileOverlayY + _TileOverlaySize)
                 {
-                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
+                    float adjustedWorldPosX = IN.worldPos.x;
+                    if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                    if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+
+                    float adjustedWorldPosY = IN.worldPos.z;
+                    if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                    if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+
+                    float uvX = ((adjustedWorldPosX % _ChunkSize) - _TileOverlayX) / _TileOverlaySize;
+                    float uvY = ((adjustedWorldPosY % _ChunkSize) - _TileOverlayY) / _TileOverlaySize;
+                    float2 uv = float2(uvX, uvY);
+
+                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, uv) * _TileOverlayColor;
                     c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
                 }
             }
