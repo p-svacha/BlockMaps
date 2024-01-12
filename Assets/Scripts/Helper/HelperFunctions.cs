@@ -108,8 +108,10 @@ public static class HelperFunctions
         };
     }
 
-    public static Direction GetDirection(Vector2Int from, Vector2Int to)
+    public static Direction GetAdjacentDirection(Vector2Int from, Vector2Int to)
     {
+        if (to == from) return Direction.None;
+
         if (to == from + new Vector2Int(1, 0)) return Direction.E;
         if (to == from + new Vector2Int(-1, 0)) return Direction.W;
         if (to == from + new Vector2Int(0, 1)) return Direction.N;
@@ -119,7 +121,18 @@ public static class HelperFunctions
         if (to == from + new Vector2Int(-1, 1)) return Direction.NW;
         if (to == from + new Vector2Int(1, -1)) return Direction.SE;
         if (to == from + new Vector2Int(-1, -1)) return Direction.SW;
-        throw new System.Exception("Position is not adjacent to character position.");
+
+        throw new System.Exception("The two given coordinates are not equal or adjacent to each other.");
+    }
+    public static Direction GetGeneralDirection(Vector2Int from, Vector2Int to)
+    {
+        if (to == from) return Direction.None;
+
+        int deltaX = to.x - from.x;
+        int deltaY = to.y - from.y;
+        float angle = Vector2.SignedAngle(to - from, Vector2.up);
+        // todo
+        return Direction.None;
     }
 
     public static Direction GetOppositeDirection(Direction dir)
@@ -134,6 +147,7 @@ public static class HelperFunctions
             Direction.NW => Direction.SE,
             Direction.SW => Direction.NE,
             Direction.SE => Direction.NW,
+            Direction.None => Direction.None,
             _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
     }

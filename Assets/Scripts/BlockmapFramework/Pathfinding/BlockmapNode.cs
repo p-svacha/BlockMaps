@@ -52,8 +52,17 @@ namespace BlockmapFramework
         public abstract bool IsSolid { get; } // Flag if entities can (generally) be placed on top of this node
 
         // Connections
-        public Dictionary<Direction, BlockmapNode> ConnectedNodes;
+        /// <summary>
+        /// ALL transition going out from this node to other nodes. Dictionary key is the target node.
+        /// </summary>
+        public Dictionary<BlockmapNode, Transition> Transitions { get; private set; }
+        /// <summary>
+        /// All transitions going out from this node to adjacent nodes (in all 8 directions) that can be reached with normal walking in that direction.
+        /// </summary>
+        public Dictionary<Direction, Transition> AdjacentTransitions { get; private set; }
 
+        // Things on this node
+        //public Dictionary<Direction, List<ClimbTransitionPoint>> ClimbingNodes;
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
 
@@ -85,8 +94,10 @@ namespace BlockmapFramework
             Height = height;
 
             RecalculateShape();
-            Surface = SurfaceManager.Instance.GetSurface(surface);
-            ConnectedNodes = new Dictionary<Direction, BlockmapNode>();
+            Surface = (surface == SurfaceId.Null) ? null : SurfaceManager.Instance.GetSurface(surface);
+            Transitions = new Dictionary<BlockmapNode, Transition>();
+            AdjacentTransitions = new Dictionary<Direction, Transition>();
+            //ClimbingNodes = new Dictionary<Direction, List<ClimbTransitionPoint>>();
         }
 
         /// <summary>
@@ -109,27 +120,61 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Connections
+        #region Transitions
+        /// ************* TRANSITIONS *************
+        /// When the navmesh of an area gets updated, a specific order needs to be followed.
+        /// Each step needs to be executed for ALL affected nodes before the next step can be executed for ALL affected nodes:
+        /// 1. ResetTransitions()
+        /// 2. SetStraightAdjacentTransitions()
+        /// 3. SetDiagonalAdjacentTransitions()
+        /// 4. SetClimbTransitions()
+        /// </summary>
+
+        public void ResetTransitions()
+        {
+            Transitions.Clear();
+            AdjacentTransitions.Clear();
+
+            /*
+            // Remove climb nodes and all their transitions
+            foreach (List<ClimbTransitionPoint> nodes in ClimbingNodes.Values)
+            {
+                foreach (ClimbTransitionPoint node in nodes)
+                {
+                    foreach (Transition t in node.Transitions.Values)
+                    {
+                        t.From.RemoveTransition(t.To);
+                        t.To.RemoveTransition(t.From);
+                    }
+                }
+            }
+            ClimbingNodes.Clear();
+            */
+        }
+
+        /// <summary>
+        /// Removes
+        /// </summary>
+        public void RemoveTransition(BlockmapNode target)
+        {
+            Transitions.Remove(target);
+        }
 
         /// <summary>
         /// Updates the straight neighbours by applying the general rule:
         /// If there is an adjacent passable node in the direction with matching heights, connect it as a neighbour.
         /// </summary>
-        public void UpdateConnectedNodesStraight()
+        public void SetStraightAdjacentTransitions()
         {
-            ConnectedNodes.Clear();
-
-            UpdateConnectedNodesStraight(Direction.N);
-            UpdateConnectedNodesStraight(Direction.E);
-            UpdateConnectedNodesStraight(Direction.S);
-            UpdateConnectedNodesStraight(Direction.W);
+            SetStraightAdjacentTransition(Direction.N);
+            SetStraightAdjacentTransition(Direction.E);
+            SetStraightAdjacentTransition(Direction.S);
+            SetStraightAdjacentTransition(Direction.W);
         }
-
         /// <summary>
-        /// Searches if there is a node in the given straight direction that matches the corner heights of this node.
-        /// <br/> If so, it is added as a connection.
+        /// Sets transitions to nodes that are adjacent in the directions N,E,S,W by checking if they connect seamlessly.
         /// </summary>
-        private void UpdateConnectedNodesStraight(Direction dir)
+        private void SetStraightAdjacentTransition(Direction dir)
         {
             if (!IsPassable(dir)) return;
 
@@ -138,45 +183,34 @@ namespace BlockmapFramework
             {
                 if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
 
-                if(ShouldConnectToNode(adjNode, dir))
+                if(ShouldConnectToNodeDirectly(adjNode, dir)) // Connect to node directly
                 {
-                    // Surface node connections can be override by air nodes built on a surface. In that case we remove the surface connection first
-                    if (ConnectedNodes.ContainsKey(dir) && ConnectedNodes[dir].Type == NodeType.Surface && adjNode.Type == NodeType.AirPath)
-                        ConnectedNodes.Remove(dir);
-
-                    // Connect node as a neighbour
-                    ConnectedNodes.Add(dir, adjNode);
+                    StraightAdjacentWalkTransition t = new StraightAdjacentWalkTransition(this, adjNode, dir);
+                    Transitions.Add(adjNode, t);
+                    AdjacentTransitions.Add(dir, t);
                 }
             }
-        }
-
-        /// <summary>
-        /// Returns if this node should be connected to the given node (that is adjacent in the given direction)
-        /// </summary>
-        protected virtual bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
-        {
-            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
         }
 
         /// <summary>
         /// Updates diagonal neighbours by applying the genereal rule:
         /// If the path N>E results in the same node as E>N, then connect NE to that node
         /// </summary>
-        public void UpdateConnectedNodesDiagonal()
+        public void SetDiagonalAdjacentTransitions()
         {
-            UpdateConnectedNodeDiagonal(Direction.NE);
-            UpdateConnectedNodeDiagonal(Direction.NW);
-            UpdateConnectedNodeDiagonal(Direction.SE);
-            UpdateConnectedNodeDiagonal(Direction.SW);
+            SetDiagonalAdjacentTransition(Direction.NE);
+            SetDiagonalAdjacentTransition(Direction.NW);
+            SetDiagonalAdjacentTransition(Direction.SE);
+            SetDiagonalAdjacentTransition(Direction.SW);
         }
-        private void UpdateConnectedNodeDiagonal(Direction dir)
+        private void SetDiagonalAdjacentTransition(Direction dir)
         {
             if (!IsPassable(dir)) return;
 
             Direction preDirection = HelperFunctions.GetNextAnticlockwiseDirection8(dir);
             Direction postDirection = HelperFunctions.GetNextClockwiseDirection8(dir);
-            BlockmapNode sideConnectedNodePre = ConnectedNodes.ContainsKey(preDirection) ? ConnectedNodes[preDirection] : null;
-            BlockmapNode sideConnectedNodePost = ConnectedNodes.ContainsKey(postDirection) ? ConnectedNodes[postDirection] : null;
+            BlockmapNode sideConnectedNodePre = AdjacentTransitions.ContainsKey(preDirection) ? AdjacentTransitions[preDirection].To : null;
+            BlockmapNode sideConnectedNodePost = AdjacentTransitions.ContainsKey(postDirection) ? AdjacentTransitions[postDirection].To : null;
 
             if (sideConnectedNodePre == null) return;
             if (sideConnectedNodePost == null) return;
@@ -184,11 +218,11 @@ namespace BlockmapFramework
             if (!sideConnectedNodePost.IsPassable(HelperFunctions.GetMirroredCorner(dir, postDirection))) return;
 
             // Check if the path N>E results in the same node as E>N - prerequisite to connect diagonal nodes (N & E are examples)
-            if (sideConnectedNodePre.ConnectedNodes.ContainsKey(postDirection) && sideConnectedNodePost.ConnectedNodes.ContainsKey(preDirection) &&
-                sideConnectedNodePre.ConnectedNodes[postDirection] == sideConnectedNodePost.ConnectedNodes[preDirection])
+            if (sideConnectedNodePre.AdjacentTransitions.ContainsKey(postDirection) && sideConnectedNodePost.AdjacentTransitions.ContainsKey(preDirection) &&
+                sideConnectedNodePre.AdjacentTransitions[postDirection].To == sideConnectedNodePost.AdjacentTransitions[preDirection].To)
             {
                 // We have a target node
-                BlockmapNode targetNode = sideConnectedNodePre.ConnectedNodes[postDirection];
+                BlockmapNode targetNode = sideConnectedNodePre.AdjacentTransitions[postDirection].To;
                 bool canConnect = true;
 
                 // Check if the target node is passable in all relevant directions
@@ -196,10 +230,60 @@ namespace BlockmapFramework
                 if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(postDirection))) canConnect = false;
                 if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) canConnect = false;
 
-                if (canConnect) ConnectedNodes[dir] = targetNode;
+                if (canConnect)
+                {
+                    DiagonalAdjacentWalkTransition t = new DiagonalAdjacentWalkTransition(this, targetNode, dir);
+                    Transitions.Add(targetNode, t);
+                    AdjacentTransitions.Add(dir, t);
+                }
             }
         }
 
+        private void SetClimbTransitions()
+        {
+            SetClimbTransitions(Direction.N);
+            SetClimbTransitions(Direction.E);
+            SetClimbTransitions(Direction.S);
+            SetClimbTransitions(Direction.W);
+        }
+        private void SetClimbTransitions(Direction dir)
+        {
+            /*
+            if (!IsPassable(dir)) return;
+
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
+            foreach (BlockmapNode adjNode in adjNodes)
+            {
+                if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
+
+                if (ShouldConnectToNodeViaClimbing(adjNode, dir))
+                {
+                    World.CreateCliffClimbConnection(this, adjNode, dir);
+                }
+            }
+            */
+        }
+
+        /// <summary>
+        /// Returns if this node should be directly connected to the given node (that is adjacent in the given direction)
+        /// </summary>
+        protected virtual bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
+        {
+            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
+        }
+        /// <summary>
+        /// Returns if this node should create a climbing connection to the given node (that is adjacent in the given direction)
+        /// </summary>
+        protected virtual bool ShouldConnectToNodeViaClimbing(BlockmapNode adjNode, Direction dir)
+        {
+            if (Type != NodeType.Surface) return false;
+            if (adjNode.Type != NodeType.Surface) return false;
+            if (!IsFlat) return false;
+            if (!adjNode.IsFlat) return false;
+            if (adjNode.BaseHeight <= BaseHeight) return false;
+
+            return true;
+        }
         #endregion
 
         #region Draw
@@ -423,7 +507,7 @@ namespace BlockmapFramework
         /// </summary>
         public int GetFreeHeadSpace(Direction dir, int forcedBaseHeight = -1)
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid).ToList();
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
 
             int minHeight = World.MAX_HEIGHT;
 
@@ -445,6 +529,11 @@ namespace BlockmapFramework
         /// Returns the minimum y coordinate of the affected corners of the given direction.
         /// </summary>
         public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
+
+        public override string ToString()
+        {
+            return Type.ToString() + WorldCoordinates.ToString() + "h:" + BaseHeight;
+        }
 
         #endregion
 

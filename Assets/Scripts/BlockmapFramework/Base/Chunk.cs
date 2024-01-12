@@ -74,14 +74,17 @@ namespace BlockmapFramework
 
         #region Actions
 
+        public void ResetNavmeshConnections()
+        {
+            foreach (BlockmapNode node in GetAllNodes()) node.ResetTransitions();
+        }
+
         /// <summary>
         /// Updates the connected nodes in Directions W,E,S,N for all nodes in this chunk.
         /// </summary>
         public void UpdatePathfindingGraphStraight()
         {
-            for (int y = 0; y < Size; y++)
-                for (int x = 0; x < Size; x++)
-                    foreach (BlockmapNode node in Nodes[x, y]) node.UpdateConnectedNodesStraight();
+            foreach (BlockmapNode node in GetAllNodes()) node.SetStraightAdjacentTransitions();
         }
 
         /// <summary>
@@ -90,9 +93,7 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdatePathfindingGraphDiagonal()
         {
-            for (int y = 0; y < Size; y++)
-                for (int x = 0; x < Size; x++)
-                    foreach (BlockmapNode node in Nodes[x, y]) node.UpdateConnectedNodesDiagonal();
+            foreach (BlockmapNode node in GetAllNodes()) node.SetDiagonalAdjacentTransitions();
         }
 
         public void AddEntity(Entity e)
@@ -176,8 +177,16 @@ namespace BlockmapFramework
         {
             List<BlockmapNode> nodes = new List<BlockmapNode>();
             for (int x = 0; x < Size; x++)
+            {
                 for (int y = 0; y < Size; y++)
-                    nodes.AddRange(GetNodes(x, y));
+                {
+                    List<BlockmapNode> coordinateNodes = GetNodes(x, y);
+                    foreach(BlockmapNode node in coordinateNodes)
+                    {
+                        nodes.Add(node);
+                    }
+                }
+            }
             return nodes;
         }
         public List<BlockmapNode> GetNodes(int heightLevel)
@@ -192,7 +201,7 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetNodes(int x, int y)
         {
-            return Nodes[x, y];
+            return new List<BlockmapNode>(Nodes[x, y]);
         }
         public List<BlockmapNode> GetNodes(Vector2Int localCoordinates)
         {

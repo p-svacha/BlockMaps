@@ -213,17 +213,17 @@ namespace BlockmapFramework
             BlockmapNode targetNode = originNode;
             for (int i = 0; i < (int)(Dimensions.x / 2); i++)
             {
-                if (!targetNode.ConnectedNodes.ContainsKey(Direction.E))
+                if (!targetNode.AdjacentTransitions.ContainsKey(Direction.E))
                     return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
 
-                targetNode = targetNode.ConnectedNodes[Direction.E];
+                targetNode = targetNode.AdjacentTransitions[Direction.E].To;
             }
             for (int i = 0; i < (int)(Dimensions.z / 2); i++)
             {
-                if (!targetNode.ConnectedNodes.ContainsKey(Direction.N))
+                if (!targetNode.AdjacentTransitions.ContainsKey(Direction.N))
                     return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
 
-                targetNode = targetNode.ConnectedNodes[Direction.N];
+                targetNode = targetNode.AdjacentTransitions[Direction.N].To;
             }
 
             if (targetNode is WaterNode waterNode && waterNode.SurfaceNode.MaxHeight >= waterNode.MaxHeight) targetNode = waterNode.SurfaceNode;
@@ -252,14 +252,14 @@ namespace BlockmapFramework
 
                     for (int i = 0; i < x; i++)
                     {
-                        if (!targetNode.ConnectedNodes.ContainsKey(Direction.E)) return null;
-                        targetNode = targetNode.ConnectedNodes[Direction.E];
+                        if (!targetNode.AdjacentTransitions.ContainsKey(Direction.E)) return null;
+                        targetNode = targetNode.AdjacentTransitions[Direction.E].To;
                     }
 
                     for (int i = 0; i < z; i++)
                     {
-                        if (!targetNode.ConnectedNodes.ContainsKey(Direction.N)) return null;
-                        targetNode = targetNode.ConnectedNodes[Direction.N];
+                        if (!targetNode.AdjacentTransitions.ContainsKey(Direction.N)) return null;
+                        targetNode = targetNode.AdjacentTransitions[Direction.N].To;
                     }
 
                     nodes.Add(targetNode);

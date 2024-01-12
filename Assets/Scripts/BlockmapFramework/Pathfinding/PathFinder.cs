@@ -43,19 +43,19 @@ namespace BlockmapFramework
                 openList.Remove(currentNode);
                 closedList.Add(currentNode);
 
-                foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in currentNode.ConnectedNodes)
+                foreach (Transition transition in currentNode.Transitions.Values)
                 {
-                    if (closedList.Contains(connectedNode.Value)) continue;
-                    if (!CanTransition(entity, currentNode, connectedNode.Value)) continue;
+                    if (closedList.Contains(transition.To)) continue;
+                    if (!transition.CanPass(entity)) continue;
 
-                    float tentativeGCost = gCosts[currentNode] + GetCCost(currentNode, connectedNode.Value, connectedNode.Key);
-                    if (!gCosts.ContainsKey(connectedNode.Value) || tentativeGCost < gCosts[connectedNode.Value])
+                    float tentativeGCost = gCosts[currentNode] + GetCCost(transition, entity);
+                    if (!gCosts.ContainsKey(transition.To) || tentativeGCost < gCosts[transition.To])
                     {
-                        previousTiles[connectedNode.Value] = currentNode;
-                        gCosts[connectedNode.Value] = tentativeGCost;
-                        fCosts[connectedNode.Value] = tentativeGCost + GetHCost(connectedNode.Value, to);
+                        previousTiles[transition.To] = currentNode;
+                        gCosts[transition.To] = tentativeGCost;
+                        fCosts[transition.To] = tentativeGCost + GetHCost(transition.To, to);
 
-                        if (!openList.Contains(connectedNode.Value)) openList.Add(connectedNode.Value);
+                        if (!openList.Contains(transition.To)) openList.Add(transition.To);
                     }
                 }
             }
@@ -75,11 +75,9 @@ namespace BlockmapFramework
         /// <summary>
         /// Real cost of going from one node to another.
         /// </summary>
-        private static float GetCCost(BlockmapNode from, BlockmapNode to, Direction dir)
+        private static float GetCCost(Transition t, Entity e)
         {
-            float value = (0.5f * (1f / from.GetSpeedModifier())) + (0.5f * (1f / to.GetSpeedModifier()));
-            if (dir == Direction.NE || dir == Direction.NW || dir == Direction.SE || dir == Direction.SW) value *= 1.4142f;
-            return value;
+            return t.GetMovementCost(e);
         }
 
         private static BlockmapNode GetLowestFCostNode(List<BlockmapNode> list, Dictionary<BlockmapNode, float> fCosts)
@@ -109,15 +107,6 @@ namespace BlockmapFramework
             }
             path.Reverse();
             return path;
-        }
-
-        /// <summary>
-        /// Checks and returns if the given entity can move from one node to another.
-        /// </summary>
-        public static bool CanTransition(Entity entity, BlockmapNode from, BlockmapNode to)
-        {
-            Direction dir = HelperFunctions.GetDirection(from.WorldCoordinates, to.WorldCoordinates);
-            return from.ConnectedNodes.ContainsValue(to) && from.IsPassable(dir, entity) && to.IsPassable(HelperFunctions.GetOppositeDirection(dir), entity);
         }
 
         #endregion

@@ -1,8 +1,21 @@
 Big Features to Add:
 
+-------- CLIMBING UPDATE ------------
 - Also add some way of cliff climbing
 	- either with new nodes
 	- or with some special animation
+
+- Implement "Transition sysmem"
+	- Dictionary<Direction, BlockmapNode> ConnectedNodes will new be List<Transition> Transitions
+	- Transitions are created dynamically when the navmesh gets calculated
+		- 1. Reset existing transitions
+		- 2. Calculate straight transitions (with adjacent height)
+		- 3. Calculate climb transitions
+		- 4. Calculate diagonal transitions
+	- Transitions are unidirectional with fromNode and toNode
+	- Transitions encode CanUse(Entity e)
+	- Transitions encode MovementCost(entity e)
+	- Transitions encode MovementVector(float t (time 0-1)) (for animation)
 
 - Ladders
 	- can be built on the side of a node when there is an adjacent node higher up in that directions
@@ -15,6 +28,21 @@ Big Features to Add:
 - Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
 
+- in nvamesh previews (both general and per entity): color arrows based on transition cost
+	- also dont draw shadows
+- delay navmesh preview update 1 frame
+
+- change "surface" attribute to surface node
+
+-------- BUILDING UPDATE ------------
+
+- Add door WallType (Passable, but not seethrough)
+- Add some kind of roof system
+	- maybe just allow changing height on normal air nodes (like on surface)
+	- and then add a second air node type: roof
+
+-------- WORLD GEN UPDATE ------------
+
 - add generators
 	=> flat empty grass
 	=> current perlin with some trees and cliffs
@@ -25,6 +53,15 @@ Big Features to Add:
 - make a dropdown for load world
 
 - make detailed example map
+
+
+
+
+
+
+
+
+-------- UNSORTED ------------
 
 - Show entity stats in static entity tool in editor
 
@@ -40,7 +77,7 @@ Big Features to Add:
 
 - Make vision radius of entities based on their dimensions
 
-- Add door WallType (Passable, but not seethrough)
+
 
 - Allow movingentities bigger than 1x1
 

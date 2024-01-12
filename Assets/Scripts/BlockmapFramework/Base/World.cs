@@ -23,6 +23,8 @@ namespace BlockmapFramework
         /// </summary>
         public const float TILE_HEIGHT = 0.5f;
 
+        public const float MAP_EDGE_HEIGHT = (-1 * TILE_HEIGHT);
+
         /// <summary>
         /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
         /// </summary>
@@ -471,7 +473,7 @@ namespace BlockmapFramework
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
             else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
         }
-        private void DeregisterNode(BlockmapNode node)
+        public void DeregisterNode(BlockmapNode node)
         {
             // Walls on node
             while(node.Walls.Count > 0) DeregisterWall(node.Walls.Values.ToList()[0]);
@@ -503,33 +505,45 @@ namespace BlockmapFramework
 
         private void GenerateFullNavmesh()
         {
+            foreach (Chunk chunk in Chunks.Values) chunk.ResetNavmeshConnections();
             foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
             foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
             UpdatePathfindingVisualization();
         }
-        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1) // RangeX is in Direction E, RangeY in Direction N
+        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
-            int redrawRadius = 1;
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeNorth; y++)
+            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeEast; x++)
+                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
 
                     List<BlockmapNode> nodes = GetNodes(coordinates);
-                    foreach (BlockmapNode node in nodes) node.UpdateConnectedNodesStraight();
+                    foreach (BlockmapNode node in nodes) node.ResetTransitions();
                 }
             }
 
-            for (int y = worldCoordinates.y - redrawRadius; y <= worldCoordinates.y + redrawRadius + rangeNorth; y++)
+            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
             {
-                for (int x = worldCoordinates.x - redrawRadius; x <= worldCoordinates.x + redrawRadius + rangeEast; x++)
+                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
+                {
+                    Vector2Int coordinates = new Vector2Int(x, y);
+                    if (!IsInWorld(coordinates)) continue;
+
+                    List<BlockmapNode> nodes = GetNodes(coordinates);
+                    foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
+                }
+            }
+
+            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
+            {
+                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
                 {
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
                     List<BlockmapNode> nodes = GetNodes(coordinates);
-                    foreach (BlockmapNode node in nodes) node.UpdateConnectedNodesDiagonal();
+                    foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
                 }
             }
 
@@ -895,6 +909,27 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
 
+        /*
+        public void CreateCliffClimbConnection(BlockmapNode from, BlockmapNode to, Direction dir)
+        {
+            Debug.Log("create climb " + from.Type.ToString() + from.WorldCoordinates.ToString() + " > " + to.Type.ToString() + to.WorldCoordinates.ToString());
+
+            ClimbNode climbStart = new ClimbNode(this, from.Chunk, NodeIdCounter++, from.LocalCoordinates, HelperFunctions.GetFlatHeights(from.BaseHeight));
+            ClimbNode climbEnd = new ClimbNode(this, from.Chunk, NodeIdCounter++, from.LocalCoordinates, HelperFunctions.GetFlatHeights(to.BaseHeight));
+
+            climbStart.Init(dir, 0.02f, climbEnd);
+            from.ConnectedNodes.Add(dir, climbStart);
+            climbStart.ConnectedNodes[HelperFunctions.GetOppositeDirection(dir)] = from;
+            climbStart.ConnectedNodes.Add(Direction.None, climbEnd);
+
+            climbEnd.Init(dir, 0.02f, climbStart);
+            climbEnd.ConnectedNodes.Add(dir, to);
+            to.ConnectedNodes[HelperFunctions.GetOppositeDirection(dir)] = climbEnd;
+            climbEnd.ConnectedNodes.Add(Direction.None, climbStart);
+
+            from.ClimbingNodes.Add(dir, new List<ClimbNode>() { climbStart, climbEnd });
+        }
+        */
 
         #endregion
 
@@ -1182,15 +1217,19 @@ namespace BlockmapFramework
 
         public Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
         {
-            if (dir == Direction.N) return (worldCoordinates + new Vector2Int(0, 1));
-            if (dir == Direction.E) return (worldCoordinates + new Vector2Int(1, 0));
-            if (dir == Direction.S) return (worldCoordinates + new Vector2Int(0, -1));
-            if (dir == Direction.W) return (worldCoordinates + new Vector2Int(-1, 0));
-            if (dir == Direction.NE) return (worldCoordinates + new Vector2Int(1, 1));
-            if (dir == Direction.NW) return (worldCoordinates + new Vector2Int(-1, 1));
-            if (dir == Direction.SE) return (worldCoordinates + new Vector2Int(1, -1));
-            if (dir == Direction.SW) return (worldCoordinates + new Vector2Int(-1, -1));
-            return worldCoordinates;
+            return worldCoordinates + GetDirectionVector(dir);
+        }
+        public Vector2Int GetDirectionVector(Direction dir, int distance = 1)
+        {
+            if (dir == Direction.N) return new Vector2Int(0, distance);
+            if (dir == Direction.E) return new Vector2Int(distance, 0);
+            if (dir == Direction.S) return new Vector2Int(0, -distance);
+            if (dir == Direction.W) return new Vector2Int(-distance, 0);
+            if (dir == Direction.NE) return new Vector2Int(distance, distance);
+            if (dir == Direction.NW) return new Vector2Int(-distance, distance);
+            if (dir == Direction.SE) return new Vector2Int(distance, -distance);
+            if (dir == Direction.SW) return new Vector2Int(-distance, -distance);
+            return new Vector2Int(0, 0);
         }
 
         public float GetWorldHeight(float heightValue)
@@ -1304,7 +1343,12 @@ namespace BlockmapFramework
             }
             return isAbove;
         }
-
+        public bool DoFullyOverlap(BlockmapNode node1, BlockmapNode node2)
+        {
+            foreach (Direction dir in HelperFunctions.GetCorners())
+                if (node1.Height[dir] != node2.Height[dir]) return false;
+            return true;
+        }
         #endregion
 
         #region Save / Load

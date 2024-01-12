@@ -21,34 +21,28 @@ namespace BlockmapFramework
         {
             ClearVisualization();
 
-            foreach (Chunk block in world.Chunks.Values)
+            foreach (Chunk chunk in world.Chunks.Values)
             {
-                for (int y = 0; y < world.ChunkSize; y++)
+                foreach (BlockmapNode node in chunk.GetAllNodes())
                 {
-                    for (int x = 0; x < world.ChunkSize; x++)
+                    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    sphere.transform.SetParent(transform);
+                    sphere.transform.localPosition = node.GetCenterWorldPosition();
+                    sphere.transform.localScale = new Vector3(NODE_SCALE, NODE_SCALE, NODE_SCALE);
+                    if (node.Type == NodeType.Surface) sphere.GetComponent<MeshRenderer>().material.color = Color.green;
+                    if (node.Type == NodeType.AirPath) sphere.GetComponent<MeshRenderer>().material.color = Color.blue;
+                    if (node.Type == NodeType.Water) sphere.GetComponent<MeshRenderer>().material.color = Color.cyan;
+
+                    foreach (Transition t in node.Transitions.Values)
                     {
-                        foreach (BlockmapNode node in block.Nodes[x, y])
-                        {
-                            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                            sphere.transform.SetParent(transform);
-                            sphere.transform.localPosition = node.GetCenterWorldPosition();
-                            sphere.transform.localScale = new Vector3(NODE_SCALE, NODE_SCALE, NODE_SCALE);
-                            if (node.Type == NodeType.Surface) sphere.GetComponent<MeshRenderer>().material.color = Color.green;
-                            if (node.Type == NodeType.AirPath) sphere.GetComponent<MeshRenderer>().material.color = Color.blue;
-                            if (node.Type == NodeType.Water) sphere.GetComponent<MeshRenderer>().material.color = Color.cyan;
+                        if (entity != null && !t.CanPass(entity)) continue;
 
-                            foreach (KeyValuePair<Direction, BlockmapNode> connectedNode in node.ConnectedNodes)
-                            {
-                                if (entity != null && !Pathfinder.CanTransition(entity, node, connectedNode.Value)) continue;
-
-                                GameObject arrow = Instantiate(ArrowPrefab, transform);
-                                arrow.transform.localPosition = node.GetCenterWorldPosition();
-                                arrow.transform.localScale = new Vector3(ARROW_SCALE, ARROW_SCALE, 0.3f * Vector3.Distance(node.GetCenterWorldPosition(), connectedNode.Value.GetCenterWorldPosition()));
-                                arrow.transform.LookAt(connectedNode.Value.GetCenterWorldPosition());
-                                arrow.transform.rotation = Quaternion.Euler(-arrow.transform.rotation.eulerAngles.x, 180 + arrow.transform.rotation.eulerAngles.y, arrow.transform.rotation.eulerAngles.z);
-                                arrow.transform.position += new Vector3(0f, ARROW_HEIGHT, 0f);
-                            }
-                        }
+                        GameObject arrow = Instantiate(ArrowPrefab, transform);
+                        arrow.transform.localPosition = node.GetCenterWorldPosition();
+                        arrow.transform.localScale = new Vector3(ARROW_SCALE, ARROW_SCALE, 0.3f * Vector3.Distance(node.GetCenterWorldPosition(), t.To.GetCenterWorldPosition()));
+                        arrow.transform.LookAt(t.To.GetCenterWorldPosition());
+                        arrow.transform.rotation = Quaternion.Euler(-arrow.transform.rotation.eulerAngles.x, 180 + arrow.transform.rotation.eulerAngles.y, arrow.transform.rotation.eulerAngles.z);
+                        arrow.transform.position += new Vector3(0f, ARROW_HEIGHT, 0f);
                     }
                 }
             }

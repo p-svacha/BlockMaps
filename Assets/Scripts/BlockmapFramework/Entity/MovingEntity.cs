@@ -110,10 +110,10 @@ namespace BlockmapFramework
                 if (TargetPath.Count > 0)
                 {
                     // TargetPath is still valid => take that path
-                    if (Pathfinder.CanTransition(this, NextNode, TargetPath[0]))
+                    if (NextNode.Transitions[TargetPath[0]].CanPass(this))
                     {
                         IsMoving = true;
-                        CurrentDirection = HelperFunctions.GetDirection(lastNode.WorldCoordinates, TargetPath[0].WorldCoordinates);
+                        CurrentDirection = HelperFunctions.GetAdjacentDirection(lastNode.WorldCoordinates, TargetPath[0].WorldCoordinates);
                         NextNode = TargetPath[0];
                         NextNode.AddEntity(this);
                     }

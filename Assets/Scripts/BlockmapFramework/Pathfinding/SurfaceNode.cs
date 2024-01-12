@@ -27,12 +27,12 @@ namespace BlockmapFramework
 
         public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
 
-        protected override bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
+        protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
             // Always connect to water if this has water as well.
             if (WaterNode != null && adjNode.Type == NodeType.Water) return true;
 
-            return base.ShouldConnectToNode(adjNode, dir);
+            return base.ShouldConnectToNodeDirectly(adjNode, dir);
         }
 
         #region Draw
@@ -136,8 +136,8 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? 0f : eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? 0f : eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
@@ -175,8 +175,8 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? 0f : southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? 0f : southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
@@ -214,8 +214,8 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? 0f : westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? 0f : westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
@@ -253,8 +253,8 @@ namespace BlockmapFramework
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
             MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? 0f : northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? 0f : northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
             MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
             MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 

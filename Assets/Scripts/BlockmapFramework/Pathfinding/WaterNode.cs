@@ -22,7 +22,7 @@ namespace BlockmapFramework
             SurfaceNode.SetWaterNode(this);
         }
 
-        protected override bool ShouldConnectToNode(BlockmapNode adjNode, Direction dir)
+        protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
             // Always connect to diagonal shore
             if(adjNode is SurfaceNode surfaceNode)
@@ -30,7 +30,7 @@ namespace BlockmapFramework
                 if(surfaceNode.WaterNode != null && !surfaceNode.IsCenterUnderWater) return true;
             }
 
-            return base.ShouldConnectToNode(adjNode, dir);
+            return base.ShouldConnectToNodeDirectly(adjNode, dir);
         }
 
         #region Getters
