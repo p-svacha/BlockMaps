@@ -10,6 +10,7 @@ namespace BlockmapFramework
         // Current movement
         public float MovementSpeed { get; protected set; }
         public bool IsMoving { get; private set; }
+        public ClimbPhase ClimbPhase { get; set; }
 
         // Pathfinding
         public BlockmapNode Target { get; private set; }
@@ -57,7 +58,7 @@ namespace BlockmapFramework
 
             if(!IsMoving) // If we are standing still, set the first transition and discard the first node since its the one we stand on and therefore already reached it.
             {
-                CurrentTransition = path[0].Transitions[path[1]];
+                SetCurrentTransition(path[0].Transitions[path[1]]);
                 path.RemoveAt(0);
             }
 
@@ -101,7 +102,7 @@ namespace BlockmapFramework
                 {
                     IsMoving = true;
                     newNextNode.AddEntity(this);
-                    CurrentTransition = newTransition;
+                    SetCurrentTransition(newTransition);
                 }
                 // TargetPath is no longer valid, find new path
                 else
@@ -117,6 +118,12 @@ namespace BlockmapFramework
                 Stop();
                 OnTargetReached();
             }
+        }
+
+        private void SetCurrentTransition(Transition t)
+        {
+            CurrentTransition = t;
+            CurrentTransition.OnTransitionStart(this);
         }
 
         /// <summary>

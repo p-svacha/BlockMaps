@@ -14,13 +14,17 @@ namespace BlockmapFramework
             Direction = dir;
         }
 
-        public override float GetMovementCost(Entity entity)
+        public override float GetMovementCost(MovingEntity entity)
         {
             float value = (0.5f * (1f / From.GetSpeedModifier())) + (0.5f * (1f / To.GetSpeedModifier()));
             if(HelperFunctions.IsCorner(Direction)) value *= 1.4142f; // Because diagonal
             return value;
         }
 
+        public override void OnTransitionStart(MovingEntity entity)
+        {
+            entity.transform.rotation = Entity.Get2dRotationByDirection(Direction);
+        }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
         {
             // Get current 2d position of entity
@@ -42,13 +46,12 @@ namespace BlockmapFramework
             float y = World.GetWorldHeightAt(newPosition2d, originNode);
             if (originNode.Type == NodeType.Water) y -= (entity.Dimensions.y * World.TILE_HEIGHT) / 2f;
 
-            // Set new position/rotation
+            // Set new position
             Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
             entity.transform.position = newPosition;
-            entity.transform.rotation = Entity.Get2dRotationByDirection(Direction);
 
             // Return true if character is very close to next node
-            if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= 0.02f) finishedTransition = true;
+            if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= REACH_EPSILON) finishedTransition = true;
             else finishedTransition = false;
         }
     }

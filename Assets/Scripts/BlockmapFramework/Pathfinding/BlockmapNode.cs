@@ -45,6 +45,7 @@ namespace BlockmapFramework
         public World World { get; private set; }
         public Chunk Chunk { get; private set; }
         public Vector2Int WorldCoordinates { get; private set; }
+        public Vector2 WorldCenter2D => WorldCoordinates + new Vector2(0.5f, 0.5f);
         public Vector2Int LocalCoordinates { get; private set; }
         public Surface Surface { get; private set; }
         public abstract NodeType Type { get; }
@@ -62,7 +63,6 @@ namespace BlockmapFramework
         public Dictionary<Direction, Transition> AdjacentTransitions { get; private set; }
 
         // Things on this node
-        //public Dictionary<Direction, List<ClimbTransitionPoint>> ClimbingNodes;
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
 
@@ -97,7 +97,6 @@ namespace BlockmapFramework
             Surface = (surface == SurfaceId.Null) ? null : SurfaceManager.Instance.GetSurface(surface);
             Transitions = new Dictionary<BlockmapNode, Transition>();
             AdjacentTransitions = new Dictionary<Direction, Transition>();
-            //ClimbingNodes = new Dictionary<Direction, List<ClimbTransitionPoint>>();
         }
 
         /// <summary>
@@ -127,29 +126,13 @@ namespace BlockmapFramework
         /// 1. ResetTransitions()
         /// 2. SetStraightAdjacentTransitions()
         /// 3. SetDiagonalAdjacentTransitions()
-        /// 4. SetClimbTransitions()
+        /// 4. SetCliffClimbTransitions()
         /// </summary>
 
         public void ResetTransitions()
         {
             Transitions.Clear();
             AdjacentTransitions.Clear();
-
-            /*
-            // Remove climb nodes and all their transitions
-            foreach (List<ClimbTransitionPoint> nodes in ClimbingNodes.Values)
-            {
-                foreach (ClimbTransitionPoint node in nodes)
-                {
-                    foreach (Transition t in node.Transitions.Values)
-                    {
-                        t.From.RemoveTransition(t.To);
-                        t.To.RemoveTransition(t.From);
-                    }
-                }
-            }
-            ClimbingNodes.Clear();
-            */
         }
 
         /// <summary>
@@ -190,6 +173,13 @@ namespace BlockmapFramework
                     AdjacentTransitions.Add(dir, t);
                 }
             }
+        }
+        /// <summary>
+        /// Returns if this node should be directly connected to the given node (that is adjacent in the given direction)
+        /// </summary>
+        protected virtual bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
+        {
+            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
         }
 
         /// <summary>
@@ -239,16 +229,15 @@ namespace BlockmapFramework
             }
         }
 
-        private void SetClimbTransitions()
+        public void SetCliffClimbTransitions()
         {
-            SetClimbTransitions(Direction.N);
-            SetClimbTransitions(Direction.E);
-            SetClimbTransitions(Direction.S);
-            SetClimbTransitions(Direction.W);
+            SetCliffClimbTransition(Direction.N);
+            SetCliffClimbTransition(Direction.E);
+            SetCliffClimbTransition(Direction.S);
+            SetCliffClimbTransition(Direction.W);
         }
-        private void SetClimbTransitions(Direction dir)
+        private void SetCliffClimbTransition(Direction dir)
         {
-            /*
             if (!IsPassable(dir)) return;
 
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
@@ -258,18 +247,10 @@ namespace BlockmapFramework
 
                 if (ShouldConnectToNodeViaClimbing(adjNode, dir))
                 {
-                    World.CreateCliffClimbConnection(this, adjNode, dir);
+                    CliffClimbTransition t = new CliffClimbTransition(this, adjNode, dir);
+                    Transitions.Add(adjNode, t);
                 }
             }
-            */
-        }
-
-        /// <summary>
-        /// Returns if this node should be directly connected to the given node (that is adjacent in the given direction)
-        /// </summary>
-        protected virtual bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
-        {
-            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
         }
         /// <summary>
         /// Returns if this node should create a climbing connection to the given node (that is adjacent in the given direction)
@@ -278,12 +259,16 @@ namespace BlockmapFramework
         {
             if (Type != NodeType.Surface) return false;
             if (adjNode.Type != NodeType.Surface) return false;
-            if (!IsFlat) return false;
-            if (!adjNode.IsFlat) return false;
-            if (adjNode.BaseHeight <= BaseHeight) return false;
+            if (!IsFlat(dir)) return false;
+            if (!adjNode.IsFlat(HelperFunctions.GetOppositeDirection(dir))) return false;
+
+            int fromHeight = Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
+            int toHeight = adjNode.Height.Where(x => HelperFunctions.GetAffectedCorners(HelperFunctions.GetOppositeDirection(dir)).Contains(x.Key)).Min(x => x.Value);
+            if (fromHeight == toHeight) return false;
 
             return true;
         }
+
         #endregion
 
         #region Draw
@@ -490,7 +475,9 @@ namespace BlockmapFramework
             return true;
         }
 
-        public bool IsFlat => Height.Values.All(x => x == Height[Direction.SW]);
+        public bool IsFlat() => Height.Values.All(x => x == Height[Direction.SW]);
+        public bool IsFlat(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Select(x => x.Value).All(x => x == Height[HelperFunctions.GetAffectedCorners(dir)[0]]);
+
         public bool IsSlope()
         {
             if (Height[Direction.NW] == Height[Direction.NE] && Height[Direction.SW] == Height[Direction.SE] && Height[Direction.NW] != Height[Direction.SW]) return true;

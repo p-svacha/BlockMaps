@@ -503,12 +503,23 @@ namespace BlockmapFramework
             UpdateVisibility();
         }
 
+        /// <summary>
+        /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
+        /// <br/> All navmesh calculations need to be done through this function.
+        /// </summary>
+        private void UpdateNavmesh(List<BlockmapNode> nodes)
+        {
+            foreach (BlockmapNode node in nodes) node.ResetTransitions();
+            foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
+            foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
+            foreach (BlockmapNode node in nodes) node.SetCliffClimbTransitions();
+            UpdatePathfindingVisualization();
+        }
         private void GenerateFullNavmesh()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.ResetNavmeshConnections();
-            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphStraight();
-            foreach (Chunk chunk in Chunks.Values) chunk.UpdatePathfindingGraphDiagonal();
-            UpdatePathfindingVisualization();
+            List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
+            foreach (Chunk chunk in Chunks.Values) nodesToUpdate.AddRange(chunk.GetAllNodes());
+            UpdateNavmesh(nodesToUpdate);
         }
         public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
@@ -525,12 +536,7 @@ namespace BlockmapFramework
                 }
             }
 
-            // Update nodes
-            foreach (BlockmapNode node in nodesToUpdate) node.ResetTransitions();
-            foreach (BlockmapNode node in nodesToUpdate) node.SetStraightAdjacentTransitions();
-            foreach (BlockmapNode node in nodesToUpdate) node.SetDiagonalAdjacentTransitions();
-
-            UpdatePathfindingVisualization();
+            UpdateNavmesh(nodesToUpdate);
         }
 
         public bool CanChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
@@ -549,7 +555,7 @@ namespace BlockmapFramework
         public bool CanBuildSurfacePath(SurfaceNode node)
         {
             if (node == null) return false;
-            if (!(node.IsFlat || node.IsSlope())) return false;
+            if (!(node.IsFlat() || node.IsSlope())) return false;
             if (node.HasPath) return false;
             if (node.GetFreeHeadSpace(Direction.None) <= 0) return false;
 
@@ -700,7 +706,7 @@ namespace BlockmapFramework
                 if (occupiedNode.Entities.Count > 0) return false;
 
                 // Check if flat
-                if (entity.RequiresFlatTerrain && !occupiedNode.IsFlat) return false;
+                if (entity.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
             }
 
             return true;
@@ -891,28 +897,6 @@ namespace BlockmapFramework
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
-
-        /*
-        public void CreateCliffClimbConnection(BlockmapNode from, BlockmapNode to, Direction dir)
-        {
-            Debug.Log("create climb " + from.Type.ToString() + from.WorldCoordinates.ToString() + " > " + to.Type.ToString() + to.WorldCoordinates.ToString());
-
-            ClimbNode climbStart = new ClimbNode(this, from.Chunk, NodeIdCounter++, from.LocalCoordinates, HelperFunctions.GetFlatHeights(from.BaseHeight));
-            ClimbNode climbEnd = new ClimbNode(this, from.Chunk, NodeIdCounter++, from.LocalCoordinates, HelperFunctions.GetFlatHeights(to.BaseHeight));
-
-            climbStart.Init(dir, 0.02f, climbEnd);
-            from.ConnectedNodes.Add(dir, climbStart);
-            climbStart.ConnectedNodes[HelperFunctions.GetOppositeDirection(dir)] = from;
-            climbStart.ConnectedNodes.Add(Direction.None, climbEnd);
-
-            climbEnd.Init(dir, 0.02f, climbStart);
-            climbEnd.ConnectedNodes.Add(dir, to);
-            to.ConnectedNodes[HelperFunctions.GetOppositeDirection(dir)] = climbEnd;
-            climbEnd.ConnectedNodes.Add(Direction.None, climbStart);
-
-            from.ClimbingNodes.Add(dir, new List<ClimbNode>() { climbStart, climbEnd });
-        }
-        */
 
         #endregion
 
@@ -1239,7 +1223,7 @@ namespace BlockmapFramework
                 if(node.Type == NodeType.Surface && objectHit.gameObject.layer == Layer_SurfaceNode)
                 {
                     Vector3 hitPosition = hit.point;
-                    return hitPosition.y;
+                    return Mathf.Max(hitPosition.y, node.BaseWorldHeight);
                 }
 
                 // We hit the air node mesh of the level we are looking for

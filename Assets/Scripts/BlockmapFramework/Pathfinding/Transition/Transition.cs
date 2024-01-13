@@ -10,6 +10,11 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class Transition
     {
+        /// <summary>
+        /// If the distance to a target is lower than this value, it is considered as reached.
+        /// </summary>
+        protected const float REACH_EPSILON = 0.02f;
+
         protected World World => From.World;
         public BlockmapNode From { get; private set; }
         public BlockmapNode To { get; private set; }
@@ -32,8 +37,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the amount of energy is required for the given entity to use this transition.
         /// </summary>
-        public abstract float GetMovementCost(Entity entity);
+        public abstract float GetMovementCost(MovingEntity entity);
 
+        /// <summary>
+        /// Gets executed when the given entity starts using this transition.
+        /// </summary>
+        public abstract void OnTransitionStart(MovingEntity entity);
         /// <summary>
         /// Updates the position of an entity using this transition in 1 frame.
         /// <br/> Returns if the entity has finished this transition as an out param.

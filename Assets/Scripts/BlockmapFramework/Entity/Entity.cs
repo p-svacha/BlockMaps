@@ -199,6 +199,7 @@ namespace BlockmapFramework
 
         public int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode).y);
         public int MaxHeight => MinHeight + Dimensions.y;
+        public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.

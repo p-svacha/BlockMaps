@@ -18,7 +18,7 @@ namespace BlockmapFramework
         #region A*
 
         // A* algorithm implementation. https://pavcreations.com/tilemap-based-a-star-algorithm-implementation-in-unity-game/
-        public static List<BlockmapNode> GetPath(Entity entity, BlockmapNode from, BlockmapNode to)
+        public static List<BlockmapNode> GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to)
         {
             if (from == to || !to.IsPassable(entity)) return null;
 
@@ -75,7 +75,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Real cost of going from one node to another.
         /// </summary>
-        private static float GetCCost(Transition t, Entity e)
+        private static float GetCCost(Transition t, MovingEntity e)
         {
             return t.GetMovementCost(e);
         }

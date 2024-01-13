@@ -1,12 +1,6 @@
 Big Features to Add:
 
-
-
 -------- MOVEMENT UPDATE ------------
-- Add CliffClimbTransition
-	- different cost based on climbing up/down
-	- for positioning use ClimbTransitionPoint
-
 - Ladders
 	- can be built on the side of a node when there is an adjacent node higher up in that directions
 
@@ -14,6 +8,7 @@ Big Features to Add:
 	=> None: Fences, ladders and cliffs always block
 	=> Basic: Ladders and easy fences
 	=> Advanced: Cliffs and advanced fences too
+- Add ClimbingSkill as an attribute to the editor character
 
 - Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
@@ -23,8 +18,13 @@ Big Features to Add:
 	- color based on transition type
 	- size based on transition cost
 - delay navmesh preview update 1 frame
+- increase display performance
+	- don't render whole map, but like 20 tiles around hovered tile or selected entity
 
 - move "surface" attribute to surface node
+
+- make moving entity presets and add them to selection
+	- these premade ones show their values in the input fields when selected and the input fields get disabled
 
 - jumping
 
