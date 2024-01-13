@@ -185,7 +185,7 @@ namespace BlockmapFramework
 
                 if(ShouldConnectToNodeDirectly(adjNode, dir)) // Connect to node directly
                 {
-                    StraightAdjacentWalkTransition t = new StraightAdjacentWalkTransition(this, adjNode, dir);
+                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, adjNode, dir);
                     Transitions.Add(adjNode, t);
                     AdjacentTransitions.Add(dir, t);
                 }
@@ -232,7 +232,7 @@ namespace BlockmapFramework
 
                 if (canConnect)
                 {
-                    DiagonalAdjacentWalkTransition t = new DiagonalAdjacentWalkTransition(this, targetNode, dir);
+                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, targetNode, dir);
                     Transitions.Add(targetNode, t);
                     AdjacentTransitions.Add(dir, t);
                 }

@@ -10,6 +10,7 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class Transition
     {
+        protected World World => From.World;
         public BlockmapNode From { get; private set; }
         public BlockmapNode To { get; private set; }
         public Direction Direction { get; protected set; }
@@ -18,7 +19,6 @@ namespace BlockmapFramework
         {
             From = from;
             To = to;
-            // Direction = HelperFunctions.GetGeneralDirection(from.WorldCoordinates, to.WorldCoordinates);
         }
 
         /// <summary>
@@ -33,18 +33,12 @@ namespace BlockmapFramework
         /// Returns the amount of energy is required for the given entity to use this transition.
         /// </summary>
         public abstract float GetMovementCost(Entity entity);
-        /*{
-            float value = (0.5f * (1f / From.GetSpeedModifier())) + (0.5f * (1f / To.GetSpeedModifier()));
-            if (dir == Direction.NE || dir == Direction.NW || dir == Direction.SE || dir == Direction.SW) value *= 1.4142f;
-            return value;
-        }*/
 
         /// <summary>
-        /// Returns the position an entity using this transition has at the relative time t (0-1), whereas 0 is when starting the transition and 1 when ending it.
+        /// Updates the position of an entity using this transition in 1 frame.
+        /// <br/> Returns if the entity has finished this transition as an out param.
+        /// <br/> Also returns the node that the entity is currently on (its origin node) as an additional out param.
         /// </summary>
-        public Vector3 GetPosition(float t)
-        {
-            return Vector3.zero;
-        }
+        public abstract void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode);
     }
 }

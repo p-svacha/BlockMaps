@@ -79,7 +79,7 @@ namespace WorldEditor
 
         public override void HandleRightClick()
         {
-            if (SelectedEntity != null && TargetPath != null) SelectedEntity.SetTargetPath(TargetPath);
+            if (SelectedEntity != null && TargetPath != null) SelectedEntity.GoTo(World.HoveredNode);
         }
 
         public override void OnDeselect()

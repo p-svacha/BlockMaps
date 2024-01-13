@@ -512,6 +512,8 @@ namespace BlockmapFramework
         }
         public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
+            // Get nodes that need update
+            List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
             for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
             {
                 for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
@@ -519,33 +521,14 @@ namespace BlockmapFramework
                     Vector2Int coordinates = new Vector2Int(x, y);
                     if (!IsInWorld(coordinates)) continue;
 
-                    List<BlockmapNode> nodes = GetNodes(coordinates);
-                    foreach (BlockmapNode node in nodes) node.ResetTransitions();
+                    nodesToUpdate.AddRange(GetNodes(coordinates));
                 }
             }
 
-            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
-            {
-                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
-                {
-                    Vector2Int coordinates = new Vector2Int(x, y);
-                    if (!IsInWorld(coordinates)) continue;
-
-                    List<BlockmapNode> nodes = GetNodes(coordinates);
-                    foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
-                }
-            }
-
-            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
-            {
-                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
-                {
-                    Vector2Int coordinates = new Vector2Int(x, y);
-                    if (!IsInWorld(coordinates)) continue;
-                    List<BlockmapNode> nodes = GetNodes(coordinates);
-                    foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
-                }
-            }
+            // Update nodes
+            foreach (BlockmapNode node in nodesToUpdate) node.ResetTransitions();
+            foreach (BlockmapNode node in nodesToUpdate) node.SetStraightAdjacentTransitions();
+            foreach (BlockmapNode node in nodesToUpdate) node.SetDiagonalAdjacentTransitions();
 
             UpdatePathfindingVisualization();
         }

@@ -1,21 +1,11 @@
 Big Features to Add:
 
--------- CLIMBING UPDATE ------------
-- Also add some way of cliff climbing
-	- either with new nodes
-	- or with some special animation
 
-- Implement "Transition sysmem"
-	- Dictionary<Direction, BlockmapNode> ConnectedNodes will new be List<Transition> Transitions
-	- Transitions are created dynamically when the navmesh gets calculated
-		- 1. Reset existing transitions
-		- 2. Calculate straight transitions (with adjacent height)
-		- 3. Calculate climb transitions
-		- 4. Calculate diagonal transitions
-	- Transitions are unidirectional with fromNode and toNode
-	- Transitions encode CanUse(Entity e)
-	- Transitions encode MovementCost(entity e)
-	- Transitions encode MovementVector(float t (time 0-1)) (for animation)
+
+-------- MOVEMENT UPDATE ------------
+- Add CliffClimbTransition
+	- different cost based on climbing up/down
+	- for positioning use ClimbTransitionPoint
 
 - Ladders
 	- can be built on the side of a node when there is an adjacent node higher up in that directions
@@ -28,11 +18,15 @@ Big Features to Add:
 - Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
 
-- in nvamesh previews (both general and per entity): color arrows based on transition cost
+- in nvamesh previews (both general and per entity):
 	- also dont draw shadows
+	- color based on transition type
+	- size based on transition cost
 - delay navmesh preview update 1 frame
 
-- change "surface" attribute to surface node
+- move "surface" attribute to surface node
+
+- jumping
 
 -------- BUILDING UPDATE ------------
 

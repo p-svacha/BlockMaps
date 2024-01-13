@@ -10,12 +10,11 @@ namespace BlockmapFramework
         // Current movement
         public float MovementSpeed { get; protected set; }
         public bool IsMoving { get; private set; }
-        public Direction CurrentDirection { get; private set; }
-        public BlockmapNode NextNode { get; private set; }
 
         // Pathfinding
         public BlockmapNode Target { get; private set; }
         public List<BlockmapNode> TargetPath { get; private set; }
+        public Transition CurrentTransition { get; private set; }
 
         // Movement Attributes
         public bool CanSwim { get; protected set; }
@@ -25,40 +24,16 @@ namespace BlockmapFramework
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");
 
             IsMoving = false;
-            NextNode = OriginNode;
         }
 
         public override void UpdateEntity()
         {
-            // Update transform position and occupied tiles (for collisions) when moving
-            Vector2 oldPosition2d = new Vector2(transform.position.x, transform.position.z);
-            Vector2Int oldWorldCoordinates = World.GetWorldCoordinates(oldPosition2d);
-
-            Vector3 nextNodePosition = NextNode.GetCenterWorldPosition();
-            Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
-            if (IsMoving)
+            if(IsMoving)
             {
-                // Calculate new world position and coordinates
-                Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, MovementSpeed * Time.deltaTime * OriginNode.GetSpeedModifier());
-                Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
+                CurrentTransition.UpdateEntityMovement(this, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
-                // Change origin node when passing over a node border
-                if (oldWorldCoordinates != newWorldCoordinates) SetOriginNode(TargetPath[0]);
-
-                // Calculate altitude (y-coordinate) on new position
-                float y = World.GetWorldHeightAt(newPosition2d, OriginNode);
-                if (OriginNode.Type == NodeType.Water) y -= (Dimensions.y * World.TILE_HEIGHT) / 2f;
-
-                // Set new position/rotation
-                Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
-                transform.position = newPosition;
-                transform.rotation = Get2dRotationByDirection(CurrentDirection);
-            }
-
-            // Character is near the destination get the next movement command
-            if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= 0.03f)
-            {
-                ReachNextNode();
+                if (OriginNode != currentOriginNode) SetOriginNode(currentOriginNode);
+                if(finishedTransition) ReachNextNode();
             }
         }
 
@@ -67,29 +42,44 @@ namespace BlockmapFramework
         /// </summary>
         public void GoTo(BlockmapNode target)
         {
-            Target = target;
-            TargetPath = Pathfinder.GetPath(this, NextNode, Target);
-            OnNewTarget();
-        }
+            // Get node where to start from. If we are moving take the next node in our current path. Else just where we are standing now.
+            BlockmapNode startNode = IsMoving ? TargetPath[0] : OriginNode;
 
-        public void SetTargetPath(List<BlockmapNode> targetPath)
-        {
-            if (targetPath[0] != OriginNode) throw new System.Exception("TargetPath needs to start at current entity location.");
-            Target = targetPath.Last();
-            NextNode = targetPath[0];
-            TargetPath = targetPath;
-            OnNewTarget();
+            // Find path to target
+            List<BlockmapNode> path =  Pathfinder.GetPath(this, startNode, target);
+
+            // Check if we found a valid path
+            if (path == null || path.Count == 0)
+            {
+                Stop();
+                return;
+            }
+
+            if(!IsMoving) // If we are standing still, set the first transition and discard the first node since its the one we stand on and therefore already reached it.
+            {
+                CurrentTransition = path[0].Transitions[path[1]];
+                path.RemoveAt(0);
+            }
+
+            // Set new path
+            TargetPath = path;
+            Target = path.Last();
+            IsMoving = true;
+            OnNewPath();
         }
 
 
         /// <summary>
         /// Gets triggered when the entity starts moving to a new target.
         /// </summary>
-        protected virtual void OnNewTarget() { }
+        protected virtual void OnNewPath() { }
 
+        /// <summary>
+        /// Recalculates the path to the current target.
+        /// </summary>
         private void UpdateTargetPath()
         {
-            TargetPath = Pathfinder.GetPath(this, NextNode, Target);
+            GoTo(Target);
         }
 
         /// <summary>
@@ -97,45 +87,51 @@ namespace BlockmapFramework
         /// </summary>
         private void ReachNextNode()
         {
-            // No target path => no movement expected
-            if (TargetPath == null || TargetPath.Count == 0) IsMoving = false;
+            BlockmapNode reachedNode = TargetPath[0];
+            TargetPath.RemoveAt(0);
 
-            // Follow a target path
-            else
+            // Target not yet reached
+            if (TargetPath.Count > 0)
             {
-                BlockmapNode lastNode = TargetPath[0];
-                TargetPath.RemoveAt(0);
+                BlockmapNode newNextNode = TargetPath[0];
+                reachedNode.Transitions.TryGetValue(newNextNode, out Transition newTransition);
 
-                // Target not yet reached
-                if (TargetPath.Count > 0)
+                // TargetPath is still valid => take that path
+                if (newTransition != null && newTransition.CanPass(this))
                 {
-                    // TargetPath is still valid => take that path
-                    if (NextNode.Transitions[TargetPath[0]].CanPass(this))
-                    {
-                        IsMoving = true;
-                        CurrentDirection = HelperFunctions.GetAdjacentDirection(lastNode.WorldCoordinates, TargetPath[0].WorldCoordinates);
-                        NextNode = TargetPath[0];
-                        NextNode.AddEntity(this);
-                    }
-                    // TargetPath is no longer valid, find new path
-                    else
-                    {
-                        Debug.Log("Target path no longer valid, finding new path");
-                        IsMoving = false;
-                        UpdateTargetPath();
-                        if(TargetPath == null) OnTargetReached();
-                    }
-
+                    IsMoving = true;
+                    newNextNode.AddEntity(this);
+                    CurrentTransition = newTransition;
                 }
-                // Target reached
+                // TargetPath is no longer valid, find new path
                 else
                 {
-                    IsMoving = false;
-                    OnTargetReached();
+                    // Debug.Log("Target path no longer valid, finding new path");
+                    UpdateTargetPath();
                 }
+
+            }
+            // Target reached
+            else
+            {
+                Stop();
+                OnTargetReached();
             }
         }
 
+        /// <summary>
+        /// Stops all movement instantly.
+        /// </summary>
+        private void Stop()
+        {
+            IsMoving = false;
+            CurrentTransition = null;
+            TargetPath = null;
+            Target = null;
+            OnStopMoving();
+        }
+
+        protected virtual void OnStopMoving() { }
         protected virtual void OnTargetReached() { }
 
     }
