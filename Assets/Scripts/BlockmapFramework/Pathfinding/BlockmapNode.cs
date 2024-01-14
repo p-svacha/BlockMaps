@@ -65,6 +65,7 @@ namespace BlockmapFramework
         // Things on this node
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
+        public Dictionary<Direction, Ladder> Ladders = new Dictionary<Direction, Ladder>();
 
         /// <summary>
         /// List containing all players that have explored this node.
@@ -264,8 +265,8 @@ namespace BlockmapFramework
             if (!IsFlat(dir)) return false;
             if (!adjNode.IsFlat(oppositeDir)) return false;
 
-            int fromHeight = Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
-            int toHeight = adjNode.Height.Where(x => HelperFunctions.GetAffectedCorners(oppositeDir).Contains(x.Key)).Min(x => x.Value);
+            int fromHeight = GetMinHeight(dir);
+            int toHeight = adjNode.GetMaxHeight(oppositeDir);
             if (fromHeight == toHeight) return false;
 
             int cliffHeight = Mathf.Abs(toHeight - fromHeight);
@@ -375,6 +376,9 @@ namespace BlockmapFramework
         public bool HasWall => Walls.Count > 0;
         public virtual float GetSpeedModifier() => Surface.SpeedModifier;
         public abstract Vector3 GetCenterWorldPosition();
+
+        public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
+        public int GetMaxHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Max(x => x.Value);
 
         /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
@@ -522,11 +526,6 @@ namespace BlockmapFramework
 
             return minHeight;
         }
-
-        /// <summary>
-        /// Returns the minimum y coordinate of the affected corners of the given direction.
-        /// </summary>
-        public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
 
         public override string ToString()
         {

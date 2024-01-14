@@ -21,7 +21,7 @@ namespace BlockmapFramework
 
         protected Vector3 GetWallStartPos(BlockmapNode node, Direction side, float wallWidth)
         {
-            int startHeightCoordinate = Wall.GetWallStartY(node, side);
+            int startHeightCoordinate = node.GetMinHeight(side);
             float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
 
             return side switch
@@ -85,13 +85,13 @@ namespace BlockmapFramework
             };
 
             // Translate footprint positions based on direction
-            footprint = footprint.Select(x => TranslatePosition(x, wall.Side)).ToList();
+            footprint = footprint.Select(x => MeshBuilder.TranslatePosition(x, wall.Side)).ToList();
 
             // Apply height offsets from slope
             for (int i = 0; i < 4; i++) footprint[i] += new Vector3(0f, heightOffsets[i], 0f);
 
             // Apply offset based on node position on chunk to footprint
-            int startHeightCoordinate = Wall.GetWallStartY(wall.Node, wall.Side);
+            int startHeightCoordinate = wall.Node.GetMinHeight(wall.Side);
             float worldHeight = wall.Node.World.GetWorldHeight(startHeightCoordinate);
             Vector3 nodeOffsetPos = new Vector3(wall.Node.LocalCoordinates.x, worldHeight, wall.Node.LocalCoordinates.y);
 
@@ -105,22 +105,6 @@ namespace BlockmapFramework
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dimensions = new Vector3(endX - startX, endY - startY, endZ - startZ);
             BuildCube(wall, meshBuilder, submesh, pos, dimensions);
-        }
-
-        private Vector3 TranslatePosition(Vector3 pos, Direction dir)
-        {
-            return dir switch
-            {
-                Direction.S => pos,
-                Direction.W => new Vector3(pos.z, pos.y, 1 - pos.x),
-                Direction.N => new Vector3(1 - pos.x, pos.y, 1 - pos.z),
-                Direction.E => new Vector3(1 - pos.z, pos.y, pos.x),
-                Direction.SW => pos,
-                Direction.SE => new Vector3(1 - pos.z, pos.y, pos.x),
-                Direction.NE => new Vector3(1 - pos.x, pos.y, 1 - pos.z),
-                Direction.NW => new Vector3(pos.z, pos.y, 1 - pos.x),
-                _ => throw new System.Exception("not handled")
-            };
         }
 
         #endregion

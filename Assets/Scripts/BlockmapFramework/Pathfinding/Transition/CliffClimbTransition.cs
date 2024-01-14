@@ -24,8 +24,8 @@ namespace BlockmapFramework
             Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
 
-            StartHeight = from.Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
-            EndHeight = to.Height.Where(x => HelperFunctions.GetAffectedCorners(oppositeDir).Contains(x.Key)).Max(x => x.Value);
+            StartHeight = from.GetMinHeight(dir);
+            EndHeight = to.GetMaxHeight(oppositeDir);
             Height = Mathf.Abs(EndHeight - StartHeight);
 
             IsAscend = (EndHeight > StartHeight);

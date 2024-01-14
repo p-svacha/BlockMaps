@@ -49,7 +49,7 @@ namespace BlockmapFramework
             Node = node;
             Side = side;
             Height = height;
-            MinHeight = GetWallStartY(node, side);
+            MinHeight = node.GetMinHeight(side);
 
             node.Walls.Add(side, this);
             node.World.Walls.Add(this);

@@ -29,6 +29,7 @@ namespace WorldEditor
         public Sprite MoveEntityToolSprite;
         public Sprite WaterToolSprite;
         public Sprite WallToolSprite;
+        public Sprite LadderToolSprite;
 
         public Texture2D GetTileSelector(Direction dir)
         {

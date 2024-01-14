@@ -30,9 +30,9 @@ namespace WorldEditor
                 if (AreaSize == 1) // Single tile height change
                 {
 
-                    Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode);
-                    bool canIncrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
-                    bool canDecrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
+                    Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode9);
+                    bool canIncrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: true);
+                    bool canDecrease = World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: false);
 
                     Color c;
                     if (canIncrease && canDecrease) c = Color.white;
@@ -56,9 +56,9 @@ namespace WorldEditor
         {
             if (AreaSize == 1) // Single tile height change
             {
-                if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true))
+                if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: true))
                 {
-                    World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: true);
+                    World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: true);
                 }
             }
             else // Multitile height change
@@ -79,7 +79,7 @@ namespace WorldEditor
                     }
 
                     // Manually update world stuff in one step instead of after each node to increase performance
-                    World.UpdateNavmesh(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+                    World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
                     World.UpdateVisionOfNearbyEntities(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }
@@ -90,9 +90,9 @@ namespace WorldEditor
         {
             if (AreaSize == 1) // Single tile height change
             {
-                if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false))
+                if (World.HoveredSurfaceNode != null && World.CanChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: false))
                 {
-                    World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode, isIncrease: false);
+                    World.ChangeHeight(World.HoveredSurfaceNode, World.NodeHoverMode9, isIncrease: false);
                 }
             }
             else // Multitile height change
@@ -113,7 +113,7 @@ namespace WorldEditor
                     }
 
                     // Manually update world stuff in one step instead of after each node to increase performance
-                    World.UpdateNavmesh(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+                    World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
                     World.UpdateVisionOfNearbyEntities(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }

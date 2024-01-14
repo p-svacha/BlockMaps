@@ -49,6 +49,7 @@ namespace BlockmapFramework
         public List<Entity> Entities = new List<Entity>();
         public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
         public List<Wall> Walls = new List<Wall>();
+        public List<Ladder> Ladders = new List<Ladder>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
@@ -71,6 +72,7 @@ namespace BlockmapFramework
         public int Layer_AirNode;
         public int Layer_Water;
         public int Layer_Wall;
+        public int Layer_Ladder;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -82,14 +84,16 @@ namespace BlockmapFramework
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
         public Wall HoveredWall { get; private set; }
+        public Ladder HoveredLadder { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
         /// <br/> The returned value is the direction of the edge/corner that is being hovered.
         /// <br/> Hovering the center part of a node will return Direction.None.
         /// </summary>
-        public Direction NodeHoverMode { get; private set; }
-        public Direction NodeSideHoverMode { get; private set; }
+        public Direction NodeHoverMode9 { get; private set; }
+        public Direction NodeHoverMode8 { get; private set; }
+        public Direction NodeHoverModeSides { get; private set; }
         private float HoverEdgeSensitivity = 0.3f; // sensitivity for NodeHoverMode
 
         public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
@@ -125,6 +129,7 @@ namespace BlockmapFramework
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Wall = LayerMask.NameToLayer("Wall");
+            Layer_Ladder = LayerMask.NameToLayer("Ladder");
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
@@ -255,16 +260,20 @@ namespace BlockmapFramework
             Wall oldHoveredWall = HoveredWall;
             Wall newHoveredWall = null;
 
+            Ladder oldHoveredLadder = HoveredLadder;
+            Ladder newHoveredLadder = null;
+
             // Shoot a raycast on surface and air layer to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall | 1 << Layer_Ladder))
             {
                 Transform objectHit = hit.transform;
 
                 Vector3 hitPosition = hit.point;
                 IsHoveringWorld = true;
 
-                NodeHoverMode = GetNodeHoverMode(hitPosition);
-                NodeSideHoverMode = GetNodeSideHoverMode(hitPosition);
+                NodeHoverMode9 = GetNodeHoverMode9(hitPosition);
+                NodeHoverMode8 = GetNodeHoverMode8(hitPosition);
+                NodeHoverModeSides = GetNodeHoverModeSides(hitPosition);
                 HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
 
                 // Update chunk
@@ -320,6 +329,12 @@ namespace BlockmapFramework
                     newHoveredWall = GetWallFromRaycastHit(hit);
                     if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.Node.WorldCoordinates;
                 }
+
+                // Hit ladder
+                else if(objectHit.gameObject.layer == Layer_Ladder)
+                {
+                    newHoveredLadder = objectHit.GetComponent<LadderReference>().Ladder;
+                }
             }
 
             // Ray to detect entity
@@ -340,6 +355,7 @@ namespace BlockmapFramework
             HoveredEntity = newHoveredEntity;
             HoveredWaterBody = newHoveredWaterBody;
             HoveredWall = newHoveredWall;
+            HoveredLadder = newHoveredLadder;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -347,7 +363,7 @@ namespace BlockmapFramework
             if (newHoveredChunk != oldHoveredChunk) OnHoveredChunkChanged?.Invoke(oldHoveredChunk, newHoveredChunk);
             if (newHoveredEntity != oldHoveredEntity) OnHoveredEntityChanged?.Invoke(oldHoveredEntity, newHoveredEntity);
         }
-        private Direction GetNodeHoverMode(Vector3 worldPos)
+        private Direction GetNodeHoverMode9(Vector3 worldPos)
         {
             Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
             if (worldPos.x < 0) posOnTile.x++;
@@ -368,32 +384,19 @@ namespace BlockmapFramework
             if (west) return Direction.W;
             return Direction.None;
         }
-        private Direction GetNodeSideHoverMode(Vector3 worldPos)
+        private Direction GetNodeHoverMode8(Vector3 worldPos)
         {
-            Direction fullHoverMode = GetNodeHoverMode(worldPos);
+            Direction fullHoverMode = GetNodeHoverMode9(worldPos);
             if (fullHoverMode == Direction.NW || fullHoverMode == Direction.NE || fullHoverMode == Direction.SW || fullHoverMode == Direction.SE)
                 return fullHoverMode;
 
-            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
-            if (worldPos.x < 0) posOnTile.x++;
-            if (worldPos.z < 0) posOnTile.y++;
-
-            if(posOnTile.x > posOnTile.y)
-            {
-                if (1f - posOnTile.x > posOnTile.y) return Direction.S;
-                else return Direction.E;
-            }
-            else
-            {
-                if (1f - posOnTile.x > posOnTile.y) return Direction.W;
-                else return Direction.N;
-            }
+            return GetNodeHoverModeSides(worldPos);
         }
-        private List<Direction> GetNodeSideHoverModes(Vector3 worldPos)
+        private List<Direction> GetNodeHoverModes8(Vector3 worldPos)
         {
             List<Direction> sides = new List<Direction>();
 
-            Direction fullHoverMode = GetNodeHoverMode(worldPos);
+            Direction fullHoverMode = GetNodeHoverMode9(worldPos);
             if (fullHoverMode == Direction.NW || fullHoverMode == Direction.NE || fullHoverMode == Direction.SW || fullHoverMode == Direction.SE)
                 sides.Add(fullHoverMode);
 
@@ -410,13 +413,30 @@ namespace BlockmapFramework
 
             return sides;
         }
+        private Direction GetNodeHoverModeSides(Vector3 worldPos)
+        {
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+            if (worldPos.x < 0) posOnTile.x++;
+            if (worldPos.z < 0) posOnTile.y++;
+
+            if (posOnTile.x > posOnTile.y)
+            {
+                if (1f - posOnTile.x > posOnTile.y) return Direction.S;
+                else return Direction.E;
+            }
+            else
+            {
+                if (1f - posOnTile.x > posOnTile.y) return Direction.W;
+                else return Direction.N;
+            }
+        }
 
         public Wall GetWallFromRaycastHit(RaycastHit hit)
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
             List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
-            Direction primaryHitSide = GetNodeSideHoverMode(hit.point);
-            List<Direction> otherPossibleHitSides = GetNodeSideHoverModes(hit.point);
+            Direction primaryHitSide = GetNodeHoverMode8(hit.point);
+            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
 
             foreach (BlockmapNode hitNode in hitNodes)
             {
@@ -437,8 +457,8 @@ namespace BlockmapFramework
                 Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
                 Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
                 List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
-                Direction primaryOffsetSide = GetNodeSideHoverMode(offsetHitPosition);
-                List<Direction> otherPossibleOffsetSides = GetNodeSideHoverModes(offsetHitPosition);
+                Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
+                List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
 
                 foreach (BlockmapNode offsetHitNode in offsetHitNodes)
                 {
@@ -521,7 +541,7 @@ namespace BlockmapFramework
             foreach (Chunk chunk in Chunks.Values) nodesToUpdate.AddRange(chunk.GetAllNodes());
             UpdateNavmesh(nodesToUpdate);
         }
-        public void UpdateNavmesh(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
+        public void UpdateNavmeshAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
             // Get nodes that need update
             List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
@@ -547,7 +567,7 @@ namespace BlockmapFramework
         {
             node.ChangeHeight(mode, isIncrease);
 
-            UpdateNavmesh(node.WorldCoordinates);
+            UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
@@ -612,7 +632,7 @@ namespace BlockmapFramework
             AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
-            UpdateNavmesh(newNode.WorldCoordinates);
+            UpdateNavmeshAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
             UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
@@ -653,7 +673,7 @@ namespace BlockmapFramework
             AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
             RegisterNode(newNode);
 
-            UpdateNavmesh(newNode.WorldCoordinates);
+            UpdateNavmeshAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
             UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
         }
@@ -668,7 +688,7 @@ namespace BlockmapFramework
         {
             DeregisterNode(node);
 
-            UpdateNavmesh(node.WorldCoordinates);
+            UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
@@ -725,7 +745,7 @@ namespace BlockmapFramework
             Entities.Add(newEntity);
 
             // Update pathfinding navmesh
-            UpdateNavmesh(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
+            UpdateNavmeshAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
         }
         public void RemoveEntity(Entity entity)
         {
@@ -743,7 +763,7 @@ namespace BlockmapFramework
             }
 
             // Update pathfinding navmesh
-            UpdateNavmesh(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
 
             if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
 
@@ -831,7 +851,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in newWaterBody.CoveredNodes) affectedChunks.Add(node.Chunk);
 
             // Update navmesh
-            UpdateNavmesh(new Vector2Int(newWaterBody.MinWorldX, newWaterBody.MinWorldY), newWaterBody.MaxWorldX - newWaterBody.MinWorldX, newWaterBody.MaxWorldY - newWaterBody.MinWorldY);
+            UpdateNavmeshAround(new Vector2Int(newWaterBody.MinWorldX, newWaterBody.MinWorldY), newWaterBody.MaxWorldX - newWaterBody.MinWorldX, newWaterBody.MaxWorldY - newWaterBody.MinWorldY);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
@@ -855,7 +875,7 @@ namespace BlockmapFramework
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
             // Update navmesh
-            UpdateNavmesh(new Vector2Int(water.MinWorldX, water.MinWorldY), water.MaxWorldX - water.MinWorldX, water.MaxWorldY - water.MinWorldY);
+            UpdateNavmeshAround(new Vector2Int(water.MinWorldX, water.MinWorldY), water.MaxWorldX - water.MinWorldX, water.MaxWorldY - water.MinWorldY);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
@@ -871,7 +891,7 @@ namespace BlockmapFramework
                 if (node.Walls.ContainsKey(dir)) return false;
 
             // Check if enough space above node to place wall of that height
-            int freeHeadSpace = node.GetFreeHeadSpace(side, Wall.GetWallStartY(node, side));
+            int freeHeadSpace = node.GetFreeHeadSpace(side, node.GetMinHeight(side));
             if (freeHeadSpace < height) return false;
 
             return true;
@@ -884,7 +904,7 @@ namespace BlockmapFramework
             Wall wall = new Wall(type);
             wall.Init(node, side, height);
 
-            UpdateNavmesh(node.WorldCoordinates);
+            UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
@@ -893,9 +913,47 @@ namespace BlockmapFramework
             BlockmapNode node = wall.Node;
             DeregisterWall(wall);
 
-            UpdateNavmesh(node.WorldCoordinates);
+            UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+        }
+
+        private Ladder GetLadder(BlockmapNode node, Direction side)
+        {
+            if (!node.IsFlat(side)) return null;
+
+            int sourceHeight = node.GetMinHeight(side);
+
+            Direction targetSide = HelperFunctions.GetOppositeDirection(side);
+            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(node.WorldCoordinates, side);
+            BlockmapNode targetNode = GetNodes(targetCoordinates).Where(x => x.GetMaxHeight(targetSide) > sourceHeight).OrderBy(x => x.GetMaxHeight(targetSide)).FirstOrDefault();
+            if (targetNode == null) return null;
+
+            return new Ladder(node, targetNode, side);
+        }
+        public bool CanBuildLadder(BlockmapNode node, Direction side)
+        {
+            return GetLadder(node, side) != null;
+        }
+        public void BuildLadder(BlockmapNode node, Direction side)
+        {
+            Ladder ladderData = GetLadder(node, side);
+            Ladder newLadder = new Ladder(ladderData); // copy
+            newLadder.Init();
+
+            UpdateNavmeshAround(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+        }
+        public void RemoveLadder(Ladder ladder)
+        {
+            BlockmapNode targetNode = ladder.Bottom;
+
+            Ladders.Remove(ladder);
+            ladder.Bottom.Ladders.Remove(ladder.Side);
+            Destroy(ladder.LadderObject.gameObject);
+
+            UpdateNavmeshAround(targetNode.WorldCoordinates);
+            RedrawNodesAround(targetNode.WorldCoordinates);
         }
 
         #endregion

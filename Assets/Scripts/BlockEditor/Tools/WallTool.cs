@@ -38,10 +38,10 @@ namespace WorldEditor
                 if (HeightInput.text == "") return;
                 int height = int.Parse(HeightInput.text);
 
-                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeSideHoverMode);
+                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode8);
 
                 Color c = Color.white;
-                if (!World.CanBuildWall(WallTypeManager.Instance.GetWallType(SelectedWallType), World.HoveredNode, World.NodeSideHoverMode, height)) c = Color.red;
+                if (!World.CanBuildWall(WallTypeManager.Instance.GetWallType(SelectedWallType), World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;
 
                 World.HoveredNode.ShowOverlay(overlayTexture, c);
             }
@@ -53,9 +53,9 @@ namespace WorldEditor
             if (HeightInput.text == "") return;
             int height = int.Parse(HeightInput.text);
             WallType type = WallTypeManager.Instance.GetWallType(SelectedWallType);
-            if (!World.CanBuildWall(type, World.HoveredNode, World.NodeSideHoverMode, height)) return;
+            if (!World.CanBuildWall(type, World.HoveredNode, World.NodeHoverMode8, height)) return;
 
-            World.PlaceWall(type, World.HoveredNode, World.NodeSideHoverMode, height);
+            World.PlaceWall(type, World.HoveredNode, World.NodeHoverMode8, height);
         }
 
         public override void HandleRightClick()

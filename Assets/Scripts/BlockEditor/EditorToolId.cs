@@ -16,6 +16,7 @@ namespace WorldEditor
         SpawnObject,
         MoveEntity,
         Water,
-        Wall
+        Wall,
+        Ladder
     }
 }

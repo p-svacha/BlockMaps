@@ -35,6 +35,7 @@ namespace WorldEditor
         public MoveEntityTool MoveEntityTool;
         public WaterTool WaterTool;
         public WallTool WallTool;
+        public LadderTool LadderTool;
 
         [Header("World")]
         public World World;
@@ -70,6 +71,7 @@ namespace WorldEditor
                 { EditorToolId.MoveEntity, MoveEntityTool },
                 { EditorToolId.Water, WaterTool },
                 { EditorToolId.Wall, WallTool },
+                { EditorToolId.Ladder, LadderTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 

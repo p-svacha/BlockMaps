@@ -4,17 +4,20 @@ Big Features to Add:
 
 -------- MOVEMENT UPDATE ------------
 
+- Ladders
+	- LadderTool
+	- can be built on the side of a node when there is an adjacent node higher up in that directions
+
+- FenceClimbTransitions
+	- only for one-sided fences
+	- Implement animation system for climbing fences
+- walls should not generally block movement, but based on entity climbing skill
+
 - Implement MovingEntity ClimbingSkill attribute
 	=> None: Fences, ladders and cliffs always block
 	=> Basic: Ladders and easy fences
 	=> Advanced: Cliffs and advanced fences too
 - Add ClimbingSkill as an attribute to the editor character
-
-- Ladders
-	- can be built on the side of a node when there is an adjacent node higher up in that directions
-
-- Implement animation system for climbing fences
-- walls should not generally block movement, but based on entity climbing skill
 
 - in nvamesh previews (both general and per entity):
 	- also dont draw shadows
@@ -25,11 +28,15 @@ Big Features to Add:
 	- don't render whole map, but like 20 tiles around hovered tile or selected entity
 
 - move "surface" attribute to surface node
+	- remove water surface
+	- remove isPaintable attribute from surface
 
 - make moving entity presets and add them to selection
 	- these premade ones show their values in the input fields when selected and the input fields get disabled
 
-- jumping
+- git page
+
+- git release
 
 -------- BUILDING UPDATE ------------
 
@@ -52,17 +59,22 @@ Big Features to Add:
 - make detailed example map
 
 
-
-
-
-
-
-
 -------- UNSORTED ------------
+
+- Add additional movement methods (jump/fly)
+- Add strength attribute with that you can destroy walls, entities
+- Stealth/Invisibility
+- Teleportation
+- Terrain affinity
+
+- Weather / Temperature (Snow/Mud)
 
 - Show entity stats in static entity tool in editor
 
+- bug: sometimes cliffs still get drawn when changin heights on big area
+
 - interface IWorld for world with documentation
+- also IEntity and IBlockmapNode
 
 - Static entities with weird shapes
 	=> adjust collider generation accordingly

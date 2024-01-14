@@ -20,6 +20,7 @@ namespace BlockmapFramework
         public Material WaterPreviewMaterial;
         public Material BrickWallMaterial;
         public Material WoodenFenceMaterial;
+        public Material LadderMaterial;
 
         [Header("Colors")]
         public Color GrassColor;
