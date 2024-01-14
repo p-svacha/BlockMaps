@@ -257,14 +257,25 @@ namespace BlockmapFramework
         /// </summary>
         protected virtual bool ShouldConnectToNodeViaClimbing(BlockmapNode adjNode, Direction dir)
         {
+            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+
             if (Type != NodeType.Surface) return false;
             if (adjNode.Type != NodeType.Surface) return false;
             if (!IsFlat(dir)) return false;
-            if (!adjNode.IsFlat(HelperFunctions.GetOppositeDirection(dir))) return false;
+            if (!adjNode.IsFlat(oppositeDir)) return false;
 
             int fromHeight = Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
-            int toHeight = adjNode.Height.Where(x => HelperFunctions.GetAffectedCorners(HelperFunctions.GetOppositeDirection(dir)).Contains(x.Key)).Min(x => x.Value);
+            int toHeight = adjNode.Height.Where(x => HelperFunctions.GetAffectedCorners(oppositeDir).Contains(x.Key)).Min(x => x.Value);
             if (fromHeight == toHeight) return false;
+
+            int cliffHeight = Mathf.Abs(toHeight - fromHeight);
+            bool isAscend = toHeight > fromHeight;
+            BlockmapNode lowerNode = isAscend ? this : adjNode;
+            Direction lowerDir = isAscend ? dir : oppositeDir;
+
+            // Check if no airnode is blocking the climb
+            int headspace = lowerNode.GetFreeHeadSpace(lowerDir);
+            if (headspace <= cliffHeight) return false;
 
             return true;
         }

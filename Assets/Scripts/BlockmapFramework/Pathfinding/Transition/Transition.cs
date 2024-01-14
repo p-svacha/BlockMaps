@@ -29,9 +29,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the given entity can use this transition.
         /// </summary>
-        public bool CanPass(Entity entity)
+        public virtual bool CanPass(Entity entity)
         {
-            return From.IsPassable(Direction, entity) && To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity);
+            if (!From.IsPassable(Direction, entity)) return false;
+            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
+
+            return true;
         }
 
         /// <summary>

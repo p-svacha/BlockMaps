@@ -1,14 +1,17 @@
 Big Features to Add:
 
+
+
 -------- MOVEMENT UPDATE ------------
-- Ladders
-	- can be built on the side of a node when there is an adjacent node higher up in that directions
 
 - Implement MovingEntity ClimbingSkill attribute
 	=> None: Fences, ladders and cliffs always block
 	=> Basic: Ladders and easy fences
 	=> Advanced: Cliffs and advanced fences too
 - Add ClimbingSkill as an attribute to the editor character
+
+- Ladders
+	- can be built on the side of a node when there is an adjacent node higher up in that directions
 
 - Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill

@@ -16,6 +16,8 @@ namespace BlockmapFramework
         public bool IsAscend { get; private set; } // true when climbing up, false when climbing down
         public int StartHeight { get; private set; }
         public int EndHeight { get; private set; }
+        public int Height { get; private set; }
+        public int HeadSpaceRequirement { get; private set; }
 
         public CliffClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir) : base(from, to)
         {
@@ -24,10 +26,16 @@ namespace BlockmapFramework
 
             StartHeight = from.Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
             EndHeight = to.Height.Where(x => HelperFunctions.GetAffectedCorners(oppositeDir).Contains(x.Key)).Max(x => x.Value);
+            Height = Mathf.Abs(EndHeight - StartHeight);
 
             IsAscend = (EndHeight > StartHeight);
 
             if (StartHeight == EndHeight) throw new System.Exception("Can't create cliff climb transition on equal heights from " + From.ToString() + " to " + To.ToString() + ".");
+
+            // Calculate head space needed to use this
+            BlockmapNode lowerNode = IsAscend ? From : To;
+            Direction lowerDir = IsAscend ? dir : oppositeDir;
+            HeadSpaceRequirement = lowerNode.GetFreeHeadSpace(lowerDir) - Height;
         }
 
         public override float GetMovementCost(MovingEntity entity)
@@ -39,6 +47,13 @@ namespace BlockmapFramework
             value += deltaY * (IsAscend ? COST_PER_TILE_UP : COST_PER_TILE_DOWN);
 
             return value;
+        }
+
+        public override bool CanPass(Entity entity)
+        {
+            if (entity.Dimensions.y > HeadSpaceRequirement) return false;
+
+            return base.CanPass(entity);
         }
 
         public override void OnTransitionStart(MovingEntity entity)

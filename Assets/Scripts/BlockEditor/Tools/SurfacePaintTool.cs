@@ -60,6 +60,9 @@ namespace WorldEditor
 
                 // Manuall redraw world in one step
                 World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+
+                // Update overlay
+                World.HoveredSurfaceNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white, AreaSize);
             }
         }
 

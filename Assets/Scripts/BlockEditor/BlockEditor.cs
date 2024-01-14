@@ -99,6 +99,7 @@ namespace WorldEditor
                 EditorPlayer = new Player(World, 0, "Player");
                 World.AddPlayer(EditorPlayer);
             }
+            else EditorPlayer = World.Players[0];
 
             // Init hooks
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
