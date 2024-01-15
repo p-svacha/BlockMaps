@@ -6,6 +6,7 @@ namespace BlockmapFramework
 {
     public class LadderEntity : Entity
     {
+        public const string LADDER_ENTITY_NAME = "ladder";
         public Ladder Ladder { get; private set; }
 
         public void Init(Ladder ladder)
@@ -13,9 +14,9 @@ namespace BlockmapFramework
             Ladder = ladder;
 
             // Attributes
-            Name = "ladder";
+            Name = "Ladder";
+            TypeId = LADDER_ENTITY_NAME;
             Dimensions = new Vector3Int(1, ladder.Height, 1);
-            Rotation = ladder.Side;
             BlocksVision = false;
             IsPassable = true;
         }

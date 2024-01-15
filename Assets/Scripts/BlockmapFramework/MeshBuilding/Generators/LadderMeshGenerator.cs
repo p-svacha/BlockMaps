@@ -10,7 +10,7 @@ namespace BlockmapFramework
     public class LadderMeshGenerator
     {
         private const float LADDER_STEP_LENGTH = 0.4f;
-        private const float LADDER_POLE_SIZE = 0.05f; // x and z dimension of the poles on the sides
+        public const float LADDER_POLE_SIZE = 0.05f; // x and z dimension of the poles on the sides
         private const float STEP_INTERVAL = 0.1f;
         private const float STEP_HEIGHT = 0.05f;
         private const float STEP_WIDTH = 0.02f;

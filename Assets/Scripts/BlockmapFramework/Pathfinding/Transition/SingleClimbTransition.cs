@@ -5,13 +5,17 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class CliffClimbTransition : Transition
+    public class SingleClimbTransition : Transition
     {
-        private const float COST_PER_TILE_UP = 2.5f;
-        private const float COST_PER_TILE_DOWN = 1.5f;
+        public const float CLIFF_COST_UP = 2.5f;
+        public const float CLIFF_COST_DOWN = 1.5f;
+        public const float CLIFF_SPEED_UP = 0.3f;
+        public const float CLIFF_SPEED_DOWN = 0.4f;
 
-        private const float SPEED_ON_CLIMB_UP = 0.3f;
-        private const float SPEED_ON_CLIMB_DOWN = 0.4f;
+        public const float LADDER_COST_UP = 1.6f;
+        public const float LADDER_COST_DOWN = 1.3f;
+        public const float LADDER_SPEED_UP = 0.65f;
+        public const float LADDER_SPEED_DOWN = 0.75f;
 
         public bool IsAscend { get; private set; } // true when climbing up, false when climbing down
         public int StartHeight { get; private set; }
@@ -19,10 +23,18 @@ namespace BlockmapFramework
         public int Height { get; private set; }
         public int HeadSpaceRequirement { get; private set; }
 
-        public CliffClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir) : base(from, to)
+        public float ClimbCostPerTile { get; private set; }
+        public float ClimbSpeed { get; private set; }
+
+        public float TransformOffset { get; private set; }
+
+        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, float cost, float speed, float transformOffset) : base(from, to)
         {
             Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+            ClimbCostPerTile = cost;
+            ClimbSpeed = speed;
+            TransformOffset = transformOffset;
 
             StartHeight = from.GetMinHeight(dir);
             EndHeight = to.GetMaxHeight(oppositeDir);
@@ -44,7 +56,7 @@ namespace BlockmapFramework
 
             // Add cost of climbing
             int deltaY = Mathf.Abs(EndHeight - StartHeight);
-            value += deltaY * (IsAscend ? COST_PER_TILE_UP : COST_PER_TILE_DOWN);
+            value += deltaY * ClimbCostPerTile;
 
             return value;
         }
@@ -80,6 +92,7 @@ namespace BlockmapFramework
                         // Calculate altitude
                         float y = World.GetWorldHeightAt(newPosition2d, From);
                         if (From.Type == NodeType.Water) y -= (entity.Dimensions.y * World.TILE_HEIGHT) / 2f;
+                        if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
@@ -102,7 +115,7 @@ namespace BlockmapFramework
                     {
                         // Move towards climb end
                         Vector3 endClimbPoint = GetEndClimbPoint(entity);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.transform.position, endClimbPoint, Time.deltaTime * (IsAscend ? SPEED_ON_CLIMB_UP :SPEED_ON_CLIMB_DOWN));
+                        Vector3 newPosition = Vector3.MoveTowards(entity.transform.position, endClimbPoint, Time.deltaTime * ClimbSpeed);
 
                         // Set new position
                         entity.transform.position = newPosition;
@@ -164,8 +177,8 @@ namespace BlockmapFramework
         }
         private Vector3 GetOffset(MovingEntity entity)
         {
-            if(IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f);
-            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f);
+            if(IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - TransformOffset);
+            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + TransformOffset);
         }
     }
 }

@@ -4,11 +4,7 @@ Big Features to Add:
 
 -------- MOVEMENT UPDATE ------------
 
-- Ladders
-	- expand cliffclimbtransitions to include ladders
-	- don't allow ladders and wall on same side (add DisableWalls attribute to Entity that prevents wall building on occupied tiles)
-	- headspace check
-	- block movement to adj node
+- entity rotation
 
 - FenceClimbTransitions
 	- only for one-sided fences

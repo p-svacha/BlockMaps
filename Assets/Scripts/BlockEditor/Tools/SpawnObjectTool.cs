@@ -15,6 +15,7 @@ namespace WorldEditor
         private StaticEntity BuildPreview;
 
         private StaticEntity SelectedEntity;
+        private Direction CurrentRotation;
 
         [Header("Elements")]
         public UI_SelectionPanel EntitySelection;
@@ -22,6 +23,8 @@ namespace WorldEditor
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
+
+            CurrentRotation = Direction.S;
 
             EntitySelection.Clear();
             foreach (StaticEntity e in editor.StaticEntities)
@@ -55,7 +58,7 @@ namespace WorldEditor
             if (!World.CanPlaceEntity(SelectedEntity, World.HoveredNode)) return;
 
             StaticEntity newEntity = Instantiate(SelectedEntity, World.transform);
-            World.SpawnEntity(newEntity, World.HoveredNode, World.Gaia);
+            World.SpawnEntity(newEntity, World.HoveredNode, CurrentRotation, World.Gaia);
         }
 
         public override void HandleRightClick()

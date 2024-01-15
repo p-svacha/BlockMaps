@@ -21,14 +21,14 @@ namespace WorldEditor
             Dimensions = new Vector3Int(1, height, 1);
             CanSwim = canSwim;
 
+            TypeId = Name + "_" + MovementSpeed + "_" + VisionRange + "_" + Dimensions.y + "_" + CanSwim;
+
             transform.localScale = new Vector3(0.2f, 0.15f * Dimensions.y, 0.2f);
         }
 
         protected override void OnInitialized()
         {
             base.OnInitialized();
-
-            TypeId = Name + "_" + MovementSpeed + "_" + VisionRange + "_" + Dimensions.y + "_" + CanSwim;
 
             TargetFlag = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             TargetFlag.transform.SetParent(transform.parent);

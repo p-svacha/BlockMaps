@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 9041309258335554347}
   - component: {fileID: 6529614281575137249}
   - component: {fileID: 8775280700281714778}
+  - component: {fileID: 4390155528046239077}
   m_Layer: 0
   m_Name: character
   m_TagString: Untagged
@@ -103,3 +104,17 @@ MonoBehaviour:
   IsPassable: 1
   BlocksVision: 0
   TargetFlag: {fileID: 0}
+--- !u!64 &4390155528046239077
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4727976861285867060}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: d071cd1d3eb2508478ac75262354d246, type: 3}

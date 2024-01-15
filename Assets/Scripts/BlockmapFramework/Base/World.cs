@@ -183,7 +183,11 @@ namespace BlockmapFramework
                 GenerateFullNavmesh();
 
                 // Init entities
-                foreach (EntityData entityData in WorldData.Entities) Entities.Add(Entity.Load(this, entityData));
+                foreach (EntityData entityData in WorldData.Entities)
+                {
+                    Entity e = Entity.Load(this, entityData);
+                    if(e != null) Entities.Add(e); // null-check because some special entities are already registered in Entity.Load (i.e. ladders)
+                }
                 foreach (Entity e in Entities) e.UpdateTransform();
 
                 InitializeStep++;
@@ -520,7 +524,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
-            foreach (BlockmapNode node in nodes) node.SetCliffClimbTransitions();
+            foreach (BlockmapNode node in nodes) node.SetSingleClimbTransitions();
             UpdatePathfindingVisualization();
         }
         private void GenerateFullNavmesh()
@@ -719,9 +723,9 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity newEntity, BlockmapNode node, Player player)
+        public void SpawnEntity(Entity newEntity, BlockmapNode node, Direction rotation, Player player)
         {
-            newEntity.Init(EntityIdCounter++, this, node, player);
+            newEntity.Init(EntityIdCounter++, this, node, rotation, player);
 
             // Update if the new entity is currently visible
             newEntity.UpdateVisiblity(ActiveVisionPlayer);
@@ -874,9 +878,12 @@ namespace BlockmapFramework
             // Adjust height if it's higher than wall type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
 
-            // Check if wall already has a wall on that side
+            // Check if node already has a wall on that side
             foreach(Direction dir in HelperFunctions.GetAffectedDirections(side))
                 if (node.Walls.ContainsKey(dir)) return false;
+
+            // Check if a ladder is already there
+            if (node.Ladders.ContainsKey(side)) return false;
 
             // Check if enough space above node to place wall of that height
             int freeHeadSpace = node.GetFreeHeadSpace(side, node.GetMinHeight(side));
@@ -906,7 +913,7 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
 
-        private Ladder GetLadder(BlockmapNode node, Direction side)
+        private Ladder GetLadderData(BlockmapNode node, Direction side)
         {
             if (!node.IsFlat(side)) return null;
 
@@ -916,16 +923,26 @@ namespace BlockmapFramework
             Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(node.WorldCoordinates, side);
             BlockmapNode targetNode = GetNodes(targetCoordinates).Where(x => x.GetMaxHeight(targetSide) > sourceHeight).OrderBy(x => x.GetMaxHeight(targetSide)).FirstOrDefault();
             if (targetNode == null) return null;
+            if (!targetNode.IsFlat(HelperFunctions.GetOppositeDirection(side))) return null;
+
+            // Check wall
+            if (node.Walls.ContainsKey(side)) return null;
+
+            // Check headspace
+            int targetHeight = targetNode.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
+            int ladderHeight = targetHeight - sourceHeight;
+            int headspace = node.GetFreeHeadSpace(side);
+            if (headspace <= ladderHeight) return null;
 
             return new Ladder(node, targetNode, side);
         }
         public bool CanBuildLadder(BlockmapNode node, Direction side)
         {
-            return GetLadder(node, side) != null;
+            return GetLadderData(node, side) != null;
         }
         public void BuildLadder(BlockmapNode node, Direction side)
         {
-            Ladder ladderData = GetLadder(node, side);
+            Ladder ladderData = GetLadderData(node, side);
             Ladder newLadder = new Ladder(ladderData); // copy
             newLadder.Init();
 
@@ -1280,6 +1297,8 @@ namespace BlockmapFramework
                     return hitPosition.y;
                 }
             }
+
+            return node.BaseWorldHeight; // fallback
 
             throw new System.Exception("World height not found for node of type " + node.Type.ToString());
         }

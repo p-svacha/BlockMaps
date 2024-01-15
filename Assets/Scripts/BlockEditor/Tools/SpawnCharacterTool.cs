@@ -45,7 +45,7 @@ namespace WorldEditor
             bool canSwim = CanSwimToggle.isOn;
             newCharacter.PreInit(speed, vision, height, canSwim);
 
-            World.SpawnEntity(newCharacter, spawnNode, Editor.EditorPlayer);
+            World.SpawnEntity(newCharacter, spawnNode, Direction.S, Editor.EditorPlayer);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

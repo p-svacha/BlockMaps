@@ -73,16 +73,17 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public void Init(int id, World world, BlockmapNode position, Player player)
+        public void Init(int id, World world, BlockmapNode position, Direction rotation, Player player)
         {
             Id = id;
-            TypeId = Name;
+            if(string.IsNullOrEmpty(TypeId)) TypeId = Name;
 
             OccupiedNodes = new List<BlockmapNode>();
             VisibleNodes = new List<BlockmapNode>();
 
             World = world;
             Player = player;
+            Rotation = rotation;
             SetOriginNode(position);
 
             gameObject.layer = World.Layer_Entity;
@@ -530,8 +531,14 @@ namespace BlockmapFramework
 
         public static Entity Load(World world, EntityData data)
         {
+            if(data.TypeId == LadderEntity.LADDER_ENTITY_NAME)
+            {
+                world.BuildLadder(world.GetNode(data.OriginNodeId), data.Rotation);
+                return null;
+            }
+
             Entity instance = world.ContentLibrary.GetEntityInstance(world, data.TypeId);
-            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), world.Players[data.PlayerId]);
+            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.Players[data.PlayerId]);
             return instance;
         }
 
@@ -542,6 +549,7 @@ namespace BlockmapFramework
                 Id = Id,
                 TypeId = TypeId,
                 OriginNodeId = OriginNode.Id,
+                Rotation = Rotation,
                 PlayerId = Player.Id
             };
         }

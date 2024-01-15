@@ -230,25 +230,50 @@ namespace BlockmapFramework
             }
         }
 
-        public void SetCliffClimbTransitions()
+        public void SetSingleClimbTransitions()
         {
-            SetCliffClimbTransition(Direction.N);
-            SetCliffClimbTransition(Direction.E);
-            SetCliffClimbTransition(Direction.S);
-            SetCliffClimbTransition(Direction.W);
+            SetSingleClimbTransition(Direction.N);
+            SetSingleClimbTransition(Direction.E);
+            SetSingleClimbTransition(Direction.S);
+            SetSingleClimbTransition(Direction.W);
         }
-        private void SetCliffClimbTransition(Direction dir)
+        private void SetSingleClimbTransition(Direction dir)
         {
-            if (!IsPassable(dir)) return;
+            if (!IsPassable(dir, checkLadder: false)) return;
 
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
-                if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
+                Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+                if (!adjNode.IsPassable(oppositeDir, checkLadder: false)) continue; // No transition to unpassable nodes
 
-                if (ShouldConnectToNodeViaClimbing(adjNode, dir))
+                // Calculate some important values
+                int fromHeight = GetMinHeight(dir);
+                int toHeight = adjNode.GetMaxHeight(oppositeDir);
+                if (fromHeight == toHeight) continue; // No transition when matching height
+                int heightDiff = Mathf.Abs(toHeight - fromHeight);
+                bool isAscend = toHeight > fromHeight;
+                BlockmapNode lowerNode = isAscend ? this : adjNode;
+                Direction lowerDir = isAscend ? dir : oppositeDir;
+
+                int headspace = lowerNode.GetFreeHeadSpace(lowerDir);
+                if (headspace <= heightDiff) continue; // Another node is blocking the transition
+
+                if (!IsFlat(dir)) continue; // Transition base needs to be flat
+                if (!adjNode.IsFlat(oppositeDir)) continue; // Transition target needs to be flat
+
+                if (ShouldCreateLadderTransition(lowerNode, lowerDir))
                 {
-                    CliffClimbTransition t = new CliffClimbTransition(this, adjNode, dir);
+                    float cost = isAscend ? SingleClimbTransition.LADDER_COST_UP : SingleClimbTransition.LADDER_COST_DOWN;
+                    float speed = isAscend ? SingleClimbTransition.LADDER_SPEED_UP : SingleClimbTransition.LADDER_SPEED_DOWN;
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, cost, speed, LadderMeshGenerator.LADDER_POLE_SIZE);
+                    Transitions.Add(adjNode, t);
+                }
+                else if (ShouldCreateCliffTransitionTo(adjNode))
+                {
+                    float cost = isAscend ? SingleClimbTransition.CLIFF_COST_UP : SingleClimbTransition.CLIFF_COST_DOWN;
+                    float speed = isAscend ? SingleClimbTransition.CLIFF_SPEED_UP : SingleClimbTransition.CLIFF_SPEED_DOWN;
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, cost, speed, 0f);
                     Transitions.Add(adjNode, t);
                 }
             }
@@ -256,27 +281,16 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if this node should create a climbing connection to the given node (that is adjacent in the given direction)
         /// </summary>
-        protected virtual bool ShouldConnectToNodeViaClimbing(BlockmapNode adjNode, Direction dir)
+        protected bool ShouldCreateCliffTransitionTo(BlockmapNode adjNode)
         {
-            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
-
             if (Type != NodeType.Surface) return false;
             if (adjNode.Type != NodeType.Surface) return false;
-            if (!IsFlat(dir)) return false;
-            if (!adjNode.IsFlat(oppositeDir)) return false;
 
-            int fromHeight = GetMinHeight(dir);
-            int toHeight = adjNode.GetMaxHeight(oppositeDir);
-            if (fromHeight == toHeight) return false;
-
-            int cliffHeight = Mathf.Abs(toHeight - fromHeight);
-            bool isAscend = toHeight > fromHeight;
-            BlockmapNode lowerNode = isAscend ? this : adjNode;
-            Direction lowerDir = isAscend ? dir : oppositeDir;
-
-            // Check if no airnode is blocking the climb
-            int headspace = lowerNode.GetFreeHeadSpace(lowerDir);
-            if (headspace <= cliffHeight) return false;
+            return true;
+        }
+        protected bool ShouldCreateLadderTransition(BlockmapNode lowerNode, Direction side)
+        {
+            if (!lowerNode.Ladders.ContainsKey(side)) return false;
 
             return true;
         }
@@ -469,7 +483,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
         /// </summary>
-        public virtual bool IsPassable(Direction dir, Entity entity = null)
+        public virtual bool IsPassable(Direction dir, Entity entity = null, bool checkLadder = true)
         {
             // Check if node is generally passable
             if (!IsPassable(entity)) return false;
@@ -481,6 +495,10 @@ namespace BlockmapFramework
             if (dir == Direction.NE) return IsPassable(Direction.N, entity) && IsPassable(Direction.E, entity);
             if (dir == Direction.SW) return IsPassable(Direction.S, entity) && IsPassable(Direction.W, entity);
             if (dir == Direction.SE) return IsPassable(Direction.S, entity) && IsPassable(Direction.E, entity);
+
+            // Check if ladder is blocking
+            if(checkLadder)
+                if (Ladders.ContainsKey(dir)) return false;
 
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);
