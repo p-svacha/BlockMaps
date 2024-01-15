@@ -31,6 +31,11 @@ namespace BlockmapFramework
         public BlockmapNode OriginNode { get; private set; }
 
         /// <summary>
+        /// What direction this entity is facing. [N/E/S/W]
+        /// </summary>
+        public Direction Rotation { get; protected set; }
+
+        /// <summary>
         /// List of tiles that this entity is currently on.
         /// </summary>
         public List<BlockmapNode> OccupiedNodes { get; private set; }
@@ -81,12 +86,15 @@ namespace BlockmapFramework
             SetOriginNode(position);
 
             gameObject.layer = World.Layer_Entity;
-            SetToCurrentWorldPosition();
+            UpdateTransform();
 
-            // Collider
-            BoxCollider collider = gameObject.AddComponent<BoxCollider>();
-            collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
-            collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+            // Box collider for blocking vision
+            if (BlocksVision)
+            {
+                BoxCollider collider = gameObject.AddComponent<BoxCollider>();
+                collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
+                collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+            }
 
             // Selection indicator
             SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
@@ -197,14 +205,14 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode).y);
-        public int MaxHeight => MinHeight + Dimensions.y;
+        public virtual int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode).y);
+        public virtual int MaxHeight => MinHeight + Dimensions.y;
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
         /// </summary>
-        public Vector3 GetWorldPosition(World world, BlockmapNode originNode)
+        public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode)
         {
             if (Dimensions.x == 1 && Dimensions.z == 1) return originNode.GetCenterWorldPosition();
 
@@ -475,17 +483,17 @@ namespace BlockmapFramework
             return OccupiedNodes.Any(x => x.IsExploredBy(player));
         }
 
-        public static Quaternion Get2dRotationByDirection(Direction dir)
+        public static Quaternion Get2dRotationByDirection(Direction dir, int degreeOffset = 0)
         {
-            if (dir == Direction.N) return Quaternion.Euler(0f, 90f, 0f);
-            if (dir == Direction.NE) return Quaternion.Euler(0f, 135f, 0f);
-            if (dir == Direction.E) return Quaternion.Euler(0f, 180f, 0f);
-            if (dir == Direction.SE) return Quaternion.Euler(0f, 225f, 0f);
-            if (dir == Direction.S) return Quaternion.Euler(0f, 270f, 0f);
-            if (dir == Direction.SW) return Quaternion.Euler(0f, 315f, 0f);
-            if (dir == Direction.W) return Quaternion.Euler(0f, 0f, 0f);
-            if (dir == Direction.NW) return Quaternion.Euler(0f, 45f, 0f);
-            return Quaternion.Euler(0f, 0f, 0f);
+            if (dir == Direction.N) return Quaternion.Euler(0f, 90f + degreeOffset, 0f);
+            if (dir == Direction.NE) return Quaternion.Euler(0f, 135f + degreeOffset, 0f);
+            if (dir == Direction.E) return Quaternion.Euler(0f, 180f + degreeOffset, 0f);
+            if (dir == Direction.SE) return Quaternion.Euler(0f, 225f + degreeOffset, 0f);
+            if (dir == Direction.S) return Quaternion.Euler(0f, 270f + degreeOffset, 0f);
+            if (dir == Direction.SW) return Quaternion.Euler(0f, 315f + degreeOffset, 0f);
+            if (dir == Direction.W) return Quaternion.Euler(0f, 0f + degreeOffset, 0f);
+            if (dir == Direction.NW) return Quaternion.Euler(0f, 45f + degreeOffset, 0f);
+            return Quaternion.Euler(0f, degreeOffset, 0f);
         }
 
         #endregion
@@ -500,11 +508,12 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Moves the entity to the current world position based on its origin node.
+        /// Moves the entity to the current world position based on its origin node and rotates it based on its Rotation.
         /// </summary>
-        public void SetToCurrentWorldPosition()
+        public void UpdateTransform()
         {
             transform.position = GetWorldPosition(World, OriginNode);
+            transform.rotation = Get2dRotationByDirection(Rotation, degreeOffset: -90);
         }
 
         /// <summary>

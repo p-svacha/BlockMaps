@@ -34,9 +34,10 @@ namespace WorldEditor
 
         public override void HandleRightClick()
         {
-            if (World.HoveredLadder == null) return;
+            if (World.HoveredEntity == null) return;
+            if (!(World.HoveredEntity is LadderEntity)) return;
 
-            World.RemoveLadder(World.HoveredLadder);
+            World.RemoveLadder((World.HoveredEntity as LadderEntity).Ladder);
         }
 
 

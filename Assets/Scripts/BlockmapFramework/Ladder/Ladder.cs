@@ -23,6 +23,16 @@ namespace BlockmapFramework
         public Direction Side { get; private set; }
 
         /// <summary>
+        /// Height at which the ladder starts.
+        /// </summary>
+        public int MinHeight { get; private set; }
+
+        /// <summary>
+        /// Height at which the ladder ends.
+        /// </summary>
+        public int MaxHeight { get; private set; }
+
+        /// <summary>
         /// How many tiles up the ladder goes.
         /// </summary>
         public int Height { get; private set; }
@@ -30,20 +40,24 @@ namespace BlockmapFramework
         /// <summary>
         /// GameObject of the ladder.
         /// </summary>
-        public LadderReference LadderObject { get; private set; }
+        public LadderEntity Entity { get; private set; }
 
         public Ladder(BlockmapNode source, BlockmapNode target, Direction side)
         {
             Bottom = source;
             Top = target;
             Side = side;
-            Height = target.GetMaxHeight(HelperFunctions.GetOppositeDirection(side)) - source.GetMinHeight(side);
+            MaxHeight = target.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
+            MinHeight = source.GetMinHeight(side);
+            Height = MaxHeight - MinHeight;
         }
         public Ladder(Ladder source) // copy constructor
         {
             Bottom = source.Bottom;
             Top = source.Top;
             Side = source.Side;
+            MaxHeight = source.MaxHeight;
+            MinHeight = source.MinHeight;
             Height = source.Height;
         }
 
@@ -52,9 +66,9 @@ namespace BlockmapFramework
         /// </summary>
         public void Init()
         {
-            World.Ladders.Add(this);
             Bottom.Ladders.Add(Side, this);
-            LadderObject = LadderMeshGenerator.GenerateLadderObject(World, this);
+            Entity = LadderMeshGenerator.GenerateLadderObject(World, this);
+            World.SpawnEntity(Entity, Bottom, World.Gaia);
         }
     }
 }

@@ -49,7 +49,6 @@ namespace BlockmapFramework
         public List<Entity> Entities = new List<Entity>();
         public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
         public List<Wall> Walls = new List<Wall>();
-        public List<Ladder> Ladders = new List<Ladder>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
@@ -84,7 +83,6 @@ namespace BlockmapFramework
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
         public Wall HoveredWall { get; private set; }
-        public Ladder HoveredLadder { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
@@ -186,7 +184,7 @@ namespace BlockmapFramework
 
                 // Init entities
                 foreach (EntityData entityData in WorldData.Entities) Entities.Add(Entity.Load(this, entityData));
-                foreach (Entity e in Entities) e.SetToCurrentWorldPosition();
+                foreach (Entity e in Entities) e.UpdateTransform();
 
                 InitializeStep++;
                 return;
@@ -260,9 +258,6 @@ namespace BlockmapFramework
             Wall oldHoveredWall = HoveredWall;
             Wall newHoveredWall = null;
 
-            Ladder oldHoveredLadder = HoveredLadder;
-            Ladder newHoveredLadder = null;
-
             // Shoot a raycast on surface and air layer to detect hovered nodes
             if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall | 1 << Layer_Ladder))
             {
@@ -329,12 +324,6 @@ namespace BlockmapFramework
                     newHoveredWall = GetWallFromRaycastHit(hit);
                     if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.Node.WorldCoordinates;
                 }
-
-                // Hit ladder
-                else if(objectHit.gameObject.layer == Layer_Ladder)
-                {
-                    newHoveredLadder = objectHit.GetComponent<LadderReference>().Ladder;
-                }
             }
 
             // Ray to detect entity
@@ -355,7 +344,6 @@ namespace BlockmapFramework
             HoveredEntity = newHoveredEntity;
             HoveredWaterBody = newHoveredWaterBody;
             HoveredWall = newHoveredWall;
-            HoveredLadder = newHoveredLadder;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -941,19 +929,13 @@ namespace BlockmapFramework
             Ladder newLadder = new Ladder(ladderData); // copy
             newLadder.Init();
 
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
+            //UpdateNavmeshAround(node.WorldCoordinates);
+            //RedrawNodesAround(node.WorldCoordinates);
         }
         public void RemoveLadder(Ladder ladder)
         {
-            BlockmapNode targetNode = ladder.Bottom;
-
-            Ladders.Remove(ladder);
             ladder.Bottom.Ladders.Remove(ladder.Side);
-            Destroy(ladder.LadderObject.gameObject);
-
-            UpdateNavmeshAround(targetNode.WorldCoordinates);
-            RedrawNodesAround(targetNode.WorldCoordinates);
+            RemoveEntity(ladder.Entity);
         }
 
         #endregion

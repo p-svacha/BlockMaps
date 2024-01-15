@@ -5,11 +5,14 @@ Big Features to Add:
 -------- MOVEMENT UPDATE ------------
 
 - Ladders
-	- LadderTool
-	- can be built on the side of a node when there is an adjacent node higher up in that directions
+	- expand cliffclimbtransitions to include ladders
+	- don't allow ladders and wall on same side (add DisableWalls attribute to Entity that prevents wall building on occupied tiles)
+	- headspace check
+	- block movement to adj node
 
 - FenceClimbTransitions
 	- only for one-sided fences
+	- also for two-sided fences
 	- Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
 
@@ -39,6 +42,8 @@ Big Features to Add:
 - git release
 
 -------- BUILDING UPDATE ------------
+
+- wall preview with height
 
 - Add door WallType (Passable, but not seethrough)
 - Add some kind of roof system

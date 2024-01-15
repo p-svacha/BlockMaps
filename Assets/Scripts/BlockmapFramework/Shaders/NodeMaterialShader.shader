@@ -5,7 +5,7 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _UseTextures("Use Textures", Float) = 0
         _MainTex("Texture", 2D) = "none" {}
         _Color("Color", Color) = (1,1,1,1)
-        _Offset("Render Priority (lowest renders first)", float) = 0
+        _Offset("Render Priority (lowest renders first, use 0.1 steps)", float) = 0
 
         // Texture mode values
         _TextureScale("Texture Scale", Float) = 1

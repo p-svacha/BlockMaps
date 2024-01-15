@@ -300,7 +300,8 @@ public class MeshBuilder
     #region Blockmap-Specific
 
     /// <summary>
-    /// When building a cube for a mesh on a node, define the values for building it from the south-west corner on 0/0 and then pass those values into this function to translate the values to the correct node and direction.
+    /// When building a cube for a mesh on a node, define the values for building it from the south-west corner.
+    /// <br/> This function translates the position and dimensions within the node to the given side.
     /// </summary>
     public void BuildCube(int submesh, Vector3 pos, Vector3 dimensions, BlockmapNode targetNode, Direction targetSide)
     {
@@ -325,6 +326,7 @@ public class MeshBuilder
         // Build cube
         BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], dimensions.y);
     }
+
 
     public static Vector3 TranslatePosition(Vector3 pos, Direction dir)
     {
