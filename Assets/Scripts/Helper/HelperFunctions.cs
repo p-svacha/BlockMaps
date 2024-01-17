@@ -91,7 +91,6 @@ public static class HelperFunctions
             _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
     }
-
     public static Direction GetNextAnticlockwiseDirection8(Direction dir)
     {
         return dir switch
@@ -104,6 +103,29 @@ public static class HelperFunctions
             Direction.SE => Direction.E,
             Direction.E => Direction.NE,
             Direction.NE => Direction.N,
+            _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
+        };
+    }
+
+    public static Direction GetNextSideDirection(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.N => Direction.E,
+            Direction.E => Direction.S,
+            Direction.S => Direction.W,
+            Direction.W => Direction.N,
+            _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
+        };
+    }
+    public static Direction GetPreviousSideDirection(Direction dir)
+    {
+        return dir switch
+        {
+            Direction.N => Direction.W,
+            Direction.E => Direction.N,
+            Direction.S => Direction.E,
+            Direction.W => Direction.S,
             _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
     }
@@ -245,6 +267,19 @@ public static class HelperFunctions
             heights.Add(GetOppositeDirection(corner), baseHeight);
         }
         return heights;
+    }
+
+    public static Quaternion Get2dRotationByDirection(Direction dir)
+    {
+        if (dir == Direction.N) return Quaternion.Euler(0f, 180f, 0f);
+        if (dir == Direction.NE) return Quaternion.Euler(0f, 225f, 0f);
+        if (dir == Direction.E) return Quaternion.Euler(0f, 270f, 0f);
+        if (dir == Direction.SE) return Quaternion.Euler(0f, 315f, 0f);
+        if (dir == Direction.S) return Quaternion.Euler(0f, 0f, 0f);
+        if (dir == Direction.SW) return Quaternion.Euler(0f, 45f, 0f);
+        if (dir == Direction.W) return Quaternion.Euler(0f, 90f, 0f);
+        if (dir == Direction.NW) return Quaternion.Euler(0f, 135f, 0f);
+        return Quaternion.Euler(0f, 0f, 0f);
     }
 
     #endregion

@@ -24,7 +24,7 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            CurrentRotation = Direction.S;
+            CurrentRotation = Direction.N;
 
             EntitySelection.Clear();
             foreach (StaticEntity e in editor.StaticEntities)
@@ -41,12 +41,18 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
+            // Rotation change inputs
+            if (Input.GetKeyDown(KeyCode.X)) CurrentRotation = HelperFunctions.GetNextSideDirection(CurrentRotation);
+            if (Input.GetKeyDown(KeyCode.Y)) CurrentRotation = HelperFunctions.GetPreviousSideDirection(CurrentRotation);
+
+            // Preview
             if (World.HoveredNode != null)
             {
-                bool canPlace = World.CanPlaceEntity(SelectedEntity, World.HoveredNode);
+                bool canPlace = World.CanPlaceEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
 
                 BuildPreview.gameObject.SetActive(true);
-                BuildPreview.transform.position = BuildPreview.GetWorldPosition(World, World.HoveredNode);
+                BuildPreview.transform.position = BuildPreview.GetWorldPosition(World, World.HoveredNode, CurrentRotation);
+                BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
                 BuildPreview.GetComponent<MeshRenderer>().material.color = canPlace ? Color.green : Color.red;
             }
             else BuildPreview.gameObject.SetActive(false);
@@ -55,7 +61,7 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
-            if (!World.CanPlaceEntity(SelectedEntity, World.HoveredNode)) return;
+            if (!World.CanPlaceEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
 
             StaticEntity newEntity = Instantiate(SelectedEntity, World.transform);
             World.SpawnEntity(newEntity, World.HoveredNode, CurrentRotation, World.Gaia);

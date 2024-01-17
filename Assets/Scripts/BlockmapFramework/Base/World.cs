@@ -71,7 +71,6 @@ namespace BlockmapFramework
         public int Layer_AirNode;
         public int Layer_Water;
         public int Layer_Wall;
-        public int Layer_Ladder;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -127,7 +126,6 @@ namespace BlockmapFramework
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Wall = LayerMask.NameToLayer("Wall");
-            Layer_Ladder = LayerMask.NameToLayer("Ladder");
 
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
@@ -263,7 +261,7 @@ namespace BlockmapFramework
             Wall newHoveredWall = null;
 
             // Shoot a raycast on surface and air layer to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall | 1 << Layer_Ladder))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall))
             {
                 Transform objectHit = hit.transform;
 
@@ -693,15 +691,15 @@ namespace BlockmapFramework
             RedrawNodesAround(node.WorldCoordinates);
         }
 
-        public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node)
+        public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node, Direction rotation)
         {
-            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node); // get nodes that would be occupied when placing the entity on the given node
+            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node, rotation); // get nodes that would be occupied when placing the entity on the given node
 
             if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
 
-            Vector3 placePos = entity.GetWorldPosition(this, node);
+            Vector3 placePos = entity.GetWorldPosition(this, node, rotation);
             int minHeight = GetNodeHeight(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
-            int maxHeight = minHeight + entity.Dimensions.y; // max y coordinate that this entity will occupy on all occupied tiles
+            int maxHeight = minHeight + entity.Height; // max y coordinate that this entity will occupy on all occupied tiles
 
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
@@ -737,7 +735,7 @@ namespace BlockmapFramework
             Entities.Add(newEntity);
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(node.WorldCoordinates, newEntity.Dimensions.x, newEntity.Dimensions.z);
+            UpdateNavmeshAround(node.WorldCoordinates, newEntity.GetDimensions().x, newEntity.GetDimensions().z);
         }
         public void RemoveEntity(Entity entity)
         {
@@ -755,7 +753,7 @@ namespace BlockmapFramework
             }
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.Dimensions.x, entity.Dimensions.z);
+            UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetDimensions().x, entity.GetDimensions().z);
 
             if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
 

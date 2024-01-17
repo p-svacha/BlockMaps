@@ -63,14 +63,19 @@ namespace BlockmapFramework
 
         public override bool CanPass(Entity entity)
         {
-            if (entity.Dimensions.y > HeadSpaceRequirement) return false;
+            // Additional requirement (headspace above ladder)
+            if (entity.Height > HeadSpaceRequirement) return false; 
 
-            return base.CanPass(entity);
+            // Base requirements (adapted to ignore ladder)
+            if (!From.IsPassable(Direction, entity, checkLadder: false)) return false;
+            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
+
+            return true;
         }
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.transform.rotation = Entity.Get2dRotationByDirection(Direction); // Look straight ahead
+            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
             entity.ClimbPhase = ClimbPhase.PreClimb;
         }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
@@ -91,7 +96,7 @@ namespace BlockmapFramework
 
                         // Calculate altitude
                         float y = World.GetWorldHeightAt(newPosition2d, From);
-                        if (From.Type == NodeType.Water) y -= (entity.Dimensions.y * World.TILE_HEIGHT) / 2f;
+                        if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
                         if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
 
                         // Set new position
@@ -102,7 +107,7 @@ namespace BlockmapFramework
                         if (Vector2.Distance(newPosition2d, startClimbPoint2d) <= REACH_EPSILON)
                         {
                             entity.ClimbPhase = ClimbPhase.InClimb;
-                            entity.transform.rotation = Entity.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction)); // Look at cliff wall
+                            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction)); // Look at cliff wall
                         }
 
                         // Out params
@@ -124,7 +129,7 @@ namespace BlockmapFramework
                         if (Vector3.Distance(newPosition, endClimbPoint) <= REACH_EPSILON)
                         {
                             entity.ClimbPhase = ClimbPhase.PostClimb;
-                            entity.transform.rotation = Entity.Get2dRotationByDirection(Direction); // Look straight ahead
+                            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
                         }
 
                         // Out params
@@ -147,7 +152,7 @@ namespace BlockmapFramework
 
                         // Calculate altitude
                         float y = World.GetWorldHeightAt(newPosition2d, To);
-                        if (To.Type == NodeType.Water) y -= (entity.Dimensions.y * World.TILE_HEIGHT) / 2f;
+                        if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);

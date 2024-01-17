@@ -503,7 +503,7 @@ namespace BlockmapFramework
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);
             if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)
-            if (entity != null && entity.Dimensions.y > headSpace) return false; // A node above is blocking the space for the entity
+            if (entity != null && entity.Height > headSpace) return false; // A node above is blocking the space for the entity
 
             return true;
         }

@@ -23,7 +23,7 @@ namespace WorldEditor
 
             TypeId = Name + "_" + MovementSpeed + "_" + VisionRange + "_" + Dimensions.y + "_" + CanSwim;
 
-            transform.localScale = new Vector3(0.2f, 0.15f * Dimensions.y, 0.2f);
+            transform.localScale = new Vector3(1f, 1f * Dimensions.y, 1f);
         }
 
         protected override void OnInitialized()

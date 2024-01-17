@@ -54,10 +54,11 @@ namespace BlockmapFramework
         /// </summary>
         public float VisionRange { get; protected set; }
 
+        [SerializeField]
         /// <summary>
         /// Size of this entity in all 3 dimensions.
         /// </summary>
-        public Vector3Int Dimensions;
+        protected Vector3Int Dimensions;
 
         /// <summary>
         /// Flag if other entities can move through this entity.
@@ -100,7 +101,7 @@ namespace BlockmapFramework
             // Selection indicator
             SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
             SelectionIndicator.transform.SetParent(transform);
-            SelectionIndicator.transform.localPosition = new Vector3(0f, 5f, 0f);
+            SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
             SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;
             SetSelected(false);
 
@@ -128,7 +129,7 @@ namespace BlockmapFramework
             }
 
             // Get list of nodes that are currently occupied
-            OccupiedNodes = GetOccupiedNodes(OriginNode);
+            OccupiedNodes = GetOccupiedNodes();
 
             // Add entity to all newly occupies nodes and chunks
             foreach (BlockmapNode node in OccupiedNodes)
@@ -182,6 +183,11 @@ namespace BlockmapFramework
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Player);
         }
 
+
+        #endregion
+
+        #region Draw
+
         /// <summary>
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
         /// </summary>
@@ -192,12 +198,12 @@ namespace BlockmapFramework
             if (IsVisibleBy(player))
             {
                 renderer.enabled = true;
-                renderer.material.color = Color.white;
+                renderer.material.SetColor("_TintColor", Color.clear);
             }
             else if (IsExploredBy(player))
             {
                 renderer.enabled = true;
-                renderer.material.color = new Color(0.5f, 0.5f, 0.5f, 0.5f); // Fog of war, todo: change this when making dedicated entity shader
+                renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
             }
             else renderer.enabled = false;
         }
@@ -206,15 +212,42 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public virtual int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode).y);
+        public virtual int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode, Rotation).y);
         public virtual int MaxHeight => MinHeight + Dimensions.y;
+        public int Height => Dimensions.y;
+        public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
+
+        public Vector3Int GetDimensions()
+        {
+            return GetDimensions(Rotation);
+        }
+        public Vector3Int GetDimensions(Direction rotation)
+        {
+            if (rotation == Direction.N || rotation == Direction.S) return Dimensions;
+            if (rotation == Direction.E || rotation == Direction.W) return new Vector3Int(Dimensions.z, Dimensions.y, Dimensions.x);
+            throw new System.Exception(rotation.ToString() + " is not a valid rotation");
+        }
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
         /// </summary>
-        public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode)
+        public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
+            // Take origin node as base position
+            Vector3Int dimensions = GetDimensions(rotation);
+            Vector2 basePosition = originNode.WorldCoordinates + new Vector2(dimensions.x * 0.5f, dimensions.z * 0.5f);
+
+            // For y, take the lowest node center out of all occupied nodes
+            List<BlockmapNode> occupiedNodes = GetOccupiedNodes(originNode, rotation);
+            float y;
+            if (occupiedNodes == null) y = world.GetWorldHeightAt(new Vector2(originNode.WorldCoordinates.x + 0.5f, originNode.WorldCoordinates.y + 0.5f), originNode);
+            else y = GetOccupiedNodes(originNode, rotation).Min(x => world.GetWorldHeightAt(new Vector2(x.WorldCoordinates.x + 0.5f, x.WorldCoordinates.y + 0.5f), x));
+
+            // Final position
+            return new Vector3(basePosition.x, y, basePosition.y);
+
+            /*
             if (Dimensions.x == 1 && Dimensions.z == 1) return originNode.GetCenterWorldPosition();
 
             float relX = (Dimensions.x % 2 == 0) ? 0f : 0.5f;
@@ -240,6 +273,7 @@ namespace BlockmapFramework
 
             float y = world.GetWorldHeightAt(new Vector2(targetNode.WorldCoordinates.x + relX, targetNode.WorldCoordinates.y + relY), targetNode);
             return new Vector3(targetNode.WorldCoordinates.x + relX, y, targetNode.WorldCoordinates.y + relY);
+            */
         }
 
         /// <summary>
@@ -247,16 +281,23 @@ namespace BlockmapFramework
         /// </summary>
         public Vector3 GetWorldCenter() => GetComponent<MeshRenderer>().bounds.center;
 
+        public List<BlockmapNode> GetOccupiedNodes()
+        {
+            return GetOccupiedNodes(OriginNode, Rotation);
+        }
         /// <summary>
-        /// Returns all nodes that would be occupied by this entity when placed on the given originNode.
+        /// Returns all nodes that would be occupied by this entity when placed on the given originNode with the given rotation.
         /// <br/> Returns null if entity can't be placed on that null.
         /// </summary>
-        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode)
+        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode, Direction rotation)
         {
             List<BlockmapNode> nodes = new List<BlockmapNode>();
-            for (int x = 0; x < Dimensions.x; x++)
+
+            Vector3Int dimensions = GetDimensions(rotation);
+
+            for (int x = 0; x < dimensions.x; x++)
             {
-                for (int z = 0; z < Dimensions.z; z++)
+                for (int z = 0; z < dimensions.z; z++)
                 {
                     BlockmapNode targetNode = originNode;
 
@@ -366,6 +407,13 @@ namespace BlockmapFramework
                 if(hit.transform.gameObject.layer == World.Layer_Water && node is SurfaceNode _surfaceNode)
                 {
                     if(World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
+                }
+
+                // Check if we hit an entity on the node. if so => visible
+                if (hit.transform.gameObject.layer == World.Layer_Entity)
+                {
+                    Entity hitEntity = hit.transform.gameObject.GetComponent<Entity>();
+                    if (node.Entities.Contains(hitEntity)) return VisionType.Visible;
                 }
             }
 
@@ -484,18 +532,6 @@ namespace BlockmapFramework
             return OccupiedNodes.Any(x => x.IsExploredBy(player));
         }
 
-        public static Quaternion Get2dRotationByDirection(Direction dir, int degreeOffset = 0)
-        {
-            if (dir == Direction.N) return Quaternion.Euler(0f, 90f + degreeOffset, 0f);
-            if (dir == Direction.NE) return Quaternion.Euler(0f, 135f + degreeOffset, 0f);
-            if (dir == Direction.E) return Quaternion.Euler(0f, 180f + degreeOffset, 0f);
-            if (dir == Direction.SE) return Quaternion.Euler(0f, 225f + degreeOffset, 0f);
-            if (dir == Direction.S) return Quaternion.Euler(0f, 270f + degreeOffset, 0f);
-            if (dir == Direction.SW) return Quaternion.Euler(0f, 315f + degreeOffset, 0f);
-            if (dir == Direction.W) return Quaternion.Euler(0f, 0f + degreeOffset, 0f);
-            if (dir == Direction.NW) return Quaternion.Euler(0f, 45f + degreeOffset, 0f);
-            return Quaternion.Euler(0f, degreeOffset, 0f);
-        }
 
         #endregion
 
@@ -513,8 +549,8 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateTransform()
         {
-            transform.position = GetWorldPosition(World, OriginNode);
-            transform.rotation = Get2dRotationByDirection(Rotation, degreeOffset: -90);
+            transform.position = GetWorldPosition(World, OriginNode, Rotation);
+            transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 
         /// <summary>

@@ -4,9 +4,7 @@ Big Features to Add:
 
 -------- MOVEMENT UPDATE ------------
 
-- entity rotation
-
-- FenceClimbTransitions
+- MultiClimbTransitions: Transitions where you climb up AND down to get to adjacent node
 	- only for one-sided fences
 	- also for two-sided fences
 	- Implement animation system for climbing fences
@@ -23,6 +21,7 @@ Big Features to Add:
 	- color based on transition type
 	- size based on transition cost
 - delay navmesh preview update 1 frame
+- make climbtransition display nicer
 - increase display performance
 	- don't render whole map, but like 20 tiles around hovered tile or selected entity
 

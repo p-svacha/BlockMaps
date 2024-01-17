@@ -67,7 +67,7 @@ namespace BlockmapFramework
         public void Init()
         {
             Bottom.Ladders.Add(Side, this);
-            Entity = LadderMeshGenerator.GenerateLadderObject(World, this);
+            Entity = LadderMeshGenerator.GenerateLadderObject(this);
             World.SpawnEntity(Entity, Bottom, Side, World.Gaia);
         }
     }

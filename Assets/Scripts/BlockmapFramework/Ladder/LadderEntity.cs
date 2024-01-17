@@ -24,7 +24,7 @@ namespace BlockmapFramework
         public override int MinHeight => Ladder.MinHeight;
         public override int MaxHeight => Ladder.MaxHeight;
 
-        public override Vector3 GetWorldPosition(World world, BlockmapNode originNode)
+        public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
             Vector3 nodeCenter = originNode.GetCenterWorldPosition();
             float worldHeight = Ladder.MinHeight * World.TILE_HEIGHT;

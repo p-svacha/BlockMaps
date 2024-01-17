@@ -23,7 +23,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.transform.rotation = Entity.Get2dRotationByDirection(Direction);
+            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction);
         }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
         {
@@ -44,7 +44,7 @@ namespace BlockmapFramework
 
             // Calculate altitude (y-coordinate) on new position
             float y = World.GetWorldHeightAt(newPosition2d, originNode);
-            if (originNode.Type == NodeType.Water) y -= (entity.Dimensions.y * World.TILE_HEIGHT) / 2f;
+            if (originNode.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
 
             // Set new position
             Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
