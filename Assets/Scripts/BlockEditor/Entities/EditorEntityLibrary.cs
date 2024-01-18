@@ -8,7 +8,7 @@ namespace WorldEditor
 {
     public class EditorEntityLibrary : WorldEntityLibrary
     {
-        private const string ENTITY_PREFAB_PATH = "Editor/Entities/";
+        private const string ENTITY_PREFAB_PATH = "Entities/Prefabs/";
         private BlockEditor Editor;
 
         public void Init(BlockEditor editor)
@@ -27,12 +27,14 @@ namespace WorldEditor
             if (id == "character")
             {
                 EditorMovingEntity prefab = Resources.Load<EditorMovingEntity>(fullPath);
+                if (prefab == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
                 EditorMovingEntity instance = GameObject.Instantiate(prefab, world.transform);
                 float movementSpeed = float.Parse(attributes[1]);
                 float vision = float.Parse(attributes[2]);
                 int height = int.Parse(attributes[3]);
                 bool canSwim = bool.Parse(attributes[4]);
-                instance.PreInit(movementSpeed, vision, height, canSwim);
+                ClimbingCategory climbSkill = (ClimbingCategory)(int.Parse(attributes[5]));
+                instance.PreInit(movementSpeed, vision, height, canSwim, climbSkill);
 
                 return instance;
             }

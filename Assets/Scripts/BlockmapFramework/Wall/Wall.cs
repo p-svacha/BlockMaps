@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// An instance of a wall in the world. All wall-specific attributes are stored in Type.
+    /// </summary>
     public class Wall
     {
         /// <summary>

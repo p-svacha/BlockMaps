@@ -65,7 +65,14 @@ namespace BlockmapFramework
         // Things on this node
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
-        public Dictionary<Direction, Ladder> Ladders = new Dictionary<Direction, Ladder>();
+        /// <summary>
+        /// Ladders that come from this node
+        /// </summary>
+        public Dictionary<Direction, Ladder> SourceLadders = new Dictionary<Direction, Ladder>();
+        /// <summary>
+        /// Ladders that lead to this node
+        /// </summary>
+        public Dictionary<Direction, Ladder> TargetLadders = new Dictionary<Direction, Ladder>(); 
 
         /// <summary>
         /// List containing all players that have explored this node.
@@ -255,6 +262,7 @@ namespace BlockmapFramework
                 bool isAscend = toHeight > fromHeight;
                 BlockmapNode lowerNode = isAscend ? this : adjNode;
                 Direction lowerDir = isAscend ? dir : oppositeDir;
+                BlockmapNode higherNode = isAscend ? adjNode : this;
 
                 int headspace = lowerNode.GetFreeHeadSpace(lowerDir);
                 if (headspace <= heightDiff) continue; // Another node is blocking the transition
@@ -264,33 +272,36 @@ namespace BlockmapFramework
 
                 if (ShouldCreateLadderTransition(lowerNode, lowerDir))
                 {
-                    float cost = isAscend ? SingleClimbTransition.LADDER_COST_UP : SingleClimbTransition.LADDER_COST_DOWN;
-                    float speed = isAscend ? SingleClimbTransition.LADDER_SPEED_UP : SingleClimbTransition.LADDER_SPEED_DOWN;
-                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, cost, speed, LadderMeshGenerator.LADDER_POLE_SIZE);
+                    List<IClimbable> climb = new List<IClimbable>();
+                    for (int i = 0; i < heightDiff; i++) climb.Add(lowerNode.SourceLadders[lowerDir]);
+
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climb);
                     Transitions.Add(adjNode, t);
                 }
-                else if (ShouldCreateCliffTransitionTo(adjNode))
+                else if (ShouldCreateCliffTransitionTo(higherNode, heightDiff))
                 {
-                    float cost = isAscend ? SingleClimbTransition.CLIFF_COST_UP : SingleClimbTransition.CLIFF_COST_DOWN;
-                    float speed = isAscend ? SingleClimbTransition.CLIFF_SPEED_UP : SingleClimbTransition.CLIFF_SPEED_DOWN;
-                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, cost, speed, 0f);
+                    List<IClimbable> climb = new List<IClimbable>();
+                    for (int i = 0; i < heightDiff; i++) climb.Add(Cliff.Instance);
+
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climb);
                     Transitions.Add(adjNode, t);
                 }
             }
         }
+
         /// <summary>
         /// Returns if this node should create a climbing connection to the given node (that is adjacent in the given direction)
         /// </summary>
-        protected bool ShouldCreateCliffTransitionTo(BlockmapNode adjNode)
+        protected bool ShouldCreateCliffTransitionTo(BlockmapNode higherNode, int heightDiff)
         {
-            if (Type != NodeType.Surface) return false;
-            if (adjNode.Type != NodeType.Surface) return false;
+            if (higherNode.Type != NodeType.Surface) return false; // Higher node needs to be surface for there to be a cliff
+            if (heightDiff > MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT) return false; // Too high
 
             return true;
         }
         protected bool ShouldCreateLadderTransition(BlockmapNode lowerNode, Direction side)
         {
-            if (!lowerNode.Ladders.ContainsKey(side)) return false;
+            if (!lowerNode.SourceLadders.ContainsKey(side)) return false;
 
             return true;
         }
@@ -498,7 +509,7 @@ namespace BlockmapFramework
 
             // Check if ladder is blocking
             if(checkLadder)
-                if (Ladders.ContainsKey(dir)) return false;
+                if (SourceLadders.ContainsKey(dir)) return false;
 
             // Check if the side has enough head space for the entity
             int headSpace = GetFreeHeadSpace(dir);

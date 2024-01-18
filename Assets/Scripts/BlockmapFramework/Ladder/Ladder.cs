@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class Ladder
+    public class Ladder : IClimbable
     {
         public World World => Bottom.World;
 
@@ -42,6 +42,15 @@ namespace BlockmapFramework
         /// </summary>
         public LadderEntity Entity { get; private set; }
 
+        // IClimbable
+        public ClimbingCategory SkillRequirement => ClimbingCategory.Basic;
+        public int MaxClimbHeight(ClimbingCategory skill) => World.MAX_HEIGHT;
+        public float CostUp => 1.6f;
+        public float CostDown => 1.3f;
+        public float SpeedUp => 0.65f;
+        public float SpeedDown => 0.75f;
+        public float TransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
+
         public Ladder(BlockmapNode source, BlockmapNode target, Direction side)
         {
             Bottom = source;
@@ -66,7 +75,8 @@ namespace BlockmapFramework
         /// </summary>
         public void Init()
         {
-            Bottom.Ladders.Add(Side, this);
+            Bottom.SourceLadders.Add(Side, this);
+            Top.TargetLadders.Add(HelperFunctions.GetOppositeDirection(Side), this);
             Entity = LadderMeshGenerator.GenerateLadderObject(this);
             World.SpawnEntity(Entity, Bottom, Side, World.Gaia);
         }

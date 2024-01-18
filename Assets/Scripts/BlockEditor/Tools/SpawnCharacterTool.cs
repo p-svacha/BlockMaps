@@ -18,6 +18,7 @@ namespace WorldEditor
         public TMP_InputField VisionInput;
         public TMP_InputField HeightInput;
         public Toggle CanSwimToggle;
+        public TMP_Dropdown ClimbingSkillDropdown;
 
         public override void UpdateTool()
         {
@@ -43,7 +44,9 @@ namespace WorldEditor
             float vision = float.Parse(VisionInput.text);
             int height = int.Parse(HeightInput.text);
             bool canSwim = CanSwimToggle.isOn;
-            newCharacter.PreInit(speed, vision, height, canSwim);
+            ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
+            Debug.Log("climbing skill is " + climbingSkill.ToString());
+            newCharacter.PreInit(speed, vision, height, canSwim, climbingSkill);
 
             World.SpawnEntity(newCharacter, spawnNode, Direction.N, Editor.EditorPlayer);
         }

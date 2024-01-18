@@ -13,6 +13,15 @@ namespace BlockmapFramework
         public override bool BlocksVision => false;
         public override Sprite PreviewSprite => ResourceManager.Singleton.WoodenFenceSprite;
 
+
+        // IClimbable
+        public override ClimbingCategory SkillRequirement => ClimbingCategory.Intermediate;
+        public override float CostUp => 1.8f;
+        public override float CostDown => 1.1f;
+        public override float SpeedUp => 0.8f;
+        public override float SpeedDown => 0.9f;
+        public override float TransformOffset => POLE_WIDTH;
+
         #region Draw
 
         private const float POLE_WIDTH = 0.1f;

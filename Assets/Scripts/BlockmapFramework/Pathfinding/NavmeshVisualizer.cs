@@ -17,7 +17,7 @@ namespace BlockmapFramework
         /// Shows the navmesh of the world.
         /// <br/> If an entity is provided the navmesh will be visualized for that entity.
         /// </summary>
-        public void Visualize(World world, Entity entity = null)
+        public void Visualize(World world, MovingEntity entity = null)
         {
             ClearVisualization();
 

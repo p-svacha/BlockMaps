@@ -7,10 +7,16 @@ namespace BlockmapFramework
 {
     public class MovingEntity : Entity
     {
+        // Const movement rules
+        public const int MAX_BASIC_CLIMB_HEIGHT = 1;
+        public const int MAX_INTERMEDIATE_CLIMB_HEIGHT = 3;
+        public const int MAX_ADVANCED_CLIMB_HEIGHT = 5;
+
         // Current movement
         public float MovementSpeed { get; protected set; }
         public bool IsMoving { get; private set; }
         public ClimbPhase ClimbPhase { get; set; }
+        public int ClimbIndex { get; set; }
 
         // Pathfinding
         public BlockmapNode Target { get; private set; }
@@ -19,6 +25,7 @@ namespace BlockmapFramework
 
         // Movement Attributes
         public bool CanSwim { get; protected set; }
+        public ClimbingCategory ClimbingSkill { get; protected set; }
 
         protected override void OnInitialized()
         {

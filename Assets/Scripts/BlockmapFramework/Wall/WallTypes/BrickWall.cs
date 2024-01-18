@@ -6,6 +6,8 @@ namespace BlockmapFramework
 {
     public class BrickWall : WallType
     {
+        private const float WALL_WIDTH = 0.1f;
+
         public override WallTypeId Id => WallTypeId.BrickWall;
         public override string Name => "Brick Wall";
         public override int MaxHeight => World.MAX_HEIGHT;
@@ -13,8 +15,15 @@ namespace BlockmapFramework
         public override bool BlocksVision => true;
         public override Sprite PreviewSprite => ResourceManager.Singleton.BrickWallSprite;
 
+        // IClimbable
+        public override ClimbingCategory SkillRequirement => ClimbingCategory.Unclimbable;
+        public override float CostUp => 0f;
+        public override float CostDown => 0f;
+        public override float SpeedUp => 0f;
+        public override float SpeedDown => 0f;
+        public override float TransformOffset => WALL_WIDTH;
 
-        private const float WALL_WIDTH = 0.1f;
+
         public override void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall)
         {
             int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BrickWallMaterial);

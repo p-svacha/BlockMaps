@@ -485,8 +485,12 @@ namespace BlockmapFramework
         }
         public void DeregisterNode(BlockmapNode node)
         {
-            // Walls on node
+            // Destroy walls on node
             while(node.Walls.Count > 0) DeregisterWall(node.Walls.Values.ToList()[0]);
+
+            // Destroy ladders from and to node
+            while (node.SourceLadders.Count > 0) RemoveLadder(node.SourceLadders.Values.ToList()[0]);
+            while (node.TargetLadders.Count > 0) RemoveLadder(node.TargetLadders.Values.ToList()[0]);
 
             // Node
             Nodes.Remove(node.Id); // Global registry
@@ -881,7 +885,7 @@ namespace BlockmapFramework
                 if (node.Walls.ContainsKey(dir)) return false;
 
             // Check if a ladder is already there
-            if (node.Ladders.ContainsKey(side)) return false;
+            if (node.SourceLadders.ContainsKey(side)) return false;
 
             // Check if enough space above node to place wall of that height
             int freeHeadSpace = node.GetFreeHeadSpace(side, node.GetMinHeight(side));
@@ -949,7 +953,8 @@ namespace BlockmapFramework
         }
         public void RemoveLadder(Ladder ladder)
         {
-            ladder.Bottom.Ladders.Remove(ladder.Side);
+            ladder.Bottom.SourceLadders.Remove(ladder.Side);
+            ladder.Top.TargetLadders.Remove(HelperFunctions.GetOppositeDirection(ladder.Side));
             RemoveEntity(ladder.Entity);
         }
 

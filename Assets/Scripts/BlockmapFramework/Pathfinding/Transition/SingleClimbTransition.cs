@@ -5,36 +5,28 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// A transition for when going to an adjacent node and having to climb up OR down between it.
+    /// </summary>
     public class SingleClimbTransition : Transition
     {
-        public const float CLIFF_COST_UP = 2.5f;
-        public const float CLIFF_COST_DOWN = 1.5f;
-        public const float CLIFF_SPEED_UP = 0.3f;
-        public const float CLIFF_SPEED_DOWN = 0.4f;
-
-        public const float LADDER_COST_UP = 1.6f;
-        public const float LADDER_COST_DOWN = 1.3f;
-        public const float LADDER_SPEED_UP = 0.65f;
-        public const float LADDER_SPEED_DOWN = 0.75f;
-
         public bool IsAscend { get; private set; } // true when climbing up, false when climbing down
         public int StartHeight { get; private set; }
         public int EndHeight { get; private set; }
         public int Height { get; private set; }
         public int HeadSpaceRequirement { get; private set; }
+        public ClimbingCategory ClimbSkillRequirement { get; private set; }
 
-        public float ClimbCostPerTile { get; private set; }
-        public float ClimbSpeed { get; private set; }
+        /// <summary>
+        /// Each element of this list represents one tile of climbing on that climbing surface.
+        /// </summary>
+        public List<IClimbable> Climb { get; private set; }
 
-        public float TransformOffset { get; private set; }
-
-        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, float cost, float speed, float transformOffset) : base(from, to)
+        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb) : base(from, to)
         {
             Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
-            ClimbCostPerTile = cost;
-            ClimbSpeed = speed;
-            TransformOffset = transformOffset;
+            Climb = climb;
 
             StartHeight = from.GetMinHeight(dir);
             EndHeight = to.GetMaxHeight(oppositeDir);
@@ -48,6 +40,8 @@ namespace BlockmapFramework
             BlockmapNode lowerNode = IsAscend ? From : To;
             Direction lowerDir = IsAscend ? dir : oppositeDir;
             HeadSpaceRequirement = lowerNode.GetFreeHeadSpace(lowerDir) - Height;
+
+            ClimbSkillRequirement = (ClimbingCategory)(climb.Max(x => (int)x.SkillRequirement));
         }
 
         public override float GetMovementCost(MovingEntity entity)
@@ -55,20 +49,26 @@ namespace BlockmapFramework
             float value = (0.5f * (1f / From.GetSpeedModifier())) + (0.5f * (1f / To.GetSpeedModifier())); // Cost of moving between start and end tile
 
             // Add cost of climbing
-            int deltaY = Mathf.Abs(EndHeight - StartHeight);
-            value += deltaY * ClimbCostPerTile;
+            foreach (IClimbable climb in Climb) value += IsAscend ? climb.CostUp : climb.CostDown;
 
             return value;
         }
 
-        public override bool CanPass(Entity entity)
+        public override bool CanPass(MovingEntity entity)
         {
-            // Additional requirement (headspace above ladder)
-            if (entity.Height > HeadSpaceRequirement) return false; 
+            // Headspace
+            if (entity.Height > HeadSpaceRequirement) return false;
+
+            // Climb skill
+            if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
+
+            // Height
+            foreach (IClimbable climb in Climb)
+                if (Height > climb.MaxClimbHeight(entity.ClimbingSkill)) return false;
 
             // Base requirements (adapted to ignore ladder)
             if (!From.IsPassable(Direction, entity, checkLadder: false)) return false;
-            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
+            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity, checkLadder: false)) return false;
 
             return true;
         }
@@ -88,7 +88,7 @@ namespace BlockmapFramework
                         Vector2 entityPosition2d = new Vector2(entity.transform.position.x, entity.transform.position.z);
 
                         // Get 2d position of climb start
-                        Vector3 startClimbPoint = GetStartClimbPoint(entity);
+                        Vector3 startClimbPoint = GetStartClimbPoint(entity, Climb[0], 0);
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
@@ -107,6 +107,7 @@ namespace BlockmapFramework
                         if (Vector2.Distance(newPosition2d, startClimbPoint2d) <= REACH_EPSILON)
                         {
                             entity.ClimbPhase = ClimbPhase.InClimb;
+                            entity.ClimbIndex = 0;
                             entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction)); // Look at cliff wall
                         }
 
@@ -118,18 +119,27 @@ namespace BlockmapFramework
 
                 case ClimbPhase.InClimb:
                     {
+                        // Get where exactly we are within the climb
+                        int index = entity.ClimbIndex;
+                        IClimbable climb = Climb[index];
+
                         // Move towards climb end
-                        Vector3 endClimbPoint = GetEndClimbPoint(entity);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.transform.position, endClimbPoint, Time.deltaTime * ClimbSpeed);
+                        Vector3 nextPoint = GetEndClimbPoint(entity, climb, index);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.transform.position, nextPoint, Time.deltaTime * (IsAscend ? climb.SpeedUp : climb.SpeedDown));
 
                         // Set new position
                         entity.transform.position = newPosition;
 
                         // Check if we reach next phase
-                        if (Vector3.Distance(newPosition, endClimbPoint) <= REACH_EPSILON)
+                        if (Vector3.Distance(newPosition, nextPoint) <= REACH_EPSILON)
                         {
-                            entity.ClimbPhase = ClimbPhase.PostClimb;
-                            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
+                            entity.ClimbIndex++;
+
+                            if (entity.ClimbIndex == Climb.Count) // Reached the top
+                            {
+                                entity.ClimbPhase = ClimbPhase.PostClimb;
+                                entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
+                            }
                         }
 
                         // Out params
@@ -172,18 +182,26 @@ namespace BlockmapFramework
             throw new System.Exception("Should never be reached, climbphase = " + entity.ClimbPhase.ToString());
         }
 
-        private Vector3 GetStartClimbPoint(MovingEntity entity)
+        private Vector3 GetStartClimbPoint(MovingEntity entity, IClimbable climb, int index)
         {
-            return new Vector3(From.WorldCoordinates.x + 0.5f, World.GetWorldHeight(StartHeight), From.WorldCoordinates.y + 0.5f) + GetOffset(entity);
+            float y;
+            if (IsAscend) y = (StartHeight + index) * World.TILE_HEIGHT;
+            else y = (StartHeight - index) * World.TILE_HEIGHT;
+
+            return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb);
         }
-        private Vector3 GetEndClimbPoint(MovingEntity entity)
+        private Vector3 GetEndClimbPoint(MovingEntity entity, IClimbable climb, int index)
         {
-            return new Vector3(From.WorldCoordinates.x + 0.5f, World.GetWorldHeight(EndHeight), From.WorldCoordinates.y + 0.5f) + GetOffset(entity);
+            float y;
+            if (IsAscend) y = (StartHeight + (index + 1)) * World.TILE_HEIGHT;
+            else y = (StartHeight - (index + 1)) * World.TILE_HEIGHT;
+
+            return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb);
         }
-        private Vector3 GetOffset(MovingEntity entity)
+        private Vector3 GetOffset(MovingEntity entity, IClimbable climb)
         {
-            if(IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - TransformOffset);
-            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + TransformOffset);
+            if(IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - climb.TransformOffset);
+            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + climb.TransformOffset);
         }
     }
 }

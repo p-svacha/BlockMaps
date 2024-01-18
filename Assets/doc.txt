@@ -4,17 +4,21 @@ Big Features to Add:
 
 -------- MOVEMENT UPDATE ------------
 
-- MultiClimbTransitions: Transitions where you climb up AND down to get to adjacent node
+- DoubleClimbTransitions: Transitions where you climb up AND down to get to adjacent node
 	- only for one-sided fences
-	- also for two-sided fences
+	- also for two-sided fences (even with different fence types, requires skill of toughest fence)
+	- also for cliff up fence down
+	- also for fence up then cliff up then fence down
 	- Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
 
-- Implement MovingEntity ClimbingSkill attribute
-	=> None: Fences, ladders and cliffs always block
-	=> Basic: Ladders and easy fences
-	=> Advanced: Cliffs and advanced fences too
-- Add ClimbingSkill as an attribute to the editor character
+- SingleClimbTransitions for when climbing up/down a wall to another node
+	> Also ladder + wall
+	> Also cliff + wall
+	> Also wall + cliff + wall
+
+- make moving entity presets and add them to selection
+- these premade ones show their values in the input fields when selected and the input fields get disabled
 
 - in nvamesh previews (both general and per entity):
 	- also dont draw shadows
@@ -29,9 +33,6 @@ Big Features to Add:
 	- remove water surface
 	- remove isPaintable attribute from surface
 
-- make moving entity presets and add them to selection
-	- these premade ones show their values in the input fields when selected and the input fields get disabled
-
 - git page
 
 - git release
@@ -41,6 +42,8 @@ Big Features to Add:
 - wall preview with height
 
 - Add door WallType (Passable, but not seethrough)
+- add window (impassable, see-through)
+
 - Add some kind of roof system
 	- maybe just allow changing height on normal air nodes (like on surface)
 	- and then add a second air node type: roof
@@ -86,11 +89,9 @@ Big Features to Add:
 
 - Make vision radius of entities based on their dimensions
 
-
-
-- Allow movingentities bigger than 1x1
-
 - improve water shader
+
+- for new static entity ideas watch project zomboid streams
 
 - dont allow suface nodes with walls in water
 	- affect canplacewater
@@ -143,13 +144,19 @@ Big Features to Add:
 
 - START CTF
 
-(- decouple entity visibility from node visiblity)
 
-(- impelemnt SurfaceAirNodes:	
+
+-------- RETIRED IDEAS ------------
+
+- decouple entity visibility from node visiblity
+
+- impelemnt SurfaceAirNodes:	
 	> Rendered like surface nodes (1x1x1 in size)
-	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1})
+	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1}
 
-(- Shoot multiple rays at a node to check vision (if performance allows)
-	> also at entities on node)
+- Shoot multiple rays at a node to check vision (if performance allows)
+	> also at entities on node
+
+- Allow movingentities bigger than 1x1
 
 

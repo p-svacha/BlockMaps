@@ -296,8 +296,15 @@ namespace BlockmapFramework
             if (HasPath) return false;
             if (Entities.Count > 0) return false;
             if (WaterNode != null) return false;
+
+            // Walls
             foreach (Direction wallDir in Walls.Keys)
                 if (HelperFunctions.DoAffectedCornersOverlap(mode, wallDir))
+                    return false;
+
+            // Ladders
+            foreach (Direction ladderDir in TargetLadders.Keys)
+                if (HelperFunctions.DoAffectedCornersOverlap(mode, ladderDir))
                     return false;
 
             // Calculate new heights
