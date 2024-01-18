@@ -261,19 +261,20 @@ namespace BlockmapFramework
                 int heightDiff = Mathf.Abs(toHeight - fromHeight);
                 bool isAscend = toHeight > fromHeight;
                 BlockmapNode lowerNode = isAscend ? this : adjNode;
-                Direction lowerDir = isAscend ? dir : oppositeDir;
+                Direction lowerSide = isAscend ? dir : oppositeDir;
                 BlockmapNode higherNode = isAscend ? adjNode : this;
+                Direction higherSide = isAscend ? oppositeDir : dir;
 
-                int headspace = lowerNode.GetFreeHeadSpace(lowerDir);
+                int headspace = lowerNode.GetFreeHeadSpace(lowerSide);
                 if (headspace <= heightDiff) continue; // Another node is blocking the transition
 
                 if (!IsFlat(dir)) continue; // Transition base needs to be flat
                 if (!adjNode.IsFlat(oppositeDir)) continue; // Transition target needs to be flat
 
-                if (ShouldCreateLadderTransition(lowerNode, lowerDir))
+                if (ShouldCreateLadderTransition(lowerNode, lowerSide))
                 {
                     List<IClimbable> climb = new List<IClimbable>();
-                    for (int i = 0; i < heightDiff; i++) climb.Add(lowerNode.SourceLadders[lowerDir]);
+                    for (int i = 0; i < heightDiff; i++) climb.Add(lowerNode.SourceLadders[lowerSide]);
 
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climb);
                     Transitions.Add(adjNode, t);
@@ -286,22 +287,57 @@ namespace BlockmapFramework
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climb);
                     Transitions.Add(adjNode, t);
                 }
+                else if(ShouldCreateSingleWallClimbTransition(lowerNode, lowerSide, higherNode, higherSide, out List<IClimbable> singleWallClimb))
+                {
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, singleWallClimb, forceTransformOffsetToZero: true);
+                    Transitions.Add(adjNode, t);
+                }
             }
         }
 
         /// <summary>
         /// Returns if this node should create a climbing connection to the given node (that is adjacent in the given direction)
         /// </summary>
-        protected bool ShouldCreateCliffTransitionTo(BlockmapNode higherNode, int heightDiff)
+        private bool ShouldCreateCliffTransitionTo(BlockmapNode higherNode, int heightDiff)
         {
             if (higherNode.Type != NodeType.Surface) return false; // Higher node needs to be surface for there to be a cliff
             if (heightDiff > MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT) return false; // Too high
 
             return true;
         }
-        protected bool ShouldCreateLadderTransition(BlockmapNode lowerNode, Direction side)
+        private bool ShouldCreateLadderTransition(BlockmapNode lowerNode, Direction lowerSide)
         {
-            if (!lowerNode.SourceLadders.ContainsKey(side)) return false;
+            if (!lowerNode.SourceLadders.ContainsKey(lowerSide)) return false;
+
+            return true;
+        }
+        private bool ShouldCreateSingleWallClimbTransition(BlockmapNode lowerNode, Direction lowerSide, BlockmapNode higherNode, Direction higherSide, out List<IClimbable> climb)
+        {
+            climb = new List<IClimbable>();
+            List<BlockmapNode> nodesBelowHigher = World.GetNodes(higherNode.WorldCoordinates, 0, higherNode.BaseHeight - 1).OrderByDescending(x => x.BaseHeight).ToList();
+
+            int initialTopHeight = higherNode.GetMaxHeight(higherSide);
+            int targetTopHeight = lowerNode.GetMinHeight(lowerSide);
+            if (initialTopHeight - targetTopHeight > MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT) return false;
+
+            int currentTopHeight = initialTopHeight;
+            foreach(BlockmapNode nodeBelow in nodesBelowHigher)
+            {
+                // Check if wall reaches up to the node we wanna climb to
+                if(nodeBelow.Walls.ContainsKey(higherSide) && 
+                    nodeBelow.Walls[higherSide].Type.SkillRequirement != ClimbingCategory.Unclimbable &&
+                    nodeBelow.Walls[higherSide].MaxHeight == currentTopHeight &&
+                    nodeBelow.Walls[higherSide].IsSloped)
+                {
+                    int newTopHeight = nodeBelow.GetMinHeight(higherSide);
+                    int height = currentTopHeight - newTopHeight;
+                    for (int i = 0; i < height; i++) climb.Add(nodeBelow.Walls[higherSide].Type);
+
+                    currentTopHeight = newTopHeight;
+                }
+            }
+
+            if (currentTopHeight != targetTopHeight) return false; // Check if the climb actually goes from our source to our target
 
             return true;
         }

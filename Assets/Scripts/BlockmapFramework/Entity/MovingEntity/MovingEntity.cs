@@ -8,9 +8,9 @@ namespace BlockmapFramework
     public class MovingEntity : Entity
     {
         // Const movement rules
-        public const int MAX_BASIC_CLIMB_HEIGHT = 1;
-        public const int MAX_INTERMEDIATE_CLIMB_HEIGHT = 3;
-        public const int MAX_ADVANCED_CLIMB_HEIGHT = 5;
+        public const int MAX_BASIC_CLIMB_HEIGHT = 2; // in tiles = 0.5m
+        public const int MAX_INTERMEDIATE_CLIMB_HEIGHT = 6; // in tiles = 0.5m
+        public const int MAX_ADVANCED_CLIMB_HEIGHT = 10; // in tiles = 0.5m
 
         // Current movement
         public float MovementSpeed { get; protected set; }

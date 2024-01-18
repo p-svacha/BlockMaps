@@ -5,14 +5,16 @@ Big Features to Add:
 -------- MOVEMENT UPDATE ------------
 
 - DoubleClimbTransitions: Transitions where you climb up AND down to get to adjacent node
-	- only for one-sided fences
-	- also for two-sided fences (even with different fence types, requires skill of toughest fence)
+	- only for one-sided fences (!!!)
+	- also for two-sided fences (even with different fence types, requires skill of toughest fence) (!!!)
 	- also for cliff up fence down
 	- also for fence up then cliff up then fence down
 	- Implement animation system for climbing fences
 - walls should not generally block movement, but based on entity climbing skill
 
-- SingleClimbTransitions for when climbing up/down a wall to another node
+- SingleClimbTransitions for cases:
+	> wall (!!!)
+	> wall + wall (+ wall + wall etc..) (!!)
 	> Also ladder + wall
 	> Also cliff + wall
 	> Also wall + cliff + wall
@@ -37,9 +39,16 @@ Big Features to Add:
 
 - git release
 
+- cache paths in one "MoveEntityTool" session
+
 -------- BUILDING UPDATE ------------
 
 - wall preview with height
+- make height adjustable with (ctrl+scrollwheel)
+- show wall type attributes in editor (climbability)
+
+- make a ladderpreview
+- make switchable to which higher node the ladder should go (with ctrl+scrollwheel)
 
 - Add door WallType (Passable, but not seethrough)
 - add window (impassable, see-through)
@@ -58,6 +67,7 @@ Big Features to Add:
 - check why it takes so long to generate big (16*32) worlds
 
 - make a dropdown for load world
+- make message "are you sure" when overwriting
 
 - make detailed example map
 

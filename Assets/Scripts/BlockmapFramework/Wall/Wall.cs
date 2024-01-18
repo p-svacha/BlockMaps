@@ -40,6 +40,11 @@ namespace BlockmapFramework
         /// </summary>
         public int MaxHeight => MinHeight + Height;
 
+        /// <summary>
+        /// Returns if this wall follows a slope.
+        /// </summary>
+        public bool IsSloped => !Type.FollowSlopes || Node.IsFlat(Side);
+
         #region Init
 
         public Wall(WallType type)

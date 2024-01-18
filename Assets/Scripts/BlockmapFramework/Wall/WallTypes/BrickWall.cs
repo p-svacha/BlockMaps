@@ -16,11 +16,11 @@ namespace BlockmapFramework
         public override Sprite PreviewSprite => ResourceManager.Singleton.BrickWallSprite;
 
         // IClimbable
-        public override ClimbingCategory SkillRequirement => ClimbingCategory.Unclimbable;
-        public override float CostUp => 0f;
-        public override float CostDown => 0f;
-        public override float SpeedUp => 0f;
-        public override float SpeedDown => 0f;
+        public override ClimbingCategory SkillRequirement => ClimbingCategory.Intermediate;
+        public override float CostUp => 2.5f;
+        public override float CostDown => 1.5f;
+        public override float SpeedUp => 0.3f;
+        public override float SpeedDown => 0.4f;
         public override float TransformOffset => WALL_WIDTH;
 
 
