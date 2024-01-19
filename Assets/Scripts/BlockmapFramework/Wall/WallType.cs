@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public abstract class WallType : IClimbable
+    public abstract class WallType
     {
         public abstract WallTypeId Id { get; }
         public abstract string Name { get; }
@@ -14,25 +14,13 @@ namespace BlockmapFramework
         public abstract bool BlocksVision { get; }
         public abstract Sprite PreviewSprite { get; }
 
-        // IClimbable
-        public abstract ClimbingCategory SkillRequirement { get; }
-        public abstract float CostUp { get; }
-        public abstract float CostDown { get; }
-        public abstract float SpeedUp { get; }
-        public abstract float SpeedDown { get; }
-        public abstract float TransformOffset { get; }
-        public int MaxClimbHeight(ClimbingCategory skill)
-        {
-            return skill switch
-            {
-                ClimbingCategory.None => 0,
-                ClimbingCategory.Basic => MovingEntity.MAX_BASIC_CLIMB_HEIGHT,
-                ClimbingCategory.Intermediate => MovingEntity.MAX_INTERMEDIATE_CLIMB_HEIGHT,
-                ClimbingCategory.Advanced => MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT,
-                ClimbingCategory.Unclimbable => 0,
-                _ => throw new System.Exception("category " + skill.ToString() + " not handled.")
-            };
-        }
+        // Climbing attributes
+        public abstract ClimbingCategory ClimbSkillRequirement { get; }
+        public abstract float ClimbCostUp { get; }
+        public abstract float ClimbCostDown { get; }
+        public abstract float ClimbSpeedUp { get; }
+        public abstract float ClimbSpeedDown { get; }
+        public abstract float Width { get; }
 
         #region Draw
 

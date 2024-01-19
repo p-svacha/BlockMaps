@@ -15,12 +15,12 @@ namespace BlockmapFramework
 
 
         // IClimbable
-        public override ClimbingCategory SkillRequirement => ClimbingCategory.Intermediate;
-        public override float CostUp => 1.8f;
-        public override float CostDown => 1.1f;
-        public override float SpeedUp => 0.8f;
-        public override float SpeedDown => 0.9f;
-        public override float TransformOffset => POLE_WIDTH;
+        public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Intermediate;
+        public override float ClimbCostUp => 1.8f;
+        public override float ClimbCostDown => 1.1f;
+        public override float ClimbSpeedUp => 0.8f;
+        public override float ClimbSpeedDown => 0.9f;
+        public override float Width => POLE_WIDTH;
 
         #region Draw
 

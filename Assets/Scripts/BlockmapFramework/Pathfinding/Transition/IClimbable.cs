@@ -44,5 +44,10 @@ namespace BlockmapFramework
         /// The world distance from the node edge that a MovingEntity has when climbing this. Basically its width.
         /// </summary>
         public float TransformOffset { get; }
+
+        /// <summary>
+        /// On which node side this climbable is located. The TransformOffset is only applied when climbing on this side.
+        /// </summary>
+        public Direction ClimbSide { get; }
     }
 }

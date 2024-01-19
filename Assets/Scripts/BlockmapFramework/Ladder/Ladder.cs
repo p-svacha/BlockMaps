@@ -50,6 +50,7 @@ namespace BlockmapFramework
         public float SpeedUp => 0.65f;
         public float SpeedDown => 0.75f;
         public float TransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
+        public Direction ClimbSide => Side;
 
         public Ladder(BlockmapNode source, BlockmapNode target, Direction side)
         {

@@ -10,14 +10,7 @@ Big Features to Add:
 	- also for cliff up fence down
 	- also for fence up then cliff up then fence down
 	- Implement animation system for climbing fences
-- walls should not generally block movement, but based on entity climbing skill
-
-- SingleClimbTransitions for cases:
-	> wall (!!!)
-	> wall + wall (+ wall + wall etc..) (!!)
-	> Also ladder + wall
-	> Also cliff + wall
-	> Also wall + cliff + wall
+- walls should generally block movement, but can be disabled with checkWalls = false (analog ladders)
 
 - make moving entity presets and add them to selection
 - these premade ones show their values in the input fields when selected and the input fields get disabled

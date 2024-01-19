@@ -8,7 +8,7 @@ namespace BlockmapFramework
     /// <summary>
     /// An instance of a wall in the world. All wall-specific attributes are stored in Type.
     /// </summary>
-    public class Wall
+    public class Wall : IClimbable
     {
         /// <summary>
         /// Type containing general properties about the wall.
@@ -43,7 +43,28 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if this wall follows a slope.
         /// </summary>
-        public bool IsSloped => !Type.FollowSlopes || Node.IsFlat(Side);
+        public bool IsSloped => Type.FollowSlopes && !Node.IsFlat(Side);
+
+        // IClimbable
+        public ClimbingCategory SkillRequirement => Type.ClimbSkillRequirement;
+        public float CostUp => Type.ClimbCostUp;
+        public float CostDown => Type.ClimbCostDown;
+        public float SpeedUp => Type.ClimbSpeedUp;
+        public float SpeedDown => Type.ClimbSpeedDown;
+        public float TransformOffset => Type.Width;
+        public Direction ClimbSide => Side;
+        public int MaxClimbHeight(ClimbingCategory skill)
+        {
+            return skill switch
+            {
+                ClimbingCategory.None => 0,
+                ClimbingCategory.Basic => MovingEntity.MAX_BASIC_CLIMB_HEIGHT,
+                ClimbingCategory.Intermediate => MovingEntity.MAX_INTERMEDIATE_CLIMB_HEIGHT,
+                ClimbingCategory.Advanced => MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT,
+                ClimbingCategory.Unclimbable => 0,
+                _ => throw new System.Exception("category " + skill.ToString() + " not handled.")
+            };
+        }
 
         #region Init
 

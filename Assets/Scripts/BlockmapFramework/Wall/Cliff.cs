@@ -21,11 +21,23 @@ namespace BlockmapFramework
 
         // IClimbable
         public ClimbingCategory SkillRequirement => ClimbingCategory.Advanced;
-        public int MaxClimbHeight(ClimbingCategory skill) => 5;
         public float CostUp => 2.5f;
         public float CostDown => 1.5f;
         public float SpeedUp => 0.3f;
         public float SpeedDown => 0.4f;
         public float TransformOffset => 0f;
+        public Direction ClimbSide => Direction.None;
+        public int MaxClimbHeight(ClimbingCategory skill)
+        {
+            return skill switch
+            {
+                ClimbingCategory.None => 0,
+                ClimbingCategory.Basic => MovingEntity.MAX_BASIC_CLIMB_HEIGHT,
+                ClimbingCategory.Intermediate => MovingEntity.MAX_INTERMEDIATE_CLIMB_HEIGHT,
+                ClimbingCategory.Advanced => MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT,
+                ClimbingCategory.Unclimbable => 0,
+                _ => throw new System.Exception("category " + skill.ToString() + " not handled.")
+            };
+        }
     }
 }
