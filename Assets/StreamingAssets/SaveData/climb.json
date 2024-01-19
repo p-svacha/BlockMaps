@@ -1,9 +1,9 @@
 {
   "Name": "climb",
   "ChunkSize": 16,
-  "MaxNodeId": 1096,
-  "MaxEntityId": 64,
-  "MaxWaterBodyId": 10,
+  "MaxNodeId": 1108,
+  "MaxEntityId": 118,
+  "MaxWaterBodyId": 16,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -19,7 +19,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -32,7 +32,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -45,7 +45,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -58,7 +58,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -71,7 +71,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -84,7 +84,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -97,7 +97,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -110,7 +110,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -123,7 +123,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -136,7 +136,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -149,7 +149,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -162,7 +162,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -175,7 +175,7 @@
             3,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -188,7 +188,7 @@
             3,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -201,7 +201,7 @@
             2,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -214,7 +214,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -223,11 +223,11 @@
           "LocalCoordinateY": 0,
           "Height": [
             2,
-            3,
-            3,
+            2,
+            2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -236,11 +236,11 @@
           "LocalCoordinateY": 1,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -253,7 +253,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -279,7 +279,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -305,7 +305,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -318,7 +318,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -344,7 +344,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -370,7 +370,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -383,7 +383,7 @@
             2,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -396,7 +396,7 @@
             2,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -422,7 +422,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -430,10 +430,10 @@
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -443,9 +443,9 @@
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
+            2,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -457,8 +457,8 @@
           "LocalCoordinateY": 2,
           "Height": [
             2,
-            3,
-            3,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -470,11 +470,11 @@
           "LocalCoordinateY": 3,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -487,7 +487,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -500,7 +500,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -638,10 +638,10 @@
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -651,10 +651,10 @@
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -664,10 +664,10 @@
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -677,9 +677,9 @@
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
+            2,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -691,7 +691,7 @@
           "LocalCoordinateY": 4,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
@@ -760,7 +760,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -773,7 +773,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -812,7 +812,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -846,10 +846,10 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            4,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -859,10 +859,10 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -872,12 +872,12 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -885,12 +885,12 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -898,12 +898,12 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
-            3,
-            3,
+            2,
+            2,
+            2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -912,11 +912,11 @@
           "LocalCoordinateY": 5,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -929,7 +929,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -942,7 +942,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -955,7 +955,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -968,7 +968,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -981,7 +981,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -994,7 +994,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1005,9 +1005,9 @@
             2,
             2,
             1,
-            2
+            1
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1015,12 +1015,12 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 13,
           "Height": [
-            2,
+            1,
             1,
             1,
             1
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1033,7 +1033,7 @@
             1,
             1
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1044,9 +1044,9 @@
             1,
             1,
             0,
-            1
+            0
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1054,12 +1054,12 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 0,
           "Height": [
-            4,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1067,10 +1067,10 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1080,12 +1080,12 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1093,10 +1093,10 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1106,10 +1106,10 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1119,9 +1119,9 @@
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
-            3,
-            3,
+            2,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -1133,7 +1133,7 @@
           "LocalCoordinateY": 6,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
@@ -1262,10 +1262,10 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1275,10 +1275,10 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1288,12 +1288,12 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1301,10 +1301,10 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1314,10 +1314,10 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1327,10 +1327,10 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1340,9 +1340,9 @@
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
+            2,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -1354,7 +1354,7 @@
           "LocalCoordinateY": 7,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
@@ -1410,7 +1410,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1436,7 +1436,7 @@
             0,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1470,10 +1470,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1483,10 +1483,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1496,12 +1496,12 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1509,10 +1509,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1522,10 +1522,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1535,10 +1535,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1548,10 +1548,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1561,8 +1561,8 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -1631,7 +1631,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1678,10 +1678,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
             2,
             2,
-            3
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1691,10 +1691,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
             2,
             2,
-            3
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1704,12 +1704,12 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
             2,
-            3,
-            3
+            2,
+            2,
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1717,10 +1717,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1730,10 +1730,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1743,10 +1743,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1756,10 +1756,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1769,8 +1769,8 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -1839,7 +1839,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1915,9 +1915,9 @@
             2,
             2,
             2,
-            3
+            2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -1925,12 +1925,12 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 3,
           "Height": [
-            3,
             2,
             2,
-            3
+            2,
+            2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -1938,10 +1938,10 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 4,
           "Height": [
-            3,
             2,
-            3,
-            3
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1951,10 +1951,10 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1964,10 +1964,10 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -1977,8 +1977,8 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -2099,7 +2099,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -2125,7 +2125,7 @@
             2,
             2
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -2138,7 +2138,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -2149,7 +2149,7 @@
             2,
             2,
             2,
-            3
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2159,10 +2159,10 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 5,
           "Height": [
-            3,
             2,
-            3,
-            3
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2172,10 +2172,10 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2185,8 +2185,8 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -2333,7 +2333,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -2369,8 +2369,8 @@
           "Height": [
             2,
             2,
-            3,
-            3
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2380,10 +2380,10 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2393,8 +2393,8 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -2567,7 +2567,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -2578,7 +2578,7 @@
             2,
             2,
             2,
-            3
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2588,10 +2588,10 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 6,
           "Height": [
-            3,
             2,
             2,
-            3
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -2601,7 +2601,7 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
+            2,
             2,
             2,
             2
@@ -3282,7 +3282,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3353,7 +3353,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3366,7 +3366,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3379,7 +3379,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3392,7 +3392,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3405,7 +3405,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3418,7 +3418,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3431,7 +3431,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3444,7 +3444,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3457,7 +3457,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3470,7 +3470,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3483,7 +3483,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3496,7 +3496,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3509,7 +3509,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3522,7 +3522,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3535,7 +3535,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3548,7 +3548,7 @@
             3,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3561,7 +3561,7 @@
             1,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3587,7 +3587,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3652,7 +3652,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3717,7 +3717,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3730,7 +3730,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3743,7 +3743,7 @@
             3,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3795,7 +3795,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3821,7 +3821,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -3847,7 +3847,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4016,7 +4016,7 @@
             0,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4094,7 +4094,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4159,7 +4159,7 @@
             2,
             3
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4180,12 +4180,12 @@
           "LocalCoordinateX": 4,
           "LocalCoordinateY": 0,
           "Height": [
-            1,
+            0,
             0,
             0,
             0
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -4237,7 +4237,7 @@
             0,
             0
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4263,7 +4263,7 @@
             0,
             0
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4328,7 +4328,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4393,7 +4393,7 @@
             0,
             0
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -4458,7 +4458,7 @@
             1,
             0
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4575,7 +4575,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4601,7 +4601,7 @@
             0,
             0
           ],
-          "Surface": "Grass",
+          "Surface": "Tarmac",
           "Type": "Surface"
         },
         {
@@ -4744,7 +4744,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -4822,7 +4822,7 @@
             0,
             0
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -5199,7 +5199,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -5433,7 +5433,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -5446,7 +5446,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -5693,7 +5693,7 @@
             2,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -5745,7 +5745,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -7389,7 +7389,7 @@
             1,
             1
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -8374,7 +8374,7 @@
           "Height": [
             2,
             2,
-            3,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -8386,7 +8386,7 @@
           "LocalCoordinateY": 8,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
@@ -8438,8 +8438,8 @@
           "LocalCoordinateY": 12,
           "Height": [
             2,
-            2,
-            2,
+            3,
+            3,
             2
           ],
           "Surface": "Grass",
@@ -8569,7 +8569,7 @@
           "Height": [
             2,
             2,
-            3,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -8581,9 +8581,9 @@
           "LocalCoordinateY": 7,
           "Height": [
             2,
-            3,
-            3,
-            3
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8596,7 +8596,7 @@
             3,
             3,
             3,
-            2
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8606,10 +8606,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 9,
           "Height": [
-            2,
             3,
-            2,
-            2
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8619,10 +8619,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 10,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8632,10 +8632,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 11,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8645,10 +8645,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 12,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8658,10 +8658,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 13,
           "Height": [
-            2,
-            2,
             3,
-            2
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8671,10 +8671,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 14,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8684,10 +8684,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 15,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8698,8 +8698,8 @@
           "LocalCoordinateY": 0,
           "Height": [
             2,
-            3,
-            3,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -8711,7 +8711,7 @@
           "LocalCoordinateY": 1,
           "Height": [
             2,
-            3,
+            2,
             2,
             2
           ],
@@ -8778,7 +8778,7 @@
             2,
             2,
             2,
-            3
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8788,10 +8788,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 7,
           "Height": [
-            3,
             2,
-            3,
-            3
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8817,7 +8817,7 @@
             3,
             3,
             3,
-            2
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8827,10 +8827,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 10,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8840,10 +8840,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 11,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8853,10 +8853,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 12,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8866,7 +8866,7 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 13,
           "Height": [
-            2,
+            3,
             3,
             3,
             3
@@ -8905,10 +8905,10 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -8918,8 +8918,8 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -8999,7 +8999,7 @@
             2,
             2,
             2,
-            3
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9010,7 +9010,7 @@
           "LocalCoordinateY": 8,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -9074,10 +9074,10 @@
           "LocalCoordinateX": 9,
           "LocalCoordinateY": 13,
           "Height": [
-            8,
-            8,
-            8,
-            8
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9113,10 +9113,10 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9126,8 +9126,8 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
+            2,
+            2,
             2,
             2
           ],
@@ -9217,9 +9217,9 @@
           "LocalCoordinateX": 10,
           "LocalCoordinateY": 8,
           "Height": [
-            2,
-            2,
-            2,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9231,7 +9231,7 @@
           "LocalCoordinateY": 9,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -9284,7 +9284,7 @@
           "Height": [
             3,
             3,
-            4,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9296,8 +9296,8 @@
           "LocalCoordinateY": 14,
           "Height": [
             3,
-            4,
-            4,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9309,7 +9309,7 @@
           "LocalCoordinateY": 15,
           "Height": [
             3,
-            4,
+            3,
             3,
             3
           ],
@@ -9321,10 +9321,10 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 0,
           "Height": [
-            3,
             2,
             2,
-            3
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9334,7 +9334,7 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
+            2,
             2,
             2,
             2
@@ -9378,7 +9378,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -9425,10 +9425,10 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 8,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9438,9 +9438,9 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 9,
           "Height": [
-            2,
-            2,
-            2,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9452,7 +9452,7 @@
           "LocalCoordinateY": 10,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -9492,8 +9492,8 @@
           "Height": [
             3,
             3,
-            4,
-            4
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9503,10 +9503,10 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 14,
           "Height": [
-            4,
-            4,
-            4,
-            4
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9516,9 +9516,9 @@
           "LocalCoordinateX": 11,
           "LocalCoordinateY": 15,
           "Height": [
-            4,
-            4,
-            4,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9547,7 +9547,7 @@
             2,
             2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -9583,7 +9583,7 @@
           "Height": [
             2,
             2,
-            1,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9595,8 +9595,8 @@
           "LocalCoordinateY": 5,
           "Height": [
             2,
-            1,
-            1,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9608,8 +9608,8 @@
           "LocalCoordinateY": 6,
           "Height": [
             2,
-            1,
-            1,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9621,7 +9621,7 @@
           "LocalCoordinateY": 7,
           "Height": [
             2,
-            1,
+            2,
             2,
             2
           ],
@@ -9642,14 +9642,27 @@
           "Type": "Surface"
         },
         {
+          "Id": 1106,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 8,
+          "Height": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
           "Id": 668,
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 9,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            5,
+            5,
+            5,
+            5
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9659,49 +9672,101 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 10,
           "Height": [
-            2,
-            2,
-            3,
-            3
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
+        },
+        {
+          "Id": 1100,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 10,
+          "Height": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
+        },
+        {
+          "Id": 1101,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 10,
+          "Height": [
+            10,
+            10,
+            10,
+            10
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
         },
         {
           "Id": 700,
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 11,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
+        },
+        {
+          "Id": 1099,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 11,
+          "Height": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
         },
         {
           "Id": 716,
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 12,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
+        },
+        {
+          "Id": 1102,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 12,
+          "Height": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
         },
         {
           "Id": 732,
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 13,
           "Height": [
-            3,
-            3,
-            4,
-            4
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9711,10 +9776,10 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 14,
           "Height": [
-            4,
-            4,
-            4,
-            4
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9724,10 +9789,10 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 15,
           "Height": [
-            4,
-            4,
-            3,
-            4
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9765,7 +9830,7 @@
           "Height": [
             2,
             2,
-            1,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9777,8 +9842,8 @@
           "LocalCoordinateY": 3,
           "Height": [
             2,
-            1,
-            1,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9790,9 +9855,9 @@
           "LocalCoordinateY": 4,
           "Height": [
             2,
-            1,
-            1,
-            1
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9802,10 +9867,10 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 5,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9815,10 +9880,10 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 6,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9828,9 +9893,9 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 7,
           "Height": [
-            1,
-            1,
-            1,
+            2,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9841,10 +9906,10 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 8,
           "Height": [
-            2,
-            1,
-            1,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9854,10 +9919,10 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 9,
           "Height": [
-            2,
-            1,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9867,9 +9932,9 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 10,
           "Height": [
-            2,
-            2,
-            2,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -9881,7 +9946,7 @@
           "LocalCoordinateY": 11,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -9909,7 +9974,7 @@
             3,
             3,
             3,
-            4
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9919,10 +9984,10 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 14,
           "Height": [
-            4,
             3,
-            4,
-            4
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9932,8 +9997,8 @@
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 15,
           "Height": [
-            4,
-            4,
+            3,
+            3,
             3,
             3
           ],
@@ -9946,8 +10011,8 @@
           "LocalCoordinateY": 0,
           "Height": [
             2,
-            1,
-            1,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9959,8 +10024,8 @@
           "LocalCoordinateY": 1,
           "Height": [
             2,
-            1,
-            1,
+            2,
+            2,
             2
           ],
           "Surface": "Grass",
@@ -9972,9 +10037,9 @@
           "LocalCoordinateY": 2,
           "Height": [
             2,
-            1,
-            1,
-            1
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9984,10 +10049,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 3,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -9997,10 +10062,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 4,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10010,10 +10075,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 5,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10023,10 +10088,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 6,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10036,10 +10101,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 7,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10049,10 +10114,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 8,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10062,10 +10127,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 9,
           "Height": [
-            1,
-            1,
-            1,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10075,10 +10140,10 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 10,
           "Height": [
-            2,
-            1,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10088,9 +10153,9 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 11,
           "Height": [
-            2,
-            2,
-            2,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -10102,7 +10167,7 @@
           "LocalCoordinateY": 12,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -10130,7 +10195,7 @@
             3,
             3,
             3,
-            4
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10140,7 +10205,7 @@
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 15,
           "Height": [
-            4,
+            3,
             3,
             3,
             3
@@ -10153,10 +10218,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 0,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10166,10 +10231,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 1,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10179,10 +10244,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 2,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10192,10 +10257,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 3,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10205,10 +10270,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 4,
           "Height": [
-            1,
-            1,
-            0,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10218,10 +10283,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 5,
           "Height": [
-            1,
-            0,
-            0,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10231,10 +10296,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 6,
           "Height": [
-            1,
-            0,
-            0,
-            1
+            2,
+            2,
+            2,
+            2
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10244,12 +10309,12 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 7,
           "Height": [
-            1,
-            0,
-            1,
-            1
+            2,
+            2,
+            2,
+            2
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
         },
         {
@@ -10257,10 +10322,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 8,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10270,10 +10335,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 9,
           "Height": [
-            1,
-            1,
-            1,
-            1
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10283,10 +10348,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 10,
           "Height": [
-            1,
-            1,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10296,10 +10361,10 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 11,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -10309,9 +10374,9 @@
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 12,
           "Height": [
-            2,
-            2,
-            2,
+            3,
+            3,
+            3,
             3
           ],
           "Surface": "Grass",
@@ -10323,7 +10388,7 @@
           "LocalCoordinateY": 13,
           "Height": [
             3,
-            2,
+            3,
             3,
             3
           ],
@@ -12031,10 +12096,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 0,
           "Height": [
-            2,
             3,
             3,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12044,10 +12109,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 1,
           "Height": [
-            2,
             3,
-            2,
-            2
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12057,10 +12122,10 @@
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 2,
           "Height": [
-            2,
-            2,
-            2,
-            2
+            3,
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12268,7 +12333,7 @@
             3,
             3,
             3,
-            2
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12278,10 +12343,10 @@
           "LocalCoordinateX": 8,
           "LocalCoordinateY": 2,
           "Height": [
-            2,
             3,
-            2,
-            2
+            3,
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12488,8 +12553,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12696,8 +12761,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -12877,7 +12942,7 @@
           "LocalCoordinateY": 0,
           "Height": [
             3,
-            4,
+            3,
             3,
             3
           ],
@@ -12904,8 +12969,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -13110,10 +13175,10 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 0,
           "Height": [
-            4,
-            3,
-            3,
-            3
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -13123,10 +13188,10 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 1,
           "Height": [
-            3,
-            3,
-            3,
-            3
+            6,
+            6,
+            6,
+            6
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -13136,13 +13201,26 @@
           "LocalCoordinateX": 12,
           "LocalCoordinateY": 2,
           "Height": [
-            3,
-            3,
-            2,
-            2
+            6,
+            6,
+            7,
+            7
           ],
-          "Surface": "Sand",
+          "Surface": "Grass",
           "Type": "Surface"
+        },
+        {
+          "Id": 1104,
+          "LocalCoordinateX": 12,
+          "LocalCoordinateY": 2,
+          "Height": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "Surface": "Tarmac",
+          "Type": "AirPath"
         },
         {
           "Id": 828,
@@ -13372,8 +13450,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -13606,8 +13684,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -13827,8 +13905,8 @@
           "Height": [
             3,
             3,
-            2,
-            2
+            3,
+            3
           ],
           "Surface": "Grass",
           "Type": "Surface"
@@ -14017,7 +14095,7 @@
   ],
   "Entities": [
     {
-      "Id": 58,
+      "Id": 110,
       "TypeId": "ladder",
       "OriginNodeId": 805,
       "Rotation": "W",
@@ -14052,43 +14130,78 @@
       "PlayerId": 0
     },
     {
-      "Id": 59,
+      "Id": 111,
       "TypeId": "ladder",
       "OriginNodeId": 359,
       "Rotation": "E",
       "PlayerId": -1
     },
     {
-      "Id": 60,
+      "Id": 112,
       "TypeId": "ladder",
       "OriginNodeId": 1038,
       "Rotation": "W",
       "PlayerId": -1
     },
     {
-      "Id": 61,
+      "Id": 113,
       "TypeId": "ladder",
       "OriginNodeId": 348,
       "Rotation": "N",
       "PlayerId": -1
     },
     {
-      "Id": 62,
+      "Id": 114,
       "TypeId": "ladder",
       "OriginNodeId": 872,
       "Rotation": "N",
       "PlayerId": -1
     },
     {
-      "Id": 63,
+      "Id": 115,
       "TypeId": "ladder",
       "OriginNodeId": 960,
       "Rotation": "E",
       "PlayerId": -1
     },
     {
-      "Id": 48,
-      "TypeId": "character_2.1_10.6_1_False_3",
+      "Id": 71,
+      "TypeId": "log_2x1",
+      "OriginNodeId": 608,
+      "Rotation": "W",
+      "PlayerId": -1
+    },
+    {
+      "Id": 72,
+      "TypeId": "log_2x1",
+      "OriginNodeId": 609,
+      "Rotation": "N",
+      "PlayerId": -1
+    },
+    {
+      "Id": 73,
+      "TypeId": "log_2x1",
+      "OriginNodeId": 592,
+      "Rotation": "N",
+      "PlayerId": -1
+    },
+    {
+      "Id": 74,
+      "TypeId": "tree02",
+      "OriginNodeId": 94,
+      "Rotation": "E",
+      "PlayerId": -1
+    },
+    {
+      "Id": 116,
+      "TypeId": "ladder",
+      "OriginNodeId": 779,
+      "Rotation": "E",
+      "PlayerId": -1
+    },
+    {
+      "Id": 117,
+      "TypeId": "character_10_10.6_1_False_3",
       "OriginNodeId": 757,
       "Rotation": "N",
       "PlayerId": 0
@@ -14490,6 +14603,324 @@
       "TypeId": "BrickWall",
       "NodeId": 874,
       "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 117,
+      "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 118,
+      "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 119,
+      "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 85,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 86,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 87,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 88,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 89,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 120,
+      "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 121,
+      "Side": "N",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 53,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 54,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 55,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 56,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 57,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 53,
+      "Side": "W",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 57,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 149,
+      "Side": "E",
+      "Height": 7
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 53,
+      "Side": "S",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 54,
+      "Side": "S",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 55,
+      "Side": "S",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 56,
+      "Side": "S",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 57,
+      "Side": "S",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 262,
+      "Side": "E",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 278,
+      "Side": "E",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 246,
+      "Side": "E",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 279,
+      "Side": "W",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 263,
+      "Side": "W",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 247,
+      "Side": "W",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 247,
+      "Side": "S",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 248,
+      "Side": "S",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 279,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 280,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 763,
+      "Side": "E",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 780,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 764,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 748,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 747,
+      "Side": "E",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 731,
+      "Side": "E",
+      "Height": 5
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 732,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 796,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 1101,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 1099,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 1100,
+      "Side": "W",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 684,
+      "Side": "W",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 700,
+      "Side": "W",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 683,
+      "Side": "E",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 715,
+      "Side": "E",
+      "Height": 6
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 812,
+      "Side": "W",
+      "Height": 2
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 1104,
+      "Side": "W",
+      "Height": 1
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 667,
+      "Side": "E",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 652,
+      "Side": "W",
+      "Height": 2
+    },
+    {
+      "TypeId": "WoodenFence",
+      "NodeId": 1106,
+      "Side": "W",
       "Height": 1
     }
   ]

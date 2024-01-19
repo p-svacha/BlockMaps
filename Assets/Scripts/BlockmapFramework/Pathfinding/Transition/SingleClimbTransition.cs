@@ -29,7 +29,7 @@ namespace BlockmapFramework
 
         public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb) : base(from, to)
         {
-            base.Direction = dir;
+            Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             Climb = climb;
 
@@ -72,7 +72,7 @@ namespace BlockmapFramework
             foreach (IClimbable climb in Climb)
                 if (Height > climb.MaxClimbHeight(entity.ClimbingSkill)) return false;
 
-            // Base requirements (adapted to ignore ladder)
+            // Base requirements (lower node needs to ignore climbables)
             if (!LowerNode.IsPassable(ClimbDirection, entity, checkClimbables: false)) return false;
             if (!HigherNode.IsPassable(HelperFunctions.GetOppositeDirection(ClimbDirection), entity)) return false;
 
@@ -81,7 +81,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(base.Direction); // Look straight ahead
+            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
             entity.ClimbPhase = ClimbPhase.PreClimb;
         }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
@@ -126,7 +126,6 @@ namespace BlockmapFramework
                 case ClimbPhase.InClimb:
                     {
                         // Get where exactly we are within the climb
-                        // todo: reverse when climbing down
                         int index = entity.ClimbIndex;
                         IClimbable climb = Climb[index];
 
@@ -209,8 +208,8 @@ namespace BlockmapFramework
         {
             float offset = (ClimbDirection == climb.ClimbSide) ? climb.TransformOffset : 0f;
 
-            if (IsAscend) return new Vector3(World.GetDirectionVector(base.Direction).x, 0f, World.GetDirectionVector(base.Direction).y) * (0.5f - entity.WorldSize.x / 2f - offset);
-            else return new Vector3(World.GetDirectionVector(base.Direction).x, 0f, World.GetDirectionVector(base.Direction).y) * (0.5f + entity.WorldSize.x / 2f + offset);
+            if (IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - offset);
+            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + offset);
         }
     }
 }

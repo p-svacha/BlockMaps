@@ -43,6 +43,9 @@ namespace BlockmapFramework
                         arrow.transform.LookAt(t.To.GetCenterWorldPosition());
                         arrow.transform.rotation = Quaternion.Euler(-arrow.transform.rotation.eulerAngles.x, 180 + arrow.transform.rotation.eulerAngles.y, arrow.transform.rotation.eulerAngles.z);
                         arrow.transform.position += new Vector3(0f, ARROW_HEIGHT, 0f);
+                        if (t is AdjacentWalkTransition) arrow.GetComponent<MeshRenderer>().material.color = Color.white;
+                        if (t is SingleClimbTransition) arrow.GetComponent<MeshRenderer>().material.color = Color.cyan;
+                        if (t is DoubleClimbTransition) arrow.GetComponent<MeshRenderer>().material.color = Color.blue;
                     }
                 }
             }

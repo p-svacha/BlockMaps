@@ -45,6 +45,8 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsSloped => Type.FollowSlopes && !Node.IsFlat(Side);
 
+        public bool IsClimbable => SkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
+
         // IClimbable
         public ClimbingCategory SkillRequirement => Type.ClimbSkillRequirement;
         public float CostUp => Type.ClimbCostUp;

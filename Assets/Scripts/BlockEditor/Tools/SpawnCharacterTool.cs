@@ -45,7 +45,6 @@ namespace WorldEditor
             int height = int.Parse(HeightInput.text);
             bool canSwim = CanSwimToggle.isOn;
             ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
-            Debug.Log("climbing skill is " + climbingSkill.ToString());
             newCharacter.PreInit(speed, vision, height, canSwim, climbingSkill);
 
             World.SpawnEntity(newCharacter, spawnNode, Direction.N, Editor.EditorPlayer);

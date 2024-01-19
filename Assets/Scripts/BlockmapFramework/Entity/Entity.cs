@@ -303,14 +303,14 @@ namespace BlockmapFramework
 
                     for (int i = 0; i < x; i++)
                     {
-                        if (!targetNode.AdjacentTransitions.ContainsKey(Direction.E)) return null;
-                        targetNode = targetNode.AdjacentTransitions[Direction.E].To;
+                        if (!targetNode.WalkTransitions.ContainsKey(Direction.E)) return null;
+                        targetNode = targetNode.WalkTransitions[Direction.E].To;
                     }
 
                     for (int i = 0; i < z; i++)
                     {
-                        if (!targetNode.AdjacentTransitions.ContainsKey(Direction.N)) return null;
-                        targetNode = targetNode.AdjacentTransitions[Direction.N].To;
+                        if (!targetNode.WalkTransitions.ContainsKey(Direction.N)) return null;
+                        targetNode = targetNode.WalkTransitions[Direction.N].To;
                     }
 
                     nodes.Add(targetNode);

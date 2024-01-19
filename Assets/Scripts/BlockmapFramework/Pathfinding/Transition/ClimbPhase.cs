@@ -8,7 +8,10 @@ namespace BlockmapFramework
     {
         None,
         PreClimb,
-        InClimb,
-        PostClimb
+        InClimb, // only used for SingleClimb
+        ClimbUp, // Only used for DoubleClimb
+        ClimbTransfer, // Only used for DoubleClimb
+        ClimbDown, // Only used for DoubleClimb
+        PostClimb,
     }
 }

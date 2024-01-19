@@ -15,7 +15,7 @@ namespace BlockmapFramework
 
 
         // IClimbable
-        public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Intermediate;
+        public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Basic;
         public override float ClimbCostUp => 1.8f;
         public override float ClimbCostDown => 1.1f;
         public override float ClimbSpeedUp => 0.8f;

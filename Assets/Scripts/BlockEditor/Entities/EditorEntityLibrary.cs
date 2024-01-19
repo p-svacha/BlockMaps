@@ -19,13 +19,14 @@ namespace WorldEditor
         public override Entity GetEntityInstance(World world, string id)
         {
             string[] attributes = id.Split('_');
-            id = attributes[0];
+            string idPrefix = attributes[0];
 
             string fullPath = ENTITY_PREFAB_PATH + id;
 
             // Editor character
-            if (id == "character")
+            if (idPrefix == "character")
             {
+                fullPath = ENTITY_PREFAB_PATH + idPrefix;
                 EditorMovingEntity prefab = Resources.Load<EditorMovingEntity>(fullPath);
                 if (prefab == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
                 EditorMovingEntity instance = GameObject.Instantiate(prefab, world.transform);
@@ -41,6 +42,7 @@ namespace WorldEditor
 
             // Default
             StaticEntity staticEntity = Resources.Load<StaticEntity>(fullPath);
+            if (staticEntity == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
             return GameObject.Instantiate(staticEntity, world.transform);
 
             throw new System.Exception("Id " + id + " does not exist.");

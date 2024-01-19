@@ -2,16 +2,6 @@ Big Features to Add:
 
 
 
--------- MOVEMENT UPDATE ------------
-
-- DoubleClimbTransitions: Transitions where you climb up AND down to get to adjacent node
-	- only for one-sided fences (!!!)
-	- also for two-sided fences (even with different fence types, requires skill of toughest fence) (!!!)
-	- also for cliff up fence down
-	- also for fence up then cliff up then fence down
-	- Implement animation system for climbing fences
-- walls should generally block movement, but can be disabled with checkWalls = false (analog ladders)
-
 - make moving entity presets and add them to selection
 - these premade ones show their values in the input fields when selected and the input fields get disabled
 
