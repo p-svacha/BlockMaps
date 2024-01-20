@@ -12,19 +12,21 @@ namespace BlockmapFramework
         public int Id { get; private set; }
         public string Name { get; private set; }
         public World World { get; private set; }
+        public Color Color { get; private set; }
 
-        public Player(World world, int id, string name)
+        public Player(World world, int id, string name, Color color)
         {
             World = world;
             Id = id;
             Name = name;
+            Color = color;
         }
 
         #region Save / Load
 
         public static Player Load(World world, PlayerData data)
         {
-            return new Player(world, data.Id, data.Name);
+            return new Player(world, data.Id, data.Name, new Color(data.ColorR, data.ColorG, data.ColorB));
         }
 
         public PlayerData Save()
@@ -32,7 +34,10 @@ namespace BlockmapFramework
             return new PlayerData
             {
                 Id = Id,
-                Name = Name
+                Name = Name,
+                ColorR = Color.r,
+                ColorG = Color.g,
+                ColorB = Color.b
             };
         }
 

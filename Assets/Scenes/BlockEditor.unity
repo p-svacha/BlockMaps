@@ -1452,7 +1452,8 @@ MonoBehaviour:
   - {fileID: 3676313996213567880, guid: 84760b41e0fb30243abdd085b37290b1, type: 3}
   - {fileID: 5733067412292867280, guid: a7800a498f3d8d74b92cb2b9c7ff69b5, type: 3}
   MovingEntityPresets:
-  - {fileID: 1789738485568082753, guid: dac81092d2ff881469751f726113913c, type: 3}
+  - {fileID: 3855192531683989928, guid: 4d39e12ff851eed428cca379e128ab21, type: 3}
+  - {fileID: 140661124634146974, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
   ToolButtonContainer: {fileID: 1523611163}
   TileInfoText: {fileID: 111172741}
   ToolWindow: {fileID: 9765087}

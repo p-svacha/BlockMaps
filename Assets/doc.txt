@@ -1,7 +1,5 @@
 Big Features to Add:
 
-- add human preset
-
 - in nvamesh previews (both general and per entity):
 	- also dont draw shadows
 	- color based on transition type
@@ -15,9 +13,9 @@ Big Features to Add:
 	- remove water surface
 	- remove isPaintable attribute from surface
 
-- git page
 
-- git release
+- Improve GitHub page with desc and screenshots
+	> make a release
 
 - cache paths in one "MoveCharacterTool" session
 
@@ -35,7 +33,9 @@ Big Features to Add:
 
 - Add some kind of roof system
 	- maybe just allow changing height on normal air nodes (like on surface)
+	- allow path mesh generation for all shapes
 	- and then add a second air node type: roof
+
 
 -------- WORLD GEN UPDATE ------------
 
@@ -55,20 +55,14 @@ Big Features to Add:
 -------- UNSORTED ------------
 
 - vision on moving entities
+	> decouple entity vision from node vision
 	> add 2nd player in editor
-	> add ui for display options (inlcuding vision player)
+	> add ui for all display options (inlcuding vision player)
 	> impelement lastseenposition per player and render there
-
-
-- Add additional movement methods (jump/fly)
-- Add strength attribute with that you can destroy walls, entities
-- Stealth/Invisibility
-- Teleportation
-- Terrain affinity
-
-- Weather / Temperature (Snow/Mud)
+	> add system to draw entities on last seen position from that players perspective
 
 - Show entity stats in static entity tool in editor
+	> same way as moving entities
 
 - bug: sometimes cliffs still get drawn when changin heights on big area
 
@@ -76,22 +70,21 @@ Big Features to Add:
 - also IEntity and IBlockmapNode
 
 - Static entities with weird shapes
-	=> adjust collider generation accordingly
-	=> occupiednodes turns into footprint
-	=> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
-	=> keep dimensions as a general entity attribute, add shape to static entity
-
-- fix entity moving backwards when giving new GoTo command while moving already
+	> adjust collider generation accordingly
+	> occupiednodes turns into footprint
+	> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
+	> keep dimensions as a general entity attribute, add shape to static entity
+	> Make editor script for static entity that allows defining shape and previewing box colliders
 
 - Make vision radius of entities based on their dimensions
 
-- improve water shader
+- Water shader (very small transparency, moving, foam when hitting terrain)
 
 - turn-based movement
-	- entites have Action Points
-	- entities have Stamina
-	- Action Point get set and depleted within 1 turn
-	- Stamina is longer term and gets regenrated only a bit per turn
+	> entites have Action Points
+	> entities have Stamina
+	> Action Point get set and depleted within 1 turn
+	> Stamina is longer term and gets regenrated only a bit per turn
 
 - strength & destroy
 	> movingentities get a new strength attribute
@@ -99,7 +92,6 @@ Big Features to Add:
 	> walls get it too
 	> entities can destroy for big stamina cost
 
-- for new static entity ideas watch project zomboid streams
 
 - dont allow suface nodes with walls in water
 	- affect canplacewater
@@ -107,8 +99,6 @@ Big Features to Add:
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
-
-- Make editor script for static entity that allows defining shape and previewing box colliders
 
 - Add different air path types
 	> each has their own mesh generator
@@ -123,24 +113,13 @@ Big Features to Add:
 	> Faster zoom (alt to decrease zoom speed)
 	> Fix zoom speed on low fps
 
-- Fix rare bug of air node not being selected exactly on edge
-
 - fix: water fill algorithm should stop after a while (like 1000 tiles?)
 
 - In terrain blend transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code
 	> also add (global perlin) noise to blending texture
 
-- Improve GitHub page with desc and screenshots
-
 - Procedural Static Entities
-
-- Water shader (very small transparency, moving, foam when hitting terrain)
-
-- decouple entity vision from node vision
-	=> mainly so newly placed entities outside of a players vision are not automatically rendered
-
-- add system to draw entities on last seen position from that players perspective
 
 - add new item framework
 	- items behave like static entities on map, but way more limited
@@ -149,6 +128,17 @@ Big Features to Add:
 - add inventory system
 	- entities can pick up and carry items
 	- add carry capacity attribute to entities
+
+- add some new static entities
+	> for new static entity ideas watch project zomboid streams
+
+- Add additional movement methods (jump/fly)
+- Add strength attribute with that you can destroy walls, entities
+- Stealth/Invisibility
+- Teleportation
+- Terrain affinity
+
+- Weather / Temperature (Snow/Mud)
 
 - START CTF
 

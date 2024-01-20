@@ -70,6 +70,15 @@ namespace BlockmapFramework
         /// </summary>
         public bool BlocksVision;
 
+        // Visual
+        private MeshRenderer Renderer;
+
+        /// <summary>
+        /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
+        /// <br/> -1 means there is no material.
+        /// </summary>
+        public int PlayerColorMaterialIndex = -1;
+
         private Projector SelectionIndicator;
 
         #region Initialize
@@ -78,6 +87,8 @@ namespace BlockmapFramework
         {
             Id = id;
             if(string.IsNullOrEmpty(TypeId)) TypeId = Name;
+
+            Renderer = GetComponent<MeshRenderer>();
 
             OccupiedNodes = new List<BlockmapNode>();
             VisibleNodes = new List<BlockmapNode>();
@@ -104,6 +115,9 @@ namespace BlockmapFramework
             SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
             SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;
             SetSelected(false);
+
+            // Player color
+            if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Player.Color;
 
             OnInitialized();
         }
@@ -193,19 +207,17 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisiblity(Player player)
         {
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-
             if (IsVisibleBy(player))
             {
-                renderer.enabled = true;
-                renderer.material.SetColor("_TintColor", Color.clear);
+                Renderer.enabled = true;
+                Renderer.material.SetColor("_TintColor", Color.clear);
             }
             else if (IsExploredBy(player))
             {
-                renderer.enabled = true;
-                renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
+                Renderer.enabled = true;
+                Renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
             }
-            else renderer.enabled = false;
+            else Renderer.enabled = false;
         }
 
         #endregion
@@ -279,7 +291,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the world position of the center of this entity.
         /// </summary>
-        public Vector3 GetWorldCenter() => GetComponent<MeshRenderer>().bounds.center;
+        public Vector3 GetWorldCenter() => Renderer.bounds.center;
 
         public List<BlockmapNode> GetOccupiedNodes()
         {
@@ -351,18 +363,18 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the given node is currently visible, in fog of war or unexplored by this entity.
         /// </summary>
-        public VisionType GetNodeVision(BlockmapNode node)
+        public VisionType GetNodeVision(BlockmapNode targetNode)
         {
             // Ignore water since its rendered based on its surface node anyway - so this value is discarded
-            if (node is WaterNode) return VisionType.Visible;
+            if (targetNode is WaterNode) return VisionType.Visible;
 
             // Check if node is out of 2d vision range (quick check to increase performance)
-            float distance = Vector2.Distance(OriginNode.WorldCoordinates, node.WorldCoordinates);
+            float distance = Vector2.Distance(OriginNode.WorldCoordinates, targetNode.WorldCoordinates);
             if (distance > VisionRange) return VisionType.Unexplored;
 
             bool markAsExplored = false;
 
-            Vector3 nodeCenter = node.GetCenterWorldPosition();
+            Vector3 nodeCenter = targetNode.GetCenterWorldPosition();
             // Shoot ray from eye to the node with infinite range and check if we hit the correct node
             RaycastHit? nodeHit = Look(nodeCenter);
 
@@ -376,14 +388,14 @@ namespace BlockmapFramework
 
                 // Check if the seen object is at the correct height
                 int seenYCoordinate = (int)(hitPosition.y / World.TILE_HEIGHT);
-                if (seenYCoordinate >= node.BaseHeight || seenYCoordinate <= node.MaxHeight)
+                if (seenYCoordinate >= targetNode.BaseHeight || seenYCoordinate <= targetNode.MaxHeight)
                 {
                     float epsilon = 0.01f;
                     float xFrac = hitPosition.x % 1f;
                     float yFrac = hitPosition.z % 1f;
 
                     // Position we hit matches the position of the node we are checking
-                    if (hitWorldCoordinates == node.WorldCoordinates)
+                    if (hitWorldCoordinates == targetNode.WorldCoordinates)
                     {
                         // If we are not close to hitting an edge, mark the node as visible
                         if (xFrac > epsilon && xFrac < 1f - epsilon && yFrac > epsilon && yFrac < 1f - epsilon) return VisionType.Visible;
@@ -392,19 +404,19 @@ namespace BlockmapFramework
                         else markAsExplored = true;
                     }
 
-                    // Also make checks for hitting a node edge on nodes adjacent to the one we are checking. 
-                    if (xFrac < epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, -1)) == node.WorldCoordinates) markAsExplored = true; // SW
-                    else if (xFrac > 1f - epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(1, -1)) == node.WorldCoordinates) markAsExplored = true; // SE
-                    else if (xFrac > 1f - epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 1)) == node.WorldCoordinates) markAsExplored = true; // NE
-                    else if (xFrac < epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(-1, 1)) == node.WorldCoordinates) markAsExplored = true; // NW
-                    else if (xFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, 0)) == node.WorldCoordinates) markAsExplored = true; // W
-                    else if (xFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 0)) == node.WorldCoordinates) markAsExplored = true; // E
-                    else if (yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(0, 1)) == node.WorldCoordinates) markAsExplored = true; // N
-                    else if (yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(0, -1)) == node.WorldCoordinates) markAsExplored = true; // S
+                    // Also make checks for hitting a node edge on nodes adjacent to the one we are checking. If so, mark is as explored
+                    if (xFrac < epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, -1)) == targetNode.WorldCoordinates) markAsExplored = true; // SW
+                    else if (xFrac > 1f - epsilon && yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(1, -1)) == targetNode.WorldCoordinates) markAsExplored = true; // SE
+                    else if (xFrac > 1f - epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 1)) == targetNode.WorldCoordinates) markAsExplored = true; // NE
+                    else if (xFrac < epsilon && yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(-1, 1)) == targetNode.WorldCoordinates) markAsExplored = true; // NW
+                    else if (xFrac < epsilon && (hitWorldCoordinates + new Vector2Int(-1, 0)) == targetNode.WorldCoordinates) markAsExplored = true; // W
+                    else if (xFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(1, 0)) == targetNode.WorldCoordinates) markAsExplored = true; // E
+                    else if (yFrac > 1f - epsilon && (hitWorldCoordinates + new Vector2Int(0, 1)) == targetNode.WorldCoordinates) markAsExplored = true; // N
+                    else if (yFrac < epsilon && (hitWorldCoordinates + new Vector2Int(0, -1)) == targetNode.WorldCoordinates) markAsExplored = true; // S
                 }
 
                 // Check if we hit the waterbody that covers the node. if so => visible
-                if(hit.transform.gameObject.layer == World.Layer_Water && node is SurfaceNode _surfaceNode)
+                if(hit.transform.gameObject.layer == World.Layer_Water && targetNode is SurfaceNode _surfaceNode)
                 {
                     if(World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                 }
@@ -413,12 +425,12 @@ namespace BlockmapFramework
                 if (hit.transform.gameObject.layer == World.Layer_Entity)
                 {
                     Entity hitEntity = hit.transform.gameObject.GetComponent<Entity>();
-                    if (node.Entities.Contains(hitEntity)) return VisionType.Visible;
+                    if (targetNode.Entities.Contains(hitEntity)) return VisionType.Visible;
                 }
             }
 
             // If the node has a water body, shoot a ray at the water surface as well
-            if(node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
+            if(targetNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
             {
                 Vector3 targetPos = new Vector3(nodeCenter.x, surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
                 RaycastHit? waterHit = Look(targetPos);
@@ -437,7 +449,7 @@ namespace BlockmapFramework
             }
 
             // If the node has entities shoot a ray at them. If we hit one, mark the node as Fog of War (because we can't see the node directly but the entity that's on it.)
-            foreach (Entity e in node.Entities)
+            foreach (Entity e in targetNode.Entities)
             {
                 RaycastHit? entityHit = Look(e.GetWorldCenter());
 

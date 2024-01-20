@@ -53,12 +53,14 @@ namespace BlockmapFramework
         private int NodeIdCounter;
         private int EntityIdCounter;
         private int WaterBodyIdCounter;
-        
+        private int PlayerIdCounter;
+
         private BlockmapCamera Camera;
         /// <summary>
         /// Neutral passive player
         /// </summary>
         public Player Gaia { get; private set; }
+        public const int GAIA_ID = -1;
         /// <summary>
         /// The player that the vision is drawn for currently.
         /// <br/> If null everything is drawn.
@@ -136,11 +138,17 @@ namespace BlockmapFramework
             // Init pathfinder
             Pathfinder.Init(this);
 
-            // Init players
-            foreach (PlayerData playerData in data.Players) AddPlayer(Player.Load(this, playerData));
+            // Init database id's
+            NodeIdCounter = data.MaxNodeId + 1;
+            EntityIdCounter = data.MaxEntityId + 1;
+            WaterBodyIdCounter = data.MaxWaterBodyId + 1;
+            PlayerIdCounter = data.MaxPlayerId + 1;
 
-            if (!Players.ContainsKey(-1)) AddPlayer(new Player(this, -1, "Gaia"));
-            Gaia = Players[-1];
+            // Init players
+            foreach (PlayerData playerData in data.Players) Players.Add(playerData.Id, Player.Load(this, playerData));
+
+            if (!Players.ContainsKey(-1)) Players.Add(GAIA_ID, new Player(this, GAIA_ID, "Gaia", Color.white));
+            Gaia = Players[GAIA_ID];
 
             // Init nodes
             foreach (ChunkData chunkData in data.Chunks)
@@ -148,9 +156,6 @@ namespace BlockmapFramework
                 Chunk chunk = Chunk.Load(this, chunkData);
                 Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
             }
-            NodeIdCounter = data.MaxNodeId + 1;
-            EntityIdCounter = data.MaxEntityId + 1;
-            WaterBodyIdCounter = data.MaxWaterBodyId + 1;
 
             // Init walls
             foreach(WallData wallData in data.Walls)
@@ -508,7 +513,13 @@ namespace BlockmapFramework
             Walls.Remove(wall);
         }
 
-        public void AddPlayer(Player player) => Players.Add(player.Id, player);
+        public Player AddPlayer(string name, Color color)
+        {
+            int id = PlayerIdCounter++;
+            Player newPlayer = new Player(this, id, name, color);
+            Players.Add(id, newPlayer);
+            return newPlayer;
+        }
         public void ResetExploration(Player player)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(player);
@@ -1400,6 +1411,7 @@ namespace BlockmapFramework
                 MaxNodeId = NodeIdCounter,
                 MaxEntityId = EntityIdCounter,
                 MaxWaterBodyId = WaterBodyIdCounter,
+                MaxPlayerId = PlayerIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Players = Players.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Select(x => x.Save()).ToList(),

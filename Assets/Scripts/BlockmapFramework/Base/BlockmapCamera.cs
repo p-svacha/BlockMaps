@@ -11,7 +11,7 @@ namespace BlockmapFramework
 
         private const float TURN_SPEED = 80f;
         private const float MOVE_SPEED = 10f;
-        private const float ZOOM_SPEED = 1;
+        private const float ZOOM_SPEED = 0.8f;
         private const float OFFSET_RADIUS_SCALE = 1f; // How far the camera is from the center depending on the height 
         private const float MIN_HEIGHT = 2f;
         private const float MAX_HEIGHT = 40f;

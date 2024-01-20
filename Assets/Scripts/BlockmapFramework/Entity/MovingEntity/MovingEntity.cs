@@ -13,7 +13,6 @@ namespace BlockmapFramework
         public const int MAX_ADVANCED_CLIMB_HEIGHT = 10; // in tiles = 0.5m
 
         // Current movement
-        
         public bool IsMoving { get; private set; }
         public ClimbPhase ClimbPhase { get; set; }
         public int ClimbIndex { get; set; }

@@ -42,7 +42,7 @@ namespace WorldEditor
             if (chunkSize * numChunks > 512) return;
 
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", chunkSize, numChunks);
-            Editor.SetWorld(data);
+            Editor.SetWorld(data, isNew: true);
         }
 
         private void SaveButton_OnClick()
@@ -60,7 +60,7 @@ namespace WorldEditor
 
             WorldData data = JsonUtilities.LoadWorld(WorldNameInput.text);
             if (data == null) return;
-            Editor.SetWorld(data);
+            Editor.SetWorld(data, isNew: false);
         }
     }
 }

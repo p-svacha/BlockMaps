@@ -46,7 +46,8 @@ namespace WorldEditor
         float deltaTime; // for fps
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
-        public Player EditorPlayer { get; private set; }
+        public Player EditorPlayer1 { get; private set; }
+        public Player EditorPlayer2 { get; private set; }
 
         void Start()
         {
@@ -56,7 +57,7 @@ namespace WorldEditor
 
             // Init world
             WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 2);
-            SetWorld(data);
+            SetWorld(data, isNew: true);
 
             // Init tools
             Tools = new Dictionary<EditorToolId, EditorTool>()
@@ -88,7 +89,7 @@ namespace WorldEditor
             SelectTool(EditorToolId.WorldGen);
         }
 
-        public void SetWorld(WorldData data)
+        public void SetWorld(WorldData data, bool isNew)
         {
             // Clear old data
             if (World != null) Destroy(World.gameObject);
@@ -97,12 +98,16 @@ namespace WorldEditor
             World = World.Load(data, ContentLibrary);
 
             // Add editor player
-            if (!World.Players.ContainsKey(0))
+            if (isNew)
             {
-                EditorPlayer = new Player(World, 0, "Player 1");
-                World.AddPlayer(EditorPlayer);
+                EditorPlayer1 = World.AddPlayer("Player 1", Color.blue);
+                EditorPlayer2 = World.AddPlayer("Player 2", Color.red);
             }
-            else EditorPlayer = World.Players[0];
+            else
+            {
+                EditorPlayer1 = World.Players[0];
+                EditorPlayer2 = World.Players[1];
+            }
 
             // Init hooks
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -151,12 +156,12 @@ namespace WorldEditor
             // V - Visibility
             if (Input.GetKeyDown(KeyCode.V))
             {
-                if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer);
+                if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer1);
                 else World.SetActiveVisionPlayer(null);
             }
 
             // R - Reset explored nodes
-            if (Input.GetKeyDown(KeyCode.R)) World.ResetExploration(EditorPlayer);
+            if (Input.GetKeyDown(KeyCode.R)) World.ResetExploration(EditorPlayer1);
         }
 
         private void UpdateTileInfoText()
