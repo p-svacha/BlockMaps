@@ -208,8 +208,17 @@ namespace BlockmapFramework
         {
             float offset = (ClimbDirection == climb.ClimbSide) ? climb.TransformOffset : 0f;
 
-            if (IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - offset);
-            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + offset);
+            float entityLength = (entity != null) ? entity.WorldSize.x / 2f : 0f;
+            if (IsAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);
+            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entityLength + offset);
+        }
+
+        public override List<Vector3> GetPreviewPath()
+        {
+            if(IsAscend)
+                return new List<Vector3>() { From.GetCenterWorldPosition(), GetEndClimbPoint(null, Climb.Last(), Climb.Count - 1), To.GetCenterWorldPosition() };
+            else
+                return new List<Vector3>() { From.GetCenterWorldPosition(), GetStartClimbPoint(null, Climb[0], 0), To.GetCenterWorldPosition() };
         }
     }
 }

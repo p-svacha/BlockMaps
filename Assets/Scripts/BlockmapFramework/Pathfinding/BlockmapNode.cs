@@ -770,7 +770,7 @@ namespace BlockmapFramework
                 case NodeType.Surface:
                     return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
-                case NodeType.AirPath:
+                case NodeType.Air:
                     return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
 
                 case NodeType.Water:

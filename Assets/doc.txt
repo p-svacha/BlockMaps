@@ -1,14 +1,5 @@
 Big Features to Add:
 
-- in nvamesh previews (both general and per entity):
-	- also dont draw shadows
-	- color based on transition type
-	- size based on transition cost
-- delay navmesh preview update 1 frame
-- make climbtransition display nicer
-- increase display performance
-	- don't render whole map, but like 20 tiles around hovered tile or selected entity
-
 - move "surface" attribute to surface node
 	- remove water surface
 	- remove isPaintable attribute from surface

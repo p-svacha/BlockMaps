@@ -271,8 +271,14 @@ namespace BlockmapFramework
             Direction climbDir = isAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction);
             float offset = (climbDir == climb.ClimbSide) ? climb.TransformOffset : 0f;
 
-            if (isAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entity.WorldSize.x / 2f - offset);
-            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entity.WorldSize.x / 2f + offset);
+            float entityLength = (entity != null) ? entity.WorldSize.x / 2f : 0f;
+            if (isAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);
+            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entityLength + offset);
+        }
+
+        public override List<Vector3> GetPreviewPath()
+        {
+            return new List<Vector3>() { From.GetCenterWorldPosition(), GetClimbDownStartPoint(null, ClimbDown.Count - 1), To.GetCenterWorldPosition() };
         }
     }
 }

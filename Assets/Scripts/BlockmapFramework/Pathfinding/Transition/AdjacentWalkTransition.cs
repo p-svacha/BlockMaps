@@ -54,5 +54,10 @@ namespace BlockmapFramework
             if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= REACH_EPSILON) finishedTransition = true;
             else finishedTransition = false;
         }
+
+        public override List<Vector3> GetPreviewPath()
+        {
+            return new List<Vector3>() { From.GetCenterWorldPosition(), To.GetCenterWorldPosition() };
+        }
     }
 }

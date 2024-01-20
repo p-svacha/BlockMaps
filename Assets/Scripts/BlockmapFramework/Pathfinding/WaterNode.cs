@@ -37,7 +37,7 @@ namespace BlockmapFramework
 
         public override Vector3 GetCenterWorldPosition()
         {
-            return new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight - 0.1f, WorldCoordinates.y + 0.5f);
+            return new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 
         public override bool IsPassable(Entity entity = null)

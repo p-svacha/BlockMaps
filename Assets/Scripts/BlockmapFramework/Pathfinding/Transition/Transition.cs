@@ -52,5 +52,11 @@ namespace BlockmapFramework
         /// <br/> Also returns the node that the entity is currently on (its origin node) as an additional out param.
         /// </summary>
         public abstract void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode);
+
+        /// <summary>
+        /// Returns a list of points that approximately show the path within this transition.
+        /// <br/> Used for navmesh preview.
+        /// </summary>
+        public abstract List<Vector3> GetPreviewPath();
     }
 }

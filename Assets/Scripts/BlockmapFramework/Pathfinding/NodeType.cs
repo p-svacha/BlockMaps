@@ -7,7 +7,7 @@ namespace BlockmapFramework
     public enum NodeType
     {
         Surface,
-        AirPath,
+        Air,
         Water,
     }
 }

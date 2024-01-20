@@ -113,6 +113,8 @@ namespace BlockmapFramework
         private int VisionUpdateRangeEast;
         private int VisionUpdateRangeNorth;
 
+        private bool DoUpdateNavmeshPreviewNextFrame;
+
         #region Init
 
         public void Init(WorldData data, WorldEntityLibrary entityLibrary)
@@ -232,6 +234,7 @@ namespace BlockmapFramework
         private void LateUpdate()
         {
             if (DoUpdateVisionNextFrame) DoUpdateVisionOfNearbyEntities();
+            if (DoUpdateNavmeshPreviewNextFrame) DoUpdatePathfindingVisualization();
         }
 
         /// <summary>
@@ -1077,10 +1080,17 @@ namespace BlockmapFramework
             IsShowingPathfindingGraph = !IsShowingPathfindingGraph;
             UpdatePathfindingVisualization();
         }
+
         private void UpdatePathfindingVisualization()
+        {
+            DoUpdateNavmeshPreviewNextFrame = true;
+        }
+        private void DoUpdatePathfindingVisualization()
         {
             if (IsShowingPathfindingGraph) NavmeshVisualizer.Singleton.Visualize(this);
             else NavmeshVisualizer.Singleton.ClearVisualization();
+
+            DoUpdateNavmeshPreviewNextFrame = false;
         }
 
         public void ToggleTextureMode()
@@ -1299,7 +1309,7 @@ namespace BlockmapFramework
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if (node.Type == NodeType.AirPath && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
+                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
