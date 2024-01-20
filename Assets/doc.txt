@@ -1,9 +1,6 @@
 Big Features to Add:
 
-
-
-- make moving entity presets and add them to selection
-- these premade ones show their values in the input fields when selected and the input fields get disabled
+- add human preset
 
 - in nvamesh previews (both general and per entity):
 	- also dont draw shadows
@@ -22,7 +19,7 @@ Big Features to Add:
 
 - git release
 
-- cache paths in one "MoveEntityTool" session
+- cache paths in one "MoveCharacterTool" session
 
 -------- BUILDING UPDATE ------------
 
@@ -57,6 +54,12 @@ Big Features to Add:
 
 -------- UNSORTED ------------
 
+- vision on moving entities
+	> add 2nd player in editor
+	> add ui for display options (inlcuding vision player)
+	> impelement lastseenposition per player and render there
+
+
 - Add additional movement methods (jump/fly)
 - Add strength attribute with that you can destroy walls, entities
 - Stealth/Invisibility
@@ -83,6 +86,18 @@ Big Features to Add:
 - Make vision radius of entities based on their dimensions
 
 - improve water shader
+
+- turn-based movement
+	- entites have Action Points
+	- entities have Stamina
+	- Action Point get set and depleted within 1 turn
+	- Stamina is longer term and gets regenrated only a bit per turn
+
+- strength & destroy
+	> movingentities get a new strength attribute
+	> staticentities get a new durability attribute
+	> walls get it too
+	> entities can destroy for big stamina cost
 
 - for new static entity ideas watch project zomboid streams
 

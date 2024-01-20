@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace WorldEditor
 {
-    public class MoveEntityTool : EditorTool
+    public class MoveCharacterTool : EditorTool
     {
-        public override EditorToolId Id => EditorToolId.MoveEntity;
+        public override EditorToolId Id => EditorToolId.MoveCharacter;
         public override string Name => "Move Entity";
         public override Sprite Icon => ResourceManager.Singleton.MoveEntityToolSprite;
 
-        private EditorMovingEntity SelectedEntity;
+        private MovingEntity SelectedEntity;
 
         private const float PATH_PREVIEW_WIDTH = 0.1f;
         private Color PATH_PREVIEW_COLOR = new Color(1f, 1f, 1f, 0.5f);
@@ -29,7 +29,7 @@ namespace WorldEditor
             PathPreview.gameObject.SetActive(false);
         }
 
-        public void SelectEntity(EditorMovingEntity e)
+        public void SelectEntity(MovingEntity e)
         {
             if (SelectedEntity != null) SelectedEntity.SetSelected(false);
             SelectedEntity = e;
@@ -70,9 +70,9 @@ namespace WorldEditor
             // Select entity
             if (World.HoveredEntity != null)
             {
-                if (World.HoveredEntity is EditorMovingEntity)
+                if (World.HoveredEntity is MovingEntity)
                 {
-                    SelectEntity((EditorMovingEntity)World.HoveredEntity);
+                    SelectEntity((MovingEntity)World.HoveredEntity);
                 }
             }
         }

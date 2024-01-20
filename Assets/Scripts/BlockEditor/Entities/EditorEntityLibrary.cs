@@ -41,9 +41,9 @@ namespace WorldEditor
             }
 
             // Default
-            StaticEntity staticEntity = Resources.Load<StaticEntity>(fullPath);
-            if (staticEntity == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
-            return GameObject.Instantiate(staticEntity, world.transform);
+            Entity entity = Resources.Load<Entity>(fullPath);
+            if (entity == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
+            return GameObject.Instantiate(entity, world.transform);
 
             throw new System.Exception("Id " + id + " does not exist.");
         }

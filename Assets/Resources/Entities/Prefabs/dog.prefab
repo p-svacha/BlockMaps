@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4727976861285867060
+--- !u!1 &435561337943630352
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5392767307661804686}
-  - component: {fileID: 9041309258335554347}
-  - component: {fileID: 6529614281575137249}
-  - component: {fileID: 8775280700281714778}
-  - component: {fileID: 4390155528046239077}
+  - component: {fileID: 954969924495112362}
+  - component: {fileID: 4246726787963909903}
+  - component: {fileID: 2092925651729875909}
+  - component: {fileID: 1789738485568082753}
+  - component: {fileID: -1378897709594726575}
   m_Layer: 0
-  m_Name: character
+  m_Name: dog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5392767307661804686
+--- !u!4 &954969924495112362
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
+  m_GameObject: {fileID: 435561337943630352}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 20.919228, y: -0.00046098232, z: 21.33947}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &9041309258335554347
+--- !u!33 &4246726787963909903
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
-  m_Mesh: {fileID: -5495902117074765545, guid: 3dcb124b34f675149bcbddbe48a5680f, type: 3}
---- !u!23 &6529614281575137249
+  m_GameObject: {fileID: 435561337943630352}
+  m_Mesh: {fileID: 4711208715938537054, guid: b2b62823d978b534baf01446e2a90989, type: 3}
+--- !u!23 &2092925651729875909
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
+  m_GameObject: {fileID: 435561337943630352}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,9 +63,9 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3f27bc8532a22dc41bd35eb28bf3f943, type: 2}
-  - {fileID: 2100000, guid: 6ec4e6dcdbf05b94985bbff7c7a17a48, type: 2}
-  - {fileID: 2100000, guid: 0864c83cc17b65a4aa4776a41cee9d7b, type: 2}
+  - {fileID: 2100000, guid: 7b2717a6a995a5040ba26d82efc5dfb7, type: 2}
+  - {fileID: 2100000, guid: 1e54a0613ec747044aec59954f30b524, type: 2}
+  - {fileID: 2100000, guid: fe02717aafe9f07458c0f79d234cb387, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -87,34 +87,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8775280700281714778
+--- !u!114 &1789738485568082753
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
+  m_GameObject: {fileID: 435561337943630352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34b67e21889d91345b1205a6d4a71557, type: 3}
+  m_Script: {fileID: 11500000, guid: 855a8d61be5375f499e8d7dcc8425601, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: character
-  Dimensions: {x: 1, y: 3, z: 1}
+  Name: dog
+  VisionRange: 3
+  Dimensions: {x: 1, y: 1, z: 1}
   IsPassable: 1
   BlocksVision: 0
-  TargetFlag: {fileID: 0}
---- !u!64 &4390155528046239077
+  MovementSpeed: 6
+  CanSwim: 1
+  ClimbingSkill: 0
+--- !u!64 &-1378897709594726575
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
+  m_GameObject: {fileID: 435561337943630352}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: -5495902117074765545, guid: 3dcb124b34f675149bcbddbe48a5680f, type: 3}
+  m_Mesh: {fileID: 4711208715938537054, guid: b2b62823d978b534baf01446e2a90989, type: 3}

@@ -52,7 +52,7 @@ namespace BlockmapFramework
         /// <summary>
         /// How far this entity can see.
         /// </summary>
-        public float VisionRange { get; protected set; }
+        public float VisionRange;
 
         [SerializeField]
         /// <summary>

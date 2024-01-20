@@ -14,7 +14,7 @@ namespace WorldEditor
         AirSlopeNode,
         SpawnCharacter,
         SpawnObject,
-        MoveEntity,
+        MoveCharacter,
         Water,
         Wall,
         Ladder

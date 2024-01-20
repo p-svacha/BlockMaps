@@ -18,6 +18,8 @@ namespace WorldEditor
         public Texture2D TileSelectorSE;
 
         [Header("Sprites")]
+        public Sprite DynamicEntitySprite;
+
         public Sprite TerrainToolSprite;
         public Sprite SurfaceToolSprite;
         public Sprite PathToolSprite;

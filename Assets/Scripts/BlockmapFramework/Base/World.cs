@@ -727,6 +727,7 @@ namespace BlockmapFramework
         }
         public void SpawnEntity(Entity newEntity, BlockmapNode node, Direction rotation, Player player)
         {
+            // Init
             newEntity.Init(EntityIdCounter++, this, node, rotation, player);
 
             // Update if the new entity is currently visible

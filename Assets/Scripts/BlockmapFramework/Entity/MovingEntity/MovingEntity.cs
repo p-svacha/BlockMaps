@@ -13,7 +13,7 @@ namespace BlockmapFramework
         public const int MAX_ADVANCED_CLIMB_HEIGHT = 10; // in tiles = 0.5m
 
         // Current movement
-        public float MovementSpeed { get; protected set; }
+        
         public bool IsMoving { get; private set; }
         public ClimbPhase ClimbPhase { get; set; }
         public int ClimbIndex { get; set; }
@@ -24,8 +24,9 @@ namespace BlockmapFramework
         public Transition CurrentTransition { get; private set; }
 
         // Movement Attributes
-        public bool CanSwim { get; protected set; }
-        public ClimbingCategory ClimbingSkill { get; protected set; }
+        public float MovementSpeed;
+        public bool CanSwim;
+        public ClimbingCategory ClimbingSkill;
 
         protected override void OnInitialized()
         {

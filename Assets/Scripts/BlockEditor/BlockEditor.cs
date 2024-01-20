@@ -16,6 +16,7 @@ namespace WorldEditor
         public EditorMovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
         public List<StaticEntity> StaticEntities;
+        public List<MovingEntity> MovingEntityPresets;
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
@@ -30,9 +31,9 @@ namespace WorldEditor
         public SurfacePathTool SurfacePathTool;
         public AirNodeTool AirNodeTool;
         public AirSlopeNodeTool AirSlopeNodeTool;
-        public SpawnCharacterTool SpawnEntityTool;
+        public SpawnCharacterTool SpawnCharacterTool;
+        public MoveCharacterTool MoveCharacterTool;
         public SpawnObjectTool SpawnObjectTool;
-        public MoveEntityTool MoveEntityTool;
         public WaterTool WaterTool;
         public WallTool WallTool;
         public LadderTool LadderTool;
@@ -66,9 +67,9 @@ namespace WorldEditor
                 { EditorToolId.SurfacePath, SurfacePathTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
-                { EditorToolId.SpawnCharacter, SpawnEntityTool },
+                { EditorToolId.SpawnCharacter, SpawnCharacterTool },
+                { EditorToolId.MoveCharacter, MoveCharacterTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
-                { EditorToolId.MoveEntity, MoveEntityTool },
                 { EditorToolId.Water, WaterTool },
                 { EditorToolId.Wall, WallTool },
                 { EditorToolId.Ladder, LadderTool },
@@ -98,7 +99,7 @@ namespace WorldEditor
             // Add editor player
             if (!World.Players.ContainsKey(0))
             {
-                EditorPlayer = new Player(World, 0, "Player");
+                EditorPlayer = new Player(World, 0, "Player 1");
                 World.AddPlayer(EditorPlayer);
             }
             else EditorPlayer = World.Players[0];
