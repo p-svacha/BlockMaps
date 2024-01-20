@@ -269,17 +269,22 @@ public static class HelperFunctions
         return heights;
     }
 
+    public static float GetDirectionAngle(Direction dir)
+    {
+        if (dir == Direction.N) return 180f;
+        if (dir == Direction.NE) return 225f;
+        if (dir == Direction.E) return 270f;
+        if (dir == Direction.SE) return 315f;
+        if (dir == Direction.S) return 0f;
+        if (dir == Direction.SW) return 45f;
+        if (dir == Direction.W) return 90f;
+        if (dir == Direction.NW) return 135f;
+        return 0f;
+    }
+
     public static Quaternion Get2dRotationByDirection(Direction dir)
     {
-        if (dir == Direction.N) return Quaternion.Euler(0f, 180f, 0f);
-        if (dir == Direction.NE) return Quaternion.Euler(0f, 225f, 0f);
-        if (dir == Direction.E) return Quaternion.Euler(0f, 270f, 0f);
-        if (dir == Direction.SE) return Quaternion.Euler(0f, 315f, 0f);
-        if (dir == Direction.S) return Quaternion.Euler(0f, 0f, 0f);
-        if (dir == Direction.SW) return Quaternion.Euler(0f, 45f, 0f);
-        if (dir == Direction.W) return Quaternion.Euler(0f, 90f, 0f);
-        if (dir == Direction.NW) return Quaternion.Euler(0f, 135f, 0f);
-        return Quaternion.Euler(0f, 0f, 0f);
+        return Quaternion.Euler(0f, GetDirectionAngle(dir), 0f);
     }
 
     #endregion

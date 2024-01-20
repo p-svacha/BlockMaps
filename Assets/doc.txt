@@ -4,7 +4,6 @@ Big Features to Add:
 	- remove water surface
 	- remove isPaintable attribute from surface
 
-
 - Improve GitHub page with desc and screenshots
 	> make a release
 

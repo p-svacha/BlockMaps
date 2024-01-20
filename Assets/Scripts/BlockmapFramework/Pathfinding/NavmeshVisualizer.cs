@@ -7,14 +7,17 @@ namespace BlockmapFramework
     public class NavmeshVisualizer : MonoBehaviour
     {
         private const float NODE_SIZE = 0.2f;
-        private const float TRANSITION_OFFSET = 0.05f;
+        private const float TRANSITION_WIDTH = 0.01f;
+        private const float TRANSITION_OFFSET = 0.03f;
         private const float TRANSITION_Y_OFFSET = 0.2f;
 
         private Material SurfaceNodeMat;
         private Material AirNodeMat;
         private Material WaterNodeMat;
 
-        private Material TransitionMat;
+        private Material WalkTransitionMat;
+        private Material SingleClimbTransitionMat;
+        private Material DoubleClimbTransitionMat;
 
         /// <summary>
         /// Shows the navmesh of the world.
@@ -31,8 +34,12 @@ namespace BlockmapFramework
             AirNodeMat.color = Color.gray;
             WaterNodeMat.color = Color.blue;
 
-            TransitionMat = new Material(Shader.Find("Standard"));
-            TransitionMat.color = Color.black;
+            WalkTransitionMat = new Material(Shader.Find("Sprites/Default"));
+            SingleClimbTransitionMat = new Material(Shader.Find("Sprites/Default"));
+            DoubleClimbTransitionMat = new Material(Shader.Find("Sprites/Default"));
+            WalkTransitionMat.color = Color.white;
+            SingleClimbTransitionMat.color = Color.cyan;
+            DoubleClimbTransitionMat.color = Color.blue;
 
             Vector3 nodeDimensions = new Vector3(NODE_SIZE, NODE_SIZE, NODE_SIZE);
 
@@ -41,9 +48,12 @@ namespace BlockmapFramework
                 // Generate line mesh (all transition lines in 1 mesh per chunk)
                 GameObject lineObject = new GameObject("transitions");
                 lineObject.transform.SetParent(transform);
+                MeshBuilder transitionMeshBuilder = new MeshBuilder(lineObject);
+                /*
                 MeshFilter meshFilter = lineObject.AddComponent<MeshFilter>();
                 List<Vector3> linesToRender = new List<Vector3>();
                 List<Color> lineColors = new List<Color>();
+                */
 
                 // Generate node mesh (all nodes in 1 mesh per chunk)
                 GameObject nodeObject = new GameObject("nodes");
@@ -53,14 +63,15 @@ namespace BlockmapFramework
                 foreach (BlockmapNode node in chunk.GetAllNodes())
                 {
                     Vector3 nodePos = node.GetCenterWorldPosition() - new Vector3(NODE_SIZE / 2f, NODE_SIZE / 2f, NODE_SIZE / 2f);
-                    int submesh = GetNodeSubmesh(nodeMeshBuilder, node);
-                    nodeMeshBuilder.BuildCube(submesh, nodePos, nodeDimensions);
+                    int nodeSubmesh = GetNodeSubmesh(nodeMeshBuilder, node);
+                    nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeDimensions);
 
                     foreach (Transition t in node.Transitions.Values)
                     {
                         if (entity != null && !t.CanPass(entity)) continue;
 
-                        Color lineColor = GetTransitionColor(t); // unused because the performant line rendering method i use doesn't support colors and width
+                        int transitionSubmesh = GetTransitionSubmesh(transitionMeshBuilder, t);
+                        float width = t.GetMovementCost(entity) * TRANSITION_WIDTH;
                         List<Vector3> linePath = t.GetPreviewPath();
 
                         // Adapt last point (to differentiate where it starts (within the node) and where it ends (before the node))
@@ -71,21 +82,22 @@ namespace BlockmapFramework
                         linePath[linePath.Count - 1] = last;
 
                         // Add offset
-                        Vector3 offset = GetOffset(t);
+                        Vector3 offset = GetOffset(t, width);
                         for (int i = 0; i < linePath.Count; i++) linePath[i] += offset;
 
                         // Add to line list
-                        for (int i = 0; i < linePath.Count - 1; i++)
+                        List<PathLine> line = new List<PathLine>();
+                        for (int i = 0; i < linePath.Count; i++)
                         {
-                            linesToRender.Add(linePath[i]);
-                            linesToRender.Add(linePath[i + 1]);
-                            lineColors.Add(lineColor);
-                            lineColors.Add(lineColor);
+                            line.Add(new PathLine(linePath[i], HelperFunctions.GetDirectionAngle(t.Direction), width));
                         }
+                        transitionMeshBuilder.BuildPath(transitionSubmesh, new Path(line));
                     }
                 }
 
                 // Render line mesh
+                transitionMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
+                /*
                 Mesh mesh = new Mesh();
                 meshFilter.mesh = mesh;
                 Vector3[] vertices = linesToRender.ToArray();
@@ -99,9 +111,10 @@ namespace BlockmapFramework
                 renderer.material = TransitionMat;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.receiveShadows = false;
+                */
 
                 // Node mesh
-                nodeMeshBuilder.ApplyMesh();
+                nodeMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
             }
         }
 
@@ -116,26 +129,27 @@ namespace BlockmapFramework
             };
         }
 
-        private Color GetTransitionColor(Transition t)
+        private int GetTransitionSubmesh(MeshBuilder meshBuilder, Transition t)
         {
-            if (t is AdjacentWalkTransition) return Color.white;
-            if (t is SingleClimbTransition) return Color.cyan;
-            if (t is DoubleClimbTransition) return Color.blue;
+            if (t is AdjacentWalkTransition) return meshBuilder.GetSubmesh(WalkTransitionMat);
+            if (t is SingleClimbTransition) return meshBuilder.GetSubmesh(SingleClimbTransitionMat);
+            if (t is DoubleClimbTransition) return meshBuilder.GetSubmesh(DoubleClimbTransitionMat);
             throw new System.Exception("Transition type " + t.GetType().ToString() + " not handled.");
         }
 
-        private Vector3 GetOffset(Transition t)
+        private Vector3 GetOffset(Transition t, float width)
         {
+            float offset = TRANSITION_OFFSET + width;
             return t.Direction switch
             {
-                Direction.N => new Vector3(TRANSITION_OFFSET, TRANSITION_Y_OFFSET, 0f),
-                Direction.NE => new Vector3(TRANSITION_OFFSET, TRANSITION_Y_OFFSET, 0f),
-                Direction.E => new Vector3(0f, TRANSITION_Y_OFFSET, TRANSITION_OFFSET),
-                Direction.SE => new Vector3(0f, TRANSITION_Y_OFFSET, -TRANSITION_OFFSET),
-                Direction.S => new Vector3(-TRANSITION_OFFSET, TRANSITION_Y_OFFSET, 0f),
-                Direction.SW => new Vector3(0f, TRANSITION_Y_OFFSET, TRANSITION_OFFSET),
-                Direction.W => new Vector3(0f, TRANSITION_Y_OFFSET, -TRANSITION_OFFSET),
-                Direction.NW => new Vector3(TRANSITION_OFFSET, TRANSITION_Y_OFFSET, 0f),
+                Direction.N => new Vector3(offset, TRANSITION_Y_OFFSET, 0f),
+                Direction.NE => new Vector3(offset, TRANSITION_Y_OFFSET, 0f),
+                Direction.E => new Vector3(0f, TRANSITION_Y_OFFSET, offset),
+                Direction.SE => new Vector3(0f, TRANSITION_Y_OFFSET, -offset),
+                Direction.S => new Vector3(-offset, TRANSITION_Y_OFFSET, 0f),
+                Direction.SW => new Vector3(0f, TRANSITION_Y_OFFSET, offset),
+                Direction.W => new Vector3(0f, TRANSITION_Y_OFFSET, -offset),
+                Direction.NW => new Vector3(offset, TRANSITION_Y_OFFSET, 0f),
                 _ => throw new System.Exception("Direction " + t.Direction.ToString() + " not handled.")
             };
         }

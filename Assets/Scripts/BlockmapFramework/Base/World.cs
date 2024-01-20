@@ -1081,7 +1081,7 @@ namespace BlockmapFramework
             UpdatePathfindingVisualization();
         }
 
-        private void UpdatePathfindingVisualization()
+        public void UpdatePathfindingVisualization()
         {
             DoUpdateNavmeshPreviewNextFrame = true;
         }
