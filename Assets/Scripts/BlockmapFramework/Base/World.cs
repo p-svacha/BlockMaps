@@ -930,44 +930,46 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
         }
 
-        private Ladder GetLadderData(BlockmapNode node, Direction side)
+        public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
         {
-            if (!node.IsFlat(side)) return null;
+            List<BlockmapNode> possibleTargetNodes = new List<BlockmapNode>();
 
-            int sourceHeight = node.GetMinHeight(side);
+            // Check if source node is viable for a ladder
+            if (!source.IsFlat(side)) return possibleTargetNodes;
+            if (source.Walls.ContainsKey(side)) return possibleTargetNodes;
+            if (source.SourceLadders.ContainsKey(side)) return possibleTargetNodes;
 
+            // Get target node (need to be adjacent, higher up and flat on the target direction)
+            int sourceHeight = source.GetMinHeight(side);
             Direction targetSide = HelperFunctions.GetOppositeDirection(side);
-            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(node.WorldCoordinates, side);
-            BlockmapNode targetNode = GetNodes(targetCoordinates).Where(x => x.GetMaxHeight(targetSide) > sourceHeight).OrderBy(x => x.GetMaxHeight(targetSide)).FirstOrDefault();
-            if (targetNode == null) return null;
-            if (!targetNode.IsFlat(HelperFunctions.GetOppositeDirection(side))) return null;
+            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(source.WorldCoordinates, side);
 
-            // Check wall
-            if (node.Walls.ContainsKey(side)) return null;
+            List<BlockmapNode> adjNodes = GetNodes(targetCoordinates).OrderBy(x => x.GetMaxHeight(targetSide)).ToList();
+            foreach (BlockmapNode adjNode in adjNodes)
+            {
+                if (adjNode.GetMaxHeight(targetSide) <= sourceHeight) continue; // not higher than starting point
+                if (!adjNode.IsFlat(HelperFunctions.GetOppositeDirection(side))) continue; // not flat in target direction
 
-            // Check ladder
-            if (node.SourceLadders.ContainsKey(side)) return null;
+                // Check headspace
+                int targetHeight = adjNode.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
+                int ladderHeight = targetHeight - sourceHeight;
+                int headspace = source.GetFreeHeadSpace(side);
+                if (headspace <= ladderHeight) continue; // a node is blocking the climb
 
-            // Check headspace
-            int targetHeight = targetNode.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
-            int ladderHeight = targetHeight - sourceHeight;
-            int headspace = node.GetFreeHeadSpace(side);
-            if (headspace <= ladderHeight) return null;
+                // Add as possible target
+                possibleTargetNodes.Add(adjNode);
+            }
 
-            return new Ladder(node, targetNode, side);
+            return possibleTargetNodes;
         }
-        public bool CanBuildLadder(BlockmapNode node, Direction side)
+        public bool CanBuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
         {
-            return GetLadderData(node, side) != null;
+            return GetPossibleLadderTargetNodes(from, side).Contains(to);
         }
-        public void BuildLadder(BlockmapNode node, Direction side)
+        public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
         {
-            Ladder ladderData = GetLadderData(node, side);
-            Ladder newLadder = new Ladder(ladderData); // copy
+            Ladder newLadder = new Ladder(from, to, side);
             newLadder.Init();
-
-            //UpdateNavmeshAround(node.WorldCoordinates);
-            //RedrawNodesAround(node.WorldCoordinates);
         }
         public void RemoveLadder(Ladder ladder)
         {

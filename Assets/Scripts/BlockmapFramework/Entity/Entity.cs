@@ -579,9 +579,11 @@ namespace BlockmapFramework
 
         public static Entity Load(World world, EntityData data)
         {
-            if(data.TypeId == LadderEntity.LADDER_ENTITY_NAME)
+            if(data.TypeId.StartsWith(LadderEntity.LADDER_ENTITY_NAME))
             {
-                world.BuildLadder(world.GetNode(data.OriginNodeId), data.Rotation);
+                string[] attributes = data.TypeId.Split('_');
+                int targetNodeId = int.Parse(attributes[1]);
+                world.BuildLadder(world.GetNode(data.OriginNodeId), world.GetNode(targetNodeId), data.Rotation);
                 return null;
             }
 

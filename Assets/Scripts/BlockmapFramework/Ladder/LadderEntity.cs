@@ -15,7 +15,7 @@ namespace BlockmapFramework
 
             // Attributes
             Name = "Ladder";
-            TypeId = LADDER_ENTITY_NAME;
+            TypeId = LADDER_ENTITY_NAME + "_" + ladder.Top.Id;
             Dimensions = new Vector3Int(1, ladder.Height, 1);
             BlocksVision = false;
             IsPassable = true;

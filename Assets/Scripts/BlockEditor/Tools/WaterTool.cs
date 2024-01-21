@@ -9,6 +9,8 @@ namespace WorldEditor
 {
     public class WaterTool : EditorTool
     {
+        private const int MAX_DEPTH = 3;
+
         public override EditorToolId Id => EditorToolId.Water;
         public override string Name => "Water";
         public override Sprite Icon => ResourceManager.Singleton.WaterToolSprite;
@@ -35,11 +37,28 @@ namespace WorldEditor
         {
             base.UpdateTool();
 
+            // Ctrl + mouse wheel: change depth
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && DepthInput.text != "")
+                {
+                    int depthText = int.Parse(DepthInput.text);
+                    if (depthText > 1) depthText--;
+                    DepthInput.text = depthText.ToString();
+                }
+                if (Input.mouseScrollDelta.y > 0 && DepthInput.text != "")
+                {
+                    int depthText = int.Parse(DepthInput.text);
+                    if(depthText < MAX_DEPTH) depthText++;
+                    DepthInput.text = depthText.ToString();
+                }
+            }
+
             if (World.HoveredSurfaceNode == null) return;
 
             if (DepthInput.text == "") return;
             int depth = int.Parse(DepthInput.text);
-            if (depth < 1 || depth > 3) return;
+            if (depth < 1 || depth > MAX_DEPTH) return;
 
             // Retreive from cache
             if (Cache.ContainsKey(World.HoveredSurfaceNode) && Cache[World.HoveredSurfaceNode].ContainsKey(depth))

@@ -61,15 +61,6 @@ namespace BlockmapFramework
             MinHeight = source.GetMinHeight(side);
             Height = MaxHeight - MinHeight;
         }
-        public Ladder(Ladder source) // copy constructor
-        {
-            Bottom = source.Bottom;
-            Top = source.Top;
-            Side = source.Side;
-            MaxHeight = source.MaxHeight;
-            MinHeight = source.MinHeight;
-            Height = source.Height;
-        }
 
         /// <summary>
         /// Register in world.

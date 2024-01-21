@@ -5,11 +5,6 @@ Big Features to Add:
 
 -------- BUILDING UPDATE ------------
 
-- make a ladderpreview
-- make switchable to which higher node the ladder should go (with ctrl+scrollwheel)
-
-- make waterbody depth changeable with ctrl+scrollwheel
-
 - Add door WallType (Passable, but not seethrough)
 - add window (impassable, see-through)
 
@@ -26,7 +21,6 @@ Big Features to Add:
 - make message "are you sure" when overwriting
 
 - make detailed example map
-
 
 -------- UNSORTED ------------
 

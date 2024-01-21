@@ -345,6 +345,9 @@ namespace BlockmapFramework
             // Case 1: Nodes are at same height
             if (fromHeight == toHeight)
             {
+                if (SourceLadders.ContainsKey(dir)) return false; // Ladder blocks since it leads to another node higher up
+                if (to.SourceLadders.ContainsKey(oppositeDir)) return false; // Ladder blocks since it leads to another node higher up
+
                 int startHeight = fromHeight;
 
                 for(int i = 0; i < totalClimbHeight; i++)
@@ -363,6 +366,8 @@ namespace BlockmapFramework
             // Case 2: From node is higher
             if(fromHeight > toHeight)
             {
+                if (SourceLadders.ContainsKey(dir)) return false; // Ladder blocks since it leads to another node higher up
+
                 // ClimbUp
                 if (fromWall == null && toWall.MaxHeight <= fromHeight) return false; // Lower wall must go higher if the higher node has no wall
 
@@ -386,6 +391,8 @@ namespace BlockmapFramework
             // Case 3: To node is higher
             if (fromHeight < toHeight)
             {
+                if (to.SourceLadders.ContainsKey(oppositeDir)) return false; // Ladder blocks since it leads to another node higher up
+
                 // ClimbUp
                 if (!CanConnectUpwardsThroughClimbing(this, dir, fromHeight, to, oppositeDir, maxHeight, out climbUp)) return false;
 
