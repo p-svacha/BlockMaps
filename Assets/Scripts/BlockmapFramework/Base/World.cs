@@ -945,6 +945,9 @@ namespace BlockmapFramework
             // Check wall
             if (node.Walls.ContainsKey(side)) return null;
 
+            // Check ladder
+            if (node.SourceLadders.ContainsKey(side)) return null;
+
             // Check headspace
             int targetHeight = targetNode.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
             int ladderHeight = targetHeight - sourceHeight;

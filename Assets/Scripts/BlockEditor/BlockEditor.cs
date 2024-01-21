@@ -105,8 +105,8 @@ namespace WorldEditor
             }
             else
             {
-                EditorPlayer1 = World.Players[0];
-                EditorPlayer2 = World.Players[1];
+                EditorPlayer1 = World.Players[1];
+                EditorPlayer2 = World.Players[2];
             }
 
             // Init hooks

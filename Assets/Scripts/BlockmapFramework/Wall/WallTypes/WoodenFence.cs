@@ -32,9 +32,9 @@ namespace BlockmapFramework
         private const float CROSS_BRACE_HEIGHT = 0.1f;
         private const float CROSS_BRACE_WIDTH = 0.05f;
 
-        public override void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WoodenFenceMaterial);
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
 
             // Poles
             float poleStep = 1f / NUM_POLES;
@@ -48,7 +48,7 @@ namespace BlockmapFramework
                 float dimZ = POLE_WIDTH;
                 Vector3 polePos = new Vector3(startX, startY, startZ);
                 Vector3 poleDims = new Vector3(dimX, dimY, dimZ);
-                BuildCube(wall, meshBuilder, submesh, polePos, poleDims);
+                BuildCube(node, side, meshBuilder, submesh, polePos, poleDims);
             }
 
             // Cross brace
@@ -60,11 +60,11 @@ namespace BlockmapFramework
             float cb_dimZ = CROSS_BRACE_WIDTH;
             Vector3 cbPos = new Vector3(cb_x, cb_y, cb_z);
             Vector3 cbDims = new Vector3(cb_dimX, cb_dimY, cb_dimZ);
-            BuildCube(wall, meshBuilder, submesh, cbPos, cbDims);
+            BuildCube(node, side, meshBuilder, submesh, cbPos, cbDims);
         }
-        public override void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WoodenFenceMaterial);
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
 
             float startX = 0;
             float dimX = POLE_WIDTH;
@@ -74,7 +74,13 @@ namespace BlockmapFramework
             float dimZ = POLE_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            BuildCube(wall, meshBuilder, submesh, pos, dim);
+            BuildCube(node, side, meshBuilder, submesh, pos, dim);
+        }
+
+        private Material GetMaterial(bool isPreview)
+        {
+            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
+            else return ResourceManager.Singleton.WoodenFenceMaterial;
         }
 
         #endregion

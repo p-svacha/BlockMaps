@@ -20,6 +20,10 @@ namespace WorldEditor
 
         private bool IsShowingNavmesh;
 
+        // Cache
+        private BlockmapNode CacheOriginNode;
+        private Dictionary<BlockmapNode, List<BlockmapNode>> PathCache = new Dictionary<BlockmapNode, List<BlockmapNode>>();
+
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
@@ -55,7 +59,19 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (!World.HoveredNode.IsExploredBy(SelectedEntity.Player)) return;
 
-            TargetPath = Pathfinder.GetPath(SelectedEntity, SelectedEntity.OriginNode, World.HoveredNode);
+            if (SelectedEntity.OriginNode != CacheOriginNode) PathCache.Clear(); // Clear cache when changing node
+            CacheOriginNode = SelectedEntity.OriginNode;
+
+            if(PathCache.TryGetValue(World.HoveredNode, out List<BlockmapNode> cachedPath)) // A path to the hovered node is cached 
+            {
+                TargetPath = cachedPath == null ? null : new List<BlockmapNode>(cachedPath);
+            }
+            else // A path to the hovered node is not yet cached
+            {
+                TargetPath = Pathfinder.GetPath(SelectedEntity, SelectedEntity.OriginNode, World.HoveredNode);
+                PathCache.Add(World.HoveredNode, TargetPath == null ? null : new List<BlockmapNode>(TargetPath)); // add to cache
+            }
+
             if (TargetPath == null) return;
 
             PathPreview.gameObject.SetActive(true);
@@ -98,5 +114,6 @@ namespace WorldEditor
             if (IsShowingNavmesh && SelectedEntity != null) NavmeshVisualizer.Singleton.Visualize(World, SelectedEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
         }
+
     }
 }

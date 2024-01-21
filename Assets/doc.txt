@@ -1,31 +1,17 @@
 Big Features to Add:
 
-- move "surface" attribute to surface node
-	- remove water surface
-	- remove isPaintable attribute from surface
-
 - Improve GitHub page with desc and screenshots
 	> make a release
 
-- cache paths in one "MoveCharacterTool" session
-
 -------- BUILDING UPDATE ------------
-
-- wall preview with height
-- make height adjustable with (ctrl+scrollwheel)
-- show wall type attributes in editor (climbability)
 
 - make a ladderpreview
 - make switchable to which higher node the ladder should go (with ctrl+scrollwheel)
 
+- make waterbody depth changeable with ctrl+scrollwheel
+
 - Add door WallType (Passable, but not seethrough)
 - add window (impassable, see-through)
-
-- Add some kind of roof system
-	- maybe just allow changing height on normal air nodes (like on surface)
-	- allow path mesh generation for all shapes
-	- and then add a second air node type: roof
-
 
 -------- WORLD GEN UPDATE ------------
 
@@ -50,6 +36,9 @@ Big Features to Add:
 	> add ui for all display options (inlcuding vision player)
 	> impelement lastseenposition per player and render there
 	> add system to draw entities on last seen position from that players perspective
+
+- animation system for walking / climbing entities
+	> silly with just hopping from one side to the other with slight rotation
 
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
@@ -86,6 +75,11 @@ Big Features to Add:
 - dont allow suface nodes with walls in water
 	- affect canplacewater
 	- affect canbuildwall
+
+- Add some kind of roof system
+	- maybe just allow changing height on normal air nodes (like on surface)
+	- allow path mesh generation for all shapes
+	- and then add a second air node type: roof
 
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type

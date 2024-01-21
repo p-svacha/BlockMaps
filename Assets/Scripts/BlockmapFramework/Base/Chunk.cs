@@ -281,6 +281,8 @@ namespace BlockmapFramework
             return new Vector2Int(worldX, worldY);
         }
 
+        public Vector3 WorldPosition => new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
+
         #endregion
 
         #region Save / Load

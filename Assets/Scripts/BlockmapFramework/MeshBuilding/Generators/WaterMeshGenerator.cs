@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public static void BuildFullWaterMesh(MeshBuilder meshBuilder, WaterBody water)
         {
-            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WaterPreviewMaterial);
+            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BuildPreviewMaterial);
 
             foreach (SurfaceNode node in water.CoveredNodes)
             {

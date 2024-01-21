@@ -24,33 +24,39 @@ namespace BlockmapFramework
         public override float Width => WALL_WIDTH;
 
 
-        public override void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BrickWallMaterial);
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
 
             float startX = 0;
             float dimX = 1f;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT * wall.Height;
+            float dimY = World.TILE_HEIGHT * height;
             float startZ = 0f;
             float dimZ = WALL_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            BuildCube(wall, meshBuilder, submesh, pos, dim);
+            BuildCube(node, side, meshBuilder, submesh, pos, dim);
         }
-        public override void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall)
+        public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BrickWallMaterial);
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
 
             float startX = 0;
             float dimX = WALL_WIDTH;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT * wall.Height;
+            float dimY = World.TILE_HEIGHT * height;
             float startZ = 0f;
             float dimZ = WALL_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            BuildCube(wall, meshBuilder, submesh, pos, dim);
+            BuildCube(node, side, meshBuilder, submesh, pos, dim);
+        }
+
+        private Material GetMaterial(bool isPreview)
+        {
+            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
+            else return ResourceManager.Singleton.BrickWallMaterial;
         }
     }
 }

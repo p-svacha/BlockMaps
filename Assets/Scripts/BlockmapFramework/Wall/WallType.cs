@@ -24,8 +24,8 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public abstract void GenerateSideMesh(MeshBuilder meshBuilder, Wall wall);
-        public abstract void GenerateCornerMesh(MeshBuilder meshBuilder, Wall wall);
+        public abstract void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview);
+        public abstract void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview);
 
         protected Vector3 GetWallStartPos(BlockmapNode node, Direction side, float wallWidth)
         {
@@ -60,15 +60,15 @@ namespace BlockmapFramework
         /// <summary>
         /// When building a cube for wall, define the values for building it from the south-west corner on 0/0 and then pass those values into this function to translate the values to the correct node and direction.
         /// </summary>
-        protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, Vector3 pos, Vector3 dimensions)
+        protected void BuildCube(BlockmapNode node, Direction side, MeshBuilder meshBuilder, int submesh, Vector3 pos, Vector3 dimensions)
         {
             List<float> heightOffsets = new List<float>() { 0f, 0f, 0f, 0f };
 
             // Calculate vertex height offsets if built on a slope
-            bool adjustHeightsToSlope = (HelperFunctions.IsSide(wall.Side) && wall.Type.FollowSlopes);
+            bool adjustHeightsToSlope = (HelperFunctions.IsSide(side) && FollowSlopes);
             if (adjustHeightsToSlope)
             {
-                float slope = World.TILE_HEIGHT * (wall.Node.Height[HelperFunctions.GetNextAnticlockwiseDirection8(wall.Side)] - wall.Node.Height[HelperFunctions.GetNextClockwiseDirection8(wall.Side)]);
+                float slope = World.TILE_HEIGHT * (node.Height[HelperFunctions.GetNextAnticlockwiseDirection8(side)] - node.Height[HelperFunctions.GetNextClockwiseDirection8(side)]);
                 float startY = 0;
                 if (slope < 0)
                 {
@@ -93,26 +93,26 @@ namespace BlockmapFramework
             };
 
             // Translate footprint positions based on direction
-            footprint = footprint.Select(x => MeshBuilder.TranslatePosition(x, wall.Side)).ToList();
+            footprint = footprint.Select(x => MeshBuilder.TranslatePosition(x, side)).ToList();
 
             // Apply height offsets from slope
             for (int i = 0; i < 4; i++) footprint[i] += new Vector3(0f, heightOffsets[i], 0f);
 
             // Apply offset based on node position on chunk to footprint
-            int startHeightCoordinate = wall.Node.GetMinHeight(wall.Side);
-            float worldHeight = wall.Node.World.GetWorldHeight(startHeightCoordinate);
-            Vector3 nodeOffsetPos = new Vector3(wall.Node.LocalCoordinates.x, worldHeight, wall.Node.LocalCoordinates.y);
+            int startHeightCoordinate = node.GetMinHeight(side);
+            float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
+            Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
 
             // Build cube
             meshBuilder.BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], dimensions.y);
         }
-        protected void BuildCube(Wall wall, MeshBuilder meshBuilder, int submesh, float startX, float endX, float startY, float endY, float startZ, float endZ)
+        protected void BuildCube(BlockmapNode node, Direction side, MeshBuilder meshBuilder, int submesh, float startX, float endX, float startY, float endY, float startZ, float endZ)
         {
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dimensions = new Vector3(endX - startX, endY - startY, endZ - startZ);
-            BuildCube(wall, meshBuilder, submesh, pos, dimensions);
+            BuildCube(node, side, meshBuilder, submesh, pos, dimensions);
         }
 
         #endregion

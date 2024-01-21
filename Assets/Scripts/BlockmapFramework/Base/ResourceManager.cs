@@ -12,12 +12,13 @@ namespace BlockmapFramework
         }
 
         [Header("Materials")]
+        public Material BuildPreviewMaterial;
+
         public Material SurfaceMaterial;
         public Material CliffMaterial;
         public Material PathMaterial;
         public Material PathCurbMaterial;
         public Material WaterMaterial;
-        public Material WaterPreviewMaterial;
         public Material BrickWallMaterial;
         public Material WoodenFenceMaterial;
         public Material LadderMaterial;
