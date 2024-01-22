@@ -65,7 +65,7 @@ namespace WorldEditor
                 World.HoveredSurfaceNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white, AreaSize);
 
                 // Update navmesh preview
-                World.UpdatePathfindingVisualizationDelayed();
+                World.UpdateNavmeshDisplayDelayed();
             }
         }
 

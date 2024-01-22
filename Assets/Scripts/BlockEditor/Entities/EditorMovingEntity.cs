@@ -36,11 +36,6 @@ namespace WorldEditor
             TargetFlag.gameObject.SetActive(false);
         }
 
-        public override void UpdateEntity()
-        {
-            base.UpdateEntity();
-        }
-
         private void GoToRandomNode()
         {
             BlockmapNode targetNode = World.GetRandomPassableNode(this);

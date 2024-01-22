@@ -1,5 +1,15 @@
 Big Features to Add:
 
+- vision on moving entities
+	> decouple entity vision from node vision
+	> add 2nd player in editor
+	> add ui for all display options (inlcuding vision player)
+	> impelement lastseenposition per player and render there
+	> add system to draw entities on last seen position from that players perspective
+	> button for explore all
+	> box collider on movingEntities should only move in SetOriginNode -> decouple from transform
+
+
 - Improve GitHub page with desc and screenshots
 	> make a release
 
@@ -18,13 +28,6 @@ Big Features to Add:
 - make detailed example map
 
 -------- UNSORTED ------------
-
-- vision on moving entities
-	> decouple entity vision from node vision
-	> add 2nd player in editor
-	> add ui for all display options (inlcuding vision player)
-	> impelement lastseenposition per player and render there
-	> add system to draw entities on last seen position from that players perspective
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation

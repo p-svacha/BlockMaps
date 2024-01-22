@@ -23,6 +23,7 @@ namespace WorldEditor
         public Dictionary<EditorToolId, UI_EditorToolButton> ToolButtons;
         public TextMeshProUGUI TileInfoText;
         public UI_ToolWindow ToolWindow;
+        public UI_WorldDisplayOptions DisplayOptions;
 
         [Header("Tools")]
         public WorldGenTool WorldGenTool;
@@ -87,6 +88,9 @@ namespace WorldEditor
             }
 
             SelectTool(EditorToolId.WorldGen);
+
+            // Init display options
+            DisplayOptions.Init(this);
         }
 
         public void SetWorld(WorldData data, bool isNew)
@@ -127,8 +131,12 @@ namespace WorldEditor
             // Click
             bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
 
-            if (EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<Button>() != null)
-                EventSystem.current.SetSelectedGameObject(null); // Unfocus any focussed button so it doesn't block input controls
+            if (EventSystem.current.currentSelectedGameObject != null && (
+                EventSystem.current.currentSelectedGameObject.GetComponent<Button>() != null ||
+                EventSystem.current.currentSelectedGameObject.GetComponent<TMP_Dropdown>() != null ||
+                EventSystem.current.currentSelectedGameObject.GetComponent<Toggle>() != null
+                ))
+                EventSystem.current.SetSelectedGameObject(null); // Unfocus any focussed button/dropdown/toggle so it doesn't block input controls
 
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
 
@@ -142,22 +150,42 @@ namespace WorldEditor
             if (isUiElementFocussed) return; // no input key checks when a ui element is focussed
 
             // G - Show/Hide Grid
-            if (Input.GetKeyDown(KeyCode.G)) World.ToggleGridOverlay();
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                World.ToggleGridOverlay();
+                DisplayOptions.UpdateValues();
+            }
 
             // P - Visualize Pathfinding
-            if(Input.GetKeyDown(KeyCode.P)) World.TogglePathfindingVisualization();
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                World.ToggleNavmesh();
+                DisplayOptions.UpdateValues();
+            }
 
             // T - Texture mode
-            if (Input.GetKeyDown(KeyCode.T)) World.ToggleTextureMode();
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                World.ToggleTextureMode();
+                DisplayOptions.UpdateValues();
+            }
 
             // B - Surface blending
-            if (Input.GetKeyDown(KeyCode.B)) World.ToggleTileBlending();
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                World.ToggleTileBlending();
+                DisplayOptions.UpdateValues();
+            }
 
             // V - Visibility
             if (Input.GetKeyDown(KeyCode.V))
             {
-                if (World.IsAllVisible) World.SetActiveVisionPlayer(EditorPlayer1);
-                else World.SetActiveVisionPlayer(null);
+                if (World.ActiveVisionPlayer == null) World.SetActiveVisionPlayer(EditorPlayer1);
+                else if (World.ActiveVisionPlayer == EditorPlayer1) World.SetActiveVisionPlayer(EditorPlayer2);
+                else if (World.ActiveVisionPlayer == EditorPlayer2) World.SetActiveVisionPlayer(null);
+                else if (World.ActiveVisionPlayer == World.Gaia) World.SetActiveVisionPlayer(null);
+
+                DisplayOptions.UpdateValues();
             }
 
             // R - Reset explored nodes

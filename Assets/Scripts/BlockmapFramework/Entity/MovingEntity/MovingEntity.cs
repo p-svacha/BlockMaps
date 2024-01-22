@@ -36,12 +36,22 @@ namespace BlockmapFramework
 
         public override void UpdateEntity()
         {
+            base.UpdateEntity();
+
+            // Movement
             if(IsMoving)
             {
                 CurrentTransition.UpdateEntityMovement(this, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
                 if (OriginNode != currentOriginNode) SetOriginNode(currentOriginNode);
                 if(finishedTransition) ReachNextNode();
+
+                // Update transform if visible
+                if(IsVisibleBy(World.ActiveVisionPlayer))
+                {
+                    transform.position = WorldPosition;
+                    transform.rotation = WorldRotation;
+                }
             }
         }
 

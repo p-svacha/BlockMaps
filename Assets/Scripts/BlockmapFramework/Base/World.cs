@@ -102,10 +102,10 @@ namespace BlockmapFramework
 
         // Draw modes
         public bool IsAllVisible => ActiveVisionPlayer == null;
-        private bool IsShowingGrid;
-        private bool IsShowingPathfindingGraph;
-        private bool IsShowingTextures;
-        private bool IsShowingTileBlending;
+        public bool IsShowingGrid { get; private set; }
+        public bool IsShowingNavmesh { get; private set; }
+        public bool IsShowingTextures { get; private set; }
+        public bool IsShowingTileBlending { get; private set; }
 
         // Variables for delayed updated
         private bool DoDelayedVisionUpdate;
@@ -196,7 +196,7 @@ namespace BlockmapFramework
                     Entity e = Entity.Load(this, entityData);
                     if(e != null) Entities.Add(e); // null-check because some special entities are already registered in Entity.Load (i.e. ladders)
                 }
-                foreach (Entity e in Entities) e.UpdateTransform();
+                foreach (Entity e in Entities) e.SetTransformToOrigin();
 
                 InitializeStep++;
                 return;
@@ -205,7 +205,7 @@ namespace BlockmapFramework
             // Frame 2 after initialization: Do stuff that requires entities to be at the correct world position
             if (InitializeStep == 2)
             {
-                foreach (Entity e in Entities) e.UpdateVisibleNodes();
+                foreach (Entity e in Entities) e.UpdateVision();
 
                 InitializeStep++;
                 return;
@@ -238,7 +238,7 @@ namespace BlockmapFramework
         {
             if (DoDelayedVisionUpdate) DoUpdateVisionOfNearbyEntities();
             if (DoDelayedNavmeshUpdate) DoUpdateNavmesh();
-            if (DoDelayedNavmeshPreviewUpdate) DoUpdatePathfindingVisualization();
+            if (DoDelayedNavmeshPreviewUpdate) DoUpdateNavmeshDisplay();
         }
 
         /// <summary>
@@ -530,7 +530,7 @@ namespace BlockmapFramework
         public void ResetExploration(Player player)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(player);
-            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVisibleNodes();
+            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVision();
 
             UpdateVisibility();
         }
@@ -551,7 +551,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
-            UpdatePathfindingVisualizationDelayed();
+            UpdateNavmeshDisplayDelayed();
 
             DoDelayedNavmeshUpdate = false;
             NavmeshUpdateNodes = null;
@@ -725,7 +725,7 @@ namespace BlockmapFramework
 
         public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node, Direction rotation)
         {
-            List<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node, rotation); // get nodes that would be occupied when placing the entity on the given node
+            HashSet<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node, rotation); // get nodes that would be occupied when placing the entity on the given node
 
             if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
 
@@ -1006,7 +1006,7 @@ namespace BlockmapFramework
             SetActiveVisionPlayer(null);
 
             UpdateGridOverlay();
-            UpdatePathfindingVisualizationDelayed();
+            UpdateNavmeshDisplayDelayed();
             UpdateTextureMode();
             UpdateTileBlending();
         }
@@ -1079,7 +1079,7 @@ namespace BlockmapFramework
         private void DoUpdateVisionOfNearbyEntities() // never call this directly
         {
             foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange + (VisionUpdateRangeEast - 1) + (VisionUpdateRangeNorth - 1)))
-                e.UpdateVisibleNodes();
+                e.UpdateVision();
 
             DoDelayedVisionUpdate = false;
         }
@@ -1089,24 +1089,33 @@ namespace BlockmapFramework
             IsShowingGrid = !IsShowingGrid;
             UpdateGridOverlay();
         }
+        public void ShowGridOverlay(bool value)
+        {
+            IsShowingGrid = value;
+            UpdateGridOverlay();
+        }
         private void UpdateGridOverlay()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.ShowGrid(IsShowingGrid);
         }
 
-        public void TogglePathfindingVisualization()
+        public void ToggleNavmesh()
         {
-            IsShowingPathfindingGraph = !IsShowingPathfindingGraph;
-            UpdatePathfindingVisualizationDelayed();
+            IsShowingNavmesh = !IsShowingNavmesh;
+            UpdateNavmeshDisplayDelayed();
         }
-
-        public void UpdatePathfindingVisualizationDelayed()
+        public void ShowNavmesh(bool value)
+        {
+            IsShowingNavmesh = value;
+            UpdateNavmeshDisplayDelayed();
+        }
+        public void UpdateNavmeshDisplayDelayed()
         {
             DoDelayedNavmeshPreviewUpdate = true;
         }
-        private void DoUpdatePathfindingVisualization() // never call this directly
+        private void DoUpdateNavmeshDisplay() // never call this directly
         {
-            if (IsShowingPathfindingGraph) NavmeshVisualizer.Singleton.Visualize(this);
+            if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this);
             else NavmeshVisualizer.Singleton.ClearVisualization();
 
             DoDelayedNavmeshPreviewUpdate = false;
@@ -1117,6 +1126,11 @@ namespace BlockmapFramework
             IsShowingTextures = !IsShowingTextures;
             UpdateTextureMode();
         }
+        public void ShowTextures(bool value)
+        {
+            IsShowingTextures = value;
+            UpdateTextureMode();
+        }
         private void UpdateTextureMode()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.ShowTextures(IsShowingTextures);
@@ -1125,6 +1139,11 @@ namespace BlockmapFramework
         public void ToggleTileBlending()
         {
             IsShowingTileBlending = !IsShowingTileBlending;
+            UpdateTileBlending();
+        }
+        public void ShowTileBlending(bool value)
+        {
+            IsShowingTileBlending = value;
             UpdateTileBlending();
         }
         private void UpdateTileBlending()

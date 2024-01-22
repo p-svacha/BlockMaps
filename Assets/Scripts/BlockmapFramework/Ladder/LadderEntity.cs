@@ -30,7 +30,5 @@ namespace BlockmapFramework
             float worldHeight = Ladder.MinHeight * World.TILE_HEIGHT;
             return new Vector3(nodeCenter.x, worldHeight, nodeCenter.z);
         }
-
-        public override void UpdateEntity() { }
     }
 }

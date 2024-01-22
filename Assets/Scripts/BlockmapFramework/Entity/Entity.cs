@@ -36,14 +36,36 @@ namespace BlockmapFramework
         public Direction Rotation { get; protected set; }
 
         /// <summary>
+        /// The exact world position this entity is at the moment.
+        /// </br> Equals transform.position when the entity is visible (in vision system).
+        /// </summary>
+        public Vector3 WorldPosition { get; private set; }
+
+        /// <summary>
+        /// The exact world rotation this entity has at the moment.
+        /// </br> Equals transform.rotation when the entity is visible (in vision system).
+        /// </summary>
+        public Quaternion WorldRotation { get; private set; }
+
+        /// <summary>
+        /// Stores the node on which each player has seen this entity the last time.
+        /// </summary>
+        public Dictionary<Player, BlockmapNode> LastKnownPosition { get; private set; }
+        /// <summary>
+        /// Stores the direction that each player has seen this entity facing at the last time.
+        /// </summary>
+        public Dictionary<Player, Direction> LastKnownRotation { get; private set; }
+
+
+        /// <summary>
         /// List of tiles that this entity is currently on.
         /// </summary>
-        public List<BlockmapNode> OccupiedNodes { get; private set; }
+        public HashSet<BlockmapNode> OccupiedNodes { get; private set; }
 
         /// <summary>
         /// List of all nodes that this entity currently sees.
         /// </summary>
-        public List<BlockmapNode> VisibleNodes { get; private set; }
+        public HashSet<BlockmapNode> VisibleNodes { get; private set; }
 
         /// <summary>
         /// Who this entity belongs to.
@@ -83,23 +105,30 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public void Init(int id, World world, BlockmapNode position, Direction rotation, Player player)
+        public void Init(int id, World world, BlockmapNode origin, Direction rotation, Player player)
         {
             Id = id;
             if(string.IsNullOrEmpty(TypeId)) TypeId = Name;
 
             Renderer = GetComponent<MeshRenderer>();
 
-            OccupiedNodes = new List<BlockmapNode>();
-            VisibleNodes = new List<BlockmapNode>();
+            OccupiedNodes = new HashSet<BlockmapNode>();
+            VisibleNodes = new HashSet<BlockmapNode>();
+
+            LastKnownPosition = new Dictionary<Player, BlockmapNode>();
+            foreach (Player p in world.Players.Values) LastKnownPosition.Add(p, null);
+            LastKnownRotation = new Dictionary<Player, Direction>();
+            foreach (Player p in world.Players.Values) LastKnownRotation.Add(p, Direction.None);
 
             World = world;
             Player = player;
             Rotation = rotation;
-            SetOriginNode(position);
+            WorldPosition = GetWorldPosition(world, origin, rotation);
+            WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+            SetOriginNode(origin);
 
             gameObject.layer = World.Layer_Entity;
-            UpdateTransform();
+            SetTransformToOrigin();
 
             // Box collider for blocking vision
             if (BlocksVision)
@@ -128,7 +157,10 @@ namespace BlockmapFramework
 
         #region Update
 
-        public abstract void UpdateEntity();
+        /// <summary>
+        /// Gets called every frame by the world.
+        /// </summary>
+        public virtual void UpdateEntity() { }
 
         /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode and Dimensions of the entity. 
@@ -154,27 +186,30 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Sets VisibleNodes according to vision and line of sight rules.
+        /// Updates all references of what this entity currently sees according to vision and line of sight rules.
         /// </summary>
-        public void UpdateVisibleNodes()
+        public void UpdateVision()
         {
             // Remove entity vision from previously visible nodes
             HashSet<BlockmapNode> previousVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
             foreach (BlockmapNode n in previousVisibleNodes) n.RemoveVisionBy(this);
 
-            // Update what nodes are visible from the current position
-            VisibleNodes = GetVisibleNodes(OriginNode, out List<BlockmapNode> exploredNodes);
+            // Get list of everything that this entity currently sees
+            GetVisibleNodes(OriginNode, out HashSet<BlockmapNode> visibleNodes, out HashSet<BlockmapNode> exploredNodes, out HashSet<Entity> visibleEntities);
+
+            // Update last known position and rotation of all currently visible entities
+            foreach (Entity e in visibleEntities) e.UpdateLastKnownPositionFor(Player);
 
             // Add entitiy vision to newly visible nodes
-            HashSet<BlockmapNode> newVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
-            foreach (BlockmapNode n in newVisibleNodes) n.AddVisionBy(this);
+            VisibleNodes = visibleNodes;
+            foreach (BlockmapNode n in visibleNodes) n.AddVisionBy(this);
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
             foreach (BlockmapNode n in exploredNodes) n.AddExploredBy(Player);
 
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVisibleNodes);
-            changedVisibilityNodes.SymmetricExceptWith(newVisibleNodes);
+            changedVisibilityNodes.SymmetricExceptWith(visibleNodes);
             //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
 
             // Add all adjacent nodes as well because vision goes over node edge
@@ -211,11 +246,17 @@ namespace BlockmapFramework
             {
                 Renderer.enabled = true;
                 Renderer.material.SetColor("_TintColor", Color.clear);
+
+                transform.position = WorldPosition;
+                transform.rotation = WorldRotation;
             }
             else if (IsExploredBy(player))
             {
                 Renderer.enabled = true;
                 Renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
+
+                transform.position = GetWorldPosition(World, LastKnownPosition[player], LastKnownRotation[player]);
+                transform.rotation = HelperFunctions.Get2dRotationByDirection(LastKnownRotation[player]);
             }
             else Renderer.enabled = false;
         }
@@ -251,41 +292,13 @@ namespace BlockmapFramework
             Vector2 basePosition = originNode.WorldCoordinates + new Vector2(dimensions.x * 0.5f, dimensions.z * 0.5f);
 
             // For y, take the lowest node center out of all occupied nodes
-            List<BlockmapNode> occupiedNodes = GetOccupiedNodes(originNode, rotation);
+            HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(originNode, rotation);
             float y;
             if (occupiedNodes == null) y = world.GetWorldHeightAt(new Vector2(originNode.WorldCoordinates.x + 0.5f, originNode.WorldCoordinates.y + 0.5f), originNode);
             else y = GetOccupiedNodes(originNode, rotation).Min(x => world.GetWorldHeightAt(new Vector2(x.WorldCoordinates.x + 0.5f, x.WorldCoordinates.y + 0.5f), x));
 
             // Final position
             return new Vector3(basePosition.x, y, basePosition.y);
-
-            /*
-            if (Dimensions.x == 1 && Dimensions.z == 1) return originNode.GetCenterWorldPosition();
-
-            float relX = (Dimensions.x % 2 == 0) ? 0f : 0.5f;
-            float relY = (Dimensions.z % 2 == 0) ? 0f : 0.5f;
-
-            BlockmapNode targetNode = originNode;
-            for (int i = 0; i < (int)(Dimensions.x / 2); i++)
-            {
-                if (!targetNode.AdjacentTransitions.ContainsKey(Direction.E))
-                    return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
-
-                targetNode = targetNode.AdjacentTransitions[Direction.E].To;
-            }
-            for (int i = 0; i < (int)(Dimensions.z / 2); i++)
-            {
-                if (!targetNode.AdjacentTransitions.ContainsKey(Direction.N))
-                    return new Vector3(originNode.WorldCoordinates.x + (int)(Dimensions.x / 2) + relX, originNode.BaseWorldHeight, originNode.WorldCoordinates.y + (int)(Dimensions.z / 2) + relY);
-
-                targetNode = targetNode.AdjacentTransitions[Direction.N].To;
-            }
-
-            if (targetNode is WaterNode waterNode && waterNode.SurfaceNode.MaxHeight >= waterNode.MaxHeight) targetNode = waterNode.SurfaceNode;
-
-            float y = world.GetWorldHeightAt(new Vector2(targetNode.WorldCoordinates.x + relX, targetNode.WorldCoordinates.y + relY), targetNode);
-            return new Vector3(targetNode.WorldCoordinates.x + relX, y, targetNode.WorldCoordinates.y + relY);
-            */
         }
 
         /// <summary>
@@ -293,7 +306,7 @@ namespace BlockmapFramework
         /// </summary>
         public Vector3 GetWorldCenter() => Renderer.bounds.center;
 
-        public List<BlockmapNode> GetOccupiedNodes()
+        public HashSet<BlockmapNode> GetOccupiedNodes()
         {
             return GetOccupiedNodes(OriginNode, Rotation);
         }
@@ -301,9 +314,9 @@ namespace BlockmapFramework
         /// Returns all nodes that would be occupied by this entity when placed on the given originNode with the given rotation.
         /// <br/> Returns null if entity can't be placed on that null.
         /// </summary>
-        public List<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode, Direction rotation)
+        public HashSet<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode, Direction rotation)
         {
-            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            HashSet<BlockmapNode> nodes = new HashSet<BlockmapNode>();
 
             Vector3Int dimensions = GetDimensions(rotation);
 
@@ -334,13 +347,15 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns all nodes that would be visible by this entity when placed on the given originNode.
         /// <br/> Additionaly returns a list of nodes that are only explored by this node, but not visible.
+        /// <br/> Also returns a list of all entities that are visible by this node.
         /// </summary>
-        private List<BlockmapNode> GetVisibleNodes(BlockmapNode originNode, out List<BlockmapNode> exploredNodes)
+        private void GetVisibleNodes(BlockmapNode originNode, out HashSet<BlockmapNode> visibleNodes, out HashSet<BlockmapNode> exploredNodes, out HashSet<Entity> visibleEntities)
         {
-            List<BlockmapNode> visibleNodes = new List<BlockmapNode>();
-            exploredNodes = new List<BlockmapNode>();
+            visibleNodes = new HashSet<BlockmapNode>(OccupiedNodes);
+            exploredNodes = new HashSet<BlockmapNode>();
+            visibleEntities = new HashSet<Entity>();
 
-            if (VisionRange == 0) return new List<BlockmapNode>(OccupiedNodes);
+            if (VisionRange == 0) return;
 
             for (int x = (int)(-VisionRange - 1); x <= VisionRange; x++)
             {
@@ -351,13 +366,16 @@ namespace BlockmapFramework
                     foreach(BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
                     {
                         VisionType vision = GetNodeVision(targetNode);
-                        if (vision == VisionType.Visible) visibleNodes.Add(targetNode);
+
+                        if (vision == VisionType.Visible)
+                        {
+                            visibleNodes.Add(targetNode);
+                            foreach (Entity e in targetNode.Entities) visibleEntities.Add(e);
+                        }
                         else if (vision == VisionType.FogOfWar) exploredNodes.Add(targetNode);
                     }
                 }
             }
-
-            return visibleNodes;
         }
 
         /// <summary>
@@ -533,17 +551,7 @@ namespace BlockmapFramework
             // Entity is visible when any of the nodes it's standing on is visible
             return OccupiedNodes.Any(x => x.IsVisibleBy(player));
         }
-        /// <summary>
-        /// Returns if the given player has explored this entity.
-        /// </summary>
-        public bool IsExploredBy(Player player)
-        {
-            if (player == Player) return true; // The own entities of a player are always explored
-
-            // Entity is explored when any of the nodes it's standing on is explored
-            return OccupiedNodes.Any(x => x.IsExploredBy(player));
-        }
-
+        public bool IsExploredBy(Player player) => LastKnownPosition[player] != null;
 
         #endregion
 
@@ -553,13 +561,28 @@ namespace BlockmapFramework
         {
             OriginNode = node;
             UpdateOccupiedNodes();
-            UpdateVisibleNodes();
+            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
+        }
+
+        public void SetWorldPosition(Vector3 pos)
+        {
+            WorldPosition = pos;
+        }
+        public void SetWorldRotation(Quaternion quat)
+        {
+            WorldRotation = quat;
+        }
+
+        public void UpdateLastKnownPositionFor(Player p)
+        {
+            LastKnownPosition[p] = OriginNode;
+            LastKnownRotation[p] = Rotation;
         }
 
         /// <summary>
         /// Moves the entity to the current world position based on its origin node and rotates it based on its Rotation.
         /// </summary>
-        public void UpdateTransform()
+        public void SetTransformToOrigin()
         {
             transform.position = GetWorldPosition(World, OriginNode, Rotation);
             transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);

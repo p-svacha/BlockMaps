@@ -23,12 +23,12 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction);
+            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
         }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
         {
             // Get current 2d position of entity
-            Vector2 oldPosition2d = new Vector2(entity.transform.position.x, entity.transform.position.z);
+            Vector2 oldPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
 
             // Get 2d position of next node
             Vector3 nextNodePosition = To.GetCenterWorldPosition();
@@ -48,7 +48,7 @@ namespace BlockmapFramework
 
             // Set new position
             Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
-            entity.transform.position = newPosition;
+            entity.SetWorldPosition(newPosition);
 
             // Return true if character is very close to next node
             if (Vector2.Distance(oldPosition2d, nextNodePosition2d) <= REACH_EPSILON) finishedTransition = true;
