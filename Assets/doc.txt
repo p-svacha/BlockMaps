@@ -3,11 +3,6 @@ Big Features to Add:
 - Improve GitHub page with desc and screenshots
 	> make a release
 
--------- BUILDING UPDATE ------------
-
-- Add door WallType (Passable, but not seethrough)
-- add window (impassable, see-through)
-
 -------- WORLD GEN UPDATE ------------
 
 - add generators
@@ -34,6 +29,10 @@ Big Features to Add:
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
+- doors
+	> open and closeable when standing next to
+	> characters get a new dexterity attribute that defines if they can open/close
+
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
 
@@ -52,6 +51,11 @@ Big Features to Add:
 - Make vision radius of entities based on their dimensions
 
 - Water shader (very small transparency, moving, foam when hitting terrain)
+
+- water tool rework:
+	> make max depth a const 3
+	> make shoreheight based on mouse pointer y coordinate
+
 
 - turn-based movement
 	> entites have Action Points

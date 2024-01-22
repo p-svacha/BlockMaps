@@ -108,12 +108,15 @@ namespace BlockmapFramework
         private bool IsShowingTileBlending;
 
         // Variables for delayed updated
-        private bool DoUpdateVisionNextFrame;
+        private bool DoDelayedVisionUpdate;
         private Vector3 VisionUpdatePosition;
         private int VisionUpdateRangeEast;
         private int VisionUpdateRangeNorth;
 
-        private bool DoUpdateNavmeshPreviewNextFrame;
+        private bool DoDelayedNavmeshUpdate;
+        private List<BlockmapNode> NavmeshUpdateNodes;
+
+        private bool DoDelayedNavmeshPreviewUpdate;
 
         #region Init
 
@@ -233,8 +236,9 @@ namespace BlockmapFramework
 
         private void LateUpdate()
         {
-            if (DoUpdateVisionNextFrame) DoUpdateVisionOfNearbyEntities();
-            if (DoUpdateNavmeshPreviewNextFrame) DoUpdatePathfindingVisualization();
+            if (DoDelayedVisionUpdate) DoUpdateVisionOfNearbyEntities();
+            if (DoDelayedNavmeshUpdate) DoUpdateNavmesh();
+            if (DoDelayedNavmeshPreviewUpdate) DoUpdatePathfindingVisualization();
         }
 
         /// <summary>
@@ -531,23 +535,33 @@ namespace BlockmapFramework
             UpdateVisibility();
         }
 
+        private void UpdateNavmeshDelayed(List<BlockmapNode> nodes)
+        {
+            DoDelayedNavmeshUpdate = true;
+            NavmeshUpdateNodes = nodes;
+        }
         /// <summary>
         /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
         /// <br/> All navmesh calculations need to be done through this function.
         /// </summary>
-        private void UpdateNavmesh(List<BlockmapNode> nodes)
+        private void DoUpdateNavmesh() // never call this directly
         {
+            List<BlockmapNode> nodes = NavmeshUpdateNodes;
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
-            foreach (BlockmapNode node in nodes) node.SetSingleClimbTransitions();
-            UpdatePathfindingVisualization();
+            foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+            UpdatePathfindingVisualizationDelayed();
+
+            DoDelayedNavmeshUpdate = false;
+            NavmeshUpdateNodes = null;
         }
         private void GenerateFullNavmesh()
         {
             List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
             foreach (Chunk chunk in Chunks.Values) nodesToUpdate.AddRange(chunk.GetAllNodes());
-            UpdateNavmesh(nodesToUpdate);
+
+            UpdateNavmeshDelayed(nodesToUpdate);
         }
         public void UpdateNavmeshAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
@@ -564,7 +578,7 @@ namespace BlockmapFramework
                 }
             }
 
-            UpdateNavmesh(nodesToUpdate);
+            UpdateNavmeshDelayed(nodesToUpdate);
         }
 
         public bool CanChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
@@ -577,7 +591,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
         public bool CanBuildSurfacePath(SurfaceNode node)
@@ -642,7 +656,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(newNode.GetCenterWorldPosition());
         }
         public bool CanBuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
         {
@@ -683,7 +697,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(newNode.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(newNode.GetCenterWorldPosition());
         }
 
         public bool CanRemoveAirNode(AirNode node)
@@ -698,7 +712,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
         public void SetSurface(SurfaceNode node, SurfaceId surface)
@@ -748,7 +762,7 @@ namespace BlockmapFramework
             newEntity.UpdateVisiblity(ActiveVisionPlayer);
 
             // Update vision of all other entities near this new entity
-            UpdateVisionOfNearbyEntities(newEntity.GetWorldCenter());
+            UpdateVisionOfNearbyEntitiesDelayed(newEntity.GetWorldCenter());
 
             // Register new entity
             Entities.Add(newEntity);
@@ -780,7 +794,7 @@ namespace BlockmapFramework
             GameObject.Destroy(entity.gameObject);
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
-            UpdateVisionOfNearbyEntities(entity.GetWorldCenter());
+            UpdateVisionOfNearbyEntitiesDelayed(entity.GetWorldCenter());
         }
 
         public WaterBody CanAddWater(SurfaceNode node, int maxDepth) // returns null when cannot
@@ -859,13 +873,13 @@ namespace BlockmapFramework
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
             foreach (BlockmapNode node in newWaterBody.CoveredNodes) affectedChunks.Add(node.Chunk);
 
-            // Update navmesh
-            UpdateNavmeshAround(new Vector2Int(newWaterBody.MinWorldX, newWaterBody.MinWorldY), newWaterBody.MaxWorldX - newWaterBody.MinWorldX, newWaterBody.MaxWorldY - newWaterBody.MinWorldY);
-
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
 
-            // Register water bofy
+            // Update navmesh
+            UpdateNavmeshAround(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1);
+
+            // Register water body
             WaterBodies.Add(newWaterBody.Id, newWaterBody);
         }
         public void RemoveWaterBody(WaterBody water)
@@ -884,7 +898,7 @@ namespace BlockmapFramework
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
             // Update navmesh
-            UpdateNavmeshAround(new Vector2Int(water.MinWorldX, water.MinWorldY), water.MaxWorldX - water.MinWorldX, water.MaxWorldY - water.MinWorldY);
+            UpdateNavmeshAround(new Vector2Int(water.MinX, water.MinY), water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
@@ -918,7 +932,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
         public void RemoveWall(Wall wall)
         {
@@ -927,7 +941,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntities(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
@@ -992,7 +1006,7 @@ namespace BlockmapFramework
             SetActiveVisionPlayer(null);
 
             UpdateGridOverlay();
-            UpdatePathfindingVisualization();
+            UpdatePathfindingVisualizationDelayed();
             UpdateTextureMode();
             UpdateTileBlending();
         }
@@ -1055,9 +1069,9 @@ namespace BlockmapFramework
         /// Recalculates the vision of all entities that have the given position within their vision range.
         /// <br/> Is delayed by one frame so all draw calls can be completed before shooting the vision rays.
         /// </summary>
-        public void UpdateVisionOfNearbyEntities(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
+        public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
         {
-            DoUpdateVisionNextFrame = true;
+            DoDelayedVisionUpdate = true;
             VisionUpdatePosition = position;
             VisionUpdateRangeEast = rangeEast;
             VisionUpdateRangeNorth = rangeNorth;
@@ -1067,7 +1081,7 @@ namespace BlockmapFramework
             foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange + (VisionUpdateRangeEast - 1) + (VisionUpdateRangeNorth - 1)))
                 e.UpdateVisibleNodes();
 
-            DoUpdateVisionNextFrame = false;
+            DoDelayedVisionUpdate = false;
         }
 
         public void ToggleGridOverlay()
@@ -1083,19 +1097,19 @@ namespace BlockmapFramework
         public void TogglePathfindingVisualization()
         {
             IsShowingPathfindingGraph = !IsShowingPathfindingGraph;
-            UpdatePathfindingVisualization();
+            UpdatePathfindingVisualizationDelayed();
         }
 
-        public void UpdatePathfindingVisualization()
+        public void UpdatePathfindingVisualizationDelayed()
         {
-            DoUpdateNavmeshPreviewNextFrame = true;
+            DoDelayedNavmeshPreviewUpdate = true;
         }
-        private void DoUpdatePathfindingVisualization()
+        private void DoUpdatePathfindingVisualization() // never call this directly
         {
             if (IsShowingPathfindingGraph) NavmeshVisualizer.Singleton.Visualize(this);
             else NavmeshVisualizer.Singleton.ClearVisualization();
 
-            DoUpdateNavmeshPreviewNextFrame = false;
+            DoDelayedNavmeshPreviewUpdate = false;
         }
 
         public void ToggleTextureMode()
@@ -1331,6 +1345,11 @@ namespace BlockmapFramework
             return node.BaseWorldHeight; // fallback
 
             throw new System.Exception("World height not found for node of type " + node.Type.ToString());
+        }
+
+        public bool IsOnNode(Vector2 worldPosition2d, BlockmapNode node)
+        {
+            return GetWorldCoordinates(worldPosition2d) == node.WorldCoordinates;
         }
 
         public SurfaceNode GetRandomSurfaceNode()

@@ -81,7 +81,7 @@ namespace WorldEditor
                     // Manually update world stuff in one step instead of after each node to increase performance
                     World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
-                    World.UpdateVisionOfNearbyEntities(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
+                    World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace WorldEditor
                     // Manually update world stuff in one step instead of after each node to increase performance
                     World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
-                    World.UpdateVisionOfNearbyEntities(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
+                    World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }
             }
         }

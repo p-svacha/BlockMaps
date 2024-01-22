@@ -9,11 +9,12 @@ namespace BlockmapFramework
         private const float NODE_SIZE = 0.2f;
         private const float TRANSITION_WIDTH = 0.01f;
         private const float TRANSITION_OFFSET = 0.03f;
-        private const float TRANSITION_Y_OFFSET = 0.2f;
+        public const float TRANSITION_Y_OFFSET = 0.2f;
 
         private Material SurfaceNodeMat;
         private Material AirNodeMat;
         private Material WaterNodeMat;
+        private Material ImpassableNodeMat;
 
         private Material WalkTransitionMat;
         private Material SingleClimbTransitionMat;
@@ -30,9 +31,11 @@ namespace BlockmapFramework
             SurfaceNodeMat = new Material(Shader.Find("Sprites/Default"));
             AirNodeMat = new Material(Shader.Find("Sprites/Default"));
             WaterNodeMat = new Material(Shader.Find("Sprites/Default"));
+            ImpassableNodeMat = new Material(Shader.Find("Sprites/Default"));
             SurfaceNodeMat.color = Color.green;
             AirNodeMat.color = Color.gray;
             WaterNodeMat.color = Color.blue;
+            ImpassableNodeMat.color = Color.red;
 
             WalkTransitionMat = new Material(Shader.Find("Sprites/Default"));
             SingleClimbTransitionMat = new Material(Shader.Find("Sprites/Default"));
@@ -49,11 +52,6 @@ namespace BlockmapFramework
                 GameObject lineObject = new GameObject("transitions");
                 lineObject.transform.SetParent(transform);
                 MeshBuilder transitionMeshBuilder = new MeshBuilder(lineObject);
-                /*
-                MeshFilter meshFilter = lineObject.AddComponent<MeshFilter>();
-                List<Vector3> linesToRender = new List<Vector3>();
-                List<Color> lineColors = new List<Color>();
-                */
 
                 // Generate node mesh (all nodes in 1 mesh per chunk)
                 GameObject nodeObject = new GameObject("nodes");
@@ -63,14 +61,14 @@ namespace BlockmapFramework
                 foreach (BlockmapNode node in chunk.GetAllNodes())
                 {
                     Vector3 nodePos = node.GetCenterWorldPosition() - new Vector3(NODE_SIZE / 2f, NODE_SIZE / 2f, NODE_SIZE / 2f);
-                    int nodeSubmesh = GetNodeSubmesh(nodeMeshBuilder, node);
+                    int nodeSubmesh = nodeMeshBuilder.GetSubmesh(GetNodeSubmeshMaterial(node));
                     nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeDimensions);
 
                     foreach (Transition t in node.Transitions.Values)
                     {
                         if (entity != null && !t.CanPass(entity)) continue;
 
-                        int transitionSubmesh = GetTransitionSubmesh(transitionMeshBuilder, t);
+                        int transitionSubmesh = transitionMeshBuilder.GetSubmesh(GetTransitionSubmeshMaterial(t));
                         float width = t.GetMovementCost(entity) * TRANSITION_WIDTH;
                         List<Vector3> linePath = t.GetPreviewPath();
 
@@ -97,43 +95,29 @@ namespace BlockmapFramework
 
                 // Render line mesh
                 transitionMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
-                /*
-                Mesh mesh = new Mesh();
-                meshFilter.mesh = mesh;
-                Vector3[] vertices = linesToRender.ToArray();
-                int[] indices = new int[vertices.Length];
-                for (int i = 0; i < indices.Length; i++) indices[i] = i;
-                mesh.vertices = vertices;
-                mesh.SetIndices(indices, MeshTopology.Lines, 0);
-                mesh.SetColors(lineColors.ToArray());
-                mesh.RecalculateBounds();
-                MeshRenderer renderer = lineObject.AddComponent<MeshRenderer>();
-                renderer.material = TransitionMat;
-                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.receiveShadows = false;
-                */
 
                 // Node mesh
                 nodeMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
             }
         }
 
-        private int GetNodeSubmesh(MeshBuilder meshBuilder, BlockmapNode node)
+        private Material GetNodeSubmeshMaterial(BlockmapNode node)
         {
+            if (!node.IsPassable()) return ImpassableNodeMat;
             return node.Type switch
             {
-                NodeType.Surface => meshBuilder.GetSubmesh(SurfaceNodeMat),
-                NodeType.Air => meshBuilder.GetSubmesh(AirNodeMat),
-                NodeType.Water => meshBuilder.GetSubmesh(WaterNodeMat),
+                NodeType.Surface => SurfaceNodeMat,
+                NodeType.Air => AirNodeMat,
+                NodeType.Water => WaterNodeMat,
                 _ => throw new System.Exception("node type " + node.Type.ToString() + " not handled.")
             };
         }
 
-        private int GetTransitionSubmesh(MeshBuilder meshBuilder, Transition t)
+        private Material GetTransitionSubmeshMaterial(Transition t)
         {
-            if (t is AdjacentWalkTransition) return meshBuilder.GetSubmesh(WalkTransitionMat);
-            if (t is SingleClimbTransition) return meshBuilder.GetSubmesh(SingleClimbTransitionMat);
-            if (t is DoubleClimbTransition) return meshBuilder.GetSubmesh(DoubleClimbTransitionMat);
+            if (t is AdjacentWalkTransition) return WalkTransitionMat;
+            if (t is SingleClimbTransition) return SingleClimbTransitionMat;
+            if (t is DoubleClimbTransition) return DoubleClimbTransitionMat;
             throw new System.Exception("Transition type " + t.GetType().ToString() + " not handled.");
         }
 

@@ -100,10 +100,15 @@ namespace BlockmapFramework
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
                         Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.MovementSpeed * Time.deltaTime * From.GetSpeedModifier());
 
-                        // Calculate altitude
-                        float y = World.GetWorldHeightAt(newPosition2d, From);
-                        if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
-                        if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
+                        // Calculate y coordinate
+                        float y;
+                        if (World.IsOnNode(newPosition2d, From))
+                        {
+                            y = World.GetWorldHeightAt(newPosition2d, From);
+                            if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
+                            if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
+                        }
+                        else y = World.TILE_HEIGHT * From.GetMinHeight(Direction);
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
@@ -167,8 +172,13 @@ namespace BlockmapFramework
                         Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.MovementSpeed * Time.deltaTime * To.GetSpeedModifier());
 
                         // Calculate altitude
-                        float y = World.GetWorldHeightAt(newPosition2d, To);
-                        if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
+                        float y;
+                        if (World.IsOnNode(newPosition2d, To))
+                        {
+                            y = World.GetWorldHeightAt(newPosition2d, To);
+                            if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
+                        }
+                        else y = World.TILE_HEIGHT * To.GetMinHeight(HelperFunctions.GetOppositeDirection(Direction));
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);

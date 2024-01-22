@@ -15,6 +15,11 @@ namespace BlockmapFramework
         public List<WaterNode> WaterNodes;
         public List<SurfaceNode> CoveredNodes;
 
+        public int MinX { get; private set; }
+        public int MaxX { get; private set; }
+        public int MinY { get; private set; }
+        public int MaxY { get; private set; }
+
         public WaterBody() { }
         public WaterBody(int id, int shoreHeight, List<WaterNode> waterNodes, List<SurfaceNode> coveredNodes)
         {
@@ -26,15 +31,16 @@ namespace BlockmapFramework
             // Init references
             for (int i = 0; i < waterNodes.Count; i++) WaterNodes[i].Init(this, coveredNodes[i]);
             CoveredNodes = WaterNodes.Select(x => x.SurfaceNode).ToList();
-        }
+
+            MinX = WaterNodes.Min(x => x.WorldCoordinates.x);
+            MaxX = WaterNodes.Max(x => x.WorldCoordinates.x);
+            MinY = WaterNodes.Min(x => x.WorldCoordinates.y);
+            MaxY = WaterNodes.Max(x => x.WorldCoordinates.y);
+    }
 
         #region Getters
 
         public float WaterSurfaceWorldHeight => ((ShoreHeight - 1) * World.TILE_HEIGHT) + (World.WATER_HEIGHT * World.TILE_HEIGHT);
-        public int MinWorldX => WaterNodes.Min(x => x.WorldCoordinates.x);
-        public int MaxWorldX => WaterNodes.Max(x => x.WorldCoordinates.x);
-        public int MinWorldY => WaterNodes.Min(x => x.WorldCoordinates.y);
-        public int MaxWorldY => WaterNodes.Max(x => x.WorldCoordinates.y);
 
         #endregion
 

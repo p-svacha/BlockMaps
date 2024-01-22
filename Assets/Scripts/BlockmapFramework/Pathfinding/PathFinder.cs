@@ -120,10 +120,17 @@ namespace BlockmapFramework
             line.endWidth = width;
             line.startColor = color;
             line.endColor = color;
-            line.positionCount = path.Count;
-            for (int i = 0; i < path.Count; i++)
+
+            List<Vector3> transitionPath = new List<Vector3>();
+            for(int i = 0; i < path.Count - 1; i++)
             {
-                line.SetPosition(i, path[i].GetCenterWorldPosition() + new Vector3(0f, World.TILE_HEIGHT * 0.5f, 0f));
+                transitionPath.AddRange(path[i].Transitions[path[i + 1]].GetPreviewPath());
+            }
+
+            line.positionCount = transitionPath.Count;
+            for (int i = 0; i < transitionPath.Count; i++)
+            {
+                line.SetPosition(i, transitionPath[i] + new Vector3(0f, NavmeshVisualizer.TRANSITION_Y_OFFSET, 0f));
             }
         }
 

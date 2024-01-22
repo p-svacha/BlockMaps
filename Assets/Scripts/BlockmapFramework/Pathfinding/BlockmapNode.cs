@@ -237,14 +237,14 @@ namespace BlockmapFramework
             }
         }
 
-        public void SetSingleClimbTransitions()
+        public void SetClimbTransitions()
         {
-            SetSingleClimbTransition(Direction.N);
-            SetSingleClimbTransition(Direction.E);
-            SetSingleClimbTransition(Direction.S);
-            SetSingleClimbTransition(Direction.W);
+            SetClimbTransition(Direction.N);
+            SetClimbTransition(Direction.E);
+            SetClimbTransition(Direction.S);
+            SetClimbTransition(Direction.W);
         }
-        private void SetSingleClimbTransition(Direction dir)
+        private void SetClimbTransition(Direction dir)
         {
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
@@ -293,7 +293,6 @@ namespace BlockmapFramework
             // Costruct climb list
             int startHeight = lowerNode.GetMinHeight(lowerSide);
             int endHeight = higherNode.GetMaxHeight(higherSide);
-            int currentHeight = startHeight;
 
             if(CanConnectUpwardsThroughClimbing(lowerNode, lowerSide, startHeight, higherNode, higherSide, endHeight, out climb))
             {
@@ -695,7 +694,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
         /// </summary>
-        public virtual bool IsPassable(Direction dir, Entity entity = null, bool checkClimbables = true)
+        public bool IsPassable(Direction dir, Entity entity = null, bool checkClimbables = true)
         {
             // Check if node is generally passable
             if (!IsPassable(entity)) return false;
