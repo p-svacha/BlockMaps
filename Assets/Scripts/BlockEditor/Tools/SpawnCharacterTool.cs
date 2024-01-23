@@ -31,10 +31,6 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            // Player Dropdown
-            List<string> playerOptions = World.Players.Values.Select(x => x.Name).ToList();
-            PlayerDropdown.AddOptions(playerOptions);
-
             EntitySelection.Clear();
             // Add variable MovingEntity to selection
             EntitySelection.AddElement(ResourceManager.Singleton.DynamicEntitySprite, Color.white, "Dynamic", () => SelectEntity(0));
@@ -52,6 +48,14 @@ namespace WorldEditor
             }
 
             EntitySelection.SelectFirstElement();
+        }
+
+        public override void OnNewWorld()
+        {
+            // Player Dropdown
+            PlayerDropdown.ClearOptions();
+            List<string> playerOptions = World.Players.Values.Select(x => x.Name).ToList();
+            PlayerDropdown.AddOptions(playerOptions);
         }
 
         public void SelectEntity(int index)

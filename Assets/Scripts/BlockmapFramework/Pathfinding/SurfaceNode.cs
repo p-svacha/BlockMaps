@@ -387,6 +387,16 @@ namespace BlockmapFramework
 
             return newHeights;
         }
+        public void SetHeight(Dictionary<Direction, int> newHeights)
+        {
+            if (IsValid(newHeights))
+            {
+                foreach (Direction dir in HelperFunctions.GetCorners())
+                    Height[dir] = newHeights[dir];
+
+                RecalculateShape();
+            }
+        }
 
         public void BuildPath(Surface surface)
         {

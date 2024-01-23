@@ -8,7 +8,7 @@ using UnityEngine;
 
 public static class JsonUtilities
 {
-    private static string DATA_FILES_PATH = Application.streamingAssetsPath + "/SaveData/";
+    public static string DATA_FILES_PATH = Application.streamingAssetsPath + "/SaveData/";
 
     public static void SaveWorld(WorldData data)
     {

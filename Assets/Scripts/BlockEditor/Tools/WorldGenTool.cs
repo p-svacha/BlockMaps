@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using BlockmapFramework;
+using System.Linq;
+using System.IO;
 
 namespace WorldEditor
 {
@@ -13,13 +15,20 @@ namespace WorldEditor
         public override string Name => "World Generation";
         public override Sprite Icon => ResourceManager.Singleton.WorldGenSprite;
 
+        private List<string> SavedWorlds;
+        private WorldGenerator ActiveGenerator;
+
         [Header("Elements")]
         public TMP_InputField ChunkSizeInput;
         public TMP_InputField NumChunksInput;
+
+        public TMP_Dropdown GeneratorDropdown;
         public Button GenerateButton;
 
-        public TMP_InputField WorldNameInput;
+        public TMP_Dropdown LoadDropdown;
         public Button LoadButton;
+
+        public TMP_InputField SaveNameInput;
         public Button SaveButton;
 
 
@@ -29,10 +38,46 @@ namespace WorldEditor
             GenerateButton.onClick.AddListener(GenerateButton_OnClick);
             LoadButton.onClick.AddListener(LoadButton_OnClick);
             SaveButton.onClick.AddListener(SaveButton_OnClick);
+
+            // Generator dropdown
+            List<string> generators = editor.Generators.Select(x => x.Name).ToList();
+            GeneratorDropdown.AddOptions(generators);
+
+            UpdateLoadWorldDropdown();
         }
 
-        private void GenerateButton_OnClick()
+        public override void UpdateTool()
         {
+            base.UpdateTool();
+
+            if(ActiveGenerator != null)
+            {
+                if(ActiveGenerator.IsGenerating)
+                {
+                    //if(Input.GetKeyDown(KeyCode.Space))
+                        ActiveGenerator.UpdateGeneration();
+                }
+                else // Generation process is finshed
+                {
+                    Editor.SetWorld(ActiveGenerator.GeneratedWorldData);
+                    ActiveGenerator = null;
+                }
+            }
+        }
+
+        private void UpdateLoadWorldDropdown()
+        {
+            LoadDropdown.ClearOptions();
+
+            string[] fullPaths = Directory.GetFiles(JsonUtilities.DATA_FILES_PATH, "*.json");
+            SavedWorlds = fullPaths.Select(x => System.IO.Path.GetFileNameWithoutExtension(x)).ToList();
+            LoadDropdown.AddOptions(SavedWorlds);
+        }
+
+        public void GenerateButton_OnClick()
+        {
+            if (ActiveGenerator != null) return; // Disabled while in generation process
+
             if (ChunkSizeInput.text == "") return;
             int chunkSize = int.Parse(ChunkSizeInput.text);
 
@@ -41,26 +86,35 @@ namespace WorldEditor
 
             if (chunkSize * numChunks > 512) return;
 
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", chunkSize, numChunks);
-            Editor.SetWorld(data, isNew: true);
+            if(World != null) Destroy(World.gameObject);
+            WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
+
+            selectedGenerator.StartGeneration(chunkSize, numChunks);
+            ActiveGenerator = selectedGenerator;
         }
 
         private void SaveButton_OnClick()
         {
-            if (WorldNameInput.text == "") return;
+            if (ActiveGenerator != null) return; // Disabled while in generation process
+            if (SaveNameInput.text == "") return;
 
             WorldData data = Editor.World.Save();
-            data.Name = WorldNameInput.text;
+            data.Name = SaveNameInput.text;
             JsonUtilities.SaveWorld(data);
+
+            UpdateLoadWorldDropdown();
         }
 
         private void LoadButton_OnClick()
         {
-            if (WorldNameInput.text == "") return;
+            if (ActiveGenerator != null) return; // Disabled while in generation process
+            if (SavedWorlds.Count == 0) return;
 
-            WorldData data = JsonUtilities.LoadWorld(WorldNameInput.text);
+            string worldToLoad = SavedWorlds[LoadDropdown.value];
+
+            WorldData data = JsonUtilities.LoadWorld(worldToLoad);
             if (data == null) return;
-            Editor.SetWorld(data, isNew: false);
+            Editor.SetWorld(data);
         }
     }
 }

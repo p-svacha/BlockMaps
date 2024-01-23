@@ -141,8 +141,6 @@ namespace BlockmapFramework
 
             // Init players
             foreach (PlayerData playerData in data.Players) Players.Add(playerData.Id, Player.Load(this, playerData));
-
-            if (!Players.ContainsKey(-1)) Players.Add(GAIA_ID, new Player(this, GAIA_ID, "Gaia", Color.white));
             Gaia = Players[GAIA_ID];
 
             // Init nodes
@@ -1209,6 +1207,12 @@ namespace BlockmapFramework
             return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
 
+        public List<SurfaceNode> GetAllSurfaceNodes()
+        {
+            List<SurfaceNode> nodes = new List<SurfaceNode>();
+            foreach (Chunk c in Chunks.Values) nodes.AddRange(c.GetAllSurfaceNodes());
+            return nodes;
+        }
         public SurfaceNode GetSurfaceNode(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;

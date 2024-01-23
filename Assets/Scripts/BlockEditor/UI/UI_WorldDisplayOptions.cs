@@ -26,10 +26,6 @@ namespace WorldEditor
         {
             Editor = editor;
 
-            List<string> visionOptions = new List<string>() { "Everything" };
-            foreach (Player p in World.Players.Values) visionOptions.Add(p.Name);
-            VisionDropdown.AddOptions(visionOptions);
-
             VisionDropdown.onValueChanged.AddListener(VisionDropdown_OnValueChanged);
             ResetExplorationButton.onClick.AddListener(ResetExplorationButton_OnClick);
             ExploreEverythingButton.onClick.AddListener(ExploreEverythingButton_OnClick);
@@ -40,6 +36,16 @@ namespace WorldEditor
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
 
             UpdateValues();
+        }
+        public void OnNewWorld()
+        {
+            gameObject.SetActive(true);
+
+            // Vision Dropdown
+            VisionDropdown.ClearOptions();
+            List<string> visionOptions = new List<string>() { "Everything" };
+            foreach (Player p in World.Players.Values) visionOptions.Add(p.Name);
+            VisionDropdown.AddOptions(visionOptions);
         }
 
         private void VisionDropdown_OnValueChanged(int value)
@@ -65,6 +71,9 @@ namespace WorldEditor
 
         public void UpdateValues()
         {
+            gameObject.SetActive(World != null);
+            if (World == null) return;
+
             if (World.ActiveVisionPlayer == null) VisionDropdown.value = 0;
             else VisionDropdown.value = VisionDropdown.options.Where(x => x.text == World.ActiveVisionPlayer.Name).Select(x => VisionDropdown.options.IndexOf(x)).First();
 

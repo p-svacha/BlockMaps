@@ -18,6 +18,10 @@ namespace WorldEditor
             Editor = editor;
         }
 
+        /// <summary>
+        /// Gets executed when a new world has been set in the editor.
+        /// </summary>
+        public virtual void OnNewWorld() { }
         public virtual void UpdateTool() { }
         public virtual void HandleLeftClick() { }
         public virtual void HandleLeftDrag() { }

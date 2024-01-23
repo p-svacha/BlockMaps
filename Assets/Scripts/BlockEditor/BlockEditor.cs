@@ -45,10 +45,9 @@ namespace WorldEditor
         // Editor
         private EditorEntityLibrary ContentLibrary;
         float deltaTime; // for fps
+        public List<WorldGenerator> Generators;
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
-        public Player EditorPlayer1 { get; private set; }
-        public Player EditorPlayer2 { get; private set; }
 
         void Start()
         {
@@ -56,9 +55,12 @@ namespace WorldEditor
             ContentLibrary = new EditorEntityLibrary();
             ContentLibrary.Init(this);
 
-            // Init world
-            WorldData data = BaseWorldGenerator.GenerateWorld("TestWorld", 16, 2);
-            SetWorld(data, isNew: true);
+            // Init generators
+            Generators = new List<WorldGenerator>()
+            {
+                new FlatWorldGenerator(),
+                new PerlinWorldGenerator()
+            };
 
             // Init tools
             Tools = new Dictionary<EditorToolId, EditorTool>()
@@ -89,11 +91,14 @@ namespace WorldEditor
 
             SelectTool(EditorToolId.WorldGen);
 
+            // Generate world
+            WorldGenTool.GenerateButton_OnClick();
+
             // Init display options
             DisplayOptions.Init(this);
         }
 
-        public void SetWorld(WorldData data, bool isNew)
+        public void SetWorld(WorldData data)
         {
             // Clear old data
             if (World != null) Destroy(World.gameObject);
@@ -101,23 +106,15 @@ namespace WorldEditor
             // Set new data
             World = World.Load(data, ContentLibrary);
 
-            // Add editor player
-            if (isNew)
-            {
-                EditorPlayer1 = World.AddPlayer("Player 1", Color.blue);
-                EditorPlayer2 = World.AddPlayer("Player 2", Color.red);
-            }
-            else
-            {
-                EditorPlayer1 = World.Players[1];
-                EditorPlayer2 = World.Players[2];
-            }
-
             // Init hooks
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
             World.OnHoveredChunkChanged += OnHoveredChunkChanged;
             World.OnHoveredEntityChanged += OnHoveredEntityChanged;
+
+            // Feedback
+            foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
+            DisplayOptions.OnNewWorld();
         }
 
         #region Controls
@@ -176,21 +173,12 @@ namespace WorldEditor
                 World.ToggleTileBlending();
                 DisplayOptions.UpdateValues();
             }
-
-            // V - Visibility
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                if (World.ActiveVisionPlayer == null) World.SetActiveVisionPlayer(EditorPlayer1);
-                else if (World.ActiveVisionPlayer == EditorPlayer1) World.SetActiveVisionPlayer(EditorPlayer2);
-                else if (World.ActiveVisionPlayer == EditorPlayer2) World.SetActiveVisionPlayer(null);
-                else if (World.ActiveVisionPlayer == World.Gaia) World.SetActiveVisionPlayer(null);
-
-                DisplayOptions.UpdateValues();
-            }
         }
 
         private void UpdateTileInfoText()
         {
+            if (World == null) return;
+
             string text = "";
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
             if (World.HoveredNode != null) text += "\n" + World.HoveredNode.Type.ToString() + " | " + World.HoveredNode.Surface.Name;

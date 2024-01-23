@@ -1,21 +1,18 @@
 Big Features to Add:
 
 - fix: selection marker doesnt disappear on all chunks when having a big area selection
+- fix: sometimes cliffs still get drawn when changin heights on big area
 
 - Improve GitHub page with desc and screenshots
 	> make a release
 
-- add generators
-	=> flat empty grass
-	=> current perlin with some trees and cliffs
-	=> add dropdown for different generators
-
 - check why it takes so long to generate big (16*32) worlds
+	> probably generatefullnavmesh
+	> make profiler tests
 
-- make a dropdown for load world
-- make message "are you sure" when overwriting
-
-- make detailed example map
+- make ctf map generator
+	> simple but a little more in-depth than just perlin
+	> entities and flag spawns
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -26,8 +23,6 @@ Big Features to Add:
 
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
-
-- bug: sometimes cliffs still get drawn when changin heights on big area
 
 - interface IWorld for world with documentation
 - also IEntity and IBlockmapNode
@@ -78,8 +73,6 @@ Big Features to Add:
 	> each has their own attribute how many tiles they block above and below
 
 - Add static entities that include navmesh nodes (like a container or bridge)
-
-- Make profiler performance tests with high speed, high vision entities in editor
 
 - Improve Camera:
 	> Shift to increase speed
