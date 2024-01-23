@@ -93,7 +93,7 @@ namespace BlockmapFramework
         public bool BlocksVision;
 
         // Visual
-        private MeshRenderer Renderer;
+       
 
         /// <summary>
         /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
@@ -101,7 +101,11 @@ namespace BlockmapFramework
         /// </summary>
         public int PlayerColorMaterialIndex = -1;
 
+        // Components
+        private MeshRenderer Renderer;
         private Projector SelectionIndicator;
+        private MeshCollider MeshCollider; // used for hovering and selecting with cursor
+        private BoxCollider VisionCollider; // used for vision checks for entites
 
         #region Initialize
 
@@ -125,18 +129,29 @@ namespace BlockmapFramework
             Rotation = rotation;
             WorldPosition = GetWorldPosition(world, origin, rotation);
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+
+            // Create a mesh collider for selecting the entity
+            gameObject.layer = World.Layer_EntityMesh;
+            MeshCollider = GetComponent<MeshCollider>();
+            if (MeshCollider == null) MeshCollider = gameObject.AddComponent<MeshCollider>();
+
+            // Wrap the entity in a wrapper
+            GameObject entityWrapper = new GameObject(Name + "_wrapper");
+            entityWrapper.transform.SetParent(transform.parent);
+            transform.SetParent(entityWrapper.transform);
+
+            // Create a collider for entity vision on a seperate object
+            GameObject visionColliderObject = new GameObject("visionCollider");
+            visionColliderObject.transform.SetParent(entityWrapper.transform);
+            visionColliderObject.transform.localScale = transform.localScale;
+            visionColliderObject.layer = World.Layer_EntityVisionCollider;
+            VisionCollider = visionColliderObject.AddComponent<BoxCollider>();
+            VisionCollider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
+            VisionCollider.center = new Vector3(0f, VisionCollider.size.y / 2, 0f);
+
+            // Move entity to spawn position
             SetOriginNode(origin);
-
-            gameObject.layer = World.Layer_Entity;
             SetTransformToOrigin();
-
-            // Box collider for blocking vision
-            if (BlocksVision)
-            {
-                BoxCollider collider = gameObject.AddComponent<BoxCollider>();
-                collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
-                collider.center = new Vector3(0f, collider.size.y / 2, 0f);
-            }
 
             // Selection indicator
             SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
@@ -440,9 +455,9 @@ namespace BlockmapFramework
                 }
 
                 // Check if we hit an entity on the node. if so => visible
-                if (hit.transform.gameObject.layer == World.Layer_Entity)
+                if (hit.transform.gameObject.layer == World.Layer_EntityVisionCollider)
                 {
-                    Entity hitEntity = hit.transform.gameObject.GetComponent<Entity>();
+                    Entity hitEntity = hit.transform.parent.GetComponentInChildren<Entity>();
                     if (targetNode.Entities.Contains(hitEntity)) return VisionType.Visible;
                 }
             }
@@ -476,7 +491,7 @@ namespace BlockmapFramework
                     RaycastHit hit = (RaycastHit)entityHit;
                     GameObject objectHit = hit.transform.gameObject;
 
-                    if (objectHit.layer == World.Layer_Entity && objectHit.GetComponent<Entity>() == e)
+                    if (objectHit.layer == World.Layer_EntityVisionCollider && objectHit.transform.parent.GetComponentInChildren<Entity>() == e)
                         markAsExplored = true;
                 }
             }
@@ -508,10 +523,13 @@ namespace BlockmapFramework
                 GameObject objectHit = hit.transform.gameObject;
 
                 // If the thing we hit is ourselves, go to the next thing
-                if (objectHit == gameObject) continue;
+                if (objectHit.transform.parent == transform.parent) continue;
 
-                // If the thing we hit is an entity that doesn't block vision, go to the next thing we hit
-                if (objectHit.layer == World.Layer_Entity && !objectHit.GetComponent<Entity>().BlocksVision) continue;
+                // If the thing we hit is an entity mesh, just continue. For entities we only check their vision collider
+                if (objectHit.layer == World.Layer_EntityMesh) continue;
+
+                // If the thing we hit is an entity vision collider that doesn't block vision, go to the next thing we hit
+                if (objectHit.layer == World.Layer_EntityVisionCollider && !objectHit.transform.parent.GetComponentInChildren<Entity>().BlocksVision) continue;
 
                 // If the thing we hit is a wall that doesn't block vision, go to the next thing we hit
                 if (objectHit.layer == World.Layer_Wall)
@@ -520,7 +538,7 @@ namespace BlockmapFramework
                     if (hitWall != null && !hitWall.Type.BlocksVision) continue;
                 }
 
-                Debug.DrawRay(source, hit.point - source, Color.red, 60f);
+                // Debug.DrawRay(source, hit.point - source, Color.red, 60f);
 
                 // Return it since it's the first thing that we actually see
                 return hit;
@@ -561,6 +579,12 @@ namespace BlockmapFramework
         {
             OriginNode = node;
             UpdateOccupiedNodes();
+
+            // Update position of vision collider
+            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
+            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+
+            // Update vision of nearby entities
             World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
         }
 
@@ -586,7 +610,11 @@ namespace BlockmapFramework
         {
             transform.position = GetWorldPosition(World, OriginNode, Rotation);
             transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+
+            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
+            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
+
 
         /// <summary>
         /// Shows/hides the selection indicator of this entity.

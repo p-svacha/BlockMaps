@@ -69,7 +69,8 @@ namespace BlockmapFramework
 
         // Layers
         public int Layer_SurfaceNode;
-        public int Layer_Entity;
+        public int Layer_EntityMesh;
+        public int Layer_EntityVisionCollider;
         public int Layer_AirNode;
         public int Layer_Water;
         public int Layer_Wall;
@@ -107,17 +108,6 @@ namespace BlockmapFramework
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
 
-        // Variables for delayed updated
-        private bool DoDelayedVisionUpdate;
-        private Vector3 VisionUpdatePosition;
-        private int VisionUpdateRangeEast;
-        private int VisionUpdateRangeNorth;
-
-        private bool DoDelayedNavmeshUpdate;
-        private List<BlockmapNode> NavmeshUpdateNodes;
-
-        private bool DoDelayedNavmeshPreviewUpdate;
-
         #region Init
 
         public void Init(WorldData data, WorldEntityLibrary entityLibrary)
@@ -129,7 +119,8 @@ namespace BlockmapFramework
             WorldData = data;
 
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
-            Layer_Entity = LayerMask.NameToLayer("Entity");
+            Layer_EntityMesh = LayerMask.NameToLayer("EntityMesh");
+            Layer_EntityVisionCollider = LayerMask.NameToLayer("EntityVisionCollider");
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Wall = LayerMask.NameToLayer("Wall");
@@ -229,16 +220,11 @@ namespace BlockmapFramework
             UpdateInitialization();
             if (!IsInitialized) return;
 
+            // Invoke delayed updates from last frame
+
             // Regular updates
             UpdateHoveredObjects();
             foreach (Entity e in Entities) e.UpdateEntity();
-        }
-
-        private void LateUpdate()
-        {
-            if (DoDelayedVisionUpdate) DoUpdateVisionOfNearbyEntities();
-            if (DoDelayedNavmeshUpdate) DoUpdateNavmesh();
-            if (DoDelayedNavmeshPreviewUpdate) DoUpdateNavmeshDisplay();
         }
 
         /// <summary>
@@ -341,12 +327,12 @@ namespace BlockmapFramework
             }
 
             // Ray to detect entity
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_Entity))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_EntityMesh))
             {
-                if (hit.transform.gameObject.layer == Layer_Entity)
+                if (hit.transform.gameObject.layer == Layer_EntityMesh)
                 {
                     Transform objectHit = hit.transform;
-                    newHoveredEntity = hit.transform.GetComponent<Entity>();
+                    newHoveredEntity = hit.transform.parent.GetComponentInChildren<Entity>();
                 }
             }
 
@@ -537,24 +523,21 @@ namespace BlockmapFramework
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes)
         {
-            DoDelayedNavmeshUpdate = true;
-            NavmeshUpdateNodes = nodes;
+            StartCoroutine(DoUpdateNavmesh(nodes));
         }
         /// <summary>
         /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
         /// <br/> All navmesh calculations need to be done through this function.
         /// </summary>
-        private void DoUpdateNavmesh() // never call this directly
+        private IEnumerator DoUpdateNavmesh(List<BlockmapNode> nodes)
         {
-            List<BlockmapNode> nodes = NavmeshUpdateNodes;
+            yield return new WaitForFixedUpdate();
+
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
             UpdateNavmeshDisplayDelayed();
-
-            DoDelayedNavmeshUpdate = false;
-            NavmeshUpdateNodes = null;
         }
         private void GenerateFullNavmesh()
         {
@@ -755,17 +738,14 @@ namespace BlockmapFramework
         }
         public void SpawnEntity(Entity newEntity, BlockmapNode node, Direction rotation, Player player)
         {
+            // Register new entity
+            Entities.Add(newEntity);
+
             // Init
             newEntity.Init(EntityIdCounter++, this, node, rotation, player);
 
             // Update if the new entity is currently visible
             newEntity.UpdateVisiblity(ActiveVisionPlayer);
-
-            // Update vision of all other entities near this new entity
-            UpdateVisionOfNearbyEntitiesDelayed(newEntity.GetWorldCenter());
-
-            // Register new entity
-            Entities.Add(newEntity);
 
             // Update pathfinding navmesh
             UpdateNavmeshAround(node.WorldCoordinates, newEntity.GetDimensions().x, newEntity.GetDimensions().z);
@@ -1071,17 +1051,14 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
         {
-            DoDelayedVisionUpdate = true;
-            VisionUpdatePosition = position;
-            VisionUpdateRangeEast = rangeEast;
-            VisionUpdateRangeNorth = rangeNorth;
+            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth));
         }
-        private void DoUpdateVisionOfNearbyEntities() // never call this directly
+        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
         {
-            foreach (Entity e in Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), VisionUpdatePosition) <= x.VisionRange + (VisionUpdateRangeEast - 1) + (VisionUpdateRangeNorth - 1)))
-                e.UpdateVision();
+            yield return new WaitForFixedUpdate();
 
-            DoDelayedVisionUpdate = false;
+            List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast - 1) + (rangeNorth - 1)).ToList();
+            foreach (Entity e in entitiesToUpdate.Where(x => x != null)) e.UpdateVision();
         }
 
         public void ToggleGridOverlay()
@@ -1111,14 +1088,14 @@ namespace BlockmapFramework
         }
         public void UpdateNavmeshDisplayDelayed()
         {
-            DoDelayedNavmeshPreviewUpdate = true;
+            StartCoroutine(DoUpdateNavmeshDisplay());
         }
-        private void DoUpdateNavmeshDisplay() // never call this directly
+        private IEnumerator DoUpdateNavmeshDisplay()
         {
+            yield return new WaitForFixedUpdate();
+
             if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this);
             else NavmeshVisualizer.Singleton.ClearVisualization();
-
-            DoDelayedNavmeshPreviewUpdate = false;
         }
 
         public void ToggleTextureMode()

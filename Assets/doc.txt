@@ -8,12 +8,16 @@ Big Features to Add:
 	> add system to draw entities on last seen position from that players perspective
 	> button for explore all
 	> box collider on movingEntities should only move in SetOriginNode -> decouple from transform
+	> when LastKnownPosition gets rendered, make
+		> don't move collider to that position
+		> make it visible that it's not the actual entity but rather the last known pos (maybe ghost shader)
+	> remove 'entity.transform' from all transitions
+		> replace with SetPosition (see WalkTransition)
 
+- fix: selection marker doesnt disappear on all chunks when having a big area selection
 
 - Improve GitHub page with desc and screenshots
 	> make a release
-
--------- WORLD GEN UPDATE ------------
 
 - add generators
 	=> flat empty grass
@@ -26,8 +30,6 @@ Big Features to Add:
 - make message "are you sure" when overwriting
 
 - make detailed example map
-
--------- UNSORTED ------------
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
