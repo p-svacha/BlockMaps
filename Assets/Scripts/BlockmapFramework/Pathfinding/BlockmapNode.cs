@@ -663,7 +663,7 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsVisibleBy(Player player)
         {
-            if (World.IsAllVisible) return true; // Everything is visible
+            if (player == null) return true; // Everything is visible
             if (SeenBy.FirstOrDefault(x => x.Player == player) != null) return true; // Node is seen by an entity of player
 
             return false;
@@ -674,7 +674,7 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsExploredBy(Player player)
         {
-            if (World.IsAllVisible) return true; // Everything is visible
+            if (player == null) return true; // Everything is visible
             return ExploredBy.Contains(player);
         }
 

@@ -103,7 +103,7 @@ MonoBehaviour:
   VisionRange: 10
   Dimensions: {x: 1, y: 4, z: 1}
   IsPassable: 1
-  BlocksVision: 1
+  BlocksVision: 0
   PlayerColorMaterialIndex: 0
   MovementSpeed: 2
   CanSwim: 1

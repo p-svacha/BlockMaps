@@ -187,9 +187,6 @@ namespace WorldEditor
 
                 DisplayOptions.UpdateValues();
             }
-
-            // R - Reset explored nodes
-            if (Input.GetKeyDown(KeyCode.R)) World.ResetExploration(EditorPlayer1);
         }
 
         private void UpdateTileInfoText()

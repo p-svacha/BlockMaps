@@ -102,7 +102,6 @@ namespace BlockmapFramework
         public event System.Action<Entity, Entity> OnHoveredEntityChanged;
 
         // Draw modes
-        public bool IsAllVisible => ActiveVisionPlayer == null;
         public bool IsShowingGrid { get; private set; }
         public bool IsShowingNavmesh { get; private set; }
         public bool IsShowingTextures { get; private set; }
@@ -516,6 +515,17 @@ namespace BlockmapFramework
         public void ResetExploration(Player player)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(player);
+            foreach (Entity entity in Entities) entity.ResetLastKnownPositionFor(player);
+
+            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVision();
+
+            UpdateVisibility();
+        }
+        public void ExploreEverything(Player player)
+        {
+            foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(player);
+            foreach (Entity entity in Entities) entity.UpdateLastKnownPositionFor(player);
+
             foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVision();
 
             UpdateVisibility();
@@ -1057,8 +1067,13 @@ namespace BlockmapFramework
         {
             yield return new WaitForFixedUpdate();
 
-            List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast - 1) + (rangeNorth - 1)).ToList();
-            foreach (Entity e in entitiesToUpdate.Where(x => x != null)) e.UpdateVision();
+            List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
+
+            foreach (Entity e in entitiesToUpdate)
+            {
+                e.UpdateVision();
+                e.UpdateVisiblity(ActiveVisionPlayer);
+            }
         }
 
         public void ToggleGridOverlay()

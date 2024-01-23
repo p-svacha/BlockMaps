@@ -16,6 +16,7 @@ namespace WorldEditor
         [Header("Elements")]
         public TMP_Dropdown VisionDropdown;
         public Button ResetExplorationButton;
+        public Button ExploreEverythingButton;
         public Toggle GridToggle;
         public Toggle TextureToggle;
         public Toggle BlendToggle;
@@ -30,11 +31,13 @@ namespace WorldEditor
             VisionDropdown.AddOptions(visionOptions);
 
             VisionDropdown.onValueChanged.AddListener(VisionDropdown_OnValueChanged);
+            ResetExplorationButton.onClick.AddListener(ResetExplorationButton_OnClick);
+            ExploreEverythingButton.onClick.AddListener(ExploreEverythingButton_OnClick);
+
             GridToggle.onValueChanged.AddListener((b) => World.ShowGridOverlay(b));
             TextureToggle.onValueChanged.AddListener((b) => World.ShowTextures(b));
             BlendToggle.onValueChanged.AddListener((b) => World.ShowTileBlending(b));
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
-            ResetExplorationButton.onClick.AddListener(ResetExplorationButton_OnClick);
 
             UpdateValues();
         }
@@ -47,6 +50,11 @@ namespace WorldEditor
         {
             Player p = GetSelectedPlayer();
             if(p != null) World.ResetExploration(p);
+        }
+        private void ExploreEverythingButton_OnClick()
+        {
+            Player p = GetSelectedPlayer();
+            if (p != null) World.ExploreEverything(p);
         }
 
         private Player GetSelectedPlayer()

@@ -12,10 +12,10 @@ TagManager:
   - Water
   - UI
   - Terrain
-  - Entity
+  - EntityMesh
   - Path
   - Wall
-  - Ladder
+  - EntityVisionCollider
   - 
   - 
   - 

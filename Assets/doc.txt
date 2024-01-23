@@ -1,19 +1,5 @@
 Big Features to Add:
 
-- vision on moving entities
-	> decouple entity vision from node vision
-	> add 2nd player in editor
-	> add ui for all display options (inlcuding vision player)
-	> impelement lastseenposition per player and render there
-	> add system to draw entities on last seen position from that players perspective
-	> button for explore all
-	> box collider on movingEntities should only move in SetOriginNode -> decouple from transform
-	> when LastKnownPosition gets rendered, make
-		> don't move collider to that position
-		> make it visible that it's not the actual entity but rather the last known pos (maybe ghost shader)
-	> remove 'entity.transform' from all transitions
-		> replace with SetPosition (see WalkTransition)
-
 - fix: selection marker doesnt disappear on all chunks when having a big area selection
 
 - Improve GitHub page with desc and screenshots

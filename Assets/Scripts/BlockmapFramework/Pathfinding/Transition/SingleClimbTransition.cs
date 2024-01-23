@@ -81,7 +81,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(Direction); // Look straight ahead
+            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
             entity.ClimbPhase = ClimbPhase.PreClimb;
         }
         public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
@@ -91,7 +91,7 @@ namespace BlockmapFramework
                 case ClimbPhase.PreClimb:
                     {
                         // Get current entity position
-                        Vector2 entityPosition2d = new Vector2(entity.transform.position.x, entity.transform.position.z);
+                        Vector2 entityPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
 
                         // Get 2d position of climb start
                         Vector3 startClimbPoint = GetStartClimbPoint(entity, Climb[0], 0);
@@ -112,14 +112,14 @@ namespace BlockmapFramework
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
-                        entity.transform.position = newPosition;
+                        entity.SetWorldPosition(newPosition);
 
                         // Check if we reach next phase
                         if (Vector2.Distance(newPosition2d, startClimbPoint2d) <= REACH_EPSILON)
                         {
                             entity.ClimbPhase = ClimbPhase.InClimb;
                             entity.ClimbIndex = 0;
-                            entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(IsAscend ? base.Direction : HelperFunctions.GetOppositeDirection(base.Direction)); // Look at wall
+                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction))); // Look at wall
                         }
 
                         // Out params
@@ -136,10 +136,10 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetEndClimbPoint(entity, climb, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.transform.position, nextPoint, Time.deltaTime * (IsAscend ? climb.SpeedUp : climb.SpeedDown));
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * (IsAscend ? climb.SpeedUp : climb.SpeedDown));
 
                         // Set new position
-                        entity.transform.position = newPosition;
+                        entity.SetWorldPosition(newPosition);
 
                         // Check if we reach next phase
                         if (Vector3.Distance(newPosition, nextPoint) <= REACH_EPSILON)
@@ -149,7 +149,7 @@ namespace BlockmapFramework
                             if (entity.ClimbIndex == Climb.Count) // Reached the top
                             {
                                 entity.ClimbPhase = ClimbPhase.PostClimb;
-                                entity.transform.rotation = HelperFunctions.Get2dRotationByDirection(base.Direction); // Look straight ahead
+                                entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
                             }
                         }
 
@@ -162,7 +162,7 @@ namespace BlockmapFramework
                 case ClimbPhase.PostClimb:
                     {
                         // Get current entity position
-                        Vector2 entityPosition2d = new Vector2(entity.transform.position.x, entity.transform.position.z);
+                        Vector2 entityPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
 
                         // Get 2d position of next node
                         Vector3 endPosition = To.GetCenterWorldPosition();
@@ -182,7 +182,7 @@ namespace BlockmapFramework
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
-                        entity.transform.position = newPosition;
+                        entity.SetWorldPosition(newPosition);
 
                         // Out params
                         finishedTransition = false;

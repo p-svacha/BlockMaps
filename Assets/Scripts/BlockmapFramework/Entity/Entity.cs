@@ -48,9 +48,9 @@ namespace BlockmapFramework
         public Quaternion WorldRotation { get; private set; }
 
         /// <summary>
-        /// Stores the node on which each player has seen this entity the last time.
+        /// Stores the exact world position at which each player has seen this entity the last time.
         /// </summary>
-        public Dictionary<Player, BlockmapNode> LastKnownPosition { get; private set; }
+        public Dictionary<Player, Vector3?> LastKnownPosition { get; private set; }
         /// <summary>
         /// Stores the direction that each player has seen this entity facing at the last time.
         /// </summary>
@@ -119,7 +119,7 @@ namespace BlockmapFramework
             OccupiedNodes = new HashSet<BlockmapNode>();
             VisibleNodes = new HashSet<BlockmapNode>();
 
-            LastKnownPosition = new Dictionary<Player, BlockmapNode>();
+            LastKnownPosition = new Dictionary<Player, Vector3?>();
             foreach (Player p in world.Players.Values) LastKnownPosition.Add(p, null);
             LastKnownRotation = new Dictionary<Player, Direction>();
             foreach (Player p in world.Players.Values) LastKnownRotation.Add(p, Direction.None);
@@ -264,14 +264,18 @@ namespace BlockmapFramework
 
                 transform.position = WorldPosition;
                 transform.rotation = WorldRotation;
+
+                foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0);
             }
             else if (IsExploredBy(player))
             {
                 Renderer.enabled = true;
                 Renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
 
-                transform.position = GetWorldPosition(World, LastKnownPosition[player], LastKnownRotation[player]);
+                transform.position = LastKnownPosition[player].Value;
                 transform.rotation = HelperFunctions.Get2dRotationByDirection(LastKnownRotation[player]);
+
+                foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0.5f);
             }
             else Renderer.enabled = false;
         }
@@ -564,19 +568,32 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsVisibleBy(Player player)
         {
+            if (player == null) return true; // Everything is visible
             if (player == Player) return true; // The own entities of a player are always visible
 
             // Entity is visible when any of the nodes it's standing on is visible
             return OccupiedNodes.Any(x => x.IsVisibleBy(player));
         }
+
+        /// <summary>
+        /// Returns if the given player has seen this entity before.
+        /// </summary>
         public bool IsExploredBy(Player player) => LastKnownPosition[player] != null;
 
         #endregion
 
         #region Setters
 
+        /// <summary>
+        /// Changes the origin node and updates all relevant information with it.
+        /// </summary>
         protected void SetOriginNode(BlockmapNode node)
         {
+            // Before setting new origin, update last known position for all players seeing this entity
+            foreach (Player p in World.Players.Values)
+                if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
+
+            // Set new origin
             OriginNode = node;
             UpdateOccupiedNodes();
 
@@ -588,6 +605,10 @@ namespace BlockmapFramework
             World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
         }
 
+        /// <summary>
+        /// Sets the exact position the entity's transform is currently at.
+        /// <br/> Only gets rendered there if actually visible.
+        /// </summary>
         public void SetWorldPosition(Vector3 pos)
         {
             WorldPosition = pos;
@@ -599,8 +620,13 @@ namespace BlockmapFramework
 
         public void UpdateLastKnownPositionFor(Player p)
         {
-            LastKnownPosition[p] = OriginNode;
+            LastKnownPosition[p] = WorldPosition;
             LastKnownRotation[p] = Rotation;
+        }
+        public void ResetLastKnownPositionFor(Player p)
+        {
+            LastKnownPosition[p] = null;
+            LastKnownRotation[p] = Direction.None;
         }
 
         /// <summary>
