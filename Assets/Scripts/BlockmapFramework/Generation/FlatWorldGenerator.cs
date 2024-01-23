@@ -9,10 +9,9 @@ namespace BlockmapFramework
         public override string Name => "Flat";
 
         protected override void OnGenerationStart() { }
-        public override void UpdateGeneration()
+        protected override void OnUpdate()
         {
-            WorldData data = CreateEmptyWorldData();
-            FinishGeneration(data);
+            FinishGeneration();
         }
     }
 }

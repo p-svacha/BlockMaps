@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -12,7 +13,7 @@ namespace BlockmapFramework
         protected int NumChunks;
         protected int WorldSize;
 
-        public WorldData GeneratedWorldData { get; private set; }
+        public World GeneratedWorld { get; private set; }
         public bool IsGenerating { get; private set; }
 
         public void StartGeneration(int chunkSize, int numChunks)
@@ -24,15 +25,22 @@ namespace BlockmapFramework
             NumChunks = numChunks;
             WorldSize = chunkSize * numChunks;
 
+            // Create empty world to start with
+            WorldData data = CreateEmptyWorldData();
+            GeneratedWorld = World.Load(data, null);
+
             IsGenerating = true;
 
             OnGenerationStart();
         }
         protected abstract void OnGenerationStart();
-        public abstract void UpdateGeneration();
-        protected void FinishGeneration(WorldData data)
+        public void UpdateGeneration()
         {
-            GeneratedWorldData = data;
+            if (GeneratedWorld != null && GeneratedWorld.IsInitialized) OnUpdate();
+        }
+        protected abstract void OnUpdate();
+        protected void FinishGeneration()
+        {
             IsGenerating = false;
         }
 

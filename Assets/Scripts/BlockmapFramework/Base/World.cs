@@ -37,7 +37,7 @@ namespace BlockmapFramework
 
         public string Name { get; private set; }
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
-        private bool IsInitialized;
+        public bool IsInitialized { get; private set; }
         public int ChunkSize { get; private set; }
         public WorldEntityLibrary ContentLibrary { get; private set; }
 
@@ -175,16 +175,12 @@ namespace BlockmapFramework
             // Frame 1 after initilaization: Do stuff that requires drawn node meshes.
             if (InitializeStep == 1)
             {
-                // Generate initial navmesh so we have node connections that we need for entity node occupation
-                GenerateFullNavmesh();
-
                 // Init entities
                 foreach (EntityData entityData in WorldData.Entities)
                 {
                     Entity e = Entity.Load(this, entityData);
                     if(e != null) Entities.Add(e); // null-check because some special entities are already registered in Entity.Load (i.e. ladders)
                 }
-                foreach (Entity e in Entities) e.SetTransformToOrigin();
 
                 InitializeStep++;
                 return;
@@ -203,7 +199,8 @@ namespace BlockmapFramework
             if (InitializeStep == 3)
             {
                 GenerateFullNavmesh();
-                IsInitialized = true;
+                InitializeStep++;
+                return;
             }
         }
 
@@ -529,22 +526,30 @@ namespace BlockmapFramework
             UpdateVisibility();
         }
 
-        private void UpdateNavmeshDelayed(List<BlockmapNode> nodes)
+        private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
-            StartCoroutine(DoUpdateNavmesh(nodes));
+            StartCoroutine(DoUpdateNavmesh(nodes, isInitialization));
         }
         /// <summary>
         /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
         /// <br/> All navmesh calculations need to be done through this function.
         /// </summary>
-        private IEnumerator DoUpdateNavmesh(List<BlockmapNode> nodes)
+        private IEnumerator DoUpdateNavmesh(List<BlockmapNode> nodes, bool isInitialization)
         {
             yield return new WaitForFixedUpdate();
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
 
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+            if(isInitialization) IsInitialized = true;
+
+            sw.Stop();
+            Debug.Log("Updating navmesh took " + sw.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+
             UpdateNavmeshDisplayDelayed();
         }
         private void GenerateFullNavmesh()
@@ -552,7 +557,7 @@ namespace BlockmapFramework
             List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
             foreach (Chunk chunk in Chunks.Values) nodesToUpdate.AddRange(chunk.GetAllNodes());
 
-            UpdateNavmeshDelayed(nodesToUpdate);
+            UpdateNavmeshDelayed(nodesToUpdate, isInitialization: true);
         }
         public void UpdateNavmeshAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
@@ -716,10 +721,10 @@ namespace BlockmapFramework
 
         public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node, Direction rotation)
         {
-            HashSet<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(node, rotation); // get nodes that would be occupied when placing the entity on the given node
+            HashSet<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
 
             if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
-
+            
             Vector3 placePos = entity.GetWorldPosition(this, node, rotation);
             int minHeight = GetNodeHeight(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
             int maxHeight = minHeight + entity.Height; // max y coordinate that this entity will occupy on all occupied tiles

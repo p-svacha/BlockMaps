@@ -100,11 +100,16 @@ namespace WorldEditor
 
         public void SetWorld(WorldData data)
         {
+            // Set new data
+            SetWorld(World.Load(data, ContentLibrary));
+        }
+        public void SetWorld(World world)
+        {
             // Clear old data
             if (World != null) Destroy(World.gameObject);
 
-            // Set new data
-            World = World.Load(data, ContentLibrary);
+            // Assign new data
+            World = world;
 
             // Init hooks
             World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;

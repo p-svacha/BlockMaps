@@ -8,7 +8,6 @@ namespace BlockmapFramework
     {
         public override string Name => "Simple Perlin";
 
-        private World World;
         private int[,] HeightMap;
         private int GenerationStep;
 
@@ -16,13 +15,10 @@ namespace BlockmapFramework
         {
             GenerationStep = 0;
         }
-        public override void UpdateGeneration()
+        protected override void OnUpdate()
         {
-            if (GenerationStep == 0) // Step 1: Create empty world and heightmap data
+            if (GenerationStep == 0) // Step 1: Create heightmap data
             {
-                WorldData data = CreateEmptyWorldData();
-                World = World.Load(data, null);
-
                 // Create height map
                 Vector2Int perlinOffset = new Vector2Int(Random.Range(0, 20000), Random.Range(0, 20000));
                 float perlinScale = 0.1f;
@@ -41,7 +37,7 @@ namespace BlockmapFramework
 
             else if (GenerationStep == 1) // Adjust height of all nodes
             {
-                foreach (SurfaceNode n in World.GetAllSurfaceNodes())
+                foreach (SurfaceNode n in GeneratedWorld.GetAllSurfaceNodes())
                 {
                     Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -53,27 +49,24 @@ namespace BlockmapFramework
                     n.SetHeight(nodeHeights);
                 }
 
-                World.DrawNodes();
+                GeneratedWorld.DrawNodes();
                 GenerationStep++;
             }
 
             else if (GenerationStep == 2) // Surface
             {
-                foreach (SurfaceNode n in World.GetAllSurfaceNodes())
+                foreach (SurfaceNode n in GeneratedWorld.GetAllSurfaceNodes())
                 {
                     if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceId.Sand);
                 }
 
-                World.DrawNodes();
+                GeneratedWorld.DrawNodes();
                 GenerationStep++;
             }
 
-            else if(GenerationStep == 3) // Get world data and end
+            else if(GenerationStep == 3) // Done
             {
-                GameObject.Destroy(World.gameObject);
-
-                WorldData data = World.Save();
-                FinishGeneration(data);
+                FinishGeneration();
             }
         }
     }

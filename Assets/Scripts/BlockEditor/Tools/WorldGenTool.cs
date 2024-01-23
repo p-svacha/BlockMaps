@@ -54,12 +54,12 @@ namespace WorldEditor
             {
                 if(ActiveGenerator.IsGenerating)
                 {
-                    //if(Input.GetKeyDown(KeyCode.Space))
+                    // if(Input.GetKeyDown(KeyCode.Space))
                         ActiveGenerator.UpdateGeneration();
                 }
                 else // Generation process is finshed
                 {
-                    Editor.SetWorld(ActiveGenerator.GeneratedWorldData);
+                    Editor.SetWorld(ActiveGenerator.GeneratedWorld);
                     ActiveGenerator = null;
                 }
             }

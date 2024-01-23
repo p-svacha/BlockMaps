@@ -311,10 +311,10 @@ namespace BlockmapFramework
             Vector2 basePosition = originNode.WorldCoordinates + new Vector2(dimensions.x * 0.5f, dimensions.z * 0.5f);
 
             // For y, take the lowest node center out of all occupied nodes
-            HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(originNode, rotation);
+            HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(world, originNode, rotation);
             float y;
             if (occupiedNodes == null) y = world.GetWorldHeightAt(new Vector2(originNode.WorldCoordinates.x + 0.5f, originNode.WorldCoordinates.y + 0.5f), originNode);
-            else y = GetOccupiedNodes(originNode, rotation).Min(x => world.GetWorldHeightAt(new Vector2(x.WorldCoordinates.x + 0.5f, x.WorldCoordinates.y + 0.5f), x));
+            else y = GetOccupiedNodes(world, originNode, rotation).Min(x => world.GetWorldHeightAt(new Vector2(x.WorldCoordinates.x + 0.5f, x.WorldCoordinates.y + 0.5f), x));
 
             // Final position
             return new Vector3(basePosition.x, y, basePosition.y);
@@ -327,39 +327,66 @@ namespace BlockmapFramework
 
         public HashSet<BlockmapNode> GetOccupiedNodes()
         {
-            return GetOccupiedNodes(OriginNode, Rotation);
+            return GetOccupiedNodes(World, OriginNode, Rotation);
         }
         /// <summary>
         /// Returns all nodes that would be occupied by this entity when placed on the given originNode with the given rotation.
         /// <br/> Returns null if entity can't be placed on that null.
         /// </summary>
-        public HashSet<BlockmapNode> GetOccupiedNodes(BlockmapNode originNode, Direction rotation)
+        public HashSet<BlockmapNode> GetOccupiedNodes(World world, BlockmapNode originNode, Direction rotation)
         {
-            HashSet<BlockmapNode> nodes = new HashSet<BlockmapNode>();
+            HashSet<BlockmapNode> nodes = new HashSet<BlockmapNode>() { originNode };
 
             Vector3Int dimensions = GetDimensions(rotation);
 
-            for (int x = 0; x < dimensions.x; x++)
+            // For each x, try to connect all the way up and see if everything is connected
+            BlockmapNode yBaseNode = originNode;
+            BlockmapNode cornerNodeNW = null;
+
+            for(int x = 0; x < dimensions.x; x++)
             {
-                for (int z = 0; z < dimensions.z; z++)
+                // Try going east
+                if (x > 0)
                 {
-                    BlockmapNode targetNode = originNode;
+                    Vector2Int eastCoordinates = world.GetWorldCoordinatesInDirection(yBaseNode.WorldCoordinates, Direction.E);
+                    List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
+                    BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yBaseNode, x, Direction.E));
+                    if (eastNode == null) return null;
 
-                    for (int i = 0; i < x; i++)
-                    {
-                        if (!targetNode.WalkTransitions.ContainsKey(Direction.E)) return null;
-                        targetNode = targetNode.WalkTransitions[Direction.E].To;
-                    }
+                    yBaseNode = eastNode;
+                    nodes.Add(yBaseNode);
+                }
 
-                    for (int i = 0; i < z; i++)
-                    {
-                        if (!targetNode.WalkTransitions.ContainsKey(Direction.N)) return null;
-                        targetNode = targetNode.WalkTransitions[Direction.N].To;
-                    }
+                BlockmapNode yNode = yBaseNode;
+                for(int y = 0; y < dimensions.z - 1; y++)
+                {
+                    // Try going north
+                    Vector2Int northCoordinates = world.GetWorldCoordinatesInDirection(yNode.WorldCoordinates, Direction.N);
+                    List<BlockmapNode> candidateNodesNorth = world.GetNodes(northCoordinates);
+                    BlockmapNode northNode = candidateNodesNorth.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yNode, x, Direction.N));
+                    if (northNode == null) return null;
 
-                    nodes.Add(targetNode);
+                    yNode = northNode;
+                    nodes.Add(yNode);
+                    if (x == 0 && y == dimensions.z - 2) cornerNodeNW = yNode;
                 }
             }
+
+            // Now we have all nodes of the footprint
+            // Also check if NW -> NE is fully connected to make sure its valid
+            if (dimensions.z > 1)
+            {
+                for (int i = 0; i < dimensions.x - 1; i++)
+                {
+                    Vector2Int eastCoordinates = world.GetWorldCoordinatesInDirection(cornerNodeNW.WorldCoordinates, Direction.E);
+                    List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
+                    BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(cornerNodeNW, x, Direction.E));
+
+                    if (eastNode == null) return null;
+                    else cornerNodeNW = eastNode;
+                }
+            }
+            
             return nodes;
         }
 

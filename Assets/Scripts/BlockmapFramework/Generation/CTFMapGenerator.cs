@@ -12,7 +12,7 @@ namespace BlockmapFramework
         {
             throw new System.NotImplementedException();
         }
-        public override void UpdateGeneration()
+        protected override void OnUpdate()
         {
             throw new System.NotImplementedException();
         }
