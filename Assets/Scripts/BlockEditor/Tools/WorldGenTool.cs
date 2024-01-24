@@ -52,7 +52,7 @@ namespace WorldEditor
 
             if(ActiveGenerator != null)
             {
-                if(ActiveGenerator.IsGenerating)
+                if(ActiveGenerator.GenerationPhase != GenerationPhase.Done)
                 {
                     // if(Input.GetKeyDown(KeyCode.Space))
                         ActiveGenerator.UpdateGeneration();

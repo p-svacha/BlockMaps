@@ -661,7 +661,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &70055723
 MonoBehaviour:
@@ -1753,7 +1753,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &239097890
 GameObject:
@@ -1821,7 +1821,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &296450344
 GameObject:
@@ -3596,7 +3596,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1001 &788375963
 PrefabInstance:
@@ -4382,7 +4382,7 @@ RectTransform:
   - {fileID: 1523611164}
   - {fileID: 1983093655}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4546,12 +4546,7 @@ MonoBehaviour:
     Press T to toggle textures.
 
     Press
-    B to toggle surface blending.
-
-    Press V to toggle visibility.
-
-    Press R
-    to reset explored tiles.'
+    B to toggle surface blending.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5594,63 +5589,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!1001 &1548259044
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 225.69568
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.000048738762
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 92.04406
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7456156681528190788, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7796371230492524030, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
-      propertyPath: m_Name
-      value: dog
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}
 --- !u!1001 &1587422430
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5661,6 +5599,22 @@ PrefabInstance:
     - target: {fileID: 1417727444808676471, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_PreferredWidth
       value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_ContentType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_KeyboardType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1860422308313849717, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
+      propertyPath: m_CharacterValidation
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2981892852145654549, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_Pivot.x
@@ -6472,7 +6426,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1859474533
 MonoBehaviour:

@@ -70,17 +70,15 @@ namespace WorldEditor
                     int minHeight = nodesInArea.Min(x => x.BaseHeight);
 
                     List<SurfaceNode> affectedNodes = nodesInArea.Where(x => x.BaseHeight == minHeight && x.CanChangeHeight(Direction.None, isIncrease: true)).ToList();
-                    HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
 
                     foreach (SurfaceNode node in affectedNodes)
                     {
                         node.ChangeHeight(Direction.None, isIncrease: true);
-                        affectedChunks.Add(node.Chunk);
                     }
 
                     // Manually update world stuff in one step instead of after each node to increase performance
                     World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
-                    foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
+                    World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }
             }
@@ -104,17 +102,15 @@ namespace WorldEditor
                     int maxHeight = nodesInArea.Max(x => x.MaxHeight);
 
                     List<SurfaceNode> affectedNodes = nodesInArea.Where(x => x.MaxHeight == maxHeight && x.CanChangeHeight(Direction.None, isIncrease: false)).ToList();
-                    HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
 
                     foreach (SurfaceNode node in affectedNodes)
                     {
                         node.ChangeHeight(Direction.None, isIncrease: false);
-                        affectedChunks.Add(node.Chunk);
                     }
 
                     // Manually update world stuff in one step instead of after each node to increase performance
                     World.UpdateNavmeshAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
-                    foreach (Chunk c in affectedChunks) World.RedrawChunk(c);
+                    World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
                     World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredSurfaceNode.GetCenterWorldPosition(), AreaSize, AreaSize);
                 }
             }
@@ -130,7 +126,10 @@ namespace WorldEditor
 
         public override void OnDeselect()
         {
-            if (World.HoveredSurfaceNode != null) World.HoveredSurfaceNode.ShowOverlay(false);
+            // Hide overlay from all chunks around previously hovered node
+            if (World.HoveredSurfaceNode != null)
+                foreach (Chunk chunk in World.GetChunks(World.HoveredSurfaceNode.Chunk.Coordinates, 2, 2))
+                    chunk.SurfaceMesh.ShowOverlay(false);
         }
     }
 }

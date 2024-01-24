@@ -109,12 +109,15 @@ namespace BlockmapFramework
 
         #region Init
 
-        public void Init(WorldData data, WorldEntityLibrary entityLibrary)
+        /// <summary>
+        /// Initializes the world by only drawing the nodes and creating the players from the given WorldData.
+        /// <br/> Everything else in the data is discarded. Navmesh will not be generated either.
+        /// </summary>
+        public void SimpleInit(WorldData data)
         {
             // Init general
             Name = data.Name;
             ChunkSize = data.ChunkSize;
-            ContentLibrary = entityLibrary;
             WorldData = data;
 
             Layer_SurfaceNode = LayerMask.NameToLayer("Terrain");
@@ -150,8 +153,24 @@ namespace BlockmapFramework
                 Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
             }
 
+            // Draw node meshes because we need to shoot rays to generate navmesh
+            DrawNodes();
+
+            IsInitialized = true;
+        }
+
+        /// <summary>
+        /// Fully initializes the given world data including all objects and generating the full navmesh.
+        /// <br/> Will take a while until finished, wait for IsInitialized = true;
+        /// </summary>
+        public void FullInit(WorldData data, WorldEntityLibrary entityLibrary)
+        {
+            SimpleInit(data);
+
+            ContentLibrary = entityLibrary;
+
             // Init walls
-            foreach(WallData wallData in data.Walls)
+            foreach (WallData wallData in data.Walls)
             {
                 Wall wall = Wall.Load(this, wallData);
             }
@@ -163,9 +182,7 @@ namespace BlockmapFramework
                 WaterBodies.Add(waterData.Id, water);
             }
 
-            // Draw node meshes because we need to shoot rays to generate navmesh
-            DrawNodes();
-
+            IsInitialized = false;
             InitializeStep = 1;
         }
         private void UpdateInitialization()
@@ -552,7 +569,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshDisplayDelayed();
         }
-        private void GenerateFullNavmesh()
+        public void GenerateFullNavmesh()
         {
             List<BlockmapNode> nodesToUpdate = new List<BlockmapNode>();
             foreach (Chunk chunk in Chunks.Values) nodesToUpdate.AddRange(chunk.GetAllNodes());
@@ -1011,9 +1028,9 @@ namespace BlockmapFramework
         {
             List<Chunk> affectedChunks = new List<Chunk>();
 
-            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeEast ; y++)
+            for (int y = worldCoordinates.y - 1; y <= worldCoordinates.y + rangeNorth; y++)
             {
-                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeNorth; x++)
+                for (int x = worldCoordinates.x - 1; x <= worldCoordinates.x + rangeEast; x++)
                 {
                     Chunk chunk = GetChunk((new Vector2Int(x, y)));
                     if (chunk != null && !affectedChunks.Contains(chunk)) affectedChunks.Add(chunk);
@@ -1448,11 +1465,25 @@ namespace BlockmapFramework
 
         #region Save / Load
 
+        /// <summary>
+        /// Loads all data and fully initializes a new world from the data. Generates a full navmesh.
+        /// <br/> Wait for IsInitialized = true before doing stuff.
+        /// </summary>
         public static World Load(WorldData data, WorldEntityLibrary entityLibrary)
         {
             GameObject worldObject = new GameObject(data.Name);
             World world = worldObject.AddComponent<World>();
-            world.Init(data, entityLibrary);
+            world.FullInit(data, entityLibrary);
+            return world;
+        }
+        /// <summary>
+        /// Only loads and draws nodes and players. Does not generate navmesh.
+        /// </summary>
+        public static World SimpleLoad(WorldData data)
+        {
+            GameObject worldObject = new GameObject(data.Name);
+            World world = worldObject.AddComponent<World>();
+            world.SimpleInit(data);
             return world;
         }
 

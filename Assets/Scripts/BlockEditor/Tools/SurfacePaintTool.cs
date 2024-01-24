@@ -58,7 +58,7 @@ namespace WorldEditor
                 List<SurfaceNode> nodes = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize).Where(x => x.Surface.Id != SelectedSurface).ToList();
                 foreach (SurfaceNode node in nodes) node.SetSurface(SelectedSurface);
 
-                // Manuall redraw world in one step
+                // Manually redraw world in one step
                 World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
 
                 // Update overlay
@@ -79,7 +79,10 @@ namespace WorldEditor
 
         public override void OnDeselect()
         {
-            if (World.HoveredSurfaceNode != null) World.HoveredSurfaceNode.ShowOverlay(false);
+            // Hide overlay from all chunks around previously hovered node
+            if (World.HoveredSurfaceNode != null)
+                foreach (Chunk chunk in World.GetChunks(World.HoveredSurfaceNode.Chunk.Coordinates, 2, 2))
+                    chunk.SurfaceMesh.ShowOverlay(false);
         }
     }
 }

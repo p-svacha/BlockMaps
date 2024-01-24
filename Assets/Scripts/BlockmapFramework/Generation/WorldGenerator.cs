@@ -14,7 +14,7 @@ namespace BlockmapFramework
         protected int WorldSize;
 
         public World GeneratedWorld { get; private set; }
-        public bool IsGenerating { get; private set; }
+        public GenerationPhase GenerationPhase { get; private set; }
 
         public void StartGeneration(int chunkSize, int numChunks)
         {
@@ -27,21 +27,25 @@ namespace BlockmapFramework
 
             // Create empty world to start with
             WorldData data = CreateEmptyWorldData();
-            GeneratedWorld = World.Load(data, null);
+            GeneratedWorld = World.SimpleLoad(data);
 
-            IsGenerating = true;
-
+            GenerationPhase = GenerationPhase.Generating;
             OnGenerationStart();
         }
         protected abstract void OnGenerationStart();
         public void UpdateGeneration()
         {
-            if (GeneratedWorld != null && GeneratedWorld.IsInitialized) OnUpdate();
+            if (GenerationPhase == GenerationPhase.Generating) OnUpdate();
+            else if (GenerationPhase == GenerationPhase.Initializing)
+            {
+                if (GeneratedWorld.IsInitialized) GenerationPhase = GenerationPhase.Done;
+            }
         }
         protected abstract void OnUpdate();
         protected void FinishGeneration()
         {
-            IsGenerating = false;
+            GenerationPhase = GenerationPhase.Initializing;
+            GeneratedWorld.GenerateFullNavmesh();
         }
 
         protected WorldData CreateEmptyWorldData()

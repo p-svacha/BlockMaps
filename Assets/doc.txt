@@ -1,12 +1,5 @@
 Big Features to Add:
 
-- fix: selection marker doesnt disappear on all chunks when having a big area selection
-- fix: sometimes cliffs still get drawn when changin heights on big area (make max area and increase at 0/0 on flat map to reproduce))
-
-- World generator:
-	> GenerateFullNavmesh when generator is done and not when world is loaded.
-	> Still at load time when loading from file.
-
 - Improve GitHub page with desc and screenshots
 	> make a release
 
