@@ -14,7 +14,7 @@ namespace BlockmapFramework
         protected int WorldSize;
 
         public World GeneratedWorld { get; private set; }
-        public GenerationPhase GenerationPhase { get; private set; }
+        public GenerationPhase GenerationPhase { get; set; }
 
         public void StartGeneration(int chunkSize, int numChunks)
         {
@@ -45,6 +45,7 @@ namespace BlockmapFramework
         protected void FinishGeneration()
         {
             GenerationPhase = GenerationPhase.Initializing;
+            foreach (Entity e in GeneratedWorld.Entities) e.UpdateVision();
             GeneratedWorld.GenerateFullNavmesh();
         }
 
@@ -106,5 +107,34 @@ namespace BlockmapFramework
             data.ColorB = color.b;
             return data;
         }
+
+        #region Helper Functions
+
+        /// <summary>
+        /// Spawns an entity on the surface near the given point.
+        /// </summary>
+        protected bool SpawnEntityAround(Entity prefab, Player player, Vector2Int pos, float standard_deviation, Direction rotation)
+        {
+            Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
+            while(!GeneratedWorld.IsInWorld(targetPos)) targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
+            BlockmapNode targetNode = GeneratedWorld.GetSurfaceNode(targetPos);
+
+            if(GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
+            {
+                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player);
+                return true;
+            }
+
+            return false;
+        }
+
+        protected Entity GetEntityPrefab(string id)
+        {
+            string fullPath = "Entities/Prefabs/" + id;
+            Entity prefab = Resources.Load<Entity>(fullPath);
+            return prefab;
+        }
+
+        #endregion
     }
 }

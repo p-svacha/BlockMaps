@@ -736,15 +736,15 @@ namespace BlockmapFramework
             RedrawNodesAround(node.WorldCoordinates);
         }
 
-        public bool CanPlaceEntity(StaticEntity entity, BlockmapNode node, Direction rotation)
+        public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation)
         {
-            HashSet<BlockmapNode> occupiedNodes = entity.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
+            HashSet<BlockmapNode> occupiedNodes = entityPrefab.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
 
             if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
             
-            Vector3 placePos = entity.GetWorldPosition(this, node, rotation);
+            Vector3 placePos = entityPrefab.GetWorldPosition(this, node, rotation);
             int minHeight = GetNodeHeight(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
-            int maxHeight = minHeight + entity.Height; // max y coordinate that this entity will occupy on all occupied tiles
+            int maxHeight = minHeight + entityPrefab.Height; // max y coordinate that this entity will occupy on all occupied tiles
 
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
@@ -761,24 +761,27 @@ namespace BlockmapFramework
                 if (occupiedNode.Entities.Count > 0) return false;
 
                 // Check if flat
-                if (entity.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
+                if (entityPrefab.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
             }
 
             return true;
         }
-        public void SpawnEntity(Entity newEntity, BlockmapNode node, Direction rotation, Player player)
+        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Player player, bool isInstance = false)
         {
+            // Create entity object
+            Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, transform);
+
             // Register new entity
-            Entities.Add(newEntity);
+            Entities.Add(instance);
 
             // Init
-            newEntity.Init(EntityIdCounter++, this, node, rotation, player);
+            instance.Init(EntityIdCounter++, this, node, rotation, player);
 
             // Update if the new entity is currently visible
-            newEntity.UpdateVisiblity(ActiveVisionPlayer);
+            instance.UpdateVisiblity(ActiveVisionPlayer);
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(node.WorldCoordinates, newEntity.GetDimensions().x, newEntity.GetDimensions().z);
+            UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
         }
         public void RemoveEntity(Entity entity)
         {
@@ -865,7 +868,7 @@ namespace BlockmapFramework
 
             return waterBody;
         }
-        public void AddWaterBody(WaterBody data)
+        public void AddWaterBody(WaterBody data, bool updateNavmesh)
         {
             // Create a new water nodes for each covered surface node
             List<WaterNode> waterNodes = new List<WaterNode>();
@@ -887,7 +890,8 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
 
             // Update navmesh
-            UpdateNavmeshAround(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1);
+            if(updateNavmesh)
+                UpdateNavmeshAround(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1);
 
             // Register water body
             WaterBodies.Add(newWaterBody.Id, newWaterBody);

@@ -6,6 +6,10 @@ Big Features to Add:
 - make ctf map generator
 	> simple but a little more in-depth than just perlin
 	> entities and flag spawns
+	> some walls
+	> some trees
+	> some air paths
+	> some water
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -53,6 +57,11 @@ Big Features to Add:
 	- affect canplacewater
 	- affect canbuildwall
 
+- expand entity navmesh impact options
+	> make it possible that entities can block a combination of full nodes, sides and corners
+	> all of it should affect the navmesh
+	> visioncollider needs to be adapted too
+
 - Add some kind of roof system
 	- maybe just allow changing height on normal air nodes (like on surface)
 	- allow path mesh generation for all shapes
@@ -87,6 +96,11 @@ Big Features to Add:
 - add inventory system
 	- entities can pick up and carry items
 	- add carry capacity attribute to entities
+
+- sound & smell
+	hearing & smelling
+
+- tunnel?
 
 - add some new static entities
 	> for new static entity ideas watch project zomboid streams

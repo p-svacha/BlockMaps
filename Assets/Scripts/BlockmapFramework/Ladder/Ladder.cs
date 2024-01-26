@@ -70,7 +70,7 @@ namespace BlockmapFramework
             Bottom.SourceLadders.Add(Side, this);
             Top.TargetLadders.Add(HelperFunctions.GetOppositeDirection(Side), this);
             Entity = LadderMeshGenerator.GenerateLadderObject(this);
-            World.SpawnEntity(Entity, Bottom, Side, World.Gaia);
+            World.SpawnEntity(Entity, Bottom, Side, World.Gaia, isInstance: true);
         }
     }
 }

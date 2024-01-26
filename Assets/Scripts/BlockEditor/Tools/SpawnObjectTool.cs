@@ -1,6 +1,8 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,6 +20,7 @@ namespace WorldEditor
         private Direction CurrentRotation;
 
         [Header("Elements")]
+        public TMP_Dropdown PlayerDropdown;
         public UI_SelectionPanel EntitySelection;
 
         public override void Init(BlockEditor editor)
@@ -39,6 +42,14 @@ namespace WorldEditor
             EntitySelection.SelectFirstElement();
         }
 
+        public override void OnNewWorld()
+        {
+            // Player Dropdown
+            PlayerDropdown.ClearOptions();
+            List<string> playerOptions = World.Players.Values.Select(x => x.Name).ToList();
+            PlayerDropdown.AddOptions(playerOptions);
+        }
+
         public override void UpdateTool()
         {
             // Rotation change inputs
@@ -48,12 +59,14 @@ namespace WorldEditor
             // Preview
             if (World.HoveredNode != null)
             {
-                bool canPlace = World.CanPlaceEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
+                bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
 
                 BuildPreview.gameObject.SetActive(true);
                 BuildPreview.transform.position = BuildPreview.GetWorldPosition(World, World.HoveredNode, CurrentRotation);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
-                BuildPreview.GetComponent<MeshRenderer>().material.color = canPlace ? Color.green : Color.red;
+
+                foreach(Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
+                    mat.color = canPlace ? Color.green : Color.red;
             }
             else BuildPreview.gameObject.SetActive(false);
         }
@@ -61,10 +74,10 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
-            if (!World.CanPlaceEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
+            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
 
-            StaticEntity newEntity = Instantiate(SelectedEntity, World.transform);
-            World.SpawnEntity(newEntity, World.HoveredNode, CurrentRotation, World.Gaia);
+            Player owner = World.Players.Values.ToList()[PlayerDropdown.value];
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner);
         }
 
         public override void HandleRightClick()

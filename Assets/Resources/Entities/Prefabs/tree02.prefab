@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3384114}
   - component: {fileID: 2377290}
   - component: {fileID: -6911241458543174536}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: tree02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: tree02
+  VisionRange: 0
   Dimensions: {x: 2, y: 7, z: 2}
   IsPassable: 0
   BlocksVision: 1
+  PlayerColorMaterialIndex: -1
   RequiresFlatTerrain: 0

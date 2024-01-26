@@ -6,6 +6,7 @@ namespace BlockmapFramework
 {
     public enum GenerationPhase
     {
+        WaitingForFixedUpdate,
         Generating,
         Initializing,
         Done

@@ -71,6 +71,19 @@ public static class HelperFunctions
 
         return v1 * s;
     }
+    public static Vector2Int GetRandomNearPosition(Vector2Int pos, float standard_deviation)
+    {
+        float x = NextGaussian(pos.x, standard_deviation);
+        float y = NextGaussian(pos.y, standard_deviation);
+
+        return new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y));
+    }
+
+    public static Direction GetRandomSideDirection()
+    {
+        List<Direction> sides = GetSides();
+        return sides[Random.Range(0, sides.Count)];
+    }
 
     #endregion
 

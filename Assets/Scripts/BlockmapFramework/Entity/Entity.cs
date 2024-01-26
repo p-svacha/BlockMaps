@@ -92,9 +92,12 @@ namespace BlockmapFramework
         /// </summary>
         public bool BlocksVision;
 
-        // Visual
-       
+        /// <summary>
+        /// Flag if entity can only be placed when the whole footprint is flat.
+        /// </summary>
+        public bool RequiresFlatTerrain;
 
+        // Visual
         /// <summary>
         /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
         /// <br/> -1 means there is no material.

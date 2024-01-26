@@ -121,12 +121,11 @@ namespace WorldEditor
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
                 newCharacter.PreInit(speed, vision, height, canSwim, climbingSkill);
 
-                World.SpawnEntity(newCharacter, spawnNode, Direction.N, owner);
+                World.SpawnEntity(newCharacter, spawnNode, Direction.N, owner, isInstance: true);
             }
             else // Fixed preset
             {
-                MovingEntity newCharacter = Instantiate(Editor.MovingEntityPresets[SelectedEntityIndex - 1], characterContainer.transform);
-                World.SpawnEntity(newCharacter, spawnNode, Direction.N, owner);
+                World.SpawnEntity(Editor.MovingEntityPresets[SelectedEntityIndex - 1], spawnNode, Direction.N, owner);
             }
         }
 

@@ -10,7 +10,10 @@ namespace BlockmapFramework
         public Camera Camera;
 
         private const float TURN_SPEED = 80f;
+
         private const float MOVE_SPEED = 10f;
+        private const float SHIFT_MOVE_SPEED = 50f;
+
         private const float ZOOM_SPEED = 0.8f;
         private const float OFFSET_RADIUS_SCALE = 1f; // How far the camera is from the center depending on the height 
         private const float MIN_HEIGHT = 2f;
@@ -32,6 +35,10 @@ namespace BlockmapFramework
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
             if (isUiElementFocussed) return;
 
+
+            float moveSpeed = MOVE_SPEED;
+            if (Input.GetKey(KeyCode.LeftShift)) moveSpeed = SHIFT_MOVE_SPEED;
+
             if (Input.GetKey(KeyCode.Q)) // Q - Rotate camera anti-clockwise
             {
                 CurrentAngle = CurrentAngle += TURN_SPEED * Time.deltaTime;
@@ -45,26 +52,26 @@ namespace BlockmapFramework
 
             if (Input.GetKey(KeyCode.W)) // W - Move camera up
             {
-                CurrentPosition.x -= MOVE_SPEED * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                CurrentPosition.y -= MOVE_SPEED * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+                CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+                CurrentPosition.y -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
             }
             if (Input.GetKey(KeyCode.A)) // A - Move camera left
             {
-                CurrentPosition.x += MOVE_SPEED * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                CurrentPosition.y += MOVE_SPEED * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+                CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+                CurrentPosition.y += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
             }
             if (Input.GetKey(KeyCode.S)) // S - Move camera down
             {
-                CurrentPosition.x += MOVE_SPEED * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                CurrentPosition.y += MOVE_SPEED * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+                CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+                CurrentPosition.y += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
             }
             if (Input.GetKey(KeyCode.D)) // D - Move camera right
             {
-                CurrentPosition.x -= MOVE_SPEED * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                CurrentPosition.y -= MOVE_SPEED * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+                CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+                CurrentPosition.y -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
             }
 

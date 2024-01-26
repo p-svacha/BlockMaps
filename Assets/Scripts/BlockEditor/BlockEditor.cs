@@ -59,7 +59,8 @@ namespace WorldEditor
             Generators = new List<WorldGenerator>()
             {
                 new FlatWorldGenerator(),
-                new PerlinWorldGenerator()
+                new PerlinWorldGenerator(),
+                new CTFMapGenerator()
             };
 
             // Init tools
@@ -120,6 +121,9 @@ namespace WorldEditor
             // Feedback
             foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
             DisplayOptions.OnNewWorld();
+
+            // Reset exploration
+            foreach (Player p in World.Players.Values) World.ResetExploration(p);
         }
 
         #region Controls
@@ -186,7 +190,7 @@ namespace WorldEditor
 
             string text = "";
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
-            if (World.HoveredNode != null) text += "\n" + World.HoveredNode.Type.ToString() + " | " + World.HoveredNode.Surface.Name;
+            if (World.HoveredNode != null) text += "\n" + World.HoveredNode.ToString();
             if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
             if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.Node.WorldCoordinates.ToString() + " " + World.HoveredWall.Node.BaseHeight + " " + World.HoveredWall.Side.ToString();

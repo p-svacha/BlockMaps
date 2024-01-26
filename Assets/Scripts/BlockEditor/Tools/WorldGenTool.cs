@@ -52,12 +52,12 @@ namespace WorldEditor
 
             if(ActiveGenerator != null)
             {
-                if(ActiveGenerator.GenerationPhase != GenerationPhase.Done)
+                if(ActiveGenerator.GenerationPhase == GenerationPhase.Generating || ActiveGenerator.GenerationPhase == GenerationPhase.Initializing)
                 {
-                    // if(Input.GetKeyDown(KeyCode.Space))
+                    //if(Input.GetKeyDown(KeyCode.Space))
                         ActiveGenerator.UpdateGeneration();
                 }
-                else // Generation process is finshed
+                else if (ActiveGenerator.GenerationPhase == GenerationPhase.Done) // Generation process is finshed
                 {
                     Editor.SetWorld(ActiveGenerator.GeneratedWorld);
                     ActiveGenerator = null;
@@ -89,8 +89,15 @@ namespace WorldEditor
             if(World != null) Destroy(World.gameObject);
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
 
-            selectedGenerator.StartGeneration(chunkSize, numChunks);
             ActiveGenerator = selectedGenerator;
+            ActiveGenerator.GenerationPhase = GenerationPhase.WaitingForFixedUpdate;
+            StartCoroutine(StartWorldGeneration(selectedGenerator, chunkSize, numChunks));
+        }
+        private IEnumerator StartWorldGeneration(WorldGenerator generator, int chunkSize, int numChunks)
+        {
+            yield return new WaitForFixedUpdate();
+
+            generator.StartGeneration(chunkSize, numChunks);
         }
 
         private void SaveButton_OnClick()
