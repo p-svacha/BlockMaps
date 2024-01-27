@@ -16,7 +16,7 @@ namespace BlockmapFramework
         public World GeneratedWorld { get; private set; }
         public GenerationPhase GenerationPhase { get; set; }
 
-        public void StartGeneration(int chunkSize, int numChunks)
+        public void InitGeneration(int chunkSize, int numChunks)
         {
             if (chunkSize > 16) throw new System.Exception("Chunk size can't be bigger than 16 due to shader limitations.");
             if (chunkSize * numChunks > 512) throw new System.Exception("World size can't be bigger than 512.");
@@ -25,6 +25,11 @@ namespace BlockmapFramework
             NumChunks = numChunks;
             WorldSize = chunkSize * numChunks;
 
+            GenerationPhase = GenerationPhase.InitializingGenerator;
+        }
+
+        private void StartGeneration()
+        {
             // Create empty world to start with
             WorldData data = CreateEmptyWorldData();
             GeneratedWorld = World.SimpleLoad(data);
@@ -33,18 +38,30 @@ namespace BlockmapFramework
             OnGenerationStart();
         }
         protected abstract void OnGenerationStart();
+        /// <summary>
+        /// Call this in FixedUpdate.
+        /// </summary>
         public void UpdateGeneration()
         {
-            if (GenerationPhase == GenerationPhase.Generating) OnUpdate();
-            else if (GenerationPhase == GenerationPhase.Initializing)
+            switch(GenerationPhase)
             {
-                if (GeneratedWorld.IsInitialized) GenerationPhase = GenerationPhase.Done;
+                case GenerationPhase.InitializingGenerator:
+                    StartGeneration();
+                    break;
+
+                case GenerationPhase.Generating:
+                    OnUpdate();
+                    break;
+
+                case GenerationPhase.InitializingWorld:
+                    if (GeneratedWorld.IsInitialized) GenerationPhase = GenerationPhase.Done;
+                    break;
             }
         }
         protected abstract void OnUpdate();
         protected void FinishGeneration()
         {
-            GenerationPhase = GenerationPhase.Initializing;
+            GenerationPhase = GenerationPhase.InitializingWorld;
             foreach (Entity e in GeneratedWorld.Entities) e.UpdateVision();
             GeneratedWorld.GenerateFullNavmesh();
         }
@@ -121,7 +138,7 @@ namespace BlockmapFramework
 
             if(GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
             {
-                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player);
+                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
                 return true;
             }
 

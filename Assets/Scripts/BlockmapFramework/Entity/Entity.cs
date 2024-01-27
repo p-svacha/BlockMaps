@@ -630,9 +630,6 @@ namespace BlockmapFramework
             // Update position of vision collider
             VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
             VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
-
-            // Update vision of nearby entities
-            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
         }
 
         /// <summary>

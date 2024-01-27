@@ -48,20 +48,14 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            base.UpdateTool();
-
-            if(ActiveGenerator != null)
+            if (ActiveGenerator != null)
             {
-                if(ActiveGenerator.GenerationPhase == GenerationPhase.Generating || ActiveGenerator.GenerationPhase == GenerationPhase.Initializing)
-                {
-                    //if(Input.GetKeyDown(KeyCode.Space))
-                        ActiveGenerator.UpdateGeneration();
-                }
-                else if (ActiveGenerator.GenerationPhase == GenerationPhase.Done) // Generation process is finshed
+                if (ActiveGenerator.GenerationPhase == GenerationPhase.Done)
                 {
                     Editor.SetWorld(ActiveGenerator.GeneratedWorld);
                     ActiveGenerator = null;
                 }
+                else ActiveGenerator.UpdateGeneration();
             }
         }
 
@@ -86,18 +80,11 @@ namespace WorldEditor
 
             if (chunkSize * numChunks > 512) return;
 
-            if(World != null) Destroy(World.gameObject);
+            if (World != null) Destroy(World.gameObject);
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
 
             ActiveGenerator = selectedGenerator;
-            ActiveGenerator.GenerationPhase = GenerationPhase.WaitingForFixedUpdate;
-            StartCoroutine(StartWorldGeneration(selectedGenerator, chunkSize, numChunks));
-        }
-        private IEnumerator StartWorldGeneration(WorldGenerator generator, int chunkSize, int numChunks)
-        {
-            yield return new WaitForFixedUpdate();
-
-            generator.StartGeneration(chunkSize, numChunks);
+            ActiveGenerator.InitGeneration(chunkSize, numChunks);
         }
 
         private void SaveButton_OnClick()

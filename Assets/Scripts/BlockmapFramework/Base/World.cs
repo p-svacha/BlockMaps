@@ -766,7 +766,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Player player, bool isInstance = false)
+        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Player player, bool isInstance = false, bool updateWorld = true)
         {
             // Create entity object
             Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, transform);
@@ -778,10 +778,10 @@ namespace BlockmapFramework
             instance.Init(EntityIdCounter++, this, node, rotation, player);
 
             // Update if the new entity is currently visible
-            instance.UpdateVisiblity(ActiveVisionPlayer);
+            if (updateWorld) instance.UpdateVisiblity(ActiveVisionPlayer);
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
+            if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
         }
         public void RemoveEntity(Entity entity)
         {
@@ -1131,8 +1131,9 @@ namespace BlockmapFramework
         }
         private IEnumerator DoUpdateNavmeshDisplay()
         {
+            if (NavmeshVisualizer.Singleton == null) yield break;
             yield return new WaitForFixedUpdate();
-
+            
             if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this);
             else NavmeshVisualizer.Singleton.ClearVisualization();
         }

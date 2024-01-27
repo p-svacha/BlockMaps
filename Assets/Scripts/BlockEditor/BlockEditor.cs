@@ -121,9 +121,6 @@ namespace WorldEditor
             // Feedback
             foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
             DisplayOptions.OnNewWorld();
-
-            // Reset exploration
-            foreach (Player p in World.Players.Values) World.ResetExploration(p);
         }
 
         #region Controls

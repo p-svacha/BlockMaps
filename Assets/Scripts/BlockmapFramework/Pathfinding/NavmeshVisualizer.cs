@@ -20,6 +20,12 @@ namespace BlockmapFramework
         private Material SingleClimbTransitionMat;
         private Material DoubleClimbTransitionMat;
 
+        private void Awake()
+        {
+            GameObject navmeshObj = GameObject.Find("NavmeshVisualizer");
+            if(navmeshObj != null) Singleton = navmeshObj.GetComponent<NavmeshVisualizer>();
+        }
+
         /// <summary>
         /// Shows the navmesh of the world.
         /// <br/> If an entity is provided the navmesh will be visualized for that entity.
@@ -143,6 +149,6 @@ namespace BlockmapFramework
             foreach (Transform t in transform) Destroy(t.gameObject);
         }
 
-        public static NavmeshVisualizer Singleton { get { return GameObject.Find("NavmeshVisualizer").GetComponent<NavmeshVisualizer>(); } }
+        public static NavmeshVisualizer Singleton;
     }
 }

@@ -6,9 +6,9 @@ namespace BlockmapFramework
 {
     public enum GenerationPhase
     {
-        WaitingForFixedUpdate,
+        InitializingGenerator,
         Generating,
-        Initializing,
+        InitializingWorld,
         Done
     }
 }

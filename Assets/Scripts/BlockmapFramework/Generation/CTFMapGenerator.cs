@@ -25,10 +25,10 @@ namespace BlockmapFramework
         protected override void OnUpdate()
         {
             if (GenerationStep == 0) GenerateNoise();
-            if (GenerationStep == 1) ApplyHeightmap();
-            if (GenerationStep == 2) CreatePlayerBases();
-            if (GenerationStep == 3) AddWaterBodies();
-            if (GenerationStep == 4) AddForests();
+            else if (GenerationStep == 1) ApplyHeightmap();
+            else if (GenerationStep == 2) CreatePlayerBases();
+            else if (GenerationStep == 3) AddWaterBodies();
+            else if (GenerationStep == 4) AddForests();
         }
 
         private void GenerateNoise()
@@ -169,7 +169,7 @@ namespace BlockmapFramework
 
             if (GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
             {
-                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, GeneratedWorld.Gaia);
+                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, GeneratedWorld.Gaia, updateWorld: false);
             }
         }
         private string GetRandomTreeId()

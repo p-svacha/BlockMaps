@@ -4,15 +4,19 @@ Big Features to Add:
 	> make a release
 
 - make ctf map generator
-	> simple but a little more in-depth than just perlin
-	> entities and flag spawns
-	> some walls
-	> some trees
-	> some air paths
-	> some water
+
+	> some walls!!
+
+	> some air paths!!
+
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
+
+- procedural rock wall entity
+	> 1xYx1 in size, connects to adjacent rock wall entities
+	> blocks path and vision
+	> rendered in 1 mesh
 
 - doors
 	> open and closeable when standing next to

@@ -43,7 +43,11 @@ namespace BlockmapFramework
             {
                 CurrentTransition.UpdateEntityMovement(this, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
-                if (OriginNode != currentOriginNode) SetOriginNode(currentOriginNode);
+                if (OriginNode != currentOriginNode)
+                {
+                    SetOriginNode(currentOriginNode);
+                    World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
+                }
                 if(finishedTransition) ReachNextNode();
 
                 // Update transform if visible
