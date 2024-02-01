@@ -77,7 +77,7 @@ namespace BlockmapFramework
         /// <summary>
         /// List containing all players that have explored this node.
         /// </summary>
-        private HashSet<Player> ExploredBy = new HashSet<Player>();
+        private HashSet<Actor> ExploredBy = new HashSet<Actor>();
 
         /// <summary>
         /// List containing all entities that currently see this node.
@@ -573,18 +573,18 @@ namespace BlockmapFramework
 
         public void AddVisionBy(Entity e)
         {
-            ExploredBy.Add(e.Player);
+            ExploredBy.Add(e.Owner);
             SeenBy.Add(e);
         }
         public void RemoveVisionBy(Entity e)
         {
             SeenBy.Remove(e);
         }
-        public void AddExploredBy(Player p)
+        public void AddExploredBy(Actor p)
         {
             ExploredBy.Add(p);
         }
-        public void RemoveExploredBy(Player p)
+        public void RemoveExploredBy(Actor p)
         {
             ExploredBy.Remove(p);
         }
@@ -661,10 +661,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if this node is visible for the specified player.
         /// </summary>
-        public bool IsVisibleBy(Player player)
+        public bool IsVisibleBy(Actor player)
         {
             if (player == null) return true; // Everything is visible
-            if (SeenBy.FirstOrDefault(x => x.Player == player) != null) return true; // Node is seen by an entity of player
+            if (SeenBy.FirstOrDefault(x => x.Owner == player) != null) return true; // Node is seen by an entity of player
 
             return false;
         }
@@ -672,7 +672,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the node has been explored by the specified player.
         /// </summary>
-        public bool IsExploredBy(Player player)
+        public bool IsExploredBy(Actor player)
         {
             if (player == null) return true; // Everything is visible
             return ExploredBy.Contains(player);

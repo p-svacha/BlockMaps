@@ -1,8 +1,9 @@
+using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlockmapFramework
+namespace CaptureTheFlag
 {
     public class CTFMapGenerator : WorldGenerator
     {
@@ -74,10 +75,10 @@ namespace BlockmapFramework
         private void CreatePlayerBases()
         {
             int p1X = SPAWN_MAP_EDGE_OFFSET;
-            CreatePlayerSpawn(GeneratedWorld.Players[0], p1X, Direction.E);
+            CreatePlayerSpawn(GeneratedWorld.Actors[0], p1X, Direction.E);
 
             int p2X = WorldSize - SPAWN_MAP_EDGE_OFFSET;
-            CreatePlayerSpawn(GeneratedWorld.Players[1], p2X, Direction.W);
+            CreatePlayerSpawn(GeneratedWorld.Actors[1], p2X, Direction.W);
 
             GeneratedWorld.DrawNodes();
             GenerationStep++;
@@ -85,7 +86,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns the flag and characters for a player.
         /// </summary>
-        private void CreatePlayerSpawn(Player player, int x, Direction faceDirection)
+        private void CreatePlayerSpawn(Actor player, int x, Direction faceDirection)
         {
             // Position
             int y = Random.Range(SPAWN_MAP_EDGE_OFFSET, WorldSize - SPAWN_MAP_EDGE_OFFSET);
@@ -98,7 +99,7 @@ namespace BlockmapFramework
 
             // Humans
             int humansSpawned = 0;
-            Entity humanPrefab = GetEntityPrefab("human");
+            Entity humanPrefab = GetCharacterPrefab("human");
             while (humansSpawned < NUM_HUMANS_PER_PLAYER)
             {
                 if (SpawnEntityAround(humanPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection)) humansSpawned++;
@@ -106,7 +107,7 @@ namespace BlockmapFramework
 
             // Dogs
             int dogsSpawned = 0;
-            Entity dogPrefab = GetEntityPrefab("dog");
+            Entity dogPrefab = GetCharacterPrefab("dog");
             while (dogsSpawned < NUM_DOGS_PER_PLAYER)
             {
                 if (SpawnEntityAround(dogPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection)) dogsSpawned++;
@@ -182,6 +183,13 @@ namespace BlockmapFramework
                 { "log_2x1", 0.3f },
             };
             return HelperFunctions.GetWeightedRandomElement(ids);
+        }
+
+        private Entity GetCharacterPrefab(string id)
+        {
+            string fullPath = "CaptureTheFlag/Characters/" + id;
+            Entity prefab = Resources.Load<Entity>(fullPath);
+            return prefab;
         }
     }
 }

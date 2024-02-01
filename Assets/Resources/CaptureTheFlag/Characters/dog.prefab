@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6425603548925115790
+--- !u!1 &7796371230492524030
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5937860657022756660}
-  - component: {fileID: 7334216841739692177}
-  - component: {fileID: 4768370901270142043}
-  - component: {fileID: 3855192531683989928}
-  - component: {fileID: -5178562942034004295}
+  - component: {fileID: 7456156681528190788}
+  - component: {fileID: 5824928286218365153}
+  - component: {fileID: 8589132102933109803}
+  - component: {fileID: 140661124634146974}
+  - component: {fileID: 3494617113912371813}
+  - component: {fileID: 4051182353153466677}
   m_Layer: 0
-  m_Name: human
+  m_Name: dog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5937860657022756660
+--- !u!4 &7456156681528190788
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6425603548925115790}
+  m_GameObject: {fileID: 7796371230492524030}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 16.568247, y: 0.003786981, z: 5.608448}
+  m_LocalPosition: {x: 15.2178135, y: 0.000048738762, z: 7.5889635}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7334216841739692177
+--- !u!33 &5824928286218365153
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6425603548925115790}
-  m_Mesh: {fileID: 4711208715938537054, guid: 3edddf764c12e6647824207647494d80, type: 3}
---- !u!23 &4768370901270142043
+  m_GameObject: {fileID: 7796371230492524030}
+  m_Mesh: {fileID: 4711208715938537054, guid: c851c36d394b5184caa13591fb5b0710, type: 3}
+--- !u!23 &8589132102933109803
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6425603548925115790}
+  m_GameObject: {fileID: 7796371230492524030}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,9 +64,10 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ee27f55a4ce198e44b8b503021a0578a, type: 2}
-  - {fileID: 2100000, guid: 8a18833a8e5c2444196032e0cc6331a8, type: 2}
-  - {fileID: 2100000, guid: 4464f051ddc0b9948b00417b5ac1c386, type: 2}
+  - {fileID: 2100000, guid: 7b2717a6a995a5040ba26d82efc5dfb7, type: 2}
+  - {fileID: 2100000, guid: c093ba25466591840b8ccd35220e65d4, type: 2}
+  - {fileID: 2100000, guid: 1e54a0613ec747044aec59954f30b524, type: 2}
+  - {fileID: 2100000, guid: fe02717aafe9f07458c0f79d234cb387, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -87,39 +89,51 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &3855192531683989928
+--- !u!114 &140661124634146974
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6425603548925115790}
+  m_GameObject: {fileID: 7796371230492524030}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 855a8d61be5375f499e8d7dcc8425601, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Name: human
-  VisionRange: 10
-  Dimensions: {x: 1, y: 3, z: 1}
+  Name: dog
+  VisionRange: 3
+  Dimensions: {x: 1, y: 1, z: 1}
   IsPassable: 1
   BlocksVision: 0
   RequiresFlatTerrain: 0
-  PlayerColorMaterialIndex: 0
-  MovementSpeed: 2
+  PlayerColorMaterialIndex: 1
+  MovementSpeed: 6
   CanSwim: 1
-  ClimbingSkill: 2
---- !u!64 &-5178562942034004295
+  ClimbingSkill: 0
+--- !u!114 &3494617113912371813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7796371230492524030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55bb4fb04725d6b4987d1bd6bd7b59aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!64 &4051182353153466677
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6425603548925115790}
+  m_GameObject: {fileID: 7796371230492524030}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4711208715938537054, guid: 3edddf764c12e6647824207647494d80, type: 3}
+  m_Mesh: {fileID: 4711208715938537054, guid: c851c36d394b5184caa13591fb5b0710, type: 3}

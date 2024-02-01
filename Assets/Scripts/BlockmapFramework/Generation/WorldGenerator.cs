@@ -72,15 +72,15 @@ namespace BlockmapFramework
             data.Name = "World";
             data.ChunkSize = ChunkSize;
             data.Chunks = new List<ChunkData>();
-            data.Players = new List<PlayerData>();
+            data.Actors = new List<ActorData>();
             data.Entities = new List<EntityData>();
             data.WaterBodies = new List<WaterBodyData>();
             data.Walls = new List<WallData>();
 
             // Create players
-            data.Players.Add(CreatePlayerData(World.GAIA_ID, "Gaia", Color.white));
-            data.Players.Add(CreatePlayerData(data.MaxPlayerId++, "Player 1", Color.blue));
-            data.Players.Add(CreatePlayerData(data.MaxPlayerId++, "Player 2", Color.red));
+            data.Actors.Add(CreatePlayerData(World.GAIA_ID, "Gaia", Color.white));
+            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 1", Color.blue));
+            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 2", Color.red));
 
             // Create chunks
             for (int x = 0; x < NumChunks; x++)
@@ -114,9 +114,9 @@ namespace BlockmapFramework
 
             return data;
         }
-        private PlayerData CreatePlayerData(int id, string name, Color color)
+        private ActorData CreatePlayerData(int id, string name, Color color)
         {
-            PlayerData data = new PlayerData();
+            ActorData data = new ActorData();
             data.Id = id;
             data.Name = name;
             data.ColorR = color.r;
@@ -130,7 +130,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns an entity on the surface near the given point.
         /// </summary>
-        protected bool SpawnEntityAround(Entity prefab, Player player, Vector2Int pos, float standard_deviation, Direction rotation)
+        protected bool SpawnEntityAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation)
         {
             Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
             while(!GeneratedWorld.IsInWorld(targetPos)) targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);

@@ -45,7 +45,7 @@ namespace BlockmapFramework
         // Database
         private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
         public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
-        public Dictionary<int, Player> Players = new Dictionary<int, Player>();
+        public Dictionary<int, Actor> Actors = new Dictionary<int, Actor>();
         public List<Entity> Entities = new List<Entity>();
         public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
         public List<Wall> Walls = new List<Wall>();
@@ -53,19 +53,19 @@ namespace BlockmapFramework
         private int NodeIdCounter;
         private int EntityIdCounter;
         private int WaterBodyIdCounter;
-        private int PlayerIdCounter;
+        private int ActorIdCounter;
 
         private BlockmapCamera Camera;
         /// <summary>
-        /// Neutral passive player
+        /// Neutral passive actor
         /// </summary>
-        public Player Gaia { get; private set; }
+        public Actor Gaia { get; private set; }
         public const int GAIA_ID = -1;
         /// <summary>
-        /// The player that the vision is drawn for currently.
+        /// The actor that the vision is drawn for currently.
         /// <br/> If null everything is drawn.
         /// </summary>
-        public Player ActiveVisionPlayer { get; private set; }
+        public Actor ActiveVisionActor { get; private set; }
 
         // Layers
         public int Layer_SurfaceNode;
@@ -110,7 +110,7 @@ namespace BlockmapFramework
         #region Init
 
         /// <summary>
-        /// Initializes the world by only drawing the nodes and creating the players from the given WorldData.
+        /// Initializes the world by only drawing the nodes and creating the actors from the given WorldData.
         /// <br/> Everything else in the data is discarded. Navmesh will not be generated either.
         /// </summary>
         public void SimpleInit(WorldData data)
@@ -140,11 +140,11 @@ namespace BlockmapFramework
             NodeIdCounter = data.MaxNodeId + 1;
             EntityIdCounter = data.MaxEntityId + 1;
             WaterBodyIdCounter = data.MaxWaterBodyId + 1;
-            PlayerIdCounter = data.MaxPlayerId + 1;
+            ActorIdCounter = data.MaxActorId + 1;
 
-            // Init players
-            foreach (PlayerData playerData in data.Players) Players.Add(playerData.Id, Player.Load(this, playerData));
-            Gaia = Players[GAIA_ID];
+            // Init actors
+            foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
+            Gaia = Actors[GAIA_ID];
 
             // Init nodes
             foreach (ChunkData chunkData in data.Chunks)
@@ -196,7 +196,9 @@ namespace BlockmapFramework
                 foreach (EntityData entityData in WorldData.Entities)
                 {
                     Entity e = Entity.Load(this, entityData);
-                    if(e != null) Entities.Add(e); // null-check because some special entities are already registered in Entity.Load (i.e. ladders)
+
+                    // Register entity (null-check because some special entities are already registered in Entity.Load (i.e. ladders))
+                    if (e != null) RegisterEntity(e);
                 }
 
                 InitializeStep++;
@@ -517,28 +519,28 @@ namespace BlockmapFramework
             Walls.Remove(wall);
         }
 
-        public Player AddPlayer(string name, Color color)
+        public Actor AddActor(string name, Color color)
         {
-            int id = PlayerIdCounter++;
-            Player newPlayer = new Player(this, id, name, color);
-            Players.Add(id, newPlayer);
-            return newPlayer;
+            int id = ActorIdCounter++;
+            Actor newActor = new Actor(this, id, name, color);
+            Actors.Add(id, newActor);
+            return newActor;
         }
-        public void ResetExploration(Player player)
+        public void ResetExploration(Actor actor)
         {
-            foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(player);
-            foreach (Entity entity in Entities) entity.ResetLastKnownPositionFor(player);
+            foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
+            foreach (Entity entity in Entities) entity.ResetLastKnownPositionFor(actor);
 
-            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Where(x => x.Owner == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
-        public void ExploreEverything(Player player)
+        public void ExploreEverything(Actor actor)
         {
-            foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(player);
-            foreach (Entity entity in Entities) entity.UpdateLastKnownPositionFor(player);
+            foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
+            foreach (Entity entity in Entities) entity.UpdateLastKnownPositionFor(actor);
 
-            foreach (Entity entity in Entities.Where(x => x.Player == player)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Where(x => x.Owner == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
@@ -766,19 +768,22 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Player player, bool isInstance = false, bool updateWorld = true)
+        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Actor actor, bool isInstance = false, bool updateWorld = true)
         {
             // Create entity object
             Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, transform);
 
-            // Register new entity
-            Entities.Add(instance);
-
             // Init
-            instance.Init(EntityIdCounter++, this, node, rotation, player);
+            instance.Init(EntityIdCounter++, this, node, rotation, actor);
+
+            // Register new entity
+            RegisterEntity(instance);
+
+            // Update vision around new entity
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.GetCenterWorldPosition());
 
             // Update if the new entity is currently visible
-            if (updateWorld) instance.UpdateVisiblity(ActiveVisionPlayer);
+            if (updateWorld) instance.UpdateVisiblity(ActiveVisionActor);
 
             // Update pathfinding navmesh
             if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
@@ -787,9 +792,15 @@ namespace BlockmapFramework
         {
             // De-register entity
             Entities.Remove(entity);
+            entity.Owner.Entities.Remove(entity);
 
             // Remove seen by on all nodes
-            foreach (BlockmapNode node in entity.VisibleNodes) node.RemoveVisionBy(entity);
+            HashSet<Chunk> chunksAffectedByVision = new HashSet<Chunk>();
+            foreach (BlockmapNode node in entity.VisibleNodes)
+            {
+                node.RemoveVisionBy(entity);
+                chunksAffectedByVision.Add(node.Chunk);
+            }
 
             // Remove node & chunk occupation
             foreach (BlockmapNode node in entity.OccupiedNodes)
@@ -801,13 +812,21 @@ namespace BlockmapFramework
             // Update pathfinding navmesh
             UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetDimensions().x, entity.GetDimensions().z);
 
-            if (entity.Player == ActiveVisionPlayer) UpdateVisibility();
+            // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
+            if (entity.Owner == ActiveVisionActor)
+                foreach (Chunk c in chunksAffectedByVision)
+                    UpdateVisibility(c);
 
             // Destroy
-            GameObject.Destroy(entity.gameObject);
+            entity.DestroySelf();
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
             UpdateVisionOfNearbyEntitiesDelayed(entity.GetWorldCenter());
+        }
+        private void RegisterEntity(Entity entity)
+        {
+            Entities.Add(entity);
+            entity.Owner.Entities.Add(entity);
         }
 
         public WaterBody CanAddWater(SurfaceNode node, int maxDepth) // returns null when cannot
@@ -1017,7 +1036,7 @@ namespace BlockmapFramework
         {
             foreach (Chunk chunk in Chunks.Values) chunk.DrawMesh();
 
-            SetActiveVisionPlayer(null);
+            SetActiveVisionActor(null);
 
             UpdateGridOverlay();
             UpdateNavmeshDisplayDelayed();
@@ -1050,33 +1069,33 @@ namespace BlockmapFramework
         public void RedrawChunk(Chunk chunk)
         {
             chunk.DrawMesh();
-            chunk.SetVisibility(ActiveVisionPlayer);
+            chunk.SetVisibility(ActiveVisionActor);
             chunk.ShowGrid(IsShowingGrid);
             chunk.ShowTextures(IsShowingTextures);
             chunk.ShowTileBlending(IsShowingTileBlending);
         }
 
         /// <summary>
-        /// Updates the visibility for the full map according to the current player vision.
+        /// Updates the visibility for the full map according to the current actor vision.
         /// </summary>
         public void UpdateVisibility()
         {
             foreach (Chunk c in Chunks.Values) UpdateVisibility(c);
         }
         /// <summary>
-        /// Updates the visibility display for one chunk according to the current player vision.
+        /// Updates the visibility display for one chunk according to the current actor vision.
         /// </summary>
         public void UpdateVisibility(Chunk c)
         {
-            c.SetVisibility(ActiveVisionPlayer);
+            c.SetVisibility(ActiveVisionActor);
         }
 
         /// <summary>
-        /// Gets called when the visibility of a node changes on the specified chunk for the specified player.
+        /// Gets called when the visibility of a node changes on the specified chunk for the specified actor.
         /// </summary>
-        public void OnVisibilityChanged(Chunk c, Player player)
+        public void OnVisibilityChanged(Chunk c, Actor actor)
         {
-            if (player == ActiveVisionPlayer) UpdateVisibility(c);
+            if (actor == ActiveVisionActor) UpdateVisibility(c);
         }
 
         /// <summary>
@@ -1092,12 +1111,7 @@ namespace BlockmapFramework
             yield return new WaitForFixedUpdate();
 
             List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
-
-            foreach (Entity e in entitiesToUpdate)
-            {
-                e.UpdateVision();
-                e.UpdateVisiblity(ActiveVisionPlayer);
-            }
+            foreach (Entity e in entitiesToUpdate) e.UpdateVision();
         }
 
         public void ToggleGridOverlay()
@@ -1168,9 +1182,9 @@ namespace BlockmapFramework
             foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(IsShowingTileBlending);
         }
 
-        public void SetActiveVisionPlayer(Player player)
+        public void SetActiveVisionActor(Actor actor)
         {
-            ActiveVisionPlayer = player;
+            ActiveVisionActor = actor;
             UpdateVisibility();
         }
 
@@ -1482,7 +1496,7 @@ namespace BlockmapFramework
             return world;
         }
         /// <summary>
-        /// Only loads and draws nodes and players. Does not generate navmesh.
+        /// Only loads and draws nodes and actors. Does not generate navmesh.
         /// </summary>
         public static World SimpleLoad(WorldData data)
         {
@@ -1501,9 +1515,9 @@ namespace BlockmapFramework
                 MaxNodeId = NodeIdCounter,
                 MaxEntityId = EntityIdCounter,
                 MaxWaterBodyId = WaterBodyIdCounter,
-                MaxPlayerId = PlayerIdCounter,
+                MaxActorId = ActorIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
-                Players = Players.Values.Select(x => x.Save()).ToList(),
+                Actors = Actors.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Select(x => x.Save()).ToList(),
                 WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
                 Walls = Walls.Select(x => x.Save()).ToList()

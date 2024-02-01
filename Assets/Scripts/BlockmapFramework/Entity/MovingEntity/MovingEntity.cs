@@ -51,7 +51,7 @@ namespace BlockmapFramework
                 if(finishedTransition) ReachNextNode();
 
                 // Update transform if visible
-                if(IsVisibleBy(World.ActiveVisionPlayer))
+                if(IsVisibleBy(World.ActiveVisionActor))
                 {
                     transform.position = WorldPosition;
                     transform.rotation = WorldRotation;

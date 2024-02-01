@@ -17,7 +17,7 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_Wall;
         }
 
-        public override void SetVisibility(Player player)
+        public override void SetVisibility(Actor player)
         {
             // Define visibility array
             List<float> visibilityArray = new List<float>();

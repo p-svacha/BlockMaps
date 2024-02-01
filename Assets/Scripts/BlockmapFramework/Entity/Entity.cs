@@ -50,11 +50,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Stores the exact world position at which each player has seen this entity the last time.
         /// </summary>
-        public Dictionary<Player, Vector3?> LastKnownPosition { get; private set; }
+        public Dictionary<Actor, Vector3?> LastKnownPosition { get; private set; }
         /// <summary>
         /// Stores the direction that each player has seen this entity facing at the last time.
         /// </summary>
-        public Dictionary<Player, Direction> LastKnownRotation { get; private set; }
+        public Dictionary<Actor, Direction> LastKnownRotation { get; private set; }
 
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Who this entity belongs to.
         /// </summary>
-        public Player Player { get; private set; }
+        public Actor Owner { get; private set; }
         /// <summary>
         /// How far this entity can see.
         /// </summary>
@@ -105,6 +105,7 @@ namespace BlockmapFramework
         public int PlayerColorMaterialIndex = -1;
 
         // Components
+        private GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
         private MeshRenderer Renderer;
         private Projector SelectionIndicator;
         private MeshCollider MeshCollider; // used for hovering and selecting with cursor
@@ -112,7 +113,7 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public void Init(int id, World world, BlockmapNode origin, Direction rotation, Player player)
+        public void Init(int id, World world, BlockmapNode origin, Direction rotation, Actor player)
         {
             Id = id;
             if(string.IsNullOrEmpty(TypeId)) TypeId = Name;
@@ -122,13 +123,13 @@ namespace BlockmapFramework
             OccupiedNodes = new HashSet<BlockmapNode>();
             VisibleNodes = new HashSet<BlockmapNode>();
 
-            LastKnownPosition = new Dictionary<Player, Vector3?>();
-            foreach (Player p in world.Players.Values) LastKnownPosition.Add(p, null);
-            LastKnownRotation = new Dictionary<Player, Direction>();
-            foreach (Player p in world.Players.Values) LastKnownRotation.Add(p, Direction.None);
+            LastKnownPosition = new Dictionary<Actor, Vector3?>();
+            foreach (Actor p in world.Actors.Values) LastKnownPosition.Add(p, null);
+            LastKnownRotation = new Dictionary<Actor, Direction>();
+            foreach (Actor p in world.Actors.Values) LastKnownRotation.Add(p, Direction.None);
 
             World = world;
-            Player = player;
+            Owner = player;
             Rotation = rotation;
             WorldPosition = GetWorldPosition(world, origin, rotation);
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
@@ -139,13 +140,13 @@ namespace BlockmapFramework
             if (MeshCollider == null) MeshCollider = gameObject.AddComponent<MeshCollider>();
 
             // Wrap the entity in a wrapper
-            GameObject entityWrapper = new GameObject(Name + "_wrapper");
-            entityWrapper.transform.SetParent(transform.parent);
-            transform.SetParent(entityWrapper.transform);
+            Wrapper = new GameObject(Name + "_wrapper");
+            Wrapper.transform.SetParent(transform.parent);
+            transform.SetParent(Wrapper.transform);
 
             // Create a collider for entity vision on a seperate object
             GameObject visionColliderObject = new GameObject("visionCollider");
-            visionColliderObject.transform.SetParent(entityWrapper.transform);
+            visionColliderObject.transform.SetParent(Wrapper.transform);
             visionColliderObject.transform.localScale = transform.localScale;
             visionColliderObject.layer = World.Layer_EntityVisionCollider;
             VisionCollider = visionColliderObject.AddComponent<BoxCollider>();
@@ -164,12 +165,17 @@ namespace BlockmapFramework
             SetSelected(false);
 
             // Player color
-            if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Player.Color;
+            if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Owner.Color;
 
             OnInitialized();
         }
 
         protected virtual void OnInitialized() { }
+
+        public void DestroySelf()
+        {
+            Destroy(Wrapper);
+        }
 
         #endregion
 
@@ -216,14 +222,14 @@ namespace BlockmapFramework
             GetVisibleNodes(OriginNode, out HashSet<BlockmapNode> visibleNodes, out HashSet<BlockmapNode> exploredNodes, out HashSet<Entity> visibleEntities);
 
             // Update last known position and rotation of all currently visible entities
-            foreach (Entity e in visibleEntities) e.UpdateLastKnownPositionFor(Player);
+            foreach (Entity e in visibleEntities) e.UpdateLastKnownPositionFor(Owner);
 
             // Add entitiy vision to newly visible nodes
             VisibleNodes = visibleNodes;
             foreach (BlockmapNode n in visibleNodes) n.AddVisionBy(this);
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
-            foreach (BlockmapNode n in exploredNodes) n.AddExploredBy(Player);
+            foreach (BlockmapNode n in exploredNodes) n.AddExploredBy(Owner);
 
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVisibleNodes);
@@ -247,7 +253,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode n in changedVisibilityNodes) changedVisibilityChunks.Add(n.Chunk);
 
             // Redraw visibility of affected chunks
-            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Player);
+            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Owner);
         }
 
 
@@ -258,7 +264,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
         /// </summary>
-        public void UpdateVisiblity(Player player)
+        public void UpdateVisiblity(Actor player)
         {
             if (IsVisibleBy(player))
             {
@@ -596,10 +602,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the given player can see this entity.
         /// </summary>
-        public bool IsVisibleBy(Player player)
+        public bool IsVisibleBy(Actor player)
         {
             if (player == null) return true; // Everything is visible
-            if (player == Player) return true; // The own entities of a player are always visible
+            if (player == Owner) return true; // The own entities of a player are always visible
 
             // Entity is visible when any of the nodes it's standing on is visible
             return OccupiedNodes.Any(x => x.IsVisibleBy(player));
@@ -608,7 +614,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the given player has seen this entity before.
         /// </summary>
-        public bool IsExploredBy(Player player) => LastKnownPosition[player] != null;
+        public bool IsExploredBy(Actor player) => LastKnownPosition[player] != null;
 
         #endregion
 
@@ -620,7 +626,7 @@ namespace BlockmapFramework
         protected void SetOriginNode(BlockmapNode node)
         {
             // Before setting new origin, update last known position for all players seeing this entity
-            foreach (Player p in World.Players.Values)
+            foreach (Actor p in World.Actors.Values)
                 if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
 
             // Set new origin
@@ -645,12 +651,12 @@ namespace BlockmapFramework
             WorldRotation = quat;
         }
 
-        public void UpdateLastKnownPositionFor(Player p)
+        public void UpdateLastKnownPositionFor(Actor p)
         {
             LastKnownPosition[p] = WorldPosition;
             LastKnownRotation[p] = Rotation;
         }
-        public void ResetLastKnownPositionFor(Player p)
+        public void ResetLastKnownPositionFor(Actor p)
         {
             LastKnownPosition[p] = null;
             LastKnownRotation[p] = Direction.None;
@@ -692,7 +698,7 @@ namespace BlockmapFramework
             }
 
             Entity instance = world.ContentLibrary.GetEntityInstance(world, data.TypeId);
-            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.Players[data.PlayerId]);
+            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.Actors[data.PlayerId]);
             return instance;
         }
 
@@ -704,7 +710,7 @@ namespace BlockmapFramework
                 TypeId = TypeId,
                 OriginNodeId = OriginNode.Id,
                 Rotation = Rotation,
-                PlayerId = Player.Id
+                PlayerId = Owner.Id
             };
         }
 

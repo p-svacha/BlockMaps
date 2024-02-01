@@ -46,7 +46,7 @@ namespace WorldEditor
         {
             // Player Dropdown
             PlayerDropdown.ClearOptions();
-            List<string> playerOptions = World.Players.Values.Select(x => x.Name).ToList();
+            List<string> playerOptions = World.Actors.Values.Select(x => x.Name).ToList();
             PlayerDropdown.AddOptions(playerOptions);
         }
 
@@ -76,7 +76,7 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
 
-            Player owner = World.Players.Values.ToList()[PlayerDropdown.value];
+            Actor owner = World.Actors.Values.ToList()[PlayerDropdown.value];
             World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner);
         }
 

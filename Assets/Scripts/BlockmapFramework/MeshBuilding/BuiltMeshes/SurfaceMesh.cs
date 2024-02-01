@@ -95,7 +95,7 @@ namespace BlockmapFramework
             surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
         }
 
-        public override void SetVisibility(Player player)
+        public override void SetVisibility(Actor player)
         {
             // Define surface visibility array based on node visibility
             List<float> surfaceVisibilityArray = new List<float>();

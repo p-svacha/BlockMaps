@@ -7,31 +7,35 @@ namespace BlockmapFramework
     /// <summary>
     /// An actor inside a BlockMap world.
     /// </summary>
-    public class Player
+    public class Actor
     {
         public int Id { get; private set; }
         public string Name { get; private set; }
         public World World { get; private set; }
         public Color Color { get; private set; }
 
-        public Player(World world, int id, string name, Color color)
+        public List<Entity> Entities { get; private set; }
+
+        public Actor(World world, int id, string name, Color color)
         {
             World = world;
             Id = id;
             Name = name;
             Color = color;
+
+            Entities = new List<Entity>();
         }
 
         #region Save / Load
 
-        public static Player Load(World world, PlayerData data)
+        public static Actor Load(World world, ActorData data)
         {
-            return new Player(world, data.Id, data.Name, new Color(data.ColorR, data.ColorG, data.ColorB));
+            return new Actor(world, data.Id, data.Name, new Color(data.ColorR, data.ColorG, data.ColorB));
         }
 
-        public PlayerData Save()
+        public ActorData Save()
         {
-            return new PlayerData
+            return new ActorData
             {
                 Id = Id,
                 Name = Name,

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7334216841739692177}
   - component: {fileID: 4768370901270142043}
   - component: {fileID: 3855192531683989928}
+  - component: {fileID: 6183136135810700717}
   - component: {fileID: -5178562942034004295}
   m_Layer: 0
   m_Name: human
@@ -109,6 +110,18 @@ MonoBehaviour:
   MovementSpeed: 2
   CanSwim: 1
   ClimbingSkill: 2
+--- !u!114 &6183136135810700717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6425603548925115790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55bb4fb04725d6b4987d1bd6bd7b59aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!64 &-5178562942034004295
 MeshCollider:
   m_ObjectHideFlags: 0

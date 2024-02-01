@@ -26,7 +26,7 @@ namespace BlockmapFramework
         }
 
 
-        public override void SetVisibility(Player player) // same as SurfaceNode
+        public override void SetVisibility(Actor player) // same as SurfaceNode
         {
             // Define surface visibility array based on node visibility
             List<float> surfaceVisibilityArray = new List<float>();

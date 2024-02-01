@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public static class HelperFunctions
 {
@@ -345,6 +348,37 @@ public static class HelperFunctions
     public static void SetBottom(RectTransform rt, float bottom)
     {
         rt.offsetMin = new Vector2(rt.offsetMin.x, bottom);
+    }
+
+    /// <summary>
+    /// Unfocusses any focussed button/dropdown/toggle UI element so that keyboard inputs don't get 'absorbed' by the UI element.
+    /// </summary>
+    public static void UnfocusNonInputUiElements()
+    {
+        if (EventSystem.current.currentSelectedGameObject != null && (
+            EventSystem.current.currentSelectedGameObject.GetComponent<Button>() != null ||
+            EventSystem.current.currentSelectedGameObject.GetComponent<TMP_Dropdown>() != null ||
+            EventSystem.current.currentSelectedGameObject.GetComponent<Toggle>() != null
+            ))
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+    }
+
+    /// <summary>
+    /// Returns if any ui element is currently focussed.
+    /// </summary>
+    public static bool IsUiFocussed()
+    {
+        return EventSystem.current.currentSelectedGameObject != null;
+    }
+
+    /// <summary>
+    /// Returns is the mouse is currently hovering over a UI element.
+    /// </summary>
+    public static bool IsMouseOverUi()
+    {
+        return EventSystem.current.IsPointerOverGameObject();
     }
 
     #endregion

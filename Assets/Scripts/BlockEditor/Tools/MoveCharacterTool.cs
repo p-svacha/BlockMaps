@@ -57,7 +57,7 @@ namespace WorldEditor
 
             if (SelectedEntity == null) return;
             if (World.HoveredNode == null) return;
-            if (!World.HoveredNode.IsExploredBy(SelectedEntity.Player)) return;
+            if (!World.HoveredNode.IsExploredBy(SelectedEntity.Owner)) return;
 
             if (SelectedEntity.OriginNode != CacheOriginNode) PathCache.Clear(); // Clear cache when changing node
             CacheOriginNode = SelectedEntity.OriginNode;

@@ -135,7 +135,7 @@ namespace BlockmapFramework
         /// Updates the visible nodes on this chunk according to the vision of the specified player.
         /// <br/> Does not change the vision values (SeenBy, ExploredBy) of the nodes, only accesses them.
         /// </summary>
-        public void SetVisibility(Player player)
+        public void SetVisibility(Actor player)
         {
             // Node visibility
             SurfaceMesh.SetVisibility(player);

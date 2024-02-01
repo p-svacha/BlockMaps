@@ -60,7 +60,7 @@ namespace WorldEditor
             {
                 new FlatWorldGenerator(),
                 new PerlinWorldGenerator(),
-                new CTFMapGenerator()
+                new CaptureTheFlag.CTFMapGenerator()
             };
 
             // Init tools
@@ -132,16 +132,9 @@ namespace WorldEditor
             CurrentTool.UpdateTool();
 
             // Click
-            bool isMouseOverUi = EventSystem.current.IsPointerOverGameObject();
-
-            if (EventSystem.current.currentSelectedGameObject != null && (
-                EventSystem.current.currentSelectedGameObject.GetComponent<Button>() != null ||
-                EventSystem.current.currentSelectedGameObject.GetComponent<TMP_Dropdown>() != null ||
-                EventSystem.current.currentSelectedGameObject.GetComponent<Toggle>() != null
-                ))
-                EventSystem.current.SetSelectedGameObject(null); // Unfocus any focussed button/dropdown/toggle so it doesn't block input controls
-
-            bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
+            bool isMouseOverUi = HelperFunctions.IsMouseOverUi();
+            HelperFunctions.UnfocusNonInputUiElements();
+            bool isUiElementFocussed = HelperFunctions.IsUiFocussed();
 
             if (Input.GetMouseButtonDown(0) && !isMouseOverUi) CurrentTool.HandleLeftClick();
             if (Input.GetMouseButton(0) && !isMouseOverUi) CurrentTool.HandleLeftDrag();

@@ -7,46 +7,71 @@ namespace CaptureTheFlag
 {
     public class CTFGame : MonoBehaviour
     {
+        public CTFUi UI;
         public GameState State { get; private set; }
         private CTFMapGenerator MapGenerator;
         private World World;
 
-        private Player Player;
-        private Player Opponent;
+        public Player Player { get; private set; }
+        public Player Opponent { get; private set; }
+
+        public Character SelectedCharacter { get; private set; }
+
+        #region Initialize
 
         private void Start()
         {
+            UI.Init(this);
+
             MapGenerator = new CTFMapGenerator();
             MapGenerator.InitGeneration(16, 4);
             State = GameState.Loading;
         }
 
+        private void StartGame()
+        {
+            World = MapGenerator.GeneratedWorld;
+
+            // Convert world actors to CTF Players
+            Player = new Player(World.Actors[0]);
+            Opponent = new Player(World.Actors[1]);
+
+            World.SetActiveVisionActor(Player.Actor);
+
+            UI.OnStartGame();
+
+            State = GameState.YourTurn;
+        }
+
+        #endregion
+
+        #region Update
+
         private void Update()
         {
-            switch(State)
+            HelperFunctions.UnfocusNonInputUiElements();
+
+            switch (State)
             {
+                case GameState.Loading:
+                    if (MapGenerator.GenerationPhase == GenerationPhase.Done) StartGame();
+                    else MapGenerator.UpdateGeneration();
+                    break;
+
                 case GameState.YourTurn:
                     break;
             }
         }
 
-        private void FixedUpdate()
+        #endregion
+
+        #region Actions
+
+        public void SelectCharacter(Character c)
         {
-            if(State == GameState.Loading)
-            {
-                if (MapGenerator.GenerationPhase == GenerationPhase.Done) StartGame();
-                else MapGenerator.UpdateGeneration();
-            }
+            SelectedCharacter = c;
         }
 
-        private void StartGame()
-        {
-            World = MapGenerator.GeneratedWorld;
-            Player = World.Players[0];
-            Opponent = World.Players[1];
-            World.SetActiveVisionPlayer(Player);
-
-            State = GameState.YourTurn;
-        }
+        #endregion
     }
 }

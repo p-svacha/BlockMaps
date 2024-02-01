@@ -54,7 +54,7 @@ namespace WorldEditor
         {
             // Player Dropdown
             PlayerDropdown.ClearOptions();
-            List<string> playerOptions = World.Players.Values.Select(x => x.Name).ToList();
+            List<string> playerOptions = World.Actors.Values.Select(x => x.Name).ToList();
             PlayerDropdown.AddOptions(playerOptions);
         }
 
@@ -106,14 +106,11 @@ namespace WorldEditor
             if (!World.HoveredNode.IsPassable(Editor.CharacterPrefab)) return;
 
             BlockmapNode spawnNode = World.HoveredNode;
-            Player owner = World.Players.Values.ToList()[PlayerDropdown.value];
-
-            GameObject characterContainer = new GameObject("CharacterContainer");
-            characterContainer.transform.SetParent(World.transform);
+            Actor owner = World.Actors.Values.ToList()[PlayerDropdown.value];
 
             if (SelectedEntityIndex == 0) // Dynamic preset
             {
-                EditorMovingEntity newCharacter = Instantiate(Editor.CharacterPrefab, characterContainer.transform);
+                EditorMovingEntity newCharacter = Instantiate(Editor.CharacterPrefab);
                 float speed = float.Parse(SpeedInput.text);
                 float vision = float.Parse(VisionInput.text);
                 int height = int.Parse(HeightInput.text);
@@ -125,7 +122,7 @@ namespace WorldEditor
             }
             else // Fixed preset
             {
-                World.SpawnEntity(Editor.MovingEntityPresets[SelectedEntityIndex - 1], spawnNode, Direction.N, owner);
+                World.SpawnEntity(Editor.MovingEntityPresets[SelectedEntityIndex - 1], spawnNode, Direction.N, owner, updateWorld: true);
             }
         }
 

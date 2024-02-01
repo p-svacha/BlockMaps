@@ -43,7 +43,7 @@ namespace BlockmapFramework
         }
         public virtual void OnDraw() { }
         public virtual void OnMeshApplied() { }
-        public abstract void SetVisibility(Player player);
+        public abstract void SetVisibility(Actor player);
 
         public void ShowTextures(bool show)
         {
