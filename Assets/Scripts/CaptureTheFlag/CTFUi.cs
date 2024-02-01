@@ -13,9 +13,11 @@ namespace CaptureTheFlag
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
 
         [Header("Elements")]
+        public GameObject LoadingScreenOverlay;
         public GameObject CharacterSelectionContainer;
         public TextMeshProUGUI TileInfoText;
 
+        private Dictionary<Character, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
         public void Init(CTFGame game)
@@ -25,12 +27,15 @@ namespace CaptureTheFlag
 
         public void OnStartGame()
         {
+            // Character selection
             HelperFunctions.DestroyAllChildredImmediately(CharacterSelectionContainer.gameObject);
 
-            foreach(Character c in Game.Player.Characters)
+            CharacterSelection.Clear();
+            foreach (Character c in Game.Player.Characters)
             {
                 UI_CharacterSelectionPanel panel = Instantiate(CharacterSelectionPrefab, CharacterSelectionContainer.transform);
                 panel.Init(Game, c);
+                CharacterSelection.Add(c, panel);
             }
         }
 
@@ -44,6 +49,15 @@ namespace CaptureTheFlag
             text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
 
             TileInfoText.text = text;
+        }
+
+        public void SelectCharacter(Character c)
+        {
+            if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true); 
+        }
+        public void DeselectCharacter(Character c)
+        {
+            if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
         }
     }
 }

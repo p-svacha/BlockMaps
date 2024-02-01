@@ -127,12 +127,6 @@ namespace BlockmapFramework
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Wall = LayerMask.NameToLayer("Wall");
 
-            // Init camera
-            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
-            Camera.SetPosition(new Vector2(ChunkSize * 0.5f, ChunkSize * 0.5f));
-            Camera.SetZoom(10f);
-            Camera.SetAngle(225);
-
             // Init pathfinder
             Pathfinder.Init(this);
 
@@ -155,6 +149,13 @@ namespace BlockmapFramework
 
             // Draw node meshes because we need to shoot rays to generate navmesh
             DrawNodes();
+
+            // Init camera
+            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
+            BlockmapNode initialCameraFocusNode = GetSurfaceNode(new Vector2Int(0, 0));
+            Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseHeight * TILE_HEIGHT, initialCameraFocusNode.WorldCoordinates.y));
+            Camera.SetZoom(10f);
+            Camera.SetAngle(225);
 
             IsInitialized = true;
         }
@@ -1186,6 +1187,11 @@ namespace BlockmapFramework
         {
             ActiveVisionActor = actor;
             UpdateVisibility();
+        }
+
+        public void CameraJumpToFocusEntity(Entity e)
+        {
+            Camera.SetPosition(e.OriginNode.GetCenterWorldPosition());
         }
 
         #endregion
