@@ -63,12 +63,18 @@ Shader "Custom/SurfaceShader"
         fixed4 _GridColor;
         float _ShowGrid;
 
+        // Overlay texture over a single area
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
         float _TileOverlayX;
         float _TileOverlayY;
         float _TileOverlaySize;
+
+        // Overlay texture over multiple tiles repeated
+        float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
+        sampler2D _MultiOverlayTex;
+        fixed4 _MultiOverlayColor;
 
         // Material attributes
         half _Glossiness;
@@ -86,10 +92,12 @@ Shader "Custom/SurfaceShader"
         float _TileBlend_SW[256];
         float _TileBlend_SE[256];
 
+
         struct Input
         {
             float2 uv_TerrainTextures;
             float2 uv2_TileOverlayTex;
+            float2 uv2_MultiOverlayTex;
             float2 uv2_GridTex;
             float3 worldPos;
         };
@@ -149,7 +157,8 @@ Shader "Custom/SurfaceShader"
             }
             
 
-            // Check visiblity
+            // ######################################################################### VISIBILITY #########################################################################
+
             float visEpsilon = 0.1; // Pixels are drawn by this value over tile edges
             float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
             float drawPixel = (tileVisibility > 0 ||
@@ -169,11 +178,13 @@ Shader "Custom/SurfaceShader"
                 discard;
             }
 
-            float fowEpsilon = 0.01; // Fog of war epsilon
+            // ######################################################################### FOG OF WAR #########################################################################
+
+            float fowEpsilon = 0.01; // Fog of war is drawn by this value outwards of visibility
             float fullVisible = (tileVisibility > 1 ||
 
-                (relativePos.x < fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
-                (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
+                (relativePos.x < fowEpsilon && relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
+                (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
                 (relativePos.x > 1 - fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] > 1) || // extension sw
                 (relativePos.x < fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 1) || // extension se
 
@@ -182,7 +193,8 @@ Shader "Custom/SurfaceShader"
                 (relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
                 (relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 1)); // extension south
 
-            // c is the color of the current pixel
+            // ######################################################################### BASE #########################################################################
+            
             fixed4 c;
 
             // Get base color
@@ -190,6 +202,7 @@ Shader "Custom/SurfaceShader"
             int surfaceIndex = _TileSurfaces[tileIndex];
             fixed4 baseColor = GetPixelColor(IN.worldPos.xz, surfaceIndex);
             
+            // ######################################################################### BLEND #########################################################################
             
             if (relativePos.x < _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend nw
             {
@@ -263,7 +276,8 @@ Shader "Custom/SurfaceShader"
                 c = baseColor;
             }
 
-            // Selection Overlay
+            // ######################################################################### OVERLAYS #########################################################################
+
             if (_ShowTileOverlay == 1)
             {
                 float adjustedWorldPosX = IN.worldPos.x;
@@ -295,18 +309,28 @@ Shader "Custom/SurfaceShader"
                 }
             }
 
-            // Grid
+            
+            if (_ShowMultiOverlay[tileIndex] == 1)
+            {
+                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
+                c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
+            }
+            
+
+            // ######################################################################### GRID #########################################################################
             if (_ShowGrid == 1) 
             {
                 fixed4 gridColor = tex2D(_GridTex, IN.uv2_GridTex) * _GridColor;
                 c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
             }
 
-            // Fog of war
+            // ######################################################################### FOG OF WAR TINT #########################################################################
             if (fullVisible != 1)
             {
                 c = (_FogOfWarColor.a * _FogOfWarColor) + ((1 - _FogOfWarColor.a) * c);
             }
+
+            // ######################################################################### FINALIZE #########################################################################
 
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables

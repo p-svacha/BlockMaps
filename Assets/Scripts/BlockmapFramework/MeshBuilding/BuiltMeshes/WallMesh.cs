@@ -41,10 +41,9 @@ namespace BlockmapFramework
 
 
             // Pass visibility array to shader
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < Renderer.materials.Length; i++)
             {
-                renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
             }
         }
     }

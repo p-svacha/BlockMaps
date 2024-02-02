@@ -80,10 +80,8 @@ namespace BlockmapFramework
                 else surfaceBlend_SW.Add(surfaceId);
             }
 
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-
             // Set blend values for surface material only
-            Material surfaceMaterial = renderer.materials[0];
+            Material surfaceMaterial = Renderer.materials[0];
             surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
             surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlend_W);
             surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlend_E);
@@ -114,10 +112,9 @@ namespace BlockmapFramework
             }
 
             // Set visibility in all surface mesh materials
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < Renderer.materials.Length; i++)
             {
-                renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
             }
         }
     }

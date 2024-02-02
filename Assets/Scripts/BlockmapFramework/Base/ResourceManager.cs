@@ -6,6 +6,7 @@ namespace BlockmapFramework
 {
     public class ResourceManager : MonoBehaviour
     {
+        public static ResourceManager Singleton;
         private void Awake()
         {
             Singleton = GameObject.Find("ResourceManager").GetComponent<ResourceManager>();
@@ -41,7 +42,5 @@ namespace BlockmapFramework
 
         [Header("Prefabs")]
         public Projector SelectionIndicator;
-
-        public static ResourceManager Singleton;
     }
 }

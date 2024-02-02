@@ -466,7 +466,7 @@ GameObject:
   m_Component:
   - component: {fileID: 385050384}
   - component: {fileID: 385050383}
-  - component: {fileID: 385050382}
+  - component: {fileID: 385050385}
   m_Layer: 0
   m_Name: ResourceManager
   m_TagString: Untagged
@@ -474,40 +474,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &385050382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385050381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b8aaf4e4df52674fb47e9bacc11a112, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TileSelector: {fileID: 2800000, guid: a6d891d10e8d9794fa1b5c407f0a9b9b, type: 3}
-  TileSelectorN: {fileID: 2800000, guid: 02c52db03ed6e83479c848c1e5a83250, type: 3}
-  TileSelectorE: {fileID: 2800000, guid: c0a54b067cf8ea84ab21bef945359655, type: 3}
-  TileSelectorS: {fileID: 2800000, guid: 0aa9650f93ddaf242863d13cb0f0daf5, type: 3}
-  TileSelectorW: {fileID: 2800000, guid: 99a0666b6f22cda43b490eeb2348f4b6, type: 3}
-  TileSelectorNE: {fileID: 2800000, guid: 203d258f31b148048b3127c95a953fd2, type: 3}
-  TileSelectorNW: {fileID: 2800000, guid: 4becd444fff310c4e915bcdf08a35a78, type: 3}
-  TileSelectorSW: {fileID: 2800000, guid: 0dff75f8f41aa8147bf8bf6d9c628b61, type: 3}
-  TileSelectorSE: {fileID: 2800000, guid: 8ec471723fc89d84f9954a8d12386898, type: 3}
-  DynamicEntitySprite: {fileID: 21300000, guid: c17335dba143ab14199f7733d8cc6e30, type: 3}
-  TerrainToolSprite: {fileID: 21300000, guid: ce5581835b5222e4db68f5af14c92f02, type: 3}
-  SurfaceToolSprite: {fileID: 21300000, guid: 8ff6229c5d115ca4b95ce2c51ced66c6, type: 3}
-  PathToolSprite: {fileID: 21300000, guid: ca91d0ce285977640a6b0c4e1f5f23bd, type: 3}
-  AirNodeSprite: {fileID: 21300000, guid: d8a36d4ffc1b12442b73de8e530bdb6e, type: 3}
-  AirSlopeNodeSprite: {fileID: 21300000, guid: 044bf015732e2ad4997ca390ead222af, type: 3}
-  WorldGenSprite: {fileID: 21300000, guid: e8bce0960d756814dbcf908642c7e3da, type: 3}
-  StaticEntitySprite: {fileID: 21300000, guid: e535161bfa8535f4881c6e48b3eb4e6b, type: 3}
-  MovingEntitySprite: {fileID: 21300000, guid: 3a2eefe3664280140a1fefc4098a2624, type: 3}
-  MoveEntityToolSprite: {fileID: 21300000, guid: 4294e41d5468e1744b8cadb5caa41137, type: 3}
-  WaterToolSprite: {fileID: 21300000, guid: db04b434c0fac5e4abc4486ff7aa819a, type: 3}
-  WallToolSprite: {fileID: 21300000, guid: 4e3dda92530e832469a16b6e1d1bc3e4, type: 3}
-  LadderToolSprite: {fileID: 21300000, guid: 76e05eabca265d6479aff6a0d74afbfe, type: 3}
 --- !u!114 &385050383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -555,6 +521,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &385050385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 385050381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61f0f9c7892872a4ba243c7e31b92156, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ReachableTileTexture: {fileID: 2800000, guid: 6939c8b398ef6bd4da6c113bdd2de8b3, type: 3}
 --- !u!1 &481135217
 GameObject:
   m_ObjectHideFlags: 0

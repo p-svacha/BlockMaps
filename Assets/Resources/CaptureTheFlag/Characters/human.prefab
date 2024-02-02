@@ -123,6 +123,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Avatar: {fileID: 21300000, guid: 5af7b01b4e7c28b46bd03261fcf232a5, type: 3}
+  MaxActionPoints: 10
+  MaxStamina: 80
+  StaminaRegeneration: 8
 --- !u!64 &-5178562942034004295
 MeshCollider:
   m_ObjectHideFlags: 0

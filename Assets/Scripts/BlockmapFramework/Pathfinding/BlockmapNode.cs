@@ -553,6 +553,17 @@ namespace BlockmapFramework
             }
         }
 
+        public void ShowMultiOverlay(Texture2D texture, Color color)
+        {
+            Mesh.SetMultiOverlayTexture(texture, color);
+            Mesh.ShowMultiOverlayOnNode(LocalCoordinates);
+        }
+        public void HideMultiOverlay()
+        {
+            Mesh.HideMultiOverlayOnNode(LocalCoordinates);
+        }
+
+
         public void SetMesh(ChunkMesh mesh)
         {
             Mesh = mesh;

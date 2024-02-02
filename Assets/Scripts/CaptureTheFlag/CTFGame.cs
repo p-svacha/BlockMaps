@@ -16,6 +16,7 @@ namespace CaptureTheFlag
         public Player Opponent { get; private set; }
 
         public Character SelectedCharacter { get; private set; }
+        private HashSet<BlockmapNode> HighlightedNodes = new();
 
         #region Game Loop
 
@@ -116,16 +117,31 @@ namespace CaptureTheFlag
             {
                 UI.SelectCharacter(c);
                 c.Entity.SetSelected(true);
+
+                HighlightNodes(c.GetReachableNodes()); // Highlight reachable nodes
             }
         }
         private void DeselectCharacter()
         {
+            UnhighlightNodes();
             if (SelectedCharacter != null)
             {
                 UI.DeselectCharacter(SelectedCharacter);
                 SelectedCharacter.Entity.SetSelected(false);
             }
             SelectedCharacter = null;
+        }
+
+        private void HighlightNodes(HashSet<BlockmapNode> nodes)
+        {
+            HighlightedNodes = nodes;
+            foreach (BlockmapNode node in HighlightedNodes)
+                node.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
+        }
+        private void UnhighlightNodes()
+        {
+            foreach (BlockmapNode node in HighlightedNodes) node.HideMultiOverlay();
+            HighlightedNodes.Clear();
         }
 
         #endregion

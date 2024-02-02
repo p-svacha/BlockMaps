@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -13,6 +14,8 @@ namespace BlockmapFramework
         protected Chunk Chunk { get; private set; }
 
         protected MeshBuilder MeshBuilder;
+        protected MeshRenderer Renderer;
+        private bool[] ShowMultiOverlay;
 
         protected void OnInit(Chunk chunk)
         {
@@ -20,6 +23,8 @@ namespace BlockmapFramework
             World = chunk.World;
             transform.SetParent(chunk.transform);
             transform.localPosition = Vector3.zero;
+
+            ShowMultiOverlay = new bool[256];
         }
 
         public void Draw()
@@ -29,14 +34,14 @@ namespace BlockmapFramework
             OnDraw();
 
             MeshBuilder.ApplyMesh();
+            Renderer = GetComponent<MeshRenderer>();
 
             // Set chunk values for all materials
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < Renderer.materials.Length; i++)
             {
-                renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
+                Renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
+                Renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
+                Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
             }
 
             OnMeshApplied();
@@ -47,37 +52,55 @@ namespace BlockmapFramework
 
         public void ShowTextures(bool show)
         {
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
-                renderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
         }
         public void ShowGrid(bool show)
         {
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
-                renderer.materials[i].SetFloat("_ShowGrid", show ? 1 : 0);
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloat("_ShowGrid", show ? 1 : 0);
         }
 
         public void ShowOverlay(bool show)
         {
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
-                renderer.materials[i].SetFloat("_ShowTileOverlay", show ? 1 : 0);
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloat("_ShowTileOverlay", show ? 1 : 0);
         }
         public void ShowOverlay(Vector2Int localCoordinates, Texture2D texture, Color color, int size)
         {
             ShowOverlay(true);
 
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < Renderer.materials.Length; i++)
             {
-                renderer.materials[i].SetTexture("_TileOverlayTex", texture);
-                renderer.materials[i].SetFloat("_TileOverlayX", localCoordinates.x);
-                renderer.materials[i].SetFloat("_TileOverlayY", localCoordinates.y);
-                renderer.materials[i].SetFloat("_TileOverlaySize", size);
-                renderer.materials[i].SetColor("_TileOverlayColor", color);
+                Renderer.materials[i].SetTexture("_TileOverlayTex", texture);
+                Renderer.materials[i].SetFloat("_TileOverlayX", localCoordinates.x);
+                Renderer.materials[i].SetFloat("_TileOverlayY", localCoordinates.y);
+                Renderer.materials[i].SetFloat("_TileOverlaySize", size);
+                Renderer.materials[i].SetColor("_TileOverlayColor", color);
             }
+        }
 
+        public void SetMultiOverlayTexture(Texture2D texture, Color color)
+        {
+            for (int i = 0; i < Renderer.materials.Length; i++)
+            {
+                Renderer.materials[i].SetTexture("_MultiOverlayTex", texture);
+                Renderer.materials[i].SetColor("_MultiOverlayColor", color);
+            }
+        }
+        public void ShowMultiOverlayOnNode(Vector2Int localCoordinates)
+        {
+            ShowMultiOverlay[localCoordinates.x * 16 + localCoordinates.y] = true;
+
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloatArray("_ShowMultiOverlay", ShowMultiOverlay.Select(b => b ? 1.0f : 0.0f).ToArray());
+        }
+        public void HideMultiOverlayOnNode(Vector2Int localCoordinates)
+        {
+            ShowMultiOverlay[localCoordinates.x * 16 + localCoordinates.y] = false;
+
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloatArray("_ShowMultiOverlay", ShowMultiOverlay.Select(b => b ? 1.0f : 0.0f).ToArray());
         }
     }
 }

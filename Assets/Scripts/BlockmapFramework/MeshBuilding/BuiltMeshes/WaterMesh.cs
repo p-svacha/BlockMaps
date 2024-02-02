@@ -45,10 +45,9 @@ namespace BlockmapFramework
             }
 
             // Set visibility in all surface mesh materials
-            MeshRenderer renderer = GetComponent<MeshRenderer>();
-            for (int i = 0; i < renderer.materials.Length; i++)
+            for (int i = 0; i < Renderer.materials.Length; i++)
             {
-                renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
             }
         }
     }
