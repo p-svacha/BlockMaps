@@ -28,7 +28,7 @@ namespace CaptureTheFlag
             Game = game;
             Character = character;
 
-            TitleText.text = character.Entity.Name;
+            TitleText.text = character.Name;
             PreviewImage.sprite = character.Avatar;
             SelectionButton.onClick.AddListener(SelectionButton_OnClick);
 

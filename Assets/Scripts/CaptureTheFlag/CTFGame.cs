@@ -1,6 +1,7 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CaptureTheFlag
@@ -118,7 +119,8 @@ namespace CaptureTheFlag
                 UI.SelectCharacter(c);
                 c.Entity.SetSelected(true);
 
-                HighlightNodes(c.GetReachableNodes()); // Highlight reachable nodes
+               
+                HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
             }
         }
         private void DeselectCharacter()

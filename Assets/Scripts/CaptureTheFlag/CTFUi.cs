@@ -16,6 +16,7 @@ namespace CaptureTheFlag
         public GameObject LoadingScreenOverlay;
         public GameObject CharacterSelectionContainer;
         public TextMeshProUGUI TileInfoText;
+        public UI_CharacterInfo CharacterInfo;
 
         private Dictionary<Character, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
@@ -37,6 +38,8 @@ namespace CaptureTheFlag
                 panel.Init(Game, c);
                 CharacterSelection.Add(c, panel);
             }
+
+            CharacterInfo.gameObject.SetActive(false);
         }
 
         private void Update()
@@ -53,11 +56,13 @@ namespace CaptureTheFlag
 
         public void SelectCharacter(Character c)
         {
-            if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true); 
+            if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
+            CharacterInfo.Init(c);
         }
         public void DeselectCharacter(Character c)
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
+            CharacterInfo.gameObject.SetActive(false);
         }
     }
 }
