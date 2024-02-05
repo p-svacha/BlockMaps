@@ -3,6 +3,8 @@ Big Features to Add:
 - Improve GitHub page with desc and screenshots
 	> make a release
 
+- Make MovingEntities fire event when reaching target, just like world
+
 - make ctf map generator
 
 	> some walls!!

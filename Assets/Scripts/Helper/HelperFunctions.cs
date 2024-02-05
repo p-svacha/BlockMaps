@@ -382,4 +382,20 @@ public static class HelperFunctions
     }
 
     #endregion
+
+    #region Color
+
+    public static Color SmoothLerpColor(Color c1, Color c2, float t)
+    {
+        t = Mathf.Clamp01(t); // Ensure t is in the range [0, 1]
+        return Color.Lerp(c1, c2, SmoothStep(t));
+    }
+
+    // SmoothStep function for smoother interpolation
+    private static float SmoothStep(float t)
+    {
+        return t * t * (3f - 2f * t);
+    }
+
+    #endregion
 }

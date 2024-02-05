@@ -9,6 +9,8 @@ namespace CaptureTheFlag
     public class CTFGame : MonoBehaviour
     {
         public CTFUi UI;
+        public LineRenderer PathPreview;
+
         public GameState State { get; private set; }
         private CTFMapGenerator MapGenerator;
         public World World { get; private set; }
@@ -38,6 +40,9 @@ namespace CaptureTheFlag
             // Convert world actors to CTF Players
             Player = new Player(World.Actors[0]);
             Opponent = new Player(World.Actors[1]);
+
+            // Hooks
+            World.OnHoveredNodeChanged += OnHoveredNodeChanged;
 
             // Vision
             World.ShowTextures(true);
@@ -99,8 +104,32 @@ namespace CaptureTheFlag
                 if (!HelperFunctions.IsMouseOverUi())
                     SelectCharacter(hoveredCharacter);
             }
-            
+        }
 
+        private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
+        {
+            UpdateHoveredMove();
+        }
+
+        /// <summary>
+        /// Shows the path preview line to the currently hovered node and shows the cost in the character info.
+        /// </summary>
+        private void UpdateHoveredMove()
+        {
+            PathPreview.gameObject.SetActive(false);
+
+            // Check if its a valid hover
+            if (World.HoveredNode == null) return;
+            if (!World.HoveredNode.IsExploredBy(Player.Actor)) return;
+            if (SelectedCharacter == null) return;
+            if (!SelectedCharacter.PossibleMoves.ContainsKey(World.HoveredNode)) return;
+
+            // It's valid
+            PathPreview.gameObject.SetActive(true);
+
+            Movement move = SelectedCharacter.PossibleMoves[World.HoveredNode];
+            UI.CharacterInfo.ShowActionPreview(move.Cost);
+            Pathfinder.ShowPathPreview(PathPreview, move.Path, 0.1f, Color.white);
         }
 
         #endregion
@@ -126,6 +155,7 @@ namespace CaptureTheFlag
         private void DeselectCharacter()
         {
             UnhighlightNodes();
+            PathPreview.gameObject.SetActive(false);
             if (SelectedCharacter != null)
             {
                 UI.DeselectCharacter(SelectedCharacter);

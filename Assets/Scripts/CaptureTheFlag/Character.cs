@@ -65,7 +65,7 @@ namespace CaptureTheFlag
             // Start with origin node
             priorityQueue.Add(Entity.OriginNode, 0f);
             nodeCosts.Add(Entity.OriginNode, 0f);
-            nodePaths.Add(Entity.OriginNode, new List<BlockmapNode>());
+            nodePaths.Add(Entity.OriginNode, new List<BlockmapNode>() { Entity.OriginNode });
 
             while(priorityQueue.Count > 0)
             {
@@ -83,6 +83,7 @@ namespace CaptureTheFlag
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
                     if (!t.Value.CanPass(Entity)) continue; // transition not passable for this character
+                    if (!t.Key.IsExploredBy(Entity.Owner)) continue; // node not explored
 
                     // Node has not yet been visited or cost is lower than previously lowest cost => Update
                     if(!nodeCosts.ContainsKey(targetNode) || totalCost < nodeCosts[targetNode])

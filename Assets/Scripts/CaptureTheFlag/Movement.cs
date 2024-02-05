@@ -11,7 +11,7 @@ namespace CaptureTheFlag
     public class Movement
     {
         /// <summary>
-        /// Exact order of nodes that are traversed for this movement, excluding the origin node and including the target node.
+        /// Exact order of nodes that are traversed for this movement, including the origin and target node.
         /// </summary>
         public List<BlockmapNode> Path { get; private set; }
 

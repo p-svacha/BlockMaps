@@ -25,8 +25,14 @@ namespace CaptureTheFlag
             TitleText.text = c.Name;
             MovementText.text = c.MovementSkill.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
-            ActionBar.UpdateValues(c.ActionPoints, c.MaxActionPoints, c.ActionPoints.ToString() + "/" + c.MaxActionPoints.ToString());
-            StaminaBar.UpdateValues(c.Stamina, c.MaxStamina, c.Stamina.ToString() + "/" + c.MaxStamina.ToString());
+            ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, c.ActionPoints.ToString() + "/" + c.MaxActionPoints.ToString());
+            StaminaBar.SetValue(c.Stamina, c.MaxStamina, c.Stamina.ToString() + "/" + c.MaxStamina.ToString());
+        }
+
+        public void ShowActionPreview(float cost)
+        {
+            ActionBar.SetPendingValue(Character.ActionPoints, Character.ActionPoints - cost, Character.MaxActionPoints, valueFormat: "0.#", ActionBar.ProgressBar.GetComponent<Image>().color, Color.black);
+            StaminaBar.SetPendingValue(Character.Stamina, Character.Stamina - cost, Character.MaxStamina, valueFormat: "0.#", StaminaBar.ProgressBar.GetComponent<Image>().color, Color.black);
         }
     }
 }
