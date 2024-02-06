@@ -27,6 +27,9 @@ namespace BlockmapFramework
         public bool CanSwim;
         public ClimbingCategory ClimbingSkill;
 
+        // Events
+        public event System.Action OnTargetReached;
+
         protected override void OnInitialized()
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");
@@ -60,9 +63,9 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Finds and walks towards the target node
+        /// Finds a path and walks towards the target node
         /// </summary>
-        public void GoTo(BlockmapNode target)
+        public void MoveTo(BlockmapNode target)
         {
             // Get node where to start from. If we are moving take the next node in our current path. Else just where we are standing now.
             BlockmapNode startNode = IsMoving ? TargetPath[0] : OriginNode;
@@ -77,13 +80,21 @@ namespace BlockmapFramework
                 return;
             }
 
-            if(!IsMoving) // If we are standing still, set the first transition and discard the first node since its the one we stand on and therefore already reached it.
+            // Set new path
+            Move(path);
+        }
+
+        /// <summary>
+        /// Starts moving according to the given path.
+        /// </summary>
+        public void Move(List<BlockmapNode> path)
+        {
+            if (!IsMoving) // If we are standing still, set the first transition and discard the first node since its the one we stand on and therefore already reached it.
             {
                 SetCurrentTransition(path[0].Transitions[path[1]]);
                 path.RemoveAt(0);
             }
 
-            // Set new path
             TargetPath = path;
             Target = path.Last();
             IsMoving = true;
@@ -101,7 +112,7 @@ namespace BlockmapFramework
         /// </summary>
         private void UpdateTargetPath()
         {
-            GoTo(Target);
+            MoveTo(Target);
         }
 
         /// <summary>
@@ -137,7 +148,7 @@ namespace BlockmapFramework
             else
             {
                 Stop();
-                OnTargetReached();
+                OnTargetReached.Invoke();
             }
         }
 
@@ -160,7 +171,6 @@ namespace BlockmapFramework
         }
 
         protected virtual void OnStopMoving() { }
-        protected virtual void OnTargetReached() { }
 
     }
 }

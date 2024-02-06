@@ -50,8 +50,8 @@ namespace CaptureTheFlag
             UI.LoadingScreenOverlay.SetActive(false);
 
             // Start Game
-            foreach (Character c in Player.Characters) c.OnStartGame();
-            foreach (Character c in Opponent.Characters) c.OnStartGame();
+            foreach (Character c in Player.Characters) c.OnStartGame(this);
+            foreach (Character c in Opponent.Characters) c.OnStartGame(this);
             UI.OnStartGame();
 
             // Camera
@@ -104,6 +104,19 @@ namespace CaptureTheFlag
                 if (!HelperFunctions.IsMouseOverUi())
                     SelectCharacter(hoveredCharacter);
             }
+
+            // Right click
+            if(Input.GetMouseButtonDown(1))
+            {
+                // Move
+                if(SelectedCharacter != null && 
+                    World.HoveredNode != null &&
+                    !SelectedCharacter.IsMoving
+                    && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Movement move))
+                {
+                    MoveCharacter(move);
+                }
+            }
         }
 
         private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
@@ -117,21 +130,41 @@ namespace CaptureTheFlag
         private void UpdateHoveredMove()
         {
             if (SelectedCharacter == null) return;
+            if (SelectedCharacter.IsMoving) return;
 
             PathPreview.gameObject.SetActive(false);
             UI.CharacterInfo.Init(SelectedCharacter);
 
             // Check if we hover a possible move
-            if (World.HoveredNode == null) return;
-            if (!World.HoveredNode.IsExploredBy(Player.Actor)) return;
-            if (!SelectedCharacter.PossibleMoves.ContainsKey(World.HoveredNode)) return;
+            BlockmapNode targetNode = World.HoveredNode;
+            if (targetNode == null) return;
+            if (!targetNode.IsExploredBy(Player.Actor)) return;
 
-            // It's valid
-            PathPreview.gameObject.SetActive(true);
 
-            Movement move = SelectedCharacter.PossibleMoves[World.HoveredNode];
-            UI.CharacterInfo.ShowActionPreview(move.Cost);
-            Pathfinder.ShowPathPreview(PathPreview, move.Path, 0.1f, Color.white);
+            // Can move there in this turn
+            if (SelectedCharacter.PossibleMoves.ContainsKey(targetNode))
+            {
+                PathPreview.gameObject.SetActive(true);
+
+                Movement move = SelectedCharacter.PossibleMoves[targetNode];
+                UI.CharacterInfo.ShowActionPreview(move.Cost);
+                Pathfinder.ShowPathPreview(PathPreview, move.Path, 0.1f, new Color(1f, 1f, 1f, 0.5f));
+            }
+            // Can not move there in this turn
+            else
+            {
+                List<BlockmapNode> path = Pathfinder.GetPath(SelectedCharacter.Entity, SelectedCharacter.Entity.OriginNode, targetNode, ignoreUnexploredNodes: true);
+                if (path == null) return; // no viable path there
+
+                PathPreview.gameObject.SetActive(true);
+                Pathfinder.ShowPathPreview(PathPreview, path, 0.1f, new Color(1f, 0f, 0f, 0.5f));
+            }
+        }
+
+        public void OnMovementDone(Character c)
+        {
+            c.UpdatePossibleMoves();
+            if (SelectedCharacter == c) SelectCharacter(c); // Reselect to update everything
         }
 
         #endregion
@@ -149,7 +182,6 @@ namespace CaptureTheFlag
             {
                 UI.SelectCharacter(c);
                 c.Entity.SetSelected(true);
-
                
                 HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
             }
@@ -164,6 +196,11 @@ namespace CaptureTheFlag
                 SelectedCharacter.Entity.SetSelected(false);
             }
             SelectedCharacter = null;
+        }
+
+        public void MoveCharacter(Movement move)
+        {
+            move.Character.Entity.Move(move.Path);
         }
 
         private void HighlightNodes(HashSet<BlockmapNode> nodes)

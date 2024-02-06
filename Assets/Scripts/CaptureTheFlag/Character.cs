@@ -10,6 +10,7 @@ namespace CaptureTheFlag
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
+        public CTFGame Game;
         public MovingEntity Entity { get; private set; }
 
         [Header("Attributes")]
@@ -25,15 +26,20 @@ namespace CaptureTheFlag
         public float Stamina { get; private set; }
         public Dictionary<BlockmapNode, Movement> PossibleMoves { get; private set; }
 
+        // Event
+        public event System.Action OnTargetReached;
+
         private void Awake()
         {
             Entity = GetComponent<MovingEntity>(); 
         }
 
-        public void OnStartGame()
+        public void OnStartGame(CTFGame game)
         {
+            Game = game;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
+            Entity.OnTargetReached += () => Game.OnMovementDone(this);
         }
 
         public void OnStartTurn()
@@ -45,7 +51,7 @@ namespace CaptureTheFlag
             UpdatePossibleMoves();
         }
 
-        private void UpdatePossibleMoves()
+        public void UpdatePossibleMoves()
         {
             PossibleMoves = GetPossibleMoves();
         }
@@ -101,12 +107,14 @@ namespace CaptureTheFlag
                             priorityQueue[targetNode] = totalCost;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Movement(this, nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
 
             return movements;
         }
+
+        public bool IsMoving => Entity.IsMoving;
     }
 }

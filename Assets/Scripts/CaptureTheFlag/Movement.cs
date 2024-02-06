@@ -11,6 +11,11 @@ namespace CaptureTheFlag
     public class Movement
     {
         /// <summary>
+        /// The character that the movement is for.
+        /// </summary>
+        public Character Character { get; private set; }
+
+        /// <summary>
         /// Exact order of nodes that are traversed for this movement, including the origin and target node.
         /// </summary>
         public List<BlockmapNode> Path { get; private set; }
@@ -20,8 +25,9 @@ namespace CaptureTheFlag
         /// </summary>
         public float Cost { get; private set; }
 
-        public Movement(List<BlockmapNode> path, float cost)
+        public Movement(Character c, List<BlockmapNode> path, float cost)
         {
+            Character = c;
             Path = path;
             Cost = cost;
         }

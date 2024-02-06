@@ -107,7 +107,7 @@ MonoBehaviour:
   BlocksVision: 0
   RequiresFlatTerrain: 0
   PlayerColorMaterialIndex: 0
-  MovementSpeed: 2
+  MovementSpeed: 8
   CanSwim: 1
   ClimbingSkill: 2
 --- !u!114 &6183136135810700717

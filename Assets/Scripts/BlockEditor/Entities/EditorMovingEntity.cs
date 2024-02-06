@@ -43,7 +43,7 @@ namespace WorldEditor
             {
                 targetNode = World.GetRandomPassableNode(this);
             }
-            GoTo(targetNode);
+            MoveTo(targetNode);
         }
 
         protected override void OnNewPath()

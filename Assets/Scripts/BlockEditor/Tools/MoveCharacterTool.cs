@@ -95,7 +95,7 @@ namespace WorldEditor
 
         public override void HandleRightClick()
         {
-            if (SelectedEntity != null && TargetPath != null) SelectedEntity.GoTo(World.HoveredNode);
+            if (SelectedEntity != null && TargetPath != null) SelectedEntity.MoveTo(World.HoveredNode);
         }
 
         public override void OnDeselect()
