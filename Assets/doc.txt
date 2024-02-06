@@ -122,11 +122,6 @@ Big Features to Add:
 
 
 -------- CTF ------------
-- Only take explored nodes into account in UpdatePossibleMoves
-- Show path preview on currently hovered node
-	> Blinking action/stamina cost on hover on a node to see how much moving there would cost
-- Tooltip targets to stat icons and progress bar
-
 - Rightclick to move to a node
 	> reduce action / stamina
 	> recalculato possible moves

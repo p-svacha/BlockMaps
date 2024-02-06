@@ -14,6 +14,7 @@ namespace CaptureTheFlag
         public TextMeshProUGUI TitleText;
         public TextMeshProUGUI MovementText;
         public TextMeshProUGUI StaminaRegenText;
+        public TextMeshProUGUI VisionText;
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
@@ -25,6 +26,7 @@ namespace CaptureTheFlag
             TitleText.text = c.Name;
             MovementText.text = c.MovementSkill.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
+            VisionText.text = c.Entity.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, c.ActionPoints.ToString() + "/" + c.MaxActionPoints.ToString());
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, c.Stamina.ToString() + "/" + c.MaxStamina.ToString());
         }

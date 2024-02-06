@@ -116,12 +116,14 @@ namespace CaptureTheFlag
         /// </summary>
         private void UpdateHoveredMove()
         {
-            PathPreview.gameObject.SetActive(false);
+            if (SelectedCharacter == null) return;
 
-            // Check if its a valid hover
+            PathPreview.gameObject.SetActive(false);
+            UI.CharacterInfo.Init(SelectedCharacter);
+
+            // Check if we hover a possible move
             if (World.HoveredNode == null) return;
             if (!World.HoveredNode.IsExploredBy(Player.Actor)) return;
-            if (SelectedCharacter == null) return;
             if (!SelectedCharacter.PossibleMoves.ContainsKey(World.HoveredNode)) return;
 
             // It's valid
