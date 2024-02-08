@@ -30,6 +30,7 @@ namespace BlockmapFramework
         // Events
         public event System.Action OnTargetReached;
 
+
         protected override void OnInitialized()
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");
@@ -49,7 +50,7 @@ namespace BlockmapFramework
                 if (OriginNode != currentOriginNode)
                 {
                     SetOriginNode(currentOriginNode);
-                    World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
+                    if(BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
                 }
                 if(finishedTransition) ReachNextNode();
 
@@ -148,7 +149,7 @@ namespace BlockmapFramework
             else
             {
                 Stop();
-                OnTargetReached.Invoke();
+                OnTargetReached?.Invoke();
             }
         }
 

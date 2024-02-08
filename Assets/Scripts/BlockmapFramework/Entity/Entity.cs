@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -33,7 +34,7 @@ namespace BlockmapFramework
         /// <summary>
         /// What direction this entity is facing. [N/E/S/W]
         /// </summary>
-        public Direction Rotation { get; protected set; }
+        public Direction Rotation { get; private set; }
 
         /// <summary>
         /// The exact world position this entity is at the moment.
@@ -42,8 +43,8 @@ namespace BlockmapFramework
         public Vector3 WorldPosition { get; private set; }
 
         /// <summary>
-        /// The exact world rotation this entity has at the moment.
-        /// </br> Equals transform.rotation when the entity is visible (in vision system).
+        /// The exact world rotation this entity is rotated at at the moment.
+        /// </br> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
         public Quaternion WorldRotation { get; private set; }
 
@@ -54,7 +55,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Stores the direction that each player has seen this entity facing at the last time.
         /// </summary>
-        public Dictionary<Actor, Direction> LastKnownRotation { get; private set; }
+        public Dictionary<Actor, Quaternion?> LastKnownRotation { get; private set; }
 
 
         /// <summary>
@@ -111,6 +112,13 @@ namespace BlockmapFramework
         private MeshCollider MeshCollider; // used for hovering and selecting with cursor
         private BoxCollider VisionCollider; // used for vision checks for entites
 
+        // Performance Profilers
+        static readonly ProfilerMarker pm_SetOriginNode = new ProfilerMarker("SetOriginNode");
+        static readonly ProfilerMarker pm_UpdateVision = new ProfilerMarker("UpdateVision");
+        static readonly ProfilerMarker pm_GetVisibleNodes = new ProfilerMarker("GetVisibleNodes");
+        static readonly ProfilerMarker pm_GetNodeVision = new ProfilerMarker("GetNodeVision");
+        static readonly ProfilerMarker pm_Look = new ProfilerMarker("Look");
+
         #region Initialize
 
         public void Init(int id, World world, BlockmapNode origin, Direction rotation, Actor player)
@@ -125,14 +133,13 @@ namespace BlockmapFramework
 
             LastKnownPosition = new Dictionary<Actor, Vector3?>();
             foreach (Actor p in world.Actors.Values) LastKnownPosition.Add(p, null);
-            LastKnownRotation = new Dictionary<Actor, Direction>();
-            foreach (Actor p in world.Actors.Values) LastKnownRotation.Add(p, Direction.None);
+            LastKnownRotation = new Dictionary<Actor, Quaternion?>();
+            foreach (Actor p in world.Actors.Values) LastKnownRotation.Add(p, null);
 
             World = world;
             Owner = player;
             Rotation = rotation;
             WorldPosition = GetWorldPosition(world, origin, rotation);
-            WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
 
             // Create a mesh collider for selecting the entity
             gameObject.layer = World.Layer_EntityMesh;
@@ -214,12 +221,16 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVision()
         {
+            pm_UpdateVision.Begin();
+
             // Remove entity vision from previously visible nodes
             HashSet<BlockmapNode> previousVisibleNodes = new HashSet<BlockmapNode>(VisibleNodes);
             foreach (BlockmapNode n in previousVisibleNodes) n.RemoveVisionBy(this);
 
             // Get list of everything that this entity currently sees
+            pm_GetVisibleNodes.Begin();
             GetVisibleNodes(OriginNode, out HashSet<BlockmapNode> visibleNodes, out HashSet<BlockmapNode> exploredNodes, out HashSet<Entity> visibleEntities);
+            pm_GetVisibleNodes.End();
 
             // Update last known position and rotation of all currently visible entities
             foreach (Entity e in visibleEntities) e.UpdateLastKnownPositionFor(Owner);
@@ -254,6 +265,8 @@ namespace BlockmapFramework
 
             // Redraw visibility of affected chunks
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Owner);
+
+            pm_UpdateVision.End();
         }
 
 
@@ -266,6 +279,7 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisiblity(Actor player)
         {
+            // Entity is currently visible => render normally at current position
             if (IsVisibleBy(player))
             {
                 Renderer.enabled = true;
@@ -276,16 +290,20 @@ namespace BlockmapFramework
 
                 foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0);
             }
+
+            // Entity was explored before but not currently visible => render transparent at last known position
             else if (IsExploredBy(player))
             {
                 Renderer.enabled = true;
                 Renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
 
                 transform.position = LastKnownPosition[player].Value;
-                transform.rotation = HelperFunctions.Get2dRotationByDirection(LastKnownRotation[player]);
+                transform.rotation = LastKnownRotation[player].Value;
 
                 foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0.5f);
             }
+
+            // Entity was not yet explored => don't render it
             else Renderer.enabled = false;
         }
 
@@ -420,7 +438,9 @@ namespace BlockmapFramework
 
                     foreach(BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
                     {
+                        pm_GetNodeVision.Begin();
                         VisionType vision = GetNodeVision(targetNode);
+                        pm_GetNodeVision.End();
 
                         if (vision == VisionType.Visible)
                         {
@@ -449,7 +469,9 @@ namespace BlockmapFramework
 
             Vector3 nodeCenter = targetNode.GetCenterWorldPosition();
             // Shoot ray from eye to the node with infinite range and check if we hit the correct node
+            pm_Look.Begin();
             RaycastHit? nodeHit = Look(nodeCenter);
+            pm_Look.End();
 
             if (nodeHit != null)
             {
@@ -625,6 +647,8 @@ namespace BlockmapFramework
         /// </summary>
         protected void SetOriginNode(BlockmapNode node)
         {
+            pm_SetOriginNode.Begin();
+
             // Before setting new origin, update last known position for all players seeing this entity
             foreach (Actor p in World.Actors.Values)
                 if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
@@ -633,9 +657,14 @@ namespace BlockmapFramework
             OriginNode = node;
             UpdateOccupiedNodes();
 
+            // Update visibility since it could have gone out of / into vision
+            UpdateVisiblity(World.ActiveVisionActor);
+
             // Update position of vision collider
             VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
             VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+
+            pm_SetOriginNode.End();
         }
 
         /// <summary>
@@ -646,6 +675,10 @@ namespace BlockmapFramework
         {
             WorldPosition = pos;
         }
+        /// <summary>
+        /// Sets the direction this entity is currently facing.
+        /// <br/> Only gets rendered in that rotation there if actually visible.
+        /// </summary>
         public void SetWorldRotation(Quaternion quat)
         {
             WorldRotation = quat;
@@ -654,12 +687,12 @@ namespace BlockmapFramework
         public void UpdateLastKnownPositionFor(Actor p)
         {
             LastKnownPosition[p] = WorldPosition;
-            LastKnownRotation[p] = Rotation;
+            LastKnownRotation[p] = WorldRotation;
         }
         public void ResetLastKnownPositionFor(Actor p)
         {
             LastKnownPosition[p] = null;
-            LastKnownRotation[p] = Direction.None;
+            LastKnownRotation[p] = null;
         }
 
         /// <summary>

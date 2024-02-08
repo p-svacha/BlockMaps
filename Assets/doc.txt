@@ -1,20 +1,16 @@
 Big Features to Add:
 
-- Performance Test on AI Movement: SetOriginNode downwoards with different Profilers
-
 - Add multi overlay functionality to nodematerialshader (Then test on water and air ndoes)
 
 - CTF: AI player and AI moves
 	> just walk randomly
 	> move camera to character when walking through visible nodes
 
-CTF: Moving character on same tile as enemy flag wins the game
+- CTF: Moving character on same tile as enemy flag wins the game
 
-- make ctf map generator
-	> some walls!!
-	> some air paths!!
-
-
+- Improve ctf map generator
+	> Add some walls
+	> Add some air paths
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation

@@ -107,6 +107,8 @@ namespace BlockmapFramework
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
 
+
+
         #region Init
 
         /// <summary>
