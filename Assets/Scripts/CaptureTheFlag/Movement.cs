@@ -6,30 +6,24 @@ using UnityEngine;
 namespace CaptureTheFlag
 {
     /// <summary>
-    /// A movement stores the path and cost for moving from one node to another with default movement for a specific character.
+    /// An action for default moving from one node to another.
     /// </summary>
-    public class Movement
+    public class Movement : CharacterAction
     {
-        /// <summary>
-        /// The character that the movement is for.
-        /// </summary>
-        public Character Character { get; private set; }
-
         /// <summary>
         /// Exact order of nodes that are traversed for this movement, including the origin and target node.
         /// </summary>
         public List<BlockmapNode> Path { get; private set; }
 
-        /// <summary>
-        /// Amount of action points and stamina that gets reduced when taking this movement.
-        /// </summary>
-        public float Cost { get; private set; }
-
-        public Movement(Character c, List<BlockmapNode> path, float cost)
+        public Movement(List<BlockmapNode> path, float cost)
         {
-            Character = c;
             Path = path;
             Cost = cost;
+        }
+
+        public override void Perform(Character c)
+        {
+            c.Entity.Move(Path);
         }
     }
 }

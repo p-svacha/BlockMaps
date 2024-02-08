@@ -27,8 +27,8 @@ namespace CaptureTheFlag
             MovementText.text = c.MovementSkill.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
             VisionText.text = c.Entity.VisionRange.ToString();
-            ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, c.ActionPoints.ToString() + "/" + c.MaxActionPoints.ToString());
-            StaminaBar.SetValue(c.Stamina, c.MaxStamina, c.Stamina.ToString() + "/" + c.MaxStamina.ToString());
+            ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
+            StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
         }
 
         public void ShowActionPreview(float cost)

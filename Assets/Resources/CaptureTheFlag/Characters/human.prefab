@@ -122,11 +122,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55bb4fb04725d6b4987d1bd6bd7b59aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Game: {fileID: 0}
   Avatar: {fileID: 21300000, guid: 5af7b01b4e7c28b46bd03261fcf232a5, type: 3}
   Name: Human
   MaxActionPoints: 10
-  MaxStamina: 100
-  StaminaRegeneration: 8
+  MaxStamina: 60
+  StaminaRegeneration: 6
   MovementSkill: 10
 --- !u!64 &-5178562942034004295
 MeshCollider:

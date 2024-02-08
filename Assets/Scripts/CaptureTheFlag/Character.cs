@@ -12,6 +12,7 @@ namespace CaptureTheFlag
 
         public CTFGame Game;
         public MovingEntity Entity { get; private set; }
+        public Player Player { get; private set; }
 
         [Header("Attributes")]
         public Sprite Avatar;
@@ -25,6 +26,7 @@ namespace CaptureTheFlag
         public float ActionPoints { get; private set; }
         public float Stamina { get; private set; }
         public Dictionary<BlockmapNode, Movement> PossibleMoves { get; private set; }
+        private CharacterAction CurrentAction;
 
         // Event
         public event System.Action OnTargetReached;
@@ -34,12 +36,16 @@ namespace CaptureTheFlag
             Entity = GetComponent<MovingEntity>(); 
         }
 
-        public void OnStartGame(CTFGame game)
+        #region Game Loop
+
+        public void OnStartGame(CTFGame game, Player player)
         {
             Game = game;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
-            Entity.OnTargetReached += () => Game.OnMovementDone(this);
+            Player = player;
+
+            Entity.OnTargetReached += OnActionDone;
         }
 
         public void OnStartTurn()
@@ -50,6 +56,24 @@ namespace CaptureTheFlag
 
             UpdatePossibleMoves();
         }
+
+        private void OnActionDone()
+        {
+            Game.OnActionDone(this, CurrentAction);
+            CurrentAction = null;
+        }
+
+        #endregion
+
+        #region Actions
+
+        public void PerformAction(CharacterAction action)
+        {
+            CurrentAction = action;
+            action.Perform(this);
+        }
+
+        #endregion
 
         public void UpdatePossibleMoves()
         {
@@ -107,7 +131,7 @@ namespace CaptureTheFlag
                             priorityQueue[targetNode] = totalCost;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Movement(this, nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
@@ -115,6 +139,12 @@ namespace CaptureTheFlag
             return movements;
         }
 
-        public bool IsMoving => Entity.IsMoving;
+        public void ReduceActionAndStamina(float amount)
+        {
+            ActionPoints -= amount;
+            Stamina -= amount;
+        }
+
+        public bool IsInAction => CurrentAction != null;
     }
 }

@@ -16,7 +16,7 @@ namespace CaptureTheFlag
         public World World { get; private set; }
 
         public Player Player { get; private set; }
-        public Player Opponent { get; private set; }
+        public AIPlayer Opponent { get; private set; }
 
         public Character SelectedCharacter { get; private set; }
         private HashSet<BlockmapNode> HighlightedNodes = new();
@@ -39,7 +39,7 @@ namespace CaptureTheFlag
 
             // Convert world actors to CTF Players
             Player = new Player(World.Actors[0]);
-            Opponent = new Player(World.Actors[1]);
+            Opponent = new AIPlayer(World.Actors[1]);
 
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
@@ -50,8 +50,8 @@ namespace CaptureTheFlag
             UI.LoadingScreenOverlay.SetActive(false);
 
             // Start Game
-            foreach (Character c in Player.Characters) c.OnStartGame(this);
-            foreach (Character c in Opponent.Characters) c.OnStartGame(this);
+            foreach (Character c in Player.Characters) c.OnStartGame(this, Player);
+            foreach (Character c in Opponent.Characters) c.OnStartGame(this, Opponent);
             UI.OnStartGame();
 
             // Camera
@@ -62,9 +62,31 @@ namespace CaptureTheFlag
 
         private void StartYourTurn()
         {
-            foreach (Character c in Player.Characters) c.OnStartTurn();
-
             State = GameState.YourTurn;
+
+            foreach (Character c in Player.Characters) c.OnStartTurn();
+            UI.UpdateSelectionPanels();
+        }
+
+        public void EndYourTurn()
+        {
+            if (State != GameState.YourTurn) return;
+            DeselectCharacter();
+
+            StartOpponentTurn();
+        }
+
+        public void StartOpponentTurn()
+        {
+            State = GameState.EnemyTurn;
+
+            foreach (Character c in Opponent.Characters) c.OnStartTurn();
+            Opponent.StartTurn();
+        }
+
+        public void EndOpponentTurn()
+        {
+            StartYourTurn();
         }
 
         #endregion
@@ -75,6 +97,13 @@ namespace CaptureTheFlag
         {
             HelperFunctions.UnfocusNonInputUiElements();
 
+            // V - Vision (debug)
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                if (World.ActiveVisionActor == Player.Actor) World.SetActiveVisionActor(null);
+                else World.SetActiveVisionActor(Player.Actor);
+            }
+
             switch (State)
             {
                 case GameState.Loading:
@@ -84,6 +113,11 @@ namespace CaptureTheFlag
 
                 case GameState.YourTurn:
                     UpdateYourTurn();
+                    break;
+
+                case GameState.EnemyTurn:
+                    Opponent.UpdateTurn();
+                    if (Opponent.TurnFinished) EndOpponentTurn();
                     break;
             }
         }
@@ -97,7 +131,7 @@ namespace CaptureTheFlag
             Character hoveredCharacter = null;
             if(World.HoveredEntity != null) World.HoveredEntity.TryGetComponent(out hoveredCharacter);
 
-            // Left click
+            // Left click - Select character
             if(Input.GetMouseButtonDown(0))
             {
                 // De/Select character
@@ -105,16 +139,17 @@ namespace CaptureTheFlag
                     SelectCharacter(hoveredCharacter);
             }
 
-            // Right click
+            // Right click - Move
             if(Input.GetMouseButtonDown(1))
             {
                 // Move
                 if(SelectedCharacter != null && 
                     World.HoveredNode != null &&
-                    !SelectedCharacter.IsMoving
+                    !SelectedCharacter.IsInAction
                     && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Movement move))
                 {
-                    MoveCharacter(move);
+                    SelectedCharacter.PerformAction(move); // Start movement
+                    UnhighlightNodes(); // Unhighlight nodes
                 }
             }
         }
@@ -130,7 +165,7 @@ namespace CaptureTheFlag
         private void UpdateHoveredMove()
         {
             if (SelectedCharacter == null) return;
-            if (SelectedCharacter.IsMoving) return;
+            if (SelectedCharacter.IsInAction) return;
 
             PathPreview.gameObject.SetActive(false);
             UI.CharacterInfo.Init(SelectedCharacter);
@@ -161,10 +196,13 @@ namespace CaptureTheFlag
             }
         }
 
-        public void OnMovementDone(Character c)
+        public void OnActionDone(Character c, CharacterAction action)
         {
+            c.ReduceActionAndStamina(action.Cost);
             c.UpdatePossibleMoves();
-            if (SelectedCharacter == c) SelectCharacter(c); // Reselect to update everything
+
+            if (c.Player == Player) UI.UpdateSelectionPanel(c);
+            if (SelectedCharacter == c) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
         }
 
         #endregion
@@ -196,11 +234,6 @@ namespace CaptureTheFlag
                 SelectedCharacter.Entity.SetSelected(false);
             }
             SelectedCharacter = null;
-        }
-
-        public void MoveCharacter(Movement move)
-        {
-            move.Character.Entity.Move(move.Path);
         }
 
         private void HighlightNodes(HashSet<BlockmapNode> nodes)

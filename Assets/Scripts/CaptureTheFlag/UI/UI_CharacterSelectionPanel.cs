@@ -31,8 +31,15 @@ namespace CaptureTheFlag
             TitleText.text = character.Name;
             PreviewImage.sprite = character.Avatar;
             SelectionButton.onClick.AddListener(SelectionButton_OnClick);
+            UpdateBars();
 
             SetSelected(false);
+        }
+
+        public void UpdateBars()
+        {
+            ActionBar.SetValue(Character.ActionPoints, Character.MaxActionPoints);
+            StaminaBar.SetValue(Character.Stamina, Character.MaxStamina);
         }
 
         private void SelectionButton_OnClick()

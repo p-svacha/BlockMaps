@@ -1,17 +1,20 @@
 Big Features to Add:
 
-- Improve GitHub page with desc and screenshots
-	> make a release
+- Performance Test on AI Movement: SetOriginNode downwoards with different Profilers
 
-- Make MovingEntities fire event when reaching target, just like world
+- Add multi overlay functionality to nodematerialshader (Then test on water and air ndoes)
+
+- CTF: AI player and AI moves
+	> just walk randomly
+	> move camera to character when walking through visible nodes
+
+CTF: Moving character on same tile as enemy flag wins the game
 
 - make ctf map generator
-
 	> some walls!!
-
 	> some air paths!!
 
-> add multi overlay functionality to nodematerialshader
+
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -104,6 +107,9 @@ Big Features to Add:
 	- entities can pick up and carry items
 	- add carry capacity attribute to entities
 
+- Improve GitHub page with desc and screenshots
+	> make a release
+
 - sound & smell
 	hearing & smelling
 
@@ -120,19 +126,6 @@ Big Features to Add:
 
 - Weather / Temperature (Snow/Mud)
 
-
--------- CTF ------------
-- Rightclick to move to a node
-	> reduce action / stamina
-	> recalculato possible moves
-
-- End turn functionality
-
-- AI player and AI moves
-	> just walk randomly
-	> move camera to character when walking through visible nodes
-
-- Moving character on same tile as enemy flag wins the game
 
 -------- RETIRED IDEAS ------------
 

@@ -31,7 +31,7 @@ public class UI_ProgressBar : MonoBehaviour
         }
     }
 
-    public void SetValue(float value, float maxValue, string text = "", bool reverse = false)
+    public void SetValue(float value, float maxValue, bool showText = false, string valueFormat = "", bool reverse = false)
     {
         BlinkingBar.SetActive(false);
         IsBlinking = false;
@@ -39,7 +39,12 @@ public class UI_ProgressBar : MonoBehaviour
         float ratio = value / maxValue;
         if (reverse) ratio = 1f - ratio;
         ProgressBar.GetComponent<RectTransform>().anchorMax = new Vector2(ratio, 1f);
-        if (ProgressText != null) ProgressText.text = text;
+
+        if (ProgressText != null)
+        {
+            if (showText) ProgressText.text = value.ToString(valueFormat) + " / " + maxValue.ToString(valueFormat);
+            else ProgressText.text = "";
+        }
     }
 
     /// <summary>

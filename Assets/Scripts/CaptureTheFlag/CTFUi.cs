@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CaptureTheFlag
 {
@@ -13,6 +14,7 @@ namespace CaptureTheFlag
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
 
         [Header("Elements")]
+        public Button EndTurnButton;
         public GameObject LoadingScreenOverlay;
         public GameObject CharacterSelectionContainer;
         public TextMeshProUGUI TileInfoText;
@@ -24,6 +26,7 @@ namespace CaptureTheFlag
         public void Init(CTFGame game)
         {
             Game = game;
+            EndTurnButton.onClick.AddListener(() => Game.EndYourTurn());
         }
 
         public void OnStartGame()
@@ -52,6 +55,21 @@ namespace CaptureTheFlag
             text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
 
             TileInfoText.text = text;
+        }
+
+        /// <summary>
+        /// Updates the selection panel for a single character.
+        /// </summary>
+        public void UpdateSelectionPanel(Character c)
+        {
+            CharacterSelection[c].UpdateBars();
+        }
+        /// <summary>
+        /// Updates the selection panel for all characters.
+        /// </summary>
+        public void UpdateSelectionPanels()
+        {
+            foreach (UI_CharacterSelectionPanel panel in CharacterSelection.Values) panel.UpdateBars();
         }
 
         public void SelectCharacter(Character c)

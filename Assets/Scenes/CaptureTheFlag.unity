@@ -243,6 +243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterSelectionPrefab: {fileID: -2926877491083528891, guid: d5fe18a625927774e8ea8ccb80be4fb3, type: 3}
+  EndTurnButton: {fileID: 1197625279}
   LoadingScreenOverlay: {fileID: 551375017}
   CharacterSelectionContainer: {fileID: 1085779443}
   TileInfoText: {fileID: 481135219}
@@ -269,6 +270,18 @@ PrefabInstance:
     - target: {fileID: 4369627934733979318, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6868416950152833190, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Pivot.x
@@ -2423,6 +2436,18 @@ PrefabInstance:
     - target: {fileID: 4369627934733979318, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
+      propertyPath: m_Color.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6868416950152833190, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Pivot.x
