@@ -8,6 +8,8 @@ namespace CaptureTheFlag
 {
     public class CTFMapGenerator : WorldGenerator
     {
+        public const string FLAG_ID = "flag";
+
         // Rules
         private const int SPAWN_MAP_EDGE_OFFSET = 10;
         private const int SPAWN_VARIATION = 5;
@@ -96,7 +98,7 @@ namespace CaptureTheFlag
 
             // Flag
             bool flagSpawned = false;
-            Entity flagPrefab = GetEntityPrefab("flag");
+            Entity flagPrefab = GetEntityPrefab(FLAG_ID);
             while (!flagSpawned) flagSpawned = SpawnEntityAround(flagPrefab, player, spawnAreaCenter, SPAWN_VARIATION, HelperFunctions.GetRandomSideDirection());
 
             // Humans
@@ -136,7 +138,7 @@ namespace CaptureTheFlag
             }
 
             // End
-            Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
+            //Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
 
             GeneratedWorld.DrawNodes();
             GenerationStep++;
@@ -244,7 +246,7 @@ namespace CaptureTheFlag
             }
 
             // End
-            Debug.Log("Generated " + numBridges + " bridges after " + attempts + " attempts.");
+            //Debug.Log("Generated " + numBridges + " bridges after " + attempts + " attempts.");
 
             GeneratedWorld.DrawNodes();
             GenerationStep++;

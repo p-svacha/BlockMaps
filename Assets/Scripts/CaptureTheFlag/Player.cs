@@ -8,6 +8,7 @@ namespace CaptureTheFlag
     public class Player
     {
         public Actor Actor;
+        public Entity Flag;
         public List<Character> Characters;
 
         public Player(Actor actor)
@@ -17,6 +18,7 @@ namespace CaptureTheFlag
             Characters = new List<Character>();
             foreach(Entity e in actor.Entities)
             {
+                if (e.TypeId == CTFMapGenerator.FLAG_ID) Flag = e;
                 if (e.TryGetComponent(out Character c)) Characters.Add(c);
             }
         }

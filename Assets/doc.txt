@@ -1,17 +1,18 @@
 Big Fe1atures to Add:
 
-- Improve ctf map generator
-	> Add some walls
-
-- CTF: Also draw multitile highlight on waternode on surfacenode (if present)
+- CTF: Jail system
+	> CTF maps have a jail area per player
+	> If two characters are on the same tile in OnActionDone, depending on map half, one character goes to jail for x turns
+	> While in jail, character has no action points
+	> Jail area is canStandOn = false
+	> Make it visible where the map half is
+	> Make it visible where the jail area is
 
 - CTF: AI player and AI moves
 	> move camera to character when walking through visible nodes
 
-- CTF: Moving character on same tile as enemy flag wins the game
-
-- CTF: Block characters from moving on a tile where another character of the same player is
-	> can still move through, still passable
+- Improve ctf map generator
+	> Add some walls
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation

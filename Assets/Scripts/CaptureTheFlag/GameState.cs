@@ -9,6 +9,6 @@ namespace CaptureTheFlag
         Loading,
         YourTurn,
         EnemyTurn,
-        Done
+        GameFinished
     }
 }

@@ -15,7 +15,7 @@ namespace CaptureTheFlag
         private CTFMapGenerator MapGenerator;
         public World World { get; private set; }
 
-        public Player Player { get; private set; }
+        public Player LocalPlayer { get; private set; }
         public AIPlayer Opponent { get; private set; }
 
         public Character SelectedCharacter { get; private set; }
@@ -38,7 +38,7 @@ namespace CaptureTheFlag
             World = MapGenerator.GeneratedWorld;
 
             // Convert world actors to CTF Players
-            Player = new Player(World.Actors[0]);
+            LocalPlayer = new Player(World.Actors[0]);
             Opponent = new AIPlayer(World.Actors[1]);
 
             // Hooks
@@ -46,25 +46,41 @@ namespace CaptureTheFlag
 
             // Vision
             World.ShowTextures(true);
-            World.SetActiveVisionActor(Player.Actor);
+            World.SetActiveVisionActor(LocalPlayer.Actor);
             UI.LoadingScreenOverlay.SetActive(false);
 
             // Start Game
-            foreach (Character c in Player.Characters) c.OnStartGame(this, Player);
+            foreach (Character c in LocalPlayer.Characters) c.OnStartGame(this, LocalPlayer);
             foreach (Character c in Opponent.Characters) c.OnStartGame(this, Opponent);
             UI.OnStartGame();
 
             // Camera
-            World.CameraJumpToFocusEntity(Player.Characters[0].Entity);
+            World.CameraJumpToFocusEntity(LocalPlayer.Characters[0].Entity);
 
             StartYourTurn();
+        }
+
+        public void OnActionDone(Character c, CharacterAction action)
+        {
+            // Check game over
+            if (IsGameOver(out Player winner)) EndGame(won: winner == LocalPlayer);
+
+            // Reduce action/stamina based on action cost
+            c.ReduceActionAndStamina(action.Cost);
+
+            // Update possible moves with remaining action/stamina
+            c.UpdatePossibleMoves();
+
+            // Update UI
+            if (c.Owner == LocalPlayer) UI.UpdateSelectionPanel(c);
+            if (SelectedCharacter == c) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
         }
 
         private void StartYourTurn()
         {
             State = GameState.YourTurn;
 
-            foreach (Character c in Player.Characters) c.OnStartTurn();
+            foreach (Character c in LocalPlayer.Characters) c.OnStartTurn();
             UI.UpdateSelectionPanels();
         }
 
@@ -89,6 +105,29 @@ namespace CaptureTheFlag
             StartYourTurn();
         }
 
+        public void EndGame(bool won)
+        {
+            State = GameState.GameFinished;
+            UI.ShowEndGameScreen(won ? "You won!" : "You lost.");
+        }
+
+
+        private bool IsGameOver(out Player winner)
+        {
+            winner = null;
+            if(LocalPlayer.Characters.Any(x => x.Node == Opponent.Flag.OriginNode))
+            {
+                winner = LocalPlayer;
+                return true;
+            }
+            if (Opponent.Characters.Any(x => x.Node == LocalPlayer.Flag.OriginNode))
+            {
+                winner = Opponent;
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region Update
@@ -100,8 +139,8 @@ namespace CaptureTheFlag
             // V - Vision (debug)
             if (Input.GetKeyDown(KeyCode.V))
             {
-                if (World.ActiveVisionActor == Player.Actor) World.SetActiveVisionActor(null);
-                else World.SetActiveVisionActor(Player.Actor);
+                if (World.ActiveVisionActor == LocalPlayer.Actor) World.SetActiveVisionActor(null);
+                else World.SetActiveVisionActor(LocalPlayer.Actor);
             }
 
             switch (State)
@@ -132,11 +171,13 @@ namespace CaptureTheFlag
             if(World.HoveredEntity != null) World.HoveredEntity.TryGetComponent(out hoveredCharacter);
 
             // Left click - Select character
-            if(Input.GetMouseButtonDown(0))
+            if(Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
             {
-                // De/Select character
-                if (!HelperFunctions.IsMouseOverUi())
-                    SelectCharacter(hoveredCharacter);
+                // Deselect character
+                if (hoveredCharacter == null) DeselectCharacter();
+
+                // Select character
+                else if(hoveredCharacter.Owner == LocalPlayer) SelectCharacter(hoveredCharacter);
             }
 
             // Right click - Move
@@ -173,7 +214,7 @@ namespace CaptureTheFlag
             // Check if we hover a possible move
             BlockmapNode targetNode = World.HoveredNode;
             if (targetNode == null) return;
-            if (!targetNode.IsExploredBy(Player.Actor)) return;
+            if (!targetNode.IsExploredBy(LocalPlayer.Actor)) return;
 
 
             // Can move there in this turn
@@ -196,15 +237,6 @@ namespace CaptureTheFlag
             }
         }
 
-        public void OnActionDone(Character c, CharacterAction action)
-        {
-            c.ReduceActionAndStamina(action.Cost);
-            c.UpdatePossibleMoves();
-
-            if (c.Player == Player) UI.UpdateSelectionPanel(c);
-            if (SelectedCharacter == c) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
-        }
-
         #endregion
 
         #region Actions
@@ -216,7 +248,7 @@ namespace CaptureTheFlag
 
             // Select new
             SelectedCharacter = c;
-            if (SelectedCharacter != null && SelectedCharacter.Player == Player)
+            if (SelectedCharacter != null)
             {
                 UI.SelectCharacter(c);
                 c.Entity.SetSelected(true);
@@ -239,8 +271,18 @@ namespace CaptureTheFlag
         private void HighlightNodes(HashSet<BlockmapNode> nodes)
         {
             HighlightedNodes = nodes;
+            HashSet<BlockmapNode> addedNodes = new HashSet<BlockmapNode>();
             foreach (BlockmapNode node in HighlightedNodes)
+            {
                 node.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
+                if (node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null) // Also highlight waternodes on top of surface nodes
+                {
+                    surfaceNode.WaterNode.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
+                    addedNodes.Add(surfaceNode.WaterNode);
+                }
+            }
+
+            foreach (BlockmapNode node in addedNodes) HighlightedNodes.Add(node);
         }
         private void UnhighlightNodes()
         {

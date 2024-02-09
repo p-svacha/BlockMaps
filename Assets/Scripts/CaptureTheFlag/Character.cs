@@ -12,7 +12,7 @@ namespace CaptureTheFlag
 
         public CTFGame Game;
         public MovingEntity Entity { get; private set; }
-        public Player Player { get; private set; }
+        public Player Owner { get; private set; }
 
         [Header("Attributes")]
         public Sprite Avatar;
@@ -43,7 +43,7 @@ namespace CaptureTheFlag
             Game = game;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
-            Player = player;
+            Owner = player;
 
             Entity.OnTargetReached += OnActionDone;
         }
@@ -130,8 +130,13 @@ namespace CaptureTheFlag
                         if(!priorityQueue.ContainsKey(targetNode) || priorityQueue[targetNode] > totalCost) 
                             priorityQueue[targetNode] = totalCost;
 
+                        // Check if we can stand on that tile (different check than IsPassable - a node can be passable but not eligible to stand on)
+                        bool canStandOnTarget = true;
+                        if (targetNode.Entities.Any(x => x.TryGetComponent(out Character character) && character.Owner == Owner)) canStandOnTarget = false; // can't stand on ally characters
+                        if (targetNode.Entities.Any(x => x == Owner.Flag)) canStandOnTarget = false; // can't stand on own flag
+
                         // Add target node to possible moves
-                        movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
+                        if(canStandOnTarget) movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
@@ -146,5 +151,6 @@ namespace CaptureTheFlag
         }
 
         public bool IsInAction => CurrentAction != null;
+        public BlockmapNode Node => Entity.OriginNode;
     }
 }

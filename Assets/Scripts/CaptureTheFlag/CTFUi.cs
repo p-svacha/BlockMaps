@@ -16,6 +16,11 @@ namespace CaptureTheFlag
         [Header("Elements")]
         public Button EndTurnButton;
         public GameObject LoadingScreenOverlay;
+
+        public GameObject EndGameScreen;
+        public TextMeshProUGUI EndGameText;
+        public Button EndGameMenuButton;
+
         public GameObject CharacterSelectionContainer;
         public TextMeshProUGUI TileInfoText;
         public UI_CharacterInfo CharacterInfo;
@@ -35,7 +40,7 @@ namespace CaptureTheFlag
             HelperFunctions.DestroyAllChildredImmediately(CharacterSelectionContainer.gameObject);
 
             CharacterSelection.Clear();
-            foreach (Character c in Game.Player.Characters)
+            foreach (Character c in Game.LocalPlayer.Characters)
             {
                 UI_CharacterSelectionPanel panel = Instantiate(CharacterSelectionPrefab, CharacterSelectionContainer.transform);
                 panel.Init(Game, c);
@@ -81,6 +86,12 @@ namespace CaptureTheFlag
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
+        }
+
+        public void ShowEndGameScreen(string text)
+        {
+            EndGameScreen.SetActive(true);
+            EndGameText.text = text;
         }
     }
 }
