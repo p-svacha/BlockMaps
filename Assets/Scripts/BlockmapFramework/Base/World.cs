@@ -104,6 +104,7 @@ namespace BlockmapFramework
         // Draw modes
         public bool IsShowingGrid { get; private set; }
         public bool IsShowingNavmesh { get; private set; }
+        public MovingEntity NavmeshEntity { get; private set; }
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
 
@@ -1114,6 +1115,7 @@ namespace BlockmapFramework
             yield return new WaitForFixedUpdate();
 
             List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
+            Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
             foreach (Entity e in entitiesToUpdate) e.UpdateVision();
         }
 
@@ -1137,6 +1139,11 @@ namespace BlockmapFramework
             IsShowingNavmesh = !IsShowingNavmesh;
             UpdateNavmeshDisplayDelayed();
         }
+        public void SetNavmeshEntity(MovingEntity entity)
+        {
+            NavmeshEntity = entity;
+            UpdateNavmeshDisplayDelayed();
+        }
         public void ShowNavmesh(bool value)
         {
             IsShowingNavmesh = value;
@@ -1151,7 +1158,7 @@ namespace BlockmapFramework
             if (NavmeshVisualizer.Singleton == null) yield break;
             yield return new WaitForFixedUpdate();
             
-            if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this);
+            if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
         }
 

@@ -186,7 +186,7 @@ MonoBehaviour:
     Rightclick on a node to move
     the selected entity there.
 
-    Press N to toggle entity-specific navmesh.'
+    Navmesh is displayed for selected entity.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2116,10 +2116,10 @@ RectTransform:
   m_Father: {fileID: 2139759259}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 170, y: -67.84}
+  m_SizeDelta: {x: 340, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &426550391
 MonoBehaviour:
@@ -4887,7 +4887,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4895,11 +4895,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 340
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_SizeDelta.y
@@ -4935,11 +4935,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 170
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 6923698067880273647, guid: 52e9eebecca8e6d4c9e2cd5f79074c19, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -6358,7 +6358,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1575131785591647977, guid: 6ea1b6af556b29041b2079ec33f0d02c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -87.84
       objectReference: {fileID: 0}
     - target: {fileID: 1575131785591647977, guid: 6ea1b6af556b29041b2079ec33f0d02c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -6733,10 +6733,10 @@ RectTransform:
   m_Father: {fileID: 2139759259}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 170, y: -23.92}
+  m_SizeDelta: {x: 340, y: 47.84}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1875124815
 MonoBehaviour:
@@ -8455,7 +8455,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2139759259
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8474,10 +8474,10 @@ RectTransform:
   m_Father: {fileID: 9765082}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 175, y: -81.27}
+  m_SizeDelta: {x: 340, y: 87.84}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2139759260
 MonoBehaviour:

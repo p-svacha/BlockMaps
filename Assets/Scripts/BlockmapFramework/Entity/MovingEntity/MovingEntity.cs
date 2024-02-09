@@ -50,7 +50,8 @@ namespace BlockmapFramework
                 if (OriginNode != currentOriginNode)
                 {
                     SetOriginNode(currentOriginNode);
-                    if(BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
+                    if (BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition()); // Recalculate vision of all nearby entities when blocking vision
+                    else UpdateVision(); // Only calculate own vision when being see-through
                 }
                 if(finishedTransition) ReachNextNode();
 

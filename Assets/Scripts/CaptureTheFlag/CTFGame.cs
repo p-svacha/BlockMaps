@@ -216,7 +216,7 @@ namespace CaptureTheFlag
 
             // Select new
             SelectedCharacter = c;
-            if (SelectedCharacter != null)
+            if (SelectedCharacter != null && SelectedCharacter.Player == Player)
             {
                 UI.SelectCharacter(c);
                 c.Entity.SetSelected(true);

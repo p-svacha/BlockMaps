@@ -18,8 +18,6 @@ namespace WorldEditor
         private List<BlockmapNode> TargetPath;
         private LineRenderer PathPreview;
 
-        private bool IsShowingNavmesh;
-
         // Cache
         private BlockmapNode CacheOriginNode;
         private Dictionary<BlockmapNode, List<BlockmapNode>> PathCache = new Dictionary<BlockmapNode, List<BlockmapNode>>();
@@ -39,15 +37,12 @@ namespace WorldEditor
             SelectedEntity = e;
             if(SelectedEntity != null) SelectedEntity.SetSelected(true);
 
-            if (SelectedEntity == null) IsShowingNavmesh = false;
-            UpdateNavmeshVisualization();
+            World.SetNavmeshEntity(SelectedEntity);
         }
 
         public override void UpdateTool()
         {
             UpdatePathPreview();
-
-            if (Input.GetKeyDown(KeyCode.N)) ToggleNavmesh();
         }
 
         private void UpdatePathPreview()
@@ -103,17 +98,5 @@ namespace WorldEditor
             SelectEntity(null);
             PathPreview.gameObject.SetActive(false);
         }
-
-        private void ToggleNavmesh()
-        {
-            IsShowingNavmesh = !IsShowingNavmesh;
-            UpdateNavmeshVisualization();
-        }
-        private void UpdateNavmeshVisualization()
-        {
-            if (IsShowingNavmesh && SelectedEntity != null) NavmeshVisualizer.Singleton.Visualize(World, SelectedEntity);
-            else NavmeshVisualizer.Singleton.ClearVisualization();
-        }
-
     }
 }

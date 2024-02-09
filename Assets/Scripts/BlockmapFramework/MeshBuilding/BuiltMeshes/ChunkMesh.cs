@@ -14,7 +14,7 @@ namespace BlockmapFramework
         protected Chunk Chunk { get; private set; }
 
         protected MeshBuilder MeshBuilder;
-        protected MeshRenderer Renderer;
+        public MeshRenderer Renderer;
         private bool[] ShowMultiOverlay;
 
         protected void OnInit(Chunk chunk)

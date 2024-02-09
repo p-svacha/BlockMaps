@@ -1,6 +1,7 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CaptureTheFlag
@@ -29,7 +30,8 @@ namespace CaptureTheFlag
             else if (GenerationStep == 1) ApplyHeightmap();
             else if (GenerationStep == 2) CreatePlayerBases();
             else if (GenerationStep == 3) AddWaterBodies();
-            else if (GenerationStep == 4) AddForests();
+            else if (GenerationStep == 4) AddBridges();
+            else if (GenerationStep == 5) AddForests();
         }
 
         private void GenerateNoise()
@@ -121,18 +123,128 @@ namespace CaptureTheFlag
 
             int targetAttempts = WorldSize / 5;
 
-            while(attempts < targetAttempts)
+            while (attempts < targetAttempts)
             {
                 attempts++;
                 SurfaceNode n = GeneratedWorld.GetRandomSurfaceNode();
                 WaterBody b = GeneratedWorld.CanAddWater(n, 3);
-                if(b != null)
+                if (b != null)
                 {
                     GeneratedWorld.AddWaterBody(b, updateNavmesh: false);
                     numWaterBodies++;
                 }
             }
-            Debug.Log("Generated " + numWaterBodies + " after " + attempts + " attempts.");
+
+            // End
+            Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
+
+            GeneratedWorld.DrawNodes();
+            GenerationStep++;
+        }
+
+        private void AddBridges()
+        {
+            int numBridges = 0;
+            int attempts = 0;
+
+            int targetAttempts = WorldSize / 4;
+
+            while (attempts < targetAttempts)
+            {
+                attempts++;
+
+                // Take a random surface node, direction and bridge height
+                SurfaceNode startNode = GeneratedWorld.GetRandomSurfaceNode();
+                Direction dir1 = HelperFunctions.GetRandomSideDirection();
+                Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
+                int bridgeHeight = startNode.MaxHeight + Random.Range(1, 7);
+                List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
+
+                // Go into first direction until the bridge ends
+                SurfaceNode nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir1);
+                bool isDone = false;
+                bool isValid = false;
+                while(!isDone)
+                {
+                    // End at world edge
+                    if(nextNode == null)
+                    {
+                        isDone = true;
+                        isValid = false;
+                    }
+
+                    // End
+                    else if(nextNode.IsFlat(dir2) && nextNode.GetMaxHeight(dir2) == bridgeHeight)
+                    {
+                        isDone = true;
+                        isValid = true;
+                    }
+
+                    // Build and end
+                    else if(nextNode.IsFlat(dir1) && nextNode.GetMaxHeight(dir1) == bridgeHeight)
+                    {
+                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
+                        isDone = true;
+                        isValid = true;
+                    }
+
+                    // Build and continue
+                    else
+                    {
+                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
+                        nextNode = GeneratedWorld.GetAdjacentSurfaceNode(nextNode, dir1);
+                    }
+                }
+                if (!isValid) continue;
+
+                // Go into first direction until the bridge ends
+                nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir2);
+                isDone = false;
+                isValid = false;
+                while (!isDone)
+                {
+                    // End at world edge
+                    if (nextNode == null)
+                    {
+                        isDone = true;
+                        isValid = false;
+                    }
+
+                    // End
+                    else if (nextNode.IsFlat(dir1) && nextNode.GetMaxHeight(dir1) == bridgeHeight)
+                    {
+                        isDone = true;
+                        isValid = true;
+                    }
+
+                    // Build and end
+                    else if (nextNode.IsFlat(dir2) && nextNode.GetMaxHeight(dir2) == bridgeHeight)
+                    {
+                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
+                        isDone = true;
+                        isValid = true;
+                    }
+
+                    // Build and continue
+                    else
+                    {
+                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
+                        nextNode = GeneratedWorld.GetAdjacentSurfaceNode(nextNode, dir2);
+                    }
+                }
+                if (!isValid) continue;
+
+                // Build bridge
+                if (bridgeCoordinates.Any(x => !GeneratedWorld.CanBuildAirPath(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
+                foreach (Vector2Int coords in bridgeCoordinates)
+                {
+                    GeneratedWorld.BuildAirPath(coords, bridgeHeight);
+                }
+                numBridges++;
+            }
+
+            // End
+            Debug.Log("Generated " + numBridges + " bridges after " + attempts + " attempts.");
 
             GeneratedWorld.DrawNodes();
             GenerationStep++;

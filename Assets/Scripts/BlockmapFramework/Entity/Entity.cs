@@ -140,6 +140,7 @@ namespace BlockmapFramework
             Owner = player;
             Rotation = rotation;
             WorldPosition = GetWorldPosition(world, origin, rotation);
+            WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
 
             // Create a mesh collider for selecting the entity
             gameObject.layer = World.Layer_EntityMesh;

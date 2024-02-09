@@ -66,12 +66,18 @@ Shader "Custom/NodeMaterialShader"
         fixed4 _GridColor;
         float _ShowGrid;
 
+        // Overlay texture over a single area
         float _CanShowTileOverlay;
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
         float _TileOverlayX;
         float _TileOverlayY;
+
+        // Overlay texture over multiple tiles repeated
+        float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
+        sampler2D _MultiOverlayTex;
+        fixed4 _MultiOverlayColor;
 
         // Material attributes
         half _Glossiness;
@@ -83,6 +89,7 @@ Shader "Custom/NodeMaterialShader"
         {
             float2 uv_MainTex;
             float2 uv2_TileOverlayTex;
+            float2 uv2_MultiOverlayTex;
             float2 uv2_GridTex;
             float3 worldPos;
             float3 worldNormal;
@@ -123,7 +130,8 @@ Shader "Custom/NodeMaterialShader"
 
             int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
 
-            // Check visiblity
+            // ######################################################################### VISIBILITY #########################################################################
+
             float visEpsilon = 0.101; // Pixels are drawn by this value over tile edges
             float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
                 float drawPixel = (tileVisibility > 0 ||
@@ -143,6 +151,8 @@ Shader "Custom/NodeMaterialShader"
                 discard;
             }
 
+            // ######################################################################### FOG OF WAR #########################################################################
+
             float fowEpsilon = 0.01; // Fog of war epsilon
             float fullVisible = (tileVisibility > 1 ||
 
@@ -156,13 +166,14 @@ Shader "Custom/NodeMaterialShader"
                 (relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
                 (relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 1)); // extension south
 
-            // Base color
+            // ######################################################################### BASE #########################################################################
+
             fixed4 c;
+
+            // ######################################################################### TRIPLANAR TEXTURE #########################################################################
 
             if (_UseTextures == 1)
             {
-                //c = tex2D(_MainTex, IN.uv_MainTex);
-
                 // Find our UVs for each axis based on world position of the fragment.
                 half2 yUV = IN.worldPos.xz / _TextureScale;
                 half2 xUV = IN.worldPos.zy / _TextureScale;
@@ -180,11 +191,17 @@ Shader "Custom/NodeMaterialShader"
                 float steepness = 1 - blendWeights.y;
                 float topTextureStrength;
                 if (steepness < _SideStartSteepness)
+                {
                     topTextureStrength = 1;
+                }
                 else if (steepness < _SideOnlySteepness)
+                {
                     topTextureStrength = 1 - ((steepness - _SideStartSteepness) * (1 / (_SideOnlySteepness - _SideStartSteepness)));
+                }
                 else
+                {
                     topTextureStrength = 0;
+                }
 
                 // Now do texture samples from our diffuse maps with each of the 3 UV set's we've just made.
                 // Blend top with side texture according to how much the surface normal points vertically (y-direction)
@@ -197,7 +214,8 @@ Shader "Custom/NodeMaterialShader"
             else c = _Color;
 
 
-            // Selection Overlay
+            // ######################################################################### OVERLAYS #########################################################################
+
             if (_CanShowTileOverlay == 1 && _ShowTileOverlay == 1)
             {
                 if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
@@ -207,18 +225,32 @@ Shader "Custom/NodeMaterialShader"
                 }
             }
 
-            // Grid
+            if (_ShowMultiOverlay[tileIndex] == 1)
+            {
+                float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
+                if (dotProduct > 0.9) // only draw when facing (almost upwards
+                {
+                    fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_GridTex) * _MultiOverlayColor;
+                    c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
+                }
+            }
+
+            // ######################################################################### GRID #########################################################################
+
             if (_ShowGrid == 1)
             {
                 fixed4 gridColor = tex2D(_GridTex, IN.uv2_GridTex) * _GridColor;
                 c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
             }
 
-            // Fog of war
+            // ######################################################################### FOG OF WAR TINT #########################################################################
+
             if (fullVisible != 1)
             {
                 c = (_FogOfWarColor.a * _FogOfWarColor) + ((1 - _FogOfWarColor.a) * c);
             }
+
+            // ######################################################################### FINALIZE #########################################################################
 
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables

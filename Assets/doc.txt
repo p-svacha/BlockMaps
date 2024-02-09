@@ -1,16 +1,17 @@
-Big Features to Add:
+Big Fe1atures to Add:
 
-- Add multi overlay functionality to nodematerialshader (Then test on water and air ndoes)
+- Improve ctf map generator
+	> Add some walls
+
+- CTF: Also draw multitile highlight on waternode on surfacenode (if present)
 
 - CTF: AI player and AI moves
-	> just walk randomly
 	> move camera to character when walking through visible nodes
 
 - CTF: Moving character on same tile as enemy flag wins the game
 
-- Improve ctf map generator
-	> Add some walls
-	> Add some air paths
+- CTF: Block characters from moving on a tile where another character of the same player is
+	> can still move through, still passable
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -26,6 +27,7 @@ Big Features to Add:
 
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
+	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
 
 - interface IWorld for world with documentation
 - also IEntity and IBlockmapNode
@@ -45,19 +47,11 @@ Big Features to Add:
 	> make max depth a const 3
 	> make shoreheight based on mouse pointer y coordinate
 
-
-- turn-based movement
-	> entites have Action Points
-	> entities have Stamina
-	> Action Point get set and depleted within 1 turn
-	> Stamina is longer term and gets regenrated only a bit per turn
-
 - strength & destroy
 	> movingentities get a new strength attribute
 	> staticentities get a new durability attribute
 	> walls get it too
 	> entities can destroy for big stamina cost
-
 
 - dont allow suface nodes with walls in water
 	- affect canplacewater
@@ -81,11 +75,6 @@ Big Features to Add:
 	> each has their own attribute how many tiles they block above and below
 
 - Add static entities that include navmesh nodes (like a container or bridge)
-
-- Improve Camera:
-	> Shift to increase speed
-	> Faster zoom (alt to decrease zoom speed)
-	> Fix zoom speed on low fps
 
 - fix: water fill algorithm should stop after a while (like 1000 tiles?)
 
