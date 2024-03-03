@@ -11,6 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _CANSHOWOVERLAYS_ON
   - _CANSHOWTILEOVERLAY_ON
   - _SHOWGRID_ON
   m_LightmapFlags: 4
@@ -69,6 +70,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
+    - _CanShowOverlays: 1
     - _CanShowTileOverlay: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -96,10 +98,12 @@ Material:
     - _UseTextures: 0
     - _ZPriority: 0
     - _ZWrite: 1
+    - _ZoneBorderWidth: 0.1
     m_Colors:
     - _Color: {r: 0.4039216, g: 0.40000004, b: 0.4039216, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
     - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
+    - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

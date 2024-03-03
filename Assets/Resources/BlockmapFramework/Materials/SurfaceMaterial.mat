@@ -106,6 +106,7 @@ Material:
     - _UVSec: 0
     - _UseTextures: 0
     - _ZWrite: 1
+    - _ZoneBorderWidth: 0.1
     m_Colors:
     - _BlockOverlayColor: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.3584906, g: 0.31283376, b: 0.31283376, a: 1}
@@ -118,4 +119,5 @@ Material:
     - _TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
     - _TileOverlayColor: {r: 1, g: 1, b: 1, a: 1}
     - _TintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -102,5 +102,11 @@ namespace BlockmapFramework
             for (int i = 0; i < Renderer.materials.Length; i++)
                 Renderer.materials[i].SetFloatArray("_ShowMultiOverlay", ShowMultiOverlay.Select(b => b ? 1.0f : 0.0f).ToArray());
         }
+
+        public void ShowZoneBorders(float[] zoneBorderArray)
+        {
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloatArray("_ZoneBorders", zoneBorderArray);
+        }
     }
 }

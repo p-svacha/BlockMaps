@@ -39,6 +39,8 @@ namespace BlockmapFramework
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         public bool IsInitialized { get; private set; }
         public int ChunkSize { get; private set; }
+        public int MinX, MaxX, MinY, MaxY;
+        public Vector2Int Dimensions { get; private set; }
         public WorldEntityLibrary ContentLibrary { get; private set; }
 
 
@@ -149,6 +151,13 @@ namespace BlockmapFramework
                 Chunk chunk = Chunk.Load(this, chunkData);
                 Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
             }
+
+            // Calculate world bounds
+            MinX = Chunks.Values.Min(x => x.Coordinates.x) * ChunkSize;
+            MaxX = Chunks.Values.Max(x => x.Coordinates.x) * ChunkSize + (ChunkSize - 1);
+            MinY = Chunks.Values.Min(x => x.Coordinates.y) * ChunkSize;
+            MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
+            Dimensions = new Vector2Int(MaxX - MinX, MaxY - MinY);
 
             // Draw node meshes because we need to shoot rays to generate navmesh
             DrawNodes();
@@ -1247,6 +1256,7 @@ namespace BlockmapFramework
 
         public BlockmapNode GetNode(int id) => Nodes[id];
 
+        public HashSet<BlockmapNode> GetAllNodes() => Nodes.Values.ToHashSet();
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int height)
         {
             return GetNodes(worldCoordinates, height, height);

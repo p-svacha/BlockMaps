@@ -8,18 +8,29 @@ namespace CaptureTheFlag
 {
     public class CTFGame : MonoBehaviour
     {
+        // Rules
+        private const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
+
+        // Elements
         public CTFUi UI;
         public LineRenderer PathPreview;
+        private CTFMapGenerator MapGenerator;
+
+        public Character SelectedCharacter { get; private set; }
+        private HashSet<BlockmapNode> HighlightedNodes = new();
+
+        // Game attributes
+        private int NeutralZoneSize;
+        private int PlayerZoneSize;
+        private Zone LocalPlayerZone;
+        private Zone NeutralZone;
+        private Zone OpponentZone;
 
         public GameState State { get; private set; }
-        private CTFMapGenerator MapGenerator;
         public World World { get; private set; }
 
         public Player LocalPlayer { get; private set; }
         public AIPlayer Opponent { get; private set; }
-
-        public Character SelectedCharacter { get; private set; }
-        private HashSet<BlockmapNode> HighlightedNodes = new();
 
         #region Game Loop
 
@@ -35,7 +46,27 @@ namespace CaptureTheFlag
 
         private void StartGame()
         {
+            // Set world
             World = MapGenerator.GeneratedWorld;
+
+            // Set zones
+            NeutralZoneSize = (int)(World.Dimensions.x * NEUTRAL_ZONE_SIZE);
+            PlayerZoneSize = (World.Dimensions.x / 2) - (NeutralZoneSize / 2);
+            HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> opponentZoneNodes = new HashSet<Vector2Int>();
+            foreach(BlockmapNode node in World.GetAllSurfaceNodes())
+            {
+                if (node.WorldCoordinates.x < PlayerZoneSize) ownZoneNodes.Add(node.WorldCoordinates);
+                else if (node.WorldCoordinates.x < PlayerZoneSize + NeutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
+                else opponentZoneNodes.Add(node.WorldCoordinates);
+            }
+            LocalPlayerZone = new Zone(World, ownZoneNodes);
+            NeutralZone = new Zone(World, neutralZoneNodes);
+            OpponentZone = new Zone(World, opponentZoneNodes);
+
+            LocalPlayerZone.DrawBorders(true);
+            OpponentZone.DrawBorders(true);
 
             // Convert world actors to CTF Players
             LocalPlayer = new Player(World.Actors[0]);
@@ -46,6 +77,7 @@ namespace CaptureTheFlag
 
             // Vision
             World.ShowTextures(true);
+            World.ShowGridOverlay(true);
             World.SetActiveVisionActor(LocalPlayer.Actor);
             UI.LoadingScreenOverlay.SetActive(false);
 

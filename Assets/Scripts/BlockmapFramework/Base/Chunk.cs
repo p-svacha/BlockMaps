@@ -21,6 +21,10 @@ namespace BlockmapFramework
         /// All entities that currently occupy at least one node on this chunk.
         /// </summary>
         private HashSet<Entity> Entities = new HashSet<Entity>();
+        /// <summary>
+        /// All zones that include at least one position in this chunk.
+        /// </summary>
+        private List<Zone> Zones = new List<Zone>();
 
         // Meshes (many types of things like nodes and walls are combined into one mesh per chunk to increase performance)
         public SurfaceMesh SurfaceMesh;
@@ -105,6 +109,15 @@ namespace BlockmapFramework
             Entities.Remove(e);
         }
 
+        public void AddZone(Zone z)
+        {
+            Zones.Add(z);
+        }
+        public void RemoveZone(Zone z)
+        {
+            Zones.Remove(z);
+        }
+
         #endregion
 
         #region Draw
@@ -160,10 +173,47 @@ namespace BlockmapFramework
             foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
-
         public void ShowTileBlending(bool show)
         {
             SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_BlendThreshhold", show ? 0.4f : 0);
+        }
+
+        public void DrawZoneBorders()
+        {
+            // Combine all visible zones on this chunk into 1 combines zone border list that contains a bool[4] (1 for each direction) for each node that state if a border should be drawn there.
+            List<bool[]> combinedBorders = new List<bool[]>();
+            for (int i = 0; i < 256; i++) combinedBorders.Add(new bool[4]);
+
+            List<Zone> visibleZones = Zones.Where(x => x.IsBorderVisible).ToList();
+            foreach (Zone z in visibleZones)
+            {
+                List<bool[]> nodeBorders = z.GetZoneBorders(this);
+                for (int i = 0; i < 256; i++) // for each 2d position on chunk
+                {
+                    for (int j = 0; j < 4; j++) // for each border direction
+                    {
+                        if (nodeBorders[i][j] == true) combinedBorders[i][j] = true;
+                    }
+                }
+
+            }
+
+            // Translate the bool[4] list into a float array that the shaders can use
+            float[] zoneBorderArray = new float[256];
+            for(int i = 0; i < 256; i++)
+            {
+                int shaderArrayValue = 0;
+                if (combinedBorders[i][0]) shaderArrayValue += 1000;
+                if (combinedBorders[i][1]) shaderArrayValue += 100;
+                if (combinedBorders[i][2]) shaderArrayValue += 10;
+                if (combinedBorders[i][3]) shaderArrayValue += 1;
+                zoneBorderArray[i] = shaderArrayValue;
+            }
+
+            // Pass array to all meshes
+            SurfaceMesh.ShowZoneBorders(zoneBorderArray);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowZoneBorders(zoneBorderArray);
+            WaterMesh.ShowZoneBorders(zoneBorderArray);
         }
 
         #endregion

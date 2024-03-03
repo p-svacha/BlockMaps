@@ -24,6 +24,9 @@ Shader "Custom/SurfaceShader"
         _TileOverlayY("Overlay Y Coord", Float) = 0
         _TileOverlaySize("Overlay Size", Float) = 1
 
+        _ZoneBorderColor("Zone Border Color", Color) = (1,1,1,1)
+        _ZoneBorderWidth("Zone Border Width", Float) = 0.1
+
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
     }
@@ -91,6 +94,13 @@ Shader "Custom/SurfaceShader"
         float _TileBlend_NE[256];
         float _TileBlend_SW[256];
         float _TileBlend_SE[256];
+
+        // Zone borders
+        // Each list element represents one node and the value represents the sides on which the border should be drawn. (0/1 for each side N/E/S/W)
+        // i.e. a value of 1001 would draw a border on the north and west side of the node.
+        fixed4 _ZoneBorderColor;
+        float _ZoneBorderWidth;
+        float _ZoneBorders[256];
 
 
         struct Input
@@ -316,6 +326,30 @@ Shader "Custom/SurfaceShader"
                 c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
             }
             
+            // ######################################################################### ZONE BORDER #########################################################################
+            int zoneValue = _ZoneBorders[tileIndex];
+            int borderWest = zoneValue % 10;
+            zoneValue /= 10;
+            int borderSouth = zoneValue % 10;
+            zoneValue /= 10;
+            int borderEast = zoneValue % 10;
+            zoneValue /= 10;
+            int borderNorth = zoneValue % 10;
+
+            bool drawBorderPattern = false;
+            if (borderNorth == 1 && relativePos.y > 1 - _ZoneBorderWidth) drawBorderPattern = true;
+            if (borderEast == 1 && relativePos.x > 1 - _ZoneBorderWidth) drawBorderPattern = true;
+            if (borderSouth == 1 && relativePos.y < _ZoneBorderWidth) drawBorderPattern = true;
+            if (borderWest == 1 && relativePos.x < _ZoneBorderWidth) drawBorderPattern = true;
+
+            if (drawBorderPattern)
+            {
+                float squareSize = 0.1;
+                float xRel = IN.worldPos.x % (squareSize * 2);
+                float zRel = IN.worldPos.z % (squareSize * 2);
+
+                if((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize)) c = _ZoneBorderColor;
+            }
 
             // ######################################################################### GRID #########################################################################
             if (_ShowGrid == 1) 

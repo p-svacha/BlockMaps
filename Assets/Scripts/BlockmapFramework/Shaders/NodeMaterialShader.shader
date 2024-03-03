@@ -20,7 +20,10 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _ShowGrid("Show Grid", Float) = 1
         _GridColor("Grid Color", Color) = (0,0,0,1)
 
-        [Toggle] _CanShowTileOverlay("Can Show Tile Overlay", Float) = 1
+        [Toggle] _CanShowOverlays("Can Show Overlays", Float) = 1
+
+        _ZoneBorderColor("Zone Border Color", Color) = (1,1,1,1)
+        _ZoneBorderWidth("Zone Border Width", Float) = 0.1
 
         /* Should not be set in inspector
         [Toggle] _ShowTileOverlay("Show Tile Overlay", Float) = 0
@@ -67,7 +70,7 @@ Shader "Custom/NodeMaterialShader"
         float _ShowGrid;
 
         // Overlay texture over a single area
-        float _CanShowTileOverlay;
+        float _CanShowOverlays;
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
@@ -78,6 +81,13 @@ Shader "Custom/NodeMaterialShader"
         float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
         sampler2D _MultiOverlayTex;
         fixed4 _MultiOverlayColor;
+
+        // Zone borders
+        // Each list element represents one node and the value represents the sides on which the border should be drawn. (0/1 for each side N/E/S/W)
+        // i.e. a value of 1001 would draw a border on the north and west side of the node.
+        fixed4 _ZoneBorderColor;
+        float _ZoneBorderWidth;
+        float _ZoneBorders[256];
 
         // Material attributes
         half _Glossiness;
@@ -216,7 +226,7 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### OVERLAYS #########################################################################
 
-            if (_CanShowTileOverlay == 1 && _ShowTileOverlay == 1)
+            if (_CanShowOverlays == 1 && _ShowTileOverlay == 1)
             {
                 if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
                 {
@@ -232,6 +242,35 @@ Shader "Custom/NodeMaterialShader"
                 {
                     fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_GridTex) * _MultiOverlayColor;
                     c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
+                }
+            }
+
+            // ######################################################################### ZONE BORDER #########################################################################
+            float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
+            if (dotProduct > 0.9) // only draw when facing (almost upwards
+            {
+                int zoneValue = _ZoneBorders[tileIndex];
+                int borderWest = zoneValue % 10;
+                zoneValue /= 10;
+                int borderSouth = zoneValue % 10;
+                zoneValue /= 10;
+                int borderEast = zoneValue % 10;
+                zoneValue /= 10;
+                int borderNorth = zoneValue % 10;
+
+                bool drawBorderPattern = false;
+                if (borderNorth == 1 && relativePos.y > 1 - _ZoneBorderWidth) drawBorderPattern = true;
+                if (borderEast == 1 && relativePos.x > 1 - _ZoneBorderWidth) drawBorderPattern = true;
+                if (borderSouth == 1 && relativePos.y < _ZoneBorderWidth) drawBorderPattern = true;
+                if (borderWest == 1 && relativePos.x < _ZoneBorderWidth) drawBorderPattern = true;
+
+                if (drawBorderPattern)
+                {
+                    float squareSize = 0.1;
+                    float xRel = IN.worldPos.x % (squareSize * 2);
+                    float zRel = IN.worldPos.z % (squareSize * 2);
+
+                    if ((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize)) c = _ZoneBorderColor;
                 }
             }
 

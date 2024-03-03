@@ -1,5 +1,10 @@
 Big Fe1atures to Add:
 
+- Framework to mark areas
+	> area is defined by a set of world coordinates and are the same across all height levels
+	> on area edge a line is drawn with linerenderer
+	> for that check all nodes that border area edge (on both sides) and draw line on wanted side
+
 - CTF: Jail system
 	> CTF maps have a jail area per player
 	> If two characters are on the same tile in OnActionDone, depending on map half, one character goes to jail for x turns
@@ -43,6 +48,12 @@ Big Fe1atures to Add:
 - Make vision radius of entities based on their dimensions
 
 - Water shader (very small transparency, moving, foam when hitting terrain)
+
+- Disallow 0101 and 1010 shapes
+- Disallow 2110 and 0112 shapes
+- Remove limit of max height diff within a node
+	> slopes can also go up 2,3,etc.
+	> keep shape requirements (max 2 different heights per node)
 
 - water tool rework:
 	> make max depth a const 3
