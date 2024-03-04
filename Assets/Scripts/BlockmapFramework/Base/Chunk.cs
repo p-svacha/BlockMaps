@@ -187,7 +187,7 @@ namespace BlockmapFramework
             List<Zone> visibleZones = Zones.Where(x => x.IsBorderVisible).ToList();
             foreach (Zone z in visibleZones)
             {
-                List<bool[]> nodeBorders = z.GetZoneBorders(this);
+                List<bool[]> nodeBorders = z.GetChunkZoneBorders(this);
                 for (int i = 0; i < 256; i++) // for each 2d position on chunk
                 {
                     for (int j = 0; j < 4; j++) // for each border direction

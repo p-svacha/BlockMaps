@@ -1,31 +1,46 @@
-Big Fe1atures to Add:
+Big Features to Add:
 
-- Framework to mark areas
-	> area is defined by a set of world coordinates and are the same across all height levels
-	> on area edge a line is drawn with linerenderer
-	> for that check all nodes that border area edge (on both sides) and draw line on wanted side
-
-- CTF: Jail system
-	> CTF maps have a jail area per player
-	> If two characters are on the same tile in OnActionDone, depending on map half, one character goes to jail for x turns
-	> While in jail, character has no action points
-	> Jail area is canStandOn = false
-	> Make it visible where the map half is
-	> Make it visible where the jail area is
+- Safe zone around flag
+	> Add that zones can belong to actors and give vision
+	> full vision
+	> not passable for own team
 
 - CTF: AI player and AI moves
+	> if we see enemy character in own zone => CHASE
+	> if we see enemy flag => GO THERE
 	> move camera to character when walking through visible nodes
 
 - Improve ctf map generator
-	> Add some walls
+	> New approach: Check XCOM and PZ map generation
+	> Split map into parcels
+	> Parcels have their own generation system on top of height map generation
+	> Parcel generation depends on bordering parcels, roads, rivers
+	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
+	> Implement rules which parcels can be next to each other
+
+	> 1. height map generation
+	> 2. line features (river, road, railroad)
+	> 3. parcel distribution
+	> 4. parcel connection points (to line features and other parcels)
+	> 5. parcel generation
+	> 6. player base generation
+		> move map zone and jail zone generation here
+		> save zones in world data
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
+
+- more general modifier system
+	> modifiers have a duration and effect, name, description, icon
+	> move jail time to modifier
+	> add ui for modifiers
 
 - procedural rock wall entity
 	> 1xYx1 in size, connects to adjacent rock wall entities
 	> blocks path and vision
 	> rendered in 1 mesh
+
+- textures for entities
 
 - doors
 	> open and closeable when standing next to

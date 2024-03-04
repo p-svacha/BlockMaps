@@ -163,7 +163,6 @@ namespace BlockmapFramework
 
             // Move entity to spawn position
             SetOriginNode(origin);
-            SetTransformToOrigin();
 
             // Selection indicator
             SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
@@ -277,6 +276,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
+        /// <br/> Also Moves the entitiy to the last or currently known position for the given player.
         /// </summary>
         public void UpdateVisiblity(Actor player)
         {
@@ -514,7 +514,7 @@ namespace BlockmapFramework
                 // Check if we hit the waterbody that covers the node. if so => visible
                 if(hit.transform.gameObject.layer == World.Layer_Water && targetNode is SurfaceNode _surfaceNode)
                 {
-                    if(World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
+                    if(_surfaceNode.WaterNode.WaterBody != null && World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                 }
 
                 // Check if we hit an entity on the node. if so => visible
@@ -644,6 +644,18 @@ namespace BlockmapFramework
         #region Setters
 
         /// <summary>
+        /// Instantly teleports this entity to the given node.
+        /// </summary>
+        public void Teleport(BlockmapNode targetNode)
+        {
+            WorldPosition = GetWorldPosition(World, targetNode, Rotation);
+            SetOriginNode(targetNode);
+
+            if (BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition()); // Recalculate vision of all nearby entities when blocking vision
+            else UpdateVision(); // Only calculate own vision when being see-through
+        }
+
+        /// <summary>
         /// Changes the origin node and updates all relevant information with it.
         /// </summary>
         protected void SetOriginNode(BlockmapNode node)
@@ -695,19 +707,6 @@ namespace BlockmapFramework
             LastKnownPosition[p] = null;
             LastKnownRotation[p] = null;
         }
-
-        /// <summary>
-        /// Moves the entity to the current world position based on its origin node and rotates it based on its Rotation.
-        /// </summary>
-        public void SetTransformToOrigin()
-        {
-            transform.position = GetWorldPosition(World, OriginNode, Rotation);
-            transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
-
-            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
-            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
-        }
-
 
         /// <summary>
         /// Shows/hides the selection indicator of this entity.

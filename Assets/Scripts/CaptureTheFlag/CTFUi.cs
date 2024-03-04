@@ -67,14 +67,14 @@ namespace CaptureTheFlag
         /// </summary>
         public void UpdateSelectionPanel(Character c)
         {
-            CharacterSelection[c].UpdateBars();
+            CharacterSelection[c].Refresh();
         }
         /// <summary>
         /// Updates the selection panel for all characters.
         /// </summary>
         public void UpdateSelectionPanels()
         {
-            foreach (UI_CharacterSelectionPanel panel in CharacterSelection.Values) panel.UpdateBars();
+            foreach (UI_CharacterSelectionPanel panel in CharacterSelection.Values) panel.Refresh();
         }
 
         public void SelectCharacter(Character c)

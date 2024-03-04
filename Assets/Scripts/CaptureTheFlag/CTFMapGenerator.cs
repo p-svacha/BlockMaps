@@ -88,7 +88,7 @@ namespace CaptureTheFlag
             GenerationStep++;
         }
         /// <summary>
-        /// Spawns the flag and characters for a player.
+        /// Spawns the flag, characters and jail zone for a player.
         /// </summary>
         private void CreatePlayerSpawn(Actor player, int x, Direction faceDirection)
         {

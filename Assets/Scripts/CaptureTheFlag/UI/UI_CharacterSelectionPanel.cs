@@ -15,6 +15,7 @@ namespace CaptureTheFlag
         public GameObject SelectionFrame;
         public Button SelectionButton;
         public TextMeshProUGUI TitleText;
+        public TextMeshProUGUI JailTimeText;
         public Image PreviewImage;
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
@@ -31,13 +32,15 @@ namespace CaptureTheFlag
             TitleText.text = character.Name;
             PreviewImage.sprite = character.Avatar;
             SelectionButton.onClick.AddListener(SelectionButton_OnClick);
-            UpdateBars();
+            Refresh();
 
             SetSelected(false);
         }
 
-        public void UpdateBars()
+        public void Refresh()
         {
+            JailTimeText.gameObject.SetActive(Character.JailTime > 0);
+            JailTimeText.text = Character.JailTime.ToString();
             ActionBar.SetValue(Character.ActionPoints, Character.MaxActionPoints);
             StaminaBar.SetValue(Character.Stamina, Character.MaxStamina);
         }

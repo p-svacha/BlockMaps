@@ -88,9 +88,20 @@ namespace WorldEditor
             }
         }
 
+        // Rightclick: Move
         public override void HandleRightClick()
         {
             if (SelectedEntity != null && TargetPath != null) SelectedEntity.MoveTo(World.HoveredNode);
+        }
+
+        // Middleclick: Teleport
+        public override void HandleMiddleClick()
+        {
+            if (SelectedEntity == null) return;
+            if (World.HoveredNode == null) return;
+            if (!World.HoveredNode.IsPassable(SelectedEntity)) return;
+
+            SelectedEntity.Teleport(World.HoveredNode);
         }
 
         public override void OnDeselect()

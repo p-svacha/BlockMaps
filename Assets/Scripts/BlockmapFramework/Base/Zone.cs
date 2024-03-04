@@ -44,15 +44,42 @@ namespace BlockmapFramework
                 chunk.AddZone(this);
         }
 
+        public void DrawBorders(bool show)
+        {
+            IsBorderVisible = show;
+            foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
+        }
+
+        #region Getters
+
+        public bool ContainsNode(BlockmapNode node)
+        {
+            return WorldCoordinates.Contains(node.WorldCoordinates);
+        }
+
+        /// <summary>
+        /// Returns a list of all nodes included in this zone.
+        /// </summary>
+        /// <returns></returns>
+        public List<BlockmapNode> GetNodes()
+        {
+            List<BlockmapNode> nodes = new List<BlockmapNode>();
+            foreach(Vector2Int coords in WorldCoordinates)
+            {
+                nodes.AddRange(World.GetNodes(coords));
+            }
+            return nodes;
+        }
+
         /// <summary>
         /// Returns a bool[] for all nodes in the given chunk.
         /// <br/> The bool[] represents if a border should be drawn N/E/S/W on that node for this zone.
         /// </summary>
-        public List<bool[]> GetZoneBorders(Chunk chunk)
+        public List<bool[]> GetChunkZoneBorders(Chunk chunk)
         {
             List<bool[]> nodeBorders = new List<bool[]>();
 
-            for(int x = 0; x < chunk.Size; x++)
+            for (int x = 0; x < chunk.Size; x++)
             {
                 for (int y = 0; y < chunk.Size; y++)
                 {
@@ -78,10 +105,6 @@ namespace BlockmapFramework
             return nodeBorders;
         }
 
-        public void DrawBorders(bool show)
-        {
-            IsBorderVisible = show;
-            foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
-        }
+        #endregion
     }
 }

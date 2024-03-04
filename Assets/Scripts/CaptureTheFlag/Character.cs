@@ -25,6 +25,7 @@ namespace CaptureTheFlag
         // Current stats
         public float ActionPoints { get; private set; }
         public float Stamina { get; private set; }
+        public int JailTime { get; private set; }
         public Dictionary<BlockmapNode, Movement> PossibleMoves { get; private set; }
         private CharacterAction CurrentAction;
 
@@ -50,9 +51,14 @@ namespace CaptureTheFlag
 
         public void OnStartTurn()
         {
+            // Base action point and stamina regeneration
             ActionPoints = MaxActionPoints;
             Stamina += StaminaRegeneration;
             if (Stamina > MaxStamina) Stamina = MaxStamina;
+
+            // No movement if in jail
+            if (JailTime > 0) JailTime--;
+            if (JailTime > 0) ActionPoints = 0;
 
             UpdatePossibleMoves();
         }
@@ -71,6 +77,11 @@ namespace CaptureTheFlag
         {
             CurrentAction = action;
             action.Perform(this);
+        }
+
+        public void SetJailTime(int turns)
+        {
+            JailTime = turns;
         }
 
         #endregion
@@ -131,12 +142,10 @@ namespace CaptureTheFlag
                             priorityQueue[targetNode] = totalCost;
 
                         // Check if we can stand on that tile (different check than IsPassable - a node can be passable but not eligible to stand on)
-                        bool canStandOnTarget = true;
-                        if (targetNode.Entities.Any(x => x.TryGetComponent(out Character character) && character.Owner == Owner)) canStandOnTarget = false; // can't stand on ally characters
-                        if (targetNode.Entities.Any(x => x == Owner.Flag)) canStandOnTarget = false; // can't stand on own flag
+                        if (!CanStandOn(targetNode)) continue;
 
                         // Add target node to possible moves
-                        if(canStandOnTarget) movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
@@ -144,10 +153,27 @@ namespace CaptureTheFlag
             return movements;
         }
 
+        /// <summary>
+        /// Returns if this character can stand on / stop on the given node. This is independent from IsPassable, a node can be passable but not able to stand on.
+        /// </summary>
+        private bool CanStandOn(BlockmapNode targetNode)
+        {
+            if (Game.GetCharacters(targetNode).Any(x => x.Owner == Owner)) return false; // can't stand on ally characters
+            if (Game.NeutralZone.ContainsNode(targetNode) && Game.GetCharacters(targetNode).Count > 0) return false; // can't stand on any characters in neutral zone
+            if (targetNode.Entities.Any(x => x == Owner.Flag)) return false; // can't stand on own flag
+
+            return true;
+        }
+
         public void ReduceActionAndStamina(float amount)
         {
             ActionPoints -= amount;
             Stamina -= amount;
+        }
+
+        public void SetActionPointsToZero()
+        {
+            ActionPoints = 0;
         }
 
         public bool IsInAction => CurrentAction != null;

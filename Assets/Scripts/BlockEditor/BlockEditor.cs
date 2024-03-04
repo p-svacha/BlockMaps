@@ -142,6 +142,8 @@ namespace WorldEditor
             if (Input.GetMouseButtonDown(1) && !isMouseOverUi) CurrentTool.HandleRightClick();
             if (Input.GetMouseButton(1) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
 
+            if (Input.GetMouseButtonDown(2) && !isMouseOverUi) CurrentTool.HandleMiddleClick();
+
 
             if (isUiElementFocussed) return; // no input key checks when a ui element is focussed
 
