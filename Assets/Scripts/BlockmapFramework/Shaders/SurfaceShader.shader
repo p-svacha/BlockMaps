@@ -24,7 +24,6 @@ Shader "Custom/SurfaceShader"
         _TileOverlayY("Overlay Y Coord", Float) = 0
         _TileOverlaySize("Overlay Size", Float) = 1
 
-        _ZoneBorderColor("Zone Border Color", Color) = (1,1,1,1)
         _ZoneBorderWidth("Zone Border Width", Float) = 0.1
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
@@ -54,6 +53,9 @@ Shader "Custom/SurfaceShader"
 
         // Terrain colors
         fixed4 _TerrainColors[256];
+
+        // Player colors
+        fixed4 _PlayerColors[8];
 
         // Terrain textures (stored in an array)
         UNITY_DECLARE_TEX2DARRAY(_TerrainTextures);
@@ -98,9 +100,9 @@ Shader "Custom/SurfaceShader"
         // Zone borders
         // Each list element represents one node and the value represents the sides on which the border should be drawn. (0/1 for each side N/E/S/W)
         // i.e. a value of 1001 would draw a border on the north and west side of the node.
-        fixed4 _ZoneBorderColor;
         float _ZoneBorderWidth;
         float _ZoneBorders[256];
+        float _ZoneBorderColors[256]; // Contains player id for each tile, colors are taken from _PlayerColors
 
 
         struct Input
@@ -348,7 +350,11 @@ Shader "Custom/SurfaceShader"
                 float xRel = IN.worldPos.x % (squareSize * 2);
                 float zRel = IN.worldPos.z % (squareSize * 2);
 
-                if((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize)) c = _ZoneBorderColor;
+                if ((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize))
+                {
+                    int colorIndex = _ZoneBorderColors[tileIndex];
+                    c = _PlayerColors[colorIndex];
+                }
             }
 
             // ######################################################################### GRID #########################################################################

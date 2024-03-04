@@ -7,7 +7,6 @@ The project currently contains a world editor where you can play with all the sy
 The world editor provides a lot of functionality to build and test own maps. Pathfinding, vision and the navmesh are all updated realtime whenever a change is made to the map.
 <br/>
 
-*World Editor*
 <br/><img src="Screenshots/editor_01.png" alt="editor_01" width="600" /><br/>
 
 
@@ -16,7 +15,6 @@ Capture The Flag is a turn-based squad tactics game based on the classic outdoor
 
 The gameplay is very simple. Two teams of 8 charaters each face off on a random, unexplored map. The goal is to move a character onto the enemy flag bevor they move one on your flag. If a character gets tagged by one of the other team he is sent to jail for 5 turns and can't move. Teams consist of different characters with different attributes.
 
-*Capture The Flag*
 <br/><img src="Screenshots/ctf_01.png" alt="ctf_01" width="600" /><br/>
 
 

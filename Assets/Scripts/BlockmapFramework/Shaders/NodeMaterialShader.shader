@@ -54,6 +54,7 @@ Shader "Custom/NodeMaterialShader"
         float _ChunkCoordinatesY;
         float _ChunkSize;
 
+        // Draw mode
         sampler2D _MainTex;
         fixed4 _Color;
         float _UseTextures;
@@ -61,6 +62,9 @@ Shader "Custom/NodeMaterialShader"
         float _TriplanarBlendSharpness;
         float _SideStartSteepness;
         float _SideOnlySteepness;
+
+        // Player colors
+        fixed4 _PlayerColors[8];
 
         // Overlays
         fixed4 _FogOfWarColor;
@@ -85,9 +89,9 @@ Shader "Custom/NodeMaterialShader"
         // Zone borders
         // Each list element represents one node and the value represents the sides on which the border should be drawn. (0/1 for each side N/E/S/W)
         // i.e. a value of 1001 would draw a border on the north and west side of the node.
-        fixed4 _ZoneBorderColor;
         float _ZoneBorderWidth;
         float _ZoneBorders[256];
+        float _ZoneBorderColors[256]; // Contains player id for each tile, colors are taken from _PlayerColors
 
         // Material attributes
         half _Glossiness;
@@ -270,7 +274,11 @@ Shader "Custom/NodeMaterialShader"
                     float xRel = IN.worldPos.x % (squareSize * 2);
                     float zRel = IN.worldPos.z % (squareSize * 2);
 
-                    if ((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize)) c = _ZoneBorderColor;
+                    if ((xRel < squareSize && zRel < squareSize) || (xRel > squareSize && zRel > squareSize))
+                    {
+                        int colorIndex = _ZoneBorderColors[tileIndex];
+                        c = _PlayerColors[colorIndex];
+                    }
                 }
             }
 

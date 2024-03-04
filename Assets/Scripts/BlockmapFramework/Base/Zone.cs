@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -9,44 +10,66 @@ namespace BlockmapFramework
     /// </summary>
     public class Zone : MonoBehaviour
     {
+        public int Id { get; private set; }
         private World World;
+        public Actor Actor { get; private set; }
         public HashSet<Vector2Int> WorldCoordinates { get; private set; }
+        public List<BlockmapNode> Nodes { get; private set; }
         public HashSet<Chunk> AffectedChunks { get; private set; }
         public bool IsBorderVisible { get; private set; }
+        public bool ProvidesVision { get; private set; }
 
-
-
-        public Zone(World world, HashSet<Vector2Int> coordinates)
+        public Zone(World world, int id, Actor actor, HashSet<Vector2Int> coordinates, bool providesVision, bool showBorders)
         {
+            Id = id;
             World = world;
+            Actor = actor;
             WorldCoordinates = coordinates;
+            ProvidesVision = providesVision;
+
+            Nodes = new List<BlockmapNode>();
             AffectedChunks = new HashSet<Chunk>();
 
-            UpdateAffectedChunks();
+            UpdateAffectedNodes();
+            SetBorderStyle(showBorders);
         }
 
         /// <summary>
-        /// Updates the zone references in all chunks if this zone has a world position in that zone or not.
+        /// Updates the zone references in all nodes and chunks this zone is on.
         /// </summary>
-        private void UpdateAffectedChunks()
+        private void UpdateAffectedNodes()
         {
+            // Remove this zone from all previously affected nodes
+            foreach (BlockmapNode node in Nodes)
+                node.RemoveZone(this);
+
+            // Recalculate affected nodes
+            Nodes.Clear();
+            foreach (Vector2Int coords in WorldCoordinates)
+                Nodes.AddRange(World.GetNodes(coords));
+
+            // Add this zone as a reference to all affected nodes
+            foreach (BlockmapNode node in Nodes)
+                node.AddZone(this);
+
+
             // Remove this zone from all previously affected chunks
             foreach (Chunk chunk in AffectedChunks)
                 chunk.RemoveZone(this);
 
             // Recalculate affected chunks
             AffectedChunks.Clear();
-            foreach (Vector2Int coords in WorldCoordinates)
-                AffectedChunks.Add(World.GetChunk(coords));
+            foreach (BlockmapNode node in Nodes)
+                AffectedChunks.Add(node.Chunk);
 
             // Add this zone as a reference to all affected chunks
             foreach (Chunk chunk in AffectedChunks)
                 chunk.AddZone(this);
         }
 
-        public void DrawBorders(bool show)
+        public void SetBorderStyle(bool visible)
         {
-            IsBorderVisible = show;
+            IsBorderVisible = visible;
             foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
         }
 
@@ -55,20 +78,6 @@ namespace BlockmapFramework
         public bool ContainsNode(BlockmapNode node)
         {
             return WorldCoordinates.Contains(node.WorldCoordinates);
-        }
-
-        /// <summary>
-        /// Returns a list of all nodes included in this zone.
-        /// </summary>
-        /// <returns></returns>
-        public List<BlockmapNode> GetNodes()
-        {
-            List<BlockmapNode> nodes = new List<BlockmapNode>();
-            foreach(Vector2Int coords in WorldCoordinates)
-            {
-                nodes.AddRange(World.GetNodes(coords));
-            }
-            return nodes;
         }
 
         /// <summary>
@@ -103,6 +112,27 @@ namespace BlockmapFramework
             }
 
             return nodeBorders;
+        }
+
+        #endregion
+
+        #region Save / Load
+
+        public static Zone Load(World world, ZoneData data)
+        {
+            return new Zone(world, data.Id, world.Actors[data.ActorId], data.Coordinates.Select(x => new Vector2Int(x.Item1, x.Item2)).ToHashSet(), data.ProvidesVision, data.ShowBorders);
+        }
+
+        public ZoneData Save()
+        {
+            return new ZoneData
+            {
+                Id = Id,
+                ActorId = Actor.Id,
+                ShowBorders = IsBorderVisible,
+                ProvidesVision = ProvidesVision,
+                Coordinates = WorldCoordinates.Select(x => new System.Tuple<int, int>(x.x, x.y)).ToList()
+            };
         }
 
         #endregion

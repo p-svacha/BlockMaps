@@ -61,6 +61,8 @@ namespace BlockmapFramework
         protected abstract void OnUpdate();
         protected void FinishGeneration()
         {
+            foreach (Chunk c in GeneratedWorld.Chunks.Values) GeneratedWorld.RedrawChunk(c);
+
             GenerationPhase = GenerationPhase.InitializingWorld;
             foreach (Entity e in GeneratedWorld.Entities) e.UpdateVision();
             GeneratedWorld.GenerateFullNavmesh();
@@ -77,8 +79,12 @@ namespace BlockmapFramework
             data.WaterBodies = new List<WaterBodyData>();
             data.Walls = new List<WallData>();
 
+            data.MaxEntityId = -1;
+            data.MaxZoneId = -1;
+            data.MaxWaterBodyId = -1;
+
             // Create players
-            data.Actors.Add(CreatePlayerData(World.GAIA_ID, "Gaia", Color.white));
+            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Gaia", Color.white));
             data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 1", Color.blue));
             data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 2", Color.red));
 
@@ -128,21 +134,29 @@ namespace BlockmapFramework
         #region Helper Functions
 
         /// <summary>
-        /// Spawns an entity on the surface near the given point.
+        /// Spawns an entity on the surface near the given point and returns the entity instance.
         /// </summary>
-        protected bool SpawnEntityAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation)
+        protected Entity SpawnEntityAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
         {
-            Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
-            while(!GeneratedWorld.IsInWorld(targetPos)) targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
+            Vector2Int targetPos = Vector2Int.zero;
+            bool keepSearching = true;
+
+            while (keepSearching) // Keep searching until we find a suitable position
+            {
+                targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
+
+                keepSearching = false;
+                if (!GeneratedWorld.IsInWorld(targetPos)) keepSearching = true;
+                else if (forbiddenNodes != null && forbiddenNodes.Contains(GeneratedWorld.GetSurfaceNode(targetPos))) keepSearching = true;
+            }
             BlockmapNode targetNode = GeneratedWorld.GetSurfaceNode(targetPos);
 
             if(GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
             {
-                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
-                return true;
+                return GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
             }
 
-            return false;
+            return null;
         }
 
         protected Entity GetEntityPrefab(string id)

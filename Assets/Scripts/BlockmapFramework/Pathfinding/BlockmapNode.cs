@@ -65,6 +65,8 @@ namespace BlockmapFramework
         // Things on this node
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
+        public List<Zone> Zones = new List<Zone>();
+
         /// <summary>
         /// Ladders that come from this node
         /// </summary>
@@ -582,6 +584,15 @@ namespace BlockmapFramework
             Entities.Remove(e);
         }
 
+        public void AddZone(Zone z)
+        {
+            Zones.Add(z);
+        }
+        public void RemoveZone(Zone z)
+        {
+            Zones.Remove(z);
+        }
+
         public void AddVisionBy(Entity e)
         {
             ExploredBy.Add(e.Owner);
@@ -672,10 +683,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if this node is visible for the specified player.
         /// </summary>
-        public bool IsVisibleBy(Actor player)
+        public bool IsVisibleBy(Actor actor)
         {
-            if (player == null) return true; // Everything is visible
-            if (SeenBy.FirstOrDefault(x => x.Owner == player) != null) return true; // Node is seen by an entity of player
+            if (actor == null) return true; // Everything is visible
+            if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of player that provides vision
+            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Node is seen by an entity of player
 
             return false;
         }

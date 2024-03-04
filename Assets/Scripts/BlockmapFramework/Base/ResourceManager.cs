@@ -24,6 +24,14 @@ namespace BlockmapFramework
         public Material WoodenFenceMaterial;
         public Material LadderMaterial;
 
+        public List<Material> GetAllNodeSurfaceMaterials() => new List<Material>()
+        {
+            SurfaceMaterial,
+            PathMaterial,
+            PathCurbMaterial,
+            WaterMaterial
+        };
+
         [Header("Colors")]
         public Color GrassColor;
         public Color SandColor;

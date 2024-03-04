@@ -1,10 +1,5 @@
 Big Features to Add:
 
-- Safe zone around flag
-	> Add that zones can belong to actors and give vision
-	> full vision
-	> not passable for own team
-
 - CTF: AI player and AI moves
 	> if we see enemy character in own zone => CHASE
 	> if we see enemy flag => GO THERE
@@ -24,8 +19,6 @@ Big Features to Add:
 	> 4. parcel connection points (to line features and other parcels)
 	> 5. parcel generation
 	> 6. player base generation
-		> move map zone and jail zone generation here
-		> save zones in world data
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -83,6 +76,12 @@ Big Features to Add:
 - dont allow suface nodes with walls in water
 	- affect canplacewater
 	- affect canbuildwall
+
+- Minimap
+	> shows tiles
+	> shows current camera position
+	> shows character positions
+	> interactable to move camera
 
 - expand entity navmesh impact options
 	> make it possible that entities can block a combination of full nodes, sides and corners

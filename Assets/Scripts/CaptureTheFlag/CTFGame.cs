@@ -9,11 +9,12 @@ namespace CaptureTheFlag
     public class CTFGame : MonoBehaviour
     {
         // Rules
-        private const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
+        public const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
         public const int JAIL_ZONE_RADIUS = 3;
-        public const int JAIL_ZONE_MIN_FLAG_DISTANCE = 5; // minimum distance from jail zone center to flag
-        public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 5; // maximum distance from jail zone center to flag
+        public const int JAIL_ZONE_MIN_FLAG_DISTANCE = 9; // minimum distance from jail zone center to flag
+        public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
         public const int JAIL_TIME = 5; // Amount of turns a character spends in jail after being tagged
+        public const float FLAG_ZONE_RADIUS = 7.5f;
 
         // Elements
         public CTFUi UI;
@@ -54,27 +55,13 @@ namespace CaptureTheFlag
             World = MapGenerator.GeneratedWorld;
 
             // Map zones
-            NeutralZoneSize = (int)(World.Dimensions.x * NEUTRAL_ZONE_SIZE);
-            PlayerZoneSize = (World.Dimensions.x / 2) - (NeutralZoneSize / 2);
-            HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
-            HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();
-            HashSet<Vector2Int> opponentZoneNodes = new HashSet<Vector2Int>();
-            foreach(BlockmapNode node in World.GetAllSurfaceNodes())
-            {
-                if (node.WorldCoordinates.x < PlayerZoneSize) ownZoneNodes.Add(node.WorldCoordinates);
-                else if (node.WorldCoordinates.x < PlayerZoneSize + NeutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
-                else opponentZoneNodes.Add(node.WorldCoordinates);
-            }
-            LocalPlayerZone = new Zone(World, ownZoneNodes);
-            NeutralZone = new Zone(World, neutralZoneNodes);
-            OpponentZone = new Zone(World, opponentZoneNodes);
-
-            LocalPlayerZone.DrawBorders(true);
-            OpponentZone.DrawBorders(true);
+            LocalPlayerZone = World.Zones[0];
+            NeutralZone = World.Zones[1];
+            OpponentZone = World.Zones[2];
 
             // Convert world actors to CTF Players
-            LocalPlayer = new Player(World.Actors[0]);
-            Opponent = new AIPlayer(World.Actors[1]);
+            LocalPlayer = new Player(World.Actors[1], World.Zones[3], World.Zones[4]);
+            Opponent = new AIPlayer(World.Actors[2], World.Zones[5], World.Zones[6]);
 
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
@@ -96,33 +83,33 @@ namespace CaptureTheFlag
             StartYourTurn();
         }
 
-        public void OnActionDone(Character c, CharacterAction action)
+        public void OnActionDone(Character character, CharacterAction action)
         {
             // Check game over
             if (IsGameOver(out Player winner)) EndGame(won: winner == LocalPlayer);
 
             // Reduce action/stamina based on action cost
-            c.ReduceActionAndStamina(action.Cost);
+            character.ReduceActionAndStamina(action.Cost);
 
             // Send all colliding characters to jail (depending on map half)
-            List<Character> characters = GetCharacters(c.Entity.OriginNode);
-            if(LocalPlayerZone.ContainsNode(c.Entity.OriginNode) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
+            List<Character> characters = GetCharacters(character.Entity.OriginNode);
+            if(LocalPlayerZone.ContainsNode(character.Entity.OriginNode) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
             {
                 foreach (Character opponentCharacter in characters.Where(x => x.Owner == Opponent))
                     SendToJail(opponentCharacter);
             }
-            if (OpponentZone.ContainsNode(c.Entity.OriginNode) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
+            if (OpponentZone.ContainsNode(character.Entity.OriginNode) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
             {
                 foreach (Character ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
                     SendToJail(ownCharacter);
             }
 
-            // Update possible moves with remaining action/stamina
-            c.UpdatePossibleMoves();
+            // Update possible moves for all characters
+            foreach (Character teamCharacter in character.Owner.Characters) teamCharacter.UpdatePossibleMoves();
 
             // Update UI
-            if (c.Owner == LocalPlayer) UI.UpdateSelectionPanel(c);
-            if (SelectedCharacter == c) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
+            if (character.Owner == LocalPlayer) UI.UpdateSelectionPanel(character);
+            if (SelectedCharacter == character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
         }
 
         private void StartYourTurn()
@@ -342,7 +329,7 @@ namespace CaptureTheFlag
         public void SendToJail(Character character)
         {
             // Get a random free node within the characters jail zone
-            List<BlockmapNode> candidateNodes = character.Owner.JailZone.GetNodes().Where(x => x.IsPassable(character.Entity)).ToList();
+            List<BlockmapNode> candidateNodes = character.Owner.JailZone.Nodes.Where(x => x.IsPassable(character.Entity)).ToList();
             BlockmapNode targetNode = candidateNodes[Random.Range(0, candidateNodes.Count)];
 
             // Teleport character to target node

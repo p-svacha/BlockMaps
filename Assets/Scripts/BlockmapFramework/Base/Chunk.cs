@@ -123,7 +123,7 @@ namespace BlockmapFramework
         #region Draw
 
         /// <summary>
-        /// Generates a single mesh for this chunk
+        /// Generates all meshes for this chunk
         /// </summary>
         public void DrawMesh()
         {
@@ -181,8 +181,13 @@ namespace BlockmapFramework
         public void DrawZoneBorders()
         {
             // Combine all visible zones on this chunk into 1 combines zone border list that contains a bool[4] (1 for each direction) for each node that state if a border should be drawn there.
-            List<bool[]> combinedBorders = new List<bool[]>();
-            for (int i = 0; i < 256; i++) combinedBorders.Add(new bool[4]);
+            bool[][] combinedBorders = new bool[256][];
+            int[] combinedBorderColors = new int[256];
+
+            for (int i = 0; i < 256; i++)
+            {
+                combinedBorders[i] = new bool[4];
+            }
 
             List<Zone> visibleZones = Zones.Where(x => x.IsBorderVisible).ToList();
             foreach (Zone z in visibleZones)
@@ -192,7 +197,11 @@ namespace BlockmapFramework
                 {
                     for (int j = 0; j < 4; j++) // for each border direction
                     {
-                        if (nodeBorders[i][j] == true) combinedBorders[i][j] = true;
+                        if (nodeBorders[i][j] == true)
+                        {
+                            combinedBorders[i][j] = true;
+                            combinedBorderColors[i] = z.Actor.Id;
+                        }
                     }
                 }
 
@@ -210,10 +219,13 @@ namespace BlockmapFramework
                 zoneBorderArray[i] = shaderArrayValue;
             }
 
+            // Translate color array with actor id's into float array that the shaders can use
+            float[] zoneBorderColors = combinedBorderColors.Select(x => (float)x).ToArray();
+
             // Pass array to all meshes
-            SurfaceMesh.ShowZoneBorders(zoneBorderArray);
-            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowZoneBorders(zoneBorderArray);
-            WaterMesh.ShowZoneBorders(zoneBorderArray);
+            SurfaceMesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
+            WaterMesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
         }
 
         #endregion

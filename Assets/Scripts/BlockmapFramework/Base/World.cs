@@ -51,18 +51,19 @@ namespace BlockmapFramework
         public List<Entity> Entities = new List<Entity>();
         public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
         public List<Wall> Walls = new List<Wall>();
+        public Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
         private int WaterBodyIdCounter;
         private int ActorIdCounter;
+        private int ZoneIdCounter;
 
         private BlockmapCamera Camera;
         /// <summary>
         /// Neutral passive actor
         /// </summary>
         public Actor Gaia { get; private set; }
-        public const int GAIA_ID = -1;
         /// <summary>
         /// The actor that the vision is drawn for currently.
         /// <br/> If null everything is drawn.
@@ -140,10 +141,12 @@ namespace BlockmapFramework
             EntityIdCounter = data.MaxEntityId + 1;
             WaterBodyIdCounter = data.MaxWaterBodyId + 1;
             ActorIdCounter = data.MaxActorId + 1;
+            ZoneIdCounter = data.MaxZoneId + 1;
 
             // Init actors
             foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
-            Gaia = Actors[GAIA_ID];
+            Gaia = Actors[0];
+            UpdateShaderPlayerColors();
 
             // Init nodes
             foreach (ChunkData chunkData in data.Chunks)
@@ -193,6 +196,13 @@ namespace BlockmapFramework
             {
                 WaterBody water = WaterBody.Load(this, waterData);
                 WaterBodies.Add(waterData.Id, water);
+            }
+
+            // Init zones
+            foreach(ZoneData zoneData in data.Zones)
+            {
+                Zone zone = Zone.Load(this, zoneData);
+                Zones.Add(zoneData.Id, zone);
             }
 
             IsInitialized = false;
@@ -537,6 +547,9 @@ namespace BlockmapFramework
             int id = ActorIdCounter++;
             Actor newActor = new Actor(this, id, name, color);
             Actors.Add(id, newActor);
+
+            UpdateShaderPlayerColors();
+
             return newActor;
         }
         public void ResetExploration(Actor actor)
@@ -577,6 +590,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+
             if(isInitialization) IsInitialized = true;
 
             sw.Stop();
@@ -781,7 +795,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Actor actor, bool isInstance = false, bool updateWorld = true)
+        public Entity SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Actor actor, bool isInstance = false, bool updateWorld = true)
         {
             // Create entity object
             Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, transform);
@@ -800,6 +814,9 @@ namespace BlockmapFramework
 
             // Update pathfinding navmesh
             if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
+
+            // Return new instance
+            return instance;
         }
         public void RemoveEntity(Entity entity)
         {
@@ -1038,6 +1055,14 @@ namespace BlockmapFramework
             RemoveEntity(ladder.Entity);
         }
 
+        public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
+        {
+            int id = ZoneIdCounter++;
+            Zone newZone = new Zone(this, id, actor, coordinates, providesVision, showBorders);
+            Zones.Add(id, newZone);
+            return newZone;
+        }
+
         #endregion
 
         #region Draw
@@ -1086,6 +1111,7 @@ namespace BlockmapFramework
             chunk.ShowGrid(IsShowingGrid);
             chunk.ShowTextures(IsShowingTextures);
             chunk.ShowTileBlending(IsShowingTileBlending);
+            chunk.DrawZoneBorders();
         }
 
         /// <summary>
@@ -1210,6 +1236,12 @@ namespace BlockmapFramework
         public void CameraJumpToFocusEntity(Entity e)
         {
             Camera.SetPosition(e.OriginNode.GetCenterWorldPosition());
+        }
+
+        public void UpdateShaderPlayerColors()
+        {
+            foreach(Material mat in ResourceManager.Singleton.GetAllNodeSurfaceMaterials())
+                mat.SetColorArray("_PlayerColors", Actors.Values.Select(x => x.Color).ToArray());
         }
 
         #endregion
@@ -1541,11 +1573,13 @@ namespace BlockmapFramework
                 MaxEntityId = EntityIdCounter,
                 MaxWaterBodyId = WaterBodyIdCounter,
                 MaxActorId = ActorIdCounter,
+                MaxZoneId = ZoneIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Actors = Actors.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Select(x => x.Save()).ToList(),
                 WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
-                Walls = Walls.Select(x => x.Save()).ToList()
+                Walls = Walls.Select(x => x.Save()).ToList(),
+                Zones = Zones.Values.Select(x => x.Save()).ToList()
             };
         }
 

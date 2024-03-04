@@ -10,7 +10,7 @@ namespace CaptureTheFlag
     {
         public bool TurnFinished { get; private set; }
 
-        public AIPlayer(Actor actor) : base(actor) { }
+        public AIPlayer(Actor actor, Zone jailZone, Zone flagZone) : base(actor, jailZone, flagZone) { }
 
         public void StartTurn()
         {
