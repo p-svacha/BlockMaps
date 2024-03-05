@@ -4,11 +4,10 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public enum GameState
+    public enum CharacterActionState
     {
-        Loading,
-        YourTurn,
-        OpponentTurn,
-        GameFinished
+        Pending,
+        Performing,
+        Done
     }
 }

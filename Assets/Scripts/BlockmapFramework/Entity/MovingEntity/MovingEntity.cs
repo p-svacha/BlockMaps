@@ -14,6 +14,7 @@ namespace BlockmapFramework
 
         // Current movement
         public bool IsMoving { get; private set; }
+        public bool IsMovementPaused { get; private set; }
         public ClimbPhase ClimbPhase { get; set; }
         public int ClimbIndex { get; set; }
 
@@ -43,7 +44,7 @@ namespace BlockmapFramework
             base.UpdateEntity();
 
             // Movement
-            if(IsMoving)
+            if(IsMoving && !IsMovementPaused)
             {
                 CurrentTransition.UpdateEntityMovement(this, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
@@ -101,6 +102,21 @@ namespace BlockmapFramework
             Target = path.Last();
             IsMoving = true;
             OnNewPath();
+        }
+
+        /// <summary>
+        /// Pauses the current movement. Doesn't trigger any hooks or logic. Movement will continue normally with UnpauseMovement().
+        /// </summary>
+        public void PauseMovement()
+        {
+            IsMovementPaused = true;
+        }
+        /// <summary>
+        /// Unpause the entity so it will move normally again.
+        /// </summary>
+        public void UnpauseMovement()
+        {
+            IsMovementPaused = false;
         }
 
 

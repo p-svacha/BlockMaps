@@ -49,7 +49,7 @@ namespace CaptureTheFlag
         {
             if (Time.time - LastClickTime < DoubleClickTimeThreshold) // Double click detected
             {
-                Game.World.CameraJumpToFocusEntity(Character.Entity);
+                Game.World.CameraPanToFocusEntity(Character.Entity, duration: 0.5f, false);
             }
             else // Single click
             {

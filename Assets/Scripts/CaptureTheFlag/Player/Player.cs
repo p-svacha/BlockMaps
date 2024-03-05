@@ -7,6 +7,7 @@ namespace CaptureTheFlag
 {
     public class Player
     {
+        public CTFGame Game;
         public Actor Actor;
         public Entity Flag;
         public List<Character> Characters;
@@ -26,6 +27,12 @@ namespace CaptureTheFlag
 
             JailZone = jailZone;
             FlagZone = flagZone;
+        }
+
+        public virtual void OnStartGame(CTFGame game)
+        {
+            Game = game;
+            foreach (Character c in Characters) c.OnStartGame(Game, this);
         }
 
         #region Getters

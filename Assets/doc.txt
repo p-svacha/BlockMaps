@@ -1,17 +1,18 @@
 Big Features to Add:
 
-- CTF: AI player and AI moves
-	> if we see enemy character in own zone => CHASE
-	> if we see enemy flag => GO THERE
-	> move camera to character when walking through visible nodes
+- Rework hover pathfinding
+	> Cache paths (forever since they can never change atm)
+	> Clicking on red path moves as far as possible
 
 - Improve ctf map generator
 	> New approach: Check XCOM and PZ map generation
 	> Split map into parcels
 	> Parcels have their own generation system on top of height map generation
-	> Parcel generation depends on bordering parcels, roads, rivers
+	> Parcel generation depends on bordering parcels, roads, rivers, map edge
 	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
 	> Implement rules which parcels can be next to each other
+	> Increase performance
+
 
 	> 1. height map generation
 	> 2. line features (river, road, railroad)
@@ -19,6 +20,44 @@ Big Features to Add:
 	> 4. parcel connection points (to line features and other parcels)
 	> 5. parcel generation
 	> 6. player base generation
+
+- Implement some line features for new map gen system
+	> road
+	> rail track
+	> stroad
+	> highway
+	> creek
+	> river
+
+- Implement some parcels and content for them for new mapgen system
+	> forest
+	> park
+	> neighbourhood
+	> industry
+	> mountain (cliff on 1 side)
+	> swamp
+	> pool
+
+- Rework jail system
+	> 1 Jail that is in neutral area
+	> gives full vision for both players
+	> Fully fenced off
+	> Characters get teleported out of jail when jail time ends
+
+- Make menu for creating game
+	> Allow different map sizes
+	> Miniscule: 7 chunks
+	> Tiny: 9 chunks
+	> Small: 11 chunks
+	> Medium: 13 chunks
+	> Big: 15 chunks
+	> Huge: 17 chunks
+	> Enormous: 20 chunks
+	> Random
+
+- Upon end game show full visible map
+
+- Seperate check for entity vision independent from node vision
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
@@ -56,6 +95,11 @@ Big Features to Add:
 - Make vision radius of entities based on their dimensions
 
 - Water shader (very small transparency, moving, foam when hitting terrain)
+
+- CTF: improve AI with job system
+	> if we see enemy character in own zone => CHASE
+	> if we see enemy flag => GO THERE
+	> some "your turn" notification when turn starts
 
 - Disallow 0101 and 1010 shapes
 - Disallow 2110 and 0112 shapes

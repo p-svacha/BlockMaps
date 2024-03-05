@@ -59,7 +59,10 @@ namespace BlockmapFramework
         private int ActorIdCounter;
         private int ZoneIdCounter;
 
-        private BlockmapCamera Camera;
+        // Camera
+        public BlockmapCamera Camera { get; private set; }
+
+        // Actors
         /// <summary>
         /// Neutral passive actor
         /// </summary>
@@ -1236,6 +1239,10 @@ namespace BlockmapFramework
         public void CameraJumpToFocusEntity(Entity e)
         {
             Camera.SetPosition(e.OriginNode.GetCenterWorldPosition());
+        }
+        public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan)
+        {
+            Camera.PanTo(duration, e.OriginNode.GetCenterWorldPosition(), followAfterPan ? e : null);
         }
 
         public void UpdateShaderPlayerColors()

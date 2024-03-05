@@ -25,6 +25,13 @@ public static class HelperFunctions
         return Mathf.Lerp(start, end, t);
     }
 
+    public static Vector3 SmoothLerp(Vector3 start, Vector3 end, float t)
+    {
+        t = Mathf.Clamp01(t);
+        t = t * t * (3f - 2f * t);
+        return Vector3.Lerp(start, end, t);
+    }
+
     #endregion
 
     #region Random

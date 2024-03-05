@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         public const int JAIL_ZONE_MIN_FLAG_DISTANCE = 9; // minimum distance from jail zone center to flag
         public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
         public const int JAIL_TIME = 5; // Amount of turns a character spends in jail after being tagged
-        public const float FLAG_ZONE_RADIUS = 7.5f;
+        public const float FLAG_ZONE_RADIUS = 7.5f;  // Amount of tiles around flag that can't be entered by own team
 
         // Elements
         public CTFUi UI;
@@ -25,8 +25,6 @@ namespace CaptureTheFlag
         private HashSet<BlockmapNode> HighlightedNodes = new();
 
         // Game attributes
-        private int NeutralZoneSize;
-        private int PlayerZoneSize;
         public Zone LocalPlayerZone { get; private set; }
         public Zone NeutralZone { get; private set; }
         public Zone OpponentZone { get; private set; }
@@ -36,6 +34,7 @@ namespace CaptureTheFlag
 
         public Player LocalPlayer { get; private set; }
         public AIPlayer Opponent { get; private set; }
+
 
         #region Game Loop
 
@@ -73,8 +72,8 @@ namespace CaptureTheFlag
             UI.LoadingScreenOverlay.SetActive(false);
 
             // Start Game
-            foreach (Character c in LocalPlayer.Characters) c.OnStartGame(this, LocalPlayer);
-            foreach (Character c in Opponent.Characters) c.OnStartGame(this, Opponent);
+            LocalPlayer.OnStartGame(this);
+            Opponent.OnStartGame(this);
             UI.OnStartGame();
 
             // Camera
@@ -83,33 +82,33 @@ namespace CaptureTheFlag
             StartYourTurn();
         }
 
-        public void OnActionDone(Character character, CharacterAction action)
+        public void OnActionDone(CharacterAction action)
         {
             // Check game over
             if (IsGameOver(out Player winner)) EndGame(won: winner == LocalPlayer);
 
             // Reduce action/stamina based on action cost
-            character.ReduceActionAndStamina(action.Cost);
+            action.Character.ReduceActionAndStamina(action.Cost);
 
             // Send all colliding characters to jail (depending on map half)
-            List<Character> characters = GetCharacters(character.Entity.OriginNode);
-            if(LocalPlayerZone.ContainsNode(character.Entity.OriginNode) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
+            List<Character> characters = GetCharacters(action.Character.Entity.OriginNode);
+            if(LocalPlayerZone.ContainsNode(action.Character.Entity.OriginNode) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
             {
                 foreach (Character opponentCharacter in characters.Where(x => x.Owner == Opponent))
                     SendToJail(opponentCharacter);
             }
-            if (OpponentZone.ContainsNode(character.Entity.OriginNode) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
+            if (OpponentZone.ContainsNode(action.Character.Entity.OriginNode) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
             {
                 foreach (Character ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
                     SendToJail(ownCharacter);
             }
 
             // Update possible moves for all characters
-            foreach (Character teamCharacter in character.Owner.Characters) teamCharacter.UpdatePossibleMoves();
+            foreach (Character teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleMoves();
 
             // Update UI
-            if (character.Owner == LocalPlayer) UI.UpdateSelectionPanel(character);
-            if (SelectedCharacter == character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
+            if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
+            if (SelectedCharacter == action.Character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
         }
 
         private void StartYourTurn()
@@ -130,7 +129,7 @@ namespace CaptureTheFlag
 
         public void StartOpponentTurn()
         {
-            State = GameState.EnemyTurn;
+            State = GameState.OpponentTurn;
 
             foreach (Character c in Opponent.Characters) c.OnStartTurn();
             Opponent.StartTurn();
@@ -190,7 +189,7 @@ namespace CaptureTheFlag
                     UpdateYourTurn();
                     break;
 
-                case GameState.EnemyTurn:
+                case GameState.OpponentTurn:
                     Opponent.UpdateTurn();
                     if (Opponent.TurnFinished) EndOpponentTurn();
                     break;
@@ -225,7 +224,7 @@ namespace CaptureTheFlag
                     !SelectedCharacter.IsInAction
                     && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Movement move))
                 {
-                    SelectedCharacter.PerformAction(move); // Start movement
+                    move.Perform(); // Start movement action
                     UnhighlightNodes(); // Unhighlight nodes
                 }
             }

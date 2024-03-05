@@ -29,8 +29,6 @@ namespace CaptureTheFlag
         public Dictionary<BlockmapNode, Movement> PossibleMoves { get; private set; }
         private CharacterAction CurrentAction;
 
-        // Event
-        public event System.Action OnTargetReached;
 
         private void Awake()
         {
@@ -45,8 +43,6 @@ namespace CaptureTheFlag
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
             Owner = player;
-
-            Entity.OnTargetReached += OnActionDone;
         }
 
         public void OnStartTurn()
@@ -63,21 +59,14 @@ namespace CaptureTheFlag
             UpdatePossibleMoves();
         }
 
-        private void OnActionDone()
+        public void SetCurrentAction(CharacterAction action)
         {
-            Game.OnActionDone(this, CurrentAction);
-            CurrentAction = null;
+            CurrentAction = action;
         }
 
         #endregion
 
         #region Actions
-
-        public void PerformAction(CharacterAction action)
-        {
-            CurrentAction = action;
-            action.Perform(this);
-        }
 
         public void SetJailTime(int turns)
         {
@@ -145,7 +134,7 @@ namespace CaptureTheFlag
                         if (!CanStandOn(targetNode)) continue;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Movement(nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Movement(Game, this, nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
