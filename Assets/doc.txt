@@ -1,8 +1,16 @@
 Big Features to Add:
 
 - Rework hover pathfinding
+	> Hover on unreachable node = no path preview
+	> Hover on node with !canStandOn = red path preview
+	> Hover on node within possible moves = green path preview
+	> Hover on reachable node outside possible moves = yellow path preview
 	> Cache paths (forever since they can never change atm)
-	> Clicking on red path moves as far as possible
+	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
+	> Clicking on yellow path moves as far as possible
+
+- Reduce human height to 2
+	> tiles are about 2x2x1 meter
 
 - Improve ctf map generator
 	> New approach: Check XCOM and PZ map generation
@@ -55,9 +63,15 @@ Big Features to Add:
 	> Enormous: 20 chunks
 	> Random
 
+- Slopes use more action points
+	> downwards * 1.25
+	> upwards * 1.5
+
 - Upon end game show full visible map
 
 - Seperate check for entity vision independent from node vision
+
+- Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation

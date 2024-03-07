@@ -12,6 +12,8 @@ namespace BlockmapFramework
     /// </summary>
     public class SurfaceNode : BlockmapNode
     {
+        public Surface Surface { get; private set; }
+
         public override NodeType Type => NodeType.Surface;
         public override bool IsSolid => true;
         public override bool IsPath => HasPath;
@@ -23,9 +25,12 @@ namespace BlockmapFramework
 
         // Path
         public bool HasPath;
-        public Surface PathSurface;
+        public SurfaceProperties PathSurfaceProperties;
 
-        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
+        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, Surface surface) : base(world, chunk, id, localCoordinates, height)
+        {
+            Surface = surface;
+        }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
@@ -291,6 +296,11 @@ namespace BlockmapFramework
 
         #region Actions
 
+        public void SetSurface(SurfaceId id)
+        {
+            Surface = SurfaceManager.Instance.GetSurface(id);
+        }
+
         public bool CanChangeHeight(Direction mode, bool isIncrease)
         {
             if (HasPath) return false;
@@ -398,15 +408,15 @@ namespace BlockmapFramework
             }
         }
 
-        public void BuildPath(Surface surface)
+        public void BuildPath(SurfaceProperties pathSurface)
         {
             HasPath = true;
-            PathSurface = surface;
+            PathSurfaceProperties = pathSurface;
         }
         public void RemovePath()
         {
             HasPath = false;
-            PathSurface = null;
+            PathSurfaceProperties = null;
         }
 
         public void SetWaterNode(WaterNode waterNode)
@@ -429,10 +439,10 @@ namespace BlockmapFramework
             Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
         }
 
-        public override float GetSpeedModifier()
+        public override SurfaceProperties GetSurfaceProperties()
         {
-            if (HasPath) return PathSurface.SpeedModifier;
-            else return Surface.SpeedModifier;
+            if (HasPath) return PathSurfaceProperties;
+            else return Surface.Properties;
         }
         
         public override Vector3 GetCenterWorldPosition()
@@ -448,6 +458,8 @@ namespace BlockmapFramework
         }
 
         public bool IsCenterUnderWater => (WaterNode != null && GetCenterWorldPosition().y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
+
+        public override int GetSubType() => (int)Surface.Id;
 
         #endregion
 

@@ -4,13 +4,15 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// Each different walkable texure/material is represented by one instance of a Surface.
+    /// </summary>
     public abstract class Surface
     {
         public abstract SurfaceId Id { get; }
         public abstract string Name { get; }
-        public abstract float SpeedModifier { get; }
+        public abstract SurfaceProperties Properties { get; }
         public abstract Color Color { get; }
         public abstract Texture2D Texture { get; }
-        public abstract bool IsPaintable { get; }
     }
 }

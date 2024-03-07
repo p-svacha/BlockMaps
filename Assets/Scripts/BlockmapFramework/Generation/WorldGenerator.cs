@@ -115,8 +115,8 @@ namespace BlockmapFramework
             data.LocalCoordinateX = localCoordinates.x;
             data.LocalCoordinateY = localCoordinates.y;
             data.Height = new int[] { 5, 5, 5, 5 };
-            data.Surface = SurfaceId.Grass;
             data.Type = NodeType.Surface;
+            data.SubType = (int)SurfaceId.Grass;
 
             return data;
         }

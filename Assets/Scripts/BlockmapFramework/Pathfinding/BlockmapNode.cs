@@ -47,7 +47,6 @@ namespace BlockmapFramework
         public Vector2Int WorldCoordinates { get; private set; }
         public Vector2 WorldCenter2D => WorldCoordinates + new Vector2(0.5f, 0.5f);
         public Vector2Int LocalCoordinates { get; private set; }
-        public Surface Surface { get; private set; }
         public abstract NodeType Type { get; }
         public abstract bool IsPath { get; }
         public abstract bool IsSolid { get; } // Flag if entities can (generally) be placed on top of this node
@@ -93,7 +92,7 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface)
+        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height)
         {
             World = world;
             Chunk = chunk;
@@ -104,7 +103,6 @@ namespace BlockmapFramework
             Height = height;
 
             RecalculateShape();
-            Surface = (surface == SurfaceId.Null) ? null : SurfaceManager.Instance.GetSurface(surface);
             Transitions = new Dictionary<BlockmapNode, Transition>();
             WalkTransitions = new Dictionary<Direction, Transition>();
         }
@@ -587,6 +585,9 @@ namespace BlockmapFramework
         public void AddZone(Zone z)
         {
             Zones.Add(z);
+
+            // Explore tiles for zone owner if zone provides vision
+            if (z.ProvidesVision) AddExploredBy(z.Actor);
         }
         public void RemoveZone(Zone z)
         {
@@ -611,17 +612,12 @@ namespace BlockmapFramework
             ExploredBy.Remove(p);
         }
 
-        public void SetSurface(SurfaceId id)
-        {
-            Surface = SurfaceManager.Instance.GetSurface(id);
-        }
-
         #endregion
 
         #region Getters
 
         public bool HasWall => Walls.Count > 0;
-        public virtual float GetSpeedModifier() => Surface.SpeedModifier;
+        public abstract SurfaceProperties GetSurfaceProperties();
         public abstract Vector3 GetCenterWorldPosition();
 
         public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
@@ -797,13 +793,13 @@ namespace BlockmapFramework
             switch(data.Type)
             {
                 case NodeType.Surface:
-                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
+                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), SurfaceManager.Instance.GetSurface((SurfaceId)data.SubType));
 
                 case NodeType.Air:
-                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
+                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height));
 
                 case NodeType.Water:
-                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), data.Surface);
+                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height));
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }
@@ -826,10 +822,12 @@ namespace BlockmapFramework
                 LocalCoordinateX = LocalCoordinates.x,
                 LocalCoordinateY = LocalCoordinates.y,
                 Height = new int[] { Height[Direction.SW], Height[Direction.SE], Height[Direction.NE], Height[Direction.NW] },
-                Surface = Surface.Id,
-                Type = Type
+                Type = Type,
+                SubType = GetSubType()
             };
         }
+
+        public abstract int GetSubType();
 
         #endregion
     }

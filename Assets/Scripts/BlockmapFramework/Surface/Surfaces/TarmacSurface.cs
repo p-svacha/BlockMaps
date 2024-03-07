@@ -10,9 +10,8 @@ namespace BlockmapFramework
 
         public override SurfaceId Id => SurfaceId.Tarmac;
         public override string Name => "Tarmac";
-        public override float SpeedModifier => 0.9f;
+        public override SurfaceProperties Properties => SurfaceManager.Instance.GetSurfaceProperties(SurfacePropertyId.Tarmac);
         public override Color Color => ResourceManager.Singleton.TarmacColor;
         public override Texture2D Texture => ResourceManager.Singleton.TarmacTexture;
-        public override bool IsPaintable => true;
     }
 }

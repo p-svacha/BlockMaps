@@ -13,7 +13,7 @@ namespace BlockmapFramework
         public WaterBody WaterBody { get; private set; }
         public SurfaceNode SurfaceNode { get; private set; }
 
-        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surface) : base(world, chunk, id, localCoordinates, height, surface) { }
+        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height) { }
 
         public void Init(WaterBody waterBody, SurfaceNode surfaceNode)
         {
@@ -48,12 +48,14 @@ namespace BlockmapFramework
             return base.IsPassable(entity);
         }
 
+        public override SurfaceProperties GetSurfaceProperties() => SurfaceManager.Instance.GetSurfaceProperties(SurfacePropertyId.Water);
+
+        public override int GetSubType() => 0;
+
         public override void Draw(MeshBuilder meshBuilder)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotImplementedException(); // drawn as part of a whole waterbody
         }
-
-
 
         #endregion
     }

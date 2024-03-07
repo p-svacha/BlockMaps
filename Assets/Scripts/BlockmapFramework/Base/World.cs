@@ -165,9 +165,6 @@ namespace BlockmapFramework
             MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
             Dimensions = new Vector2Int(MaxX - MinX, MaxY - MinY);
 
-            // Draw node meshes because we need to shoot rays to generate navmesh
-            DrawNodes();
-
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
             BlockmapNode initialCameraFocusNode = GetSurfaceNode(new Vector2Int(0, 0));
@@ -207,6 +204,9 @@ namespace BlockmapFramework
                 Zone zone = Zone.Load(this, zoneData);
                 Zones.Add(zoneData.Id, zone);
             }
+
+            // Draw node meshes because we need to shoot rays to generate navmesh
+            DrawNodes();
 
             IsInitialized = false;
             InitializeStep = 1;
@@ -648,7 +648,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildSurfacePath(SurfaceNode node, Surface pathSurface)
+        public void BuildSurfacePath(SurfaceNode node, SurfaceProperties pathSurface)
         {
             node.BuildPath(pathSurface);
             RedrawNodesAround(node.WorldCoordinates);
@@ -696,7 +696,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), SurfaceId.Tarmac);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height));
             RegisterNode(newNode);
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
@@ -737,7 +737,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Tarmac);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir));
             RegisterNode(newNode);
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
@@ -926,7 +926,7 @@ namespace BlockmapFramework
             List<WaterNode> waterNodes = new List<WaterNode>();
             foreach (SurfaceNode node in data.CoveredNodes)
             {
-                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight), SurfaceId.Water);
+                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight));
                 waterNodes.Add(waterNode);
                 RegisterNode(waterNode);
             }
@@ -1238,11 +1238,11 @@ namespace BlockmapFramework
 
         public void CameraJumpToFocusEntity(Entity e)
         {
-            Camera.SetPosition(e.OriginNode.GetCenterWorldPosition());
+            Camera.SetPosition(e.WorldPosition);
         }
         public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan)
         {
-            Camera.PanTo(duration, e.OriginNode.GetCenterWorldPosition(), followAfterPan ? e : null);
+            Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null);
         }
 
         public void UpdateShaderPlayerColors()

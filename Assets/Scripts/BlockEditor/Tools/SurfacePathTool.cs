@@ -29,7 +29,7 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredSurfaceNode != null && World.CanBuildSurfacePath(World.HoveredSurfaceNode))
-                World.BuildSurfacePath(World.HoveredSurfaceNode, SurfaceManager.Instance.GetSurface(SurfaceId.Tarmac));
+                World.BuildSurfacePath(World.HoveredSurfaceNode, SurfaceManager.Instance.GetSurfaceProperties(SurfacePropertyId.Tarmac));
         }
 
         public override void HandleRightClick()

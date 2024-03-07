@@ -53,8 +53,8 @@ namespace BlockmapFramework
                 {
                     CurrentPosition = PanTargetPosition;
                     UpdatePosition();
-                    IsPanning = false;
                     FollowEntity = PostPanFollowEntity;
+                    IsPanning = false;
                 }
 
                 else // Pan in progress

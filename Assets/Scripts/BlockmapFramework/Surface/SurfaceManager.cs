@@ -11,16 +11,26 @@ namespace BlockmapFramework
     public class SurfaceManager
     {
         private static SurfaceManager _Instance;
+        private Dictionary<SurfacePropertyId, SurfaceProperties> SurfaceProperties;
         private Dictionary<SurfaceId, Surface> Surfaces;
 
         private SurfaceManager()
         {
+            // Defines all surface properties
+            SurfaceProperties = new Dictionary<SurfacePropertyId, SurfaceProperties>()
+            {
+                {SurfacePropertyId.Grass, new SP01_Grass() },
+                {SurfacePropertyId.Sand, new SP02_Sand() },
+                {SurfacePropertyId.Water, new SP03_Water() },
+                {SurfacePropertyId.Tarmac, new SP04_Tarmac() },
+            };
+
+            // Define all surfaces
             Surfaces = new Dictionary<SurfaceId, Surface>()
             {
                 { SurfaceId.Grass, new GrassSurface() },
                 { SurfaceId.Sand, new SandSurface() },
                 { SurfaceId.Tarmac, new TarmacSurface() },
-                { SurfaceId.Water, new WaterSurface() }
             };
 
             // Pass terrain colors to surface material
@@ -46,10 +56,11 @@ namespace BlockmapFramework
             }
         }
 
-        public List<Surface> GetPaintableSurfaces() => Surfaces.Values.Where(x => x.IsPaintable).ToList();
+        public List<Surface> GetAllSurfaces() => Surfaces.Values.ToList();
         public Surface GetSurface(SurfaceId id)
         {
             return Surfaces[id];
         }
+        public SurfaceProperties GetSurfaceProperties(SurfacePropertyId id) => SurfaceProperties[id];
     }
 }

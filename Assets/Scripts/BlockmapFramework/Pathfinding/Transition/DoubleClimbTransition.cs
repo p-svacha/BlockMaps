@@ -42,7 +42,7 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(MovingEntity entity)
         {
-            float value = (0.5f * (1f / From.GetSpeedModifier())) + (0.5f * (1f / To.GetSpeedModifier())); // Cost of moving between start and end tile
+            float value = (0.5f * (1f / From.GetSurfaceProperties().SpeedModifier)) + (0.5f * (1f / To.GetSurfaceProperties().SpeedModifier)); // Cost of moving between start and end tile
 
             // Add cost of climbing
             foreach (IClimbable climb in ClimbUp) value += climb.CostUp;
@@ -93,7 +93,7 @@ namespace BlockmapFramework
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.MovementSpeed * Time.deltaTime * From.GetSpeedModifier());
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.MovementSpeed * Time.deltaTime * From.GetSurfaceProperties().SpeedModifier);
 
                         // Calculate altitude
                         float y = World.GetWorldHeightAt(newPosition2d, From);
@@ -214,7 +214,7 @@ namespace BlockmapFramework
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.MovementSpeed * Time.deltaTime * To.GetSpeedModifier());
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.MovementSpeed * Time.deltaTime * To.GetSurfaceProperties().SpeedModifier);
 
                         // Calculate altitude
                         float y = World.GetWorldHeightAt(newPosition2d, To);

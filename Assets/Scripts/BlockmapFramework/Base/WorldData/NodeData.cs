@@ -16,10 +16,9 @@ namespace BlockmapFramework
         public int[] Height { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public SurfaceId Surface { get; set; }
-        [JsonConverter(typeof(StringEnumConverter))]
-        public NodeType Type { get; set; }
 
+        public NodeType Type { get; set; }
+        public int SubType { get; set; } // Different for every type (i.e. surface for surface nodes, path type for air nodes)
 
     }
 }
