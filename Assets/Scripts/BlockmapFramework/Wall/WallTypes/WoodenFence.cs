@@ -26,9 +26,9 @@ namespace BlockmapFramework
 
         private const float POLE_WIDTH = 0.1f;
         private const int NUM_POLES = 2;
-        private const float POLE_HEIGHT = 0.3f;
+        private const float POLE_HEIGHT = 0.4f;
 
-        private const float CROSS_BRACE_START_Y = 0.1f;
+        private const float CROSS_BRACE_START_Y = 0.2f;
         private const float CROSS_BRACE_HEIGHT = 0.1f;
         private const float CROSS_BRACE_WIDTH = 0.05f;
 
@@ -80,7 +80,7 @@ namespace BlockmapFramework
         private Material GetMaterial(bool isPreview)
         {
             if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
-            else return ResourceManager.Singleton.WoodenFenceMaterial;
+            else return ResourceManager.Singleton.Mat_Wood;
         }
 
         #endregion

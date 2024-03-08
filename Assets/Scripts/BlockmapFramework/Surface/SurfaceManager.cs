@@ -30,7 +30,8 @@ namespace BlockmapFramework
             {
                 { SurfaceId.Grass, new S001_Grass(this) },
                 { SurfaceId.Sand, new S002_Sand(this) },
-                { SurfaceId.Path, new S003_Street(this) },
+                { SurfaceId.Concrete, new S003_Concrete(this) },
+                { SurfaceId.Street, new S004_Street(this) },
             };
 
             // Pass terrain colors to surface material

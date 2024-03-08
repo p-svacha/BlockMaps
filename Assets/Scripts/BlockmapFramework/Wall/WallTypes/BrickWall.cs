@@ -56,7 +56,7 @@ namespace BlockmapFramework
         private Material GetMaterial(bool isPreview)
         {
             if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
-            else return ResourceManager.Singleton.BrickWallMaterial;
+            else return ResourceManager.Singleton.Mat_BrickWall;
         }
     }
 }

@@ -45,12 +45,12 @@ namespace BlockmapFramework
 
         private void DrawSurface(MeshBuilder meshBuilder)
         {
-            Surface.DrawNodeSurface(this, meshBuilder);
+            Surface.DrawNodeSurface(World, this, meshBuilder);
         }
 
         private void DrawSides(MeshBuilder meshBuilder)
         {
-            int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.CliffMaterial);
+            int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Rock);
             DrawEastSide(meshBuilder, cliffSubmesh);
             DrawWestSide(meshBuilder, cliffSubmesh);
             DrawSouthSide(meshBuilder, cliffSubmesh);

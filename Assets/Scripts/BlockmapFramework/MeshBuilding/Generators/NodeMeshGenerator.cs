@@ -84,5 +84,160 @@ namespace BlockmapFramework
                     break;
             }
         }
+
+        /// <summary>
+        /// Builds a surface that connects to adjacent nodes with the same surface and draws a curb to other surfaces.
+        /// </summary>
+        public static void BuildBorderedNodeSurface(World world, BlockmapNode node, MeshBuilder meshBuilder, Material mainMaterial, Material curbMaterial, float mainHeight, float curbHeight, float curbWidth)
+        {
+            int mainSubmesh = meshBuilder.GetSubmesh(mainMaterial);
+            int curbSubmesh = meshBuilder.GetSubmesh(curbMaterial);
+
+            // Center plane
+            DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, curbWidth, 1f - curbWidth, curbWidth, 1f - curbWidth); // top
+            DrawShapePlane(meshBuilder, node, mainSubmesh, 0f, 0f, 1f, 0f, 1f, mirror: true); // bottom
+
+            // Edge connections
+            DrawEdge(meshBuilder, node, Direction.N, mainSubmesh, curbSubmesh, curbWidth, 1f - curbWidth, 1f - curbWidth, 1f, mainHeight, curbHeight);
+            DrawEdge(meshBuilder, node, Direction.S, mainSubmesh, curbSubmesh, curbWidth, 1f - curbWidth, 0f, curbWidth, mainHeight, curbHeight);
+            DrawEdge(meshBuilder, node, Direction.E, mainSubmesh, curbSubmesh, 1f - curbWidth, 1f, curbWidth, 1f - curbWidth, mainHeight, curbHeight);
+            DrawEdge(meshBuilder, node, Direction.W, mainSubmesh, curbSubmesh, 0f, curbWidth, curbWidth, 1f - curbWidth, mainHeight, curbHeight);
+
+            // Corner connections
+            DrawCorner(meshBuilder, node, Direction.NW, mainSubmesh, curbSubmesh, 0, curbWidth, 1f - curbWidth, 1f, mainHeight, curbHeight);
+            DrawCorner(meshBuilder, node, Direction.NE, mainSubmesh, curbSubmesh, 1f - curbWidth, 1f, 1f - curbWidth, 1f, mainHeight, curbHeight);
+            DrawCorner(meshBuilder, node, Direction.SE, mainSubmesh, curbSubmesh, 1f - curbWidth, 1f, 0f, curbWidth, mainHeight, curbHeight);
+            DrawCorner(meshBuilder, node, Direction.SW, mainSubmesh, curbSubmesh, 0, curbWidth, 0f, curbWidth, mainHeight, curbHeight);
+        }
+
+        /// <summary>
+        /// Creates a plane parrallel to the shape of this tile covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.
+        /// </summary>
+        private static void DrawShapePlane(MeshBuilder meshBuilder, BlockmapNode node, int submesh, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false)
+        {
+            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart) + height, node.LocalCoordinates.y + yStart);
+            Vector2 v_SW_uv = new Vector2(xStart, yStart);
+            MeshVertex v_SW = meshBuilder.AddVertex(v_SW_pos, v_SW_uv);
+
+            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart) + height, node.LocalCoordinates.y + yStart);
+            Vector2 v_SE_uv = new Vector2(xEnd, yStart);
+            MeshVertex v_SE = meshBuilder.AddVertex(v_SE_pos, v_SE_uv);
+
+            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd) + height, node.LocalCoordinates.y + yEnd);
+            Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
+            MeshVertex v_NE = meshBuilder.AddVertex(v_NE_pos, v_NE_uv);
+
+            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd) + height, node.LocalCoordinates.y + yEnd);
+            Vector2 v_NW_uv = new Vector2(xStart, yEnd);
+            MeshVertex v_NW = meshBuilder.AddVertex(v_NW_pos, v_NW_uv);
+
+            if (mirror) meshBuilder.AddPlane(submesh, v_SW, v_NW, v_NE, v_SE);
+            else meshBuilder.AddPlane(submesh, v_SW, v_SE, v_NE, v_NW);
+        }
+
+        /// <summary>
+        /// Returns the world height for the current node at the given relative position.
+        /// </summary>
+        private static float GetVertexHeight(BlockmapNode node, float x, float y)
+        {
+            return node.GetWorldHeightAt(new Vector2(x, y));
+        }
+
+        private static void DrawEdge(MeshBuilder meshBuilder, BlockmapNode node, Direction dir, int mainSubmesh, int curbSubmesh, float xStart, float xEnd, float yStart, float yEnd, float mainHeight, float curbHeight)
+        {
+            // Check if a path is connected in that direction
+            bool hasPathConnection = node.HasSurfaceConnection(dir);
+
+            // Draw connection to adjacent path
+            if (hasPathConnection)
+            {
+                DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
+            }
+
+            // Draw curb
+            else
+            {
+                DrawShapePlane(meshBuilder, node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
+                DrawCurbSides(meshBuilder, node, dir, curbSubmesh, xStart, xEnd, yStart, yEnd, mainHeight, curbHeight);
+            }
+        }
+
+        private static void DrawCorner(MeshBuilder meshBuilder, BlockmapNode node, Direction dir, int mainSubmesh, int curbSubmesh, float xStart, float xEnd, float yStart, float yEnd, float mainHeight, float curbHeight)
+        {
+            // Check if a path is connected in that direction
+            bool hasPathConnection = (
+                node.HasSurfaceConnection(HelperFunctions.GetNextAnticlockwiseDirection8(dir)) &&
+                node.HasSurfaceConnection(dir) &&
+                node.HasSurfaceConnection(HelperFunctions.GetNextClockwiseDirection8(dir)));
+
+            // Draw connection to adjacent path corner
+            if (hasPathConnection)
+            {
+                DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
+            }
+
+            else // Draw curb
+            {
+                DrawShapePlane(meshBuilder, node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
+                DrawCurbSides(meshBuilder, node, dir, curbSubmesh, xStart, xEnd, yStart, yEnd, mainHeight, curbHeight);
+            }
+        }
+
+
+
+        private static void DrawCurbSides(MeshBuilder meshBuilder, BlockmapNode node, Direction dir, int curbSubmesh, float xStart, float xEnd, float yStart, float yEnd, float mainHeight, float curbHeight)
+        {
+
+            if (HelperFunctions.GetAffectedDirections(dir).Contains(Direction.N) || mainHeight != curbHeight) // North curb side
+            {
+                meshBuilder.BuildPlane(curbSubmesh,
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd), node.LocalCoordinates.y + yEnd),
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd) + curbHeight, node.LocalCoordinates.y + yEnd),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd) + curbHeight, node.LocalCoordinates.y + yEnd),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd), node.LocalCoordinates.y + yEnd),
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 1f)
+                    );
+            }
+
+            if (HelperFunctions.GetAffectedDirections(dir).Contains(Direction.S) || mainHeight != curbHeight) // South curb side
+            {
+                meshBuilder.BuildPlane(curbSubmesh,
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart), node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart) + curbHeight, node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart) + curbHeight, node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart), node.LocalCoordinates.y + yStart),
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 1f),
+                    mirror: true
+                    );
+            }
+
+            if (HelperFunctions.GetAffectedDirections(dir).Contains(Direction.W) || mainHeight != curbHeight) // West curb side
+            {
+
+                meshBuilder.BuildPlane(curbSubmesh,
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart), node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart) + curbHeight, node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd) + curbHeight, node.LocalCoordinates.y + yEnd),
+                    new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd), node.LocalCoordinates.y + yEnd),
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 1f)
+                    );
+            }
+
+            if (HelperFunctions.GetAffectedDirections(dir).Contains(Direction.E) || mainHeight != curbHeight) // East curb side
+            {
+                meshBuilder.BuildPlane(curbSubmesh,
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart), node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart) + curbHeight, node.LocalCoordinates.y + yStart),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd) + curbHeight, node.LocalCoordinates.y + yEnd),
+                    new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd), node.LocalCoordinates.y + yEnd),
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 1f),
+                    mirror: true
+                    );
+            }
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace BlockmapFramework
 
         public static void BuildWaterMeshForSingleNode(MeshBuilder meshBuilder, WaterNode node)
         {
-            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.WaterMaterial);
+            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Water);
 
             float waterWorldHeight = node.WaterBody.WaterSurfaceWorldHeight;
 

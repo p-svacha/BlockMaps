@@ -641,27 +641,6 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
-        /*
-        public bool CanBuildSurfacePath(SurfaceNode node)
-        {
-            if (node == null) return false;
-            if (!(node.IsFlat() || node.IsSlope())) return false;
-            if (node.GetFreeHeadSpace(Direction.None) <= 0) return false;
-
-            return true;
-        }
-        public void BuildSurfacePath(SurfaceNode node, SurfaceProperties pathSurface)
-        {
-            node.BuildPath(pathSurface);
-            RedrawNodesAround(node.WorldCoordinates);
-        }
-        public void RemoveSurfacePath(SurfaceNode node)
-        {
-            node.RemovePath();
-            RedrawNodesAround(node.WorldCoordinates);
-        }
-        */
-
         public bool CanBuildAirPath(Vector2Int worldCoordinates, int height)
         {
             Chunk chunk = GetChunk(worldCoordinates);

@@ -13,14 +13,14 @@ namespace BlockmapFramework
 
         public AirNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height)
         {
-            Surface = SurfaceManager.Instance.GetSurface(SurfaceId.Path);
+            Surface = SurfaceManager.Instance.GetSurface(SurfaceId.Concrete);
         }
 
         #region Draw
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            DefaultPathMeshBuilder.BuildPath(this, meshBuilder);
+            NodeMeshGenerator.BuildBorderedNodeSurface(World, this, meshBuilder, ResourceManager.Singleton.Mat_ConcreteDark, ResourceManager.Singleton.Mat_Concrete2, 0.1f, 0.1f, 0.1f);
         }
 
         #endregion

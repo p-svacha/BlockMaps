@@ -2,8 +2,10 @@ Shader "Custom/NodeMaterialShader"
 {
     Properties // Exposed to editor in material insepctor
     {
+        [Toggle] _FullVisibility("Full Visibility", Float) = 1
         [Toggle] _UseTextures("Use Textures", Float) = 0
         _MainTex("Texture", 2D) = "none" {}
+        _TextureTint("Texture Tint", Color) = (1,1,1,0)
         _Color("Color", Color) = (1,1,1,1)
         _Offset("Render Priority (lowest renders first, use 0.1 steps)", float) = 0
 
@@ -20,8 +22,6 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _ShowGrid("Show Grid", Float) = 1
         _GridColor("Grid Color", Color) = (0,0,0,1)
 
-        [Toggle] _CanShowOverlays("Can Show Overlays", Float) = 1
-
         _ZoneBorderColor("Zone Border Color", Color) = (1,1,1,1)
         _ZoneBorderWidth("Zone Border Width", Float) = 0.1
 
@@ -31,6 +31,7 @@ Shader "Custom/NodeMaterialShader"
         _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
         _TileOverlayX("Overlay X Coord", Float) = 0
         _TileOverlayY("Overlay Y Coord", Float) = 0
+         _TileOverlaySize("Overlay Size", Float) = 1
         */
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
@@ -56,6 +57,7 @@ Shader "Custom/NodeMaterialShader"
 
         // Draw mode
         sampler2D _MainTex;
+        fixed4 _TextureTint;
         fixed4 _Color;
         float _UseTextures;
         float _TextureScale;
@@ -74,12 +76,12 @@ Shader "Custom/NodeMaterialShader"
         float _ShowGrid;
 
         // Overlay texture over a single area
-        float _CanShowOverlays;
         float _ShowTileOverlay;
         sampler2D _TileOverlayTex;
         fixed4 _TileOverlayColor;
         float _TileOverlayX;
         float _TileOverlayY;
+        float _TileOverlaySize;
 
         // Overlay texture over multiple tiles repeated
         float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
@@ -97,6 +99,7 @@ Shader "Custom/NodeMaterialShader"
         half _Glossiness;
         half _Metallic;
 
+        float _FullVisibility;
         float _TileVisibility[324];
 
         struct Input
@@ -148,7 +151,7 @@ Shader "Custom/NodeMaterialShader"
 
             float visEpsilon = 0.101; // Pixels are drawn by this value over tile edges
             float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
-                float drawPixel = (tileVisibility > 0 ||
+                float drawPixel = (_FullVisibility == 1 || tileVisibility > 0 ||
 
                     (relativePos.x < visEpsilon&& relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 0) || // extension ne
                     (relativePos.x > 1 - visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 0) || // extension nw
@@ -168,7 +171,7 @@ Shader "Custom/NodeMaterialShader"
             // ######################################################################### FOG OF WAR #########################################################################
 
             float fowEpsilon = 0.01; // Fog of war epsilon
-            float fullVisible = (tileVisibility > 1 ||
+            float fullVisible = (_FullVisibility == 1 || tileVisibility > 1 ||
 
                 (relativePos.x < fowEpsilon&& relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
                 (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
@@ -182,7 +185,10 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### BASE #########################################################################
 
-            fixed4 c;
+            fixed4 c = _Color;
+
+            float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
+            float isFacingUpwards = (dotProduct > 0.9);
 
             // ######################################################################### TRIPLANAR TEXTURE #########################################################################
 
@@ -224,34 +230,53 @@ Shader "Custom/NodeMaterialShader"
                 half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV) + topTextureStrength * tex2D(_MainTex, zUV);
 
                 c.rgb = xDiff * blendWeights.x + yDiff * blendWeights.y + zDiff * blendWeights.z;
+
+                // Tint
+                c = (_TextureTint.a * _TextureTint) + ((1 - _TextureTint.a) * c);
             }
-            else c = _Color;
 
 
             // ######################################################################### OVERLAYS #########################################################################
 
-            if (_CanShowOverlays == 1 && _ShowTileOverlay == 1)
+            if (_ShowTileOverlay == 1 && isFacingUpwards == 1)
             {
-                if (localCoords.x == _TileOverlayX && localCoords.y == _TileOverlayY)
+                float adjustedWorldPosX = IN.worldPos.x;
+                if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                float exactLocalCoordinatesX = (adjustedWorldPosX % _ChunkSize);
+
+                float adjustedWorldPosY = IN.worldPos.z;
+                if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                float exactLocalCoordinatesY = (adjustedWorldPosY % _ChunkSize);
+
+                if (exactLocalCoordinatesX >= _TileOverlayX && exactLocalCoordinatesX < _TileOverlayX + _TileOverlaySize && exactLocalCoordinatesY >= _TileOverlayY && exactLocalCoordinatesY < _TileOverlayY + _TileOverlaySize)
                 {
-                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, IN.uv2_GridTex) * _TileOverlayColor;
+                    float adjustedWorldPosX = IN.worldPos.x;
+                    if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+                    if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
+
+                    float adjustedWorldPosY = IN.worldPos.z;
+                    if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+                    if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+
+                    float uvX = ((adjustedWorldPosX % _ChunkSize) - _TileOverlayX) / _TileOverlaySize;
+                    float uvY = ((adjustedWorldPosY % _ChunkSize) - _TileOverlayY) / _TileOverlaySize;
+                    float2 uv = float2(uvX, uvY);
+
+                    fixed4 tileOverlayColor = tex2D(_TileOverlayTex, uv) * _TileOverlayColor;
                     c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
                 }
             }
 
-            if (_ShowMultiOverlay[tileIndex] == 1)
+            if (_ShowMultiOverlay[tileIndex] == 1 && isFacingUpwards == 1)
             {
-                float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
-                if (dotProduct > 0.9) // only draw when facing (almost upwards
-                {
-                    fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_GridTex) * _MultiOverlayColor;
-                    c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
-                }
+                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_GridTex) * _MultiOverlayColor;
+                c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
             }
 
             // ######################################################################### ZONE BORDER #########################################################################
-            float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
-            if (dotProduct > 0.9) // only draw when facing (almost upwards
+            if (isFacingUpwards == 1)
             {
                 int zoneValue = _ZoneBorders[tileIndex];
                 int borderWest = zoneValue % 10;

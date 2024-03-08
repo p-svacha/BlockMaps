@@ -26,6 +26,6 @@ namespace BlockmapFramework
         /// <summary>
         /// Draw the top side of a node with this surface.
         /// </summary>
-        public abstract void DrawNodeSurface(BlockmapNode node, MeshBuilder meshBuilder);
+        public abstract void DrawNodeSurface(World world, BlockmapNode node, MeshBuilder meshBuilder);
     }
 }

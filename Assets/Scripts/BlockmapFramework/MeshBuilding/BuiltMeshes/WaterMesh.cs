@@ -47,6 +47,7 @@ namespace BlockmapFramework
             // Set visibility in all surface mesh materials
             for (int i = 0; i < Renderer.materials.Length; i++)
             {
+                Renderer.materials[i].SetFloat("_FullVisibility", 0);
                 Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
             }
         }

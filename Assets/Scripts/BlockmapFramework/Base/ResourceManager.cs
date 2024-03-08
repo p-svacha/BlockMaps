@@ -16,20 +16,21 @@ namespace BlockmapFramework
         public Material BuildPreviewMaterial;
 
         public Material SurfaceMaterial;
-        public Material CliffMaterial;
-        public Material PathMaterial;
-        public Material PathCurbMaterial;
-        public Material WaterMaterial;
-        public Material BrickWallMaterial;
-        public Material WoodenFenceMaterial;
         public Material LadderMaterial;
+
+        public Material Mat_Asphalt;
+        public Material Mat_BrickWall;
+        public Material Mat_Rock;
+        public Material Mat_Cobblestone;
+        public Material Mat_Concrete;
+        public Material Mat_ConcreteDark;
+        public Material Mat_Concrete2;
+        public Material Mat_Water;
+        public Material Mat_Wood;
 
         public List<Material> GetAllNodeSurfaceMaterials() => new List<Material>()
         {
             SurfaceMaterial,
-            PathMaterial,
-            PathCurbMaterial,
-            WaterMaterial
         };
 
         [Header("Colors")]

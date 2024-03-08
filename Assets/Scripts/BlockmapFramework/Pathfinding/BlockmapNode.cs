@@ -625,6 +625,18 @@ namespace BlockmapFramework
         public int GetMaxHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Max(x => x.Value);
 
         /// <summary>
+        /// Checks and returns if a node with the same surface exists in the given direction with a matching height to this node.
+        /// </summary>
+        public bool HasSurfaceConnection(Direction dir)
+        {
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
+            foreach (BlockmapNode adjNode in adjNodes)
+                if (adjNode.GetSurface() == GetSurface() && World.DoAdjacentHeightsMatch(this, adjNode, dir))
+                    return true;
+            return false;
+        }
+
+        /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
         /// </summary>
         public float GetRelativeHeightAt(Vector2 relativePosition)

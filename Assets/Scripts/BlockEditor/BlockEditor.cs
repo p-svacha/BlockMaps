@@ -29,7 +29,6 @@ namespace WorldEditor
         public WorldGenTool WorldGenTool;
         public TerrainTool TerrainTool;
         public SurfacePaintTool SurfacePaintTool;
-        //public SurfacePathTool SurfacePathTool;
         public AirNodeTool AirNodeTool;
         public AirSlopeNodeTool AirSlopeNodeTool;
         public SpawnCharacterTool SpawnCharacterTool;
@@ -69,7 +68,6 @@ namespace WorldEditor
                 { EditorToolId.WorldGen, WorldGenTool },
                 { EditorToolId.Terrain, TerrainTool },
                 { EditorToolId.SurfacePaint, SurfacePaintTool },
-                //{ EditorToolId.SurfacePath, SurfacePathTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
