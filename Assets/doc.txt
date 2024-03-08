@@ -1,5 +1,29 @@
 Big Features to Add:
 
+(> allow any height diffs on allowed shapes)
+(> change traignle direction on 0111 and 1000 so its smoother)
+
+(/) > complete blockmapnode.GetRelativeHeightAt for all shapes
+> introduce new street surface that uses the function
+	- blend = false
+	- border gets drawn as cobblestone if no adjacent street
+> introduce new sidewalk surface
+	> new version of current surface path
+	> blend = false
+	> slightly raised
+	> little curb border when not adjacent to sidewalk
+> remove whole surface path system - it's all surface now
+> add surface option for air nodes
+	> each surface has an option how it's drawn as an air node
+> allow changing shape on air nodes
+	- add property how many nodes below an airnode blocks (maybe based on surface)
+> implement climb/hillwalk system for slopes
+	- have a slope value for each transition that is 0 for flat, +1 for going 1 tile up, -1 for going 1 down etc
+		- for that have a getter for each node that gives back the height on the center of the node
+		- also have a getter that gives back the height of each side8 of the node
+		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
+	- all entities have a max slope they can walk
+
 - Rework hover pathfinding
 	> Hover on unreachable node = no path preview
 	> Hover on node with !canStandOn = red path preview

@@ -83,6 +83,7 @@ namespace BlockmapFramework
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
+        public Vector3 HoveredWorldPosition { get; private set; }
         public Vector2Int HoveredWorldCoordinates { get; private set; }       
         public BlockmapNode HoveredNode { get; private set; }
         public AirNode HoveredAirNode { get; private set; }
@@ -305,6 +306,7 @@ namespace BlockmapFramework
                 Vector3 hitPosition = hit.point;
                 IsHoveringWorld = true;
 
+                HoveredWorldPosition = hitPosition;
                 NodeHoverMode9 = GetNodeHoverMode9(hitPosition);
                 NodeHoverMode8 = GetNodeHoverMode8(hitPosition);
                 NodeHoverModeSides = GetNodeHoverModeSides(hitPosition);
@@ -639,11 +641,11 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
+        /*
         public bool CanBuildSurfacePath(SurfaceNode node)
         {
             if (node == null) return false;
             if (!(node.IsFlat() || node.IsSlope())) return false;
-            if (node.HasPath) return false;
             if (node.GetFreeHeadSpace(Direction.None) <= 0) return false;
 
             return true;
@@ -658,6 +660,7 @@ namespace BlockmapFramework
             node.RemovePath();
             RedrawNodesAround(node.WorldCoordinates);
         }
+        */
 
         public bool CanBuildAirPath(Vector2Int worldCoordinates, int height)
         {

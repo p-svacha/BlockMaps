@@ -48,7 +48,6 @@ namespace BlockmapFramework
         public Vector2 WorldCenter2D => WorldCoordinates + new Vector2(0.5f, 0.5f);
         public Vector2Int LocalCoordinates { get; private set; }
         public abstract NodeType Type { get; }
-        public abstract bool IsPath { get; }
         public abstract bool IsSolid { get; } // Flag if entities can (generally) be placed on top of this node
 
         // Connections
@@ -119,9 +118,10 @@ namespace BlockmapFramework
 
         protected string GetShape(Dictionary<Direction, int> height)
         {
+            List<int> distinctHeights = height.Values.Distinct().OrderBy(x => x).ToList();
             int baseHeight = height.Values.Min();
             string binaryShape = "";
-            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += (height[dir] - baseHeight);
+            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += distinctHeights.IndexOf(height[dir]);
             return binaryShape;
         }
 
@@ -617,6 +617,7 @@ namespace BlockmapFramework
         #region Getters
 
         public bool HasWall => Walls.Count > 0;
+        public abstract Surface GetSurface();
         public abstract SurfaceProperties GetSurfaceProperties();
         public abstract Vector3 GetCenterWorldPosition();
 
@@ -626,7 +627,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
         /// </summary>
-        private float GetRelativeHeightAt(Vector2 relativePosition)
+        public float GetRelativeHeightAt(Vector2 relativePosition)
         {
             if (relativePosition.x < 0 || relativePosition.x > 1 || relativePosition.y < 0 || relativePosition.y > 1) throw new System.Exception("Given position must be relative. It's currently " + relativePosition.x + "/" + relativePosition.y);
 
@@ -649,7 +650,7 @@ namespace BlockmapFramework
                     else return relativePosition.x - relativePosition.y;
                 case "1000":
                     if (relativePosition.x + relativePosition.y > 1) return 0f;
-                    else return 1f - relativePosition.y + relativePosition.x;
+                    else return -(relativePosition.x + relativePosition.y - 1f);
 
                 case "1110":
                     if (relativePosition.x > relativePosition.y) return 1f;
@@ -663,9 +664,45 @@ namespace BlockmapFramework
                 case "0111":
                     if (relativePosition.x + relativePosition.y > 1) return 1f;
                     else return relativePosition.y + relativePosition.x;
+
+                case "1010":
+                    if(UseAlternativeVariant)
+                    {
+                        if (relativePosition.x + relativePosition.y < 1) return -(relativePosition.x + relativePosition.y - 1f);
+                        else return relativePosition.y + relativePosition.x - 1f;
+                    }
+                    else
+                    {
+                        if (relativePosition.x > relativePosition.y) return 1f - (relativePosition.x - relativePosition.y);
+                        else return 1f - (relativePosition.y - relativePosition.x);
+                    }
+                case "0101":
+                    if (UseAlternativeVariant)
+                    {
+                        if (relativePosition.x > relativePosition.y) return relativePosition.x - relativePosition.y;
+                        else return relativePosition.y - relativePosition.x;
+                    }
+                    else
+                    {
+                        if (relativePosition.x + relativePosition.y > 1) return 1f - (relativePosition.y + relativePosition.x - 1f);
+                        else return relativePosition.y + relativePosition.x;
+                    }
+
+                case "2101":
+                    if (relativePosition.x + relativePosition.y < 1) return 1f + (-(relativePosition.x + relativePosition.y - 1f));
+                    else return 1f - (relativePosition.y + relativePosition.x - 1f);
+                case "0121":
+                    if (relativePosition.x + relativePosition.y > 1) return 1f + (relativePosition.y + relativePosition.x - 1f);
+                    else return relativePosition.y + relativePosition.x;
+                case "1012":
+                    if (relativePosition.x < relativePosition.y) return 1f + (relativePosition.y - relativePosition.x);
+                    else return 1f - (relativePosition.x - relativePosition.y);
+                case "1210":
+                    if (relativePosition.x > relativePosition.y) return 1f + (relativePosition.x - relativePosition.y);
+                    else return 1f - (relativePosition.y - relativePosition.x);
             }
-            //todo
-            throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height should never be used.");
+
+            throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height implementation is missing.");
         }
 
         /// <summary>

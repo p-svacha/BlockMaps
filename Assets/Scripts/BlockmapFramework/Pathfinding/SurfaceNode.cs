@@ -16,16 +16,11 @@ namespace BlockmapFramework
 
         public override NodeType Type => NodeType.Surface;
         public override bool IsSolid => true;
-        public override bool IsPath => HasPath;
 
         /// <summary>
         /// The water node covering this node.
         /// </summary>
         public WaterNode WaterNode { get; private set; }
-
-        // Path
-        public bool HasPath;
-        public SurfaceProperties PathSurfaceProperties;
 
         public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, Surface surface) : base(world, chunk, id, localCoordinates, height)
         {
@@ -46,80 +41,11 @@ namespace BlockmapFramework
         {
             DrawSurface(meshBuilder);
             DrawSides(meshBuilder);
-            if (HasPath) DrawPath(meshBuilder);
         }
 
         private void DrawSurface(MeshBuilder meshBuilder)
         {
-            int surfaceSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
-
-            // Surface vertices
-            float xStart = LocalCoordinates.x;
-            float xEnd = LocalCoordinates.x + 1;
-            float yStart = LocalCoordinates.y;
-            float yEnd = LocalCoordinates.y + 1;
-            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)LocalCoordinates.y / Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(LocalCoordinates.x + 1) / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
-            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)LocalCoordinates.x / Chunk.Size, (float)(LocalCoordinates.y + 1) / Chunk.Size), new Vector2(0f, 1f));
-
-            switch (Shape)
-            {
-                case "0000":
-                case "1100":
-                case "0110":
-                case "0011":
-                case "1001":
-                case "0001":
-                case "1011":
-                case "0100":
-                case "1110":
-                case "0121":
-                case "1012":
-                case "2101":
-                case "1210":
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    break;
-
-                case "1000":
-                case "0010":
-                case "0111":
-                case "1101":
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
-                    break;
-
-                case "1010":
-                    if (UseAlternativeVariant)
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
-                    }
-                    else
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    }
-                    break;
-
-                case "0101":
-                    if (UseAlternativeVariant)
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    }
-                    else
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4b, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3a);
-                    }
-                    break;
-            }
+            Surface.DrawNodeSurface(this, meshBuilder);
         }
 
         private void DrawSides(MeshBuilder meshBuilder)
@@ -287,11 +213,6 @@ namespace BlockmapFramework
             }
         }
 
-        private void DrawPath(MeshBuilder meshBuilder)
-        {
-            PathMeshBuilder.BuildPath(this, meshBuilder);
-        }
-
         #endregion
 
         #region Actions
@@ -303,7 +224,6 @@ namespace BlockmapFramework
 
         public bool CanChangeHeight(Direction mode, bool isIncrease)
         {
-            if (HasPath) return false;
             if (Entities.Count > 0) return false;
             if (WaterNode != null) return false;
 
@@ -319,6 +239,7 @@ namespace BlockmapFramework
 
             // Calculate new heights
             Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
+            if (!IsValid(newHeights)) return false;
             int newBaseHeight = newHeights.Values.Min();
             int newMaxHeight = newHeights.Values.Max();
 
@@ -408,17 +329,6 @@ namespace BlockmapFramework
             }
         }
 
-        public void BuildPath(SurfaceProperties pathSurface)
-        {
-            HasPath = true;
-            PathSurfaceProperties = pathSurface;
-        }
-        public void RemovePath()
-        {
-            HasPath = false;
-            PathSurfaceProperties = null;
-        }
-
         public void SetWaterNode(WaterNode waterNode)
         {
             WaterNode = waterNode;
@@ -439,11 +349,8 @@ namespace BlockmapFramework
             Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
         }
 
-        public override SurfaceProperties GetSurfaceProperties()
-        {
-            if (HasPath) return PathSurfaceProperties;
-            else return Surface.Properties;
-        }
+        public override Surface GetSurface() => Surface;
+        public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
         
         public override Vector3 GetCenterWorldPosition()
         {

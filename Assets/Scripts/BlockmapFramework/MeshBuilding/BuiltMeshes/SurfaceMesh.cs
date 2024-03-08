@@ -18,6 +18,10 @@ namespace BlockmapFramework
 
         public override void OnDraw()
         {
+            // Create surface material submesh so it always has index 0
+            MeshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
+
+            // Draw each node on the mesh builder
             foreach (SurfaceNode node in Chunk.GetAllSurfaceNodes())
             {
                 // Generate mesh
@@ -47,36 +51,36 @@ namespace BlockmapFramework
 
                 // Blend west
                 SurfaceNode westNode = World.GetAdjacentSurfaceNode(node, Direction.W);
-                if (westNode != null && World.DoAdjacentHeightsMatch(node, westNode, Direction.W)) surfaceBlend_W.Add((int)westNode.Surface.Id);
+                if (DoBlend(node, westNode, Direction.W)) surfaceBlend_W.Add((int)westNode.Surface.Id);
                 else surfaceBlend_W.Add(surfaceId);
                 // Blend north
                 SurfaceNode northNode = World.GetAdjacentSurfaceNode(node, Direction.N);
-                if (northNode != null && World.DoAdjacentHeightsMatch(node, northNode, Direction.N)) surfaceBlend_N.Add((int)northNode.Surface.Id);
+                if (DoBlend(node, northNode, Direction.N)) surfaceBlend_N.Add((int)northNode.Surface.Id);
                 else surfaceBlend_N.Add(surfaceId);
                 // Blend south
                 SurfaceNode southNode = World.GetAdjacentSurfaceNode(node, Direction.S);
-                if (southNode != null && World.DoAdjacentHeightsMatch(node, southNode, Direction.S)) surfaceBlend_S.Add((int)southNode.Surface.Id);
+                if (DoBlend(node, southNode, Direction.S)) surfaceBlend_S.Add((int)southNode.Surface.Id);
                 else surfaceBlend_S.Add(surfaceId);
                 // Blend east
                 SurfaceNode eastNode = World.GetAdjacentSurfaceNode(node, Direction.E);
-                if (eastNode != null && World.DoAdjacentHeightsMatch(node, eastNode, Direction.E)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
+                if (DoBlend(node, eastNode, Direction.E)) surfaceBlend_E.Add((int)eastNode.Surface.Id);
                 else surfaceBlend_E.Add(surfaceId);
 
                 // Blend nw
                 SurfaceNode nwNode = World.GetAdjacentSurfaceNode(node, Direction.NW);
-                if (nwNode != null && World.DoAdjacentHeightsMatch(node, nwNode, Direction.NW)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
+                if (DoBlend(node, nwNode, Direction.NW)) surfaceBlend_NW.Add((int)nwNode.Surface.Id);
                 else surfaceBlend_NW.Add(surfaceId);
                 // Blend ne
                 SurfaceNode neNode = World.GetAdjacentSurfaceNode(node, Direction.NE);
-                if (neNode != null && World.DoAdjacentHeightsMatch(node, neNode, Direction.NE)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
+                if (DoBlend(node, neNode, Direction.NE)) surfaceBlend_NE.Add((int)neNode.Surface.Id);
                 else surfaceBlend_NE.Add(surfaceId);
                 // Blend se
                 SurfaceNode seNode = World.GetAdjacentSurfaceNode(node, Direction.SE);
-                if (seNode != null && World.DoAdjacentHeightsMatch(node, seNode, Direction.SE)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
+                if (DoBlend(node, seNode, Direction.SE)) surfaceBlend_SE.Add((int)seNode.Surface.Id);
                 else surfaceBlend_SE.Add(surfaceId);
                 // Blend sw
                 SurfaceNode swNode = World.GetAdjacentSurfaceNode(node, Direction.SW);
-                if (swNode != null && World.DoAdjacentHeightsMatch(node, swNode, Direction.SW)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
+                if (DoBlend(node, swNode, Direction.SW)) surfaceBlend_SW.Add((int)swNode.Surface.Id);
                 else surfaceBlend_SW.Add(surfaceId);
             }
 
@@ -91,6 +95,18 @@ namespace BlockmapFramework
             surfaceMaterial.SetFloatArray("_TileBlend_NE", surfaceBlend_NE);
             surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlend_SE);
             surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlend_SW);
+        }
+
+        /// <summary>
+        /// Returns if a source node should have the adjacent node in a given direction blended into itself.
+        /// </summary>
+        private bool DoBlend(SurfaceNode sourceNode, SurfaceNode adjacentNode, Direction dir)
+        {
+            if (adjacentNode == null) return false; // no adajcent node
+            if (!World.DoAdjacentHeightsMatch(sourceNode, adjacentNode, dir)) return false; // adjacent node isn't connected seamlessly
+            if (!sourceNode.Surface.DoBlend) return false; // source node surface doesn't blend
+            if (!adjacentNode.Surface.DoBlend) return false; // adjacent node surface doesn't blend
+            return true;
         }
 
         public override void SetVisibility(Actor player)

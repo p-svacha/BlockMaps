@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace WorldEditor
 {
+    /*
     public class SurfacePathTool : EditorTool
     {
         public override EditorToolId Id => EditorToolId.SurfacePath;
@@ -50,4 +51,5 @@ namespace WorldEditor
 
         #endregion
     }
+    */
 }

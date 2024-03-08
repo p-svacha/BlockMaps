@@ -29,7 +29,7 @@ namespace WorldEditor
         public WorldGenTool WorldGenTool;
         public TerrainTool TerrainTool;
         public SurfacePaintTool SurfacePaintTool;
-        public SurfacePathTool SurfacePathTool;
+        //public SurfacePathTool SurfacePathTool;
         public AirNodeTool AirNodeTool;
         public AirSlopeNodeTool AirSlopeNodeTool;
         public SpawnCharacterTool SpawnCharacterTool;
@@ -69,7 +69,7 @@ namespace WorldEditor
                 { EditorToolId.WorldGen, WorldGenTool },
                 { EditorToolId.Terrain, TerrainTool },
                 { EditorToolId.SurfacePaint, SurfacePaintTool },
-                { EditorToolId.SurfacePath, SurfacePathTool },
+                //{ EditorToolId.SurfacePath, SurfacePathTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
@@ -182,7 +182,12 @@ namespace WorldEditor
 
             string text = "";
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
-            if (World.HoveredNode != null) text += "\n" + World.HoveredNode.ToString();
+            if (World.HoveredNode != null)
+            {
+                text += "\n" + World.HoveredNode.ToString();
+                text += "\nShape: " + World.HoveredNode.Shape;
+                text += "\nRelHeight: " + World.HoveredNode.GetRelativeHeightAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            }
             if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
             if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.Node.WorldCoordinates.ToString() + " " + World.HoveredWall.Node.BaseHeight + " " + World.HoveredWall.Side.ToString();

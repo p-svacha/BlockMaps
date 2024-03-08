@@ -6667,7 +6667,7 @@ MonoBehaviour:
   WoodenFenceSprite: {fileID: 21300000, guid: 2f1a73e15ff73b047949f908f0fbd70a, type: 3}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
-  TarmacTexture: {fileID: 2800000, guid: f496d54c6bd45ca49a6ca92eecd7b290, type: 3}
+  ConcreteTexture: {fileID: 2800000, guid: ec801ad075b375644866ca9eff2ea15b, type: 3}
   WaterTexture: {fileID: 2800000, guid: 2cf8a180b7dbd934f834ab7f8d588d22, type: 3}
   SelectionIndicator: {fileID: 1841773600738071307, guid: 20b217845ce3c4e4397dcdcfbf4e6935, type: 3}
 --- !u!114 &1859474534

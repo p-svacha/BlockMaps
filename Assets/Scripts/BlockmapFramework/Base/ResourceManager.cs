@@ -45,7 +45,7 @@ namespace BlockmapFramework
         [Header("Textures")]
         public Texture2D GrassTexture;
         public Texture2D SandTexture;
-        public Texture2D TarmacTexture;
+        public Texture2D ConcreteTexture;
         public Texture2D WaterTexture;
 
         [Header("Prefabs")]

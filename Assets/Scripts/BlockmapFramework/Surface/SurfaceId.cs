@@ -6,7 +6,7 @@ public enum SurfaceId
 {
     Grass = 0,
     Sand = 1,
-    Tarmac = 2,
+    Path = 2,
     Water = 3,
     Null = 4
 }

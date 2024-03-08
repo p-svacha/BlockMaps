@@ -8,7 +8,6 @@ namespace BlockmapFramework
     {
         public override NodeType Type => NodeType.Water;
         public override bool IsSolid => false;
-        public override bool IsPath => false;
 
         public WaterBody WaterBody { get; private set; }
         public SurfaceNode SurfaceNode { get; private set; }
@@ -48,6 +47,7 @@ namespace BlockmapFramework
             return base.IsPassable(entity);
         }
 
+        public override Surface GetSurface() => null;
         public override SurfaceProperties GetSurfaceProperties() => SurfaceManager.Instance.GetSurfaceProperties(SurfacePropertyId.Water);
 
         public override int GetSubType() => 0;

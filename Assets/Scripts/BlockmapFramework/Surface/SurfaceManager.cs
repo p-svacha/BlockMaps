@@ -28,9 +28,9 @@ namespace BlockmapFramework
             // Define all surfaces
             Surfaces = new Dictionary<SurfaceId, Surface>()
             {
-                { SurfaceId.Grass, new GrassSurface() },
-                { SurfaceId.Sand, new SandSurface() },
-                { SurfaceId.Tarmac, new TarmacSurface() },
+                { SurfaceId.Grass, new S001_Grass(this) },
+                { SurfaceId.Sand, new S002_Sand(this) },
+                { SurfaceId.Path, new S003_Street(this) },
             };
 
             // Pass terrain colors to surface material
