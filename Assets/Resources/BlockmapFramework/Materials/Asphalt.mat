@@ -102,10 +102,11 @@ Material:
     - _ZWrite: 1
     - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.25490198, g: 0.24705884, b: 0.24705884, a: 1}
+    - _Color: {r: 0.29411766, g: 0.29411766, b: 0.29411766, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
+    - _TextureTint: {r: 1, g: 1, b: 1, a: 0}
     - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
     - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

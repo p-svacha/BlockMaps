@@ -25,6 +25,7 @@ namespace BlockmapFramework
         public Material Mat_Concrete;
         public Material Mat_ConcreteDark;
         public Material Mat_Concrete2;
+        public Material Mat_Hedge;
         public Material Mat_Water;
         public Material Mat_Wood;
 

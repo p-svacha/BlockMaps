@@ -339,10 +339,9 @@ namespace BlockmapFramework
         #region Blockmap-Specific
 
         /// <summary>
-        /// When building a cube for a mesh on a node, define the values for building it from the south-west corner.
-        /// <br/> This function translates the position and dimensions within the node to the given side.
+        /// When building a cube on a node, define the values for building it flat from the south-west corner on 0/0 and then pass those values into this function to translate the values to the correct node.
         /// </summary>
-        public void BuildCube(int submesh, Vector3 pos, Vector3 dimensions, BlockmapNode targetNode, Direction targetSide)
+        public void BuildCube(BlockmapNode node, int submesh, Vector3 pos, Vector3 dimensions)
         {
             // Calculate footprint vertex positions
             List<Vector3> footprint = new List<Vector3>() {
@@ -352,13 +351,19 @@ namespace BlockmapFramework
                 new Vector3(pos.x, pos.y, pos.z + dimensions.z),
             };
 
-            // Translate footprint positions based on direction
-            footprint = footprint.Select(x => TranslatePosition(x, targetSide)).ToList();
+            // Apply height offsets from slope to footprint
+            if (!node.IsFlat())
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    float height = node.GetRelativeHeightAt(new Vector2(footprint[i].x, footprint[i].z)) * World.TILE_HEIGHT;
+                    footprint[i] += new Vector3(0f, height, 0f);
+                }
+            }
 
             // Apply offset based on node position on chunk to footprint
-            int startHeightCoordinate = targetNode.GetMinHeight(targetSide);
-            float worldHeight = targetNode.World.GetWorldHeight(startHeightCoordinate);
-            Vector3 nodeOffsetPos = new Vector3(targetNode.LocalCoordinates.x, worldHeight, targetNode.LocalCoordinates.y);
+            float worldHeight = node.BaseWorldHeight;
+            Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
 

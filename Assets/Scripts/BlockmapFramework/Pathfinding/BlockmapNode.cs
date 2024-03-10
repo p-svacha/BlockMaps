@@ -637,6 +637,18 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Checks and returns if an adjacent node in the given direction with a seamless connection has an entity of the given type.
+        /// </summary>
+        public bool HasEntityConnection(Direction dir, string typeId)
+        {
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
+            foreach (BlockmapNode adjNode in adjNodes)
+                if (World.DoAdjacentHeightsMatch(this, adjNode, dir) && adjNode.Entities.Any(x => x.TypeId == typeId))
+                    return true;
+            return false;
+        }
+
+        /// <summary>
         /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
         /// </summary>
         public float GetRelativeHeightAt(Vector2 relativePosition)

@@ -102,7 +102,7 @@ Material:
     - _ZWrite: 1
     - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.3921569, g: 0.3921569, b: 0.3921569, a: 1}
+    - _Color: {r: 0.41176474, g: 0.41176474, b: 0.4156863, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 0}

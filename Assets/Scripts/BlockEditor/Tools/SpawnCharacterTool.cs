@@ -40,7 +40,7 @@ namespace WorldEditor
             {
                 int j = i;
                 MovingEntity preset = editor.MovingEntityPresets[j];
-                Texture2D previewThumbnail = AssetPreview.GetAssetPreview(preset.gameObject);
+                Texture2D previewThumbnail = preset.GetEditorThumbnail();
                 Sprite icon = null;
                 if (previewThumbnail != null)
                     icon = Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);

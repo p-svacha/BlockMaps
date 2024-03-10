@@ -1,25 +1,36 @@
 Big Features to Add:
 
-(> allow any height diffs on allowed shapes)
-(> change traignle direction on 0111 and 1000 so its smoother)
+
+
+finish hedge mesh gen
+add height as param
+
+put wallmeshgenerator code into wallmesh
+same with procmesh
+same with others maybe1
+
+add roughness and normal maps to nodeshader with strength slide
+add some noise to hedge material
 
 - sloped curb sides downwards => for dirt path
-- street texture scale
-- big overlay for nodeshader normal
 
-> introduce new street surface that uses the function
-	- blend = false
-	- border gets drawn as cobblestone if no adjacent street
-> introduce new sidewalk surface
-	> new version of current surface path
-	> blend = false
-	> slightly raised
-	> little curb border when not adjacent to sidewalk
+- procedural entities
+	> Entities whose meshes are generated at runtime
+	> one mesh per chunks for all procedural entities
+	>  hedge
+	> rock wall
+	> 1xYx1 in size, connects to adjacent rock wall entities
+	> blocks path and vision
+	> rendered in 1 mesh
+
 > add surface option for air nodes
-	> each surface has an option how it's drawn as an surface and/or air node
+	> each surface has an option how it's drawn as a ground and/or air node
+	> add all ground surfaces to air nodes too
 > allow changing shape on air nodes
 	- add property how many nodes below an airnode blocks (maybe based on surface)
 	- remove air slope tool
+
+(> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes
 	- have a slope value for each transition that is 0 for flat, +1 for going 1 tile up, -1 for going 1 down etc
 		- for that have a getter for each node that gives back the height on the center of the node
@@ -27,7 +38,7 @@ Big Features to Add:
 		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
 	- all entities have a max slope they can walk
 
-
+	
 - limit vision to height (don't draw anything above height x)
 
 - Rework hover pathfinding
@@ -110,11 +121,6 @@ Big Features to Add:
 	> modifiers have a duration and effect, name, description, icon
 	> move jail time to modifier
 	> add ui for modifiers
-
-- procedural rock wall entity
-	> 1xYx1 in size, connects to adjacent rock wall entities
-	> blocks path and vision
-	> rendered in 1 mesh
 
 - textures for entities
 

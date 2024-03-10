@@ -13,7 +13,6 @@ namespace BlockmapFramework
             for (int heightLevel = 0; heightLevel < World.MAX_HEIGHT; heightLevel++)
             {
                 List<AirNode> nodesToDraw = chunk.GetAirNodes(heightLevel);
-
                 if (nodesToDraw.Count == 0) continue;
 
                 // Generate mesh

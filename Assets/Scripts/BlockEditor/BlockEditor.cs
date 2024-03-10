@@ -34,6 +34,7 @@ namespace WorldEditor
         public SpawnCharacterTool SpawnCharacterTool;
         public MoveCharacterTool MoveCharacterTool;
         public SpawnObjectTool SpawnObjectTool;
+        public ProceduralEntityTool ProceduralEntityTool;
         public WaterTool WaterTool;
         public WallTool WallTool;
         public LadderTool LadderTool;
@@ -42,7 +43,7 @@ namespace WorldEditor
         public World World;
 
         // Editor
-        private EditorEntityLibrary ContentLibrary;
+        public EditorEntityLibrary EntityLibrary { get; private set; }
         float deltaTime; // for fps
         public List<WorldGenerator> Generators;
         private Dictionary<EditorToolId, EditorTool> Tools;
@@ -51,8 +52,8 @@ namespace WorldEditor
         void Start()
         {
             // Init editor content
-            ContentLibrary = new EditorEntityLibrary();
-            ContentLibrary.Init(this);
+            EntityLibrary = new EditorEntityLibrary();
+            EntityLibrary.Init(this);
 
             // Init generators
             Generators = new List<WorldGenerator>()
@@ -70,12 +71,13 @@ namespace WorldEditor
                 { EditorToolId.SurfacePaint, SurfacePaintTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
-                { EditorToolId.SpawnCharacter, SpawnCharacterTool },
-                { EditorToolId.MoveCharacter, MoveCharacterTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
-                { EditorToolId.Water, WaterTool },
+                { EditorToolId.ProceduralEntity, ProceduralEntityTool },
                 { EditorToolId.Wall, WallTool },
                 { EditorToolId.Ladder, LadderTool },
+                { EditorToolId.Water, WaterTool },
+                { EditorToolId.SpawnCharacter, SpawnCharacterTool },
+                { EditorToolId.MoveCharacter, MoveCharacterTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
@@ -100,7 +102,7 @@ namespace WorldEditor
         public void SetWorld(WorldData data)
         {
             // Set new data
-            SetWorld(World.Load(data, ContentLibrary));
+            SetWorld(World.Load(data, EntityLibrary));
         }
         public void SetWorld(World world)
         {

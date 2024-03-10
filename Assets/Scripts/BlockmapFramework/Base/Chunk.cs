@@ -31,6 +31,7 @@ namespace BlockmapFramework
         public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
         public Dictionary<int, WallMesh> WallMeshes;
+        public Dictionary<int, ProceduralEntityMesh> ProceduralEntityMeshes;
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -74,6 +75,7 @@ namespace BlockmapFramework
 
             AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
             WallMeshes = new Dictionary<int, WallMesh>();
+            ProceduralEntityMeshes = new Dictionary<int, ProceduralEntityMesh>();
         }
 
         #region Actions
@@ -140,6 +142,9 @@ namespace BlockmapFramework
             foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
 
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) Destroy(mesh.gameObject);
+            ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
+
             // Chunk position
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
         }
@@ -154,6 +159,7 @@ namespace BlockmapFramework
             SurfaceMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(player);
             WaterMesh.SetVisibility(player);
 
             // Entity visibility
@@ -171,6 +177,7 @@ namespace BlockmapFramework
             SurfaceMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
         public void ShowTileBlending(bool show)

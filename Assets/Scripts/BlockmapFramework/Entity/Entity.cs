@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Profiling;
+using UnityEditor;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -145,11 +146,11 @@ namespace BlockmapFramework
             // Create a mesh collider for selecting the entity
             gameObject.layer = World.Layer_EntityMesh;
             MeshCollider = GetComponent<MeshCollider>();
-            if (MeshCollider == null) MeshCollider = gameObject.AddComponent<MeshCollider>();
+            if (MeshCollider == null && GetComponent<MeshRenderer>() != null) MeshCollider = gameObject.AddComponent<MeshCollider>();
 
             // Wrap the entity in a wrapper
             Wrapper = new GameObject(Name + "_wrapper");
-            Wrapper.transform.SetParent(transform.parent);
+            Wrapper.transform.SetParent(World.transform);
             transform.SetParent(Wrapper.transform);
 
             // Create a collider for entity vision on a seperate object
@@ -278,7 +279,7 @@ namespace BlockmapFramework
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
         /// <br/> Also Moves the entitiy to the last or currently known position for the given player.
         /// </summary>
-        public void UpdateVisiblity(Actor player)
+        public virtual void UpdateVisiblity(Actor player)
         {
             // Entity is currently visible => render normally at current position
             if (IsVisibleBy(player))
@@ -351,7 +352,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the world position of the center of this entity.
         /// </summary>
-        public Vector3 GetWorldCenter() => Renderer.bounds.center;
+        public virtual Vector3 GetWorldCenter() => VisionCollider.bounds.center;
 
         public HashSet<BlockmapNode> GetOccupiedNodes()
         {
@@ -638,6 +639,8 @@ namespace BlockmapFramework
         /// Returns if the given player has seen this entity before.
         /// </summary>
         public bool IsExploredBy(Actor player) => LastKnownPosition[player] != null;
+
+        public virtual Texture2D GetEditorThumbnail() => AssetPreview.GetAssetPreview(gameObject);
 
         #endregion
 

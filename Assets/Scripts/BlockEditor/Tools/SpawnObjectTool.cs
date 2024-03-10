@@ -32,11 +32,11 @@ namespace WorldEditor
             EntitySelection.Clear();
             foreach (StaticEntity e in editor.StaticEntities)
             {
-                Texture2D previewThumbnail = AssetPreview.GetAssetPreview(e.gameObject);
+                Texture2D previewThumbnail = e.GetEditorThumbnail();
                 Sprite icon = null;
                 if (previewThumbnail != null)
                     icon = Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
-                EntitySelection.AddElement(icon, Color.white, e.name, () => SelectEntity(e));
+                EntitySelection.AddElement(icon, Color.white, e.Name, () => SelectEntity(e));
             }
 
             EntitySelection.SelectFirstElement();

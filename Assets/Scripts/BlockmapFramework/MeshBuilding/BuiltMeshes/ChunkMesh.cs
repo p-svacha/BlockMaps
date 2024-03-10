@@ -6,7 +6,7 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// Represents one object/mesh within a chunk
+    /// Represents one mesh within a chunk that is used to render multiple instances of the same object type in one object. (i.e. nodes, walls, procedural entities)
     /// </summary>
     public abstract class ChunkMesh : MonoBehaviour
     {

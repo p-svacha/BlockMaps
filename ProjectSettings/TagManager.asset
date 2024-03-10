@@ -16,7 +16,7 @@ TagManager:
   - Path
   - Wall
   - EntityVisionCollider
-  - 
+  - ProceduralEntityMesh
   - 
   - 
   - 

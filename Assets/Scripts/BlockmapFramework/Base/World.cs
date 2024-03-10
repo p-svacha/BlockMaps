@@ -80,6 +80,7 @@ namespace BlockmapFramework
         public int Layer_AirNode;
         public int Layer_Water;
         public int Layer_Wall;
+        public int Layer_ProceduralEntityMesh;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -136,6 +137,7 @@ namespace BlockmapFramework
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Wall = LayerMask.NameToLayer("Wall");
+            Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
 
             // Init pathfinder
             Pathfinder.Init(this);
@@ -206,9 +208,6 @@ namespace BlockmapFramework
                 Zones.Add(zoneData.Id, zone);
             }
 
-            // Draw node meshes because we need to shoot rays to generate navmesh
-            DrawNodes();
-
             IsInitialized = false;
             InitializeStep = 1;
         }
@@ -227,6 +226,9 @@ namespace BlockmapFramework
                     // Register entity (null-check because some special entities are already registered in Entity.Load (i.e. ladders))
                     if (e != null) RegisterEntity(e);
                 }
+
+                // Draw node meshes because we need to shoot rays to generate navmesh
+                DrawNodes();
 
                 InitializeStep++;
                 return;
@@ -368,12 +370,16 @@ namespace BlockmapFramework
             }
 
             // Ray to detect entity
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_EntityMesh))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_SurfaceNode | 1 << Layer_AirNode | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh))
             {
                 if (hit.transform.gameObject.layer == Layer_EntityMesh)
                 {
                     Transform objectHit = hit.transform;
                     newHoveredEntity = hit.transform.parent.GetComponentInChildren<Entity>();
+                }
+                else if(hit.transform.gameObject.layer == Layer_ProceduralEntityMesh)
+                {
+                    newHoveredEntity = GetProceduralEntityFromRaycastHit(hit);
                 }
             }
 
@@ -504,6 +510,18 @@ namespace BlockmapFramework
                     }
                 }
             }
+
+            return null;
+        }
+        private ProceduralEntity GetProceduralEntityFromRaycastHit(RaycastHit hit)
+        {
+            ProceduralEntityMesh hitMesh = hit.transform.GetComponent<ProceduralEntityMesh>();
+            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
+            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hitMesh.HeightLevel);
+
+            // If the exact node we hit has a procedural entity, return that
+            BlockmapNode targetNode = hitNodes.FirstOrDefault(x => x.Entities.Any(e => e is ProceduralEntity));
+            if (targetNode != null) return targetNode.Entities.First(x => x is ProceduralEntity) as ProceduralEntity;
 
             return null;
         }
@@ -791,6 +809,9 @@ namespace BlockmapFramework
             // Register new entity
             RegisterEntity(instance);
 
+            // Redraw chunk meshes if it is a procedural entity
+            if(instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
+
             // Update vision around new entity
             if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.GetCenterWorldPosition());
 
@@ -823,6 +844,9 @@ namespace BlockmapFramework
                 node.RemoveEntity(entity);
                 node.Chunk.RemoveEntity(entity);
             }
+
+            // Redraw chunk meshes if it is a procedural entity
+            if (entity is ProceduralEntity) RedrawNodesAround(entity.OriginNode.WorldCoordinates);
 
             // Update pathfinding navmesh
             UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetDimensions().x, entity.GetDimensions().z);

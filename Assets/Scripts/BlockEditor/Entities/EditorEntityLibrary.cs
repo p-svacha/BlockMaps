@@ -16,7 +16,7 @@ namespace WorldEditor
             Editor = editor;
         }
 
-        public override Entity GetEntityInstance(World world, string id)
+        protected override Entity GetCustomEntityInstance(World world, string id)
         {
             string[] attributes = id.Split('_');
             string idPrefix = attributes[0];

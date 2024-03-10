@@ -22,11 +22,11 @@ namespace WorldEditor
 
         public Sprite TerrainToolSprite;
         public Sprite SurfaceToolSprite;
-        public Sprite PathToolSprite;
         public Sprite AirNodeSprite;
         public Sprite AirSlopeNodeSprite;
         public Sprite WorldGenSprite;
         public Sprite StaticEntitySprite;
+        public Sprite ProceduralEntitySprite;
         public Sprite MovingEntitySprite;
         public Sprite MoveEntityToolSprite;
         public Sprite WaterToolSprite;
