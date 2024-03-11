@@ -33,12 +33,6 @@ namespace WorldEditor
         public Sprite WallToolSprite;
         public Sprite LadderToolSprite;
 
-        [Header("Thumbnails")]
-        public Sprite Thumbnail_Brickwall;
-        public Sprite Thumbnail_WoodenFence;
-
-        public Sprite Thumbnail_Hedge;
-
         public Texture2D GetTileSelector(Direction dir)
         {
             if (dir == Direction.None) return TileSelector;

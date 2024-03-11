@@ -1,11 +1,11 @@
 {
   "Name": "reding",
   "ChunkSize": 16,
-  "MaxNodeId": 1025,
-  "MaxEntityId": 1,
-  "MaxWaterBodyId": 0,
-  "MaxActorId": 4,
-  "MaxZoneId": 0,
+  "MaxNodeId": 1026,
+  "MaxEntityId": 10,
+  "MaxWaterBodyId": 1,
+  "MaxActorId": 5,
+  "MaxZoneId": 1,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -13374,9 +13374,204 @@
       "OriginNodeId": 296,
       "Rotation": "N",
       "PlayerId": 0
+    },
+    {
+      "Id": 2,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 417,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 3,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 433,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 4,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 449,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 5,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 465,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 6,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 481,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 7,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 497,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 8,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 401,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 9,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 400,
+      "Rotation": "N",
+      "PlayerId": 0
     }
   ],
   "WaterBodies": [],
-  "Walls": [],
+  "Walls": [
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 343,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 344,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 345,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 346,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 347,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 348,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 349,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 350,
+      "Side": "N",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 351,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 848,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 849,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 850,
+      "Side": "N",
+      "Height": 2
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 358,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 374,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 390,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 406,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 422,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 438,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 454,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 470,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 486,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 502,
+      "Side": "E",
+      "Height": 3
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 342,
+      "Side": "NE",
+      "Height": 3
+    }
+  ],
   "Zones": []
 }

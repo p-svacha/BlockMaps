@@ -5,15 +5,6 @@ add some noise to hedge material
 
 - sloped curb sides downwards => for dirt path
 
-- procedural entities
-	> Entities whose meshes are generated at runtime
-	> one mesh per chunks for all procedural entities
-	>  hedge
-	> rock wall
-	> 1xYx1 in size, connects to adjacent rock wall entities
-	> blocks path and vision
-	> rendered in 1 mesh
-
 > add surface option for air nodes
 	> each surface has an option how it's drawn as a ground and/or air node
 	> add all ground surfaces to air nodes too
@@ -23,6 +14,11 @@ add some noise to hedge material
 
 - rework how player colors are passed to chunkmeshes for rendering zone borders
 	> always pass to chunkmesh in setvisiblity
+
+- add some car models
+	> Rework dimensions attribute of entities
+	> Entities can now have a different heigh per node
+	> Car hood has height 1/2, rest height 2/3, width = 2, length = 4/5
 
 (> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes
@@ -43,9 +39,6 @@ add some noise to hedge material
 	> Cache paths (forever since they can never change atm)
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
-
-- Reduce human height to 2
-	> tiles are about 2x2x1 meter
 
 - Improve ctf map generator
 	> New approach: Check XCOM and PZ map generation

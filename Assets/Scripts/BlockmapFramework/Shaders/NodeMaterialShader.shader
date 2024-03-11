@@ -36,6 +36,12 @@ Shader "Custom/NodeMaterialShader"
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
+
+        _NormalMap("Normal Map", 2D) = "bump" {}  // New property for the normal map
+        _NormalStrength("Normal Strength", Range(-20, 20)) = 0  // New property for normal strength
+
+        _HeightMap("Height Map", 2D) = "white" {}
+        _HeightPower("Height Power", Range(0,.125)) = 0
     }
 
         SubShader
@@ -64,6 +70,14 @@ Shader "Custom/NodeMaterialShader"
         float _TriplanarBlendSharpness;
         float _SideStartSteepness;
         float _SideOnlySteepness;
+
+        // Normal Map
+        sampler2D _NormalMap;
+        half _NormalStrength;
+
+        // Height Map
+        sampler2D _HeightMap;
+        float _HeightPower;
 
         // Player colors
         fixed4 _PlayerColors[8];
@@ -110,6 +124,10 @@ Shader "Custom/NodeMaterialShader"
             float2 uv2_GridTex;
             float3 worldPos;
             float3 worldNormal;
+            float2 uv_NormalMap;
+            float2 uv_HeightMap;
+            float3 viewDir;
+            INTERNAL_DATA
         };
 
         int GetVisibilityArrayIndex(float x, float y)
@@ -201,7 +219,7 @@ Shader "Custom/NodeMaterialShader"
 
                 // Get the absolute value of the world normal.
                 // Put the blend weights to the power of BlendSharpness: The higher the value, the sharper the transition between the planar maps will be.
-                half3 blendWeights = pow(abs(IN.worldNormal), _TriplanarBlendSharpness);
+                half3 blendWeights = pow(abs(WorldNormalVector(IN, o.Normal)), _TriplanarBlendSharpness);
 
                 // ----- TRIPLANAR ------
                 // Divide our blend mask by the sum of it's components, this will make x+y+z=1
@@ -223,13 +241,26 @@ Shader "Custom/NodeMaterialShader"
                     topTextureStrength = 0;
                 }
 
+
+                // Get offset for height map
+                float2 texOffsetY = ParallaxOffset(tex2D(_HeightMap, yUV).g, _HeightPower, IN.viewDir);
+                float2 texOffsetX = ParallaxOffset(tex2D(_HeightMap, xUV).g, _HeightPower, IN.viewDir);
+                float2 texOffsetZ = ParallaxOffset(tex2D(_HeightMap, zUV).g, _HeightPower, IN.viewDir);
+
                 // Now do texture samples from our diffuse maps with each of the 3 UV set's we've just made.
                 // Blend top with side texture according to how much the surface normal points vertically (y-direction)
-                half3 yDiff = (1 - topTextureStrength) * tex2D(_MainTex, yUV) + topTextureStrength * tex2D(_MainTex, yUV);
-                half3 xDiff = (1 - topTextureStrength) * tex2D(_MainTex, xUV) + topTextureStrength * tex2D(_MainTex, xUV);
-                half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV) + topTextureStrength * tex2D(_MainTex, zUV);
-
+                half3 yDiff = (1 - topTextureStrength) * tex2D(_MainTex, yUV + texOffsetY) + topTextureStrength * tex2D(_MainTex, yUV + texOffsetY);
+                half3 xDiff = (1 - topTextureStrength) * tex2D(_MainTex, xUV + texOffsetX) + topTextureStrength * tex2D(_MainTex, xUV + texOffsetX);
+                half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV + texOffsetZ) + topTextureStrength * tex2D(_MainTex, zUV + texOffsetZ);
+                
                 c.rgb = xDiff * blendWeights.x + yDiff * blendWeights.y + zDiff * blendWeights.z;
+
+                // Normal map (set same triplanar uv's)
+                half3 normalY = UnpackScaleNormal(tex2D(_NormalMap, yUV + texOffsetY), _NormalStrength);
+                half3 normalX = UnpackScaleNormal(tex2D(_NormalMap, xUV + texOffsetX), _NormalStrength);
+                half3 normalZ = UnpackScaleNormal(tex2D(_NormalMap, zUV + texOffsetZ), _NormalStrength);
+
+                o.Normal.rgb = normalX * blendWeights.x + normalY * blendWeights.y + normalZ * blendWeights.z;
 
                 // Tint
                 c = (_TextureTint.a * _TextureTint) + ((1 - _TextureTint.a) * c);
@@ -315,7 +346,7 @@ Shader "Custom/NodeMaterialShader"
                 c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
             }
 
-            // ######################################################################### FOG OF WAR TINT #########################################################################
+            // ######################################################################### FOG OF WAR TINT ###############################################################
 
             if (fullVisible != 1)
             {
@@ -324,7 +355,9 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### FINALIZE #########################################################################
 
+           
             o.Albedo = c.rgb;
+
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
