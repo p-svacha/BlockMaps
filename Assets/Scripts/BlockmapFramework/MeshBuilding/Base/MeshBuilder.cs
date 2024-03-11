@@ -339,16 +339,16 @@ namespace BlockmapFramework
         #region Blockmap-Specific
 
         /// <summary>
-        /// When building a cube on a node, define the values for building it flat from the south-west corner on 0/0 and then pass those values into this function to translate the values to the correct node.
+        /// Builds a cube onto a node, given the relative position and dimensions on that node.
         /// </summary>
-        public void BuildCube(BlockmapNode node, int submesh, Vector3 pos, Vector3 dimensions)
+        public void BuildCube(BlockmapNode node, int submesh, Vector3 relPos, Vector3 relDim)
         {
-            // Calculate footprint vertex positions
+            // Calculate flat footprint vertex positions
             List<Vector3> footprint = new List<Vector3>() {
-                new Vector3(pos.x, pos.y, pos.z),
-                new Vector3(pos.x + dimensions.x, pos.y, pos.z),
-                new Vector3(pos.x + dimensions.x, pos.y, pos.z + dimensions.z),
-                new Vector3(pos.x, pos.y, pos.z + dimensions.z),
+                new Vector3(relPos.x, relPos.y, relPos.z),
+                new Vector3(relPos.x + relDim.x, relPos.y, relPos.z),
+                new Vector3(relPos.x + relDim.x, relPos.y, relPos.z + relDim.z),
+                new Vector3(relPos.x, relPos.y, relPos.z + relDim.z),
             };
 
             // Apply height offsets from slope to footprint
@@ -368,7 +368,66 @@ namespace BlockmapFramework
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
 
             // Build cube
-            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], dimensions.y);
+            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], relDim.y);
+        }
+
+        /// <summary>
+        /// Builds a cube with a bevelled top onto a node, given the relative position and dimensions on that node.
+        /// </summary>
+        public void BuildCubeWithBevelledTop(BlockmapNode node, int submeshIndex, Vector3 relPos, Vector3 relDim, float bevelHeight, Dictionary<Direction, float> bevelSizes)
+        {
+            // Calculate all vertex positions
+            float bottomY = relPos.y;
+            float midY = relPos.y + relDim.y - bevelHeight;
+            float topY = relPos.y + relDim.y;
+
+            List<Vector3> vertices = new List<Vector3>()
+            {
+                new Vector3(relPos.x, bottomY, relPos.z), // Bottom SW
+                new Vector3(relPos.x + relDim.x, bottomY, relPos.z), // Bottom SE
+                new Vector3(relPos.x + relDim.x, bottomY, relPos.z + relDim.z), // Bottom NE
+                new Vector3(relPos.x, bottomY, relPos.z + relDim.z), // Bottom NW
+
+                new Vector3(relPos.x, midY, relPos.z), // Mid SW
+                new Vector3(relPos.x + relDim.x, midY, relPos.z), // Mid SE
+                new Vector3(relPos.x + relDim.x, midY, relPos.z + relDim.z), // Mid NE
+                new Vector3(relPos.x, midY, relPos.z + relDim.z), // Mid NW
+
+                new Vector3(relPos.x + bevelSizes[Direction.W], topY, relPos.z + bevelSizes[Direction.S]), // Top SW
+                new Vector3(relPos.x + relDim.x - bevelSizes[Direction.E], topY, relPos.z + bevelSizes[Direction.S]), // Top SE
+                new Vector3(relPos.x + relDim.x - bevelSizes[Direction.E], topY, relPos.z + relDim.z - bevelSizes[Direction.N]), // Top NE
+                new Vector3(relPos.x + bevelSizes[Direction.W], topY, relPos.z + relDim.z - bevelSizes[Direction.N]), // Top NW
+            };
+
+            // Apply height offsets from slope to all vertices
+            if (!node.IsFlat())
+            {
+                for (int i = 0; i < vertices.Count; i++)
+                {
+                    float height = node.GetRelativeHeightAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    vertices[i] += new Vector3(0f, height, 0f);
+                }
+            }
+
+            // Apply offset based on node position on chunk to footprint
+            float worldHeight = node.BaseWorldHeight;
+            Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
+            for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
+
+            // Lower sides
+            BuildPlane(submeshIndex, vertices[0], vertices[4], vertices[5], vertices[1], Vector2.zero, Vector2.one, mirror: true); // South
+            BuildPlane(submeshIndex, vertices[2], vertices[6], vertices[7], vertices[3], Vector2.zero, Vector2.one, mirror: true); // North
+            BuildPlane(submeshIndex, vertices[1], vertices[5], vertices[6], vertices[2], Vector2.zero, Vector2.one, mirror: true); // East
+            BuildPlane(submeshIndex, vertices[0], vertices[4], vertices[7], vertices[3], Vector2.zero, Vector2.one); // West
+
+            // Middle/bevel sides
+            BuildPlane(submeshIndex, vertices[4], vertices[8], vertices[9], vertices[5], Vector2.zero, Vector2.one, mirror: true); // South
+            BuildPlane(submeshIndex, vertices[6], vertices[10], vertices[11], vertices[7], Vector2.zero, Vector2.one, mirror: true); // North
+            BuildPlane(submeshIndex, vertices[5], vertices[9], vertices[10], vertices[6], Vector2.zero, Vector2.one, mirror: true); // East
+            BuildPlane(submeshIndex, vertices[4], vertices[8], vertices[11], vertices[7], Vector2.zero, Vector2.one); // West
+
+            // Top side
+            BuildPlane(submeshIndex, vertices[8], vertices[9], vertices[10], vertices[11], Vector2.zero, Vector2.one);
         }
 
 

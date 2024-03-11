@@ -125,7 +125,7 @@ namespace BlockmapFramework
         public void Init(int id, World world, BlockmapNode origin, Direction rotation, Actor player)
         {
             Id = id;
-            if(string.IsNullOrEmpty(TypeId)) TypeId = Name;
+            if (string.IsNullOrEmpty(TypeId)) TypeId = Name;
 
             Renderer = GetComponent<MeshRenderer>();
 
@@ -250,9 +250,9 @@ namespace BlockmapFramework
 
             // Add all adjacent nodes as well because vision goes over node edge
             HashSet<BlockmapNode> adjNodes = new HashSet<BlockmapNode>();
-            foreach(BlockmapNode n in changedVisibilityNodes)
+            foreach (BlockmapNode n in changedVisibilityNodes)
             {
-                foreach(Direction dir in HelperFunctions.GetAllDirections8())
+                foreach (Direction dir in HelperFunctions.GetAllDirections8())
                 {
                     foreach (BlockmapNode adjNode in World.GetAdjacentNodes(n.WorldCoordinates, dir))
                         adjNodes.Add(adjNode);
@@ -372,7 +372,7 @@ namespace BlockmapFramework
             BlockmapNode yBaseNode = originNode;
             BlockmapNode cornerNodeNW = null;
 
-            for(int x = 0; x < dimensions.x; x++)
+            for (int x = 0; x < dimensions.x; x++)
             {
                 // Try going east
                 if (x > 0)
@@ -387,7 +387,7 @@ namespace BlockmapFramework
                 }
 
                 BlockmapNode yNode = yBaseNode;
-                for(int y = 0; y < dimensions.z - 1; y++)
+                for (int y = 0; y < dimensions.z - 1; y++)
                 {
                     // Try going north
                     Vector2Int northCoordinates = world.GetWorldCoordinatesInDirection(yNode.WorldCoordinates, Direction.N);
@@ -415,7 +415,7 @@ namespace BlockmapFramework
                     else cornerNodeNW = eastNode;
                 }
             }
-            
+
             return nodes;
         }
 
@@ -434,11 +434,11 @@ namespace BlockmapFramework
 
             for (int x = (int)(-VisionRange - 1); x <= VisionRange; x++)
             {
-                for(int y = (int)(-VisionRange - 1); y <= VisionRange; y++)
+                for (int y = (int)(-VisionRange - 1); y <= VisionRange; y++)
                 {
                     Vector2Int targetWorldCoordinates = new Vector2Int(originNode.WorldCoordinates.x + x, originNode.WorldCoordinates.y + y);
 
-                    foreach(BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
+                    foreach (BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
                     {
                         pm_GetNodeVision.Begin();
                         VisionType vision = GetNodeVision(targetNode);
@@ -513,9 +513,9 @@ namespace BlockmapFramework
                 }
 
                 // Check if we hit the waterbody that covers the node. if so => visible
-                if(hit.transform.gameObject.layer == World.Layer_Water && targetNode is SurfaceNode _surfaceNode)
+                if (hit.transform.gameObject.layer == World.Layer_Water && targetNode is SurfaceNode _surfaceNode)
                 {
-                    if(_surfaceNode.WaterNode != null && World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
+                    if (_surfaceNode.WaterNode != null && World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                 }
 
                 // Check if we hit an entity on the node. if so => visible
@@ -527,7 +527,7 @@ namespace BlockmapFramework
             }
 
             // If the node has a water body, shoot a ray at the water surface as well
-            if(targetNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
+            if (targetNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
             {
                 Vector3 targetPos = new Vector3(nodeCenter.x, surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
                 RaycastHit? waterHit = Look(targetPos);
@@ -540,7 +540,7 @@ namespace BlockmapFramework
                     {
                         Vector3 hitPosition = hit.point;
                         Vector2Int hitWorldCoordinates = World.GetWorldCoordinates(hitPosition);
-                        if(World.GetWaterNode(hitWorldCoordinates).WaterBody == surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
+                        if (World.GetWaterNode(hitWorldCoordinates).WaterBody == surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                     }
                 }
             }
@@ -550,7 +550,7 @@ namespace BlockmapFramework
             {
                 RaycastHit? entityHit = Look(e.GetWorldCenter());
 
-                if(entityHit != null)
+                if (entityHit != null)
                 {
                     RaycastHit hit = (RaycastHit)entityHit;
                     GameObject objectHit = hit.transform.gameObject;
@@ -640,7 +640,13 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsExploredBy(Actor player) => LastKnownPosition[player] != null;
 
-        public virtual Texture2D GetEditorThumbnail() => AssetPreview.GetAssetPreview(gameObject);
+        public virtual Sprite GetThumbnail()
+        {
+            Texture2D previewThumbnail = AssetPreview.GetAssetPreview(gameObject);
+            if (previewThumbnail != null)
+                return Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
+            return null;
+        }
 
         #endregion
 

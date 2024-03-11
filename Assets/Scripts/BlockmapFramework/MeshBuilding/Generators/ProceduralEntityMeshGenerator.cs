@@ -24,7 +24,7 @@ namespace BlockmapFramework
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (BlockmapNode node in nodesToDraw)
                 {
-                    foreach (ProceduralEntity e in node.Entities.Where(x => x is ProceduralEntity)) e.BuildMesh(meshBuilder, node, isPreview: false);
+                    foreach (ProceduralEntity e in node.Entities.Where(x => x is ProceduralEntity)) e.BuildMesh(meshBuilder);
                 }
                 meshBuilder.ApplyMesh();
 

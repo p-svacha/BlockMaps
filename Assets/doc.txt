@@ -1,14 +1,5 @@
 Big Features to Add:
 
-
-
-finish hedge mesh gen
-add height as param
-
-put wallmeshgenerator code into wallmesh
-same with procmesh
-same with others maybe1
-
 add roughness and normal maps to nodeshader with strength slide
 add some noise to hedge material
 
@@ -29,6 +20,9 @@ add some noise to hedge material
 > allow changing shape on air nodes
 	- add property how many nodes below an airnode blocks (maybe based on surface)
 	- remove air slope tool
+
+- rework how player colors are passed to chunkmeshes for rendering zone borders
+	> always pass to chunkmesh in setvisiblity
 
 (> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes

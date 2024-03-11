@@ -11,7 +11,7 @@ namespace BlockmapFramework
         public override int MaxHeight => 1;
         public override bool FollowSlopes => true;
         public override bool BlocksVision => false;
-        public override Sprite PreviewSprite => ResourceManager.Singleton.WoodenFenceSprite;
+        public override Sprite PreviewSprite => ResourceManager.Singleton.Thumbnail_WoodenFence;
 
 
         // IClimbable

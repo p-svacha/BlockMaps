@@ -16,7 +16,14 @@ namespace BlockmapFramework
         public Entity GetEntityInstance(World world, string id)
         {
             // Check if its a procedural entity
-            if(ProceduralEntities.TryGetValue(id, out ProceduralEntity procEntity)) return procEntity.GetInstance();
+            string[] attributes = id.Split('_');
+            string baseId = attributes[0];
+
+            if (ProceduralEntities.TryGetValue(baseId, out ProceduralEntity procEntity))
+            {
+                int height = int.Parse(attributes[1]);
+                return procEntity.GetInstance(height);
+            }
 
             return GetCustomEntityInstance(world, id);
         }
@@ -25,7 +32,7 @@ namespace BlockmapFramework
 
         public Dictionary<string, ProceduralEntity> ProceduralEntities = new Dictionary<string, ProceduralEntity>()
         {
-            { PE001_Hedge.TYPE_ID, new PE001_Hedge() }
+            { "PE001", new PE001_Hedge() }
         };
     }
 }

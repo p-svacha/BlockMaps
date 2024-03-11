@@ -20,6 +20,7 @@ namespace WorldEditor
 
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
+        public TMP_InputField HeightInput;
         public UI_SelectionPanel EntitySelection;
 
         public override void Init(BlockEditor editor)
@@ -29,11 +30,7 @@ namespace WorldEditor
             EntitySelection.Clear();
             foreach (ProceduralEntity e in editor.EntityLibrary.ProceduralEntities.Values)
             {
-                Texture2D previewThumbnail = e.GetEditorThumbnail();
-                Sprite icon = null;
-                if (previewThumbnail != null)
-                    icon = Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
-                EntitySelection.AddElement(icon, Color.white, e.Name, () => SelectEntity(e));
+                EntitySelection.AddElement(e.GetThumbnail(), Color.white, e.Name, () => SelectEntity(e));
             }
 
             EntitySelection.SelectFirstElement();
@@ -54,13 +51,28 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
+            // Ctrl + mouse wheel: change height
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && HeightInput.text != "")
+                {
+                    int height = int.Parse(HeightInput.text);
+                    if (height > 1) height--;
+                    HeightInput.text = height.ToString();
+                }
+                if (Input.mouseScrollDelta.y > 0 && HeightInput.text != "")
+                {
+                    int height = int.Parse(HeightInput.text);
+                    height++;
+                    HeightInput.text = height.ToString();
+                }
+            }
+
             // Preview
             if (World.HoveredNode != null)
             {
-                //if (HeightInput.text == "") return;
-                //int height = int.Parse(HeightInput.text);
-
-                //Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode8);
+                if (HeightInput.text == "") return;
+                int height = int.Parse(HeightInput.text);
 
                 Color c = Color.white;
                 if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION)) c = Color.red;
@@ -69,7 +81,7 @@ namespace WorldEditor
                 BuildPreview.SetActive(true);
                 BuildPreview.transform.position = World.HoveredNode.Chunk.WorldPosition;
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                SelectedEntity.BuildMesh(previewMeshBuilder, World.HoveredNode, isPreview: true);
+                SelectedEntity.BuildMesh(previewMeshBuilder, World.HoveredNode, height, isPreview: true);
                 previewMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
@@ -80,8 +92,10 @@ namespace WorldEditor
         {
             if (World.HoveredNode == null) return;
             if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION)) return;
+            if (HeightInput.text == "") return;
 
-            ProceduralEntity instance = SelectedEntity.GetInstance();
+            int height = int.Parse(HeightInput.text);
+            ProceduralEntity instance = SelectedEntity.GetInstance(height);
             Actor owner = World.Actors.Values.ToList()[PlayerDropdown.value];
 
             World.SpawnEntity(instance, World.HoveredNode, DEFAULT_ROTATION, owner, isInstance: true);

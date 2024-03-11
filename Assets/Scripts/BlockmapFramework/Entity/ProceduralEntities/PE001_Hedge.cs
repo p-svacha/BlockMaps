@@ -5,31 +5,85 @@ using UnityEngine;
 namespace BlockmapFramework {
     public class PE001_Hedge : ProceduralEntity
     {
-        public const string TYPE_ID = "PE001_Hedge";
-        private const float HEDGE_EDGE_OFFSET = 0.2f;
+        protected override string BaseTypeId => "PE001";
+        private const float EDGE_OFFSET = 0.2f;
+        private const float BEVEL_HEIGHT = 0.15f;
+        private const float BEVEL_WIDTH = 0.1f;
 
-        public override Texture2D GetEditorThumbnail() => new Texture2D(100, 100);
+        public override Sprite GetThumbnail() => ResourceManager.Singleton.Thumbnail_Hedge;
 
         public PE001_Hedge()
         {
-            TypeId = TYPE_ID;
             Name = "Hedge";
-            Dimensions = new Vector3Int(1, 1, 1);
         }
 
-        public override void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, bool isPreview = false)
+        public override void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
         {
-            World world = node.World;
-
             Material mat = isPreview ? ResourceManager.Singleton.BuildPreviewMaterial : ResourceManager.Singleton.Mat_Hedge;
-            int hedgeSubmesh = meshBuilder.GetSubmesh(mat);
-            meshBuilder.BuildCube(node, hedgeSubmesh, new Vector3(HEDGE_EDGE_OFFSET, 0f, HEDGE_EDGE_OFFSET), new Vector3(1f - 2 * HEDGE_EDGE_OFFSET, World.TILE_HEIGHT, 1f - 2 * HEDGE_EDGE_OFFSET));
+            int submesh = meshBuilder.GetSubmesh(mat);
 
-            if(node.HasEntityConnection(Direction.N, TYPE_ID)) // Connection north
-                meshBuilder.BuildCube(node, hedgeSubmesh, new Vector3(HEDGE_EDGE_OFFSET, 0f, 1f - HEDGE_EDGE_OFFSET), new Vector3(1f - 2 * HEDGE_EDGE_OFFSET, World.TILE_HEIGHT, HEDGE_EDGE_OFFSET));
+            float hedgeWidth = 1f - 2 * EDGE_OFFSET;
+            float hedgeHeight = height * World.TILE_HEIGHT;
 
-            if (node.HasEntityConnection(Direction.S, TYPE_ID)) // Connection south
-                meshBuilder.BuildCube(node, hedgeSubmesh, new Vector3(HEDGE_EDGE_OFFSET, 0f, 0f), new Vector3(1f - 2 * HEDGE_EDGE_OFFSET, World.TILE_HEIGHT, HEDGE_EDGE_OFFSET));
+            Dictionary<Direction, bool> hasConnection = new Dictionary<Direction, bool>();
+            foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, GetTypeId(height)));
+
+            Dictionary<Direction, float> bevelWidths = new Dictionary<Direction, float>();
+            foreach (Direction dir in HelperFunctions.GetSides()) bevelWidths.Add(dir, hasConnection[dir] ? 0f : BEVEL_WIDTH);
+
+            meshBuilder.BuildCubeWithBevelledTop(node, submesh, new Vector3(EDGE_OFFSET, 0f, EDGE_OFFSET), new Vector3(hedgeWidth, hedgeHeight, hedgeWidth), BEVEL_HEIGHT, bevelWidths);
+
+            // Side connections
+            foreach (Direction dir in HelperFunctions.GetSides())
+            {
+                if (hasConnection[dir])
+                {
+                    Direction nextSide = HelperFunctions.GetNextSideDirection(dir);
+                    Direction prevSide = HelperFunctions.GetPreviousSideDirection(dir);
+                    Direction nextCorner = HelperFunctions.GetNextDirection8(dir);
+                    Direction prevCorner = HelperFunctions.GetPreviousDirection8(dir);
+                    Dictionary<Direction, float> bevelWidthsSide = new Dictionary<Direction, float> {
+                        { dir, 0f }, { HelperFunctions.GetOppositeDirection(dir), 0f },
+                        { nextSide , (hasConnection[nextSide] && hasConnection[nextCorner]) ? 0f : BEVEL_WIDTH },
+                        { prevSide, (hasConnection[prevCorner] && hasConnection[prevSide]) ? 0f : BEVEL_WIDTH }
+                    };
+
+                    Vector3 pos = dir switch
+                    {
+                        Direction.N => new Vector3(EDGE_OFFSET, 0f, 1f - EDGE_OFFSET),
+                        Direction.E => new Vector3(1f - EDGE_OFFSET, 0f, EDGE_OFFSET),
+                        Direction.S => new Vector3(EDGE_OFFSET, 0f, 0f),
+                        Direction.W => new Vector3(0f, 0f, EDGE_OFFSET),
+                    };
+                    Vector3 dim = dir switch
+                    {
+                        Direction.N => new Vector3(hedgeWidth, hedgeHeight, EDGE_OFFSET),
+                        Direction.E => new Vector3(EDGE_OFFSET, hedgeHeight, hedgeWidth),
+                        Direction.S => new Vector3(hedgeWidth, hedgeHeight, EDGE_OFFSET),
+                        Direction.W => new Vector3(EDGE_OFFSET, hedgeHeight, hedgeWidth),
+                    };
+                    
+                    meshBuilder.BuildCubeWithBevelledTop(node, submesh, pos, dim, BEVEL_HEIGHT, bevelWidthsSide);
+                }
+            }
+
+            // Edge connections
+            foreach(Direction dir in HelperFunctions.GetCorners())
+            {
+                if(HelperFunctions.GetAffectedDirections(dir).TrueForAll(x => hasConnection[x]))
+                {
+                    Vector3 pos = dir switch
+                    {
+                        Direction.NW => new Vector3(0f, 0f, 1f - EDGE_OFFSET),
+                        Direction.NE => new Vector3(1f - EDGE_OFFSET, 0f, 1f - EDGE_OFFSET),
+                        Direction.SE => new Vector3(1f - EDGE_OFFSET, 0f, 0f),
+                        Direction.SW => new Vector3(0f, 0f, 0f),
+                    };
+                    Vector3 dim = new Vector3(EDGE_OFFSET, hedgeHeight, EDGE_OFFSET);
+
+                    meshBuilder.BuildCube(node, submesh, pos, dim);
+                }
+            }
         }
     }
 }

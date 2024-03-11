@@ -13,7 +13,7 @@ namespace BlockmapFramework
         public override int MaxHeight => World.MAX_HEIGHT;
         public override bool FollowSlopes => false;
         public override bool BlocksVision => true;
-        public override Sprite PreviewSprite => ResourceManager.Singleton.BrickWallSprite;
+        public override Sprite PreviewSprite => ResourceManager.Singleton.Thumbnail_Brickwall;
 
         // IClimbable
         public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Intermediate;

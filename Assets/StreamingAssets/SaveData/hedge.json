@@ -1,11 +1,11 @@
 {
   "Name": "hedge",
   "ChunkSize": 16,
-  "MaxNodeId": 1025,
-  "MaxEntityId": 17,
-  "MaxWaterBodyId": 0,
-  "MaxActorId": 4,
-  "MaxZoneId": 0,
+  "MaxNodeId": 1026,
+  "MaxEntityId": 7,
+  "MaxWaterBodyId": 1,
+  "MaxActorId": 5,
+  "MaxZoneId": 1,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -13370,57 +13370,43 @@
   "Entities": [
     {
       "Id": 0,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 152,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 184,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 1,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 185,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 2,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 186,
       "Rotation": "N",
       "PlayerId": 0
     },
     {
       "Id": 4,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 106,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 191,
       "Rotation": "N",
       "PlayerId": 0
     },
     {
-      "Id": 9,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 120,
+      "Id": 5,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 175,
       "Rotation": "N",
       "PlayerId": 0
     },
     {
-      "Id": 10,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 104,
-      "Rotation": "N",
-      "PlayerId": 0
-    },
-    {
-      "Id": 11,
-      "TypeId": "tree01",
-      "OriginNodeId": 153,
-      "Rotation": "N",
-      "PlayerId": 0
-    },
-    {
-      "Id": 12,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 136,
-      "Rotation": "N",
-      "PlayerId": 0
-    },
-    {
-      "Id": 15,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 169,
-      "Rotation": "N",
-      "PlayerId": 0
-    },
-    {
-      "Id": 16,
-      "TypeId": "PE001_Hedge",
-      "OriginNodeId": 168,
+      "Id": 6,
+      "TypeId": "PE001_0",
+      "OriginNodeId": 159,
       "Rotation": "N",
       "PlayerId": 0
     }

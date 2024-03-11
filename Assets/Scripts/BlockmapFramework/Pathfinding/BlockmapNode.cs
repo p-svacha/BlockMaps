@@ -205,8 +205,8 @@ namespace BlockmapFramework
         {
             if (!IsPassable(dir)) return;
 
-            Direction preDirection = HelperFunctions.GetNextAnticlockwiseDirection8(dir);
-            Direction postDirection = HelperFunctions.GetNextClockwiseDirection8(dir);
+            Direction preDirection = HelperFunctions.GetPreviousDirection8(dir);
+            Direction postDirection = HelperFunctions.GetNextDirection8(dir);
             BlockmapNode sideConnectedNodePre = WalkTransitions.ContainsKey(preDirection) ? WalkTransitions[preDirection].To : null;
             BlockmapNode sideConnectedNodePost = WalkTransitions.ContainsKey(postDirection) ? WalkTransitions[postDirection].To : null;
 
@@ -637,7 +637,7 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Checks and returns if an adjacent node in the given direction with a seamless connection has an entity of the given type.
+        /// Checks and returns if an adjacent node in the given direction with a seamless connection has an entity of the given type prefix.
         /// </summary>
         public bool HasEntityConnection(Direction dir, string typeId)
         {
@@ -653,7 +653,7 @@ namespace BlockmapFramework
         /// </summary>
         public float GetRelativeHeightAt(Vector2 relativePosition)
         {
-            if (relativePosition.x < 0 || relativePosition.x > 1 || relativePosition.y < 0 || relativePosition.y > 1) throw new System.Exception("Given position must be relative. It's currently " + relativePosition.x + "/" + relativePosition.y);
+            relativePosition = new Vector2(Mathf.Clamp01(relativePosition.x), Mathf.Clamp01(relativePosition.y)); // Clamp to [0-1]
 
             switch (Shape)
             {

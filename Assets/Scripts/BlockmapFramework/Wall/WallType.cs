@@ -68,7 +68,7 @@ namespace BlockmapFramework
             bool adjustHeightsToSlope = (HelperFunctions.IsSide(side) && FollowSlopes);
             if (adjustHeightsToSlope)
             {
-                float slope = World.TILE_HEIGHT * (node.Height[HelperFunctions.GetNextAnticlockwiseDirection8(side)] - node.Height[HelperFunctions.GetNextClockwiseDirection8(side)]);
+                float slope = World.TILE_HEIGHT * (node.Height[HelperFunctions.GetPreviousDirection8(side)] - node.Height[HelperFunctions.GetNextDirection8(side)]);
                 float startY = 0;
                 if (slope < 0)
                 {

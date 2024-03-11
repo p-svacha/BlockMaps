@@ -40,9 +40,11 @@ namespace BlockmapFramework
         public Color TarmacColor;
         public Color WaterColor;
 
-        [Header("WallType Sprites")]
-        public Sprite BrickWallSprite;
-        public Sprite WoodenFenceSprite;
+        [Header("Thumbnails")]
+        public Sprite Thumbnail_Brickwall;
+        public Sprite Thumbnail_WoodenFence;
+
+        public Sprite Thumbnail_Hedge;
 
         [Header("Textures")]
         public Texture2D GrassTexture;

@@ -99,7 +99,7 @@ public static class HelperFunctions
 
     #region Direction
 
-    public static Direction GetNextClockwiseDirection8(Direction dir)
+    public static Direction GetNextDirection8(Direction dir)
     {
         return dir switch
         {
@@ -114,7 +114,7 @@ public static class HelperFunctions
             _ => throw new System.Exception("Direction " + dir.ToString() + " not handled")
         };
     }
-    public static Direction GetNextAnticlockwiseDirection8(Direction dir)
+    public static Direction GetPreviousDirection8(Direction dir)
     {
         return dir switch
         {

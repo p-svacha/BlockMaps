@@ -166,9 +166,9 @@ namespace BlockmapFramework
         {
             // Check if a path is connected in that direction
             bool hasPathConnection = (
-                node.HasSurfaceConnection(HelperFunctions.GetNextAnticlockwiseDirection8(dir)) &&
+                node.HasSurfaceConnection(HelperFunctions.GetPreviousDirection8(dir)) &&
                 node.HasSurfaceConnection(dir) &&
-                node.HasSurfaceConnection(HelperFunctions.GetNextClockwiseDirection8(dir)));
+                node.HasSurfaceConnection(HelperFunctions.GetNextDirection8(dir)));
 
             // Draw connection to adjacent path corner
             if (hasPathConnection)

@@ -9,13 +9,25 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class ProceduralEntity : Entity
     {
-        public ProceduralEntity GetInstance()
+        protected abstract string BaseTypeId { get; }
+
+        public ProceduralEntity GetInstance(int height)
         {
             GameObject obj = new GameObject(Name);
             ProceduralEntity procEntity = obj.AddComponent<PE001_Hedge>();
+            procEntity.InitProceduralEntity(height);
             return procEntity;
         }
-        public abstract void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, bool isPreview = false);
+
+        public void InitProceduralEntity(int height)
+        {
+            TypeId = GetTypeId(height);
+            Dimensions = new Vector3Int(1, height, 1);
+        }
+
+        protected string GetTypeId(int height) => BaseTypeId + "_" + height.ToString();
+        public void BuildMesh(MeshBuilder meshBuilder) => BuildMesh(meshBuilder, OriginNode, Height, isPreview: false);
+        public abstract void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false);
 
         public override void UpdateVisiblity(Actor player) { } // Visibility is handled through ProceduralEntityChunkMesh
     }
