@@ -1,11 +1,11 @@
 {
   "Name": "parkplatz",
   "ChunkSize": 16,
-  "MaxNodeId": 1041,
-  "MaxEntityId": 12,
-  "MaxWaterBodyId": 0,
-  "MaxActorId": 4,
-  "MaxZoneId": 0,
+  "MaxNodeId": 1045,
+  "MaxEntityId": 50,
+  "MaxWaterBodyId": 4,
+  "MaxActorId": 8,
+  "MaxZoneId": 4,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -22,7 +22,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 16,
@@ -35,7 +35,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 32,
@@ -48,7 +48,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 48,
@@ -61,7 +61,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 64,
@@ -74,7 +74,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 80,
@@ -172,52 +172,52 @@
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 208,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 224,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 240,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 1,
@@ -230,7 +230,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 17,
@@ -243,7 +243,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 33,
@@ -256,7 +256,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 49,
@@ -269,7 +269,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 65,
@@ -282,7 +282,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 81,
@@ -380,52 +380,52 @@
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 209,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 225,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 241,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 2,
@@ -438,7 +438,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 18,
@@ -451,7 +451,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 34,
@@ -464,7 +464,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 50,
@@ -477,7 +477,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 66,
@@ -490,7 +490,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 82,
@@ -588,52 +588,52 @@
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            8,
+            8,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 210,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            8,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 226,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 242,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 3,
@@ -646,7 +646,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 19,
@@ -659,7 +659,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 35,
@@ -672,7 +672,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 51,
@@ -685,7 +685,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 67,
@@ -698,7 +698,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 83,
@@ -796,52 +796,52 @@
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 211,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 227,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 243,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 4,
@@ -854,7 +854,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 20,
@@ -867,7 +867,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 36,
@@ -880,7 +880,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 52,
@@ -893,7 +893,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 68,
@@ -906,7 +906,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 84,
@@ -1062,7 +1062,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 21,
@@ -1075,7 +1075,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 37,
@@ -1088,7 +1088,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 53,
@@ -1101,7 +1101,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 69,
@@ -1114,7 +1114,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 85,
@@ -1270,7 +1270,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 22,
@@ -1283,7 +1283,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 38,
@@ -1296,7 +1296,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 54,
@@ -1309,7 +1309,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 70,
@@ -1322,7 +1322,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 86,
@@ -1478,7 +1478,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 23,
@@ -1491,7 +1491,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 39,
@@ -1504,7 +1504,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 55,
@@ -1517,7 +1517,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 71,
@@ -1530,7 +1530,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 87,
@@ -1686,7 +1686,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 24,
@@ -1699,7 +1699,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 40,
@@ -1712,7 +1712,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 56,
@@ -1725,7 +1725,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 72,
@@ -1738,7 +1738,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 88,
@@ -1894,7 +1894,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 25,
@@ -1907,7 +1907,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 41,
@@ -1920,7 +1920,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 57,
@@ -1933,7 +1933,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 73,
@@ -1946,7 +1946,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 3
         },
         {
           "Id": 89,
@@ -2807,19 +2807,6 @@
           "SubType": 2
         },
         {
-          "Id": 1026,
-          "LocalCoordinateX": 13,
-          "LocalCoordinateY": 6,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 125,
           "LocalCoordinateX": 13,
           "LocalCoordinateY": 7,
@@ -2950,19 +2937,6 @@
           "SubType": 2
         },
         {
-          "Id": 1034,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 0,
-          "Height": [
-            5,
-            6,
-            6,
-            5
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 30,
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 1,
@@ -2974,19 +2948,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1035,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 1,
-          "Height": [
-            5,
-            6,
-            6,
-            5
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 46,
@@ -3002,19 +2963,6 @@
           "SubType": 2
         },
         {
-          "Id": 1036,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 2,
-          "Height": [
-            5,
-            6,
-            6,
-            5
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 62,
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 3,
@@ -3026,19 +2974,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1037,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 3,
-          "Height": [
-            5,
-            6,
-            6,
-            5
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 78,
@@ -3054,19 +2989,6 @@
           "SubType": 2
         },
         {
-          "Id": 1028,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 4,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 94,
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 5,
@@ -3080,19 +3002,6 @@
           "SubType": 2
         },
         {
-          "Id": 1027,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 5,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 110,
           "LocalCoordinateX": 14,
           "LocalCoordinateY": 6,
@@ -3104,19 +3013,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1025,
-          "LocalCoordinateX": 14,
-          "LocalCoordinateY": 6,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 126,
@@ -3249,19 +3145,6 @@
           "SubType": 2
         },
         {
-          "Id": 1032,
-          "LocalCoordinateX": 15,
-          "LocalCoordinateY": 0,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 31,
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 1,
@@ -3273,19 +3156,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1031,
-          "LocalCoordinateX": 15,
-          "LocalCoordinateY": 1,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 47,
@@ -3301,19 +3171,6 @@
           "SubType": 2
         },
         {
-          "Id": 1030,
-          "LocalCoordinateX": 15,
-          "LocalCoordinateY": 2,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 63,
           "LocalCoordinateX": 15,
           "LocalCoordinateY": 3,
@@ -3325,19 +3182,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1029,
-          "LocalCoordinateX": 15,
-          "LocalCoordinateY": 3,
-          "Height": [
-            6,
-            6,
-            6,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 79,
@@ -3506,832 +3350,832 @@
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 0,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 272,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 1,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            6,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 288,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 2,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            6,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 304,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 3,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 320,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 4,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 336,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 5,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 352,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 6,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 368,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 7,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 384,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 8,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 400,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 9,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 416,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 10,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 432,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 11,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 448,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 464,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 480,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 496,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 257,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 0,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 273,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 1,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            6
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 289,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 2,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            6,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 305,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 3,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 321,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 4,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 337,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 5,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 353,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 6,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 369,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 7,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 385,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 8,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 401,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 9,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 417,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 10,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 433,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 11,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 449,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 465,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 481,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 497,
           "LocalCoordinateX": 1,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            8,
+            8,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 258,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 0,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 274,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 1,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 290,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 2,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 306,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 3,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 322,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 4,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 338,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 5,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 354,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 6,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 370,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 7,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 386,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 8,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 402,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 9,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 418,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 10,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 434,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 11,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 450,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 466,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 482,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 498,
           "LocalCoordinateX": 2,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            8,
+            7,
+            7,
+            8
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 259,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 0,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 275,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 1,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 291,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 2,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 307,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 3,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 323,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 4,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 339,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 5,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 355,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 6,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 371,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 7,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 387,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 8,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 403,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 9,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 419,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 10,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 435,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 11,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 451,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 12,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 467,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 13,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 483,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 14,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 499,
           "LocalCoordinateX": 3,
           "LocalCoordinateY": 15,
           "Height": [
-            5,
-            5,
-            5,
-            5
+            7,
+            7,
+            7,
+            7
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 260,
@@ -6849,19 +6693,6 @@
           "SubType": 2
         },
         {
-          "Id": 1033,
-          "LocalCoordinateX": 0,
-          "LocalCoordinateY": 0,
-          "Height": [
-            6,
-            5,
-            5,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 528,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 1,
@@ -6873,19 +6704,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1038,
-          "LocalCoordinateX": 0,
-          "LocalCoordinateY": 1,
-          "Height": [
-            6,
-            5,
-            5,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 544,
@@ -6901,19 +6719,6 @@
           "SubType": 2
         },
         {
-          "Id": 1039,
-          "LocalCoordinateX": 0,
-          "LocalCoordinateY": 2,
-          "Height": [
-            6,
-            5,
-            5,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
-        },
-        {
           "Id": 560,
           "LocalCoordinateX": 0,
           "LocalCoordinateY": 3,
@@ -6925,19 +6730,6 @@
           ],
           "Type": "Surface",
           "SubType": 2
-        },
-        {
-          "Id": 1040,
-          "LocalCoordinateX": 0,
-          "LocalCoordinateY": 3,
-          "Height": [
-            6,
-            5,
-            5,
-            6
-          ],
-          "Type": "Air",
-          "SubType": 0
         },
         {
           "Id": 576,
@@ -7522,7 +7314,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 531,
@@ -7730,7 +7522,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 532,
@@ -7938,7 +7730,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 533,
@@ -8146,7 +7938,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 534,
@@ -8354,7 +8146,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 535,
@@ -8562,7 +8354,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 536,
@@ -8770,7 +8562,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 537,
@@ -8978,7 +8770,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 538,
@@ -9186,7 +8978,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 539,
@@ -9394,7 +9186,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 540,
@@ -9602,7 +9394,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 541,
@@ -9810,7 +9602,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 542,
@@ -10018,7 +9810,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 543,
@@ -10031,7 +9823,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 559,
@@ -10044,7 +9836,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 575,
@@ -10057,7 +9849,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 591,
@@ -10070,7 +9862,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 607,
@@ -10083,7 +9875,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 623,
@@ -10096,7 +9888,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 639,
@@ -10109,7 +9901,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 655,
@@ -10122,7 +9914,7 @@
             5
           ],
           "Type": "Surface",
-          "SubType": 2
+          "SubType": 0
         },
         {
           "Id": 671,
@@ -13656,9 +13448,205 @@
     {
       "Id": 11,
       "TypeId": "human",
-      "OriginNodeId": 189,
+      "OriginNodeId": 712,
       "Rotation": "N",
       "PlayerId": 2
+    },
+    {
+      "Id": 14,
+      "TypeId": "car1",
+      "OriginNodeId": 239,
+      "Rotation": "E",
+      "PlayerId": 0
+    },
+    {
+      "Id": 18,
+      "TypeId": "car1",
+      "OriginNodeId": 196,
+      "Rotation": "W",
+      "PlayerId": 0
+    },
+    {
+      "Id": 21,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 655,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 22,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 639,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 23,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 623,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 24,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 607,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 25,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 591,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 26,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 575,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 27,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 559,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 28,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 543,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 29,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 527,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 30,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 525,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 31,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 526,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 32,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 524,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 33,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 523,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 34,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 521,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 35,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 522,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 36,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 519,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 37,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 520,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 38,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 518,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 39,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 517,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 40,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 516,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 41,
+      "TypeId": "PE001_3",
+      "OriginNodeId": 515,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 44,
+      "TypeId": "car1",
+      "OriginNodeId": 741,
+      "Rotation": "E",
+      "PlayerId": 0
+    },
+    {
+      "Id": 45,
+      "TypeId": "car2",
+      "OriginNodeId": 252,
+      "Rotation": "E",
+      "PlayerId": 0
+    },
+    {
+      "Id": 46,
+      "TypeId": "car3",
+      "OriginNodeId": 276,
+      "Rotation": "W",
+      "PlayerId": 0
+    },
+    {
+      "Id": 47,
+      "TypeId": "car3",
+      "OriginNodeId": 399,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 49,
+      "TypeId": "car2",
+      "OriginNodeId": 901,
+      "Rotation": "N",
+      "PlayerId": 0
     }
   ],
   "WaterBodies": [],
@@ -13800,6 +13788,156 @@
       "NodeId": 927,
       "Side": "N",
       "Height": 26
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 244,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 228,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 212,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 196,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 260,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 276,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 292,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 308,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 324,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 340,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 356,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 372,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 388,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 404,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 420,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 436,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 452,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 468,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 484,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 500,
+      "Side": "W",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 179,
+      "Side": "N",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 178,
+      "Side": "N",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 177,
+      "Side": "N",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 176,
+      "Side": "N",
+      "Height": 4
+    },
+    {
+      "TypeId": "BrickWall",
+      "NodeId": 180,
+      "Side": "NW",
+      "Height": 4
     }
   ],
   "Zones": []

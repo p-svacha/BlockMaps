@@ -1,10 +1,5 @@
 Big Features to Add:
 
-add roughness and normal maps to nodeshader with strength slide
-add some noise to hedge material
-
-- sloped curb sides downwards => for dirt path
-
 > add surface option for air nodes
 	> each surface has an option how it's drawn as a ground and/or air node
 	> add all ground surfaces to air nodes too
@@ -19,6 +14,7 @@ add some noise to hedge material
 	> Rework dimensions attribute of entities
 	> Entities can now have a different heigh per node
 	> Car hood has height 1/2, rest height 2/3, width = 2, length = 4/5
+	> Add UseTextures attribute to entity shader and support both modes on created models
 
 (> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes
@@ -110,6 +106,8 @@ add some noise to hedge material
 	> add ui for modifiers
 
 - textures for entities
+
+- sloped curb sides downwards => for dirt path
 
 - doors
 	> open and closeable when standing next to

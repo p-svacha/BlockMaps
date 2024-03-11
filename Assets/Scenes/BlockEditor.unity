@@ -1788,6 +1788,9 @@ MonoBehaviour:
   - {fileID: 3676313996213567880, guid: 84760b41e0fb30243abdd085b37290b1, type: 3}
   - {fileID: 5733067412292867280, guid: a7800a498f3d8d74b92cb2b9c7ff69b5, type: 3}
   - {fileID: 8464747610039907741, guid: 7320757889cdbe34aaf4eb3abd77007a, type: 3}
+  - {fileID: 7891101492167024780, guid: cbdaf7f99e6dd6b40b2b4c8b8efc0ed3, type: 3}
+  - {fileID: 7850068992233850819, guid: 5255de23aaf96f748a82be163c765a2b, type: 3}
+  - {fileID: 8021986298840465171, guid: 28d6e07caf0d91a49991b29822e52c2f, type: 3}
   MovingEntityPresets:
   - {fileID: 3855192531683989928, guid: 4d39e12ff851eed428cca379e128ab21, type: 3}
   - {fileID: 140661124634146974, guid: f7fd59700cd3ef64995ac5e7864cdc68, type: 3}

@@ -269,7 +269,7 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### OVERLAYS #########################################################################
 
-            if (_ShowTileOverlay == 1 && isFacingUpwards == 1)
+            if (_ShowTileOverlay == 1)
             {
                 float adjustedWorldPosX = IN.worldPos.x;
                 if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;

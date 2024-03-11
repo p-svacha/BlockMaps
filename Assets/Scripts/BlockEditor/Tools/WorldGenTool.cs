@@ -109,6 +109,8 @@ namespace WorldEditor
             WorldData data = JsonUtilities.LoadWorld(worldToLoad);
             if (data == null) return;
             Editor.SetWorld(data);
+
+            SaveNameInput.text = worldToLoad;
         }
     }
 }
