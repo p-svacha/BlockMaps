@@ -13,7 +13,7 @@ namespace BlockmapFramework
 
         public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
 
-        public SurfaceNode[,] SurfaceNodes { get; private set; }
+        public GroundNode[,] GroundNodes { get; private set; }
         public List<AirNode>[,] AirNodes { get; private set; }
         public WaterNode[,] WaterNodes { get; private set; }
 
@@ -27,7 +27,7 @@ namespace BlockmapFramework
         private List<Zone> Zones = new List<Zone>();
 
         // Meshes (many types of things like nodes and walls are combined into one mesh per chunk to increase performance)
-        public SurfaceMesh SurfaceMesh;
+        public GroundMesh GroundMesh;
         public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
         public Dictionary<int, WallMesh> WallMeshes;
@@ -46,7 +46,7 @@ namespace BlockmapFramework
             // Init  nodes
             Nodes = new List<BlockmapNode>[Size, Size];
             AirNodes = new List<AirNode>[Size, Size];
-            SurfaceNodes = new SurfaceNode[Size, Size];
+            GroundNodes = new GroundNode[Size, Size];
             WaterNodes = new WaterNode[Size, Size];
 
             for (int x = 0; x < Size; x++)
@@ -65,9 +65,9 @@ namespace BlockmapFramework
             }
 
             // Init meshes
-            GameObject surfaceMeshObject = new GameObject("SurfaceMesh");
-            SurfaceMesh = surfaceMeshObject.AddComponent<SurfaceMesh>();
-            SurfaceMesh.Init(this);
+            GameObject groundMeshObject = new GameObject("GroundMesh");
+            GroundMesh = groundMeshObject.AddComponent<GroundMesh>();
+            GroundMesh.Init(this);
 
             GameObject waterMeshObject = new GameObject("WaterMesh");
             WaterMesh = waterMeshObject.AddComponent<WaterMesh>();
@@ -129,15 +129,15 @@ namespace BlockmapFramework
         /// </summary>
         public void DrawMesh()
         {
-            // Surface mesh
-            SurfaceMesh.Draw();
+            // Ground mesh
+            GroundMesh.Draw();
 
             // Water mesh
             WaterMesh.Draw();
 
             // Meshes per height level
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) Destroy(mesh.gameObject);
-            AirNodeMeshes = AirNodeMeshGenerator.GenerateMeshes(this);
+            AirNodeMeshes = AirNodeMesh.GenerateAirNodeMeshes(this);
 
             foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
@@ -156,7 +156,7 @@ namespace BlockmapFramework
         public void SetVisibility(Actor player)
         {
             // Node visibility
-            SurfaceMesh.SetVisibility(player);
+            GroundMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(player);
@@ -168,13 +168,13 @@ namespace BlockmapFramework
 
         public void ShowGrid(bool show)
         {
-            SurfaceMesh.ShowGrid(show);
+            GroundMesh.ShowGrid(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowGrid(show);
             WaterMesh.ShowGrid(show);
         }
         public void ShowTextures(bool show)
         {
-            SurfaceMesh.ShowTextures(show);
+            GroundMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
@@ -182,7 +182,8 @@ namespace BlockmapFramework
         }
         public void ShowTileBlending(bool show)
         {
-            SurfaceMesh.GetComponent<MeshRenderer>().material.SetFloat("_BlendThreshhold", show ? 0.4f : 0);
+            GroundMesh.ShowTileBlending(show);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTileBlending(show);
         }
 
         public void DrawZoneBorders()
@@ -230,7 +231,7 @@ namespace BlockmapFramework
             float[] zoneBorderColors = combinedBorderColors.Select(x => (float)x).ToArray();
 
             // Pass array to all meshes
-            SurfaceMesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
+            GroundMesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
             WaterMesh.ShowZoneBorders(zoneBorderArray, zoneBorderColors);
         }
@@ -274,21 +275,21 @@ namespace BlockmapFramework
             return GetNodes(localCoordinates.x, localCoordinates.y);
         }
 
-        public List<SurfaceNode> GetAllSurfaceNodes()
+        public List<GroundNode> GetAllGroundNodes()
         {
-            List<SurfaceNode> nodes = new List<SurfaceNode>();
+            List<GroundNode> nodes = new List<GroundNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    nodes.Add(GetSurfaceNode(x,y));
+                    nodes.Add(GetGroundNode(x,y));
             return nodes;
         }
-        public SurfaceNode GetSurfaceNode(int x, int y)
+        public GroundNode GetGroundNode(int x, int y)
         {
-            return SurfaceNodes[x, y];
+            return GroundNodes[x, y];
         }
-        public SurfaceNode GetSurfaceNode(Vector2Int localCoordinates)
+        public GroundNode GetGroundNode(Vector2Int localCoordinates)
         {
-            return GetSurfaceNode(localCoordinates.x, localCoordinates.y);
+            return GetGroundNode(localCoordinates.x, localCoordinates.y);
         }
 
         public List<WaterNode> GetAllWaterNodes()

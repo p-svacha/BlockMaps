@@ -17,7 +17,7 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public override void DrawNodeSurface(World world, BlockmapNode node, MeshBuilder meshBuilder)
+        public override void DrawNode(World world, BlockmapNode node, MeshBuilder meshBuilder)
         {
             NodeMeshGenerator.BuildBorderedNodeSurface(world, node, meshBuilder, ResourceManager.Singleton.Mat_Asphalt, ResourceManager.Singleton.Mat_Cobblestone, 0.05f, 0.05f, 0.2f);
         }

@@ -533,23 +533,23 @@ namespace BlockmapFramework
             if(LocalCoordinates.x + size >= Chunk.Size && LocalCoordinates.y + size >= Chunk.Size)
             {
                 World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y + 1), out Chunk chunk_NE);
-                if(chunk_NE != null) chunk_NE.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y - Chunk.Size), texture, color, size);
+                if(chunk_NE != null) chunk_NE.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y - Chunk.Size), texture, color, size);
 
                 World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
-                if(chunk_E != null) chunk_E.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
+                if(chunk_E != null) chunk_E.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
 
                 World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
-                if(chunk_N != null) chunk_N.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+                if(chunk_N != null) chunk_N.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
             }
             else if (LocalCoordinates.x + size >= Chunk.Size)
             {
                 World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
-                if (chunk_E != null) chunk_E.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
+                if (chunk_E != null) chunk_E.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
             }
             else if (LocalCoordinates.y + size >= Chunk.Size)
             {
                 World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
-                if (chunk_N != null) chunk_N.SurfaceMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+                if (chunk_N != null) chunk_N.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
             }
         }
 
@@ -842,7 +842,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Type.ToString() + WorldCoordinates.ToString() + "h:" + BaseHeight;
+            return Type.ToString() + WorldCoordinates.ToString() + "\nBase Height:" + BaseHeight + "\nSurfaceProperties:" + GetSurfaceProperties().Name;
         }
 
         #endregion
@@ -853,11 +853,11 @@ namespace BlockmapFramework
         {
             switch(data.Type)
             {
-                case NodeType.Surface:
-                    return new SurfaceNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), SurfaceManager.Instance.GetSurface((SurfaceId)data.SubType));
+                case NodeType.Ground:
+                    return new GroundNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), (SurfaceId)data.SubType);
 
                 case NodeType.Air:
-                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height));
+                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), (SurfaceId)data.SubType);
 
                 case NodeType.Water:
                     return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height));

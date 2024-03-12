@@ -112,7 +112,7 @@ namespace BlockmapFramework
             if (!node.IsPassable()) return ImpassableNodeMat;
             return node.Type switch
             {
-                NodeType.Surface => SurfaceNodeMat,
+                NodeType.Ground => SurfaceNodeMat,
                 NodeType.Air => AirNodeMat,
                 NodeType.Water => WaterNodeMat,
                 _ => throw new System.Exception("node type " + node.Type.ToString() + " not handled.")

@@ -1,23 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
 {
     /// <summary>
-    /// A mesh that contains all geometry for all nodes within one height level in a chunk.
+    /// Represents the mesh that has all ground nodes of a single chunk.
     /// </summary>
-    public class AirNodeMesh : ChunkMesh
+    public class GroundMesh : ChunkMesh
     {
-        public int HeightLevel { get; private set; }
-
-        public void Init(Chunk chunk, int level)
+        public void Init(Chunk chunk)
         {
             OnInit(chunk);
 
-            HeightLevel = level;
-            gameObject.layer = chunk.World.Layer_AirNode;
+            gameObject.layer = chunk.World.Layer_SurfaceNode;
+        }
+
+        public override void OnDraw()
+        {
+            // Create surface material submesh so it always has index 0
+            MeshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
+
+            // Draw each node on the mesh builder
+            foreach (GroundNode node in Chunk.GetAllGroundNodes())
+            {
+                // Generate mesh
+                node.Draw(MeshBuilder);
+                node.SetMesh(this);
+            }
         }
 
         public override void OnMeshApplied()
@@ -33,10 +43,10 @@ namespace BlockmapFramework
                 for (int y = 0; y < Chunk.Size; y++)
                 {
                     // Get node
-                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), HeightLevel).OrderBy(x => x.MaxHeight).FirstOrDefault();
+                    GroundNode node = Chunk.GetGroundNode(x, y);
 
                     // Base surface
-                    int surfaceId = node == null ? -1 : (int)node.Surface.Id;
+                    int surfaceId = (int)node.Surface.Id;
                     surfaceArray.Add(surfaceId);
 
                     // Blend for each direction
@@ -49,7 +59,7 @@ namespace BlockmapFramework
             }
 
             // Set blend values for surface material only
-            Material surfaceMaterial = GetComponent<MeshRenderer>().materials[0];
+            Material surfaceMaterial = Renderer.materials[0];
             surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
             surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlendArrays[Direction.W]);
             surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlendArrays[Direction.E]);
@@ -72,7 +82,7 @@ namespace BlockmapFramework
             if (!sourceNode.GetSurface().DoBlend) return false; // No blend on this node
 
             List<BlockmapNode> adjacentNodes = World.GetAdjacentNodes(sourceNode.WorldCoordinates, dir);
-            foreach(BlockmapNode adjNode in adjacentNodes)
+            foreach (BlockmapNode adjNode in adjacentNodes)
             {
                 if (!World.DoAdjacentHeightsMatch(sourceNode, adjNode, dir)) continue;
                 if (adjNode.GetSurface() == null) continue;
@@ -84,85 +94,30 @@ namespace BlockmapFramework
             return false;
         }
 
-
         public override void SetVisibility(Actor player)
         {
-            // Set renderer
-            if(Renderer == null) Renderer = GetComponent<MeshRenderer>();
-
-            // Define visibility array
-            List<float> visibilityArray = new List<float>();
+            // Define surface visibility array based on node visibility
+            List<float> surfaceVisibilityArray = new List<float>();
             for (int x = -1; x <= Chunk.Size; x++)
             {
                 for (int y = -1; y <= Chunk.Size; y++)
                 {
-                    int visibility = 0; // 0 = unexplored
+                    GroundNode targetNode = Chunk.World.GetSurfaceNode(Chunk.GetWorldCoordinates(new Vector2Int(x, y)));
 
-                    Vector2Int localCoordinates = new Vector2Int(x, y);
-                    Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
-
-                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, HeightLevel).ToList();
-
-                    if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
-                    else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
-
-                    visibilityArray.Add(visibility);
+                    int visibility;
+                    if (targetNode != null && targetNode.IsVisibleBy(player)) visibility = 2; // 2 = visible
+                    else if (targetNode != null && targetNode.IsExploredBy(player)) visibility = 1; // 1 = fog of war
+                    else visibility = 0; // 0 = unexplored
+                    surfaceVisibilityArray.Add(visibility);
                 }
             }
 
-
-            // Pass visibility array to shader
+            // Set visibility in all surface mesh materials
             for (int i = 0; i < Renderer.materials.Length; i++)
             {
                 Renderer.materials[i].SetFloat("_FullVisibility", 0);
-                Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
             }
         }
-
-        #region Generator
-
-        /// <summary>
-        /// Generates all AirNodeMeshes for a single chunk. (one per height level)
-        /// </summary>
-        public static Dictionary<int, AirNodeMesh> GenerateAirNodeMeshes(Chunk chunk)
-        {
-            Dictionary<int, AirNodeMesh> meshes = new Dictionary<int, AirNodeMesh>();
-
-            for (int heightLevel = 0; heightLevel < World.MAX_HEIGHT; heightLevel++)
-            {
-                List<AirNode> nodesToDraw = chunk.GetAirNodes(heightLevel);
-                if (nodesToDraw.Count == 0) continue;
-
-                // Generate mesh
-                GameObject meshObject = new GameObject("AirNodeMesh_" + heightLevel);
-                AirNodeMesh mesh = meshObject.AddComponent<AirNodeMesh>();
-                mesh.Init(chunk, heightLevel);
-
-                MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach (AirNode airNode in nodesToDraw)
-                {
-                    airNode.Draw(meshBuilder);
-                    airNode.SetMesh(mesh);
-                }
-                meshBuilder.ApplyMesh();
-
-                // Set chunk values for all materials
-                MeshRenderer renderer = mesh.GetComponent<MeshRenderer>();
-                for (int i = 0; i < renderer.materials.Length; i++)
-                {
-                    renderer.materials[i].SetFloat("_ChunkSize", chunk.Size);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesX", chunk.Coordinates.x);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesY", chunk.Coordinates.y);
-                }
-
-                meshes.Add(heightLevel, mesh);
-
-                mesh.OnMeshApplied();
-            }
-
-            return meshes;
-        }
-
-        #endregion
     }
 }

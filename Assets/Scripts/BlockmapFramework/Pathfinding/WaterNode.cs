@@ -10,11 +10,11 @@ namespace BlockmapFramework
         public override bool IsSolid => false;
 
         public WaterBody WaterBody { get; private set; }
-        public SurfaceNode SurfaceNode { get; private set; }
+        public GroundNode SurfaceNode { get; private set; }
 
         public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height) { }
 
-        public void Init(WaterBody waterBody, SurfaceNode surfaceNode)
+        public void Init(WaterBody waterBody, GroundNode surfaceNode)
         {
             WaterBody = waterBody;
             SurfaceNode = surfaceNode;
@@ -24,7 +24,7 @@ namespace BlockmapFramework
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
             // Always connect to diagonal shore
-            if(adjNode is SurfaceNode surfaceNode)
+            if(adjNode is GroundNode surfaceNode)
             {
                 if(surfaceNode.WaterNode != null && !surfaceNode.IsCenterUnderWater) return true;
             }

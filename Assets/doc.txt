@@ -1,5 +1,9 @@
 Big Features to Add:
 
+blending ground to airnode
+surface painting on airnodes
+cliff wall
+
 > add surface option for air nodes
 	> each surface has an option how it's drawn as a ground and/or air node
 	> add all ground surfaces to air nodes too
@@ -7,14 +11,22 @@ Big Features to Add:
 	- add property how many nodes below an airnode blocks (maybe based on surface)
 	- remove air slope tool
 
+canplaceprocenitity height
+
 - rework how player colors are passed to chunkmeshes for rendering zone borders
 	> always pass to chunkmesh in setvisiblity
 
 - add some car models
 	> Rework dimensions attribute of entities
+		> Add new EntityShape class/struct
+		> Each node within dimensions has a defined hitbox that can be [Full/None/Wall_N/E/S/W]
 	> Entities can now have a different heigh per node
 	> Car hood has height 1/2, rest height 2/3, width = 2, length = 4/5
 	> Add UseTextures attribute to entity shader and support both modes on created models
+	> Implement entity nodes, allow car roof
+		> new metal surface
+	> make a list of material indexes colorable in editor
+		> save color in entityData
 
 (> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes
@@ -53,6 +65,8 @@ Big Features to Add:
 	> 5. parcel generation
 	> 6. player base generation
 
+- decouple/add entity visibility from node visiblity
+
 - Implement some line features for new map gen system
 	> road
 	> rail track
@@ -86,6 +100,9 @@ Big Features to Add:
 	> Huge: 17 chunks
 	> Enormous: 20 chunks
 	> Random
+
+- Water flowing in one direction
+- Waterfall
 
 - Slopes use more action points
 	> downwards * 1.25
@@ -239,8 +256,6 @@ Big Features to Add:
 
 
 -------- RETIRED IDEAS ------------
-
-- decouple entity visibility from node visiblity
 
 - impelemnt SurfaceAirNodes:	
 	> Rendered like surface nodes (1x1x1 in size)

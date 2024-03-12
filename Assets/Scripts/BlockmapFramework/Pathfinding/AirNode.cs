@@ -11,16 +11,16 @@ namespace BlockmapFramework
         public override NodeType Type => NodeType.Air;
         public override bool IsSolid => true;
 
-        public AirNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height)
+        public AirNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height)
         {
-            Surface = SurfaceManager.Instance.GetSurface(SurfaceId.Concrete);
+            Surface = SurfaceManager.Instance.GetSurface(surfaceId);
         }
 
         #region Draw
 
         public override void Draw(MeshBuilder meshBuilder)
         {
-            NodeMeshGenerator.BuildBorderedNodeSurface(World, this, meshBuilder, ResourceManager.Singleton.Mat_ConcreteDark, ResourceManager.Singleton.Mat_Concrete2, 0.1f, 0.1f, 0.1f);
+            Surface.DrawNode(World, this, meshBuilder);
         }
 
         #endregion
@@ -35,7 +35,7 @@ namespace BlockmapFramework
         public override Surface GetSurface() => Surface;
         public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
 
-        public override int GetSubType() => 0;
+        public override int GetSubType() => (int)Surface.Id;
 
         #endregion
     }

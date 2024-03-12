@@ -55,8 +55,8 @@ namespace WorldEditor
         {
             if (World.HoveredSurfaceNode != null)
             {
-                List<SurfaceNode> nodes = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize).Where(x => x.Surface.Id != SelectedSurface).ToList();
-                foreach (SurfaceNode node in nodes) node.SetSurface(SelectedSurface);
+                List<GroundNode> nodes = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize).Where(x => x.Surface.Id != SelectedSurface).ToList();
+                foreach (GroundNode node in nodes) node.SetSurface(SelectedSurface);
 
                 // Manually redraw world in one step
                 World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
@@ -69,12 +69,12 @@ namespace WorldEditor
             }
         }
 
-        public override void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode)
+        public override void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
         {
             // Hide overlay from all chunks around previously hovered node
             if (oldNode != null)
                 foreach (Chunk chunk in World.GetChunks(oldNode.Chunk.Coordinates, 2, 2))
-                    chunk.SurfaceMesh.ShowOverlay(false);
+                    chunk.GroundMesh.ShowOverlay(false);
         }
 
         public override void OnDeselect()
@@ -82,7 +82,7 @@ namespace WorldEditor
             // Hide overlay from all chunks around previously hovered node
             if (World.HoveredSurfaceNode != null)
                 foreach (Chunk chunk in World.GetChunks(World.HoveredSurfaceNode.Chunk.Coordinates, 2, 2))
-                    chunk.SurfaceMesh.ShowOverlay(false);
+                    chunk.GroundMesh.ShowOverlay(false);
         }
     }
 }

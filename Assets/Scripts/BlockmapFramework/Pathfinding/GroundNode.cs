@@ -8,13 +8,13 @@ using static BlockmapFramework.BlockmapNode;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// Represents one tile on the surface of the terrain.
+    /// Represents a ground node (the lowest node on that world coordinate) 
     /// </summary>
-    public class SurfaceNode : BlockmapNode
+    public class GroundNode : BlockmapNode
     {
         public Surface Surface { get; private set; }
 
-        public override NodeType Type => NodeType.Surface;
+        public override NodeType Type => NodeType.Ground;
         public override bool IsSolid => true;
 
         /// <summary>
@@ -22,9 +22,9 @@ namespace BlockmapFramework
         /// </summary>
         public WaterNode WaterNode { get; private set; }
 
-        public SurfaceNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, Surface surface) : base(world, chunk, id, localCoordinates, height)
+        public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height)
         {
-            Surface = surface;
+            Surface = SurfaceManager.Instance.GetSurface(surfaceId);
         }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
@@ -45,7 +45,7 @@ namespace BlockmapFramework
 
         private void DrawSurface(MeshBuilder meshBuilder)
         {
-            Surface.DrawNodeSurface(World, this, meshBuilder);
+            Surface.DrawNode(World, this, meshBuilder);
         }
 
         private void DrawSides(MeshBuilder meshBuilder)
@@ -58,7 +58,7 @@ namespace BlockmapFramework
         }
         private void DrawEastSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            SurfaceNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
+            GroundNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -97,7 +97,7 @@ namespace BlockmapFramework
         }
         private void DrawSouthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            SurfaceNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
+            GroundNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -136,7 +136,7 @@ namespace BlockmapFramework
         }
         private void DrawWestSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            SurfaceNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
+            GroundNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -175,7 +175,7 @@ namespace BlockmapFramework
         }
         private void DrawNorthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            SurfaceNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
+            GroundNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;

@@ -66,7 +66,7 @@ namespace CaptureTheFlag
         private void ApplyHeightmap()
         {
 
-            foreach (SurfaceNode n in GeneratedWorld.GetAllSurfaceNodes())
+            foreach (GroundNode n in GeneratedWorld.GetAllSurfaceNodes())
             {
                 Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -175,7 +175,7 @@ namespace CaptureTheFlag
             while (attempts < targetAttempts)
             {
                 attempts++;
-                SurfaceNode n = GeneratedWorld.GetRandomSurfaceNode();
+                GroundNode n = GeneratedWorld.GetRandomSurfaceNode();
                 WaterBody b = GeneratedWorld.CanAddWater(n, 3);
                 if (b != null)
                 {
@@ -203,14 +203,14 @@ namespace CaptureTheFlag
                 attempts++;
 
                 // Take a random surface node, direction and bridge height
-                SurfaceNode startNode = GeneratedWorld.GetRandomSurfaceNode();
+                GroundNode startNode = GeneratedWorld.GetRandomSurfaceNode();
                 Direction dir1 = HelperFunctions.GetRandomSideDirection();
                 Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
                 int bridgeHeight = startNode.MaxHeight + Random.Range(1, 7);
                 List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
 
                 // Go into first direction until the bridge ends
-                SurfaceNode nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir1);
+                GroundNode nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir1);
                 bool isDone = false;
                 bool isValid = false;
                 while(!isDone)
@@ -287,7 +287,7 @@ namespace CaptureTheFlag
                 if (bridgeCoordinates.Any(x => !GeneratedWorld.CanBuildAirPath(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
                 foreach (Vector2Int coords in bridgeCoordinates)
                 {
-                    GeneratedWorld.BuildAirPath(coords, bridgeHeight);
+                    GeneratedWorld.BuildAirPath(coords, bridgeHeight, SurfaceId.Concrete);
                 }
                 numBridges++;
             }

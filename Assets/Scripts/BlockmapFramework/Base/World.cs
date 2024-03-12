@@ -88,7 +88,7 @@ namespace BlockmapFramework
         public Vector2Int HoveredWorldCoordinates { get; private set; }       
         public BlockmapNode HoveredNode { get; private set; }
         public AirNode HoveredAirNode { get; private set; }
-        public SurfaceNode HoveredSurfaceNode { get; private set; }
+        public GroundNode HoveredSurfaceNode { get; private set; }
         public Entity HoveredEntity { get; private set; }
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
@@ -105,7 +105,7 @@ namespace BlockmapFramework
         private float HoverEdgeSensitivity = 0.3f; // sensitivity for NodeHoverMode
 
         public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
-        public event System.Action<SurfaceNode, SurfaceNode> OnHoveredSurfaceNodeChanged;
+        public event System.Action<GroundNode, GroundNode> OnHoveredSurfaceNodeChanged;
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
         public event System.Action<Entity, Entity> OnHoveredEntityChanged;
 
@@ -285,8 +285,8 @@ namespace BlockmapFramework
             BlockmapNode oldHoveredNode = HoveredNode;
             BlockmapNode newHoveredNode = null;
 
-            SurfaceNode oldHoveredSurfaceNode = HoveredSurfaceNode;
-            SurfaceNode newHoveredSurfaceNode = null;
+            GroundNode oldHoveredSurfaceNode = HoveredSurfaceNode;
+            GroundNode newHoveredSurfaceNode = null;
 
             AirNode oldHoveredAirNode = HoveredAirNode;
             AirNode newHoveredAirNode = null;
@@ -536,7 +536,7 @@ namespace BlockmapFramework
 
             // Chunk registry
             node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
-            if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = surfaceNode;
+            if (node is GroundNode surfaceNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = surfaceNode;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
             else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
         }
@@ -554,7 +554,7 @@ namespace BlockmapFramework
 
             // Chunk registry
             node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
-            if (node is SurfaceNode surfaceNode) node.Chunk.SurfaceNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
+            if (node is GroundNode surfaceNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
         }
@@ -646,11 +646,11 @@ namespace BlockmapFramework
             UpdateNavmeshDelayed(nodesToUpdate);
         }
 
-        public bool CanChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
+        public bool CanChangeHeight(GroundNode node, Direction mode, bool isIncrease)
         {
             return node.CanChangeHeight(mode, isIncrease);
         }
-        public void ChangeHeight(SurfaceNode node, Direction mode, bool isIncrease)
+        public void ChangeHeight(GroundNode node, Direction mode, bool isIncrease)
         {
             node.ChangeHeight(mode, isIncrease);
 
@@ -663,7 +663,7 @@ namespace BlockmapFramework
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
-            SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
+            GroundNode surfaceNode = chunk.GetGroundNode(localCoordinates);
 
             // Check if an entity or wall below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
@@ -691,12 +691,12 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildAirPath(Vector2Int worldCoordinates, int height)
+        public void BuildAirPath(Vector2Int worldCoordinates, int height, SurfaceId surface)
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height));
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), surface);
             RegisterNode(newNode);
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
@@ -707,7 +707,7 @@ namespace BlockmapFramework
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
-            SurfaceNode surfaceNode = chunk.GetSurfaceNode(localCoordinates);
+            GroundNode surfaceNode = chunk.GetGroundNode(localCoordinates);
 
             // Check if an entity or wall below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
@@ -737,7 +737,7 @@ namespace BlockmapFramework
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir));
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Concrete);
             RegisterNode(newNode);
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
@@ -760,14 +760,6 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
-        public void SetSurface(SurfaceNode node, SurfaceId surface)
-        {
-            if (node.Surface.Id == surface) return;
-
-            node.SetSurface(surface);
-            RedrawNodesAround(node.WorldCoordinates);
-        }
-
         public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation)
         {
             HashSet<BlockmapNode> occupiedNodes = entityPrefab.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
@@ -783,7 +775,7 @@ namespace BlockmapFramework
             {
                 // Check if the place position is on water
                 if (occupiedNode is WaterNode waterNode && placePos.y <= waterNode.WaterBody.WaterSurfaceWorldHeight) return false;
-                if (occupiedNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null &&  placePos.y <= surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
+                if (occupiedNode is GroundNode surfaceNode && surfaceNode.WaterNode != null &&  placePos.y <= surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
 
                 // Check if anything above that blocks space
                 int headSpace = occupiedNode.GetFreeHeadSpace(Direction.None);
@@ -868,16 +860,16 @@ namespace BlockmapFramework
             entity.Owner.Entities.Add(entity);
         }
 
-        public WaterBody CanAddWater(SurfaceNode node, int maxDepth) // returns null when cannot
+        public WaterBody CanAddWater(GroundNode node, int maxDepth) // returns null when cannot
         {
             int shoreHeight = node.BaseHeight + 1;
             WaterBody waterBody = new WaterBody(); // dummy water body to store data that can later be used to create a real water body
             waterBody.ShoreHeight = shoreHeight;
-            waterBody.CoveredNodes = new List<SurfaceNode>();
+            waterBody.CoveredNodes = new List<GroundNode>();
 
-            List<System.Tuple<SurfaceNode, Direction>> checkedNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that were already checked for water expansion in one direction
-            List<System.Tuple<SurfaceNode, Direction>> expansionNodes = new List<System.Tuple<SurfaceNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
-            expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(node, Direction.None));
+            List<System.Tuple<GroundNode, Direction>> checkedNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that were already checked for water expansion in one direction
+            List<System.Tuple<GroundNode, Direction>> expansionNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
+            expansionNodes.Add(new System.Tuple<GroundNode, Direction>(node, Direction.None));
 
             // Check the following:
             // > If the node goes deeper than maxDepth, return false
@@ -885,8 +877,8 @@ namespace BlockmapFramework
             // > If the node is above shoreDepth, do nothing
             while (expansionNodes.Count > 0)
             {
-                System.Tuple<SurfaceNode, Direction> check = expansionNodes[0];
-                SurfaceNode checkNode = check.Item1;
+                System.Tuple<GroundNode, Direction> check = expansionNodes[0];
+                GroundNode checkNode = check.Item1;
                 Direction checkDir = check.Item2;
                 expansionNodes.RemoveAt(0);
 
@@ -916,10 +908,10 @@ namespace BlockmapFramework
 
                     waterBody.CoveredNodes.Add(checkNode);
 
-                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
-                    if (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
-                    if (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
-                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<SurfaceNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
+                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentSurfaceNode(checkNode, Direction.W), Direction.E));
                 }
                 else { } // above water
             }
@@ -930,7 +922,7 @@ namespace BlockmapFramework
         {
             // Create a new water nodes for each covered surface node
             List<WaterNode> waterNodes = new List<WaterNode>();
-            foreach (SurfaceNode node in data.CoveredNodes)
+            foreach (GroundNode node in data.CoveredNodes)
             {
                 WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight));
                 waterNodes.Add(waterNode);
@@ -961,10 +953,10 @@ namespace BlockmapFramework
 
             // Get chunks that will had nodes covered in water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
-            foreach (SurfaceNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
+            foreach (GroundNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
 
             // Remove water node reference from all covered surface nodes
-            foreach (SurfaceNode node in water.CoveredNodes) node.SetWaterNode(null);
+            foreach (GroundNode node in water.CoveredNodes) node.SetWaterNode(null);
 
             // Deregister deleted water nodes
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
@@ -1318,28 +1310,28 @@ namespace BlockmapFramework
             return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
 
-        public List<SurfaceNode> GetAllSurfaceNodes()
+        public List<GroundNode> GetAllSurfaceNodes()
         {
-            List<SurfaceNode> nodes = new List<SurfaceNode>();
-            foreach (Chunk c in Chunks.Values) nodes.AddRange(c.GetAllSurfaceNodes());
+            List<GroundNode> nodes = new List<GroundNode>();
+            foreach (Chunk c in Chunks.Values) nodes.AddRange(c.GetAllGroundNodes());
             return nodes;
         }
-        public SurfaceNode GetSurfaceNode(Vector2Int worldCoordinates)
+        public GroundNode GetSurfaceNode(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;
 
             Chunk chunk = GetChunk(worldCoordinates);
-            return chunk.GetSurfaceNode(chunk.GetLocalCoordinates(worldCoordinates));
+            return chunk.GetGroundNode(chunk.GetLocalCoordinates(worldCoordinates));
         }
-        public List<SurfaceNode> GetSurfaceNodes(Vector2Int worldCoordinates, int rangeEast, int rangeNorth)
+        public List<GroundNode> GetSurfaceNodes(Vector2Int worldCoordinates, int rangeEast, int rangeNorth)
         {
-            List<SurfaceNode> nodes = new List<SurfaceNode>();
+            List<GroundNode> nodes = new List<GroundNode>();
             for(int x = 0; x < rangeEast; x++)
             {
                 for(int y = 0; y < rangeNorth; y++)
                 {
                     Vector2Int coordinates = worldCoordinates + new Vector2Int(x, y);
-                    SurfaceNode node = GetSurfaceNode(coordinates);
+                    GroundNode node = GetSurfaceNode(coordinates);
                     if (node != null) nodes.Add(node);
                 }
             }
@@ -1386,11 +1378,11 @@ namespace BlockmapFramework
             Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(worldCoordinates, dir);
             return GetNodes(targetCoordinates);
         }
-        public SurfaceNode GetAdjacentSurfaceNode(Vector2Int worldCoordinates, Direction dir)
+        public GroundNode GetAdjacentSurfaceNode(Vector2Int worldCoordinates, Direction dir)
         {
             return GetSurfaceNode(GetWorldCoordinatesInDirection(worldCoordinates, dir));
         }
-        public SurfaceNode GetAdjacentSurfaceNode(BlockmapNode node, Direction dir)
+        public GroundNode GetAdjacentSurfaceNode(BlockmapNode node, Direction dir)
         {
             return GetAdjacentSurfaceNode(node.WorldCoordinates, dir);
         }
@@ -1447,7 +1439,7 @@ namespace BlockmapFramework
                 Transform objectHit = hit.transform;
 
                 // We hit the surface mesh we are looking for
-                if(node.Type == NodeType.Surface && objectHit.gameObject.layer == Layer_SurfaceNode)
+                if(node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_SurfaceNode)
                 {
                     Vector3 hitPosition = hit.point;
                     return Mathf.Max(hitPosition.y, node.BaseWorldHeight);
@@ -1478,14 +1470,14 @@ namespace BlockmapFramework
             return GetWorldCoordinates(worldPosition2d) == node.WorldCoordinates;
         }
 
-        public SurfaceNode GetRandomSurfaceNode()
+        public GroundNode GetRandomSurfaceNode()
         {
             List<Chunk> candidateChunks = Chunks.Values.ToList();
             Chunk chosenChunk = candidateChunks[Random.Range(0, candidateChunks.Count)];
 
             int x = Random.Range(0, ChunkSize);
             int y = Random.Range(0, ChunkSize);
-            return chosenChunk.GetSurfaceNode(x, y);
+            return chosenChunk.GetGroundNode(x, y);
         }
         public BlockmapNode GetRandomPassableNode(Entity entity) // very not performant
         {

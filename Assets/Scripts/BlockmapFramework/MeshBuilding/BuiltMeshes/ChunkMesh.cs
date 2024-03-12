@@ -60,6 +60,11 @@ namespace BlockmapFramework
             for (int i = 0; i < Renderer.materials.Length; i++)
                 Renderer.materials[i].SetFloat("_ShowGrid", show ? 1 : 0);
         }
+        public void ShowTileBlending(bool show)
+        {
+            for (int i = 0; i < Renderer.materials.Length; i++)
+                Renderer.materials[i].SetFloat("_BlendThreshhold", show ? 0.4f : 0);
+        }
 
         public void ShowOverlay(bool show)
         {

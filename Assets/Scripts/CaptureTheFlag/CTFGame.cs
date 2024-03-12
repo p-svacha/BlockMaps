@@ -310,7 +310,7 @@ namespace CaptureTheFlag
             foreach (BlockmapNode node in HighlightedNodes)
             {
                 node.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
-                if (node is SurfaceNode surfaceNode && surfaceNode.WaterNode != null) // Also highlight waternodes on top of surface nodes
+                if (node is GroundNode surfaceNode && surfaceNode.WaterNode != null) // Also highlight waternodes on top of surface nodes
                 {
                     surfaceNode.WaterNode.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
                     addedNodes.Add(surfaceNode.WaterNode);

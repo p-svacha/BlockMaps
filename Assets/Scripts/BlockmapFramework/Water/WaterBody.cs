@@ -13,7 +13,7 @@ namespace BlockmapFramework
         /// </summary>
         public int ShoreHeight;
         public List<WaterNode> WaterNodes;
-        public List<SurfaceNode> CoveredNodes;
+        public List<GroundNode> CoveredNodes;
 
         public int MinX { get; private set; }
         public int MaxX { get; private set; }
@@ -21,12 +21,12 @@ namespace BlockmapFramework
         public int MaxY { get; private set; }
 
         public WaterBody() { }
-        public WaterBody(int id, int shoreHeight, List<WaterNode> waterNodes, List<SurfaceNode> coveredNodes)
+        public WaterBody(int id, int shoreHeight, List<WaterNode> waterNodes, List<GroundNode> coveredNodes)
         {
             Id = id;
             ShoreHeight = shoreHeight;
             WaterNodes = new List<WaterNode>(waterNodes);
-            CoveredNodes = new List<SurfaceNode>(coveredNodes);
+            CoveredNodes = new List<GroundNode>(coveredNodes);
 
             // Init references
             for (int i = 0; i < waterNodes.Count; i++) WaterNodes[i].Init(this, coveredNodes[i]);
@@ -48,7 +48,7 @@ namespace BlockmapFramework
 
         public static WaterBody Load(World world, WaterBodyData data)
         {
-            return new WaterBody(data.Id, data.ShoreHeight, data.WaterNodes.Select(x => world.GetNode(x) as WaterNode).ToList(), data.CoveredNodes.Select(x => world.GetNode(x) as SurfaceNode).ToList());
+            return new WaterBody(data.Id, data.ShoreHeight, data.WaterNodes.Select(x => world.GetNode(x) as WaterNode).ToList(), data.CoveredNodes.Select(x => world.GetNode(x) as GroundNode).ToList());
         }
 
         public WaterBodyData Save()

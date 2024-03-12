@@ -17,7 +17,7 @@ namespace WorldEditor
 
         private WaterBody CurrentWaterBody;
         private GameObject WaterPreview;
-        private Dictionary<SurfaceNode, Dictionary<int, WaterBody>> Cache;
+        private Dictionary<GroundNode, Dictionary<int, WaterBody>> Cache;
 
         [Header("Elements")]
         public TMP_InputField DepthInput;
@@ -27,7 +27,7 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            Cache = new Dictionary<SurfaceNode, Dictionary<int, WaterBody>>();
+            Cache = new Dictionary<GroundNode, Dictionary<int, WaterBody>>();
 
             WaterPreview = new GameObject("Water preview");
             WaterPreview.gameObject.SetActive(false);
@@ -75,7 +75,7 @@ namespace WorldEditor
                 //Debug.Log("Water on " + coveredNodes.Count + " nodes: " + s);
 
                 // Update Cache
-                foreach (SurfaceNode coveredNode in CurrentWaterBody.CoveredNodes)
+                foreach (GroundNode coveredNode in CurrentWaterBody.CoveredNodes)
                 {
                     if (coveredNode.BaseHeight != World.HoveredSurfaceNode.BaseHeight) continue; // only add nodes to cache with same base height
                     if (!Cache.ContainsKey(coveredNode)) Cache.Add(coveredNode, new Dictionary<int, WaterBody>());

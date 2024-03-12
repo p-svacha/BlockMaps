@@ -11,6 +11,7 @@ namespace BlockmapFramework
     public abstract class SurfaceProperties
     {
         public abstract SurfacePropertyId Id { get; }
+        public abstract string Name { get; }
         public abstract float SpeedModifier { get; }
     }
 }

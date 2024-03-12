@@ -200,7 +200,7 @@ namespace WorldEditor
             TileInfoText.text = text;
         }
 
-        private void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode)
+        private void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
         {
             CurrentTool.OnHoveredSurfaceNodeChanged(oldNode, newNode);
         }

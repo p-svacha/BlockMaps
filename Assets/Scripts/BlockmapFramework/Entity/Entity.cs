@@ -513,7 +513,7 @@ namespace BlockmapFramework
                 }
 
                 // Check if we hit the waterbody that covers the node. if so => visible
-                if (hit.transform.gameObject.layer == World.Layer_Water && targetNode is SurfaceNode _surfaceNode)
+                if (hit.transform.gameObject.layer == World.Layer_Water && targetNode is GroundNode _surfaceNode)
                 {
                     if (_surfaceNode.WaterNode != null && World.GetWaterNode(hitWorldCoordinates).WaterBody == _surfaceNode.WaterNode.WaterBody) return VisionType.Visible;
                 }
@@ -527,7 +527,7 @@ namespace BlockmapFramework
             }
 
             // If the node has a water body, shoot a ray at the water surface as well
-            if (targetNode is SurfaceNode surfaceNode && surfaceNode.WaterNode != null)
+            if (targetNode is GroundNode surfaceNode && surfaceNode.WaterNode != null)
             {
                 Vector3 targetPos = new Vector3(nodeCenter.x, surfaceNode.WaterNode.WaterBody.WaterSurfaceWorldHeight, nodeCenter.z);
                 RaycastHit? waterHit = Look(targetPos);

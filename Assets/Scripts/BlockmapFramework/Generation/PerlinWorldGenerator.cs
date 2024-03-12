@@ -37,7 +37,7 @@ namespace BlockmapFramework
 
             else if (GenerationStep == 1) // Adjust height of all nodes
             {
-                foreach (SurfaceNode n in GeneratedWorld.GetAllSurfaceNodes())
+                foreach (GroundNode n in GeneratedWorld.GetAllSurfaceNodes())
                 {
                     Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -55,7 +55,7 @@ namespace BlockmapFramework
 
             else if (GenerationStep == 2) // Surface
             {
-                foreach (SurfaceNode n in GeneratedWorld.GetAllSurfaceNodes())
+                foreach (GroundNode n in GeneratedWorld.GetAllSurfaceNodes())
                 {
                     if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceId.Sand);
                 }

@@ -13,12 +13,28 @@ namespace WorldEditor
 
         private GameObject BuildPreview;
         private int BuildHeight;
+        private SurfaceId SelectedSurface;
+
+        [Header("Elements")]
+        public UI_SelectionPanel SelectionPanel;
 
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
 
             BuildHeight = 5;
+
+            SelectionPanel.Clear();
+            foreach (Surface s in SurfaceManager.Instance.GetAllSurfaces())
+            {
+                SelectionPanel.AddElement(null, s.Color, s.Name, () => SelectSurface(s.Id));
+            }
+            SelectionPanel.SelectFirstElement();
+        }
+
+        public void SelectSurface(SurfaceId surface)
+        {
+            SelectedSurface = surface;
         }
 
         public override void UpdateTool()
@@ -45,15 +61,18 @@ namespace WorldEditor
 
         private void HandleInputs()
         {
-            // Change height
-            if (Input.GetKeyDown(KeyCode.R)) SetHeight(BuildHeight + 1);
-            if (Input.GetKeyDown(KeyCode.F)) SetHeight(BuildHeight - 1);
+            // Ctrl + mouse wheel: change height
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && BuildHeight > 1) BuildHeight--;
+                if (Input.mouseScrollDelta.y > 0 && BuildHeight < World.MAX_HEIGHT - 1) BuildHeight++;
+            }
         }
 
         public override void HandleLeftClick()
         {
             if (World.HoveredNode != null && World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight))
-                World.BuildAirPath(World.HoveredWorldCoordinates, BuildHeight);
+                World.BuildAirPath(World.HoveredWorldCoordinates, BuildHeight, SelectedSurface);
         }
 
         public override void HandleRightClick()
@@ -71,12 +90,6 @@ namespace WorldEditor
         {
             GameObject.Destroy(BuildPreview);
             BuildPreview = null;
-        }
-
-        private void SetHeight(int value)
-        {
-            BuildHeight = value;
-            BuildHeight = Mathf.Clamp(BuildHeight, 0, World.MAX_HEIGHT);
         }
     }
 }

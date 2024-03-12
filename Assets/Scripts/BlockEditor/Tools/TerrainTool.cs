@@ -65,13 +65,13 @@ namespace WorldEditor
             {
                 if (World.HoveredSurfaceNode != null)
                 {
-                    List<SurfaceNode> nodesInArea = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+                    List<GroundNode> nodesInArea = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
 
                     int minHeight = nodesInArea.Min(x => x.BaseHeight);
 
-                    List<SurfaceNode> affectedNodes = nodesInArea.Where(x => x.BaseHeight == minHeight && x.CanChangeHeight(Direction.None, isIncrease: true)).ToList();
+                    List<GroundNode> affectedNodes = nodesInArea.Where(x => x.BaseHeight == minHeight && x.CanChangeHeight(Direction.None, isIncrease: true)).ToList();
 
-                    foreach (SurfaceNode node in affectedNodes)
+                    foreach (GroundNode node in affectedNodes)
                     {
                         node.ChangeHeight(Direction.None, isIncrease: true);
                     }
@@ -97,13 +97,13 @@ namespace WorldEditor
             {
                 if (World.HoveredSurfaceNode != null)
                 {
-                    List<SurfaceNode> nodesInArea = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+                    List<GroundNode> nodesInArea = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
 
                     int maxHeight = nodesInArea.Max(x => x.MaxHeight);
 
-                    List<SurfaceNode> affectedNodes = nodesInArea.Where(x => x.MaxHeight == maxHeight && x.CanChangeHeight(Direction.None, isIncrease: false)).ToList();
+                    List<GroundNode> affectedNodes = nodesInArea.Where(x => x.MaxHeight == maxHeight && x.CanChangeHeight(Direction.None, isIncrease: false)).ToList();
 
-                    foreach (SurfaceNode node in affectedNodes)
+                    foreach (GroundNode node in affectedNodes)
                     {
                         node.ChangeHeight(Direction.None, isIncrease: false);
                     }
@@ -116,12 +116,12 @@ namespace WorldEditor
             }
         }
 
-        public override void OnHoveredSurfaceNodeChanged(SurfaceNode oldNode, SurfaceNode newNode)
+        public override void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
         {
             // Hide overlay from all chunks around previously hovered node
             if(oldNode != null)
                 foreach (Chunk chunk in World.GetChunks(oldNode.Chunk.Coordinates, 2, 2)) 
-                    chunk.SurfaceMesh.ShowOverlay(false);
+                    chunk.GroundMesh.ShowOverlay(false);
         }
 
         public override void OnDeselect()
@@ -129,7 +129,7 @@ namespace WorldEditor
             // Hide overlay from all chunks around previously hovered node
             if (World.HoveredSurfaceNode != null)
                 foreach (Chunk chunk in World.GetChunks(World.HoveredSurfaceNode.Chunk.Coordinates, 2, 2))
-                    chunk.SurfaceMesh.ShowOverlay(false);
+                    chunk.GroundMesh.ShowOverlay(false);
         }
     }
 }
