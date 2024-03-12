@@ -43,6 +43,7 @@ namespace BlockmapFramework
         [Header("Thumbnails")]
         public Sprite Thumbnail_Brickwall;
         public Sprite Thumbnail_WoodenFence;
+        public Sprite Thumbnail_CliffWall;
 
         public Sprite Thumbnail_Hedge;
 

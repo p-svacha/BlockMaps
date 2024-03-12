@@ -7,6 +7,7 @@ namespace BlockmapFramework
     public enum WallTypeId
     {
         BrickWall,
-        WoodenFence
+        WoodenFence,
+        CliffWall
     }
 }

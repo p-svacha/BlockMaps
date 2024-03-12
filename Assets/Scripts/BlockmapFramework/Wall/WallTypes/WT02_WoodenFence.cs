@@ -4,12 +4,13 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WoodenFence : WallType
+    public class WT02_WoodenFence : WallType
     {
         public override WallTypeId Id => WallTypeId.WoodenFence;
         public override string Name => "Wooden Fence";
         public override int MaxHeight => 1;
         public override bool FollowSlopes => true;
+        public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => false;
         public override Sprite PreviewSprite => ResourceManager.Singleton.Thumbnail_WoodenFence;
 
@@ -34,7 +35,7 @@ namespace BlockmapFramework
 
         public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Wood, isPreview));
 
             // Poles
             float poleStep = 1f / NUM_POLES;
@@ -48,7 +49,7 @@ namespace BlockmapFramework
                 float dimZ = POLE_WIDTH;
                 Vector3 polePos = new Vector3(startX, startY, startZ);
                 Vector3 poleDims = new Vector3(dimX, dimY, dimZ);
-                BuildCube(node, side, meshBuilder, submesh, polePos, poleDims);
+                meshBuilder.BuildCube(node, side, submesh, polePos, poleDims, FollowSlopes);
             }
 
             // Cross brace
@@ -60,11 +61,11 @@ namespace BlockmapFramework
             float cb_dimZ = CROSS_BRACE_WIDTH;
             Vector3 cbPos = new Vector3(cb_x, cb_y, cb_z);
             Vector3 cbDims = new Vector3(cb_dimX, cb_dimY, cb_dimZ);
-            BuildCube(node, side, meshBuilder, submesh, cbPos, cbDims);
+            meshBuilder.BuildCube(node, side, submesh, cbPos, cbDims, FollowSlopes);
         }
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Wood, isPreview));
 
             float startX = 0;
             float dimX = POLE_WIDTH;
@@ -74,13 +75,7 @@ namespace BlockmapFramework
             float dimZ = POLE_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            BuildCube(node, side, meshBuilder, submesh, pos, dim);
-        }
-
-        private Material GetMaterial(bool isPreview)
-        {
-            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
-            else return ResourceManager.Singleton.Mat_Wood;
+            meshBuilder.BuildCube(node, side, submesh, pos, dim, FollowSlopes);
         }
 
         #endregion

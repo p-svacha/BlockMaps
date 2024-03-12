@@ -430,6 +430,92 @@ namespace BlockmapFramework
             BuildPlane(submeshIndex, vertices[8], vertices[9], vertices[10], vertices[11], Vector2.zero, Vector2.one);
         }
 
+        /// <summary>
+        /// Builds a cube onto a node, given the relative position, dimensions and side on that node.
+        /// <br/>Relative positions are from SW corner and get translated to the given direction.
+        /// </summary>
+        public void BuildCube(BlockmapNode node, Direction side, int submesh, Vector3 pos, Vector3 dimensions, bool adjustToNodeSlope)
+        {
+            List<float> heightOffsets = new List<float>() { 0f, 0f, 0f, 0f };
+
+            // Calculate vertex height offsets if built on a slope
+            bool adjustHeightsToSlope = (HelperFunctions.IsSide(side) && adjustToNodeSlope);
+            if (adjustHeightsToSlope)
+            {
+                float slope = World.TILE_HEIGHT * (node.Height[HelperFunctions.GetPreviousDirection8(side)] - node.Height[HelperFunctions.GetNextDirection8(side)]);
+                float startY = 0;
+                if (slope < 0)
+                {
+                    startY = -slope;
+                    slope = 0;
+                }
+
+                float startYOffset = Mathf.Lerp(startY, slope, pos.x);
+                float endYOffset = Mathf.Lerp(startY, slope, pos.x + dimensions.x);
+                heightOffsets[0] = startYOffset;
+                heightOffsets[1] = endYOffset;
+                heightOffsets[2] = endYOffset;
+                heightOffsets[3] = startYOffset;
+            }
+
+            // Calculate footprint vertex positions
+            List<Vector3> footprint = new List<Vector3>() {
+                new Vector3(pos.x, pos.y, pos.z),
+                new Vector3(pos.x + dimensions.x, pos.y, pos.z),
+                new Vector3(pos.x + dimensions.x, pos.y, pos.z + dimensions.z),
+                new Vector3(pos.x, pos.y, pos.z + dimensions.z),
+            };
+
+            // Translate footprint positions based on direction
+            footprint = footprint.Select(x => TranslatePosition(x, side)).ToList();
+
+            // Apply height offsets from slope
+            for (int i = 0; i < 4; i++) footprint[i] += new Vector3(0f, heightOffsets[i], 0f);
+
+            // Apply offset based on node position on chunk to footprint
+            int startHeightCoordinate = node.GetMinHeight(side);
+            float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
+            Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
+
+            for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
+
+            // Build cube
+            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], dimensions.y);
+        }
+
+        /// <summary>
+        /// Builds a plane onto a node, given the relative position of the 4 vertices and side on that node.
+        /// <br/>Relative positions are from S side / SW corner and get translated to the given direction.
+        /// </summary>
+        public void BuildPlane(BlockmapNode node, Direction side, int submesh, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4, bool adjustToNodeSlope, bool mirror = false)
+        {
+            // Calculate flat footprint vertex positions
+            List<Vector3> vertices = new List<Vector3>() { p1, p2, p3, p4 };
+
+            // Translate footprint positions based on direction
+            vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
+
+            // Apply height offsets from slope to footprint
+            if (!node.IsFlat())
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    float height = node.GetRelativeHeightAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    vertices[i] += new Vector3(0f, height, 0f);
+                }
+            }
+
+            // Apply offset based on node position on chunk to footprint
+            int startHeightCoordinate = node.GetMinHeight(side);
+            float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
+            Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
+
+            for (int i = 0; i < 4; i++) vertices[i] += nodeOffsetPos;
+
+            // Build plane
+            BuildPlane(submesh, vertices[0], vertices[1], vertices[2], vertices[3], Vector2.zero, Vector2.one, mirror);
+        }
+
 
         public static Vector3 TranslatePosition(Vector3 pos, Direction dir)
         {

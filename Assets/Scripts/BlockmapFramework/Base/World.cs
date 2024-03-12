@@ -986,6 +986,9 @@ namespace BlockmapFramework
 
         public bool CanBuildWall(WallType type, BlockmapNode node, Direction side, int height)
         {
+            // Check if disallowed corner
+            if (HelperFunctions.IsCorner(side) && !type.CanBuildOnCorners) return false;
+
             // Adjust height if it's higher than wall type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
 

@@ -1,7 +1,5 @@
 Big Features to Add:
 
-cliff wall
-
 > allow changing shape on air nodes
 	- add property how many nodes below an airnode blocks (maybe based on surface)
 	- remove air slope tool
