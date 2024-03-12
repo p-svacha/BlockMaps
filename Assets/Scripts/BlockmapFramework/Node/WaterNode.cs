@@ -10,15 +10,15 @@ namespace BlockmapFramework
         public override bool IsSolid => false;
 
         public WaterBody WaterBody { get; private set; }
-        public GroundNode SurfaceNode { get; private set; }
+        public GroundNode GroundNode { get; private set; }
 
         public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height) { }
 
         public void Init(WaterBody waterBody, GroundNode surfaceNode)
         {
             WaterBody = waterBody;
-            SurfaceNode = surfaceNode;
-            SurfaceNode.SetWaterNode(this);
+            GroundNode = surfaceNode;
+            GroundNode.SetWaterNode(this);
         }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
@@ -41,7 +41,7 @@ namespace BlockmapFramework
 
         public override bool IsPassable(Entity entity = null)
         {
-            if (!SurfaceNode.IsCenterUnderWater) return false; // Surface node on same spot is passable
+            if (!GroundNode.IsCenterUnderWater) return false; // Surface node on same spot is passable
             if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
             
             return base.IsPassable(entity);

@@ -30,7 +30,7 @@ namespace BlockmapFramework
 
             // Init references
             for (int i = 0; i < waterNodes.Count; i++) WaterNodes[i].Init(this, coveredNodes[i]);
-            CoveredNodes = WaterNodes.Select(x => x.SurfaceNode).ToList();
+            CoveredNodes = WaterNodes.Select(x => x.GroundNode).ToList();
 
             MinX = WaterNodes.Min(x => x.WorldCoordinates.x);
             MaxX = WaterNodes.Max(x => x.WorldCoordinates.x);
@@ -58,7 +58,7 @@ namespace BlockmapFramework
                 Id = Id,
                 ShoreHeight = ShoreHeight,
                 WaterNodes = WaterNodes.Select(x => x.Id).ToList(),
-                CoveredNodes = WaterNodes.Select(x => x.SurfaceNode.Id).ToList()
+                CoveredNodes = WaterNodes.Select(x => x.GroundNode.Id).ToList()
             };
         }
 

@@ -66,7 +66,7 @@ namespace CaptureTheFlag
         private void ApplyHeightmap()
         {
 
-            foreach (GroundNode n in GeneratedWorld.GetAllSurfaceNodes())
+            foreach (GroundNode n in GeneratedWorld.GetAllGroundNodes())
             {
                 Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -175,7 +175,7 @@ namespace CaptureTheFlag
             while (attempts < targetAttempts)
             {
                 attempts++;
-                GroundNode n = GeneratedWorld.GetRandomSurfaceNode();
+                GroundNode n = GeneratedWorld.GetRandomGroundNode();
                 WaterBody b = GeneratedWorld.CanAddWater(n, 3);
                 if (b != null)
                 {
@@ -203,14 +203,14 @@ namespace CaptureTheFlag
                 attempts++;
 
                 // Take a random surface node, direction and bridge height
-                GroundNode startNode = GeneratedWorld.GetRandomSurfaceNode();
+                GroundNode startNode = GeneratedWorld.GetRandomGroundNode();
                 Direction dir1 = HelperFunctions.GetRandomSideDirection();
                 Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
                 int bridgeHeight = startNode.MaxHeight + Random.Range(1, 7);
                 List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
 
                 // Go into first direction until the bridge ends
-                GroundNode nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir1);
+                GroundNode nextNode = GeneratedWorld.GetAdjacentGroundNode(startNode, dir1);
                 bool isDone = false;
                 bool isValid = false;
                 while(!isDone)
@@ -241,13 +241,13 @@ namespace CaptureTheFlag
                     else
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = GeneratedWorld.GetAdjacentSurfaceNode(nextNode, dir1);
+                        nextNode = GeneratedWorld.GetAdjacentGroundNode(nextNode, dir1);
                     }
                 }
                 if (!isValid) continue;
 
                 // Go into first direction until the bridge ends
-                nextNode = GeneratedWorld.GetAdjacentSurfaceNode(startNode, dir2);
+                nextNode = GeneratedWorld.GetAdjacentGroundNode(startNode, dir2);
                 isDone = false;
                 isValid = false;
                 while (!isDone)
@@ -278,7 +278,7 @@ namespace CaptureTheFlag
                     else
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = GeneratedWorld.GetAdjacentSurfaceNode(nextNode, dir2);
+                        nextNode = GeneratedWorld.GetAdjacentGroundNode(nextNode, dir2);
                     }
                 }
                 if (!isValid) continue;
@@ -328,7 +328,7 @@ namespace CaptureTheFlag
             HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> opponentZoneNodes = new HashSet<Vector2Int>();
-            foreach (BlockmapNode node in GeneratedWorld.GetAllSurfaceNodes())
+            foreach (BlockmapNode node in GeneratedWorld.GetAllGroundNodes())
             {
                 if (node.WorldCoordinates.x < playerZoneSize) ownZoneNodes.Add(node.WorldCoordinates);
                 else if (node.WorldCoordinates.x < playerZoneSize + neutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
@@ -343,7 +343,7 @@ namespace CaptureTheFlag
 
         private void SpawnRandomTree(int x, int y)
         {
-            BlockmapNode targetNode = GeneratedWorld.GetSurfaceNode(new Vector2Int(x, y));
+            BlockmapNode targetNode = GeneratedWorld.GetGroundNode(new Vector2Int(x, y));
             Direction rotation = HelperFunctions.GetRandomSideDirection();
 
             Entity prefab = GetEntityPrefab(GetRandomTreeId());

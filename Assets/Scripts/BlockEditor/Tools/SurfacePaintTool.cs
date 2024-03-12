@@ -13,7 +13,6 @@ namespace WorldEditor
         public override Sprite Icon => ResourceManager.Singleton.SurfaceToolSprite;
 
         private SurfaceId SelectedSurface;
-        private int AreaSize = 1;
 
         [Header("Elements")]
         public UI_SelectionPanel SelectionPanel;
@@ -39,50 +38,31 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            // Ctrl + mouse wheel: change area size
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                if (Input.mouseScrollDelta.y < 0 && AreaSize > 1) AreaSize--;
-                if (Input.mouseScrollDelta.y > 0 && AreaSize < World.ChunkSize) AreaSize++;
-            }
-
             // Update tile overlay
-            if (World.HoveredSurfaceNode != null)
-                World.HoveredSurfaceNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white, AreaSize);
+            if (World.HoveredDynamicNode != null)
+                World.HoveredDynamicNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
         }
 
         public override void HandleLeftDrag()
         {
-            if (World.HoveredSurfaceNode != null)
+            if (World.HoveredDynamicNode != null)
             {
-                List<GroundNode> nodes = World.GetSurfaceNodes(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize).Where(x => x.Surface.Id != SelectedSurface).ToList();
-                foreach (GroundNode node in nodes) node.SetSurface(SelectedSurface);
-
-                // Manually redraw world in one step
-                World.RedrawNodesAround(World.HoveredSurfaceNode.WorldCoordinates, AreaSize, AreaSize);
+                World.SetSurface(World.HoveredDynamicNode, SelectedSurface);
 
                 // Update overlay
-                World.HoveredSurfaceNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white, AreaSize);
-
-                // Update navmesh preview
-                World.UpdateNavmeshDisplayDelayed();
+                World.HoveredDynamicNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
             }
         }
 
-        public override void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
+        public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
         {
-            // Hide overlay from all chunks around previously hovered node
-            if (oldNode != null)
-                foreach (Chunk chunk in World.GetChunks(oldNode.Chunk.Coordinates, 2, 2))
-                    chunk.GroundMesh.ShowOverlay(false);
+            // Hide previous node overlay
+            if (oldNode != null) oldNode.ShowOverlay(false);
         }
 
         public override void OnDeselect()
         {
-            // Hide overlay from all chunks around previously hovered node
-            if (World.HoveredSurfaceNode != null)
-                foreach (Chunk chunk in World.GetChunks(World.HoveredSurfaceNode.Chunk.Coordinates, 2, 2))
-                    chunk.GroundMesh.ShowOverlay(false);
+            if (World.HoveredNode != null) World.HoveredNode.ShowOverlay(false);
         }
     }
 }

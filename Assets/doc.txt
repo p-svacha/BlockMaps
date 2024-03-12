@@ -1,12 +1,7 @@
 Big Features to Add:
 
-blending ground to airnode
-surface painting on airnodes
 cliff wall
 
-> add surface option for air nodes
-	> each surface has an option how it's drawn as a ground and/or air node
-	> add all ground surfaces to air nodes too
 > allow changing shape on air nodes
 	- add property how many nodes below an airnode blocks (maybe based on surface)
 	- remove air slope tool

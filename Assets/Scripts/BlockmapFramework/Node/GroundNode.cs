@@ -10,10 +10,8 @@ namespace BlockmapFramework
     /// <summary>
     /// Represents a ground node (the lowest node on that world coordinate) 
     /// </summary>
-    public class GroundNode : BlockmapNode
+    public class GroundNode : DynamicNode
     {
-        public Surface Surface { get; private set; }
-
         public override NodeType Type => NodeType.Ground;
         public override bool IsSolid => true;
 
@@ -22,10 +20,7 @@ namespace BlockmapFramework
         /// </summary>
         public WaterNode WaterNode { get; private set; }
 
-        public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height)
-        {
-            Surface = SurfaceManager.Instance.GetSurface(surfaceId);
-        }
+        public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height, surfaceId) { }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
@@ -58,7 +53,7 @@ namespace BlockmapFramework
         }
         private void DrawEastSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            GroundNode eastNode = World.GetAdjacentSurfaceNode(this, Direction.E);
+            GroundNode eastNode = World.GetAdjacentGroundNode(this, Direction.E);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -97,7 +92,7 @@ namespace BlockmapFramework
         }
         private void DrawSouthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            GroundNode southNode = World.GetAdjacentSurfaceNode(this, Direction.S);
+            GroundNode southNode = World.GetAdjacentGroundNode(this, Direction.S);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -136,7 +131,7 @@ namespace BlockmapFramework
         }
         private void DrawWestSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            GroundNode westNode = World.GetAdjacentSurfaceNode(this, Direction.W);
+            GroundNode westNode = World.GetAdjacentGroundNode(this, Direction.W);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -175,7 +170,7 @@ namespace BlockmapFramework
         }
         private void DrawNorthSide(MeshBuilder meshBuilder, int cliffSubmesh)
         {
-            GroundNode northNode = World.GetAdjacentSurfaceNode(this, Direction.N);
+            GroundNode northNode = World.GetAdjacentGroundNode(this, Direction.N);
 
             float xStart = LocalCoordinates.x;
             float xEnd = LocalCoordinates.x + 1f;
@@ -217,118 +212,6 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public void SetSurface(SurfaceId id)
-        {
-            Surface = SurfaceManager.Instance.GetSurface(id);
-        }
-
-        public bool CanChangeHeight(Direction mode, bool isIncrease)
-        {
-            if (Entities.Count > 0) return false;
-            if (WaterNode != null) return false;
-
-            // Walls
-            foreach (Direction wallDir in Walls.Keys)
-                if (HelperFunctions.DoAffectedCornersOverlap(mode, wallDir))
-                    return false;
-
-            // Ladders
-            foreach (Direction ladderDir in TargetLadders.Keys)
-                if (HelperFunctions.DoAffectedCornersOverlap(mode, ladderDir))
-                    return false;
-
-            // Calculate new heights
-            Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
-            if (!IsValid(newHeights)) return false;
-            int newBaseHeight = newHeights.Values.Min();
-            int newMaxHeight = newHeights.Values.Max();
-
-            // Check if all heights are within allowed values
-            if (newHeights.Values.Any(x => x < 0)) return false;
-            if (newHeights.Values.Any(x => x > World.MAX_HEIGHT)) return false;
-
-            // Check if a node above would block increase
-            if (isIncrease)
-            {
-                List<BlockmapNode> nodesBelow = World.GetNodes(WorldCoordinates, 0, newBaseHeight);
-                if (nodesBelow.Any(x => x != this && !World.IsAbove(x.Height, newHeights))) return false;
-            }
-
-            // Check if decreasing height would leave node under water of adjacent water body
-            if (!isIncrease)
-            {
-                foreach (Direction corner1 in HelperFunctions.GetAffectedCorners(mode))
-                {
-                    foreach (Direction side in HelperFunctions.GetAffectedSides(corner1))
-                    {
-                        WaterNode adjWater = World.GetAdjacentWaterNode(WorldCoordinates, side);
-                        if (adjWater == null) continue;
-                        bool ownSideUnderwater = false;
-                        bool otherSideUnderwater = false;
-                        foreach (Direction corner2 in HelperFunctions.GetAffectedCorners(side))
-                        {
-                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight) ownSideUnderwater = true;
-                            if (adjWater.SurfaceNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) otherSideUnderwater = true;
-
-                            if (ownSideUnderwater && adjWater.SurfaceNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
-                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
-                        }
-                    }
-                }
-            }
-
-            return true;
-        }
-        public void ChangeHeight(Direction mode, bool isIncrease)
-        {
-            Dictionary<Direction, int> preChange = new Dictionary<Direction, int>();
-            foreach (Direction dir in Height.Keys) preChange[dir] = Height[dir];
-
-            Height = GetNewHeights(mode, isIncrease);
-
-            // Don't apply change if resulting shape is not valid
-            if (!IsValid(Height))
-            {
-                foreach (Direction dir in HelperFunctions.GetCorners()) Height[dir] = preChange[dir];
-            }
-            else UseAlternativeVariant = isIncrease;
-
-            RecalculateShape();
-        }
-        private Dictionary<Direction, int> GetNewHeights(Direction mode, bool isIncrease)
-        {
-            Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
-            foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
-
-            // Calculate min and max height of affected corners
-            int minHeight = World.MAX_HEIGHT;
-            int maxHeight = 0;
-            foreach(Direction dir in HelperFunctions.GetAffectedCorners(mode))
-            {
-                if (Height[dir] < minHeight) minHeight = Height[dir];
-                if (Height[dir] > maxHeight) maxHeight = Height[dir];
-            }
-
-            // Calculate new heights
-            foreach (Direction dir in HelperFunctions.GetAffectedCorners(mode))
-            {
-                if (newHeights[dir] == minHeight && isIncrease) newHeights[dir] += 1;
-                if (newHeights[dir] == maxHeight && !isIncrease) newHeights[dir] -= 1;
-            }
-
-            return newHeights;
-        }
-        public void SetHeight(Dictionary<Direction, int> newHeights)
-        {
-            if (IsValid(newHeights))
-            {
-                foreach (Direction dir in HelperFunctions.GetCorners())
-                    Height[dir] = newHeights[dir];
-
-                RecalculateShape();
-            }
-        }
-
         public void SetWaterNode(WaterNode waterNode)
         {
             WaterNode = waterNode;
@@ -338,20 +221,14 @@ namespace BlockmapFramework
 
         #region Getters
 
-        private bool IsValid(Dictionary<Direction,int> height)
+        public override bool CanChangeHeight(Direction mode, bool isIncrease)
         {
-            if (height.Values.Any(x => x < 0)) return false;
-            if (height.Values.Any(x => x > World.MAX_HEIGHT)) return false;
+            if (WaterNode != null) return false;
 
-            return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||
-            Mathf.Abs(height[Direction.SW] - height[Direction.NW]) > 1 ||
-            Mathf.Abs(height[Direction.NW] - height[Direction.NE]) > 1 ||
-            Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
+            return base.CanChangeHeight(mode, isIncrease);
         }
 
-        public override Surface GetSurface() => Surface;
-        public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
-        
+       
         public override Vector3 GetCenterWorldPosition()
         {
             return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
@@ -365,8 +242,6 @@ namespace BlockmapFramework
         }
 
         public bool IsCenterUnderWater => (WaterNode != null && GetCenterWorldPosition().y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
-
-        public override int GetSubType() => (int)Surface.Id;
 
         #endregion
 

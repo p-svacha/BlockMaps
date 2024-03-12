@@ -54,19 +54,19 @@ namespace WorldEditor
                 }
             }
 
-            if (World.HoveredSurfaceNode == null) return;
+            if (World.HoveredGroundNode == null) return;
 
             if (DepthInput.text == "") return;
             int depth = int.Parse(DepthInput.text);
             if (depth < 1 || depth > MAX_DEPTH) return;
 
             // Retreive from cache
-            if (Cache.ContainsKey(World.HoveredSurfaceNode) && Cache[World.HoveredSurfaceNode].ContainsKey(depth))
-                CurrentWaterBody = Cache[World.HoveredSurfaceNode][depth];
+            if (Cache.ContainsKey(World.HoveredGroundNode) && Cache[World.HoveredGroundNode].ContainsKey(depth))
+                CurrentWaterBody = Cache[World.HoveredGroundNode][depth];
 
             // Retreive from calculation
             else
-                CurrentWaterBody = World.CanAddWater(World.HoveredSurfaceNode, maxDepth: depth);
+                CurrentWaterBody = World.CanAddWater(World.HoveredGroundNode, maxDepth: depth);
 
             if (CurrentWaterBody != null) // can add water
             {
@@ -77,7 +77,7 @@ namespace WorldEditor
                 // Update Cache
                 foreach (GroundNode coveredNode in CurrentWaterBody.CoveredNodes)
                 {
-                    if (coveredNode.BaseHeight != World.HoveredSurfaceNode.BaseHeight) continue; // only add nodes to cache with same base height
+                    if (coveredNode.BaseHeight != World.HoveredGroundNode.BaseHeight) continue; // only add nodes to cache with same base height
                     if (!Cache.ContainsKey(coveredNode)) Cache.Add(coveredNode, new Dictionary<int, WaterBody>());
                     if (!Cache[coveredNode].ContainsKey(depth)) Cache[coveredNode].Add(depth, CurrentWaterBody);
                 }
@@ -94,8 +94,8 @@ namespace WorldEditor
             else // cannot add water
             {
                 // Update cache
-                if (!Cache.ContainsKey(World.HoveredSurfaceNode)) Cache.Add(World.HoveredSurfaceNode, new Dictionary<int, WaterBody>());
-                if (!Cache[World.HoveredSurfaceNode].ContainsKey(depth)) Cache[World.HoveredSurfaceNode].Add(depth, null); 
+                if (!Cache.ContainsKey(World.HoveredGroundNode)) Cache.Add(World.HoveredGroundNode, new Dictionary<int, WaterBody>());
+                if (!Cache[World.HoveredGroundNode].ContainsKey(depth)) Cache[World.HoveredGroundNode].Add(depth, null); 
 
                 WaterPreview.gameObject.SetActive(false);
             }

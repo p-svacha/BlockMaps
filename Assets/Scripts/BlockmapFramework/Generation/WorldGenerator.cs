@@ -147,9 +147,9 @@ namespace BlockmapFramework
 
                 keepSearching = false;
                 if (!GeneratedWorld.IsInWorld(targetPos)) keepSearching = true;
-                else if (forbiddenNodes != null && forbiddenNodes.Contains(GeneratedWorld.GetSurfaceNode(targetPos))) keepSearching = true;
+                else if (forbiddenNodes != null && forbiddenNodes.Contains(GeneratedWorld.GetGroundNode(targetPos))) keepSearching = true;
             }
-            BlockmapNode targetNode = GeneratedWorld.GetSurfaceNode(targetPos);
+            BlockmapNode targetNode = GeneratedWorld.GetGroundNode(targetPos);
 
             if(GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
             {

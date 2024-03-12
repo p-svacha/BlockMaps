@@ -113,7 +113,7 @@ namespace WorldEditor
             World = world;
 
             // Init hooks
-            World.OnHoveredSurfaceNodeChanged += OnHoveredSurfaceNodeChanged;
+            World.OnHoveredGroundNodeChanged += OnHoveredSurfaceNodeChanged;
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
             World.OnHoveredChunkChanged += OnHoveredChunkChanged;
             World.OnHoveredEntityChanged += OnHoveredEntityChanged;

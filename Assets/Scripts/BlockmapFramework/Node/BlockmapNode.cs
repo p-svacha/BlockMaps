@@ -457,7 +457,7 @@ namespace BlockmapFramework
             }
 
             // Step 3: Check the surface node of the coordinates we are climbing to. If its higher than we currently are in our climb, add it to our climb.
-            BlockmapNode toSurfaceNode = World.GetSurfaceNode(higherNode.WorldCoordinates);
+            BlockmapNode toSurfaceNode = World.GetGroundNode(higherNode.WorldCoordinates);
             if (toSurfaceNode == higherNode && toSurfaceNode.GetMinHeight(higherSide) == endHeight) // The surface node is our target
             {
                 int climbHeight = endHeight - currentHeight;

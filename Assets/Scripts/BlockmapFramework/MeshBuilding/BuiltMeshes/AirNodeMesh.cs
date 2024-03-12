@@ -22,11 +22,13 @@ namespace BlockmapFramework
 
         public override void OnMeshApplied()
         {
-            // Shader values
+            Material surfaceMaterial = GetComponent<MeshRenderer>().materials.FirstOrDefault(x => x.shader.name == "Custom/SurfaceShader");
+            if (surfaceMaterial == null) return;
+
+            // Set surface values for surface materials (textures per node and blending)
             List<float> surfaceArray = new List<float>();
             Dictionary<Direction, List<float>> surfaceBlendArrays = new Dictionary<Direction, List<float>>();
             foreach (Direction dir in HelperFunctions.GetAllDirections8()) surfaceBlendArrays.Add(dir, new List<float>());
-
 
             for (int x = 0; x < Chunk.Size; x++)
             {
@@ -49,7 +51,6 @@ namespace BlockmapFramework
             }
 
             // Set blend values for surface material only
-            Material surfaceMaterial = GetComponent<MeshRenderer>().materials[0];
             surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
             surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlendArrays[Direction.W]);
             surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlendArrays[Direction.E]);

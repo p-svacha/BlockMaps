@@ -34,7 +34,7 @@ namespace BlockmapFramework
             {
                 for (int y = -1; y <= Chunk.Size; y++)
                 {
-                    GroundNode targetNode = Chunk.World.GetSurfaceNode(Chunk.GetWorldCoordinates(new Vector2Int(x, y)));
+                    GroundNode targetNode = Chunk.World.GetGroundNode(Chunk.GetWorldCoordinates(new Vector2Int(x, y)));
 
                     int visibility;
                     if (targetNode != null && targetNode.IsVisibleBy(player)) visibility = 2; // 2 = visible
