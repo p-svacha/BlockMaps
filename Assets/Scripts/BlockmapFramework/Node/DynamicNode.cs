@@ -49,11 +49,12 @@ namespace BlockmapFramework
             if (newHeights.Values.Any(x => x < 0)) return false;
             if (newHeights.Values.Any(x => x > World.MAX_HEIGHT)) return false;
 
-            // Check if a node above would block increase
-            if (isIncrease)
+            // Check if changing height would intersect the node with another one on the same coordinates
+            List<BlockmapNode> nodes = World.GetNodes(WorldCoordinates);
+            foreach(BlockmapNode node in nodes)
             {
-                List<BlockmapNode> nodesBelow = World.GetNodes(WorldCoordinates, 0, newBaseHeight);
-                if (nodesBelow.Any(x => x != this && !World.IsAbove(x.Height, newHeights))) return false;
+                if (node == this) continue;
+                if (World.DoNodesIntersect(newHeights, node.Height)) return false;
             }
 
             // Check if decreasing height would leave node under water of adjacent water body

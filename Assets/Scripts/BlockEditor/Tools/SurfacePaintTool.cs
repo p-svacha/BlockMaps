@@ -59,9 +59,9 @@ namespace WorldEditor
             // Hide previous node overlay
             if (oldNode != null) oldNode.ShowOverlay(false);
         }
-
         public override void OnDeselect()
         {
+            // Hide node overlay
             if (World.HoveredNode != null) World.HoveredNode.ShowOverlay(false);
         }
     }

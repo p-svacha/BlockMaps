@@ -32,7 +32,7 @@ namespace WorldEditor
         public virtual void OnDeselect() { }
         public virtual void OnSelect() { }
 
-        public virtual void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode) { }
+        public virtual void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode) { }
         public virtual void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode) { }
         public virtual void OnHoveredChunkChanged(Chunk oldChunk, Chunk newChunk) { }
         public virtual void OnHoveredEntityChanged(Entity oldEntity, Entity newEntity) { }

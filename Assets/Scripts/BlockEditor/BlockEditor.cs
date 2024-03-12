@@ -20,6 +20,8 @@ namespace WorldEditor
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
+        public GameObject ToolNamePanel;
+        public TextMeshProUGUI ToolNameText;
         public Dictionary<EditorToolId, UI_EditorToolButton> ToolButtons;
         public TextMeshProUGUI TileInfoText;
         public UI_ToolWindow ToolWindow;
@@ -27,10 +29,10 @@ namespace WorldEditor
 
         [Header("Tools")]
         public WorldGenTool WorldGenTool;
-        public TerrainTool TerrainTool;
+        public GroundSculptingTool GroundSculptingTool;
+        public NodeShapingTool NodeShapingTool;
         public SurfacePaintTool SurfacePaintTool;
         public AirNodeTool AirNodeTool;
-        public AirSlopeNodeTool AirSlopeNodeTool;
         public SpawnCharacterTool SpawnCharacterTool;
         public MoveCharacterTool MoveCharacterTool;
         public SpawnObjectTool SpawnObjectTool;
@@ -67,10 +69,10 @@ namespace WorldEditor
             Tools = new Dictionary<EditorToolId, EditorTool>()
             {
                 { EditorToolId.WorldGen, WorldGenTool },
-                { EditorToolId.Terrain, TerrainTool },
+                { EditorToolId.GroundSculpting, GroundSculptingTool },
+                { EditorToolId.NodeShaping, NodeShapingTool },
                 { EditorToolId.SurfacePaint, SurfacePaintTool },
                 { EditorToolId.AirNode, AirNodeTool },
-                { EditorToolId.AirSlopeNode, AirSlopeNodeTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.ProceduralEntity, ProceduralEntityTool },
                 { EditorToolId.Wall, WallTool },
@@ -202,7 +204,7 @@ namespace WorldEditor
 
         private void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
         {
-            CurrentTool.OnHoveredSurfaceNodeChanged(oldNode, newNode);
+            CurrentTool.OnHoveredGroundNodeChanged(oldNode, newNode);
         }
         private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
         {

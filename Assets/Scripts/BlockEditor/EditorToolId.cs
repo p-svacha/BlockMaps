@@ -7,7 +7,8 @@ namespace WorldEditor
     public enum EditorToolId
     {
         WorldGen,
-        Terrain,
+        GroundSculpting,
+        NodeShaping,
         SurfacePaint,
         AirNode,
         AirSlopeNode,

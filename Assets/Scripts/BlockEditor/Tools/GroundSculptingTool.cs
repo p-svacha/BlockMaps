@@ -7,11 +7,11 @@ using UnityEngine.EventSystems;
 
 namespace WorldEditor
 {
-    public class TerrainTool : EditorTool
+    public class GroundSculptingTool : EditorTool
     {
-        public override EditorToolId Id => EditorToolId.Terrain;
+        public override EditorToolId Id => EditorToolId.GroundSculpting;
         public override string Name => "Edit Terrain";
-        public override Sprite Icon => ResourceManager.Singleton.TerrainToolSprite;
+        public override Sprite Icon => ResourceManager.Singleton.GroundSculptingSprite;
 
         private int AreaSize = 1;
 
@@ -116,7 +116,7 @@ namespace WorldEditor
             }
         }
 
-        public override void OnHoveredSurfaceNodeChanged(GroundNode oldNode, GroundNode newNode)
+        public override void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode)
         {
             // Hide overlay from all chunks around previously hovered node
             if(oldNode != null)

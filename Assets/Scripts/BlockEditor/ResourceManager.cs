@@ -20,7 +20,8 @@ namespace WorldEditor
         [Header("Sprites")]
         public Sprite DynamicEntitySprite;
 
-        public Sprite TerrainToolSprite;
+        public Sprite GroundSculptingSprite;
+        public Sprite NodeShapingSprite;
         public Sprite SurfaceToolSprite;
         public Sprite AirNodeSprite;
         public Sprite AirSlopeNodeSprite;
@@ -32,6 +33,10 @@ namespace WorldEditor
         public Sprite WaterToolSprite;
         public Sprite WallToolSprite;
         public Sprite LadderToolSprite;
+
+        [Header("UI")]
+        public Color UI_ButtonSelectedColor;
+        public Color UI_ButtonDefaultColor;
 
         public Texture2D GetTileSelector(Direction dir)
         {

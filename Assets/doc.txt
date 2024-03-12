@@ -1,10 +1,12 @@
 Big Features to Add:
 
-> allow changing shape on air nodes
-	- add property how many nodes below an airnode blocks (maybe based on surface)
-	- remove air slope tool
+- add smooth edge option to ground sculpt tool
 
-canplaceprocenitity height
+- add roof surface
+
+- air node tool intersect hover with invisible plane on current build height
+
+- canplaceprocenitity height
 
 - rework how player colors are passed to chunkmeshes for rendering zone borders
 	> always pass to chunkmesh in setvisiblity
@@ -20,6 +22,11 @@ canplaceprocenitity height
 		> new metal surface
 	> make a list of material indexes colorable in editor
 		> save color in entityData
+- expand entity navmesh impact options
+	> make it possible that entities can block a combination of full nodes, sides and corners
+	> all of it should affect the navmesh
+	> visioncollider needs to be adapted too
+
 
 (> allow any height diffs on allowed shapes)
 > implement climb/hillwalk system for slopes
@@ -32,7 +39,7 @@ canplaceprocenitity height
 	
 - limit vision to height (don't draw anything above height x)
 
-- Rework hover pathfinding
+- CTF: Rework hover pathfinding
 	> Hover on unreachable node = no path preview
 	> Hover on node with !canStandOn = red path preview
 	> Hover on node within possible moves = green path preview
@@ -41,7 +48,7 @@ canplaceprocenitity height
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
 
-- Improve ctf map generator
+- CTF: Improve ctf map generator
 	> New approach: Check XCOM and PZ map generation
 	> Split map into parcels
 	> Parcels have their own generation system on top of height map generation
@@ -104,6 +111,8 @@ canplaceprocenitity height
 - Upon end game show full visible map
 
 - Seperate check for entity vision independent from node vision
+	> Make some other vision tests
+	> note and fix vision bugs
 
 - Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
 
@@ -193,11 +202,6 @@ canplaceprocenitity height
 	- Can't tag or be tagged, fly at fixed height
 	- Only give vision
 
-- expand entity navmesh impact options
-	> make it possible that entities can block a combination of full nodes, sides and corners
-	> all of it should affect the navmesh
-	> visioncollider needs to be adapted too
-
 - Add some kind of roof system
 	- maybe just allow changing height on normal air nodes (like on surface)
 	- allow path mesh generation for all shapes
@@ -249,10 +253,6 @@ canplaceprocenitity height
 
 
 -------- RETIRED IDEAS ------------
-
-- impelemnt SurfaceAirNodes:	
-	> Rendered like surface nodes (1x1x1 in size)
-	> BaseHeight = x and Height = {x+1,x+1,x+1,x+1}
 
 - Shoot multiple rays at a node to check vision (if performance allows)
 	> also at entities on node

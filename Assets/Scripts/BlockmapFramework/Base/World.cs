@@ -654,11 +654,11 @@ namespace BlockmapFramework
             UpdateNavmeshDelayed(nodesToUpdate);
         }
 
-        public bool CanChangeHeight(GroundNode node, Direction mode, bool isIncrease)
+        public bool CanChangeHeight(DynamicNode node, Direction mode, bool isIncrease)
         {
             return node.CanChangeHeight(mode, isIncrease);
         }
-        public void ChangeHeight(GroundNode node, Direction mode, bool isIncrease)
+        public void ChangeHeight(DynamicNode node, Direction mode, bool isIncrease)
         {
             node.ChangeHeight(mode, isIncrease);
 
@@ -1556,6 +1556,14 @@ namespace BlockmapFramework
             }
         }
 
+        /// <summary>
+        /// Checks and returns if two node heights intersect by either fully overlapping or going through each other.
+        /// </summary>
+        public bool DoNodesIntersect(Dictionary<Direction, int> n1, Dictionary<Direction, int> n2)
+        {
+            if (!IsAbove(n1, n2) && !IsAbove(n2, n1)) return true; // Neither node is fully above the other one => they intersect
+            return false;
+        }
         public bool IsAbove(Dictionary<Direction, int> topHeight, Dictionary<Direction, int> botHeight) // returns true if at least one corner of topHeight is above botHeight and none of them are below botHeight
         {
             bool isAbove = false;
