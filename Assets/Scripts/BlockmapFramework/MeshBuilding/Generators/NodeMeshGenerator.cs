@@ -30,58 +30,15 @@ namespace BlockmapFramework
             MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
             MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
 
-            switch (node.Shape)
+            if(node.GetTriangleMeshShapeVariant())
             {
-                case "0000":
-                case "1100":
-                case "0110":
-                case "0011":
-                case "1001":
-                case "0001":
-                case "1011":
-                case "0100":
-                case "1110":
-                case "1012":
-                case "1210":
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    break;
-
-                case "1000":
-                case "0010":
-                case "0111":
-                case "1101":
-                case "2101":
-                case "0121":
-                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                    meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
-                    break;
-
-                case "1010":
-                    if (node.UseAlternativeVariant)
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
-                    }
-                    else
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    }
-                    break;
-
-                case "0101":
-                    if (node.UseAlternativeVariant)
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
-                    }
-                    else
-                    {
-                        meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4b, v2a);
-                        meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3a);
-                    }
-                    break;
+                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
+                meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
+            }
+            else
+            {
+                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
+                meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
             }
         }
 
@@ -94,8 +51,8 @@ namespace BlockmapFramework
             int curbSubmesh = meshBuilder.GetSubmesh(curbMaterial);
 
             // Center plane
-            DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, curbWidth, 1f - curbWidth, curbWidth, 1f - curbWidth); // top
-            DrawShapePlane(meshBuilder, node, mainSubmesh, 0f, 0f, 1f, 0f, 1f, mirror: true); // bottom
+            meshBuilder.DrawShapePlane(node, mainSubmesh, mainHeight, curbWidth, 1f - curbWidth, curbWidth, 1f - curbWidth); // top
+            meshBuilder.DrawShapePlane(node, mainSubmesh, 0f, 0f, 1f, 0f, 1f, mirror: true); // bottom
 
             // Edge connections
             DrawEdge(meshBuilder, node, Direction.N, mainSubmesh, curbSubmesh, curbWidth, 1f - curbWidth, 1f - curbWidth, 1f, mainHeight, curbHeight);
@@ -108,31 +65,6 @@ namespace BlockmapFramework
             DrawCorner(meshBuilder, node, Direction.NE, mainSubmesh, curbSubmesh, 1f - curbWidth, 1f, 1f - curbWidth, 1f, mainHeight, curbHeight);
             DrawCorner(meshBuilder, node, Direction.SE, mainSubmesh, curbSubmesh, 1f - curbWidth, 1f, 0f, curbWidth, mainHeight, curbHeight);
             DrawCorner(meshBuilder, node, Direction.SW, mainSubmesh, curbSubmesh, 0, curbWidth, 0f, curbWidth, mainHeight, curbHeight);
-        }
-
-        /// <summary>
-        /// Creates a plane parrallel to the shape of this tile covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.
-        /// </summary>
-        private static void DrawShapePlane(MeshBuilder meshBuilder, BlockmapNode node, int submesh, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false)
-        {
-            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yStart) + height, node.LocalCoordinates.y + yStart);
-            Vector2 v_SW_uv = new Vector2(xStart, yStart);
-            MeshVertex v_SW = meshBuilder.AddVertex(v_SW_pos, v_SW_uv);
-
-            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yStart) + height, node.LocalCoordinates.y + yStart);
-            Vector2 v_SE_uv = new Vector2(xEnd, yStart);
-            MeshVertex v_SE = meshBuilder.AddVertex(v_SE_pos, v_SE_uv);
-
-            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, GetVertexHeight(node, xEnd, yEnd) + height, node.LocalCoordinates.y + yEnd);
-            Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
-            MeshVertex v_NE = meshBuilder.AddVertex(v_NE_pos, v_NE_uv);
-
-            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, GetVertexHeight(node, xStart, yEnd) + height, node.LocalCoordinates.y + yEnd);
-            Vector2 v_NW_uv = new Vector2(xStart, yEnd);
-            MeshVertex v_NW = meshBuilder.AddVertex(v_NW_pos, v_NW_uv);
-
-            if (mirror) meshBuilder.AddPlane(submesh, v_SW, v_NW, v_NE, v_SE);
-            else meshBuilder.AddPlane(submesh, v_SW, v_SE, v_NE, v_NW);
         }
 
         /// <summary>
@@ -151,13 +83,13 @@ namespace BlockmapFramework
             // Draw connection to adjacent path
             if (hasPathConnection)
             {
-                DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
+                meshBuilder.DrawShapePlane(node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
             }
 
             // Draw curb
             else
             {
-                DrawShapePlane(meshBuilder, node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
+                meshBuilder.DrawShapePlane(node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
                 DrawCurbSides(meshBuilder, node, dir, curbSubmesh, xStart, xEnd, yStart, yEnd, mainHeight, curbHeight);
             }
         }
@@ -173,12 +105,12 @@ namespace BlockmapFramework
             // Draw connection to adjacent path corner
             if (hasPathConnection)
             {
-                DrawShapePlane(meshBuilder, node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
+                meshBuilder.DrawShapePlane(node, mainSubmesh, mainHeight, xStart, xEnd, yStart, yEnd);
             }
 
             else // Draw curb
             {
-                DrawShapePlane(meshBuilder, node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
+                meshBuilder.DrawShapePlane(node, curbSubmesh, curbHeight, xStart, xEnd, yStart, yEnd); // curb top
                 DrawCurbSides(meshBuilder, node, dir, curbSubmesh, xStart, xEnd, yStart, yEnd, mainHeight, curbHeight);
             }
         }

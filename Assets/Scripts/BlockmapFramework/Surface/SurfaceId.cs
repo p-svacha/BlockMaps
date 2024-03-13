@@ -7,5 +7,6 @@ public enum SurfaceId
     Grass,
     Sand,
     Concrete,
-    Street
+    Street,
+    RoofingTiles
 }

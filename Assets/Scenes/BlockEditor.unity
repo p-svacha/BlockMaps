@@ -7720,6 +7720,7 @@ MonoBehaviour:
   Mat_Asphalt: {fileID: 2100000, guid: e3ff98423350ef3488cb3d49298df067, type: 2}
   Mat_BrickWall: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
   Mat_Rock: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
+  Mat_RoofingTiles: {fileID: 2100000, guid: effc84cd0136c5c4999a7c1a570906cd, type: 2}
   Mat_Cobblestone: {fileID: 2100000, guid: 523c733375c89144984a614ea337cec8, type: 2}
   Mat_Concrete: {fileID: 2100000, guid: 8f040e32a5f8d9a45a3059fd459d5c37, type: 2}
   Mat_ConcreteDark: {fileID: 2100000, guid: 00617540111469d43804b98d11445575, type: 2}

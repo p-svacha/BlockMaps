@@ -94,7 +94,7 @@ namespace BlockmapFramework
             {
                 foreach (Direction dir in HelperFunctions.GetCorners()) Height[dir] = preChange[dir];
             }
-            else UseAlternativeVariant = isIncrease;
+            else LastHeightChangeWasIncrease = isIncrease;
 
             RecalculateShape();
         }

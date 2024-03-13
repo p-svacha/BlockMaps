@@ -1,7 +1,5 @@
 Big Features to Add:
 
-- add roof surface
-
 - air node tool intersect hover with invisible plane on current build height
 
 - canplaceprocenitity height

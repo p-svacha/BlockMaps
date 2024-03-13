@@ -21,6 +21,7 @@ namespace BlockmapFramework
         public Material Mat_Asphalt;
         public Material Mat_BrickWall;
         public Material Mat_Rock;
+        public Material Mat_RoofingTiles;
         public Material Mat_Cobblestone;
         public Material Mat_Concrete;
         public Material Mat_ConcreteDark;

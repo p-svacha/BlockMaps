@@ -12,6 +12,7 @@ namespace BlockmapFramework
         public override string Name => "Grass";
         public override SurfacePropertyId PropertiesId => SurfacePropertyId.Grass;
         public override bool DoBlend => true;
+        public override bool UseLongEdges => false;
         public override Color Color => ResourceManager.Singleton.GrassColor;
         public override Texture2D Texture => ResourceManager.Singleton.GrassTexture;
 

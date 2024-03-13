@@ -13,6 +13,7 @@ namespace BlockmapFramework
         public abstract string Name { get; }
         public abstract SurfacePropertyId PropertiesId { get; }
         public abstract bool DoBlend { get; } // flag if this surface should blend into adjacent nodes of other surfaces
+        public abstract bool UseLongEdges { get; } // If true, triangles on edge shaped nodes (0001 & 1110) are always built in a way that the edge is long
         public abstract Color Color { get; }
         public abstract Texture2D Texture { get; }
 

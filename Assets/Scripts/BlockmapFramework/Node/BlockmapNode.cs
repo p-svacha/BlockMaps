@@ -39,7 +39,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
         /// </summary>
-        public bool UseAlternativeVariant;
+        public bool LastHeightChangeWasIncrease;
 
         // Node attributes
         public World World { get; private set; }
@@ -664,33 +664,65 @@ namespace BlockmapFramework
                 case "0110": return relativePosition.x;
 
                 case "0001":
-                    if (relativePosition.x > relativePosition.y) return 0f;
-                    else return relativePosition.y - relativePosition.x;
+                    if(GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x > relativePosition.y) return 0f;
+                        else return relativePosition.y - relativePosition.x;
+                    }
+                    else return Mathf.Min(1f - relativePosition.x, relativePosition.y);
                 case "0010":
-                    if (relativePosition.x + relativePosition.y < 1) return 0f;
-                    else return relativePosition.y + relativePosition.x - 1f;
+                    if (!GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x + relativePosition.y < 1) return 0f;
+                        else return relativePosition.y + relativePosition.x - 1f;
+                    }
+                    else return Mathf.Min(relativePosition.x, relativePosition.y);
                 case "0100":
-                    if (relativePosition.x < relativePosition.y) return 0f;
-                    else return relativePosition.x - relativePosition.y;
+                    if (GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x < relativePosition.y) return 0f;
+                        else return relativePosition.x - relativePosition.y;
+                    }
+                    else return Mathf.Min(relativePosition.x, 1f - relativePosition.y);
                 case "1000":
-                    if (relativePosition.x + relativePosition.y > 1) return 0f;
-                    else return -(relativePosition.x + relativePosition.y - 1f);
+                    if (!GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x + relativePosition.y > 1) return 0f;
+                        else return -(relativePosition.x + relativePosition.y - 1f);
+                    }
+                    else return Mathf.Min(1f - relativePosition.x, 1f - relativePosition.y);
 
                 case "1110":
-                    if (relativePosition.x > relativePosition.y) return 1f;
-                    else return 1f - (relativePosition.y - relativePosition.x);
+                    if (GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x > relativePosition.y) return 1f;
+                        else return 1f - (relativePosition.y - relativePosition.x);
+                    }
+                    else return Mathf.Max(relativePosition.x, 1f - relativePosition.y);
                 case "1101":
-                    if (relativePosition.x + relativePosition.y < 1) return 1f;
-                    else return 1f - (relativePosition.y + relativePosition.x - 1f);
+                    if (!GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x + relativePosition.y < 1) return 1f;
+                        else return 1f - (relativePosition.y + relativePosition.x - 1f);
+                    }
+                    else return Mathf.Max(1f - relativePosition.x, 1f - relativePosition.y);
                 case "1011":
-                    if (relativePosition.x < relativePosition.y) return 1f;
-                    else return 1f - (relativePosition.x - relativePosition.y);
+                    if (GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x < relativePosition.y) return 1f;
+                        else return 1f - (relativePosition.x - relativePosition.y);
+                    }
+                    else return Mathf.Max(1f - relativePosition.x, relativePosition.y);
                 case "0111":
-                    if (relativePosition.x + relativePosition.y > 1) return 1f;
-                    else return relativePosition.y + relativePosition.x;
+                    if (!GetTriangleMeshShapeVariant())
+                    {
+                        if (relativePosition.x + relativePosition.y > 1) return 1f;
+                        else return relativePosition.y + relativePosition.x;
+                    }
+                    else return Mathf.Max(relativePosition.x, relativePosition.y);
 
                 case "1010":
-                    if(UseAlternativeVariant)
+                    if(LastHeightChangeWasIncrease)
                     {
                         if (relativePosition.x + relativePosition.y < 1) return -(relativePosition.x + relativePosition.y - 1f);
                         else return relativePosition.y + relativePosition.x - 1f;
@@ -701,7 +733,7 @@ namespace BlockmapFramework
                         else return 1f - (relativePosition.y - relativePosition.x);
                     }
                 case "0101":
-                    if (UseAlternativeVariant)
+                    if (LastHeightChangeWasIncrease)
                     {
                         if (relativePosition.x > relativePosition.y) return relativePosition.x - relativePosition.y;
                         else return relativePosition.y - relativePosition.x;
@@ -727,6 +759,54 @@ namespace BlockmapFramework
             }
 
             throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height implementation is missing.");
+        }
+
+        /// <summary>
+        /// Returns how the triangles should be built to draw the mesh of this node.
+        /// <br/> If true, the standard variant (SW, SE, NE / SW, NE, NW) is used.
+        /// <br/> If false, the alternate variant (SW, SE, NW / SE, NE, NW) is used.
+        /// </summary>
+        public bool GetTriangleMeshShapeVariant()
+        {
+            switch (Shape)
+            {
+                case "0000":
+                case "1100":
+                case "0110":
+                case "0011":
+                case "1001":
+                case "1012":
+                case "1210":
+                    return true;
+
+                case "2101":
+                case "0121":
+                    return false;
+
+                case "0001":
+                case "1011":
+                case "0100":
+                case "1110":
+                    if (GetSurface() != null && GetSurface().UseLongEdges) return false;
+                    else return true;
+
+                case "1000":
+                case "0010":
+                case "0111":
+                case "1101":
+                    if (GetSurface() != null && GetSurface().UseLongEdges) return true;
+                    else return false;
+
+                case "1010":
+                    if (LastHeightChangeWasIncrease) return false;
+                    else return true;
+
+                case "0101":
+                    if (LastHeightChangeWasIncrease) return true;
+                    else return false;
+            }
+
+            throw new System.Exception();
         }
 
         /// <summary>

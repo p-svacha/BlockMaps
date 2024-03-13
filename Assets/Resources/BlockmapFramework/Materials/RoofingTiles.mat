@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BrickWall
+  m_Name: RoofingTiles
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
@@ -44,15 +44,15 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GridTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: c458290407db0ee4983ea7036de4d488, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7f146e625185a0548afd7b11da1b64b9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: a41f15f373a77854eb38b7499ad0b489, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9e99e3895432ce6409736c382c65ec1b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -60,7 +60,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 36676615e10c01643a04a841001c7b4c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -87,12 +87,12 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
-    - _HeightPower: 0
+    - _HeightPower: 0.03
     - _Metallic: 0
     - _Mode: 0
-    - _NormalStrength: 0
+    - _NormalStrength: 0.3
     - _OcclusionStrength: 1
-    - _Offset: 0.1
+    - _Offset: 0
     - _Parallax: 0.02
     - _ShowGrid: 0
     - _ShowTileOverlay: 0
@@ -101,17 +101,17 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TextureScale: 1
+    - _TextureScale: 0.9
     - _TileOverlayX: 0
     - _TileOverlayY: 0
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
     - _UseTextures: 1
-    - _ZPriority: 0
+    - _ZPriority: 1
     - _ZWrite: 1
     - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.48235297, g: 0.29803923, b: 0.22352943, a: 1}
+    - _Color: {r: 0.5921569, g: 0.34901962, b: 0.24313727, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}

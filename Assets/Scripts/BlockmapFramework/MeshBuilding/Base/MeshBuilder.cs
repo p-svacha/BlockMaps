@@ -99,9 +99,9 @@ namespace BlockmapFramework
             Vertices.Remove(meshVertex);
         }
 
-        public MeshTriangle AddTriangle(int submeshIndex, MeshVertex vertex1, MeshVertex vertex2, MeshVertex vertex3)
+        public MeshTriangle AddTriangle(int submeshIndex, MeshVertex vertex1, MeshVertex vertex2, MeshVertex vertex3, bool mirror = false)
         {
-            MeshTriangle triangle = new MeshTriangle(submeshIndex, vertex1, vertex2, vertex3);
+            MeshTriangle triangle = mirror ? new MeshTriangle(submeshIndex, vertex1, vertex3, vertex2) : new MeshTriangle(submeshIndex, vertex1, vertex2, vertex3);
             Triangles[submeshIndex].Add(triangle);
             return triangle;
         }
@@ -496,7 +496,7 @@ namespace BlockmapFramework
             vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
 
             // Apply height offsets from slope to footprint
-            if (!node.IsFlat())
+            if (!node.IsFlat() && adjustToNodeSlope)
             {
                 for (int i = 0; i < 4; i++)
                 {
@@ -516,7 +516,6 @@ namespace BlockmapFramework
             BuildPlane(submesh, vertices[0], vertices[1], vertices[2], vertices[3], Vector2.zero, Vector2.one, mirror);
         }
 
-
         public static Vector3 TranslatePosition(Vector3 pos, Direction dir)
         {
             return dir switch
@@ -531,6 +530,39 @@ namespace BlockmapFramework
                 Direction.NW => new Vector3(pos.z, pos.y, 1 - pos.x),
                 _ => throw new System.Exception("not handled")
             };
+        }
+
+        /// <summary>
+        /// Creates a plane parrallel to the surface shape of a node covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.
+        /// </summary>
+        public void DrawShapePlane(BlockmapNode node, int submesh, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false)
+        {
+            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldHeightAt(new Vector2(xStart, yStart)) + height, node.LocalCoordinates.y + yStart);
+            Vector2 v_SW_uv = new Vector2(xStart, yStart);
+            MeshVertex v_SW = AddVertex(v_SW_pos, v_SW_uv);
+
+            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldHeightAt(new Vector2(xEnd, yStart)) + height, node.LocalCoordinates.y + yStart);
+            Vector2 v_SE_uv = new Vector2(xEnd, yStart);
+            MeshVertex v_SE = AddVertex(v_SE_pos, v_SE_uv);
+
+            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldHeightAt(new Vector2(xEnd, yEnd)) + height, node.LocalCoordinates.y + yEnd);
+            Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
+            MeshVertex v_NE = AddVertex(v_NE_pos, v_NE_uv);
+
+            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldHeightAt(new Vector2(xStart, yEnd)) + height, node.LocalCoordinates.y + yEnd);
+            Vector2 v_NW_uv = new Vector2(xStart, yEnd);
+            MeshVertex v_NW = AddVertex(v_NW_pos, v_NW_uv);
+
+            if (node.GetTriangleMeshShapeVariant())
+            {
+                AddTriangle(submesh, v_SW, v_NE, v_SE, mirror);
+                AddTriangle(submesh, v_SW, v_NW, v_NE, mirror);
+            }
+            else
+            {
+                AddTriangle(submesh, v_SW, v_NW, v_SE, mirror);
+                AddTriangle(submesh, v_SE, v_NW, v_NE, mirror);
+            }
         }
 
         #endregion
