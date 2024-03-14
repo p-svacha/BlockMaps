@@ -153,7 +153,6 @@ namespace BlockmapFramework
             // Init actors
             foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
             Gaia = Actors[0];
-            UpdateShaderPlayerColors();
 
             // Init nodes
             foreach (ChunkData chunkData in data.Chunks)
@@ -579,8 +578,6 @@ namespace BlockmapFramework
             Actor newActor = new Actor(this, id, name, color);
             Actors.Add(id, newActor);
 
-            UpdateShaderPlayerColors();
-
             return newActor;
         }
         public void ResetExploration(Actor actor)
@@ -677,6 +674,8 @@ namespace BlockmapFramework
         
         public bool CanBuildAirPath(Vector2Int worldCoordinates, int height)
         {
+            if (!IsInWorld(worldCoordinates)) return false;
+
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
@@ -1260,12 +1259,6 @@ namespace BlockmapFramework
         public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan)
         {
             Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null);
-        }
-
-        public void UpdateShaderPlayerColors()
-        {
-            foreach(Material mat in ResourceManager.Singleton.GetAllNodeSurfaceMaterials())
-                mat.SetColorArray("_PlayerColors", Actors.Values.Select(x => x.Color).ToArray());
         }
 
         #endregion

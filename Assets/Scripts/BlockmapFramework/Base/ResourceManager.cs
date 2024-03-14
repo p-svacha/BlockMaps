@@ -30,11 +30,6 @@ namespace BlockmapFramework
         public Material Mat_Water;
         public Material Mat_Wood;
 
-        public List<Material> GetAllNodeSurfaceMaterials() => new List<Material>()
-        {
-            SurfaceMaterial,
-        };
-
         [Header("Colors")]
         public Color GrassColor;
         public Color SandColor;

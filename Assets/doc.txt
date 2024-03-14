@@ -1,12 +1,5 @@
 Big Features to Add:
 
-- air node tool intersect hover with invisible plane on current build height
-
-- canplaceprocenitity height
-
-- rework how player colors are passed to chunkmeshes for rendering zone borders
-	> always pass to chunkmesh in setvisiblity
-
 - add some car models
 	> Rework dimensions attribute of entities
 		> Add new EntityShape class/struct
@@ -25,6 +18,9 @@ Big Features to Add:
 
 
 (> allow any height diffs on allowed shapes)
+- Remove limit of max height diff within a node
+	> slopes can also go up 2,3,etc.
+	> keep shape requirements (max 2 different heights per node)
 > implement climb/hillwalk system for slopes
 	- have a slope value for each transition that is 0 for flat, +1 for going 1 tile up, -1 for going 1 down etc
 		- for that have a getter for each node that gives back the height on the center of the node
@@ -104,18 +100,18 @@ Big Features to Add:
 	> downwards * 1.25
 	> upwards * 1.5
 
-- Upon end game show full visible map
+- CTF: Upon end game show full visible map
 
 - Seperate check for entity vision independent from node vision
 	> Make some other vision tests
 	> note and fix vision bugs
 
-- Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
+- CTF: Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
-- more general modifier system
+- CTF: more general modifier system
 	> modifiers have a duration and effect, name, description, icon
 	> move jail time to modifier
 	> add ui for modifiers
@@ -127,6 +123,9 @@ Big Features to Add:
 - doors
 	> open and closeable when standing next to
 	> characters get a new dexterity attribute that defines if they can open/close
+
+- window
+	> glass material
 
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
@@ -150,12 +149,6 @@ Big Features to Add:
 	> if we see enemy character in own zone => CHASE
 	> if we see enemy flag => GO THERE
 	> some "your turn" notification when turn starts
-
-- Disallow 0101 and 1010 shapes
-- Disallow 2110 and 0112 shapes
-- Remove limit of max height diff within a node
-	> slopes can also go up 2,3,etc.
-	> keep shape requirements (max 2 different heights per node)
 
 - water tool rework:
 	> make max depth a const 3
@@ -182,6 +175,7 @@ Big Features to Add:
 	> certain characters can carry it
 	> impassable zones moves with carried flag
 	> if character holding flag gets tagged = game over, no matter where
+	> win game when flag is back home
 
 - Dogs need a nearby master to work
 
@@ -198,17 +192,8 @@ Big Features to Add:
 	- Can't tag or be tagged, fly at fixed height
 	- Only give vision
 
-- Add some kind of roof system
-	- maybe just allow changing height on normal air nodes (like on surface)
-	- allow path mesh generation for all shapes
-	- and then add a second air node type: roof
-
 - Static entities types: Like high grass, maize, foliage, debris, puddle
 	> multiple static entities per node: one per type
-
-- Add different air path types
-	> each has their own mesh generator
-	> each has their own attribute how many tiles they block above and below
 
 - Add static entities that include navmesh nodes (like a container or bridge)
 
@@ -250,9 +235,10 @@ Big Features to Add:
 
 -------- RETIRED IDEAS ------------
 
+- Disallow 0101 and 1010 shapes
+- Disallow 2110 and 0112 shapes
+
 - Shoot multiple rays at a node to check vision (if performance allows)
 	> also at entities on node
 
 - Allow movingentities bigger than 1x1
-
-

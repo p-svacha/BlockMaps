@@ -111,13 +111,8 @@ namespace BlockmapFramework
                 }
             }
 
-
-            // Pass visibility array to shader
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetFloat("_FullVisibility", 0);
-                Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
-            }
+            // Pass to shader
+            SetShaderVisibilityData(visibilityArray);
         }
 
         #region Generator

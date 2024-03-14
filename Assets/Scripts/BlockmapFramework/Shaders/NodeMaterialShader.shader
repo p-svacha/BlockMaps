@@ -22,7 +22,6 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _ShowGrid("Show Grid", Float) = 1
         _GridColor("Grid Color", Color) = (0,0,0,1)
 
-        _ZoneBorderColor("Zone Border Color", Color) = (1,1,1,1)
         _ZoneBorderWidth("Zone Border Width", Float) = 0.1
 
         /* Should not be set in inspector
@@ -205,8 +204,8 @@ Shader "Custom/NodeMaterialShader"
 
             fixed4 c = _Color;
 
-            float dotProduct = dot(IN.worldNormal, float3(0, 1, 0));
-            float isFacingUpwards = (dotProduct > 0.9);
+            float dotProduct = dot(WorldNormalVector(IN, o.Normal), float3(0, 1, 0));
+            float isFacingUpwards = (dotProduct > 0.7);
 
             // ######################################################################### TRIPLANAR TEXTURE #########################################################################
 
@@ -269,7 +268,7 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### OVERLAYS #########################################################################
 
-            if (_ShowTileOverlay == 1)
+            if (_ShowTileOverlay == 1 && isFacingUpwards == 1)
             {
                 float adjustedWorldPosX = IN.worldPos.x;
                 if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;

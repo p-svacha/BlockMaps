@@ -116,5 +116,16 @@ namespace BlockmapFramework
                 Renderer.materials[i].SetFloatArray("_ZoneBorderColors", zoneBorderColors);
             }
         }
+
+        protected void SetShaderVisibilityData(List<float> surfaceVisibilityArray)
+        {
+            // Set visibility in all surface mesh materials
+            for (int i = 0; i < Renderer.materials.Length; i++)
+            {
+                Renderer.materials[i].SetColorArray("_PlayerColors", World.Actors.Values.Select(x => x.Color).ToArray());
+                Renderer.materials[i].SetFloat("_FullVisibility", 0);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
+            }
+        }
     }
 }

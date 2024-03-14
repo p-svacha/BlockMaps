@@ -14,6 +14,7 @@ namespace WorldEditor
         private GameObject BuildPreview;
         private int BuildHeight;
         private SurfaceId SelectedSurface;
+        private Vector2Int HoveredCoordinates;
 
         [Header("Elements")]
         public UI_SelectionPanel SelectionPanel;
@@ -39,24 +40,32 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
+            UpdateHoveredCoordinates();
             UpdatePreview();
             HandleInputs();
         }
 
+        // Sets the current coordinates from intersecting mouse hover with an invisible plane on the build height
+        private void UpdateHoveredCoordinates()
+        {
+            var plane = new Plane(Vector3.up, new Vector3(0f, BuildHeight * World.TILE_HEIGHT, 0f));
+            var ray = World.Camera.Camera.ScreenPointToRay(Input.mousePosition);
+            if (plane.Raycast(ray, out float distance))
+            {
+                Vector3 hitPoint = ray.GetPoint(distance);
+                HoveredCoordinates = World.GetWorldCoordinates(hitPoint);
+            }
+        }
+
         private void UpdatePreview()
         {
-            if (World.HoveredNode != null)
-            {
-                Vector3 hoverPos = World.HoveredNode.GetCenterWorldPosition();
-                BuildPreview.transform.position = new Vector3(hoverPos.x, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.1f, hoverPos.z);
-                BuildPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            BuildPreview.transform.position = new Vector3(HoveredCoordinates.x + 0.5f, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.1f, HoveredCoordinates.y + 0.5f);
+            BuildPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
-                Color previewColor = Color.white;
-                if (!World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight)) previewColor = Color.red;
-                if (World.HoveredAirNode != null && World.CanRemoveAirNode(World.HoveredAirNode)) previewColor = new Color(1f, 0.5f, 0f);
+            Color previewColor = Color.white;
+            if (!World.CanBuildAirPath(HoveredCoordinates, BuildHeight)) previewColor = Color.red;
 
-                BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
-            }
+            BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
         }
 
         private void HandleInputs()
@@ -71,8 +80,8 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredNode != null && World.CanBuildAirPath(World.HoveredWorldCoordinates, BuildHeight))
-                World.BuildAirPath(World.HoveredWorldCoordinates, BuildHeight, SelectedSurface);
+            if (World.CanBuildAirPath(HoveredCoordinates, BuildHeight))
+                World.BuildAirPath(HoveredCoordinates, BuildHeight, SelectedSurface);
         }
 
         public override void HandleRightClick()

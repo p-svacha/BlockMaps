@@ -59,12 +59,14 @@ namespace WorldEditor
                     int height = int.Parse(HeightInput.text);
                     if (height > 1) height--;
                     HeightInput.text = height.ToString();
+                    SelectedEntity.SetHeight(height);
                 }
                 if (Input.mouseScrollDelta.y > 0 && HeightInput.text != "")
                 {
                     int height = int.Parse(HeightInput.text);
                     height++;
                     HeightInput.text = height.ToString();
+                    SelectedEntity.SetHeight(height);
                 }
             }
 

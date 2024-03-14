@@ -665,6 +665,14 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Sets the height of the entity. Does not affect anything immediately.
+        /// </summary>
+        public void SetHeight(int height)
+        {
+            Dimensions = new Vector3Int(Dimensions.x, height, Dimensions.z);
+        }
+
+        /// <summary>
         /// Changes the origin node and updates all relevant information with it.
         /// </summary>
         protected void SetOriginNode(BlockmapNode node)
