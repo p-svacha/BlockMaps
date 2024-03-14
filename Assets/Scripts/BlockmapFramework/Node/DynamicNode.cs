@@ -25,8 +25,9 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(id);
         }
 
-        public virtual bool CanChangeHeight(Direction mode, bool isIncrease)
+        public bool CanChangeHeight(Direction mode)
         {
+            // Entities
             if (Entities.Count > 0) return false;
 
             // Walls
@@ -38,6 +39,14 @@ namespace BlockmapFramework
             foreach (Direction ladderDir in TargetLadders.Keys)
                 if (HelperFunctions.DoAffectedCornersOverlap(mode, ladderDir))
                     return false;
+
+            return true;
+        }
+
+        public virtual bool CanChangeHeight(Direction mode, bool isIncrease)
+        {
+            // General, height direction unrelated checks
+            if (!CanChangeHeight(mode)) return false;
 
             // Calculate new heights
             Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
@@ -98,6 +107,24 @@ namespace BlockmapFramework
 
             RecalculateShape();
         }
+
+        public void SetHeight(Direction corner, int height)
+        {
+            Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
+            foreach(Direction dir in HelperFunctions.GetCorners())
+            {
+                if (dir == corner) newHeights[dir] = height;
+                else newHeights[dir] = Height[dir];
+            }
+
+            if(World.IsValidNodeHeight(newHeights))
+            {
+                if (Height[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
+                Height = newHeights;
+                RecalculateShape();
+            }
+        }
+
         private Dictionary<Direction, int> GetNewHeights(Direction mode, bool isIncrease)
         {
             Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();

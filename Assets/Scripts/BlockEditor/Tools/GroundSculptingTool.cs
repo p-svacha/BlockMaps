@@ -100,36 +100,17 @@ namespace WorldEditor
                         node.ChangeHeight(Direction.None, isIncrease);
                     }
 
-                    // Smooth outside edges
+                    // Smooth outside edges of affected nodes
                     if (SmoothEdgeToggle.isOn)
                     {
-                        // North side
-                        for (int x = 0; x < AreaSize; x++)
+                        foreach(GroundNode node in affectedNodes)
                         {
-                            GroundNode node = World.GetGroundNode(new Vector2Int(coordinates.x + x, coordinates.y + AreaSize - 1));
-                            if (!affectedNodes.Contains(node)) continue;
-                            SmoothNodeEdge(node, Direction.N, isIncrease);
-                        }
-                        // East side
-                        for (int y = 0; y < AreaSize; y++)
-                        {
-                            GroundNode node = World.GetGroundNode(new Vector2Int(coordinates.x + AreaSize - 1, coordinates.y + y));
-                            if (!affectedNodes.Contains(node)) continue;
-                            SmoothNodeEdge(node, Direction.E, isIncrease);
-                        }
-                        // South side
-                        for (int x = 0; x < AreaSize; x++)
-                        {
-                            GroundNode node = World.GetGroundNode(new Vector2Int(coordinates.x + x, coordinates.y));
-                            if (!affectedNodes.Contains(node)) continue;
-                            SmoothNodeEdge(node, Direction.S, isIncrease);
-                        }
-                        // West side
-                        for (int y = 0; y < AreaSize; y++)
-                        {
-                            GroundNode node = World.GetGroundNode(new Vector2Int(coordinates.x, coordinates.y + y));
-                            if (!affectedNodes.Contains(node)) continue;
-                            SmoothNodeEdge(node, Direction.W, isIncrease);
+                            foreach (Direction side in HelperFunctions.GetSides())
+                            {
+                                GroundNode adjNode = World.GetAdjacentGroundNode(node, side);
+                                if (affectedNodes.Contains(adjNode)) continue;
+                                SmoothNodeEdge(node, side);
+                            }
                         }
                     }
 
@@ -144,7 +125,7 @@ namespace WorldEditor
         /// <summary>
         /// Smooths out the edge outside one side of a node
         /// </summary>
-        private void SmoothNodeEdge(GroundNode node, Direction dir, bool isIncrease)
+        private void SmoothNodeEdge(GroundNode node, Direction dir)
         {
             Direction preDir = HelperFunctions.GetPreviousDirection8(dir);
             Direction preDir_Opp = HelperFunctions.GetOppositeDirection(preDir);
@@ -155,10 +136,10 @@ namespace WorldEditor
             GroundNode adjNodeFull = World.GetAdjacentGroundNode(node, dir);
             GroundNode adjNodePost = World.GetAdjacentGroundNode(node, postDir);
 
-            if (adjNodePre != null && adjNodePre.Height[preDir_Opp] != node.Height[preDir]) adjNodePre.ChangeHeight(preDir_Opp, isIncrease);
-            if (adjNodeFull != null && adjNodeFull.Height[postDir_Opp] != node.Height[postDir]) adjNodeFull.ChangeHeight(postDir_Opp, isIncrease);
-            if (adjNodeFull != null && adjNodeFull.Height[preDir_Opp] != node.Height[preDir]) adjNodeFull.ChangeHeight(preDir_Opp, isIncrease);
-            if (adjNodePost != null && adjNodePost.Height[postDir_Opp] != node.Height[postDir]) adjNodePost.ChangeHeight(postDir_Opp, isIncrease);
+            if (adjNodePre != null && adjNodePre.Height[preDir_Opp] != node.Height[preDir] && adjNodePre.CanChangeHeight(Direction.None)) adjNodePre.SetHeight(preDir_Opp, node.Height[preDir]);
+            if (adjNodeFull != null && adjNodeFull.Height[postDir_Opp] != node.Height[postDir] && adjNodeFull.CanChangeHeight(Direction.None)) adjNodeFull.SetHeight(postDir_Opp, node.Height[postDir]);
+            if (adjNodeFull != null && adjNodeFull.Height[preDir_Opp] != node.Height[preDir] && adjNodeFull.CanChangeHeight(Direction.None)) adjNodeFull.SetHeight(preDir_Opp, node.Height[preDir]);
+            if (adjNodePost != null && adjNodePost.Height[postDir_Opp] != node.Height[postDir] && adjNodePost.CanChangeHeight(Direction.None)) adjNodePost.SetHeight(postDir_Opp, node.Height[postDir]);
         }
 
         public override void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode)

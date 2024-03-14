@@ -58,6 +58,13 @@ Big Features to Add:
 	> 6. player base generation
 
 - decouple/add entity visibility from node visiblity
+- decouple/add wall visibiliry from node visibility
+
+wall drag
+air node drag
+proc entity drag
+tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
+walls where top matches adjacent node (a bit like ladders)
 
 - Implement some line features for new map gen system
 	> road
