@@ -39,13 +39,13 @@ namespace BlockmapFramework
 
         /// <summary>
         /// The exact world position this entity is at the moment.
-        /// </br> Equals transform.position when the entity is visible (in vision system).
+        /// <br/> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
         public Vector3 WorldPosition { get; private set; }
 
         /// <summary>
         /// The exact world rotation this entity is rotated at at the moment.
-        /// </br> Equals transform.position when the entity is visible (in vision system).
+        /// <br/> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
         public Quaternion WorldRotation { get; private set; }
 
@@ -107,7 +107,7 @@ namespace BlockmapFramework
         public int PlayerColorMaterialIndex = -1;
 
         // Components
-        private GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
+        protected GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
         private MeshRenderer Renderer;
         private Projector SelectionIndicator;
         private MeshCollider MeshCollider; // used for hovering and selecting with cursor
@@ -154,13 +154,7 @@ namespace BlockmapFramework
             transform.SetParent(Wrapper.transform);
 
             // Create a collider for entity vision on a seperate object
-            GameObject visionColliderObject = new GameObject("visionCollider");
-            visionColliderObject.transform.SetParent(Wrapper.transform);
-            visionColliderObject.transform.localScale = transform.localScale;
-            visionColliderObject.layer = World.Layer_EntityVisionCollider;
-            VisionCollider = visionColliderObject.AddComponent<BoxCollider>();
-            VisionCollider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
-            VisionCollider.center = new Vector3(0f, VisionCollider.size.y / 2, 0f);
+            CreateVisionCollider();
 
             // Move entity to spawn position
             SetOriginNode(origin);
@@ -176,6 +170,20 @@ namespace BlockmapFramework
             if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Owner.Color;
 
             OnInitialized();
+        }
+
+        /// <summary>
+        /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.
+        /// </summary>
+        protected virtual void CreateVisionCollider()
+        {
+            GameObject visionColliderObject = new GameObject("visionCollider");
+            visionColliderObject.transform.SetParent(Wrapper.transform);
+            visionColliderObject.transform.localScale = transform.localScale;
+            visionColliderObject.layer = World.Layer_EntityVisionCollider;
+            VisionCollider = visionColliderObject.AddComponent<BoxCollider>();
+            VisionCollider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
+            VisionCollider.center = new Vector3(0f, VisionCollider.size.y / 2, 0f);
         }
 
         protected virtual void OnInitialized() { }
@@ -352,7 +360,22 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the world position of the center of this entity.
         /// </summary>
-        public virtual Vector3 GetWorldCenter() => VisionCollider.bounds.center;
+        public virtual Vector3 GetWorldCenter() => GetWorldPosition(World, OriginNode, Rotation) + new Vector3(0f, WorldHeight / 2f, 0f);
+
+        /// <summary>
+        /// Returns the translated local coordinate in x/y direction depending the rotation of the entity.
+        /// </summary>
+        /// <returns></returns>
+        public Vector2Int GetLocalPosition(Vector2Int localCoord)
+        {
+            return Rotation switch
+            {
+                Direction.N => localCoord,
+                Direction.E => new Vector2Int(localCoord.y, Dimensions.z - localCoord.y - 1),
+                Direction.S => new Vector2Int(Dimensions.x - localCoord.x - 1, Dimensions.z - localCoord.y - 1),
+                Direction.W => new Vector2Int(Dimensions.z - localCoord.y - 1, localCoord.x),
+            };
+        }
 
         public HashSet<BlockmapNode> GetOccupiedNodes()
         {
@@ -691,10 +714,18 @@ namespace BlockmapFramework
             UpdateVisiblity(World.ActiveVisionActor);
 
             // Update position of vision collider
-            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
-            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+            UpdateVisionColliderPosition();
 
             pm_SetOriginNode.End();
+        }
+
+        /// <summary>
+        /// Updates the position of all vision colliders according to the current OriginNode and rotation of this entity.
+        /// </summary>
+        protected virtual void UpdateVisionColliderPosition()
+        {
+            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
+            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 
         /// <summary>

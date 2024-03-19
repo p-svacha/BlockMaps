@@ -1,21 +1,19 @@
 Big Features to Add:
 
-- add some car models
-	> Rework dimensions attribute of entities
-		> Add new EntityShape class/struct
-		> Each node within dimensions has a defined hitbox that can be [Full/None/Wall_N/E/S/W]
-	> Entities can now have a different heigh per node
-	> Car hood has height 1/2, rest height 2/3, width = 2, length = 4/5
-	> Add UseTextures attribute to entity shader and support both modes on created models
-	> Implement entity nodes, allow car roof
-		> new metal surface
-	> make a list of material indexes colorable in editor
-		> save color in entityData
-- expand entity navmesh impact options
-	> make it possible that entities can block a combination of full nodes, sides and corners
-	> all of it should affect the navmesh
-	> visioncollider needs to be adapted too
+- Allow building walls on walls
+	> New attribute solidTop
+	> When wall exists, try building on top
+	> Adjust climbables
 
+- New WallType: Window
+	> Transparent
+	> Window gets bigger when adjacent walls are windows too
+
+- New WallType: Door
+	> own subclass with state attribute open/close
+	> state affects navmesh
+	> state affects vision
+	> Mesh gen gets impacted by adjacent door
 
 (> allow any height diffs on allowed shapes)
 - Remove limit of max height diff within a node
@@ -28,6 +26,8 @@ Big Features to Add:
 		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
 	- all entities have a max slope they can walk
 
+- make a list of material indexes colorable in editor
+	> save color in entityData
 	
 - limit vision to height (don't draw anything above height x)
 
@@ -60,11 +60,13 @@ Big Features to Add:
 - decouple/add entity visibility from node visiblity
 - decouple/add wall visibiliry from node visibility
 
-wall drag
-air node drag
-proc entity drag
-tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
-walls where top matches adjacent node (a bit like ladders)
+- Editor improvements:
+	> wall drag
+	> air node drag
+	> proc entity drag
+	> tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
+	
+- Walls where top matches adjacent node (a bit like ladders)
 
 - Implement some line features for new map gen system
 	> road
@@ -238,6 +240,18 @@ walls where top matches adjacent node (a bit like ladders)
 - Terrain affinity
 
 - Weather / Temperature (Snow/Mud)
+
+- Expand entity shapes
+	> Rework dimensions attribute of entities
+	> Add new EntityShape class/struct
+	> Each node within dimensions has a defined vision hitbox that can be [Full/None/Wall_N/E/S/W]
+	> make it possible that entities can block a combination of full nodes, sides and corners
+	> Impact vision
+	> Impact navmesh
+
+- Allow entites to have their own nodes
+
+- Add UseTextures attribute to entity shader and support both modes on created models
 
 
 -------- RETIRED IDEAS ------------
