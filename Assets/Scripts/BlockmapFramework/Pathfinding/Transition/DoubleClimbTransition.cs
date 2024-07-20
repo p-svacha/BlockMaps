@@ -164,7 +164,7 @@ namespace BlockmapFramework
                         if (Vector3.Distance(newPosition, nextPoint) <= REACH_EPSILON)
                         {
                             entity.ClimbPhase = ClimbPhase.ClimbDown;
-                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(HelperFunctions.GetOppositeDirection(Direction))); // Look at wall
+                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(HelperFunctions.GetOppositeDirection(Direction))); // Look at fence
                         }
 
                         // Out params

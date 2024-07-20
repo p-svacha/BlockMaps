@@ -16,11 +16,13 @@ namespace BlockmapFramework
         public int MaxActorId { get; set; }
         public int MaxZoneId { get; set; }
         public int MaxFenceId { get; set; }
+        public int MaxWallId { get; set; }
         public List<ChunkData> Chunks { get; set; }
         public List<ActorData> Actors { get; set; }
         public List<EntityData> Entities { get; set; }
         public List<WaterBodyData> WaterBodies { get; set; }
         public List<FenceData> Fences { get; set; }
+        public List<WallData> Walls { get; set; }
         public List<ZoneData> Zones { get; set; }
     }
 }

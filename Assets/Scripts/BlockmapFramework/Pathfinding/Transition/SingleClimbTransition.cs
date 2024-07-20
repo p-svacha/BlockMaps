@@ -119,7 +119,7 @@ namespace BlockmapFramework
                         {
                             entity.ClimbPhase = ClimbPhase.InClimb;
                             entity.ClimbIndex = 0;
-                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction))); // Look at wall
+                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction))); // Look at fence
                         }
 
                         // Out params

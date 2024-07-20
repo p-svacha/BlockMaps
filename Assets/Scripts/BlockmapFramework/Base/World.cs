@@ -51,6 +51,7 @@ namespace BlockmapFramework
         private Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
         private Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
         private Dictionary<int, Fence> Fences = new Dictionary<int, Fence>();
+        private Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
         private Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
 
         private int NodeIdCounter;
@@ -59,6 +60,7 @@ namespace BlockmapFramework
         private int ActorIdCounter;
         private int ZoneIdCounter;
         private int FenceIdCounter;
+        private int WallIdCounter;
 
         // Camera
         public BlockmapCamera Camera { get; private set; }
@@ -150,6 +152,7 @@ namespace BlockmapFramework
             ActorIdCounter = data.MaxActorId + 1;
             ZoneIdCounter = data.MaxZoneId + 1;
             FenceIdCounter = data.MaxFenceId + 1;
+            WallIdCounter = data.MaxWallId + 1;
 
             // Init actors
             foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
@@ -194,6 +197,13 @@ namespace BlockmapFramework
             {
                 Fence fence = Fence.Load(this, fenceData);
                 Fences.Add(fence.Id, fence);
+            }
+
+            // Init walls
+            foreach(WallData wallData in data.Walls)
+            {
+                Wall wall = Wall.Load(wallData);
+                Walls.Add(wall.Id, wall);
             }
 
             // Init water bodies
@@ -1600,12 +1610,14 @@ namespace BlockmapFramework
                 MaxActorId = ActorIdCounter,
                 MaxZoneId = ZoneIdCounter,
                 MaxFenceId = FenceIdCounter,
+                MaxWallId = WallIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Actors = Actors.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Values.Select(x => x.Save()).ToList(),
                 WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
                 Fences = Fences.Values.Select(x => x.Save()).ToList(),
-                Zones = Zones.Values.Select(x => x.Save()).ToList()
+                Zones = Zones.Values.Select(x => x.Save()).ToList(),
+                Walls = Walls.Values.Select(x => x.Save()).ToList(),
             };
         }
 

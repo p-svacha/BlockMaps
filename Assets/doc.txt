@@ -12,14 +12,40 @@
 - Walls have a WallShape attribute that decides how a wall gets rendered (basically what currently WallType is)
 
 Tools:
- - The current tool that is now in should still work, called "Fence"
  - New "Free wall placement" tool where you can place walls like air nodes with 2 selections:
-	> Wall shape (solid, window, slope)
+	> Wall shape (solid, corner, block, window, slope)
+		° Decides in what directions the wall can be placed
+			- Solid/Window/Slope = Side
+			- Corner = Corner
+			- Block = None (full cell)
 	> Wall material (brick, wood, concrete)
 		° Decides climbing skill requirement
 	> Ctrl+Scroll to change height (like air nodes)
 		° Show transparent grid on selected height
 	> Hovermode changes direction
+
+Systems to check:
+ - Database systems
+ - WallData to load/save
+ - CurrentHoveredWall in World
+ - CanPlace, Place and Remove in World
+ - WallTool in Editor
+	° BuildPreview depending only on shape
+
+ - Collision checks when building other stuff
+	> Air nodes
+	> Fences
+	> Ladders
+ - Pathfinding
+	> Transitions should be blocked by walls
+ - Climbing
+	> Add climbing checks (only shape == solid)
+ - Vision
+	> Vision should be blocked by walls
+	> Not by window glass
+	> Each wall piece has a LastSeenPosition and IsDisovered and IsSeen just like Nodes
+		° Make a general IVisionTarget interface and add it to entities and walls and nodes
+		° Maybe split into IStaticVisionTarget and IDynamicVisionTarget where only the dynamic one includes LastSeenPosition
 
 ---
 

@@ -18,6 +18,7 @@ namespace WorldEditor
         MoveCharacter,
         Water,
         Fence,
-        Ladder
+        Ladder,
+        Wall
     }
 }

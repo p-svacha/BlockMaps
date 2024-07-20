@@ -6,7 +6,7 @@ namespace BlockmapFramework
 {
     /// <summary>
     /// All vertical things that can be climbed by entites need to implement this.
-    /// <br/> This includes ladders, cliffs and walls.
+    /// <br/> This includes ladders, cliffs and fences.
     /// </summary>
     public interface IClimbable
     {

@@ -40,6 +40,7 @@ namespace WorldEditor
         public WaterTool WaterTool;
         public FenceTool FenceTool;
         public LadderTool LadderTool;
+        public WallTool WallTool;
 
         [Header("World")]
         public World World;
@@ -76,6 +77,7 @@ namespace WorldEditor
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.ProceduralEntity, ProceduralEntityTool },
                 { EditorToolId.Fence, FenceTool },
+                { EditorToolId.Wall, WallTool },
                 { EditorToolId.Ladder, LadderTool },
                 { EditorToolId.Water, WaterTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },

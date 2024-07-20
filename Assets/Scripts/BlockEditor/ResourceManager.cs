@@ -32,6 +32,7 @@ namespace WorldEditor
         public Sprite MoveEntityToolSprite;
         public Sprite WaterToolSprite;
         public Sprite FenceToolSprite;
+        public Sprite WallToolSprite;
         public Sprite LadderToolSprite;
 
         [Header("UI")]
