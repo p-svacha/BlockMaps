@@ -321,7 +321,7 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public virtual int MinHeight => World.GetNodeHeight(GetWorldPosition(World, OriginNode, Rotation).y);
+        public virtual int MinHeight => Mathf.CeilToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT);
         public virtual int MaxHeight => MinHeight + Dimensions.y;
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
@@ -340,6 +340,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
+        /// <br/>The world position is always in the center of the entity in the x and z axis and on the bottom in the y axis.
         /// </summary>
         public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {

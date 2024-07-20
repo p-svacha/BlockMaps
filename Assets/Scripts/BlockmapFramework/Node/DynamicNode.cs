@@ -27,15 +27,10 @@ namespace BlockmapFramework
 
         public bool CanChangeHeight(Direction mode)
         {
-            // Entities
+            // Entities: Can't change height in any entity is on the node
             if (Entities.Count > 0) return false;
 
-            // Fences
-            foreach (Direction fenceDir in Fences.Keys)
-                if (HelperFunctions.DoAffectedCornersOverlap(mode, fenceDir))
-                    return false;
-
-            // Ladders
+            // Ladders: Can't change height if any ladder is affected by height change
             foreach (Direction ladderDir in TargetLadders.Keys)
                 if (HelperFunctions.DoAffectedCornersOverlap(mode, ladderDir))
                     return false;
@@ -45,7 +40,7 @@ namespace BlockmapFramework
 
         public virtual bool CanChangeHeight(Direction mode, bool isIncrease)
         {
-            // General, height direction unrelated checks
+            // General checks no matter if up/down
             if (!CanChangeHeight(mode)) return false;
 
             // Calculate new heights
@@ -59,11 +54,31 @@ namespace BlockmapFramework
             if (newHeights.Values.Any(x => x > World.MAX_HEIGHT)) return false;
 
             // Check if changing height would intersect the node with another one on the same coordinates
-            List<BlockmapNode> nodes = World.GetNodes(WorldCoordinates);
-            foreach(BlockmapNode node in nodes)
+            List<BlockmapNode> nodesOnCoordinate = World.GetNodes(WorldCoordinates);
+            foreach(BlockmapNode node in nodesOnCoordinate)
             {
                 if (node == this) continue;
                 if (World.DoNodesIntersect(newHeights, node.Height)) return false;
+            }
+
+            // Check if increasing height would lead to a fence intersecting with a node above
+            if (isIncrease)
+            {
+                foreach (Fence fence in Fences.Values)
+                {
+                    Dictionary<Direction, int> newFenceHeights = fence.GetMaxHeights(newHeights);
+                    foreach(BlockmapNode nodeAbove in nodesOnCoordinate)
+                    {
+                        if (nodeAbove == this) continue;
+                        if (nodeAbove.BaseHeight >= newBaseHeight)
+                        {
+                            foreach(Direction corner in newFenceHeights.Keys)
+                            {
+                                if (nodeAbove.Height[corner] < newFenceHeights[corner]) return false;
+                            }
+                        }
+                    }
+                }
             }
 
             // Check if decreasing height would leave node under water of adjacent water body
@@ -84,6 +99,22 @@ namespace BlockmapFramework
 
                             if (ownSideUnderwater && adjWater.GroundNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
                             if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
+                        }
+                    }
+                }
+            }
+
+            // Check if decreasing height would intersect with a fence below
+            if(!isIncrease)
+            {
+                foreach (BlockmapNode nodeBelow in World.GetNodes(WorldCoordinates, 0, BaseHeight - 1))
+                {
+                    foreach(Fence fence in nodeBelow.Fences.Values)
+                    {
+                        Dictionary<Direction, int> fenceHeights = fence.MaxHeights;
+                        foreach(Direction corner in fenceHeights.Keys)
+                        {
+                            if (fenceHeights[corner] > newHeights[corner]) return false;
                         }
                     }
                 }

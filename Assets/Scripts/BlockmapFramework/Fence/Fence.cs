@@ -6,7 +6,8 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// An instance of a fence in the world. All fence-specific attributes are stored in Type.
+    /// Fences are a kind of barrier at the edge or corner of nodes. They follow the node topography and may be climbable.
+    /// <br/>An instance represents one fence one one node in the world. All fence-specific attributes are stored in Type.
     /// </summary>
     public class Fence : IClimbable
     {
@@ -38,17 +39,22 @@ namespace BlockmapFramework
         /// <summary>
         /// The minimum y coordinate that this fence is taking up.
         /// </summary>
-        public int MinHeight { get; private set; }
+        public int MinHeight => Node.GetMinHeight(Side);
 
         /// <summary>
         /// The maximum y coordinate that this fence is taking up.
         /// </summary>
-        public int MaxHeight => MinHeight + Height;
+        public int MaxHeight => Node.GetMaxHeight(Side) + Height;
+
+        /// <summary>
+        /// Returns the height for this fence for all corners it covers as a y coordinate.
+        /// </summary>
+        public Dictionary<Direction, int> MaxHeights => GetMaxHeights(Node.Height);
 
         /// <summary>
         /// Returns if this fence follows a slope.
         /// </summary>
-        public bool IsSloped => Type.FollowSlopes && !Node.IsFlat(Side);
+        public bool IsSloped => !Node.IsFlat(Side);
 
         public bool IsClimbable => SkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
 
@@ -86,7 +92,6 @@ namespace BlockmapFramework
             Node = node;
             Side = side;
             Height = height;
-            MinHeight = node.GetMinHeight(side);
 
             node.Fences.Add(side, this);
         }
@@ -102,6 +107,19 @@ namespace BlockmapFramework
         {
             List<Direction> relevantCorners = HelperFunctions.GetAffectedCorners(side);
             return node.Height.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
+        }
+
+        /// <summary>
+        /// Returns a dictionary containing the maximum height of this fence for all corners it covers, given the node it is on would have the provided heights.
+        /// </summary>
+        public Dictionary<Direction, int> GetMaxHeights(Dictionary<Direction, int> nodeHeight)
+        {
+            Dictionary<Direction, int> fenceHeights = new Dictionary<Direction, int>();
+            foreach(Direction dir in HelperFunctions.GetAffectedCorners(Side))
+            {
+                fenceHeights.Add(dir, nodeHeight[dir] + Height);
+            }
+            return fenceHeights;
         }
 
         public override string ToString()

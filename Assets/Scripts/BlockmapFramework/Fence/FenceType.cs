@@ -10,7 +10,6 @@ namespace BlockmapFramework
         public abstract FenceTypeId Id { get; }
         public abstract string Name { get; }
         public abstract int MaxHeight { get; }
-        public abstract bool FollowSlopes { get; }
         public abstract bool CanBuildOnCorners { get; }
         public abstract bool BlocksVision { get; }
         public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/Fences/" + Id.ToString());

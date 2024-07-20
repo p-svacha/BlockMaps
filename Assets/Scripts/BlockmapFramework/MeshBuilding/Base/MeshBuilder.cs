@@ -156,7 +156,7 @@ namespace BlockmapFramework
 
         #endregion
         /// <summary>
-        /// Adds all meshvertices and meshtriangles to build a wall. Returns a MeshPlane containing all data.
+        /// Adds all meshvertices and meshtriangles to build a plane. Returns a MeshPlane containing all data.
         /// UV from first to second vector is uv-y-axis
         /// <br/> UV2 is forced to 0.5/0.5 so it doesn't interfere with shader (BlockMap-specific).
         /// </summary>
@@ -280,7 +280,7 @@ namespace BlockmapFramework
         /// </summary>
         public void CarveHoleInPlane(int submeshIndex, MeshPlane plane, Vector2 holePosition, Vector2 holeDimensions)
         {
-            // Remove the wall that contains the hole
+            // Remove the plane that contains the hole
             RemovePlane(submeshIndex, plane);
 
             // Add new vertices on the sides of the hole

@@ -11,7 +11,6 @@ namespace BlockmapFramework
         public override FenceTypeId Id => FenceTypeId.BrickWall;
         public override string Name => "Brick Wall";
         public override int MaxHeight => World.MAX_HEIGHT;
-        public override bool FollowSlopes => false;
         public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => true;
 
@@ -36,7 +35,7 @@ namespace BlockmapFramework
             float dimZ = WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            meshBuilder.BuildCube(node, side, submesh, pos, dim, FollowSlopes);
+            meshBuilder.BuildCube(node, side, submesh, pos, dim, adjustToNodeSlope: true);
         }
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
@@ -50,7 +49,7 @@ namespace BlockmapFramework
             float dimZ = WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            meshBuilder.BuildCube(node, side, submesh, pos, dim, FollowSlopes);
+            meshBuilder.BuildCube(node, side, submesh, pos, dim, adjustToNodeSlope: true);
         }
     }
 }

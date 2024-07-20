@@ -725,47 +725,6 @@ namespace BlockmapFramework
             RedrawNodesAround(newNode.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(newNode.GetCenterWorldPosition());
         }
-        public bool CanBuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
-        {
-            Chunk chunk = GetChunk(worldCoordinates);
-            Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
-            GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
-
-            // Check if an entity or fence below is blocking this space
-            List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
-            foreach (BlockmapNode node in belowNodes)
-            {
-                foreach (Entity e in node.Entities)
-                    if (e.MaxHeight > height)
-                        return false;
-
-                foreach (Fence fence in node.Fences.Values)
-                    if (fence.MaxHeight > height)
-                        return false;
-            }
-
-            // Check if underwater
-            WaterNode water = GetWaterNode(worldCoordinates);
-            if (water != null && water.WaterBody.ShoreHeight > height) return false;
-
-            // Check overlapping with existing node
-            List<BlockmapNode> sameLevelNodes = GetNodes(worldCoordinates, height);
-            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetSlopeHeights(height, dir), x.Height))) return false;
-
-            return true;
-        }
-        public void BuildAirSlope(Vector2Int worldCoordinates, int height, Direction dir)
-        {
-            Chunk chunk = GetChunk(worldCoordinates);
-            Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
-
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetSlopeHeights(height, dir), SurfaceId.Concrete);
-            RegisterNode(newNode);
-
-            UpdateNavmeshAround(newNode.WorldCoordinates);
-            RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(newNode.GetCenterWorldPosition());
-        }
 
         public bool CanRemoveAirNode(AirNode node)
         {
@@ -1005,9 +964,13 @@ namespace BlockmapFramework
             // Check if a ladder is already there
             if (node.SourceLadders.ContainsKey(side)) return false;
 
-            // Check if enough space above node to place fence of that height
-            int freeHeadSpace = node.GetFreeHeadSpace(side, node.GetMinHeight(side));
-            if (freeHeadSpace < height) return false;
+            // Check for each fence corner if enough space is above node
+            foreach(Direction corner in HelperFunctions.GetAffectedCorners(side))
+            {
+                int freeHeadSpace = node.GetFreeHeadSpace(corner);
+                if (freeHeadSpace < height) return false;
+            }
+           
 
             return true;
         }

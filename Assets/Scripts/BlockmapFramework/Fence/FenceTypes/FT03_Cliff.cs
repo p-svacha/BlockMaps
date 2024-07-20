@@ -9,7 +9,6 @@ namespace BlockmapFramework
         public override FenceTypeId Id => FenceTypeId.Cliff;
         public override string Name => "Cliff Wall";
         public override int MaxHeight => World.MAX_HEIGHT;
-        public override bool FollowSlopes => false;
         public override bool CanBuildOnCorners => false;
         public override bool BlocksVision => true;
 
@@ -31,8 +30,8 @@ namespace BlockmapFramework
             Vector3 p3 = new Vector3(1f, World.TILE_HEIGHT * height, 0f);
             Vector3 p4 = new Vector3(1f, 0f, 0f);
 
-            meshBuilder.BuildPlane(node, side, submesh, p1, p2, p3, p4, FollowSlopes);
-            meshBuilder.BuildPlane(node, side, submesh, p1, p2, p3, p4, FollowSlopes, mirror: true);
+            meshBuilder.BuildPlane(node, side, submesh, p1, p2, p3, p4, adjustToNodeSlope: true);
+            meshBuilder.BuildPlane(node, side, submesh, p1, p2, p3, p4, adjustToNodeSlope: true, mirror: true);
         }
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview) { } // can't build on corners
     }

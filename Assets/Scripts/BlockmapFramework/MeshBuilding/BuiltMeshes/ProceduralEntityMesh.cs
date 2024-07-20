@@ -17,7 +17,7 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_ProceduralEntityMesh;
         }
 
-        public override void SetVisibility(Actor player) // Same as WallMesh
+        public override void SetVisibility(Actor player) // Same as FenceMesh
         {
             // Set renderer
             if (Renderer == null) Renderer = GetComponent<MeshRenderer>();

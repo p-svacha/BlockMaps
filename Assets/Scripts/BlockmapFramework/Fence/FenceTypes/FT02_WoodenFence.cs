@@ -9,7 +9,6 @@ namespace BlockmapFramework
         public override FenceTypeId Id => FenceTypeId.WoodenFence;
         public override string Name => "Wooden Fence";
         public override int MaxHeight => 1;
-        public override bool FollowSlopes => true;
         public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => false;
 
@@ -48,7 +47,7 @@ namespace BlockmapFramework
                 float dimZ = POLE_WIDTH;
                 Vector3 polePos = new Vector3(startX, startY, startZ);
                 Vector3 poleDims = new Vector3(dimX, dimY, dimZ);
-                meshBuilder.BuildCube(node, side, submesh, polePos, poleDims, FollowSlopes);
+                meshBuilder.BuildCube(node, side, submesh, polePos, poleDims, adjustToNodeSlope: true);
             }
 
             // Cross brace
@@ -60,7 +59,7 @@ namespace BlockmapFramework
             float cb_dimZ = CROSS_BRACE_WIDTH;
             Vector3 cbPos = new Vector3(cb_x, cb_y, cb_z);
             Vector3 cbDims = new Vector3(cb_dimX, cb_dimY, cb_dimZ);
-            meshBuilder.BuildCube(node, side, submesh, cbPos, cbDims, FollowSlopes);
+            meshBuilder.BuildCube(node, side, submesh, cbPos, cbDims, adjustToNodeSlope: true);
         }
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
@@ -74,7 +73,7 @@ namespace BlockmapFramework
             float dimZ = POLE_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
-            meshBuilder.BuildCube(node, side, submesh, pos, dim, FollowSlopes);
+            meshBuilder.BuildCube(node, side, submesh, pos, dim, adjustToNodeSlope: true);
         }
 
         #endregion

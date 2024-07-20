@@ -20,7 +20,7 @@ namespace BlockmapFramework
         public Dictionary<Direction, int> Height { get; protected set; }
 
         /// <summary>
-        /// Lowest point of this node.
+        /// Lowest y coordinate of this node.
         /// </summary>
         public int BaseHeight { get; private set; }
         public float BaseWorldHeight => BaseHeight * World.TILE_HEIGHT;
@@ -617,8 +617,14 @@ namespace BlockmapFramework
         public abstract SurfaceProperties GetSurfaceProperties();
         public abstract Vector3 GetCenterWorldPosition();
 
-        public int GetMinHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Min(x => x.Value);
-        public int GetMaxHeight(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Max(x => x.Value);
+        /// <summary>
+        /// Returns the minimum height on the given side of this node as a y coordinate. 
+        /// </summary>
+        public int GetMinHeight(Direction side) => Height.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Min(x => x.Value);
+        /// <summary>
+        /// Returns the maximum height on the given side of this node as a y coordinate. 
+        /// </summary>
+        public int GetMaxHeight(Direction side) => Height.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Max(x => x.Value);
 
         /// <summary>
         /// Checks and returns if a node with the same surface exists in the given direction with a matching height to this node.
@@ -890,13 +896,12 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the minimun amount of space (in amount of tiles) that is free above this node.
+        /// Returns the minimun amount of space (in amount of tiles) that is free above this node in the given direction by checking all corners that are affected by that direction.
         /// <br/> For example a flat node right above this flat node would be 1.
         /// <br/> If any corner of an above node overlaps with this node 0 is returned.
-        /// <br/> forcedBaseHeight can be passed to check free head space from a specific height instead of node corner.
         /// <br/> Direction.None can be passed to check all corners.
         /// </summary>
-        public int GetFreeHeadSpace(Direction dir, int forcedBaseHeight = -1)
+        public int GetFreeHeadSpace(Direction dir)
         {
             List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
 
@@ -907,8 +912,6 @@ namespace BlockmapFramework
                 foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {
                     int diff = node.Height[corner] - Height[corner];
-                    if (forcedBaseHeight != -1) diff = node.Height[corner] - forcedBaseHeight;
-
                     if (diff < minHeight) minHeight = diff;
                 }
             }
