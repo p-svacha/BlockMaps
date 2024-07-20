@@ -30,9 +30,9 @@ namespace BlockmapFramework
             // Entities
             if (Entities.Count > 0) return false;
 
-            // Walls
-            foreach (Direction wallDir in Walls.Keys)
-                if (HelperFunctions.DoAffectedCornersOverlap(mode, wallDir))
+            // Fences
+            foreach (Direction fenceDir in Fences.Keys)
+                if (HelperFunctions.DoAffectedCornersOverlap(mode, fenceDir))
                     return false;
 
             // Ladders

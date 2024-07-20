@@ -6,47 +6,47 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// An instance of a wall in the world. All wall-specific attributes are stored in Type.
+    /// An instance of a fence in the world. All fence-specific attributes are stored in Type.
     /// </summary>
-    public class Wall : IClimbable
+    public class Fence : IClimbable
     {
         /// <summary>
-        /// Unique identifier of this specific wall.
+        /// Unique identifier of this specific fence.
         /// </summary>
         public int Id { get; private set; }
 
         /// <summary>
-        /// Type containing general properties about the wall.
+        /// Type containing general properties about the fence.
         /// </summary>
-        public WallType Type { get; private set; }
+        public FenceType Type { get; private set; }
 
         /// <summary>
-        /// Node that this wall piece is placed on.
+        /// Node that this fence piece is placed on.
         /// </summary>
         public BlockmapNode Node { get; private set; }
 
         /// <summary>
-        /// On what side of the OriginNode this wall is placed on.
+        /// On what side of the OriginNode this fence is placed on.
         /// </summary>
         public Direction Side { get; private set; }
 
         /// <summary>
-        /// How many tiles high this wall is, starting at OriginNode.BaseHeight.
+        /// How many tiles high this fence is, starting at OriginNode.BaseHeight.
         /// </summary>
         public int Height { get; private set; }
 
         /// <summary>
-        /// The minimum y coordinate that this wall is taking up.
+        /// The minimum y coordinate that this fence is taking up.
         /// </summary>
         public int MinHeight { get; private set; }
 
         /// <summary>
-        /// The maximum y coordinate that this wall is taking up.
+        /// The maximum y coordinate that this fence is taking up.
         /// </summary>
         public int MaxHeight => MinHeight + Height;
 
         /// <summary>
-        /// Returns if this wall follows a slope.
+        /// Returns if this fence follows a slope.
         /// </summary>
         public bool IsSloped => Type.FollowSlopes && !Node.IsFlat(Side);
 
@@ -75,7 +75,7 @@ namespace BlockmapFramework
 
         #region Init
 
-        public Wall(WallType type)
+        public Fence(FenceType type)
         {
             Type = type;
         }
@@ -88,7 +88,7 @@ namespace BlockmapFramework
             Height = height;
             MinHeight = node.GetMinHeight(side);
 
-            node.Walls.Add(side, this);
+            node.Fences.Add(side, this);
         }
 
         #endregion
@@ -96,29 +96,34 @@ namespace BlockmapFramework
         #region Getters
 
         /// <summary>
-        /// Returns the y coordinate of where the wall would start when placing on the given node & side.
+        /// Returns the y coordinate of where the fence would start when placing on the given node & side.
         /// </summary>
-        public static int GetWallStartY(BlockmapNode node, Direction side)
+        public static int GetFenceStartY(BlockmapNode node, Direction side)
         {
             List<Direction> relevantCorners = HelperFunctions.GetAffectedCorners(side);
             return node.Height.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
+        }
+
+        public override string ToString()
+        {
+            return Node.WorldCoordinates.ToString() + " " + Node.BaseHeight + " " + Side.ToString() + " " + Type.Name.ToString();
         }
 
         #endregion
 
         #region Save / Load
 
-        public static Wall Load(World world, WallData data)
+        public static Fence Load(World world, FenceData data)
         {
-            WallType type = WallTypeManager.Instance.GetWallType(data.TypeId);
-            Wall wall = new Wall(type);
-            wall.Init(data.Id, world.GetNode(data.NodeId), data.Side, data.Height);
-            return wall;
+            FenceType type = FenceTypeManager.Instance.GetFenceType(data.TypeId);
+            Fence fence = new Fence(type);
+            fence.Init(data.Id, world.GetNode(data.NodeId), data.Side, data.Height);
+            return fence;
         }
 
-        public WallData Save()
+        public FenceData Save()
         {
-            return new WallData
+            return new FenceData
             {
                 Id = Id,
                 TypeId = Type.Id,

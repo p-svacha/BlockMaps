@@ -847,7 +847,7 @@ MonoBehaviour:
   SurfaceMaterial: {fileID: 2100000, guid: 473924d3185d1b348929fdd221a92050, type: 2}
   LadderMaterial: {fileID: 2100000, guid: dda4b16a11c04cd4b99157e9f99c625c, type: 2}
   Mat_Asphalt: {fileID: 2100000, guid: e3ff98423350ef3488cb3d49298df067, type: 2}
-  Mat_BrickWall: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
+  Mat_Brick: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
   Mat_Rock: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
   Mat_RoofingTiles: {fileID: 2100000, guid: effc84cd0136c5c4999a7c1a570906cd, type: 2}
   Mat_Cobblestone: {fileID: 2100000, guid: 523c733375c89144984a614ea337cec8, type: 2}

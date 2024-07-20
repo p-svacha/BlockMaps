@@ -19,7 +19,7 @@ namespace BlockmapFramework
         public Material LadderMaterial;
 
         public Material Mat_Asphalt;
-        public Material Mat_BrickWall;
+        public Material Mat_Brick;
         public Material Mat_Rock;
         public Material Mat_RoofingTiles;
         public Material Mat_Cobblestone;
@@ -35,13 +35,6 @@ namespace BlockmapFramework
         public Color SandColor;
         public Color TarmacColor;
         public Color WaterColor;
-
-        [Header("Thumbnails")]
-        public Sprite Thumbnail_Brickwall;
-        public Sprite Thumbnail_WoodenFence;
-        public Sprite Thumbnail_CliffWall;
-
-        public Sprite Thumbnail_Hedge;
 
         [Header("Textures")]
         public Texture2D GrassTexture;

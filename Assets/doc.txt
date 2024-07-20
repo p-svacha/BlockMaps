@@ -1,35 +1,32 @@
 --- Update Walls V2
 
 General:
-- Whole fence/wall framework gets an updated
-- Tools that exist now will be ported to new system and still work the same, the walls/fences will just be stored differently in the background
-- Instead of walls/fences being stored on a node, they will be stored in their own datastructure, independently of nodes
-- Walls can still be easily accessed for specific nodes through specialized getters
+- Current wall framework stays as it is but gets called fence framework
+	> Everything current gets renamend to fence
+	> Fences will new always follow slopes
+	> Changing a node height with fence will also change the fence
 
-- Walls are stored in a Dictionary<Vector3, WallInfo> data structure per chunk (and also a global one in World):
+- New wall framework gets added:
+- Walls will be stored in their own datastructure, independently of nodes
+- Walls will always be in exactly one world cell
+
+- Walls are stored in a Dictionary<Vector3Int, List<Wall>> data structure per chunk (and also a global one in World):
 	Vector3 refers to the x, y, z position on the map
 	WallInfo contains a List<Wall> of all walls that are inside this position with some functionality of retrieving and adding walls on a certain direction
+		° GetWall(Vector3Int pos, Direction dir) returns a singular wall
 
-- Walls have a new WallMaterial attribute, that are stored in a static WallMaterialManager (just like SurfaceManager for node surfaces)
-- Walls have a new WallShape attribute that decides how a wall gets rendered (basically what currently WallType is)
+- Walls have a WallMaterial attribute, that are stored in a static WallMaterialManager (just like SurfaceManager for node surfaces)
+- Walls have a WallShape attribute that decides how a wall gets rendered (basically what currently WallType is)
 
 Tools:
- - The current tool that is now in should still work, called "Fence":
-	> Uses walls that have a premade WallMaterial and WallShape and additional rules (like max height) and places them directly on nodes, always following slopes
-	> Add a new "stop on node" option that will stop the height at the first node intersection.
-		° If it is sloped, then the top wall element will be a sloped one so its flush with the node
-		° Ctrl+Scroll changes between the 1st, 2nd, 3rd etc. node intersection to stop. (Just like with ladder placement)
+ - The current tool that is now in should still work, called "Fence"
  - New "Free wall placement" tool where you can place walls like air nodes with 2 selections:
-	> Wall shape (solid, slope)
+	> Wall shape (solid, window, slope)
 	> Wall material (brick, wood, concrete)
 		° Decides climbing skill requirement
 	> Ctrl+Scroll to change height (like air nodes)
 		° Show transparent grid on selected height
 	> Hovermode changes direction
-- "Wall features" tool where you can plop features onto existing (only if WallShape == Solid) walls 
-	> Window
-	> Adjacent walls with the same feature merge into each other (i.e. two walls above each other with the window feature it then turns into one big window)
-	> Windows affect vision (glass should be ignored by vision system)
 
 ---
 

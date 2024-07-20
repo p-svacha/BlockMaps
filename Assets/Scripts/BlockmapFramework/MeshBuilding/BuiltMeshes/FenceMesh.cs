@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WallMesh : ChunkMesh
+    public class FenceMesh : ChunkMesh
     {
         public int HeightLevel { get; private set; }
 
@@ -14,7 +14,7 @@ namespace BlockmapFramework
             OnInit(chunk);
 
             HeightLevel = level;
-            gameObject.layer = chunk.World.Layer_Wall;
+            gameObject.layer = chunk.World.Layer_Fence;
         }
 
         public override void SetVisibility(Actor player)

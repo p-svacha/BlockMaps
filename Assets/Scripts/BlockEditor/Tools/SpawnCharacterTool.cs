@@ -121,6 +121,13 @@ namespace WorldEditor
                 World.SpawnEntity(Editor.MovingEntityPresets[SelectedEntityIndex - 1], spawnNode, Direction.N, owner, updateWorld: true);
             }
         }
+        public override void HandleRightClick()
+        {
+            if (World.HoveredEntity == null) return;
+            if (!(World.HoveredEntity is MovingEntity)) return;
+
+            World.RemoveEntity(World.HoveredEntity);
+        }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
         {

@@ -13,7 +13,7 @@ namespace BlockmapFramework
         public override SurfacePropertyId PropertiesId => SurfacePropertyId.Tarmac;
         public override bool DoBlend => false;
         public override bool UseLongEdges => true;
-        public override Color Color => ResourceManager.Singleton.Mat_BrickWall.color;
+        public override Color Color => ResourceManager.Singleton.Mat_Brick.color;
         public override Texture2D Texture => ResourceManager.Singleton.GrassTexture;
 
         #region Draw

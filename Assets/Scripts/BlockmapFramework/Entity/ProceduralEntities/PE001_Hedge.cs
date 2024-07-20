@@ -10,8 +10,6 @@ namespace BlockmapFramework {
         private const float BEVEL_HEIGHT = 0.15f;
         private const float BEVEL_WIDTH = 0.1f;
 
-        public override Sprite GetThumbnail() => ResourceManager.Singleton.Thumbnail_Hedge;
-
         public PE001_Hedge()
         {
             Name = "Hedge";

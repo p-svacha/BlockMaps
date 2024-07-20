@@ -82,7 +82,7 @@ namespace BlockmapFramework
             data.Actors = new List<ActorData>();
             data.Entities = new List<EntityData>();
             data.WaterBodies = new List<WaterBodyData>();
-            data.Walls = new List<WallData>();
+            data.Fences = new List<FenceData>();
 
             data.MaxEntityId = -1;
             data.MaxZoneId = -1;

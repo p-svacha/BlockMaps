@@ -6,18 +6,18 @@ using TMPro;
 
 namespace WorldEditor
 {
-    public class WallTool : EditorTool
+    public class FenceTool : EditorTool
     {
-        public override EditorToolId Id => EditorToolId.Wall;
-        public override string Name => "Build Walls/Fences";
-        public override Sprite Icon => ResourceManager.Singleton.WallToolSprite;
+        public override EditorToolId Id => EditorToolId.Fence;
+        public override string Name => "Build Fences";
+        public override Sprite Icon => ResourceManager.Singleton.FenceToolSprite;
 
-        private WallType SelectedWallType;
+        private FenceType SelectedFenceType;
 
         private GameObject BuildPreview;
 
         [Header("Elements")]
-        public UI_SelectionPanel WallSelection;
+        public UI_SelectionPanel FenceSelection;
         public TMP_InputField HeightInput;
         public TMP_InputField ClimbabilityText;
 
@@ -25,17 +25,17 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            WallSelection.Clear();
-            foreach (WallType wall in WallTypeManager.Instance.GetAllWallTypes())
-                WallSelection.AddElement(wall.PreviewSprite, Color.white, wall.Name, () => SelectWallType(wall.Id));
+            FenceSelection.Clear();
+            foreach (FenceType fence in FenceTypeManager.Instance.GetAllFenceTypes())
+                FenceSelection.AddElement(fence.PreviewSprite, Color.white, fence.Name, () => SelectFenceType(fence.Id));
 
-            WallSelection.SelectFirstElement();
+            FenceSelection.SelectFirstElement();
         }
 
-        private void SelectWallType(WallTypeId wall)
+        private void SelectFenceType(FenceTypeId fence)
         {
-            WallType type = WallTypeManager.Instance.GetWallType(wall);
-            SelectedWallType = type;
+            FenceType type = FenceTypeManager.Instance.GetFenceType(fence);
+            SelectedFenceType = type;
             ClimbabilityText.text = type.ClimbSkillRequirement.ToString();
         }
 
@@ -66,7 +66,7 @@ namespace WorldEditor
                 Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode8);
 
                 Color c = Color.white;
-                if (!World.CanBuildWall(SelectedWallType, World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;
+                if (!World.CanBuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;
 
                 World.HoveredNode.ShowOverlay(overlayTexture, c);
 
@@ -74,7 +74,7 @@ namespace WorldEditor
                 BuildPreview.SetActive(true);
                 BuildPreview.transform.position = World.HoveredNode.Chunk.WorldPosition;
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                WallMeshGenerator.DrawWall(previewMeshBuilder, SelectedWallType, World.HoveredNode, World.NodeHoverMode8, height, isPreview: true);
+                FenceMeshGenerator.DrawFence(previewMeshBuilder, SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height, isPreview: true);
                 previewMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
@@ -86,16 +86,16 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (HeightInput.text == "") return;
             int height = int.Parse(HeightInput.text);
-            if (!World.CanBuildWall(SelectedWallType, World.HoveredNode, World.NodeHoverMode8, height)) return;
+            if (!World.CanBuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height)) return;
 
-            World.PlaceWall(SelectedWallType, World.HoveredNode, World.NodeHoverMode8, height);
+            World.PlaceFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height);
         }
 
         public override void HandleRightClick()
         {
-            if (World.HoveredWall == null) return;
+            if (World.HoveredFence == null) return;
 
-            World.RemoveWall(World.HoveredWall);
+            World.RemoveFence(World.HoveredFence);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
@@ -106,7 +106,7 @@ namespace WorldEditor
 
         public override void OnSelect()
         {
-            BuildPreview = new GameObject("WallPreview");
+            BuildPreview = new GameObject("FencePreview");
         }
         public override void OnDeselect()
         {

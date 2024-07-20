@@ -14,7 +14,7 @@ TagManager:
   - Terrain
   - EntityMesh
   - Path
-  - Wall
+  - Fence
   - EntityVisionCollider
   - ProceduralEntityMesh
   - 

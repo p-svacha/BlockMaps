@@ -619,11 +619,11 @@ namespace BlockmapFramework
                 // If the thing we hit is an entity vision collider that doesn't block vision, go to the next thing we hit
                 if (objectHit.layer == World.Layer_EntityVisionCollider && !objectHit.transform.parent.GetComponentInChildren<Entity>().BlocksVision) continue;
 
-                // If the thing we hit is a wall that doesn't block vision, go to the next thing we hit
-                if (objectHit.layer == World.Layer_Wall)
+                // If the thing we hit is a fence that doesn't block vision, go to the next thing we hit
+                if (objectHit.layer == World.Layer_Fence)
                 {
-                    Wall hitWall = World.GetWallFromRaycastHit(hit);
-                    if (hitWall != null && !hitWall.Type.BlocksVision) continue;
+                    Fence hitFence = World.GetFenceFromRaycastHit(hit);
+                    if (hitFence != null && !hitFence.Type.BlocksVision) continue;
                 }
 
                 // Debug.DrawRay(source, hit.point - source, Color.red, 60f);

@@ -5,11 +5,12 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// A kind of entity whose mesh is generated at runtime and which is rendered on a node-to-node basis (like walls).
+    /// A kind of entity whose mesh is generated at runtime and which is placed and rendered on a node-to-node basis.
     /// </summary>
     public abstract class ProceduralEntity : Entity
     {
         protected abstract string BaseTypeId { get; }
+        public override Sprite GetThumbnail() => Resources.Load<Sprite>("Editor/Thumbnails/ProceduralEntities/" + Name);
 
         public ProceduralEntity GetInstance(int height)
         {

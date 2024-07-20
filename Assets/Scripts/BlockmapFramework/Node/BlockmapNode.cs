@@ -62,7 +62,7 @@ namespace BlockmapFramework
 
         // Things on this node
         public HashSet<Entity> Entities = new HashSet<Entity>();
-        public Dictionary<Direction, Wall> Walls = new Dictionary<Direction, Wall>();
+        public Dictionary<Direction, Fence> Fences = new Dictionary<Direction, Fence>();
         public List<Zone> Zones = new List<Zone>();
 
         /// <summary>
@@ -320,17 +320,17 @@ namespace BlockmapFramework
             if (!IsFlat(dir)) return false; // Transition base needs to be flat
             if (!to.IsFlat(oppositeDir)) return false; // Transition target needs to be flat
 
-            // Get walls on both sides
-            Wall fromWall, toWall;
-            Walls.TryGetValue(dir, out fromWall);
-            to.Walls.TryGetValue(oppositeDir, out toWall);
-            if (fromWall == null && toWall == null) return false; // At least one wall needed
+            // Get fences on both sides
+            Fence fromFence, toFence;
+            Fences.TryGetValue(dir, out fromFence);
+            to.Fences.TryGetValue(oppositeDir, out toFence);
+            if (fromFence == null && toFence == null) return false; // At least one fence needed
 
-            // Check if walls are climbable
-            if (fromWall != null && !fromWall.IsClimbable) return false; // Wall is unclimbable
-            if (toWall != null && !toWall.IsClimbable) return false; // Wall is unclimbable
+            // Check if fences are climbable
+            if (fromFence != null && !fromFence.IsClimbable) return false; // Fence is unclimbable
+            if (toFence != null && !toFence.IsClimbable) return false; // Fence is unclimbable
 
-            int maxHeight = Mathf.Max(fromWall != null ? fromWall.MaxHeight : 0, toWall != null ? toWall.MaxHeight : 0);
+            int maxHeight = Mathf.Max(fromFence != null ? fromFence.MaxHeight : 0, toFence != null ? toFence.MaxHeight : 0);
             int totalClimbHeight = maxHeight - minHeight;
             if(totalClimbHeight > MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT) return false; // Too high
 
@@ -352,12 +352,12 @@ namespace BlockmapFramework
                 for(int i = 0; i < totalClimbHeight; i++)
                 {
                     // ClimbUp
-                    if (fromWall != null && i <= fromWall.MaxHeight - startHeight) climbUp.Add(fromWall);
-                    else climbUp.Add(toWall);
+                    if (fromFence != null && i <= fromFence.MaxHeight - startHeight) climbUp.Add(fromFence);
+                    else climbUp.Add(toFence);
 
                     // ClimbDown
-                    if (toWall != null && i <= toWall.MaxHeight - startHeight) climbDown.Add(toWall);
-                    else climbDown.Add(fromWall);
+                    if (toFence != null && i <= toFence.MaxHeight - startHeight) climbDown.Add(toFence);
+                    else climbDown.Add(fromFence);
                 }
                 return true;
             }
@@ -368,18 +368,18 @@ namespace BlockmapFramework
                 if (SourceLadders.ContainsKey(dir)) return false; // Ladder blocks since it leads to another node higher up
 
                 // ClimbUp
-                if (fromWall == null && toWall.MaxHeight <= fromHeight) return false; // Lower wall must go higher if the higher node has no wall
+                if (fromFence == null && toFence.MaxHeight <= fromHeight) return false; // Lower fence must go higher if the higher node has no fence
 
                 int currentHeight = fromHeight;
-                if (fromWall != null)
+                if (fromFence != null)
                 {
-                    int climbHeight = fromWall.MaxHeight - fromHeight;
-                    for (int i = 0; i < climbHeight; i++) climbUp.Add(fromWall);
+                    int climbHeight = fromFence.MaxHeight - fromHeight;
+                    for (int i = 0; i < climbHeight; i++) climbUp.Add(fromFence);
                     currentHeight += climbHeight;
                 }
 
                 if(currentHeight < maxHeight)
-                    for (int i = 0; i < maxHeight - currentHeight; i++) climbUp.Add(toWall);
+                    for (int i = 0; i < maxHeight - currentHeight; i++) climbUp.Add(toFence);
 
                 // ClimbDown
                 if (!CanConnectUpwardsThroughClimbing(to, oppositeDir, toHeight, this, dir, maxHeight, out climbDown)) return false;
@@ -396,18 +396,18 @@ namespace BlockmapFramework
                 if (!CanConnectUpwardsThroughClimbing(this, dir, fromHeight, to, oppositeDir, maxHeight, out climbUp)) return false;
 
                 // ClimbDown
-                if (toWall == null && fromWall.MaxHeight <= toHeight) return false; // Lower wall must go higher if the higher node has no wall
+                if (toFence == null && fromFence.MaxHeight <= toHeight) return false; // Lower fence must go higher if the higher node has no fence
 
                 int currentHeight = toHeight;
-                if (toWall != null)
+                if (toFence != null)
                 {
-                    int climbHeight = toWall.MaxHeight - toHeight;
-                    for (int i = 0; i < climbHeight; i++) climbDown.Add(toWall);
+                    int climbHeight = toFence.MaxHeight - toHeight;
+                    for (int i = 0; i < climbHeight; i++) climbDown.Add(toFence);
                     currentHeight += climbHeight;
                 }
 
                 if (currentHeight < maxHeight)
-                    for (int i = 0; i < maxHeight - currentHeight; i++) climbDown.Add(fromWall);
+                    for (int i = 0; i < maxHeight - currentHeight; i++) climbDown.Add(fromFence);
 
                 return true;
             }
@@ -416,31 +416,31 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns a climbing path exists (through ladders, walls, cliffs, etc.) from the given lowerNode to the given higherNode.
+        /// Returns a climbing path exists (through ladders, fences, cliffs, etc.) from the given lowerNode to the given higherNode.
         /// </summary>
         private bool CanConnectUpwardsThroughClimbing(BlockmapNode lowerNode, Direction lowerSide, int startHeight, BlockmapNode higherNode, Direction higherSide, int endHeight, out List<IClimbable> climb)
         {
             climb = new List<IClimbable>();
             int currentHeight = startHeight;
 
-            // Step 1: First check if lower node has a wall
-            if (lowerNode.Walls.TryGetValue(lowerSide, out Wall lowerWall))
+            // Step 1: First check if lower node has a fence
+            if (lowerNode.Fences.TryGetValue(lowerSide, out Fence lowerFence))
             {
-                int climbHeight = lowerWall.MaxHeight - startHeight;
+                int climbHeight = lowerFence.MaxHeight - startHeight;
 
-                if (!lowerWall.IsClimbable) return false; // Wall is unclimbable
-                if (lowerWall.MaxHeight > endHeight) return false; // Wall goes higher than the height we want
-                if (climbHeight > lowerWall.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Wall is too high to climb
+                if (!lowerFence.IsClimbable) return false; // Fence is unclimbable
+                if (lowerFence.MaxHeight > endHeight) return false; // Fence goes higher than the height we want
+                if (climbHeight > lowerFence.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Fence is too high to climb
 
-                // Add the wall as the first part of the climb
-                for (int i = 0; i < climbHeight; i++) climb.Add(lowerWall);
+                // Add the fence as the first part of the climb
+                for (int i = 0; i < climbHeight; i++) climb.Add(lowerFence);
                 currentHeight += climbHeight;
 
                 // Check if we reached the target height
                 if (currentHeight == endHeight) return true;
             }
 
-            // Step 2: If no wall, check if lower node has a ladder
+            // Step 2: If no fence, check if lower node has a ladder
             else if (lowerNode.SourceLadders.TryGetValue(lowerSide, out Ladder ladder))
             {
                 int climbHeight = ladder.MaxHeight - startHeight;
@@ -479,23 +479,23 @@ namespace BlockmapFramework
                 currentHeight += climbHeight;
             }
 
-            // Step 4: Check if we can complete the climb with walls below higherNode
+            // Step 4: Check if we can complete the climb with fences below higherNode
             List<BlockmapNode> nodesBelowHigher = World.GetNodes(higherNode.WorldCoordinates).OrderBy(x => x.BaseHeight).ToList();
             foreach (BlockmapNode nodeBelow in nodesBelowHigher)
             {
-                if (nodeBelow.Walls.TryGetValue(higherSide, out Wall higherWall))
+                if (nodeBelow.Fences.TryGetValue(higherSide, out Fence higherFence))
                 {
-                    int climbHeight = higherWall.MaxHeight - currentHeight;
+                    int climbHeight = higherFence.MaxHeight - currentHeight;
 
-                    if (higherWall.MaxHeight <= currentHeight) continue; // Wall is too low, not interested
+                    if (higherFence.MaxHeight <= currentHeight) continue; // Fence is too low, not interested
 
-                    if (!higherWall.IsClimbable) return false;
-                    if (higherWall.MinHeight > currentHeight) return false; // Wall is too high up
-                    if (higherWall.MaxHeight > endHeight) return false; // Wall goes higher than the height we want
-                    if (climbHeight > higherWall.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Wall is too high to climb
+                    if (!higherFence.IsClimbable) return false;
+                    if (higherFence.MinHeight > currentHeight) return false; // Fence is too high up
+                    if (higherFence.MaxHeight > endHeight) return false; // Fence goes higher than the height we want
+                    if (climbHeight > higherFence.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Fence is too high to climb
 
-                    // Add the wall as the first part of the climb
-                    for (int i = 0; i < climbHeight; i++) climb.Add(higherWall);
+                    // Add the fence as the first part of the climb
+                    for (int i = 0; i < climbHeight; i++) climb.Add(higherFence);
                     currentHeight += climbHeight;
 
                     // Check if we reached the target height
@@ -612,7 +612,7 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public bool HasWall => Walls.Count > 0;
+        public bool HasFence => Fences.Count > 0;
         public abstract Surface GetSurface();
         public abstract SurfaceProperties GetSurfaceProperties();
         public abstract Vector3 GetCenterWorldPosition();
@@ -858,7 +858,7 @@ namespace BlockmapFramework
             // Special checks for corner directions
             if(HelperFunctions.GetCorners().Contains(dir))
             {
-                if (Walls.ContainsKey(dir)) return false;
+                if (Fences.ContainsKey(dir)) return false;
                 if (!HelperFunctions.GetAffectedSides(dir).All(x => IsPassable(x, entity))) return false;
 
                 return true;
@@ -868,7 +868,7 @@ namespace BlockmapFramework
             if (checkClimbables)
             {
                 if (SourceLadders.ContainsKey(dir)) return false;
-                if (Walls.ContainsKey(dir)) return false;
+                if (Fences.ContainsKey(dir)) return false;
             }
 
             // Check if the side has enough head space for the entity

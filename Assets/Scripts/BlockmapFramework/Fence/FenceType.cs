@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public abstract class WallType
+    public abstract class FenceType
     {
-        public abstract WallTypeId Id { get; }
+        public abstract FenceTypeId Id { get; }
         public abstract string Name { get; }
         public abstract int MaxHeight { get; }
         public abstract bool FollowSlopes { get; }
         public abstract bool CanBuildOnCorners { get; }
         public abstract bool BlocksVision { get; }
-        public abstract Sprite PreviewSprite { get; }
+        public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/Fences/" + Id.ToString());
 
         // Climbing attributes
         public abstract ClimbingCategory ClimbSkillRequirement { get; }

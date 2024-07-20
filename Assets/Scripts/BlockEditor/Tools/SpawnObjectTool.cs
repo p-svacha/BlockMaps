@@ -78,7 +78,10 @@ namespace WorldEditor
 
         public override void HandleRightClick()
         {
-            if (World.HoveredEntity != null) World.RemoveEntity(World.HoveredEntity);
+            if (World.HoveredEntity == null) return;
+            if (!(World.HoveredEntity is StaticEntity)) return;
+                
+            World.RemoveEntity(World.HoveredEntity);
         }
 
         public void SelectEntity(StaticEntity e)

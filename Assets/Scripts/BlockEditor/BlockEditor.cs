@@ -38,7 +38,7 @@ namespace WorldEditor
         public SpawnObjectTool SpawnObjectTool;
         public ProceduralEntityTool ProceduralEntityTool;
         public WaterTool WaterTool;
-        public WallTool WallTool;
+        public FenceTool FenceTool;
         public LadderTool LadderTool;
 
         [Header("World")]
@@ -75,7 +75,7 @@ namespace WorldEditor
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.ProceduralEntity, ProceduralEntityTool },
-                { EditorToolId.Wall, WallTool },
+                { EditorToolId.Fence, FenceTool },
                 { EditorToolId.Ladder, LadderTool },
                 { EditorToolId.Water, WaterTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
@@ -192,7 +192,7 @@ namespace WorldEditor
             }
             if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
-            if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.Node.WorldCoordinates.ToString() + " " + World.HoveredWall.Node.BaseHeight + " " + World.HoveredWall.Side.ToString();
+            if (World.HoveredFence != null) text += "\nFence: " + World.HoveredFence.ToString();
 
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;

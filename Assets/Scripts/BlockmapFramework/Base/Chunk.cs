@@ -28,11 +28,11 @@ namespace BlockmapFramework
         /// </summary>
         private List<Zone> Zones = new List<Zone>();
 
-        // Meshes (many types of things like nodes and walls are combined into one mesh per chunk to increase performance)
+        // Meshes (many types of things like nodes and fences are combined into one mesh per chunk to increase performance)
         public GroundMesh GroundMesh;
         public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
-        public Dictionary<int, WallMesh> WallMeshes;
+        public Dictionary<int, FenceMesh> FenceMeshes;
         public Dictionary<int, ProceduralEntityMesh> ProceduralEntityMeshes;
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace BlockmapFramework
             WaterMesh.Init(this);
 
             AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
-            WallMeshes = new Dictionary<int, WallMesh>();
+            FenceMeshes = new Dictionary<int, FenceMesh>();
             ProceduralEntityMeshes = new Dictionary<int, ProceduralEntityMesh>();
         }
 
@@ -141,8 +141,8 @@ namespace BlockmapFramework
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) Destroy(mesh.gameObject);
             AirNodeMeshes = AirNodeMesh.GenerateAirNodeMeshes(this);
 
-            foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
-            WallMeshes = WallMeshGenerator.GenerateMeshes(this);
+            foreach (FenceMesh mesh in FenceMeshes.Values) Destroy(mesh.gameObject);
+            FenceMeshes = FenceMeshGenerator.GenerateMeshes(this);
 
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) Destroy(mesh.gameObject);
             ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
@@ -160,7 +160,7 @@ namespace BlockmapFramework
             // Node visibility
             GroundMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
+            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(player);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(player);
             WaterMesh.SetVisibility(player);
 
@@ -178,7 +178,7 @@ namespace BlockmapFramework
         {
             GroundMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
+            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.ShowTextures(show);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }

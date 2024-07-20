@@ -422,14 +422,14 @@ GameObject:
   m_Component:
   - component: {fileID: 27077389}
   - component: {fileID: 27077391}
-  - component: {fileID: 27077390}
+  - component: {fileID: 27077392}
   m_Layer: 5
-  m_Name: WallTool
+  m_Name: FenceTool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &27077389
 RectTransform:
   m_ObjectHideFlags: 0
@@ -449,26 +449,11 @@ RectTransform:
   m_Father: {fileID: 9765082}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 175, y: -208.01}
-  m_SizeDelta: {x: 340, y: 117.84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &27077390
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 27077388}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed24634783ba1124d91937216bb38052, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WallSelection: {fileID: 1419173758}
-  HeightInput: {fileID: 82764138}
-  ClimbabilityText: {fileID: 1913952687}
 --- !u!114 &27077391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -495,6 +480,21 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &27077392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27077388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462709044be17db4f9bcbd4480e4a5bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FenceSelection: {fileID: 1419173758}
+  HeightInput: {fileID: 82764138}
+  ClimbabilityText: {fileID: 1913952687}
 --- !u!1 &30221705
 GameObject:
   m_ObjectHideFlags: 0
@@ -728,7 +728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMin.x
@@ -736,11 +736,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 340
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_SizeDelta.y
@@ -776,11 +776,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 170
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -10
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1899,7 +1899,7 @@ MonoBehaviour:
   SpawnObjectTool: {fileID: 2139759260}
   ProceduralEntityTool: {fileID: 616166034}
   WaterTool: {fileID: 824148377}
-  WallTool: {fileID: 27077390}
+  FenceTool: {fileID: 27077392}
   LadderTool: {fileID: 445324966}
   World: {fileID: 0}
   CurrentTool: {fileID: 0}
@@ -6103,7 +6103,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1575131785591647977, guid: 6ea1b6af556b29041b2079ec33f0d02c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -117.84
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1575131785591647977, guid: 6ea1b6af556b29041b2079ec33f0d02c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -7417,10 +7417,10 @@ RectTransform:
   m_Father: {fileID: 27077389}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 170, y: -97.84}
-  m_SizeDelta: {x: 340, y: 20}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1813198667
 MonoBehaviour:
@@ -7497,7 +7497,7 @@ MonoBehaviour:
   SurfaceMaterial: {fileID: 2100000, guid: 473924d3185d1b348929fdd221a92050, type: 2}
   LadderMaterial: {fileID: 2100000, guid: dda4b16a11c04cd4b99157e9f99c625c, type: 2}
   Mat_Asphalt: {fileID: 2100000, guid: e3ff98423350ef3488cb3d49298df067, type: 2}
-  Mat_BrickWall: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
+  Mat_Brick: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
   Mat_Rock: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
   Mat_RoofingTiles: {fileID: 2100000, guid: effc84cd0136c5c4999a7c1a570906cd, type: 2}
   Mat_Cobblestone: {fileID: 2100000, guid: 523c733375c89144984a614ea337cec8, type: 2}
@@ -7511,10 +7511,6 @@ MonoBehaviour:
   SandColor: {r: 0.7, g: 0.5, b: 0, a: 1}
   TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   WaterColor: {r: 0, g: 0.3, b: 0.3, a: 1}
-  Thumbnail_Brickwall: {fileID: 21300000, guid: a5394b9a964aab64f83c760d0ab57319, type: 3}
-  Thumbnail_WoodenFence: {fileID: 21300000, guid: 2f1a73e15ff73b047949f908f0fbd70a, type: 3}
-  Thumbnail_CliffWall: {fileID: 21300000, guid: d0d7d93378e08734093271a9eb7c3d5f, type: 3}
-  Thumbnail_Hedge: {fileID: 21300000, guid: 9c179521ec9ea474b854e9fee52ff77a, type: 3}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
   ConcreteTexture: {fileID: 2800000, guid: ec801ad075b375644866ca9eff2ea15b, type: 3}
@@ -7553,7 +7549,7 @@ MonoBehaviour:
   MovingEntitySprite: {fileID: 21300000, guid: 3a2eefe3664280140a1fefc4098a2624, type: 3}
   MoveEntityToolSprite: {fileID: 21300000, guid: 4294e41d5468e1744b8cadb5caa41137, type: 3}
   WaterToolSprite: {fileID: 21300000, guid: db04b434c0fac5e4abc4486ff7aa819a, type: 3}
-  WallToolSprite: {fileID: 21300000, guid: 4e3dda92530e832469a16b6e1d1bc3e4, type: 3}
+  FenceToolSprite: {fileID: 21300000, guid: 4e3dda92530e832469a16b6e1d1bc3e4, type: 3}
   LadderToolSprite: {fileID: 21300000, guid: 76e05eabca265d6479aff6a0d74afbfe, type: 3}
   UI_ButtonSelectedColor: {r: 0.4056604, g: 0.39346188, b: 0.112896055, a: 1}
   UI_ButtonDefaultColor: {r: 0.26666668, g: 0.27058825, b: 0.27058825, a: 1}
@@ -7952,7 +7948,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMin.x
@@ -7960,11 +7956,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 340
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_SizeDelta.y
@@ -8000,11 +7996,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 170
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -10
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6443082836695246900, guid: 9219c69ce66a4bf4699b0cc7294ced6c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -8214,10 +8210,10 @@ RectTransform:
   m_Father: {fileID: 27077389}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 170, y: -23.92}
-  m_SizeDelta: {x: 340, y: 47.84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1924973843
 MonoBehaviour:
@@ -8239,12 +8235,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Leftclick on a node to place a wall.
+  m_text: 'Leftclick on a node to place a fence.
 
-    Rightclick on an existing node
+    Rightclick on an existing fence
     to remove it.
 
-    Use Ctrl + Scrollwheel to change wall height.'
+    Use Ctrl + Scrollwheel to change fence height.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -9413,10 +9409,10 @@ RectTransform:
   m_Father: {fileID: 27077389}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 170, y: -67.84}
-  m_SizeDelta: {x: 340, y: 20}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2124040226
 MonoBehaviour:

@@ -17,7 +17,7 @@ namespace WorldEditor
         ProceduralEntity,
         MoveCharacter,
         Water,
-        Wall,
+        Fence,
         Ladder
     }
 }

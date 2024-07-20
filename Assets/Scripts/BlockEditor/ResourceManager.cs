@@ -17,7 +17,7 @@ namespace WorldEditor
         public Texture2D TileSelectorSW;
         public Texture2D TileSelectorSE;
 
-        [Header("Sprites")]
+        [Header("Tool Icons")]
         public Sprite DynamicEntitySprite;
 
         public Sprite GroundSculptingSprite;
@@ -31,7 +31,7 @@ namespace WorldEditor
         public Sprite MovingEntitySprite;
         public Sprite MoveEntityToolSprite;
         public Sprite WaterToolSprite;
-        public Sprite WallToolSprite;
+        public Sprite FenceToolSprite;
         public Sprite LadderToolSprite;
 
         [Header("UI")]

@@ -5,26 +5,26 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public static class WallMeshGenerator
+    public static class FenceMeshGenerator
     {
-        public static Dictionary<int, WallMesh> GenerateMeshes(Chunk chunk)
+        public static Dictionary<int, FenceMesh> GenerateMeshes(Chunk chunk)
         {
-            Dictionary<int, WallMesh> meshes = new Dictionary<int, WallMesh>();
+            Dictionary<int, FenceMesh> meshes = new Dictionary<int, FenceMesh>();
 
             for (int heightLevel = 0; heightLevel < World.MAX_HEIGHT; heightLevel++)
             {
-                List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.HasWall).ToList();
+                List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.HasFence).ToList();
                 if (nodesToDraw.Count == 0) continue;
 
                 // Generate mesh
-                GameObject meshObject = new GameObject("WallMesh_" + heightLevel);
-                WallMesh mesh = meshObject.AddComponent<WallMesh>();
+                GameObject meshObject = new GameObject("FenceMesh_" + heightLevel);
+                FenceMesh mesh = meshObject.AddComponent<FenceMesh>();
                 mesh.Init(chunk, heightLevel);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (BlockmapNode node in nodesToDraw)
                 {
-                    foreach (Wall wall in node.Walls.Values) DrawWall(meshBuilder, wall.Type, wall.Node, wall.Side, wall.Height);
+                    foreach (Fence fence in node.Fences.Values) DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
                 }
                 meshBuilder.ApplyMesh();
 
@@ -43,11 +43,11 @@ namespace BlockmapFramework
             return meshes;
         }
 
-        public static void DrawWall(MeshBuilder meshBuilder, WallType type, BlockmapNode node, Direction side, int height, bool isPreview = false)
+        public static void DrawFence(MeshBuilder meshBuilder, FenceType type, BlockmapNode node, Direction side, int height, bool isPreview = false)
         {
             if (HelperFunctions.IsSide(side)) type.GenerateSideMesh(meshBuilder, node, side, height, isPreview);
             else if (HelperFunctions.IsCorner(side)) type.GenerateCornerMesh(meshBuilder, node, side, height, isPreview);
-            else throw new System.Exception("Walls can only be drawn when on side or corner of a node");
+            else throw new System.Exception("Fences can only be drawn when on side or corner of a node");
         }
     }
 }

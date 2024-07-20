@@ -4,15 +4,14 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WT02_WoodenFence : WallType
+    public class FT02_WoodenFence : FenceType
     {
-        public override WallTypeId Id => WallTypeId.WoodenFence;
+        public override FenceTypeId Id => FenceTypeId.WoodenFence;
         public override string Name => "Wooden Fence";
         public override int MaxHeight => 1;
         public override bool FollowSlopes => true;
         public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => false;
-        public override Sprite PreviewSprite => ResourceManager.Singleton.Thumbnail_WoodenFence;
 
 
         // IClimbable

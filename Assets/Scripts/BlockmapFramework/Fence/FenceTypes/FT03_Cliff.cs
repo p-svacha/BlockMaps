@@ -4,15 +4,14 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WT03_CliffWall : WallType
+    public class FT03_Cliff : FenceType
     {
-        public override WallTypeId Id => WallTypeId.CliffWall;
+        public override FenceTypeId Id => FenceTypeId.Cliff;
         public override string Name => "Cliff Wall";
         public override int MaxHeight => World.MAX_HEIGHT;
         public override bool FollowSlopes => false;
         public override bool CanBuildOnCorners => false;
         public override bool BlocksVision => true;
-        public override Sprite PreviewSprite => ResourceManager.Singleton.Thumbnail_CliffWall;
 
         // IClimbable
         public override ClimbingCategory ClimbSkillRequirement => Cliff.Instance.SkillRequirement;

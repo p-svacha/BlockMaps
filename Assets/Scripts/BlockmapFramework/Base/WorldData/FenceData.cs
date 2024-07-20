@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WallData
+    public class FenceData
     {
         public int Id { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public WallTypeId TypeId { get; set; }
+        public FenceTypeId TypeId { get; set; }
         
         public int NodeId { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]

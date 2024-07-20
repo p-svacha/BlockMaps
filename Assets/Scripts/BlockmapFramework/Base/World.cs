@@ -50,7 +50,7 @@ namespace BlockmapFramework
         private Dictionary<int, Actor> Actors = new Dictionary<int, Actor>();
         private Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
         private Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
-        private Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
+        private Dictionary<int, Fence> Fences = new Dictionary<int, Fence>();
         private Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
 
         private int NodeIdCounter;
@@ -58,7 +58,7 @@ namespace BlockmapFramework
         private int WaterBodyIdCounter;
         private int ActorIdCounter;
         private int ZoneIdCounter;
-        private int WallIdCounter;
+        private int FenceIdCounter;
 
         // Camera
         public BlockmapCamera Camera { get; private set; }
@@ -80,7 +80,7 @@ namespace BlockmapFramework
         public int Layer_EntityVisionCollider;
         public int Layer_AirNode;
         public int Layer_Water;
-        public int Layer_Wall;
+        public int Layer_Fence;
         public int Layer_ProceduralEntityMesh;
 
         // Attributes regarding current cursor position
@@ -94,7 +94,7 @@ namespace BlockmapFramework
         public Entity HoveredEntity { get; private set; }
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
-        public Wall HoveredWall { get; private set; }
+        public Fence HoveredFence { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
@@ -137,7 +137,7 @@ namespace BlockmapFramework
             Layer_EntityVisionCollider = LayerMask.NameToLayer("EntityVisionCollider");
             Layer_AirNode = LayerMask.NameToLayer("Path");
             Layer_Water = LayerMask.NameToLayer("Water");
-            Layer_Wall = LayerMask.NameToLayer("Wall");
+            Layer_Fence = LayerMask.NameToLayer("Fence");
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
 
             // Init pathfinder
@@ -149,7 +149,7 @@ namespace BlockmapFramework
             WaterBodyIdCounter = data.MaxWaterBodyId + 1;
             ActorIdCounter = data.MaxActorId + 1;
             ZoneIdCounter = data.MaxZoneId + 1;
-            WallIdCounter = data.MaxWallId + 1;
+            FenceIdCounter = data.MaxFenceId + 1;
 
             // Init actors
             foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
@@ -189,11 +189,11 @@ namespace BlockmapFramework
 
             ContentLibrary = entityLibrary;
 
-            // Init walls
-            foreach (WallData wallData in data.Walls)
+            // Init fences
+            foreach (FenceData fenceData in data.Fences)
             {
-                Wall wall = Wall.Load(this, wallData);
-                Walls.Add(wall.Id, wall);
+                Fence fence = Fence.Load(this, fenceData);
+                Fences.Add(fence.Id, fence);
             }
 
             // Init water bodies
@@ -307,11 +307,11 @@ namespace BlockmapFramework
             WaterBody oldHoveredWaterBody = HoveredWaterBody;
             WaterBody newHoveredWaterBody = null;
 
-            Wall oldHoveredWall = HoveredWall;
-            Wall newHoveredWall = null;
+            Fence oldHoveredFence = HoveredFence;
+            Fence newHoveredFence = null;
 
             // Shoot a raycast on ground and air layers to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Wall))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence))
             {
                 Transform objectHit = hit.transform;
 
@@ -374,11 +374,11 @@ namespace BlockmapFramework
                     }
                 }
 
-                // Hit wall
-                else if(objectHit.gameObject.layer == Layer_Wall)
+                // Hit fence
+                else if(objectHit.gameObject.layer == Layer_Fence)
                 {
-                    newHoveredWall = GetWallFromRaycastHit(hit);
-                    if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.Node.WorldCoordinates;
+                    newHoveredFence = GetFenceFromRaycastHit(hit);
+                    if (newHoveredFence != null) HoveredWorldCoordinates = newHoveredFence.Node.WorldCoordinates;
                 }
             }
 
@@ -404,7 +404,7 @@ namespace BlockmapFramework
             HoveredChunk = newHoveredChunk;
             HoveredEntity = newHoveredEntity;
             HoveredWaterBody = newHoveredWaterBody;
-            HoveredWall = newHoveredWall;
+            HoveredFence = newHoveredFence;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -480,23 +480,23 @@ namespace BlockmapFramework
             }
         }
 
-        public Wall GetWallFromRaycastHit(RaycastHit hit)
+        public Fence GetFenceFromRaycastHit(RaycastHit hit)
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
+            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
             Direction primaryHitSide = GetNodeHoverMode8(hit.point);
             List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
 
             foreach (BlockmapNode hitNode in hitNodes)
             {
-                if (hitNode != null && hitNode.Walls.ContainsKey(primaryHitSide)) return hitNode.Walls[primaryHitSide];
+                if (hitNode != null && hitNode.Fences.ContainsKey(primaryHitSide)) return hitNode.Fences[primaryHitSide];
                 else
                 {
                     foreach (Direction hitSide in otherPossibleHitSides)
                     {
-                        if (hitNode != null && hitNode.Walls.ContainsKey(hitSide))
+                        if (hitNode != null && hitNode.Fences.ContainsKey(hitSide))
                         {
-                            return hitNode.Walls[hitSide];
+                            return hitNode.Fences[hitSide];
                         }
                     }
                 }
@@ -505,20 +505,20 @@ namespace BlockmapFramework
                 // Do the same detection stuff again with the offset position
                 Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
                 Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<WallMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
+                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
                 Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
                 List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
 
                 foreach (BlockmapNode offsetHitNode in offsetHitNodes)
                 {
-                    if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(primaryOffsetSide)) return offsetHitNode.Walls[primaryOffsetSide];
+                    if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(primaryOffsetSide)) return offsetHitNode.Fences[primaryOffsetSide];
                     else
                     {
                         foreach (Direction hitSide in otherPossibleOffsetSides)
                         {
-                            if (offsetHitNode != null && offsetHitNode.Walls.ContainsKey(hitSide))
+                            if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(hitSide))
                             {
-                                return offsetHitNode.Walls[hitSide];
+                                return offsetHitNode.Fences[hitSide];
                             }
                         }
                     }
@@ -556,8 +556,8 @@ namespace BlockmapFramework
         }
         public void DeregisterNode(BlockmapNode node)
         {
-            // Destroy walls on node
-            while(node.Walls.Count > 0) DeregisterWall(node.Walls.Values.ToList()[0]);
+            // Destroy fences on node
+            while(node.Fences.Count > 0) DeregisterFence(node.Fences.Values.ToList()[0]);
 
             // Destroy ladders from and to node
             while (node.SourceLadders.Count > 0) RemoveLadder(node.SourceLadders.Values.ToList()[0]);
@@ -572,11 +572,11 @@ namespace BlockmapFramework
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if(node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
         }
-        private void DeregisterWall(Wall wall)
+        private void DeregisterFence(Fence fence)
         {
-            BlockmapNode node = wall.Node;
-            node.Walls.Remove(wall.Side);
-            Walls.Remove(wall.Id);
+            BlockmapNode node = fence.Node;
+            node.Fences.Remove(fence.Side);
+            Fences.Remove(fence.Id);
         }
 
         public Actor AddActor(string name, Color color)
@@ -687,7 +687,7 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
 
-            // Check if an entity or wall below is blocking this space
+            // Check if an entity or fence below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
             foreach (BlockmapNode node in belowNodes)
             {
@@ -695,8 +695,8 @@ namespace BlockmapFramework
                     if (e.MaxHeight > height)
                         return false;
 
-                foreach (Wall wall in node.Walls.Values)
-                    if (wall.MaxHeight > height)
+                foreach (Fence fence in node.Fences.Values)
+                    if (fence.MaxHeight > height)
                         return false;
             }
 
@@ -731,7 +731,7 @@ namespace BlockmapFramework
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
 
-            // Check if an entity or wall below is blocking this space
+            // Check if an entity or fence below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
             foreach (BlockmapNode node in belowNodes)
             {
@@ -739,8 +739,8 @@ namespace BlockmapFramework
                     if (e.MaxHeight > height)
                         return false;
 
-                foreach (Wall wall in node.Walls.Values)
-                    if (wall.MaxHeight > height)
+                foreach (Fence fence in node.Fences.Values)
+                    if (fence.MaxHeight > height)
                         return false;
             }
 
@@ -990,46 +990,46 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
-        public bool CanBuildWall(WallType type, BlockmapNode node, Direction side, int height)
+        public bool CanBuildFence(FenceType type, BlockmapNode node, Direction side, int height)
         {
             // Check if disallowed corner
             if (HelperFunctions.IsCorner(side) && !type.CanBuildOnCorners) return false;
 
-            // Adjust height if it's higher than wall type allows
+            // Adjust height if it's higher than fence type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
 
-            // Check if node already has a wall on that side
-            foreach(Direction dir in HelperFunctions.GetAffectedDirections(side))
-                if (node.Walls.ContainsKey(dir)) return false;
+            // Check if node already has a fence on that side
+            foreach (Direction dir in HelperFunctions.GetAffectedDirections(side))
+                if (node.Fences.ContainsKey(dir)) return false;
 
             // Check if a ladder is already there
             if (node.SourceLadders.ContainsKey(side)) return false;
 
-            // Check if enough space above node to place wall of that height
+            // Check if enough space above node to place fence of that height
             int freeHeadSpace = node.GetFreeHeadSpace(side, node.GetMinHeight(side));
             if (freeHeadSpace < height) return false;
 
             return true;
         }
-        public void PlaceWall(WallType type, BlockmapNode node, Direction side, int height)
+        public void PlaceFence(FenceType type, BlockmapNode node, Direction side, int height)
         {
-            // Adjust height if it's higher than wall type allows
+            // Adjust height if it's higher than fence type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
 
-            Wall wall = new Wall(type);
-            wall.Init(WallIdCounter++, node, side, height);
+            Fence fence = new Fence(type);
+            fence.Init(FenceIdCounter++, node, side, height);
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
 
-            // Register wall
-            Walls.Add(wall.Id, wall);
+            // Register fence
+            Fences.Add(fence.Id, fence);
         }
-        public void RemoveWall(Wall wall)
+        public void RemoveFence(Fence fence)
         {
-            BlockmapNode node = wall.Node;
-            DeregisterWall(wall);
+            BlockmapNode node = fence.Node;
+            DeregisterFence(fence);
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
@@ -1042,7 +1042,7 @@ namespace BlockmapFramework
 
             // Check if source node is viable for a ladder
             if (!source.IsFlat(side)) return possibleTargetNodes;
-            if (source.Walls.ContainsKey(side)) return possibleTargetNodes;
+            if (source.Fences.ContainsKey(side)) return possibleTargetNodes;
             if (source.SourceLadders.ContainsKey(side)) return possibleTargetNodes;
 
             // Get target node (need to be adjacent, higher up and flat on the target direction)
@@ -1280,14 +1280,14 @@ namespace BlockmapFramework
         public List<Actor> GetAllActors() => Actors.Values.ToList();
         public List<Entity> GetAllEntities() => Entities.Values.ToList();
         public List<WaterBody> GetAllWaterBodies() => WaterBodies.Values.ToList();
-        public List<Wall> GetAllWalls() => Walls.Values.ToList();
+        public List<Fence> GetAllFences() => Fences.Values.ToList();
         public List<Zone> GetAllZones() => Zones.Values.ToList();
 
         public BlockmapNode GetNode(int id) => Nodes[id];
         public Actor GetActor(int id) => Actors[id];
         public Entity GetEntity(int id) => Entities[id];
         public WaterBody GetWaterBody(int id) => WaterBodies[id];
-        public Wall GetWall(int id) => Walls[id];
+        public Fence GetFence(int id) => Fences[id];
         public Zone GetZone(int id) => Zones[id];
 
 
@@ -1636,12 +1636,12 @@ namespace BlockmapFramework
                 MaxWaterBodyId = WaterBodyIdCounter,
                 MaxActorId = ActorIdCounter,
                 MaxZoneId = ZoneIdCounter,
-                MaxWallId = WallIdCounter,
+                MaxFenceId = FenceIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Actors = Actors.Values.Select(x => x.Save()).ToList(),
                 Entities = Entities.Values.Select(x => x.Save()).ToList(),
                 WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
-                Walls = Walls.Values.Select(x => x.Save()).ToList(),
+                Fences = Fences.Values.Select(x => x.Save()).ToList(),
                 Zones = Zones.Values.Select(x => x.Save()).ToList()
             };
         }
