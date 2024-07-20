@@ -15,6 +15,7 @@ namespace BlockmapFramework
         public int MaxWaterBodyId { get; set; }
         public int MaxActorId { get; set; }
         public int MaxZoneId { get; set; }
+        public int MaxWallId { get; set; }
         public List<ChunkData> Chunks { get; set; }
         public List<ActorData> Actors { get; set; }
         public List<EntityData> Entities { get; set; }

@@ -8,6 +8,8 @@ namespace BlockmapFramework
 {
     public class WallData
     {
+        public int Id { get; set; }
+
         [JsonConverter(typeof(StringEnumConverter))]
         public WallTypeId TypeId { get; set; }
         

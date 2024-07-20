@@ -52,7 +52,7 @@ namespace BlockmapFramework
 
             Vector3 nodeDimensions = new Vector3(NODE_SIZE, NODE_SIZE, NODE_SIZE);
 
-            foreach (Chunk chunk in world.Chunks.Values)
+            foreach (Chunk chunk in world.GetAllChunks())
             {
                 // Generate line mesh (all transition lines in 1 mesh per chunk)
                 GameObject lineObject = new GameObject("transitions");

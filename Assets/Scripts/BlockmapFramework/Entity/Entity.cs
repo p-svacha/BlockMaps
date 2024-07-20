@@ -133,9 +133,9 @@ namespace BlockmapFramework
             VisibleNodes = new HashSet<BlockmapNode>();
 
             LastKnownPosition = new Dictionary<Actor, Vector3?>();
-            foreach (Actor p in world.Actors.Values) LastKnownPosition.Add(p, null);
+            foreach (Actor p in world.GetAllActors()) LastKnownPosition.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
-            foreach (Actor p in world.Actors.Values) LastKnownRotation.Add(p, null);
+            foreach (Actor p in world.GetAllActors()) LastKnownRotation.Add(p, null);
 
             World = world;
             Owner = player;
@@ -374,6 +374,7 @@ namespace BlockmapFramework
                 Direction.E => new Vector2Int(localCoord.y, Dimensions.z - localCoord.y - 1),
                 Direction.S => new Vector2Int(Dimensions.x - localCoord.x - 1, Dimensions.z - localCoord.y - 1),
                 Direction.W => new Vector2Int(Dimensions.z - localCoord.y - 1, localCoord.x),
+                _ => throw new System.Exception("invalid direction")
             };
         }
 
@@ -703,7 +704,7 @@ namespace BlockmapFramework
             pm_SetOriginNode.Begin();
 
             // Before setting new origin, update last known position for all players seeing this entity
-            foreach (Actor p in World.Actors.Values)
+            foreach (Actor p in World.GetAllActors())
                 if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
 
             // Set new origin
@@ -779,7 +780,7 @@ namespace BlockmapFramework
             }
 
             Entity instance = world.ContentLibrary.GetEntityInstance(world, data.TypeId);
-            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.Actors[data.PlayerId]);
+            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.GetActor(data.PlayerId));
             return instance;
         }
 

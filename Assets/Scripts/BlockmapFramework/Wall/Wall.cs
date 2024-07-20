@@ -11,6 +11,11 @@ namespace BlockmapFramework
     public class Wall : IClimbable
     {
         /// <summary>
+        /// Unique identifier of this specific wall.
+        /// </summary>
+        public int Id { get; private set; }
+
+        /// <summary>
         /// Type containing general properties about the wall.
         /// </summary>
         public WallType Type { get; private set; }
@@ -75,15 +80,15 @@ namespace BlockmapFramework
             Type = type;
         }
 
-        public void Init(BlockmapNode node, Direction side, int height)
+        public void Init(int id, BlockmapNode node, Direction side, int height)
         {
+            Id = id;
             Node = node;
             Side = side;
             Height = height;
             MinHeight = node.GetMinHeight(side);
 
             node.Walls.Add(side, this);
-            node.World.Walls.Add(this);
         }
 
         #endregion
@@ -107,7 +112,7 @@ namespace BlockmapFramework
         {
             WallType type = WallTypeManager.Instance.GetWallType(data.TypeId);
             Wall wall = new Wall(type);
-            wall.Init(world.GetNode(data.NodeId), data.Side, data.Height);
+            wall.Init(data.Id, world.GetNode(data.NodeId), data.Side, data.Height);
             return wall;
         }
 
@@ -115,6 +120,7 @@ namespace BlockmapFramework
         {
             return new WallData
             {
+                Id = Id,
                 TypeId = Type.Id,
                 NodeId = Node.Id,
                 Side = Side,

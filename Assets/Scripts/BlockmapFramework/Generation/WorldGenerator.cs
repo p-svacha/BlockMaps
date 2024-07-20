@@ -59,13 +59,18 @@ namespace BlockmapFramework
             }
         }
         protected abstract void OnUpdate();
+
+        /// <summary>
+        /// Last step of world generation, after this the world starts being initialized.
+        /// </summary>
         protected void FinishGeneration()
         {
-            foreach (Chunk c in GeneratedWorld.Chunks.Values) GeneratedWorld.RedrawChunk(c);
+            foreach (Chunk c in GeneratedWorld.GetAllChunks()) GeneratedWorld.RedrawChunk(c);
+
+            foreach (Entity e in GeneratedWorld.GetAllEntities()) e.UpdateVision();
+            GeneratedWorld.GenerateFullNavmesh();
 
             GenerationPhase = GenerationPhase.InitializingWorld;
-            foreach (Entity e in GeneratedWorld.Entities) e.UpdateVision();
-            GeneratedWorld.GenerateFullNavmesh();
         }
 
         protected WorldData CreateEmptyWorldData()

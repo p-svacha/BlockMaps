@@ -54,13 +54,13 @@ namespace CaptureTheFlag
             World = MapGenerator.GeneratedWorld;
 
             // Map zones
-            LocalPlayerZone = World.Zones[0];
-            NeutralZone = World.Zones[1];
-            OpponentZone = World.Zones[2];
+            LocalPlayerZone = World.GetZone(id: 0);
+            NeutralZone = World.GetZone(id: 1);
+            OpponentZone = World.GetZone(id: 2);
 
             // Convert world actors to CTF Players
-            LocalPlayer = new Player(World.Actors[1], World.Zones[3], World.Zones[4]);
-            Opponent = new AIPlayer(World.Actors[2], World.Zones[5], World.Zones[6]);
+            LocalPlayer = new Player(World.GetActor(id: 1), World.GetZone(id: 3), World.GetZone(id: 4));
+            Opponent = new AIPlayer(World.GetActor(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
 
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;

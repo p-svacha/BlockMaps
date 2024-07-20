@@ -525,31 +525,27 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Shows the given texture as the tile overlay.
-        /// <br/> Areas bigger than 1 only work for surface nodes.
+        /// <br/> Areas bigger than 1 only work for ground nodes.
         /// </summary>
         public void ShowOverlay(Texture2D texture, Color color, int size = 1)
         {
             Mesh.ShowOverlay(LocalCoordinates, texture, color, size);
-            if(LocalCoordinates.x + size >= Chunk.Size && LocalCoordinates.y + size >= Chunk.Size)
-            {
-                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y + 1), out Chunk chunk_NE);
-                if(chunk_NE != null) chunk_NE.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y - Chunk.Size), texture, color, size);
 
-                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
-                if(chunk_E != null) chunk_E.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
+            if (size > 1)
+            {
+                // Get chunks for each corner of the overlay area
+                Chunk chunk_NW = World.GetChunk(WorldCoordinates.x, WorldCoordinates.y + size - 1);
+                Chunk chunk_NE = World.GetChunk(WorldCoordinates.x + size - 1, WorldCoordinates.y + size - 1);
+                Chunk chunk_SE = World.GetChunk(WorldCoordinates.x + size - 1, WorldCoordinates.y);
 
-                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
-                if(chunk_N != null) chunk_N.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
-            }
-            else if (LocalCoordinates.x + size >= Chunk.Size)
-            {
-                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x + 1, Chunk.Coordinates.y), out Chunk chunk_E);
-                if (chunk_E != null) chunk_E.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
-            }
-            else if (LocalCoordinates.y + size >= Chunk.Size)
-            {
-                World.Chunks.TryGetValue(new Vector2Int(Chunk.Coordinates.x, Chunk.Coordinates.y + 1), out Chunk chunk_N);
-                if (chunk_N != null) chunk_N.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+                if (chunk_NE != null && chunk_NE != Chunk)
+                    chunk_NE.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y - Chunk.Size), texture, color, size);
+
+                if (chunk_NW != null && chunk_NW != Chunk)
+                    chunk_NW.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x, LocalCoordinates.y - Chunk.Size), texture, color, size);
+
+                if(chunk_SE != null && chunk_SE != Chunk)
+                    chunk_SE.GroundMesh.ShowOverlay(new Vector2Int(LocalCoordinates.x - Chunk.Size, LocalCoordinates.y), texture, color, size);
             }
         }
 

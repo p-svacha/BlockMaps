@@ -7,15 +7,17 @@ namespace BlockmapFramework
 {
     public class Chunk : MonoBehaviour
     {
+        public Vector2Int Coordinates { get; private set; } // Acts as the unique primary key for each chunk
         public int Size { get; private set; }
         public World World { get; private set; }
-        public Vector2Int Coordinates { get; private set; }
 
         public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
 
         public GroundNode[,] GroundNodes { get; private set; }
         public List<AirNode>[,] AirNodes { get; private set; }
         public WaterNode[,] WaterNodes { get; private set; }
+
+        // public Dictionary<Vector3Int, List<Wall>> Walls; // Stores all walls present in this chunk, grouped by local cell coordinate
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.

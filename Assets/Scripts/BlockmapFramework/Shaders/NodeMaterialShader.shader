@@ -268,40 +268,42 @@ Shader "Custom/NodeMaterialShader"
 
             // ######################################################################### OVERLAYS #########################################################################
 
-            if (_ShowTileOverlay == 1 && isFacingUpwards == 1)
+            
+            // Single overlay texture that stretches across multiple tiles
+            if (_ShowTileOverlay == 1)
             {
+                // Get adjusted wolld position, clamping it within the chunk coordinates
                 float adjustedWorldPosX = IN.worldPos.x;
                 if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
                 if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
-                float exactLocalCoordinatesX = (adjustedWorldPosX % _ChunkSize);
 
                 float adjustedWorldPosY = IN.worldPos.z;
                 if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
                 if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
+
+                // Calculate exact local coordinate on the chunk that we're on
+                float exactLocalCoordinatesX = (adjustedWorldPosX % _ChunkSize);
                 float exactLocalCoordinatesY = (adjustedWorldPosY % _ChunkSize);
 
-                if (exactLocalCoordinatesX >= _TileOverlayX && exactLocalCoordinatesX < _TileOverlayX + _TileOverlaySize && exactLocalCoordinatesY >= _TileOverlayY && exactLocalCoordinatesY < _TileOverlayY + _TileOverlaySize)
+                // If we are within the area that the overlay should be drawn, draw it
+                if (exactLocalCoordinatesX >= _TileOverlayX &&
+                    exactLocalCoordinatesX < _TileOverlayX + _TileOverlaySize &&
+                    exactLocalCoordinatesY >= _TileOverlayY &&
+                    exactLocalCoordinatesY < _TileOverlayY + _TileOverlaySize)
                 {
-                    float adjustedWorldPosX = IN.worldPos.x;
-                    if (adjustedWorldPosX > (_ChunkCoordinatesX + 1) * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
-                    if (adjustedWorldPosX < _ChunkCoordinatesX * _ChunkSize) adjustedWorldPosX = _ChunkCoordinatesX * _ChunkSize;
-
-                    float adjustedWorldPosY = IN.worldPos.z;
-                    if (adjustedWorldPosY > (_ChunkCoordinatesY + 1) * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
-                    if (adjustedWorldPosY < _ChunkCoordinatesY * _ChunkSize) adjustedWorldPosY = _ChunkCoordinatesY * _ChunkSize;
-
                     float uvX = ((adjustedWorldPosX % _ChunkSize) - _TileOverlayX) / _TileOverlaySize;
                     float uvY = ((adjustedWorldPosY % _ChunkSize) - _TileOverlayY) / _TileOverlaySize;
                     float2 uv = float2(uvX, uvY);
 
                     fixed4 tileOverlayColor = tex2D(_TileOverlayTex, uv) * _TileOverlayColor;
-                    c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c);
+                    c = (tileOverlayColor.a * tileOverlayColor) + ((1 - tileOverlayColor.a) * c); // Add overlay to current color based on overlay alpha
                 }
             }
 
-            if (_ShowMultiOverlay[tileIndex] == 1 && isFacingUpwards == 1)
+            // Overlay texture that gets repeated over multuple tiles
+            if (_ShowMultiOverlay[tileIndex] == 1)
             {
-                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_GridTex) * _MultiOverlayColor;
+                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
                 c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
             }
 

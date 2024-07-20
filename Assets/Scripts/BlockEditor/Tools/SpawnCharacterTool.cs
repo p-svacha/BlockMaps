@@ -50,7 +50,7 @@ namespace WorldEditor
         {
             // Player Dropdown
             PlayerDropdown.ClearOptions();
-            List<string> playerOptions = World.Actors.Values.Select(x => x.Name).ToList();
+            List<string> playerOptions = World.GetAllActors().Select(x => x.Name).ToList();
             PlayerDropdown.AddOptions(playerOptions);
         }
 
@@ -102,7 +102,7 @@ namespace WorldEditor
             if (!World.HoveredNode.IsPassable(Editor.CharacterPrefab)) return;
 
             BlockmapNode spawnNode = World.HoveredNode;
-            Actor owner = World.Actors.Values.ToList()[PlayerDropdown.value];
+            Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
             if (SelectedEntityIndex == 0) // Dynamic preset
             {

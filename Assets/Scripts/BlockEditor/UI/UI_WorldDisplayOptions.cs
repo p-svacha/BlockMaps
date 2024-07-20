@@ -44,7 +44,7 @@ namespace WorldEditor
             // Vision Dropdown
             VisionDropdown.ClearOptions();
             List<string> visionOptions = new List<string>() { "Everything" };
-            foreach (Actor p in World.Actors.Values) visionOptions.Add(p.Name);
+            foreach (Actor p in World.GetAllActors()) visionOptions.Add(p.Name);
             VisionDropdown.AddOptions(visionOptions);
         }
 
@@ -66,7 +66,7 @@ namespace WorldEditor
         private Actor GetSelectedPlayer()
         {
             if (VisionDropdown.value == 0) return null;
-            else return World.Actors.Values.First(x => x.Name == VisionDropdown.options[VisionDropdown.value].text);
+            else return World.GetActor(VisionDropdown.options[VisionDropdown.value].text);
         }
 
         public void UpdateValues()

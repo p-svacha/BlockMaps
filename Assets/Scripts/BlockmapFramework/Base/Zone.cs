@@ -120,7 +120,7 @@ namespace BlockmapFramework
 
         public static Zone Load(World world, ZoneData data)
         {
-            return new Zone(world, data.Id, world.Actors[data.ActorId], data.Coordinates.Select(x => new Vector2Int(x.Item1, x.Item2)).ToHashSet(), data.ProvidesVision, data.ShowBorders);
+            return new Zone(world, data.Id, world.GetActor(data.ActorId), data.Coordinates.Select(x => new Vector2Int(x.Item1, x.Item2)).ToHashSet(), data.ProvidesVision, data.ShowBorders);
         }
 
         public ZoneData Save()

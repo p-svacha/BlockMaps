@@ -54,6 +54,7 @@ namespace BlockmapFramework {
                         Direction.E => new Vector3(1f - EDGE_OFFSET, 0f, EDGE_OFFSET),
                         Direction.S => new Vector3(EDGE_OFFSET, 0f, 0f),
                         Direction.W => new Vector3(0f, 0f, EDGE_OFFSET),
+                        _ => throw new System.Exception("invalid direction")
                     };
                     Vector3 dim = dir switch
                     {
@@ -61,6 +62,7 @@ namespace BlockmapFramework {
                         Direction.E => new Vector3(EDGE_OFFSET, hedgeHeight, hedgeWidth),
                         Direction.S => new Vector3(hedgeWidth, hedgeHeight, EDGE_OFFSET),
                         Direction.W => new Vector3(EDGE_OFFSET, hedgeHeight, hedgeWidth),
+                        _ => throw new System.Exception("invalid direction")
                     };
                     
                     meshBuilder.BuildCubeWithBevelledTop(node, submesh, pos, dim, BEVEL_HEIGHT, bevelWidthsSide);
@@ -78,6 +80,7 @@ namespace BlockmapFramework {
                         Direction.NE => new Vector3(1f - EDGE_OFFSET, 0f, 1f - EDGE_OFFSET),
                         Direction.SE => new Vector3(1f - EDGE_OFFSET, 0f, 0f),
                         Direction.SW => new Vector3(0f, 0f, 0f),
+                        _ => throw new System.Exception("invalid direction")
                     };
                     Vector3 dim = new Vector3(EDGE_OFFSET, hedgeHeight, EDGE_OFFSET);
 

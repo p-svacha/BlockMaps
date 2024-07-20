@@ -46,18 +46,19 @@ namespace BlockmapFramework
 
         // Database
         private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
-        public Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
-        public Dictionary<int, Actor> Actors = new Dictionary<int, Actor>();
-        public List<Entity> Entities = new List<Entity>();
-        public Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
-        public List<Wall> Walls = new List<Wall>();
-        public Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
+        private Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+        private Dictionary<int, Actor> Actors = new Dictionary<int, Actor>();
+        private Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
+        private Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
+        private Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
+        private Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
         private int WaterBodyIdCounter;
         private int ActorIdCounter;
         private int ZoneIdCounter;
+        private int WallIdCounter;
 
         // Camera
         public BlockmapCamera Camera { get; private set; }
@@ -118,7 +119,6 @@ namespace BlockmapFramework
         public bool IsShowingTileBlending { get; private set; }
 
 
-
         #region Init
 
         /// <summary>
@@ -149,6 +149,7 @@ namespace BlockmapFramework
             WaterBodyIdCounter = data.MaxWaterBodyId + 1;
             ActorIdCounter = data.MaxActorId + 1;
             ZoneIdCounter = data.MaxZoneId + 1;
+            WallIdCounter = data.MaxWallId + 1;
 
             // Init actors
             foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
@@ -192,6 +193,7 @@ namespace BlockmapFramework
             foreach (WallData wallData in data.Walls)
             {
                 Wall wall = Wall.Load(this, wallData);
+                Walls.Add(wall.Id, wall);
             }
 
             // Init water bodies
@@ -211,6 +213,10 @@ namespace BlockmapFramework
             IsInitialized = false;
             InitializeStep = 1;
         }
+
+        /// <summary>
+        /// Gets executed each frame while the world is being initialized
+        /// </summary>
         private void UpdateInitialization()
         {
             if (IsInitialized) return;
@@ -237,7 +243,7 @@ namespace BlockmapFramework
             // Frame 2 after initialization: Do stuff that requires entities to be at the correct world position
             if (InitializeStep == 2)
             {
-                foreach (Entity e in Entities) e.UpdateVision();
+                foreach (Entity e in Entities.Values) e.UpdateVision();
 
                 InitializeStep++;
                 return;
@@ -259,14 +265,15 @@ namespace BlockmapFramework
         void Update()
         {
             // Check if world is done initializing
-            UpdateInitialization();
-            if (!IsInitialized) return;
-
-            // Invoke delayed updates from last frame
+            if (!IsInitialized)
+            {
+                UpdateInitialization();
+                return;
+            }
 
             // Regular updates
             UpdateHoveredObjects();
-            foreach (Entity e in Entities) e.UpdateEntity();
+            foreach (Entity e in Entities.Values) e.UpdateEntity();
         }
 
         /// <summary>
@@ -569,7 +576,7 @@ namespace BlockmapFramework
         {
             BlockmapNode node = wall.Node;
             node.Walls.Remove(wall.Side);
-            Walls.Remove(wall);
+            Walls.Remove(wall.Id);
         }
 
         public Actor AddActor(string name, Color color)
@@ -583,18 +590,18 @@ namespace BlockmapFramework
         public void ResetExploration(Actor actor)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
-            foreach (Entity entity in Entities) entity.ResetLastKnownPositionFor(actor);
+            foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
 
-            foreach (Entity entity in Entities.Where(x => x.Owner == actor)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
         public void ExploreEverything(Actor actor)
         {
             foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
-            foreach (Entity entity in Entities) entity.UpdateLastKnownPositionFor(actor);
+            foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
 
-            foreach (Entity entity in Entities.Where(x => x.Owner == actor)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
@@ -834,7 +841,7 @@ namespace BlockmapFramework
         public void RemoveEntity(Entity entity)
         {
             // De-register entity
-            Entities.Remove(entity);
+            Entities.Remove(entity.Id);
             entity.Owner.Entities.Remove(entity);
 
             // Remove seen by on all nodes
@@ -871,7 +878,7 @@ namespace BlockmapFramework
         }
         private void RegisterEntity(Entity entity)
         {
-            Entities.Add(entity);
+            Entities.Add(entity.Id, entity);
             entity.Owner.Entities.Add(entity);
         }
 
@@ -1010,11 +1017,14 @@ namespace BlockmapFramework
             if (height > type.MaxHeight) height = type.MaxHeight;
 
             Wall wall = new Wall(type);
-            wall.Init(node, side, height);
+            wall.Init(WallIdCounter++, node, side, height);
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
+
+            // Register wall
+            Walls.Add(wall.Id, wall);
         }
         public void RemoveWall(Wall wall)
         {
@@ -1168,7 +1178,7 @@ namespace BlockmapFramework
         {
             yield return new WaitForFixedUpdate();
 
-            List<Entity> entitiesToUpdate = Entities.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
+            List<Entity> entitiesToUpdate = Entities.Values.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
             Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
             foreach (Entity e in entitiesToUpdate) e.UpdateVision();
         }
@@ -1265,6 +1275,22 @@ namespace BlockmapFramework
 
         #region Getters
 
+        public List<BlockmapNode> GetAllNodes() => Nodes.Values.ToList();
+        public List<Chunk> GetAllChunks() => Chunks.Values.ToList();
+        public List<Actor> GetAllActors() => Actors.Values.ToList();
+        public List<Entity> GetAllEntities() => Entities.Values.ToList();
+        public List<WaterBody> GetAllWaterBodies() => WaterBodies.Values.ToList();
+        public List<Wall> GetAllWalls() => Walls.Values.ToList();
+        public List<Zone> GetAllZones() => Zones.Values.ToList();
+
+        public BlockmapNode GetNode(int id) => Nodes[id];
+        public Actor GetActor(int id) => Actors[id];
+        public Entity GetEntity(int id) => Entities[id];
+        public WaterBody GetWaterBody(int id) => WaterBodies[id];
+        public Wall GetWall(int id) => Walls[id];
+        public Zone GetZone(int id) => Zones[id];
+
+
         /// <summary>
         /// Returns if the given world coordinates exist in this world.
         /// </summary>
@@ -1272,7 +1298,6 @@ namespace BlockmapFramework
         {
             return GetChunk(worldCoordinates) != null;
         }
-
         public bool IsValidNodeHeight(Dictionary<Direction, int> height)
         {
             if (height.Values.Any(x => x < 0)) return false;
@@ -1284,6 +1309,7 @@ namespace BlockmapFramework
             Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
         }
 
+        
         /// <summary>
         /// Returns the chunk that the given world coordinates are on.
         /// </summary>
@@ -1300,6 +1326,7 @@ namespace BlockmapFramework
             if (Chunks.TryGetValue(chunkCoordinates, out Chunk value)) return value;
             else return null;
         }
+        public Chunk GetChunk(int worldX, int worldY) => GetChunk(new Vector2Int(worldX, worldY));
         public List<Chunk> GetChunks(Vector2Int chunkCoordinates, int rangeEast, int rangeNorth)
         {
             List<Chunk> chunks = new List<Chunk>();
@@ -1314,9 +1341,8 @@ namespace BlockmapFramework
             return chunks;
         }
 
-        public BlockmapNode GetNode(int id) => Nodes[id];
-
-        public HashSet<BlockmapNode> GetAllNodes() => Nodes.Values.ToHashSet();
+        public Actor GetActor(string name) => Actors.Values.First(x => x.Name == name);
+        
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int height)
         {
             return GetNodes(worldCoordinates, height, height);
@@ -1610,11 +1636,12 @@ namespace BlockmapFramework
                 MaxWaterBodyId = WaterBodyIdCounter,
                 MaxActorId = ActorIdCounter,
                 MaxZoneId = ZoneIdCounter,
+                MaxWallId = WallIdCounter,
                 Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
                 Actors = Actors.Values.Select(x => x.Save()).ToList(),
-                Entities = Entities.Select(x => x.Save()).ToList(),
+                Entities = Entities.Values.Select(x => x.Save()).ToList(),
                 WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
-                Walls = Walls.Select(x => x.Save()).ToList(),
+                Walls = Walls.Values.Select(x => x.Save()).ToList(),
                 Zones = Zones.Values.Select(x => x.Save()).ToList()
             };
         }

@@ -27,8 +27,8 @@ namespace CaptureTheFlag
         protected override void OnGenerationStart()
         {
             GenerationStep = 0;
-            LocalPlayer = GeneratedWorld.Actors[1];
-            Opponent = GeneratedWorld.Actors[2];
+            LocalPlayer = GeneratedWorld.GetActor(1);
+            Opponent = GeneratedWorld.GetActor(2);
         }
         protected override void OnUpdate()
         {

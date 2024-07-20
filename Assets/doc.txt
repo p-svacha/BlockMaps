@@ -1,19 +1,49 @@
-Big Features to Add:
+--- Update Walls V2
 
-- Allow building walls on walls
-	> New attribute solidTop
-	> When wall exists, try building on top
-	> Adjust climbables
+General:
+- Whole fence/wall framework gets an updated
+- Tools that exist now will be ported to new system and still work the same, the walls/fences will just be stored differently in the background
+- Instead of walls/fences being stored on a node, they will be stored in their own datastructure, independently of nodes
+- Walls can still be easily accessed for specific nodes through specialized getters
 
-- New WallType: Window
-	> Transparent
-	> Window gets bigger when adjacent walls are windows too
+- Walls are stored in a Dictionary<Vector3, WallInfo> data structure per chunk (and also a global one in World):
+	Vector3 refers to the x, y, z position on the map
+	WallInfo contains a List<Wall> of all walls that are inside this position with some functionality of retrieving and adding walls on a certain direction
 
-- New WallType: Door
-	> own subclass with state attribute open/close
-	> state affects navmesh
-	> state affects vision
-	> Mesh gen gets impacted by adjacent door
+- Walls have a new WallMaterial attribute, that are stored in a static WallMaterialManager (just like SurfaceManager for node surfaces)
+- Walls have a new WallShape attribute that decides how a wall gets rendered (basically what currently WallType is)
+
+Tools:
+ - The current tool that is now in should still work, called "Fence":
+	> Uses walls that have a premade WallMaterial and WallShape and additional rules (like max height) and places them directly on nodes, always following slopes
+	> Add a new "stop on node" option that will stop the height at the first node intersection.
+		° If it is sloped, then the top wall element will be a sloped one so its flush with the node
+		° Ctrl+Scroll changes between the 1st, 2nd, 3rd etc. node intersection to stop. (Just like with ladder placement)
+ - New "Free wall placement" tool where you can place walls like air nodes with 2 selections:
+	> Wall shape (solid, slope)
+	> Wall material (brick, wood, concrete)
+		° Decides climbing skill requirement
+	> Ctrl+Scroll to change height (like air nodes)
+		° Show transparent grid on selected height
+	> Hovermode changes direction
+- "Wall features" tool where you can plop features onto existing (only if WallShape == Solid) walls 
+	> Window
+	> Adjacent walls with the same feature merge into each other (i.e. two walls above each other with the window feature it then turns into one big window)
+	> Windows affect vision (glass should be ignored by vision system)
+
+---
+
+--- Update Doors
+
+New wall feature "Door":
+ - own subclass with state attribute open/close
+ - state affects navmesh
+ - state affects vision
+ - Mesh gen gets impacted by adjacent door
+
+---
+
+--- Update More Node Shapes
 
 (> allow any height diffs on allowed shapes)
 - Remove limit of max height diff within a node
@@ -26,47 +56,20 @@ Big Features to Add:
 		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
 	- all entities have a max slope they can walk
 
-- make a list of material indexes colorable in editor
-	> save color in entityData
-	
+---
+
 - limit vision to height (don't draw anything above height x)
 
-- CTF: Rework hover pathfinding
-	> Hover on unreachable node = no path preview
-	> Hover on node with !canStandOn = red path preview
-	> Hover on node within possible moves = green path preview
-	> Hover on reachable node outside possible moves = yellow path preview
-	> Cache paths (forever since they can never change atm)
-	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
-	> Clicking on yellow path moves as far as possible
-
-- CTF: Improve ctf map generator
-	> New approach: Check XCOM and PZ map generation
-	> Split map into parcels
-	> Parcels have their own generation system on top of height map generation
-	> Parcel generation depends on bordering parcels, roads, rivers, map edge
-	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
-	> Implement rules which parcels can be next to each other
-	> Increase performance
-
-
-	> 1. height map generation
-	> 2. line features (river, road, railroad)
-	> 3. parcel distribution
-	> 4. parcel connection points (to line features and other parcels)
-	> 5. parcel generation
-	> 6. player base generation
-
-- decouple/add entity visibility from node visiblity
-- decouple/add wall visibiliry from node visibility
+- also check entity visibility independently from node visiblity
+- also check wall visibility independently from node visiblity
 
 - Editor improvements:
 	> wall drag
 	> air node drag
 	> proc entity drag
 	> tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
-	
-- Walls where top matches adjacent node (a bit like ladders)
+
+- Adjust entity World height (only where its drawn) based on surface it's on - a little higher on conrete etc.
 
 - Implement some line features for new map gen system
 	> road
@@ -85,22 +88,8 @@ Big Features to Add:
 	> swamp
 	> pool
 
-- Rework jail system
-	> 1 Jail that is in neutral area
-	> gives full vision for both players
-	> Fully fenced off
-	> Characters get teleported out of jail when jail time ends
-
-- Make menu for creating game
-	> Allow different map sizes
-	> Miniscule: 7 chunks
-	> Tiny: 9 chunks
-	> Small: 11 chunks
-	> Medium: 13 chunks
-	> Big: 15 chunks
-	> Huge: 17 chunks
-	> Enormous: 20 chunks
-	> Random
+- make a list of material indexes colorable in editor
+	> save color in entityData
 
 - Water flowing in one direction
 - Waterfall
@@ -108,6 +97,7 @@ Big Features to Add:
 - Slopes use more action points
 	> downwards * 1.25
 	> upwards * 1.5
+
 
 - CTF: Upon end game show full visible map
 
@@ -168,10 +158,6 @@ Big Features to Add:
 	> staticentities get a new durability attribute
 	> walls get it too
 	> entities can destroy for big stamina cost
-
-- dont allow suface nodes with walls in water
-	- affect canplacewater
-	- affect canbuildwall
 
 - Minimap
 	> shows tiles
@@ -234,7 +220,6 @@ Big Features to Add:
 	> for new static entity ideas watch project zomboid streams
 
 - Add additional movement methods (jump/fly)
-- Add strength attribute with that you can destroy walls, entities
 - Stealth/Invisibility
 - Teleportation
 - Terrain affinity
@@ -252,6 +237,49 @@ Big Features to Add:
 - Allow entites to have their own nodes
 
 - Add UseTextures attribute to entity shader and support both modes on created models
+
+- CTF: Rework hover pathfinding
+	> Hover on unreachable node = no path preview
+	> Hover on node with !canStandOn = red path preview
+	> Hover on node within possible moves = green path preview
+	> Hover on reachable node outside possible moves = yellow path preview
+	> Cache paths (forever since they can never change atm)
+	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
+	> Clicking on yellow path moves as far as possible
+
+- CTF: Improve ctf map generator
+	> New approach: Check XCOM and PZ map generation
+	> Split map into parcels
+	> Parcels have their own generation system on top of height map generation
+	> Parcel generation depends on bordering parcels, roads, rivers, map edge
+	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
+	> Implement rules which parcels can be next to each other
+	> Increase performance
+
+
+	> 1. height map generation
+	> 2. line features (river, road, railroad)
+	> 3. parcel distribution
+	> 4. parcel connection points (to line features and other parcels)
+	> 5. parcel generation
+	> 6. player base generation
+
+- CTF: Rework jail system
+	> 1 Jail that is in neutral area
+	> gives full vision for both players
+	> Fully fenced off
+	> Characters get teleported out of jail when jail time ends
+
+- CTF: Make menu for creating game
+	> Allow different map sizes
+	> Miniscule: 7 chunks
+	> Tiny: 9 chunks
+	> Small: 11 chunks
+	> Medium: 13 chunks
+	> Big: 15 chunks
+	> Huge: 17 chunks
+	> Enormous: 20 chunks
+	> Random
 
 
 -------- RETIRED IDEAS ------------
