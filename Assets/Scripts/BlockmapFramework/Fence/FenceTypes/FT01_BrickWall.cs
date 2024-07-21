@@ -10,7 +10,7 @@ namespace BlockmapFramework
 
         public override FenceTypeId Id => FenceTypeId.BrickWall;
         public override string Name => "Brick Wall";
-        public override int MaxHeight => World.MAX_HEIGHT;
+        public override int MaxHeight => World.MAX_ALTITUDE;
         public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => true;
 

@@ -338,18 +338,43 @@ namespace BlockmapFramework
 
         #region Blockmap-Specific
 
+        private List<Vector3> GetFootprint(Vector3 position, Vector3 dimensions)
+        {
+            return new List<Vector3>() {
+                new Vector3(position.x, position.y, position.z),
+                new Vector3(position.x + dimensions.x, position.y, position.z),
+                new Vector3(position.x + dimensions.x, position.y, position.z + dimensions.z),
+                new Vector3(position.x, position.y, position.z + dimensions.z),
+            };
+        }
+
+        /// <summary>
+        /// Builds a cube onto a given cell, given the relative position and dimensions within the cell.
+        /// <br/>Relative positions are from SW corner and get translated to the given direction.
+        /// </summary>
+        public void BuildCube(Vector3Int localCellPos, Direction side, int submesh, Vector3 relativePos, Vector3 relativeDim)
+        {
+            // Calculate footprint vertex positions
+            List<Vector3> footprint = GetFootprint(relativePos, relativeDim);
+
+            // Translate footprint positions based on direction
+            footprint = footprint.Select(x => TranslatePosition(x, side)).ToList();
+
+            // Apply offset based on cell position within the chunk
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
+
+            // Build cube
+            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], relativeDim.y);
+        }
+
         /// <summary>
         /// Builds a cube onto a node, given the relative position and dimensions on that node.
         /// </summary>
         public void BuildCube(BlockmapNode node, int submesh, Vector3 relPos, Vector3 relDim)
         {
             // Calculate flat footprint vertex positions
-            List<Vector3> footprint = new List<Vector3>() {
-                new Vector3(relPos.x, relPos.y, relPos.z),
-                new Vector3(relPos.x + relDim.x, relPos.y, relPos.z),
-                new Vector3(relPos.x + relDim.x, relPos.y, relPos.z + relDim.z),
-                new Vector3(relPos.x, relPos.y, relPos.z + relDim.z),
-            };
+            List<Vector3> footprint = GetFootprint(relPos, relDim);
 
             // Apply height offsets from slope to footprint
             if (!node.IsFlat())
@@ -459,12 +484,7 @@ namespace BlockmapFramework
             }
 
             // Calculate footprint vertex positions
-            List<Vector3> footprint = new List<Vector3>() {
-                new Vector3(pos.x, pos.y, pos.z),
-                new Vector3(pos.x + dimensions.x, pos.y, pos.z),
-                new Vector3(pos.x + dimensions.x, pos.y, pos.z + dimensions.z),
-                new Vector3(pos.x, pos.y, pos.z + dimensions.z),
-            };
+            List<Vector3> footprint = GetFootprint(pos, dimensions);
 
             // Translate footprint positions based on direction
             footprint = footprint.Select(x => TranslatePosition(x, side)).ToList();

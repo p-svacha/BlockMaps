@@ -11,6 +11,8 @@ namespace BlockmapFramework
     /// </summary>
     public class Wall
     {
+        private World World;
+
         /// <summary>
         /// Unique identifier of this specific wall.
         /// </summary>
@@ -19,7 +21,11 @@ namespace BlockmapFramework
         /// <summary>
         /// The world cell coordiantes of the wall.
         /// </summary>
-        public Vector3Int CellCoordinates { get; private set; }
+        public Vector3Int GlobalCellCoordinates { get; private set; }
+        public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
+        public Vector2Int WorldCoordinates => new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
+        public Chunk Chunk => World.GetChunk(WorldCoordinates);
+        public Vector3 CenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, GlobalCellCoordinates.y + (World.TILE_HEIGHT / 2), GlobalCellCoordinates.z + 0.5f);
 
         /// <summary>
         /// The side within the cell this wall covers.
@@ -38,10 +44,11 @@ namespace BlockmapFramework
 
         #region Init
 
-        public Wall(int id, Vector3Int cellCoordinates, Direction side, WallShape shape, WallMaterial material)
+        public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material)
         {
+            World = world;
             Id = id;
-            CellCoordinates = cellCoordinates;
+            GlobalCellCoordinates = globalCellCoordinates;
             Side = side;
             Shape = shape;
             Material = material;
@@ -51,9 +58,9 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static Wall Load(WallData data)
+        public static Wall Load(World world, WallData data)
         {
-            Wall wall = new Wall(data.Id, new Vector3Int(data.CellX, data.CellY, data.CellZ), (Direction)data.Side, WallManager.Instance.GetWallShape((WallShapeId)data.ShapeId), WallManager.Instance.GetWallMaterial((WallMaterialId)data.MaterialId));
+            Wall wall = new Wall(world, data.Id, new Vector3Int(data.CellX, data.CellY, data.CellZ), (Direction)data.Side, WallManager.Instance.GetWallShape((WallShapeId)data.ShapeId), WallManager.Instance.GetWallMaterial((WallMaterialId)data.MaterialId));
             return wall;
         }
 
@@ -62,9 +69,9 @@ namespace BlockmapFramework
             return new WallData
             {
                 Id = Id,
-                CellX = CellCoordinates.x,
-                CellY = CellCoordinates.y,
-                CellZ = CellCoordinates.z,
+                CellX = GlobalCellCoordinates.x,
+                CellY = GlobalCellCoordinates.y,
+                CellZ = GlobalCellCoordinates.z,
                 Side = (int)Side,
                 ShapeId = (int)Shape.Id,
                 MaterialId = (int)Material.Id

@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public override FenceTypeId Id => FenceTypeId.Cliff;
         public override string Name => "Cliff Wall";
-        public override int MaxHeight => World.MAX_HEIGHT;
+        public override int MaxHeight => World.MAX_ALTITUDE;
         public override bool CanBuildOnCorners => false;
         public override bool BlocksVision => true;
 

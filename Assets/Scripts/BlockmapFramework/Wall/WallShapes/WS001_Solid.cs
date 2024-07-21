@@ -10,9 +10,21 @@ namespace BlockmapFramework
         public override string Name => "Solid";
         public override List<Direction> ValidSides => HelperFunctions.GetSides();
 
-        public override void GenerateMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, Material material)
+        private const float WIDTH = 0.1f;
+
+        public override void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material)
         {
-            throw new System.NotImplementedException();
+            int submesh = meshBuilder.GetSubmesh(material);
+
+            float startX = 0;
+            float dimX = 1f;
+            float startY = 0f;
+            float dimY = World.TILE_HEIGHT;
+            float startZ = 0f;
+            float dimZ = WIDTH;
+            Vector3 pos = new Vector3(startX, startY, startZ);
+            Vector3 dim = new Vector3(dimX, dimY, dimZ);
+            meshBuilder.BuildCube(localCellPosition, side, submesh, pos, dim);
         }
     }
 }

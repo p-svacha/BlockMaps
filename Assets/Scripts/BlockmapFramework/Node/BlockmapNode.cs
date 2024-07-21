@@ -903,9 +903,9 @@ namespace BlockmapFramework
         /// </summary>
         public int GetFreeHeadSpace(Direction dir)
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_HEIGHT).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_ALTITUDE).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
 
-            int minHeight = World.MAX_HEIGHT;
+            int minHeight = World.MAX_ALTITUDE;
 
             foreach (BlockmapNode node in nodesAbove)
             {

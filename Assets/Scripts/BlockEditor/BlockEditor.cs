@@ -26,6 +26,7 @@ namespace WorldEditor
         public TextMeshProUGUI TileInfoText;
         public UI_ToolWindow ToolWindow;
         public UI_WorldDisplayOptions DisplayOptions;
+        public GameObject AltitudeHelperPlane;
 
         [Header("Tools")]
         public WorldGenTool WorldGenTool;

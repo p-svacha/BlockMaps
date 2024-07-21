@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BlockmapFramework;
+using TMPro;
 
 namespace WorldEditor
 {
@@ -12,18 +13,19 @@ namespace WorldEditor
         public override Sprite Icon => ResourceManager.Singleton.AirNodeSprite;
 
         private GameObject BuildPreview;
-        private int BuildHeight;
         private SurfaceId SelectedSurface;
         private Vector2Int HoveredCoordinates;
+        private int BuildAltitude => int.Parse(AltitudeInput.text);
 
         [Header("Elements")]
         public UI_SelectionPanel SelectionPanel;
+        public TMP_InputField AltitudeInput;
 
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
 
-            BuildHeight = 5;
+            SetAltitude(5);
 
             SelectionPanel.Clear();
             foreach (Surface s in SurfaceManager.Instance.GetAllSurfaces())
@@ -45,43 +47,44 @@ namespace WorldEditor
             HandleInputs();
         }
 
-        // Sets the current coordinates from intersecting mouse hover with an invisible plane on the build height
         private void UpdateHoveredCoordinates()
         {
-            var plane = new Plane(Vector3.up, new Vector3(0f, BuildHeight * World.TILE_HEIGHT, 0f));
-            var ray = World.Camera.Camera.ScreenPointToRay(Input.mousePosition);
-            if (plane.Raycast(ray, out float distance))
-            {
-                Vector3 hitPoint = ray.GetPoint(distance);
-                HoveredCoordinates = World.GetWorldCoordinates(hitPoint);
-            }
+            HoveredCoordinates = World.GetHoveredCoordinates(BuildAltitude);
         }
 
         private void UpdatePreview()
         {
-            BuildPreview.transform.position = new Vector3(HoveredCoordinates.x + 0.5f, World.TILE_HEIGHT * BuildHeight + World.TILE_HEIGHT * 0.1f, HoveredCoordinates.y + 0.5f);
+            BuildPreview.transform.position = new Vector3(HoveredCoordinates.x + 0.5f, World.TILE_HEIGHT * BuildAltitude + World.TILE_HEIGHT * 0.1f, HoveredCoordinates.y + 0.5f);
             BuildPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
             Color previewColor = Color.white;
-            if (!World.CanBuildAirPath(HoveredCoordinates, BuildHeight)) previewColor = Color.red;
+            if (!World.CanBuildAirPath(HoveredCoordinates, BuildAltitude)) previewColor = Color.red;
 
             BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
         }
 
         private void HandleInputs()
         {
-            // Ctrl + mouse wheel: change height
+            // Ctrl + mouse wheel: change altitude
             if (Input.GetKey(KeyCode.LeftControl))
             {
-                if (Input.mouseScrollDelta.y < 0 && BuildHeight > 1) BuildHeight--;
-                if (Input.mouseScrollDelta.y > 0 && BuildHeight < World.MAX_HEIGHT - 1) BuildHeight++;
+                if (Input.mouseScrollDelta.y < 0) SetAltitude(BuildAltitude - 1);
+                if (Input.mouseScrollDelta.y > 0) SetAltitude(BuildAltitude + 1);
             }
+        }
+
+        private void SetAltitude(int altitude)
+        {
+            if (altitude < 0) altitude = 0;
+            if (altitude > World.MAX_ALTITUDE) altitude = World.MAX_ALTITUDE;
+            AltitudeInput.text = altitude.ToString();
+            Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, BuildAltitude * World.TILE_HEIGHT, Editor.AltitudeHelperPlane.transform.position.z);
         }
 
         public override void HandleLeftClick()
         {
-            if (World.CanBuildAirPath(HoveredCoordinates, BuildHeight))
-                World.BuildAirPath(HoveredCoordinates, BuildHeight, SelectedSurface);
+            if (World.CanBuildAirPath(HoveredCoordinates, BuildAltitude))
+                World.BuildAirPath(HoveredCoordinates, BuildAltitude, SelectedSurface);
         }
 
         public override void HandleRightClick()
@@ -94,11 +97,15 @@ namespace WorldEditor
             BuildPreview = GameObject.CreatePrimitive(PrimitiveType.Cube);
             GameObject.Destroy(BuildPreview.GetComponent<BoxCollider>());
             BuildPreview.transform.localScale = new Vector3(1f, World.TILE_HEIGHT * 0.1f, 1f);
+
+            Editor.AltitudeHelperPlane.SetActive(true);
         }
         public override void OnDeselect()
         {
             GameObject.Destroy(BuildPreview);
             BuildPreview = null;
+
+            Editor.AltitudeHelperPlane.SetActive(false);
         }
     }
 }

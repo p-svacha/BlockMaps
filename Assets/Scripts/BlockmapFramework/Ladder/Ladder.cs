@@ -44,7 +44,7 @@ namespace BlockmapFramework
 
         // IClimbable
         public ClimbingCategory SkillRequirement => ClimbingCategory.Basic;
-        public int MaxClimbHeight(ClimbingCategory skill) => World.MAX_HEIGHT;
+        public int MaxClimbHeight(ClimbingCategory skill) => World.MAX_ALTITUDE;
         public float CostUp => 1.6f;
         public float CostDown => 1.3f;
         public float SpeedUp => 0.65f;

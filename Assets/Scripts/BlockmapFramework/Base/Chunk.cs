@@ -17,7 +17,10 @@ namespace BlockmapFramework
         public List<AirNode>[,] AirNodes { get; private set; }
         public WaterNode[,] WaterNodes { get; private set; }
 
-        // public Dictionary<Vector3Int, List<Wall>> Walls; // Stores all walls present in this chunk, grouped by local cell coordinate
+        /// <summary>
+        /// All walls present in this chunk, grouped by local cell coordinates
+        /// </summary>
+        public Dictionary<Vector3Int, List<Wall>> Walls = new Dictionary<Vector3Int, List<Wall>>();
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
@@ -33,6 +36,7 @@ namespace BlockmapFramework
         public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
         public Dictionary<int, FenceMesh> FenceMeshes;
+        public Dictionary<int, WallMesh> WallMeshes;
         public Dictionary<int, ProceduralEntityMesh> ProceduralEntityMeshes;
 
         /// <summary>
@@ -77,6 +81,7 @@ namespace BlockmapFramework
 
             AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
             FenceMeshes = new Dictionary<int, FenceMesh>();
+            WallMeshes = new Dictionary<int, WallMesh>();
             ProceduralEntityMeshes = new Dictionary<int, ProceduralEntityMesh>();
         }
 
@@ -122,6 +127,17 @@ namespace BlockmapFramework
             Zones.Remove(z);
         }
 
+        public void AddWall(Wall w)
+        {
+            Vector3Int localCoords = w.LocalCellCoordinates;
+            if (Walls.ContainsKey(localCoords)) Walls[localCoords].Add(w);
+            else Walls.Add(localCoords, new List<Wall>() { w });
+        }
+        public void RemoveWall(Wall w)
+        {
+            Walls[w.LocalCellCoordinates].Remove(w);
+        }
+
         #endregion
 
         #region Draw
@@ -129,7 +145,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Generates all meshes for this chunk
         /// </summary>
-        public void DrawMesh()
+        public void DrawMeshes()
         {
             // Ground mesh
             GroundMesh.Draw();
@@ -143,6 +159,9 @@ namespace BlockmapFramework
 
             foreach (FenceMesh mesh in FenceMeshes.Values) Destroy(mesh.gameObject);
             FenceMeshes = FenceMeshGenerator.GenerateMeshes(this);
+
+            foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
+            WallMeshes = WallMeshGenerator.GenerateMeshes(this);
 
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) Destroy(mesh.gameObject);
             ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
@@ -258,13 +277,13 @@ namespace BlockmapFramework
             }
             return nodes;
         }
-        public List<BlockmapNode> GetNodes(int heightLevel)
+        public List<BlockmapNode> GetNodes(int altitude)
         {
             List<BlockmapNode> nodes = new List<BlockmapNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                     foreach (BlockmapNode node in GetNodes(x, y))
-                        if (node.BaseHeight == heightLevel)
+                        if (node.BaseHeight == altitude)
                             nodes.Add(node);
             return nodes;
         }
@@ -338,6 +357,15 @@ namespace BlockmapFramework
         public List<AirNode> GetAirNodes(Vector2Int localCoordinates)
         {
             return GetAirNodes(localCoordinates.x, localCoordinates.y);
+        }
+
+        public List<Wall> GetWalls(Vector3Int localCellCoordinates)
+        {
+            return Walls[localCellCoordinates];
+        }
+        public List<Wall> GetWalls(int altitude)
+        {
+            return Walls.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
         }
 
         public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)

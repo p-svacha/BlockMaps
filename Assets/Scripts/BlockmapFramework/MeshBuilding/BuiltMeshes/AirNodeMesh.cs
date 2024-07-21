@@ -124,7 +124,7 @@ namespace BlockmapFramework
         {
             Dictionary<int, AirNodeMesh> meshes = new Dictionary<int, AirNodeMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_HEIGHT; heightLevel++)
+            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
             {
                 List<AirNode> nodesToDraw = chunk.GetAirNodes(heightLevel);
                 if (nodesToDraw.Count == 0) continue;

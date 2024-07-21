@@ -16,7 +16,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Maximum y coordiante a tile can have.
         /// </summary>
-        public const int MAX_HEIGHT = 30;
+        public const int MAX_ALTITUDE = 30;
 
         /// <summary>
         /// Physical height (y) of a tile.
@@ -84,6 +84,7 @@ namespace BlockmapFramework
         public int Layer_Water;
         public int Layer_Fence;
         public int Layer_ProceduralEntityMesh;
+        public int Layer_Wall;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -141,6 +142,7 @@ namespace BlockmapFramework
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Fence = LayerMask.NameToLayer("Fence");
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
+            Layer_Wall = LayerMask.NameToLayer("Wall");
 
             // Init pathfinder
             Pathfinder.Init(this);
@@ -202,8 +204,8 @@ namespace BlockmapFramework
             // Init walls
             foreach(WallData wallData in data.Walls)
             {
-                Wall wall = Wall.Load(wallData);
-                Walls.Add(wall.Id, wall);
+                Wall wall = Wall.Load(this, wallData);
+                RegisterWall(wall);
             }
 
             // Init water bodies
@@ -548,6 +550,37 @@ namespace BlockmapFramework
             if (targetNode != null) return targetNode.Entities.First(x => x is ProceduralEntity) as ProceduralEntity;
 
             return null;
+        }
+
+
+        /// <summary>
+        /// Returns the exact world position of where the cursor is currently hovering on a specific altitude level.
+        /// <br/>Calculation is based on intersecting mouse hover with an invisible plane on the given altitude.
+        /// </summary>
+        private Vector3 GetAltitudeHitPoint(int altitude)
+        {
+            var plane = new Plane(Vector3.up, new Vector3(0f, altitude * World.TILE_HEIGHT, 0f));
+            var ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
+            if (plane.Raycast(ray, out float distance)) return ray.GetPoint(distance);
+            throw new System.Exception("Altitude World Position Retrieval Error");
+        }
+
+        /// <summary>
+        /// Returns the world coordinates of the currently hovered position on a specific altitude level.
+        /// </summary>
+        public Vector2Int GetHoveredCoordinates(int altitude)
+        {
+            Vector3 altitudeHitPoint = GetAltitudeHitPoint(altitude);
+            return GetWorldCoordinates(altitudeHitPoint);
+        }
+
+        /// <summary>
+        /// Returns the side hover mode of the currently hovered position on a specific altitude level.
+        /// </summary>
+        public Direction GetNodeHoverModeSides(int altitude)
+        {
+            Vector3 altitudeHitPoint = GetAltitudeHitPoint(altitude);
+            return GetNodeHoverModeSides(altitudeHitPoint);
         }
 
         #endregion
@@ -1009,6 +1042,27 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
+        public bool CanBuildWall(Vector3Int globalCellCoordinates, Direction side)
+        {
+            return true;
+        }
+        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material)
+        {
+            // Create and register new wall
+            Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material);
+            RegisterWall(newWall);
+
+            // Update systems around cell
+            UpdateNavmeshAround(newWall.WorldCoordinates);
+            RedrawNodesAround(newWall.WorldCoordinates);
+            UpdateVisionOfNearbyEntitiesDelayed(newWall.CenterWorldPosition);
+        }
+        private void RegisterWall(Wall wall) // add to database and add all references in different objects
+        {
+            Walls.Add(wall.Id, wall);
+            wall.Chunk.AddWall(wall);
+        }
+
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
         {
             List<BlockmapNode> possibleTargetNodes = new List<BlockmapNode>();
@@ -1074,7 +1128,7 @@ namespace BlockmapFramework
         /// </summary>
         public void DrawNodes()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.DrawMesh();
+            foreach (Chunk chunk in Chunks.Values) chunk.DrawMeshes();
 
             SetActiveVisionActor(null);
 
@@ -1108,7 +1162,7 @@ namespace BlockmapFramework
         /// </summary>
         public void RedrawChunk(Chunk chunk)
         {
-            chunk.DrawMesh();
+            chunk.DrawMeshes();
             chunk.SetVisibility(ActiveVisionActor);
             chunk.ShowGrid(IsShowingGrid);
             chunk.ShowTextures(IsShowingTextures);
@@ -1255,6 +1309,7 @@ namespace BlockmapFramework
         public List<WaterBody> GetAllWaterBodies() => WaterBodies.Values.ToList();
         public List<Fence> GetAllFences() => Fences.Values.ToList();
         public List<Zone> GetAllZones() => Zones.Values.ToList();
+        public List<Wall> GetAllWalls() => Walls.Values.ToList();
 
         public BlockmapNode GetNode(int id) => Nodes[id];
         public Actor GetActor(int id) => Actors[id];
@@ -1262,6 +1317,7 @@ namespace BlockmapFramework
         public WaterBody GetWaterBody(int id) => WaterBodies[id];
         public Fence GetFence(int id) => Fences[id];
         public Zone GetZone(int id) => Zones[id];
+        public Wall GetWall(int id) => Walls[id];
 
 
         /// <summary>
@@ -1274,7 +1330,7 @@ namespace BlockmapFramework
         public bool IsValidNodeHeight(Dictionary<Direction, int> height)
         {
             if (height.Values.Any(x => x < 0)) return false;
-            if (height.Values.Any(x => x > World.MAX_HEIGHT)) return false;
+            if (height.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
 
             return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||
             Mathf.Abs(height[Direction.SW] - height[Direction.NW]) > 1 ||
@@ -1421,6 +1477,24 @@ namespace BlockmapFramework
                     if (e.MinHeight <= maxHeight && e.MaxHeight >= minHeight)
                         entities.Add(e);
             return entities;
+        }
+
+        public List<Wall> GetWalls(Vector3Int globalCellCoordinates)
+        {
+            Vector2Int globalCoordinates2D = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
+            Chunk chunk = GetChunk(globalCoordinates2D);
+            Vector2Int localWorldCoordinates = chunk.GetLocalCoordinates(globalCoordinates2D);
+            Vector3Int localCellCoordinates = new Vector3Int(localWorldCoordinates.x, globalCellCoordinates.y, localWorldCoordinates.y);
+            return chunk.GetWalls(localCellCoordinates);
+        }
+        public Vector3Int GetLocalCellCoordinates(Vector3Int globalCellCoordinates)
+        {
+            Vector2Int globalWorldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
+            Chunk chunk = GetChunk(globalWorldCoordinates);
+            if (chunk == null) throw new System.Exception("The given global cell position " + globalCellCoordinates.ToString() + " is outside the world.");
+
+            Vector2Int localWorldCoordinates = chunk.GetLocalCoordinates(globalWorldCoordinates);
+            return new Vector3Int(localWorldCoordinates.x, globalCellCoordinates.y, localWorldCoordinates.y);
         }
 
         public Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)

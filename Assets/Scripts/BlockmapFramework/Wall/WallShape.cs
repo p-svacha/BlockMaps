@@ -15,6 +15,6 @@ namespace BlockmapFramework
         public abstract List<Direction> ValidSides { get; }
         public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/WallShapes/" + Id.ToString());
 
-        public abstract void GenerateMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, Material material);
+        public abstract void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material);
     }
 }

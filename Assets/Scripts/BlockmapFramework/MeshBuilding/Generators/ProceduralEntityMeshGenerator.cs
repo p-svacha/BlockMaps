@@ -11,7 +11,7 @@ namespace BlockmapFramework
         {
             Dictionary<int, ProceduralEntityMesh> meshes = new Dictionary<int, ProceduralEntityMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_HEIGHT; heightLevel++)
+            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
             {
                 List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.Entities.Any(e => e is ProceduralEntity)).ToList();
                 if (nodesToDraw.Count == 0) continue;

@@ -51,7 +51,7 @@ namespace BlockmapFramework
 
             // Check if all heights are within allowed values
             if (newHeights.Values.Any(x => x < 0)) return false;
-            if (newHeights.Values.Any(x => x > World.MAX_HEIGHT)) return false;
+            if (newHeights.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
 
             // Check if changing height would intersect the node with another one on the same coordinates
             List<BlockmapNode> nodesOnCoordinate = World.GetNodes(WorldCoordinates);
@@ -162,7 +162,7 @@ namespace BlockmapFramework
             foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
 
             // Calculate min and max height of affected corners
-            int minHeight = World.MAX_HEIGHT;
+            int minHeight = World.MAX_ALTITUDE;
             int maxHeight = 0;
             foreach (Direction dir in HelperFunctions.GetAffectedCorners(mode))
             {

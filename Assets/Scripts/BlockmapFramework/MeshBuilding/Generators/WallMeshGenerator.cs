@@ -5,14 +5,21 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public static class FenceMeshGenerator
+    public static class WallMeshGenerator
     {
-        public static Dictionary<int, FenceMesh> GenerateMeshes(Chunk chunk)
+        /// <summary>
+        /// Generates the meshes for all altitude levels of a chunk
+        /// </summary>
+        public static Dictionary<int, WallMesh> GenerateMeshes(Chunk chunk)
         {
-            Dictionary<int, FenceMesh> meshes = new Dictionary<int, FenceMesh>();
+            Dictionary<int, WallMesh> meshes = new Dictionary<int, WallMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
+            for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
+                List<Wall> wallsToDraw = chunk.GetWalls(altitude);
+                if (wallsToDraw.Count == 0) continue;
+
+                /*
                 List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.HasFence).ToList();
                 if (nodesToDraw.Count == 0) continue;
 
@@ -38,16 +45,24 @@ namespace BlockmapFramework
                 }
 
                 meshes.Add(heightLevel, mesh);
+                */
             }
 
             return meshes;
         }
 
-        public static void DrawFence(MeshBuilder meshBuilder, FenceType type, BlockmapNode node, Direction side, int height, bool isPreview = false)
+        /// <summary>
+        /// Adds the mesh of a single wall piece to a MeshBuilder.
+        /// </summary>
+        public static void DrawWall(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, WallShape shape, WallMaterial material, bool isPreview = false)
         {
-            if (HelperFunctions.IsSide(side)) type.GenerateSideMesh(meshBuilder, node, side, height, isPreview);
-            else if (HelperFunctions.IsCorner(side)) type.GenerateCornerMesh(meshBuilder, node, side, height, isPreview);
-            else throw new System.Exception("Fences can only be drawn when on side or corner of a node");
+            shape.GenerateMesh(meshBuilder, localCellPosition, side, GetMaterial(material.Material, isPreview));
+        }
+
+        private static Material GetMaterial(Material mat, bool isPreview)
+        {
+            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
+            else return mat;
         }
     }
 }
