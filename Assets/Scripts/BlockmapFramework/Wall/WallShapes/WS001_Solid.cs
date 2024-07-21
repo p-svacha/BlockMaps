@@ -6,11 +6,12 @@ namespace BlockmapFramework
 {
     public class WS001_Solid : WallShape
     {
+        private const float WIDTH = 0.1f;
+
         public override WallShapeId Id => WallShapeId.Solid;
         public override string Name => "Solid";
-        public override List<Direction> ValidSides => HelperFunctions.GetSides();
-
-        private const float WIDTH = 0.1f;
+        // public override List<Direction> ValidSides => HelperFunctions.GetSides();
+        public override float Width => WIDTH;
 
         public override void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material)
         {

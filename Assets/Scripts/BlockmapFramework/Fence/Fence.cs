@@ -39,45 +39,33 @@ namespace BlockmapFramework
         /// <summary>
         /// The minimum y coordinate that this fence is taking up.
         /// </summary>
-        public int MinHeight => Node.GetMinHeight(Side);
+        public int MinAltitude => Node.GetMinAltitude(Side);
 
         /// <summary>
         /// The maximum y coordinate that this fence is taking up.
         /// </summary>
-        public int MaxHeight => Node.GetMaxHeight(Side) + Height;
+        public int MaxAltitude => Node.GetMaxAltitude(Side) + Height - 1;
 
         /// <summary>
         /// Returns the height for this fence for all corners it covers as a y coordinate.
         /// </summary>
-        public Dictionary<Direction, int> MaxHeights => GetMaxHeights(Node.Height);
+        public Dictionary<Direction, int> MaxHeights => GetMaxHeights(Node.Altitude);
 
         /// <summary>
         /// Returns if this fence follows a slope.
         /// </summary>
         public bool IsSloped => !Node.IsFlat(Side);
 
-        public bool IsClimbable => SkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
+        public bool IsClimbable => ClimbSkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
 
         // IClimbable
-        public ClimbingCategory SkillRequirement => Type.ClimbSkillRequirement;
-        public float CostUp => Type.ClimbCostUp;
-        public float CostDown => Type.ClimbCostDown;
-        public float SpeedUp => Type.ClimbSpeedUp;
-        public float SpeedDown => Type.ClimbSpeedDown;
-        public float TransformOffset => Type.Width;
+        public ClimbingCategory ClimbSkillRequirement => Type.ClimbSkillRequirement;
+        public float ClimbCostUp => Type.ClimbCostUp;
+        public float ClimbCostDown => Type.ClimbCostDown;
+        public float ClimbSpeedUp => Type.ClimbSpeedUp;
+        public float ClimbSpeedDown => Type.ClimbSpeedDown;
+        public float ClimbTransformOffset => Type.Width;
         public Direction ClimbSide => Side;
-        public int MaxClimbHeight(ClimbingCategory skill)
-        {
-            return skill switch
-            {
-                ClimbingCategory.None => 0,
-                ClimbingCategory.Basic => MovingEntity.MAX_BASIC_CLIMB_HEIGHT,
-                ClimbingCategory.Intermediate => MovingEntity.MAX_INTERMEDIATE_CLIMB_HEIGHT,
-                ClimbingCategory.Advanced => MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT,
-                ClimbingCategory.Unclimbable => 0,
-                _ => throw new System.Exception("category " + skill.ToString() + " not handled.")
-            };
-        }
 
         #region Init
 
@@ -106,7 +94,7 @@ namespace BlockmapFramework
         public static int GetFenceStartY(BlockmapNode node, Direction side)
         {
             List<Direction> relevantCorners = HelperFunctions.GetAffectedCorners(side);
-            return node.Height.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
+            return node.Altitude.Where(x => relevantCorners.Contains(x.Key)).Min(x => x.Value);
         }
 
         /// <summary>
@@ -124,7 +112,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Node.WorldCoordinates.ToString() + " " + Node.BaseHeight + " " + Side.ToString() + " " + Type.Name.ToString();
+            return Node.WorldCoordinates.ToString() + " H:" + Height + "(" + MinAltitude + "-" + MaxAltitude + ") " + Side.ToString() + " " + Type.Name.ToString();
         }
 
         #endregion

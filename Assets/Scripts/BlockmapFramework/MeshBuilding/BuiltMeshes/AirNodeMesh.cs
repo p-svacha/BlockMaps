@@ -37,7 +37,7 @@ namespace BlockmapFramework
                 for (int y = 0; y < Chunk.Size; y++)
                 {
                     // Get node
-                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), HeightLevel).OrderBy(x => x.MaxHeight).FirstOrDefault();
+                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), HeightLevel).OrderBy(x => x.MaxAltitude).FirstOrDefault();
 
                     // Base surface
                     int surfaceId = node == null ? -1 : (int)node.Surface.Id;

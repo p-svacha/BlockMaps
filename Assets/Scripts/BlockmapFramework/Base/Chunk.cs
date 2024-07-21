@@ -286,7 +286,7 @@ namespace BlockmapFramework
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                     foreach (BlockmapNode node in GetNodes(x, y))
-                        if (node.BaseHeight == altitude)
+                        if (node.BaseAltitude == altitude)
                             nodes.Add(node);
             return nodes;
         }
@@ -349,7 +349,7 @@ namespace BlockmapFramework
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                     foreach (AirNode node in GetAirNodes(x, y))
-                        if (node.BaseHeight == heightLevel)
+                        if (node.BaseAltitude == heightLevel)
                             nodes.Add(node);
             return nodes;
         }
@@ -364,7 +364,7 @@ namespace BlockmapFramework
 
         public List<Wall> GetWalls(Vector3Int localCellCoordinates)
         {
-            if (!Walls.ContainsKey(localCellCoordinates)) return null;
+            if (!Walls.ContainsKey(localCellCoordinates)) return new List<Wall>();
             return Walls[localCellCoordinates];
         }
         public List<Wall> GetWalls(int altitude)

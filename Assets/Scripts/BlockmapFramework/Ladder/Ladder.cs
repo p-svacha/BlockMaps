@@ -25,12 +25,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Height at which the ladder starts.
         /// </summary>
-        public int MinHeight { get; private set; }
+        public int MinAltitude { get; private set; }
 
         /// <summary>
-        /// Height at which the ladder ends.
+        /// Altitude above where the ladder ends.
         /// </summary>
-        public int MaxHeight { get; private set; }
+        public int MaxAltitude { get; private set; }
 
         /// <summary>
         /// How many tiles up the ladder goes.
@@ -43,13 +43,12 @@ namespace BlockmapFramework
         public LadderEntity Entity { get; private set; }
 
         // IClimbable
-        public ClimbingCategory SkillRequirement => ClimbingCategory.Basic;
-        public int MaxClimbHeight(ClimbingCategory skill) => World.MAX_ALTITUDE;
-        public float CostUp => 1.6f;
-        public float CostDown => 1.3f;
-        public float SpeedUp => 0.65f;
-        public float SpeedDown => 0.75f;
-        public float TransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
+        public ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Basic;
+        public float ClimbCostUp => 1.6f;
+        public float ClimbCostDown => 1.3f;
+        public float ClimbSpeedUp => 0.65f;
+        public float ClimbSpeedDown => 0.75f;
+        public float ClimbTransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
         public Direction ClimbSide => Side;
 
         public Ladder(BlockmapNode source, BlockmapNode target, Direction side)
@@ -57,9 +56,9 @@ namespace BlockmapFramework
             Bottom = source;
             Top = target;
             Side = side;
-            MaxHeight = target.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
-            MinHeight = source.GetMinHeight(side);
-            Height = MaxHeight - MinHeight;
+            MaxAltitude = target.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side));
+            MinAltitude = source.GetMinAltitude(side);
+            Height = MaxAltitude - MinAltitude;
         }
 
         /// <summary>

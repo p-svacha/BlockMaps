@@ -13,37 +13,32 @@ namespace BlockmapFramework
         /// <summary>
         /// What kind of skill a MovingEntity needs to climb this.
         /// </summary>
-        public ClimbingCategory SkillRequirement { get; }
-
-        /// <summary>
-        /// Returns the maximum height this climbable can be so that a MovingEntity with the given climbing skill can still climb it.
-        /// </summary>
-        public int MaxClimbHeight(ClimbingCategory skill);
+        public ClimbingCategory ClimbSkillRequirement { get; }
 
         /// <summary>
         /// The movement cost of climbing one tile up.
         /// </summary>
-        public float CostUp { get; }
+        public float ClimbCostUp { get; }
 
         /// <summary>
         /// The movement cost of climbing one tile down.
         /// </summary>
-        public float CostDown { get; }
+        public float ClimbCostDown { get; }
 
         /// <summary>
         /// The movement speed when climbing up.
         /// </summary>
-        public float SpeedUp { get; }
+        public float ClimbSpeedUp { get; }
 
         /// <summary>
         /// The movement speed when climbing down.
         /// </summary>
-        public float SpeedDown { get; }
+        public float ClimbSpeedDown { get; }
         
         /// <summary>
         /// The world distance from the node edge that a MovingEntity has when climbing this. Basically its width.
         /// </summary>
-        public float TransformOffset { get; }
+        public float ClimbTransformOffset { get; }
 
         /// <summary>
         /// On which node side this climbable is located. The TransformOffset is only applied when climbing on this side.

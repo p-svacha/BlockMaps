@@ -21,13 +21,13 @@ namespace BlockmapFramework
             IsPassable = true;
         }
 
-        public override int MinHeight => Ladder.MinHeight;
-        public override int MaxHeight => Ladder.MaxHeight;
+        public override int MinHeight => Ladder.MinAltitude;
+        public override int MaxHeight => Ladder.MaxAltitude;
 
         public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
             Vector3 nodeCenter = originNode.GetCenterWorldPosition();
-            float worldHeight = Ladder.MinHeight * World.TILE_HEIGHT;
+            float worldHeight = Ladder.MinAltitude * World.TILE_HEIGHT;
             return new Vector3(nodeCenter.x, worldHeight, nodeCenter.z);
         }
     }

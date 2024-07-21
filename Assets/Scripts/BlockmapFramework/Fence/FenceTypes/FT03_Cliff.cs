@@ -13,11 +13,11 @@ namespace BlockmapFramework
         public override bool BlocksVision => true;
 
         // IClimbable
-        public override ClimbingCategory ClimbSkillRequirement => Cliff.Instance.SkillRequirement;
-        public override float ClimbCostUp => Cliff.Instance.CostUp;
-        public override float ClimbCostDown => Cliff.Instance.CostDown;
-        public override float ClimbSpeedUp => Cliff.Instance.SpeedUp;
-        public override float ClimbSpeedDown => Cliff.Instance.SpeedDown;
+        public override ClimbingCategory ClimbSkillRequirement => Cliff.Instance.ClimbSkillRequirement;
+        public override float ClimbCostUp => Cliff.Instance.ClimbCostUp;
+        public override float ClimbCostDown => Cliff.Instance.ClimbCostDown;
+        public override float ClimbSpeedUp => Cliff.Instance.ClimbSpeedUp;
+        public override float ClimbSpeedDown => Cliff.Instance.ClimbSpeedDown;
         public override float Width => 0f;
 
 

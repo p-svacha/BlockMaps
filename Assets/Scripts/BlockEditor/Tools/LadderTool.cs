@@ -41,12 +41,12 @@ namespace WorldEditor
                     BlockmapNode bottom = World.HoveredNode;
                     BlockmapNode top = TargetNode;
                     Direction side = World.NodeHoverModeSides;
-                    int height = top.GetMaxHeight(HelperFunctions.GetOppositeDirection(side)) - bottom.GetMinHeight(side);
+                    int height = top.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side)) - bottom.GetMinAltitude(side);
 
                     // Preview
                     BuildPreview.SetActive(true);
                     MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                    BuildPreview.transform.position = new Vector3(bottom.GetCenterWorldPosition().x, World.TILE_HEIGHT * bottom.GetMinHeight(side), bottom.GetCenterWorldPosition().z);
+                    BuildPreview.transform.position = new Vector3(bottom.GetCenterWorldPosition().x, World.TILE_HEIGHT * bottom.GetMinAltitude(side), bottom.GetCenterWorldPosition().z);
                     BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                     LadderMeshGenerator.GenerateLadderMesh(previewMeshBuilder, height, isPreview: true);
                     previewMeshBuilder.ApplyMesh();

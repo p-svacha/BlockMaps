@@ -9,7 +9,7 @@ namespace BlockmapFramework
     /// <br/>An instance represents one wall on a single world cell covering a specific direction (side, corner or full cell).
     /// <br/>Each wall consist of a combination of a WallShape and a WallMaterial, which together define how the wall looks and acts.
     /// </summary>
-    public class Wall
+    public class Wall : IClimbable
     {
         private World World;
 
@@ -41,6 +41,17 @@ namespace BlockmapFramework
         /// The material this wall is made of.
         /// </summary>
         public WallMaterial Material { get; private set; }
+
+
+        // IClimbable
+        public ClimbingCategory ClimbSkillRequirement => Material.ClimbSkillRequirement;
+        public float ClimbCostUp => Material.ClimbCostUp;
+        public float ClimbCostDown => Material.ClimbCostDown;
+        public float ClimbSpeedUp => Material.ClimbSpeedUp;
+        public float ClimbSpeedDown => Material.ClimbSpeedDown;
+        public float ClimbTransformOffset => Shape.Width;
+        public Direction ClimbSide => Side;
+        public bool IsClimbable => ClimbSkillRequirement != ClimbingCategory.Unclimbable;
 
         #region Init
 

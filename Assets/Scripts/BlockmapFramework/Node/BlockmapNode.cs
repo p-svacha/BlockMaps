@@ -17,18 +17,18 @@ namespace BlockmapFramework
         /// <summary>
         /// Height of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
-        public Dictionary<Direction, int> Height { get; protected set; }
+        public Dictionary<Direction, int> Altitude { get; protected set; }
 
         /// <summary>
         /// Lowest y coordinate of this node.
         /// </summary>
-        public int BaseHeight { get; private set; }
-        public float BaseWorldHeight => BaseHeight * World.TILE_HEIGHT;
+        public int BaseAltitude { get; private set; }
+        public float BaseWorldHeight => BaseAltitude * World.TILE_HEIGHT;
 
         /// <summary>
         /// Highest point of this node.
         /// </summary>
-        public int MaxHeight { get; private set; }
+        public int MaxAltitude { get; private set; }
 
         /// <summary>
         /// Shape is saved in a string with 4 chars, where each char is a corner (SW, SE, NE, NW) storing the height above the min height of the node.
@@ -99,7 +99,7 @@ namespace BlockmapFramework
 
             LocalCoordinates = new Vector2Int(localCoordinates.x, localCoordinates.y);
             WorldCoordinates = chunk.GetWorldCoordinates(LocalCoordinates);
-            Height = height;
+            Altitude = height;
 
             RecalculateShape();
             Transitions = new Dictionary<BlockmapNode, Transition>();
@@ -111,9 +111,9 @@ namespace BlockmapFramework
         /// </summary>
         protected void RecalculateShape()
         {
-            BaseHeight = Height.Values.Min();
-            MaxHeight = Height.Values.Max();
-            Shape = GetShape(Height);
+            BaseAltitude = Altitude.Values.Min();
+            MaxAltitude = Altitude.Values.Max();
+            Shape = GetShape(Altitude);
         }
 
         protected string GetShape(Dictionary<Direction, int> height)
@@ -251,11 +251,13 @@ namespace BlockmapFramework
             {
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList))
                 {
+                    Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList);
                     Transitions.Add(adjNode, t);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown))
                 {
+                    Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown);
                     Transitions.Add(adjNode, t);
                 }
@@ -268,242 +270,69 @@ namespace BlockmapFramework
         private bool ShouldCreateSingleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climb)
         {
             climb = new List<IClimbable>();
-            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
 
             // Calculate some important values
-            int fromHeight = GetMinHeight(dir);
-            int toHeight = to.GetMaxHeight(oppositeDir);
-            int heightDiff = Mathf.Abs(toHeight - fromHeight);
-            bool isAscend = toHeight > fromHeight;
-            BlockmapNode lowerNode = isAscend ? this : to;
-            Direction lowerSide = isAscend ? dir : oppositeDir;
-            BlockmapNode higherNode = isAscend ? to : this;
-            Direction higherSide = isAscend ? oppositeDir : dir;
+            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+            int fromAltitude = GetMinAltitude(dir);
+            int toAltitude = to.GetMaxAltitude(oppositeDir);
+            int climbHeight = toAltitude - fromAltitude;
 
-            // Make some initial checks
-            if (fromHeight == toHeight) return false; // No transition when matching height
-            if (!lowerNode.IsPassable(lowerSide, checkClimbables: false)) return false; // Lower node is not passable in the needed direction
-            if (!higherNode.IsPassable(higherSide)) return false; // Higher node is not passable in the needed direction
+            if (!IsFlat(dir)) return false;
+            if (!to.IsFlat(oppositeDir)) return false;
 
-            int headspace = lowerNode.GetFreeHeadSpace(lowerSide);
-            if (headspace <= heightDiff) return false; // Another node is blocking the transition
-            if (!IsFlat(dir)) return false; // Transition base needs to be flat
-            if (!to.IsFlat(oppositeDir)) return false; // Transition target needs to be flat
-
-            // Costruct climb list
-            int startHeight = lowerNode.GetMinHeight(lowerSide);
-            int endHeight = higherNode.GetMaxHeight(higherSide);
-
-            if(CanConnectUpwardsThroughClimbing(lowerNode, lowerSide, startHeight, higherNode, higherSide, endHeight, out climb))
+                if (climbHeight > 0)
             {
-                return true;
+                climb = GetClimbUp(dir);
+                return climb.Count == Mathf.Abs(climbHeight);
             }
-
+            if (climbHeight < 0)
+            {
+                climb = to.GetClimbUp(oppositeDir);
+                climb.Reverse();
+                return climb.Count == Mathf.Abs(climbHeight);
+            }
             return false;
         }
 
         private bool ShouldCreateDoubleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climbUp, out List<IClimbable> climbDown)
         {
-            climbUp = new List<IClimbable>();
-            climbDown = new List<IClimbable>();
-
             // Calculate some important values
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
-            int fromHeight = GetMinHeight(dir);
-            int toHeight = to.GetMaxHeight(oppositeDir);
-            int minHeight = Mathf.Min(fromHeight, toHeight);
+            int fromAltitude = GetMinAltitude(dir);
+            int toAltitude = to.GetMaxAltitude(oppositeDir);
 
-            // Passability checks
-            if (!IsPassable(dir, checkClimbables: false)) return false; // Lower node is not passable in the needed direction
-            if (!to.IsPassable(oppositeDir, checkClimbables: false)) return false; // Higher node is not passable in the needed direction
+            climbUp = GetClimbUp(dir);
+            climbDown = to.GetClimbUp(oppositeDir);
+            climbDown.Reverse();
 
-            if (!IsFlat(dir)) return false; // Transition base needs to be flat
-            if (!to.IsFlat(oppositeDir)) return false; // Transition target needs to be flat
+            if (climbUp.Count == 0 || climbDown.Count == 0) return false; // climb up and down doesn't match up
+            if (GetFreeHeadSpace(dir) < climbUp.Count + 1) return false; // not enough headspace at end of climb up
+            if (to.GetFreeHeadSpace(oppositeDir) < climbDown.Count + 1) return false; // not enough headspace at start of climb down
 
-            // Get fences on both sides
-            Fence fromFence, toFence;
-            Fences.TryGetValue(dir, out fromFence);
-            to.Fences.TryGetValue(oppositeDir, out toFence);
-            if (fromFence == null && toFence == null) return false; // At least one fence needed
-
-            // Check if fences are climbable
-            if (fromFence != null && !fromFence.IsClimbable) return false; // Fence is unclimbable
-            if (toFence != null && !toFence.IsClimbable) return false; // Fence is unclimbable
-
-            int maxHeight = Mathf.Max(fromFence != null ? fromFence.MaxHeight : 0, toFence != null ? toFence.MaxHeight : 0);
-            int totalClimbHeight = maxHeight - minHeight;
-            if(totalClimbHeight > MovingEntity.MAX_ADVANCED_CLIMB_HEIGHT) return false; // Too high
-
-            // Headspeace checks
-            int headspaceFrom = GetFreeHeadSpace(dir);
-            if (headspaceFrom <= maxHeight - fromHeight) return false; // Another node is blocking on the from-side
-            int headspaceTo = to.GetFreeHeadSpace(oppositeDir);
-            if (headspaceTo <= maxHeight - toHeight) return false; // Another node is blocking on the to-side
-            
-
-            // Case 1: Nodes are at same height
-            if (fromHeight == toHeight)
-            {
-                if (SourceLadders.ContainsKey(dir)) return false; // Ladder blocks since it leads to another node higher up
-                if (to.SourceLadders.ContainsKey(oppositeDir)) return false; // Ladder blocks since it leads to another node higher up
-
-                int startHeight = fromHeight;
-
-                for(int i = 0; i < totalClimbHeight; i++)
-                {
-                    // ClimbUp
-                    if (fromFence != null && i <= fromFence.MaxHeight - startHeight) climbUp.Add(fromFence);
-                    else climbUp.Add(toFence);
-
-                    // ClimbDown
-                    if (toFence != null && i <= toFence.MaxHeight - startHeight) climbDown.Add(toFence);
-                    else climbDown.Add(fromFence);
-                }
-                return true;
-            }
-
-            // Case 2: From node is higher
-            if(fromHeight > toHeight)
-            {
-                if (SourceLadders.ContainsKey(dir)) return false; // Ladder blocks since it leads to another node higher up
-
-                // ClimbUp
-                if (fromFence == null && toFence.MaxHeight <= fromHeight) return false; // Lower fence must go higher if the higher node has no fence
-
-                int currentHeight = fromHeight;
-                if (fromFence != null)
-                {
-                    int climbHeight = fromFence.MaxHeight - fromHeight;
-                    for (int i = 0; i < climbHeight; i++) climbUp.Add(fromFence);
-                    currentHeight += climbHeight;
-                }
-
-                if(currentHeight < maxHeight)
-                    for (int i = 0; i < maxHeight - currentHeight; i++) climbUp.Add(toFence);
-
-                // ClimbDown
-                if (!CanConnectUpwardsThroughClimbing(to, oppositeDir, toHeight, this, dir, maxHeight, out climbDown)) return false;
-
-                return true;
-            }
-
-            // Case 3: To node is higher
-            if (fromHeight < toHeight)
-            {
-                if (to.SourceLadders.ContainsKey(oppositeDir)) return false; // Ladder blocks since it leads to another node higher up
-
-                // ClimbUp
-                if (!CanConnectUpwardsThroughClimbing(this, dir, fromHeight, to, oppositeDir, maxHeight, out climbUp)) return false;
-
-                // ClimbDown
-                if (toFence == null && fromFence.MaxHeight <= toHeight) return false; // Lower fence must go higher if the higher node has no fence
-
-                int currentHeight = toHeight;
-                if (toFence != null)
-                {
-                    int climbHeight = toFence.MaxHeight - toHeight;
-                    for (int i = 0; i < climbHeight; i++) climbDown.Add(toFence);
-                    currentHeight += climbHeight;
-                }
-
-                if (currentHeight < maxHeight)
-                    for (int i = 0; i < maxHeight - currentHeight; i++) climbDown.Add(fromFence);
-
-                return true;
-            }
-
-            return false;
+            return (fromAltitude + climbUp.Count - climbDown.Count) == toAltitude;
         }
 
         /// <summary>
-        /// Returns a climbing path exists (through ladders, fences, cliffs, etc.) from the given lowerNode to the given higherNode.
+        /// Returns the whole climb when trying to climb up from this node in a given side direction as an IClimbable-List, where each element represents the climbable for one altitude level.
         /// </summary>
-        private bool CanConnectUpwardsThroughClimbing(BlockmapNode lowerNode, Direction lowerSide, int startHeight, BlockmapNode higherNode, Direction higherSide, int endHeight, out List<IClimbable> climb)
+        public List<IClimbable> GetClimbUp(Direction dir)
         {
-            climb = new List<IClimbable>();
-            int currentHeight = startHeight;
+            if (!HelperFunctions.GetSides().Contains(dir)) throw new System.Exception("A climb can only happen in a side direction (N/E/S/W)");
 
-            // Step 1: First check if lower node has a fence
-            if (lowerNode.Fences.TryGetValue(lowerSide, out Fence lowerFence))
+            // Set some important values
+            List<IClimbable> climb = new List<IClimbable>();
+            int currentAltitude = GetMinAltitude(dir);
+
+            IClimbable nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
+            while(nextClimbingPiece != null)
             {
-                int climbHeight = lowerFence.MaxHeight - startHeight;
+                climb.Add(nextClimbingPiece);
+                currentAltitude++;
 
-                if (!lowerFence.IsClimbable) return false; // Fence is unclimbable
-                if (lowerFence.MaxHeight > endHeight) return false; // Fence goes higher than the height we want
-                if (climbHeight > lowerFence.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Fence is too high to climb
-
-                // Add the fence as the first part of the climb
-                for (int i = 0; i < climbHeight; i++) climb.Add(lowerFence);
-                currentHeight += climbHeight;
-
-                // Check if we reached the target height
-                if (currentHeight == endHeight) return true;
+                nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
             }
 
-            // Step 2: If no fence, check if lower node has a ladder
-            else if (lowerNode.SourceLadders.TryGetValue(lowerSide, out Ladder ladder))
-            {
-                int climbHeight = ladder.MaxHeight - startHeight;
-
-                if (ladder.MaxHeight > endHeight) return false; // Ladder goes higher than the height we want
-                if (climbHeight > ladder.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Ladder is too high to climb
-
-                // Add the ladder as the first part of the climb
-                for (int i = 0; i < climbHeight; i++) climb.Add(ladder);
-                currentHeight += climbHeight;
-
-                // Check if we reached the target height
-                if (currentHeight == endHeight) return true;
-            }
-
-            // Step 3: Check the surface node of the coordinates we are climbing to. If its higher than we currently are in our climb, add it to our climb.
-            BlockmapNode toSurfaceNode = World.GetGroundNode(higherNode.WorldCoordinates);
-            if (toSurfaceNode == higherNode && toSurfaceNode.GetMinHeight(higherSide) == endHeight) // The surface node is our target
-            {
-                int climbHeight = endHeight - currentHeight;
-                if (climbHeight > Cliff.Instance.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Cliff is too high to climb
-
-                // Complete the climb list
-                for (int i = 0; i < climbHeight; i++) climb.Add(Cliff.Instance);
-                return true;
-            }
-            else if (toSurfaceNode.GetMinHeight(higherSide) > currentHeight) // Surface node is not our target, but higher than we currently are
-            {
-                int climbHeight = toSurfaceNode.GetMinHeight(higherSide) - currentHeight;
-
-                if (!toSurfaceNode.IsFlat(higherSide)) return false; // Can't climb up to a sloped cliff
-                if (climbHeight > Cliff.Instance.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Cliff is too high to climb
-
-                // Add the cliff to the climb list
-                for (int i = 0; i < climbHeight; i++) climb.Add(Cliff.Instance);
-                currentHeight += climbHeight;
-            }
-
-            // Step 4: Check if we can complete the climb with fences below higherNode
-            List<BlockmapNode> nodesBelowHigher = World.GetNodes(higherNode.WorldCoordinates).OrderBy(x => x.BaseHeight).ToList();
-            foreach (BlockmapNode nodeBelow in nodesBelowHigher)
-            {
-                if (nodeBelow.Fences.TryGetValue(higherSide, out Fence higherFence))
-                {
-                    int climbHeight = higherFence.MaxHeight - currentHeight;
-
-                    if (higherFence.MaxHeight <= currentHeight) continue; // Fence is too low, not interested
-
-                    if (!higherFence.IsClimbable) return false;
-                    if (higherFence.MinHeight > currentHeight) return false; // Fence is too high up
-                    if (higherFence.MaxHeight > endHeight) return false; // Fence goes higher than the height we want
-                    if (climbHeight > higherFence.MaxClimbHeight(ClimbingCategory.Advanced)) return false; // Fence is too high to climb
-
-                    // Add the fence as the first part of the climb
-                    for (int i = 0; i < climbHeight; i++) climb.Add(higherFence);
-                    currentHeight += climbHeight;
-
-                    // Check if we reached the target height
-                    if (currentHeight == endHeight) return true;
-                }
-            }
-
-            return false;
+            return climb;
         }
 
         #endregion
@@ -618,13 +447,13 @@ namespace BlockmapFramework
         public abstract Vector3 GetCenterWorldPosition();
 
         /// <summary>
-        /// Returns the minimum height on the given side of this node as a y coordinate. 
+        /// Returns the minimum altitude on the given side of this node as a y coordinate. 
         /// </summary>
-        public int GetMinHeight(Direction side) => Height.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Min(x => x.Value);
+        public int GetMinAltitude(Direction side) => Altitude.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Min(x => x.Value);
         /// <summary>
-        /// Returns the maximum height on the given side of this node as a y coordinate. 
+        /// Returns the maximum altitude on the given side of this node as a y coordinate. 
         /// </summary>
-        public int GetMaxHeight(Direction side) => Height.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Max(x => x.Value);
+        public int GetMaxAltitude(Direction side) => Altitude.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Max(x => x.Value);
 
         /// <summary>
         /// Checks and returns if a node with the same surface exists in the given direction with a matching height to this node.
@@ -855,6 +684,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
+        /// <br/> If entity is null a general check will be made for the navmesh.
         /// </summary>
         public bool IsPassable(Direction dir, Entity entity = null, bool checkClimbables = true)
         {
@@ -870,11 +700,23 @@ namespace BlockmapFramework
                 return true;
             }
 
-            // Check if ladder is blocking
+            // Check if a climbable is blocking
             if (checkClimbables)
             {
+                // Ladders
                 if (SourceLadders.ContainsKey(dir)) return false;
+
+                // Fences
                 if (Fences.ContainsKey(dir)) return false;
+
+                // Walls
+                for(int i = GetMinAltitude(dir); i <= GetMaxAltitude(dir); i++)
+                {
+                    Vector3Int globalCellCoordinates = new Vector3Int(WorldCoordinates.x, i, WorldCoordinates.y);
+                    List<Wall> walls = World.GetWalls(globalCellCoordinates);
+                    foreach (Wall w in walls)
+                        if (w.Side == dir) return false;
+                }
             }
 
             // Check if the side has enough head space for the entity
@@ -885,13 +727,13 @@ namespace BlockmapFramework
             return true;
         }
 
-        public bool IsFlat() => Height.Values.All(x => x == Height[Direction.SW]);
-        public bool IsFlat(Direction dir) => Height.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Select(x => x.Value).All(x => x == Height[HelperFunctions.GetAffectedCorners(dir)[0]]);
+        public bool IsFlat() => Altitude.Values.All(x => x == Altitude[Direction.SW]);
+        public bool IsFlat(Direction dir) => Altitude.Where(x => HelperFunctions.GetAffectedCorners(dir).Contains(x.Key)).Select(x => x.Value).All(x => x == Altitude[HelperFunctions.GetAffectedCorners(dir)[0]]);
 
         public bool IsSlope()
         {
-            if (Height[Direction.NW] == Height[Direction.NE] && Height[Direction.SW] == Height[Direction.SE] && Height[Direction.NW] != Height[Direction.SW]) return true;
-            if (Height[Direction.NW] == Height[Direction.SW] && Height[Direction.NE] == Height[Direction.SE] && Height[Direction.NW] != Height[Direction.NE]) return true;
+            if (Altitude[Direction.NW] == Altitude[Direction.NE] && Altitude[Direction.SW] == Altitude[Direction.SE] && Altitude[Direction.NW] != Altitude[Direction.SW]) return true;
+            if (Altitude[Direction.NW] == Altitude[Direction.SW] && Altitude[Direction.NE] == Altitude[Direction.SE] && Altitude[Direction.NW] != Altitude[Direction.NE]) return true;
             return false;
         }
 
@@ -903,7 +745,7 @@ namespace BlockmapFramework
         /// </summary>
         public int GetFreeHeadSpace(Direction dir)
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxHeight, World.MAX_ALTITUDE).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxAltitude, World.MAX_ALTITUDE).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
 
             int minHeight = World.MAX_ALTITUDE;
 
@@ -911,7 +753,7 @@ namespace BlockmapFramework
             {
                 foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
                 {
-                    int diff = node.Height[corner] - Height[corner];
+                    int diff = node.Altitude[corner] - Altitude[corner];
                     if (diff < minHeight) minHeight = diff;
                 }
             }
@@ -921,7 +763,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Type.ToString() + WorldCoordinates.ToString() + "\nBase Height:" + BaseHeight + "\nSurfaceProperties:" + GetSurfaceProperties().Name;
+            return Type.ToString() + WorldCoordinates.ToString() +  " alt:" + BaseAltitude + " " + GetSurfaceProperties().Name;
         }
 
         #endregion
@@ -961,7 +803,7 @@ namespace BlockmapFramework
                 Id = Id,
                 LocalCoordinateX = LocalCoordinates.x,
                 LocalCoordinateY = LocalCoordinates.y,
-                Height = new int[] { Height[Direction.SW], Height[Direction.SE], Height[Direction.NE], Height[Direction.NW] },
+                Height = new int[] { Altitude[Direction.SW], Altitude[Direction.SE], Altitude[Direction.NE], Altitude[Direction.NW] },
                 Type = Type,
                 SubType = GetSubType()
             };

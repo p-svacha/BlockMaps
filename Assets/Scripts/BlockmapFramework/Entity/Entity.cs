@@ -322,7 +322,7 @@ namespace BlockmapFramework
         #region Getters
 
         public virtual int MinHeight => Mathf.CeilToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT);
-        public virtual int MaxHeight => MinHeight + Dimensions.y;
+        public virtual int MaxHeight => MinHeight + Dimensions.y - 1;
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
@@ -510,7 +510,7 @@ namespace BlockmapFramework
 
                 // Check if the seen object is at the correct height
                 int seenYCoordinate = (int)(hitPosition.y / World.TILE_HEIGHT);
-                if (seenYCoordinate >= targetNode.BaseHeight || seenYCoordinate <= targetNode.MaxHeight)
+                if (seenYCoordinate >= targetNode.BaseAltitude || seenYCoordinate <= targetNode.MaxAltitude)
                 {
                     float epsilon = 0.01f;
                     float xFrac = hitPosition.x % 1f;

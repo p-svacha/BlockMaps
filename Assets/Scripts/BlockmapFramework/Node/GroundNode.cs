@@ -61,29 +61,29 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
             if(eastNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
-            else if (Height[Direction.NE] < eastNode.Height[Direction.NW] && Height[Direction.SE] < eastNode.Height[Direction.SW]) // Both corners are lower than next tile
+            else if (Altitude[Direction.NE] < eastNode.Altitude[Direction.NW] && Altitude[Direction.SE] < eastNode.Altitude[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
-            else if (Height[Direction.NE] < eastNode.Height[Direction.NW]) // Only NE corner is lower
+            else if (Altitude[Direction.NE] < eastNode.Altitude[Direction.NW]) // Only NE corner is lower
             {
-                if (Height[Direction.SE] == eastNode.Height[Direction.SW])
+                if (Altitude[Direction.SE] == eastNode.Altitude[Direction.SW])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, cc);
             }
 
-            else if (Height[Direction.SE] < eastNode.Height[Direction.SW]) // Only SE corner is lower
+            else if (Altitude[Direction.SE] < eastNode.Altitude[Direction.SW]) // Only SE corner is lower
             {
-                if (Height[Direction.NE] == eastNode.Height[Direction.NW])
+                if (Altitude[Direction.NE] == eastNode.Altitude[Direction.NW])
                     meshBuilder.AddTriangle(cliffSubmesh, v3, v4, v1);
 
                 else
@@ -100,29 +100,29 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Height[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Height[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
             if (southNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
-            else if (Height[Direction.SE] < southNode.Height[Direction.NE] && Height[Direction.SW] < southNode.Height[Direction.NW]) // Both corners are lower than next tile
+            else if (Altitude[Direction.SE] < southNode.Altitude[Direction.NE] && Altitude[Direction.SW] < southNode.Altitude[Direction.NW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1);
 
-            else if (Height[Direction.SE] < southNode.Height[Direction.NE]) // Only SE corner is lower
+            else if (Altitude[Direction.SE] < southNode.Altitude[Direction.NE]) // Only SE corner is lower
             {
-                if (Height[Direction.SW] == southNode.Height[Direction.NW])
+                if (Altitude[Direction.SW] == southNode.Altitude[Direction.NW])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v2, cc);
             }
 
-            else if (Height[Direction.SW] < southNode.Height[Direction.NW]) // Only SW corner is lower
+            else if (Altitude[Direction.SW] < southNode.Altitude[Direction.NW]) // Only SW corner is lower
             {
-                if (Height[Direction.SE] == southNode.Height[Direction.NE])
+                if (Altitude[Direction.SE] == southNode.Altitude[Direction.NE])
                     meshBuilder.AddTriangle(cliffSubmesh, v3, v4, v1);
 
                 else
@@ -139,29 +139,29 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
             if (westNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 
-            else if (Height[Direction.NW] < westNode.Height[Direction.NE] && Height[Direction.SW] < westNode.Height[Direction.SE]) // Both corners are lower than next tile
+            else if (Altitude[Direction.NW] < westNode.Altitude[Direction.NE] && Altitude[Direction.SW] < westNode.Altitude[Direction.SE]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
-            else if (Height[Direction.NW] < westNode.Height[Direction.NE]) // Only NE corner is lower
+            else if (Altitude[Direction.NW] < westNode.Altitude[Direction.NE]) // Only NE corner is lower
             {
-                if (Height[Direction.SW] == westNode.Height[Direction.SE])
+                if (Altitude[Direction.SW] == westNode.Altitude[Direction.SE])
                     meshBuilder.AddTriangle(cliffSubmesh, v1, v3, v2);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, cc);
             }
 
-            else if (Height[Direction.SW] < westNode.Height[Direction.SE]) // Only SE corner is lower
+            else if (Altitude[Direction.SW] < westNode.Altitude[Direction.SE]) // Only SE corner is lower
             {
-                if (Height[Direction.NW] == westNode.Height[Direction.NE])
+                if (Altitude[Direction.NW] == westNode.Altitude[Direction.NE])
                     meshBuilder.AddTriangle(cliffSubmesh, v4, v3, v1);
 
                 else
@@ -178,29 +178,29 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Height[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Height[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseHeight * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 
             if (northNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 
-            else if (Height[Direction.NE] < northNode.Height[Direction.SE] && Height[Direction.NW] < northNode.Height[Direction.SW]) // Both corners are lower than next tile
+            else if (Altitude[Direction.NE] < northNode.Altitude[Direction.SE] && Altitude[Direction.NW] < northNode.Altitude[Direction.SW]) // Both corners are lower than next tile
                 meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4);
 
-            else if (Height[Direction.NE] < northNode.Height[Direction.SE]) // Only SE corner is lower
+            else if (Altitude[Direction.NE] < northNode.Altitude[Direction.SE]) // Only SE corner is lower
             {
-                if (Height[Direction.NW] == northNode.Height[Direction.SW])
+                if (Altitude[Direction.NW] == northNode.Altitude[Direction.SW])
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, v3);
 
                 else
                     meshBuilder.AddTriangle(cliffSubmesh, v2, v1, cc);
             }
 
-            else if (Height[Direction.NW] < northNode.Height[Direction.SW]) // Only SW corner is lower
+            else if (Altitude[Direction.NW] < northNode.Altitude[Direction.SW]) // Only SW corner is lower
             {
-                if (Height[Direction.NE] == northNode.Height[Direction.SE])
+                if (Altitude[Direction.NE] == northNode.Altitude[Direction.SE])
                     meshBuilder.AddTriangle(cliffSubmesh, v4, v3, v1);
 
                 else

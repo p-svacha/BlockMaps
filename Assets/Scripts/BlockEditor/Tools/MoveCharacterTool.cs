@@ -104,6 +104,10 @@ namespace WorldEditor
             SelectedEntity.Teleport(World.HoveredNode);
         }
 
+        public override void OnSelect()
+        {
+            PathCache.Clear();
+        }
         public override void OnDeselect()
         {
             SelectEntity(null);

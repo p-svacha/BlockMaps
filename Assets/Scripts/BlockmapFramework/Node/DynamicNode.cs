@@ -58,7 +58,7 @@ namespace BlockmapFramework
             foreach(BlockmapNode node in nodesOnCoordinate)
             {
                 if (node == this) continue;
-                if (World.DoNodesIntersect(newHeights, node.Height)) return false;
+                if (World.DoNodesIntersect(newHeights, node.Altitude)) return false;
             }
 
             // Check if increasing height would lead to a fence intersecting with a node above
@@ -70,11 +70,11 @@ namespace BlockmapFramework
                     foreach(BlockmapNode nodeAbove in nodesOnCoordinate)
                     {
                         if (nodeAbove == this) continue;
-                        if (nodeAbove.BaseHeight >= newBaseHeight)
+                        if (nodeAbove.BaseAltitude >= newBaseHeight)
                         {
                             foreach(Direction corner in newFenceHeights.Keys)
                             {
-                                if (nodeAbove.Height[corner] < newFenceHeights[corner]) return false;
+                                if (nodeAbove.Altitude[corner] < newFenceHeights[corner]) return false;
                             }
                         }
                     }
@@ -95,9 +95,9 @@ namespace BlockmapFramework
                         foreach (Direction corner2 in HelperFunctions.GetAffectedCorners(side))
                         {
                             if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight) ownSideUnderwater = true;
-                            if (adjWater.GroundNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) otherSideUnderwater = true;
+                            if (adjWater.GroundNode.Altitude[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) otherSideUnderwater = true;
 
-                            if (ownSideUnderwater && adjWater.GroundNode.Height[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
+                            if (ownSideUnderwater && adjWater.GroundNode.Altitude[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
                             if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
                         }
                     }
@@ -107,7 +107,7 @@ namespace BlockmapFramework
             // Check if decreasing height would intersect with a fence below
             if(!isIncrease)
             {
-                foreach (BlockmapNode nodeBelow in World.GetNodes(WorldCoordinates, 0, BaseHeight - 1))
+                foreach (BlockmapNode nodeBelow in World.GetNodes(WorldCoordinates, 0, BaseAltitude - 1))
                 {
                     foreach(Fence fence in nodeBelow.Fences.Values)
                     {
@@ -125,14 +125,14 @@ namespace BlockmapFramework
         public void ChangeHeight(Direction mode, bool isIncrease)
         {
             Dictionary<Direction, int> preChange = new Dictionary<Direction, int>();
-            foreach (Direction dir in Height.Keys) preChange[dir] = Height[dir];
+            foreach (Direction dir in Altitude.Keys) preChange[dir] = Altitude[dir];
 
-            Height = GetNewHeights(mode, isIncrease);
+            Altitude = GetNewHeights(mode, isIncrease);
 
             // Don't apply change if resulting shape is not valid
-            if (!World.IsValidNodeHeight(Height))
+            if (!World.IsValidNodeHeight(Altitude))
             {
-                foreach (Direction dir in HelperFunctions.GetCorners()) Height[dir] = preChange[dir];
+                foreach (Direction dir in HelperFunctions.GetCorners()) Altitude[dir] = preChange[dir];
             }
             else LastHeightChangeWasIncrease = isIncrease;
 
@@ -145,13 +145,13 @@ namespace BlockmapFramework
             foreach(Direction dir in HelperFunctions.GetCorners())
             {
                 if (dir == corner) newHeights[dir] = height;
-                else newHeights[dir] = Height[dir];
+                else newHeights[dir] = Altitude[dir];
             }
 
             if(World.IsValidNodeHeight(newHeights))
             {
-                if (Height[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
-                Height = newHeights;
+                if (Altitude[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
+                Altitude = newHeights;
                 RecalculateShape();
             }
         }
@@ -159,15 +159,15 @@ namespace BlockmapFramework
         private Dictionary<Direction, int> GetNewHeights(Direction mode, bool isIncrease)
         {
             Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
-            foreach (Direction dir in Height.Keys) newHeights[dir] = Height[dir];
+            foreach (Direction dir in Altitude.Keys) newHeights[dir] = Altitude[dir];
 
             // Calculate min and max height of affected corners
             int minHeight = World.MAX_ALTITUDE;
             int maxHeight = 0;
             foreach (Direction dir in HelperFunctions.GetAffectedCorners(mode))
             {
-                if (Height[dir] < minHeight) minHeight = Height[dir];
-                if (Height[dir] > maxHeight) maxHeight = Height[dir];
+                if (Altitude[dir] < minHeight) minHeight = Altitude[dir];
+                if (Altitude[dir] > maxHeight) maxHeight = Altitude[dir];
             }
 
             // Calculate new heights
@@ -184,7 +184,7 @@ namespace BlockmapFramework
             if (World.IsValidNodeHeight(newHeights))
             {
                 foreach (Direction dir in HelperFunctions.GetCorners())
-                    Height[dir] = newHeights[dir];
+                    Altitude[dir] = newHeights[dir];
 
                 RecalculateShape();
             }

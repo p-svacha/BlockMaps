@@ -24,7 +24,7 @@ namespace BlockmapFramework
 
         public override Vector3 GetCenterWorldPosition()
         {
-            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeight(BaseHeight + ((MaxHeight - BaseHeight) * 0.5f)), WorldCoordinates.y + 0.5f);
+            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeight(BaseAltitude + ((MaxAltitude - BaseAltitude) * 0.5f)), WorldCoordinates.y + 0.5f);
         }
 
         #endregion

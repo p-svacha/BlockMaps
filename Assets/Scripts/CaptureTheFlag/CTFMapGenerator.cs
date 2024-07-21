@@ -206,7 +206,7 @@ namespace CaptureTheFlag
                 GroundNode startNode = GeneratedWorld.GetRandomGroundNode();
                 Direction dir1 = HelperFunctions.GetRandomSideDirection();
                 Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
-                int bridgeHeight = startNode.MaxHeight + Random.Range(1, 7);
+                int bridgeHeight = startNode.MaxAltitude + Random.Range(1, 7);
                 List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
 
                 // Go into first direction until the bridge ends
@@ -223,14 +223,14 @@ namespace CaptureTheFlag
                     }
 
                     // End
-                    else if(nextNode.IsFlat(dir2) && nextNode.GetMaxHeight(dir2) == bridgeHeight)
+                    else if(nextNode.IsFlat(dir2) && nextNode.GetMaxAltitude(dir2) == bridgeHeight)
                     {
                         isDone = true;
                         isValid = true;
                     }
 
                     // Build and end
-                    else if(nextNode.IsFlat(dir1) && nextNode.GetMaxHeight(dir1) == bridgeHeight)
+                    else if(nextNode.IsFlat(dir1) && nextNode.GetMaxAltitude(dir1) == bridgeHeight)
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
                         isDone = true;
@@ -260,14 +260,14 @@ namespace CaptureTheFlag
                     }
 
                     // End
-                    else if (nextNode.IsFlat(dir1) && nextNode.GetMaxHeight(dir1) == bridgeHeight)
+                    else if (nextNode.IsFlat(dir1) && nextNode.GetMaxAltitude(dir1) == bridgeHeight)
                     {
                         isDone = true;
                         isValid = true;
                     }
 
                     // Build and end
-                    else if (nextNode.IsFlat(dir2) && nextNode.GetMaxHeight(dir2) == bridgeHeight)
+                    else if (nextNode.IsFlat(dir2) && nextNode.GetMaxAltitude(dir2) == bridgeHeight)
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
                         isDone = true;

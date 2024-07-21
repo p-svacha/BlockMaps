@@ -178,7 +178,7 @@ namespace BlockmapFramework
             // Init camera
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
             BlockmapNode initialCameraFocusNode = GetGroundNode(new Vector2Int(0, 0));
-            Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseHeight * TILE_HEIGHT, initialCameraFocusNode.WorldCoordinates.y));
+            Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseAltitude * TILE_HEIGHT, initialCameraFocusNode.WorldCoordinates.y));
             Camera.SetZoom(10f);
             Camera.SetAngle(225);
 
@@ -354,14 +354,14 @@ namespace BlockmapFramework
                 // Hit air node
                 else if (objectHit.gameObject.layer == Layer_AirNode)
                 {
-                    newHoveredAirNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                    newHoveredAirNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseAltitude == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
 
                     if (newHoveredAirNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
                     {
                         Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
                         Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
 
-                        newHoveredAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseHeight == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
+                        newHoveredAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseAltitude == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
                         
                     }
 
@@ -511,7 +511,7 @@ namespace BlockmapFramework
         public Fence GetFenceFromRaycastHit(RaycastHit hit)
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
+            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxAltitude).ToList();
             Direction primaryHitSide = GetNodeHoverMode8(hit.point);
             List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
 
@@ -533,7 +533,7 @@ namespace BlockmapFramework
                 // Do the same detection stuff again with the offset position
                 Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
                 Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxHeight).ToList();
+                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxAltitude).ToList();
                 Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
                 List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
 
@@ -627,6 +627,9 @@ namespace BlockmapFramework
             var plane = new Plane(Vector3.up, new Vector3(0f, altitude * World.TILE_HEIGHT, 0f));
             var ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
             if (plane.Raycast(ray, out float distance)) return ray.GetPoint(distance);
+
+            // Below should only happen when cursor is out of game window.
+            return Vector3.zero;
             throw new System.Exception("Altitude World Position Retrieval Error");
         }
 
@@ -800,11 +803,11 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in belowNodes)
             {
                 foreach (Entity e in node.Entities)
-                    if (e.MaxHeight > height)
+                    if (e.MaxHeight >= height)
                         return false;
 
                 foreach (Fence fence in node.Fences.Values)
-                    if (fence.MaxHeight > height)
+                    if (fence.MaxAltitude >= height)
                         return false;
             }
 
@@ -814,10 +817,10 @@ namespace BlockmapFramework
 
             // Check overlapping with existing node
             List<BlockmapNode> sameLevelNodes = GetNodes(worldCoordinates, height);
-            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetFlatHeights(height), x.Height))) return false;
+            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetFlatHeights(height), x.Altitude))) return false;
 
             // Check if overlap with ground
-            if (!IsAbove(HelperFunctions.GetFlatHeights(height), groundNode.Height)) return false;
+            if (!IsAbove(HelperFunctions.GetFlatHeights(height), groundNode.Altitude)) return false;
 
             return true;
         }
@@ -868,7 +871,7 @@ namespace BlockmapFramework
 
                 // Check if anything above that blocks space
                 int headSpace = occupiedNode.GetFreeHeadSpace(Direction.None);
-                if (occupiedNode.BaseHeight + headSpace < maxHeight) return false;
+                if (occupiedNode.BaseAltitude + headSpace < maxHeight) return false;
 
                 // Check if alredy has an entity
                 if (occupiedNode.Entities.Count > 0) return false;
@@ -951,7 +954,7 @@ namespace BlockmapFramework
 
         public WaterBody CanAddWater(GroundNode node, int maxDepth) // returns null when cannot
         {
-            int shoreHeight = node.BaseHeight + 1;
+            int shoreHeight = node.BaseAltitude + 1;
             WaterBody waterBody = new WaterBody(); // dummy water body to store data that can later be used to create a real water body
             waterBody.ShoreHeight = shoreHeight;
             waterBody.CoveredNodes = new List<GroundNode>();
@@ -977,15 +980,15 @@ namespace BlockmapFramework
 
                 checkedNodes.Add(check);
 
-                bool isTooDeep = checkNode.BaseHeight < shoreHeight - maxDepth;
+                bool isTooDeep = checkNode.BaseAltitude < shoreHeight - maxDepth;
                 if (isTooDeep) return null; // too deep
                 if (checkNode.WaterNode != null) return null; // already has water here
 
                 bool isUnderwater = (
-                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight)) ||
-                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.NW] < shoreHeight))
+                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.NE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Altitude[Direction.NE] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.NW] < shoreHeight))
                     );
                 if (isUnderwater) // underwater
                 {
@@ -997,10 +1000,10 @@ namespace BlockmapFramework
 
                     waterBody.CoveredNodes.Add(checkNode);
 
-                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.N), Direction.S));
-                    if (checkNode.Height[Direction.NE] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.E), Direction.W));
-                    if (checkNode.Height[Direction.SW] < shoreHeight || checkNode.Height[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.S), Direction.N));
-                    if (checkNode.Height[Direction.NW] < shoreHeight || checkNode.Height[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.W), Direction.E));
+                    if (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Altitude[Direction.NE] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.W), Direction.E));
                 }
                 else { } // above water
             }
@@ -1078,6 +1081,19 @@ namespace BlockmapFramework
                 int freeHeadSpace = node.GetFreeHeadSpace(corner);
                 if (freeHeadSpace < height) return false;
             }
+
+            // Check if we would overlap a wall
+            int minAltitude = node.GetMinAltitude(side);
+            int maxAltitude = node.GetMaxAltitude(side) + height - 1;
+            for (int i = minAltitude; i <= maxAltitude; i++)
+            {
+                Vector3Int globalCellCoordinates = new Vector3Int(node.WorldCoordinates.x, i, node.WorldCoordinates.y);
+                List<Wall> walls = GetWalls(globalCellCoordinates);
+                foreach(Wall w in walls)
+                {
+                    if (HelperFunctions.DoAffectedCornersOverlap(side, w.Side)) return false;
+                }
+            }
            
 
             return true;
@@ -1109,6 +1125,34 @@ namespace BlockmapFramework
 
         public bool CanBuildWall(Vector3Int globalCellCoordinates, Direction side)
         {
+            int altitude = globalCellCoordinates.y;
+            Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
+            List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
+
+            // Check if we would overlap a fence
+            foreach (BlockmapNode nodeOnCoordinate in nodesOnCoordinate)
+            {
+                foreach(Fence fence in nodeOnCoordinate.Fences.Values)
+                {
+                    if(HelperFunctions.DoAffectedCornersOverlap(side, fence.Side))
+                    {
+                        if (fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude) return false;
+                    }
+                }
+            }
+
+            // Check if we would overlap a ladder
+            foreach (BlockmapNode nodeOnCoordinate in nodesOnCoordinate)
+            {
+                foreach(Ladder ladder in nodeOnCoordinate.SourceLadders.Values)
+                {
+                    if (HelperFunctions.DoAffectedCornersOverlap(side, ladder.Side))
+                    {
+                        if (ladder.MinAltitude <= altitude && ladder.MaxAltitude >= altitude) return false;
+                    }
+                }
+            }
+
             return true;
         }
         public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material)
@@ -1149,21 +1193,35 @@ namespace BlockmapFramework
             if (source.SourceLadders.ContainsKey(side)) return possibleTargetNodes;
 
             // Get target node (need to be adjacent, higher up and flat on the target direction)
-            int sourceHeight = source.GetMinHeight(side);
+            int sourceAltitude = source.GetMinAltitude(side);
             Direction targetSide = HelperFunctions.GetOppositeDirection(side);
             Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(source.WorldCoordinates, side);
 
-            List<BlockmapNode> adjNodes = GetNodes(targetCoordinates).OrderBy(x => x.GetMaxHeight(targetSide)).ToList();
+            List<BlockmapNode> adjNodes = GetNodes(targetCoordinates).OrderBy(x => x.GetMaxAltitude(targetSide)).ToList();
             foreach (BlockmapNode adjNode in adjNodes)
             {
-                if (adjNode.GetMaxHeight(targetSide) <= sourceHeight) continue; // not higher than starting point
+                if (adjNode.GetMaxAltitude(targetSide) <= sourceAltitude) continue; // not higher than starting point
                 if (!adjNode.IsFlat(HelperFunctions.GetOppositeDirection(side))) continue; // not flat in target direction
+                //if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(side))) continue; // blocked in the direction we would come from when reaching top of ladder
 
                 // Check headspace
-                int targetHeight = adjNode.GetMaxHeight(HelperFunctions.GetOppositeDirection(side));
-                int ladderHeight = targetHeight - sourceHeight;
+                int targetAltitude = adjNode.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side));
+                int ladderHeight = targetAltitude - sourceAltitude;
                 int headspace = source.GetFreeHeadSpace(side);
                 if (headspace <= ladderHeight) continue; // a node is blocking the climb
+
+                // Check if a wall would block the ladder
+                bool isBlockedByWall = false;
+                for(int i = sourceAltitude; i <= targetAltitude; i++)
+                {
+                    Vector3Int globalCellCoordinates = new Vector3Int(source.WorldCoordinates.x, i, source.WorldCoordinates.y);
+                    List<Wall> walls = GetWalls(globalCellCoordinates);
+                    foreach (Wall w in walls)
+                    {
+                        if (HelperFunctions.DoAffectedCornersOverlap(side, w.Side)) isBlockedByWall = true;
+                    }
+                }
+                if (isBlockedByWall) continue;
 
                 // Add as possible target
                 possibleTargetNodes.Add(adjNode);
@@ -1454,7 +1512,7 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
-            return GetNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
+            return GetNodes(worldCoordinates).Where(x => x.BaseAltitude >= minHeight && x.BaseAltitude <= maxHeight).ToList();
         }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
@@ -1512,7 +1570,7 @@ namespace BlockmapFramework
         }
         public List<AirNode> GetAirNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
         {
-            return GetAirNodes(worldCoordinates).Where(x => x.BaseHeight >= minHeight && x.BaseHeight <= maxHeight).ToList();
+            return GetAirNodes(worldCoordinates).Where(x => x.BaseAltitude >= minHeight && x.BaseAltitude <= maxHeight).ToList();
         }
 
         public Vector2Int GetWorldCoordinates(Vector3 worldPosition)
@@ -1563,6 +1621,61 @@ namespace BlockmapFramework
             Vector3Int localCellCoordinates = new Vector3Int(localWorldCoordinates.x, globalCellCoordinates.y, localWorldCoordinates.y);
             return chunk.GetWalls(localCellCoordinates);
         }
+        public Wall GetWall(Vector3Int globalCellCoordinates, Direction side)
+        {
+            return GetWalls(globalCellCoordinates).FirstOrDefault(x => x.Side == side);
+        }
+
+        /// <summary>
+        /// If present, returns the climbable (cliff, ladder, fence, wall) on the given side of a specific cell.
+        /// </summary>
+        public IClimbable GetClimbable(Vector3Int globalCellCoordinates, Direction side)
+        {
+            Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
+            int altitude = globalCellCoordinates.y;
+            Vector2Int adjacentCoordinates = GetWorldCoordinatesInDirection(worldCoordinates, side);
+            Vector3Int adjacentCellCoordinates = new Vector3Int(adjacentCoordinates.x, altitude, adjacentCoordinates.y);
+            Direction oppositeSide = HelperFunctions.GetOppositeDirection(side);
+
+            // Nodes on source side
+            foreach (BlockmapNode node in GetNodes(worldCoordinates))
+            {
+                // Look for fence on source side
+                if (node.Fences.TryGetValue(side, out Fence fence))
+                    if (fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude)
+                        return fence;
+
+                // Look for ladder on source side
+                if (node.SourceLadders.TryGetValue(side, out Ladder ladder))
+                    if (ladder.MinAltitude <= altitude && ladder.MaxAltitude > altitude)
+                        return ladder;
+            }
+
+            // Look for wall piece on source side
+            Wall wall = GetWall(globalCellCoordinates, side);
+            if (wall != null) return wall;
+
+            // Nodes on adjacent opposite side
+            foreach (BlockmapNode adjNode in GetNodes(adjacentCoordinates))
+            {
+                // Look for fence on adjacent opposite side
+                if (adjNode.Fences.TryGetValue(oppositeSide, out Fence fence))
+                    if (fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude)
+                        return fence;
+            }
+
+            // Look for wall piece on adjacent opposite side
+            Wall oppositeWall = GetWall(adjacentCellCoordinates, oppositeSide);
+            if (oppositeWall != null) return oppositeWall;
+
+            // Look for cliif on opposite side
+            GroundNode adjGroundNode = GetGroundNode(adjacentCoordinates);
+            if (adjGroundNode.GetMinAltitude(oppositeSide) > altitude) return Cliff.Instance;
+
+            // No climbable found
+            return null;
+        }
+
         public Vector3Int GetLocalCellCoordinates(Vector3Int globalCellCoordinates)
         {
             Vector2Int globalWorldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
@@ -1618,7 +1731,7 @@ namespace BlockmapFramework
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseHeight)
+                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseAltitude)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
@@ -1670,28 +1783,28 @@ namespace BlockmapFramework
             switch (dir)
             {
                 case Direction.N:
-                    return (fromNode.Height[Direction.NE] == toNode.Height[Direction.SE]) && (fromNode.Height[Direction.NW] == toNode.Height[Direction.SW]);
+                    return (fromNode.Altitude[Direction.NE] == toNode.Altitude[Direction.SE]) && (fromNode.Altitude[Direction.NW] == toNode.Altitude[Direction.SW]);
 
                 case Direction.S:
-                    return (fromNode.Height[Direction.SE] == toNode.Height[Direction.NE]) && (fromNode.Height[Direction.SW] == toNode.Height[Direction.NW]);
+                    return (fromNode.Altitude[Direction.SE] == toNode.Altitude[Direction.NE]) && (fromNode.Altitude[Direction.SW] == toNode.Altitude[Direction.NW]);
 
                 case Direction.E:
-                    return (fromNode.Height[Direction.SE] == toNode.Height[Direction.SW]) && (fromNode.Height[Direction.NE] == toNode.Height[Direction.NW]);
+                    return (fromNode.Altitude[Direction.SE] == toNode.Altitude[Direction.SW]) && (fromNode.Altitude[Direction.NE] == toNode.Altitude[Direction.NW]);
 
                 case Direction.W:
-                    return (fromNode.Height[Direction.SW] == toNode.Height[Direction.SE]) && (fromNode.Height[Direction.NW] == toNode.Height[Direction.NE]);
+                    return (fromNode.Altitude[Direction.SW] == toNode.Altitude[Direction.SE]) && (fromNode.Altitude[Direction.NW] == toNode.Altitude[Direction.NE]);
 
                 case Direction.NW:
-                    return fromNode.Height[Direction.NW] == toNode.Height[Direction.SE];
+                    return fromNode.Altitude[Direction.NW] == toNode.Altitude[Direction.SE];
 
                 case Direction.NE:
-                    return fromNode.Height[Direction.NE] == toNode.Height[Direction.SW];
+                    return fromNode.Altitude[Direction.NE] == toNode.Altitude[Direction.SW];
 
                 case Direction.SW:
-                    return fromNode.Height[Direction.SW] == toNode.Height[Direction.NE];
+                    return fromNode.Altitude[Direction.SW] == toNode.Altitude[Direction.NE];
 
                 case Direction.SE:
-                    return fromNode.Height[Direction.SE] == toNode.Height[Direction.NW];
+                    return fromNode.Altitude[Direction.SE] == toNode.Altitude[Direction.NW];
 
                 default:
                     return false;
@@ -1719,7 +1832,7 @@ namespace BlockmapFramework
         public bool DoFullyOverlap(BlockmapNode node1, BlockmapNode node2)
         {
             foreach (Direction dir in HelperFunctions.GetCorners())
-                if (node1.Height[dir] != node2.Height[dir]) return false;
+                if (node1.Altitude[dir] != node2.Altitude[dir]) return false;
             return true;
         }
         #endregion

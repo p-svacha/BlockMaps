@@ -21,14 +21,14 @@ namespace BlockmapFramework
             float xEnd = node.LocalCoordinates.x + 1;
             float yStart = node.LocalCoordinates.y;
             float yEnd = node.LocalCoordinates.y + 1;
-            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, node.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, node.Height[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, node.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, node.Height[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
-            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Height[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
 
             if(node.GetTriangleMeshShapeVariant())
             {

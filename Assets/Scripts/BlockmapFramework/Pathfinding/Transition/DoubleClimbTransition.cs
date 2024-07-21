@@ -27,8 +27,8 @@ namespace BlockmapFramework
             ClimbUp = climbUp;
             ClimbDown = climbDown;
 
-            StartHeight = from.GetMinHeight(dir);
-            EndHeight = to.GetMaxHeight(HelperFunctions.GetOppositeDirection(dir));
+            StartHeight = from.GetMinAltitude(dir);
+            EndHeight = to.GetMaxAltitude(HelperFunctions.GetOppositeDirection(dir));
 
             HeightUp = climbUp.Count;
             HeightDown = climbDown.Count;
@@ -37,7 +37,7 @@ namespace BlockmapFramework
             HeadSpaceRequirementUp = From.GetFreeHeadSpace(dir) - HeightUp;
             HeadSpaceRequirementDown = To.GetFreeHeadSpace(HelperFunctions.GetOppositeDirection(dir)) - HeightDown;
 
-            ClimbSkillRequirement = (ClimbingCategory)(climbUp.Concat(climbDown).Max(x => (int)x.SkillRequirement));
+            ClimbSkillRequirement = (ClimbingCategory)(climbUp.Concat(climbDown).Max(x => (int)x.ClimbSkillRequirement));
         }
 
         public override float GetMovementCost(MovingEntity entity)
@@ -45,8 +45,8 @@ namespace BlockmapFramework
             float value = (0.5f * (1f / From.GetSurfaceProperties().SpeedModifier)) + (0.5f * (1f / To.GetSurfaceProperties().SpeedModifier)); // Cost of moving between start and end tile
 
             // Add cost of climbing
-            foreach (IClimbable climb in ClimbUp) value += climb.CostUp;
-            foreach (IClimbable climb in ClimbDown) value += climb.CostDown;
+            foreach (IClimbable climb in ClimbUp) value += climb.ClimbCostUp;
+            foreach (IClimbable climb in ClimbDown) value += climb.ClimbCostDown;
 
             return value;
         }
@@ -59,12 +59,6 @@ namespace BlockmapFramework
 
             // Climb skill
             if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
-
-            // Height
-            foreach (IClimbable climb in ClimbUp)
-                if (HeightUp > climb.MaxClimbHeight(entity.ClimbingSkill)) return false;
-            foreach (IClimbable climb in ClimbDown)
-                if (HeightDown > climb.MaxClimbHeight(entity.ClimbingSkill)) return false;
 
             // Base requirements (adapted to ignore ladder)
             if (!From.IsPassable(Direction, entity, checkClimbables: false)) return false;
@@ -124,7 +118,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbUpEndPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.SpeedUp);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedUp);
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -155,7 +149,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbDownStartPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.SpeedUp);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedUp);
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -181,7 +175,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbDownEndPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.SpeedDown);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedDown);
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -269,7 +263,7 @@ namespace BlockmapFramework
         private Vector3 GetOffset(MovingEntity entity, IClimbable climb, bool isAscend)
         {
             Direction climbDir = isAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction);
-            float offset = (climbDir == climb.ClimbSide) ? climb.TransformOffset : 0f;
+            float offset = (climbDir == climb.ClimbSide) ? climb.ClimbTransformOffset : 0f;
 
             float entityLength = (entity != null) ? entity.WorldSize.x / 2f : 0f;
             if (isAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);

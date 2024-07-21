@@ -13,5 +13,12 @@ namespace BlockmapFramework
         public abstract WallMaterialId Id { get; }
         public abstract string Name { get; }
         public abstract Material Material { get; }
+
+        // Climbing attributes
+        public abstract ClimbingCategory ClimbSkillRequirement { get; }
+        public abstract float ClimbCostUp { get; }
+        public abstract float ClimbCostDown { get; }
+        public abstract float ClimbSpeedUp { get; }
+        public abstract float ClimbSpeedDown { get; }
     }
 }

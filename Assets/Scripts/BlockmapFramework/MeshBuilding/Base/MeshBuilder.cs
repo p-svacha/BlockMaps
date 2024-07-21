@@ -467,7 +467,7 @@ namespace BlockmapFramework
             bool adjustHeightsToSlope = (HelperFunctions.IsSide(side) && adjustToNodeSlope);
             if (adjustHeightsToSlope)
             {
-                float slope = World.TILE_HEIGHT * (node.Height[HelperFunctions.GetPreviousDirection8(side)] - node.Height[HelperFunctions.GetNextDirection8(side)]);
+                float slope = World.TILE_HEIGHT * (node.Altitude[HelperFunctions.GetPreviousDirection8(side)] - node.Altitude[HelperFunctions.GetNextDirection8(side)]);
                 float startY = 0;
                 if (slope < 0)
                 {
@@ -493,7 +493,7 @@ namespace BlockmapFramework
             for (int i = 0; i < 4; i++) footprint[i] += new Vector3(0f, heightOffsets[i], 0f);
 
             // Apply offset based on node position on chunk to footprint
-            int startHeightCoordinate = node.GetMinHeight(side);
+            int startHeightCoordinate = node.GetMinAltitude(side);
             float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
@@ -526,7 +526,7 @@ namespace BlockmapFramework
             }
 
             // Apply offset based on node position on chunk to footprint
-            int startHeightCoordinate = node.GetMinHeight(side);
+            int startHeightCoordinate = node.GetMinAltitude(side);
             float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
