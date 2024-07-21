@@ -196,6 +196,7 @@ namespace WorldEditor
             if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
             if (World.HoveredFence != null) text += "\nFence: " + World.HoveredFence.ToString();
+            if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.ToString();
 
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;

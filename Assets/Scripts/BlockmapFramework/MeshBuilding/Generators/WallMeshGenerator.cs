@@ -16,36 +16,24 @@ namespace BlockmapFramework
 
             for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
+                // Get walls for altitude level
                 List<Wall> wallsToDraw = chunk.GetWalls(altitude);
                 if (wallsToDraw.Count == 0) continue;
 
-                /*
-                List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.HasFence).ToList();
-                if (nodesToDraw.Count == 0) continue;
-
                 // Generate mesh
-                GameObject meshObject = new GameObject("FenceMesh_" + heightLevel);
-                FenceMesh mesh = meshObject.AddComponent<FenceMesh>();
-                mesh.Init(chunk, heightLevel);
+                GameObject meshObject = new GameObject("WallMesh_" + altitude);
+                WallMesh mesh = meshObject.AddComponent<WallMesh>();
+                mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach (BlockmapNode node in nodesToDraw)
+                foreach(Wall wall in wallsToDraw)
                 {
-                    foreach (Fence fence in node.Fences.Values) DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
+                    wall.Shape.GenerateMesh(meshBuilder, wall.LocalCellCoordinates, wall.Side, wall.Material.Material);
                 }
                 meshBuilder.ApplyMesh();
+                mesh.OnMeshApplied();
 
-                // Set chunk values for all materials
-                MeshRenderer renderer = mesh.GetComponent<MeshRenderer>();
-                for (int i = 0; i < renderer.materials.Length; i++)
-                {
-                    renderer.materials[i].SetFloat("_ChunkSize", chunk.Size);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesX", chunk.Coordinates.x);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesY", chunk.Coordinates.y);
-                }
-
-                meshes.Add(heightLevel, mesh);
-                */
+                meshes.Add(altitude, mesh);
             }
 
             return meshes;

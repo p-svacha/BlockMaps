@@ -22,6 +22,8 @@ namespace BlockmapFramework
 
         public override void OnMeshApplied()
         {
+            base.OnMeshApplied();
+
             Material surfaceMaterial = GetComponent<MeshRenderer>().materials.FirstOrDefault(x => x.shader.name == "Custom/SurfaceShader");
             if (surfaceMaterial == null) return;
 
@@ -88,9 +90,6 @@ namespace BlockmapFramework
 
         public override void SetVisibility(Actor player)
         {
-            // Set renderer
-            if(Renderer == null) Renderer = GetComponent<MeshRenderer>();
-
             // Define visibility array
             List<float> visibilityArray = new List<float>();
             for (int x = -1; x <= Chunk.Size; x++)
@@ -141,19 +140,9 @@ namespace BlockmapFramework
                     airNode.SetMesh(mesh);
                 }
                 meshBuilder.ApplyMesh();
-
-                // Set chunk values for all materials
-                MeshRenderer renderer = mesh.GetComponent<MeshRenderer>();
-                for (int i = 0; i < renderer.materials.Length; i++)
-                {
-                    renderer.materials[i].SetFloat("_ChunkSize", chunk.Size);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesX", chunk.Coordinates.x);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesY", chunk.Coordinates.y);
-                }
+                mesh.OnMeshApplied();
 
                 meshes.Add(heightLevel, mesh);
-
-                mesh.OnMeshApplied();
             }
 
             return meshes;

@@ -14,7 +14,7 @@ namespace BlockmapFramework
         protected Chunk Chunk { get; private set; }
 
         protected MeshBuilder MeshBuilder;
-        public MeshRenderer Renderer;
+        public MeshRenderer Renderer { get; private set; }
         private bool[] ShowMultiOverlay;
 
         protected void OnInit(Chunk chunk)
@@ -27,6 +27,10 @@ namespace BlockmapFramework
             ShowMultiOverlay = new bool[256];
         }
 
+        /// <summary>
+        /// Standard method for a chunkmesh to generate its mesh that is unique per chunk (not 1 per altitude level).
+        /// <br/>Currently only used by GroundMesh and WaterMesh
+        /// </summary>
         public void Draw()
         {
             MeshBuilder = new MeshBuilder(gameObject);
@@ -34,20 +38,14 @@ namespace BlockmapFramework
             OnDraw();
 
             MeshBuilder.ApplyMesh();
-            Renderer = GetComponent<MeshRenderer>();
-
-            // Set chunk values for all materials
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                Renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
-            }
-
             OnMeshApplied();
         }
         public virtual void OnDraw() { }
-        public virtual void OnMeshApplied() { }
+        public virtual void OnMeshApplied()
+        {
+            Renderer = GetComponent<MeshRenderer>();
+            SetChunkShaderValues();
+        }
         public abstract void SetVisibility(Actor player);
 
         public void ShowTextures(bool show)
@@ -117,6 +115,18 @@ namespace BlockmapFramework
             }
         }
 
+        /// <summary>
+        /// Passes all static data from the chunk to all shaders of this mesh.
+        /// </summary>
+        public void SetChunkShaderValues()
+        {
+            for (int i = 0; i < Renderer.materials.Length; i++)
+            {
+                Renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
+                Renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
+                Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
+            }
+        }
         protected void SetShaderVisibilityData(List<float> surfaceVisibilityArray)
         {
             // Set visibility in all surface mesh materials

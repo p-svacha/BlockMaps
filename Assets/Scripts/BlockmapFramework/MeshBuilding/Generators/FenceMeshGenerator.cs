@@ -27,15 +27,7 @@ namespace BlockmapFramework
                     foreach (Fence fence in node.Fences.Values) DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
                 }
                 meshBuilder.ApplyMesh();
-
-                // Set chunk values for all materials
-                MeshRenderer renderer = mesh.GetComponent<MeshRenderer>();
-                for (int i = 0; i < renderer.materials.Length; i++)
-                {
-                    renderer.materials[i].SetFloat("_ChunkSize", chunk.Size);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesX", chunk.Coordinates.x);
-                    renderer.materials[i].SetFloat("_ChunkCoordinatesY", chunk.Coordinates.y);
-                }
+                mesh.OnMeshApplied();
 
                 meshes.Add(heightLevel, mesh);
             }

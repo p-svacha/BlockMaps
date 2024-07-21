@@ -130,6 +130,7 @@ namespace BlockmapFramework
         public void AddWall(Wall w)
         {
             Vector3Int localCoords = w.LocalCellCoordinates;
+            Debug.Log("adding a wall with global " + w.GlobalCellCoordinates.ToString() + " on chunk " + Coordinates.ToString() + " at local pos " + localCoords.ToString());
             if (Walls.ContainsKey(localCoords)) Walls[localCoords].Add(w);
             else Walls.Add(localCoords, new List<Wall>() { w });
         }
@@ -180,6 +181,7 @@ namespace BlockmapFramework
             GroundMesh.SetVisibility(player);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(player);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(player);
             WaterMesh.SetVisibility(player);
 
@@ -198,6 +200,7 @@ namespace BlockmapFramework
             GroundMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.ShowTextures(show);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
@@ -361,6 +364,7 @@ namespace BlockmapFramework
 
         public List<Wall> GetWalls(Vector3Int localCellCoordinates)
         {
+            if (!Walls.ContainsKey(localCellCoordinates)) return null;
             return Walls[localCellCoordinates];
         }
         public List<Wall> GetWalls(int altitude)

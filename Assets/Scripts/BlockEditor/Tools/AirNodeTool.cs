@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BlockmapFramework;
 using TMPro;
+using UnityEngine.UI;
 
 namespace WorldEditor
 {
@@ -20,6 +21,7 @@ namespace WorldEditor
         [Header("Elements")]
         public UI_SelectionPanel SelectionPanel;
         public TMP_InputField AltitudeInput;
+        public Toggle HelperGridToggle;
 
         public override void Init(BlockEditor editor)
         {
@@ -71,6 +73,9 @@ namespace WorldEditor
                 if (Input.mouseScrollDelta.y < 0) SetAltitude(BuildAltitude - 1);
                 if (Input.mouseScrollDelta.y > 0) SetAltitude(BuildAltitude + 1);
             }
+
+            // H: Toggle helper grid
+            if (Input.GetKeyDown(KeyCode.H)) ShowHelperGrid(!HelperGridToggle.isOn);
         }
 
         private void SetAltitude(int altitude)
@@ -79,6 +84,12 @@ namespace WorldEditor
             if (altitude > World.MAX_ALTITUDE) altitude = World.MAX_ALTITUDE;
             AltitudeInput.text = altitude.ToString();
             Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, BuildAltitude * World.TILE_HEIGHT, Editor.AltitudeHelperPlane.transform.position.z);
+        }
+
+        private void ShowHelperGrid(bool show)
+        {
+            Editor.AltitudeHelperPlane.SetActive(show);
+            HelperGridToggle.isOn = show;
         }
 
         public override void HandleLeftClick()
@@ -98,7 +109,8 @@ namespace WorldEditor
             GameObject.Destroy(BuildPreview.GetComponent<BoxCollider>());
             BuildPreview.transform.localScale = new Vector3(1f, World.TILE_HEIGHT * 0.1f, 1f);
 
-            Editor.AltitudeHelperPlane.SetActive(true);
+            ShowHelperGrid(HelperGridToggle.isOn);
+            SetAltitude(int.Parse(AltitudeInput.text));
         }
         public override void OnDeselect()
         {

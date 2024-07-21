@@ -19,9 +19,6 @@ namespace BlockmapFramework
 
         public override void SetVisibility(Actor player)
         {
-            // Set renderer
-            if (Renderer == null) Renderer = GetComponent<MeshRenderer>();
-
             // Define visibility array
             List<float> visibilityArray = new List<float>();
             for (int x = -1; x <= Chunk.Size; x++)

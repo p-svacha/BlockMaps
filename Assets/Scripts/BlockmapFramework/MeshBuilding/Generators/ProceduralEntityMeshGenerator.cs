@@ -27,15 +27,7 @@ namespace BlockmapFramework
                     foreach (ProceduralEntity e in node.Entities.Where(x => x is ProceduralEntity)) e.BuildMesh(meshBuilder);
                 }
                 meshBuilder.ApplyMesh();
-
-                // Set chunk values for all materials
-                mesh.Renderer = mesh.GetComponent<MeshRenderer>();
-                for (int i = 0; i < mesh.Renderer.materials.Length; i++)
-                {
-                    mesh.Renderer.materials[i].SetFloat("_ChunkSize", chunk.Size);
-                    mesh.Renderer.materials[i].SetFloat("_ChunkCoordinatesX", chunk.Coordinates.x);
-                    mesh.Renderer.materials[i].SetFloat("_ChunkCoordinatesY", chunk.Coordinates.y);
-                }
+                mesh.OnMeshApplied();
 
                 meshes.Add(heightLevel, mesh);
             }

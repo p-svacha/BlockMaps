@@ -98,6 +98,7 @@ namespace BlockmapFramework
         public Chunk HoveredChunk { get; private set; }
         public WaterBody HoveredWaterBody { get; private set; }
         public Fence HoveredFence { get; private set; }
+        public Wall HoveredWall { get; private set; }
 
         /// <summary>
         /// What area of the node is currently being hovered.
@@ -322,8 +323,11 @@ namespace BlockmapFramework
             Fence oldHoveredFence = HoveredFence;
             Fence newHoveredFence = null;
 
+            Wall oldHoveredWall = HoveredWall;
+            Wall newHoveredWall = null;
+
             // Shoot a raycast on ground and air layers to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence | 1 << Layer_Wall))
             {
                 Transform objectHit = hit.transform;
 
@@ -392,6 +396,13 @@ namespace BlockmapFramework
                     newHoveredFence = GetFenceFromRaycastHit(hit);
                     if (newHoveredFence != null) HoveredWorldCoordinates = newHoveredFence.Node.WorldCoordinates;
                 }
+
+                // Hit wall
+                else if(objectHit.gameObject.layer == Layer_Wall)
+                {
+                    newHoveredWall = GetWallFromRaycastHit(hit);
+                    if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.WorldCoordinates;
+                }
             }
 
             // Ray to detect entity
@@ -417,6 +428,7 @@ namespace BlockmapFramework
             HoveredEntity = newHoveredEntity;
             HoveredWaterBody = newHoveredWaterBody;
             HoveredFence = newHoveredFence;
+            HoveredWall = newHoveredWall;
 
             // Fire update events
             if (newHoveredNode != oldHoveredNode) OnHoveredNodeChanged?.Invoke(oldHoveredNode, newHoveredNode);
@@ -453,6 +465,10 @@ namespace BlockmapFramework
 
             return GetNodeHoverModeSides(worldPos);
         }
+
+        /// <summary>
+        /// Returns all possible directions a fence/wall can have when hovering a position.
+        /// </summary>
         private List<Direction> GetNodeHoverModes8(Vector3 worldPos)
         {
             List<Direction> sides = new List<Direction>();
@@ -542,13 +558,62 @@ namespace BlockmapFramework
         private ProceduralEntity GetProceduralEntityFromRaycastHit(RaycastHit hit)
         {
             ProceduralEntityMesh hitMesh = hit.transform.GetComponent<ProceduralEntityMesh>();
-            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hitMesh.HeightLevel);
+            List<BlockmapNode> hitNodes = GetNodes(HoveredWorldCoordinates, hitMesh.HeightLevel);
 
             // If the exact node we hit has a procedural entity, return that
             BlockmapNode targetNode = hitNodes.FirstOrDefault(x => x.Entities.Any(e => e is ProceduralEntity));
             if (targetNode != null) return targetNode.Entities.First(x => x is ProceduralEntity) as ProceduralEntity;
 
+            return null;
+        }
+        private Wall GetWallFromRaycastHit(RaycastHit hit)
+        {
+            // Check if there is a wall on the exact HoveredWorldCoordinates in the HovereModeSide direction
+            WallMesh hitMesh = hit.transform.GetComponent<WallMesh>();
+            int altitude = hitMesh.Altitude;
+            Vector3Int globalCellCoordinates = new Vector3Int(HoveredWorldCoordinates.x, altitude, HoveredWorldCoordinates.y);
+            Direction primaryHitSide = NodeHoverModeSides;
+            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
+
+            List<Wall> cellWalls = GetWalls(globalCellCoordinates);
+            if (cellWalls != null)
+            {
+                // Check primary hit side
+                Wall hitWall = cellWalls.FirstOrDefault(x => x.Side == NodeHoverModeSides);
+                if (hitWall != null) return hitWall;
+
+                // Check other possible hit sides
+                foreach (Direction dir in otherPossibleHitSides)
+                {
+                    Wall otherHitWall = cellWalls.FirstOrDefault(x => x.Side == dir);
+                    if (otherHitWall != null) return otherHitWall;
+                }
+            }
+
+            // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+            // Do the same detection stuff again with the offset position
+            Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+            Vector3Int offsetCellCoordinates = new Vector3Int(offsetCoordinates.x, altitude, offsetCoordinates.y);
+            Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
+            List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
+
+            List<Wall> offsetCellWalls = GetWalls(offsetCellCoordinates);
+            if (offsetCellWalls != null)
+            {
+                // Check primary hit side
+                Wall hitWall = offsetCellWalls.FirstOrDefault(x => x.Side == primaryOffsetSide);
+                if (hitWall != null) return hitWall;
+
+                // Check other possible hit sides
+                foreach (Direction dir in otherPossibleOffsetSides)
+                {
+                    Wall otherHitWall = offsetCellWalls.FirstOrDefault(x => x.Side == dir);
+                    if (otherHitWall != null) return otherHitWall;
+                }
+            }
+
+            // Didn't find anything
             return null;
         }
 
@@ -1061,6 +1126,17 @@ namespace BlockmapFramework
         {
             Walls.Add(wall.Id, wall);
             wall.Chunk.AddWall(wall);
+        }
+        public void RemoveWall(Wall wall)
+        {
+            // Deregister
+            Walls.Remove(wall.Id);
+            wall.Chunk.RemoveWall(wall);
+
+            // Update systems around cell
+            UpdateNavmeshAround(wall.WorldCoordinates);
+            RedrawNodesAround(wall.WorldCoordinates);
+            UpdateVisionOfNearbyEntitiesDelayed(wall.CenterWorldPosition);
         }
 
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)

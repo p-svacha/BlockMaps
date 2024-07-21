@@ -19,9 +19,6 @@ namespace BlockmapFramework
 
         public override void SetVisibility(Actor player)
         {
-            // Set renderer
-            if (Renderer == null) Renderer = GetComponent<MeshRenderer>();
-
             // Define visibility array
             List<float> visibilityArray = new List<float>();
             for (int x = -1; x <= Chunk.Size; x++)
@@ -32,9 +29,19 @@ namespace BlockmapFramework
 
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
+                    if(!World.IsInWorld(worldCoordiantes)) // Outside world
+                    {
+                        visibilityArray.Add(0);
+                        continue;
+                    }
                     Vector3Int globalCellCoordinates = new Vector3Int(worldCoordiantes.x, Altitude, worldCoordiantes.y);
 
                     List<Wall> walls = World.GetWalls(globalCellCoordinates);
+                    if(walls == null) // No walls in this cell
+                    {
+                        visibilityArray.Add(0);
+                        continue;
+                    }
 
                     visibility = 2; // 2 = visible
                     //if (walls.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible

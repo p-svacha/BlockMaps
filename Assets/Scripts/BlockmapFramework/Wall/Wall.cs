@@ -56,6 +56,15 @@ namespace BlockmapFramework
 
         #endregion
 
+        #region Getters
+
+        public override string ToString()
+        {
+            return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Name + " " + Material.Name;
+        }
+
+        #endregion
+
         #region Save / Load
 
         public static Wall Load(World world, WallData data)

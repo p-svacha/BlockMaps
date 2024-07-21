@@ -33,6 +33,8 @@ namespace BlockmapFramework
 
         public override void OnMeshApplied()
         {
+            base.OnMeshApplied();
+
             // Shader values
             List<float> surfaceArray = new List<float>();
             Dictionary<Direction, List<float>> surfaceBlendArrays = new Dictionary<Direction, List<float>>();

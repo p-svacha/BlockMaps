@@ -1,16 +1,4 @@
 --- Update Walls V2
-- New wall framework gets added:
-- Walls will be stored in their own datastructure, independently of nodes
-- Walls will always be in exactly one world cell
-
-- Walls are stored in a Dictionary<Vector3Int, List<Wall>> data structure per chunk (and also a global one in World):
-	Vector3 refers to the x, y, z position on the map
-	WallInfo contains a List<Wall> of all walls that are inside this position with some functionality of retrieving and adding walls on a certain direction
-		° GetWall(Vector3Int pos, Direction dir) returns a singular wall
-
-- Walls have a WallMaterial attribute, that are stored in a static WallMaterialManager (just like SurfaceManager for node surfaces)
-- Walls have a WallShape attribute that decides how a wall gets rendered (basically what currently WallType is)
-
 Tools:
  - New "Free wall placement" tool where you can place walls like air nodes with 2 selections:
 	> Wall shape (solid, corner, block, window, slope)

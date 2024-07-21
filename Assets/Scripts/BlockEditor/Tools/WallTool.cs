@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace WorldEditor
 {
@@ -23,6 +24,7 @@ namespace WorldEditor
         public UI_SelectionPanel ShapeSelection;
         public UI_SelectionPanel MaterialSelection;
         public TMP_InputField AltitudeInput;
+        public Toggle HelperGridToggle;
 
         public override void Init(BlockEditor editor)
         {
@@ -64,6 +66,9 @@ namespace WorldEditor
                 if (Input.mouseScrollDelta.y < 0) SetAltitude(BuildAltitude - 1);
                 if (Input.mouseScrollDelta.y > 0) SetAltitude(BuildAltitude + 1);
             }
+
+            // H: Toggle helper grid
+            if (Input.GetKeyDown(KeyCode.H)) ShowHelperGrid(!HelperGridToggle.isOn);
         }
 
         private void SetAltitude(int altitude)
@@ -72,6 +77,12 @@ namespace WorldEditor
             if (altitude > World.MAX_ALTITUDE) altitude = World.MAX_ALTITUDE;
             AltitudeInput.text = altitude.ToString();
             Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, BuildAltitude * World.TILE_HEIGHT, Editor.AltitudeHelperPlane.transform.position.z);
+        }
+
+        private void ShowHelperGrid(bool show)
+        {
+            Editor.AltitudeHelperPlane.SetActive(show);
+            HelperGridToggle.isOn = show;
         }
 
         private void UpdatePreview()
@@ -116,19 +127,24 @@ namespace WorldEditor
             if (!World.CanBuildWall(globalCellPosition, side)) return;
 
             // BUILD THE WALL
+            Debug.Log(World == null);
             World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial);
         }
 
         public override void HandleRightClick()
         {
-            // todo
+            if (World.HoveredWall == null) return;
+
+            World.RemoveWall(World.HoveredWall);
         }
 
 
         public override void OnSelect()
         {
             BuildPreview = new GameObject("WallPreview");
-            Editor.AltitudeHelperPlane.SetActive(true);
+
+            ShowHelperGrid(HelperGridToggle.isOn);
+            SetAltitude(int.Parse(AltitudeInput.text));
         }
         public override void OnDeselect()
         {
