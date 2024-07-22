@@ -498,6 +498,18 @@ namespace BlockmapFramework
                 else return Direction.N;
             }
         }
+        private Direction GetNodeHoverModeCorners(Vector3 worldPos)
+        {
+            Vector2 posOnTile = new Vector2(worldPos.x - (int)worldPos.x, worldPos.z - (int)worldPos.z);
+
+            if (posOnTile.x >= 0.5f && posOnTile.y >= 0.5f) return Direction.NE;
+            if (posOnTile.x < 0.5f && posOnTile.y >= 0.5f) return Direction.NW;
+            if (posOnTile.x < 0.5f && posOnTile.y < 0.5f) return Direction.SW;
+            if (posOnTile.x >= 0.5f && posOnTile.y < 0.5f) return Direction.SE;
+
+            throw new System.Exception("posOnTile " + posOnTile.ToString() + " is invalid");
+        }
+
 
         public AirNode GetAirNodeFromRaycastHit(RaycastHit hit)
         {
@@ -543,7 +555,7 @@ namespace BlockmapFramework
 
             // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
             // Do the same detection stuff again with the offset position
-            Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+            Vector3 offsetHitPosition = hit.point + new Vector3(-0.01f, 0f, -0.01f);
             Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
             List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, altitude).OrderByDescending(x => x.MaxAltitude).ToList();
             Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
@@ -581,9 +593,10 @@ namespace BlockmapFramework
         public Wall GetWallFromRaycastHit(RaycastHit hit)
         {
             // Check if there is a wall on the exact HoveredWorldCoordinates in the HovereModeSide direction
+            Vector2Int hitWorldCoordinate = GetWorldCoordinates(hit.point);
             WallMesh hitMesh = hit.transform.GetComponent<WallMesh>();
             int altitude = hitMesh.Altitude;
-            Vector3Int globalCellCoordinates = new Vector3Int(HoveredWorldCoordinates.x, altitude, HoveredWorldCoordinates.y);
+            Vector3Int globalCellCoordinates = new Vector3Int(hitWorldCoordinate.x, altitude, hitWorldCoordinate.y);
             Direction primaryHitSide = NodeHoverModeSides;
             List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
 
@@ -604,7 +617,7 @@ namespace BlockmapFramework
 
             // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
             // Do the same detection stuff again with the offset position
-            Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+            Vector3 offsetHitPosition = hit.point + new Vector3(-0.01f, 0f, -0.01f);
             Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
             Vector3Int offsetCellCoordinates = new Vector3Int(offsetCoordinates.x, altitude, offsetCoordinates.y);
             Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
@@ -626,7 +639,7 @@ namespace BlockmapFramework
             }
 
             // Didn't find anything
-            Debug.LogWarning("GetWallFromRaycastHit failed to find a wall at world position: " + hit.point.ToString());
+            Debug.LogWarning("GetWallFromRaycastHit failed to find a wall at world position: " + hit.point.ToString() + "/" + hitWorldCoordinate.ToString() + " (offset was " + offsetHitPosition.ToString() + "/" + offsetCoordinates.ToString() + ")");
             return null;
         }
 
@@ -662,6 +675,15 @@ namespace BlockmapFramework
         {
             Vector3 altitudeHitPoint = GetAltitudeHitPoint(altitude);
             return GetNodeHoverModeSides(altitudeHitPoint);
+        }
+
+        /// <summary>
+        /// Returns the corner hover mode of the currently hovered position on a specific altitude level.
+        /// </summary>
+        public Direction GetNodeHoverModeCorners(int altitude)
+        {
+            Vector3 altitudeHitPoint = GetAltitudeHitPoint(altitude);
+            return GetNodeHoverModeCorners(altitudeHitPoint);
         }
 
         #endregion
@@ -1087,6 +1109,8 @@ namespace BlockmapFramework
 
         public bool CanBuildFence(FenceType type, BlockmapNode node, Direction side, int height)
         {
+            List<Direction> affectedSides = HelperFunctions.GetAffectedDirections(side);
+
             // Check if disallowed corner
             if (HelperFunctions.IsCorner(side) && !type.CanBuildOnCorners) return false;
 
@@ -1094,7 +1118,7 @@ namespace BlockmapFramework
             if (height > type.MaxHeight) height = type.MaxHeight;
 
             // Check if node already has a fence on that side
-            foreach (Direction dir in HelperFunctions.GetAffectedDirections(side))
+            foreach (Direction dir in affectedSides)
                 if (node.Fences.ContainsKey(dir)) return false;
 
             // Check if a ladder is already there
@@ -1116,7 +1140,10 @@ namespace BlockmapFramework
                 List<Wall> walls = GetWalls(globalCellCoordinates);
                 foreach(Wall w in walls)
                 {
-                    if (HelperFunctions.DoAffectedCornersOverlap(side, w.Side)) return false;
+                    foreach (Direction dir in affectedSides)
+                    {
+                        if (w.Side == dir) return false;
+                    }
                 }
             }
            
@@ -1153,15 +1180,19 @@ namespace BlockmapFramework
             int altitude = globalCellCoordinates.y;
             Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
             List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
+            List<Direction> affectedSides = HelperFunctions.GetAffectedDirections(side);
 
             // Check if we would overlap a fence
             foreach (BlockmapNode nodeOnCoordinate in nodesOnCoordinate)
             {
                 foreach(Fence fence in nodeOnCoordinate.Fences.Values)
                 {
-                    if(HelperFunctions.DoAffectedCornersOverlap(side, fence.Side))
+                    foreach (Direction affectedSide in affectedSides)
                     {
-                        if (fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude) return false;
+                        if (fence.Side == affectedSide)
+                        {
+                            if (fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude) return false;
+                        }
                     }
                 }
             }
@@ -1178,12 +1209,20 @@ namespace BlockmapFramework
                 }
             }
 
+            // Check if we would overlap another wall
+            foreach (Wall w in GetWalls(globalCellCoordinates))
+            {
+                foreach (Direction affectedSide in affectedSides)
+                    if (w.Side == affectedSide)
+                        return false;
+            }
+
             return true;
         }
-        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material)
+        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material, bool mirrored)
         {
             // Create and register new wall
-            Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material);
+            Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
             RegisterWall(newWall);
 
             // Update systems around cell

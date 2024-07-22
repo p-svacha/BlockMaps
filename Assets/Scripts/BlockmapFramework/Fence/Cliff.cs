@@ -27,5 +27,6 @@ namespace BlockmapFramework
         public float ClimbSpeedDown => 0.4f;
         public float ClimbTransformOffset => 0f;
         public Direction ClimbSide => Direction.None;
+        public bool IsClimbable => true;
     }
 }

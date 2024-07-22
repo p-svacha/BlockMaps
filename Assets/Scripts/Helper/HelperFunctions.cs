@@ -310,6 +310,45 @@ public static class HelperFunctions
         return Quaternion.Euler(0f, GetDirectionAngle(dir), 0f);
     }
 
+    /// <summary>
+    /// Returns the global cell coordinates of the wall that is to the left/right/above/below a wall piece with the given source coordinates and side.
+    /// <br/> dir refers which direction we want to search, whereas (N = Above, S = Below, W = Left, E = Right).
+    /// </summary>
+    public static Vector3Int GetAdjacentWallCellCoordinates(Vector3Int sourceCoordinates, Direction sourceSide, Direction dir)
+    {
+        if (dir == Direction.N) return new Vector3Int(sourceCoordinates.x, sourceCoordinates.y + 1, sourceCoordinates.z);
+        if (dir == Direction.S) return new Vector3Int(sourceCoordinates.x, sourceCoordinates.y - 1, sourceCoordinates.z);
+
+        Vector3Int offset = Vector3Int.zero;
+        if (GetAffectedSides(dir).Contains(Direction.N)) offset = new Vector3Int(0, 1, 0);
+        if (GetAffectedSides(dir).Contains(Direction.S)) offset = new Vector3Int(0, -1, 0);
+
+        if (GetAffectedSides(dir).Contains(Direction.W))
+        {
+            return sourceSide switch
+            {
+                Direction.N => offset + new Vector3Int(sourceCoordinates.x + 1, sourceCoordinates.y, sourceCoordinates.z),
+                Direction.S => offset + new Vector3Int(sourceCoordinates.x - 1, sourceCoordinates.y, sourceCoordinates.z),
+                Direction.W => offset + new Vector3Int(sourceCoordinates.x, sourceCoordinates.y, sourceCoordinates.z + 1),
+                Direction.E => offset + new Vector3Int(sourceCoordinates.x, sourceCoordinates.y, sourceCoordinates.z - 1),
+                _ => throw new System.Exception("direction not handled")
+            };
+        }
+
+        if (GetAffectedSides(dir).Contains(Direction.E))
+        {
+            return sourceSide switch
+            {
+                Direction.N => offset + new Vector3Int(sourceCoordinates.x - 1, sourceCoordinates.y, sourceCoordinates.z),
+                Direction.S => offset + new Vector3Int(sourceCoordinates.x + 1, sourceCoordinates.y, sourceCoordinates.z),
+                Direction.W => offset + new Vector3Int(sourceCoordinates.x, sourceCoordinates.y, sourceCoordinates.z - 1),
+                Direction.E => offset + new Vector3Int(sourceCoordinates.x, sourceCoordinates.y, sourceCoordinates.z + 1),
+                _ => throw new System.Exception("direction not handled")
+            };
+        }
+        throw new System.Exception("direction not handled");
+    }
+
     #endregion
 
     #region UI

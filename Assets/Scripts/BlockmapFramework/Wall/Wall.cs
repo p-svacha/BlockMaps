@@ -43,6 +43,11 @@ namespace BlockmapFramework
         /// </summary>
         public WallMaterial Material { get; private set; }
 
+        /// <summary>
+        /// Flag if this is the mirrored version of the wall piece.
+        /// </summary>
+        public bool IsMirrored { get; private set; }
+
         public float Width => Shape.Width;
 
 
@@ -54,11 +59,11 @@ namespace BlockmapFramework
         public float ClimbSpeedDown => Material.ClimbSpeedDown;
         public float ClimbTransformOffset => Shape.Width;
         public Direction ClimbSide => Side;
-        public bool IsClimbable => ClimbSkillRequirement != ClimbingCategory.Unclimbable;
+        public bool IsClimbable => Shape.IsClimbable && ClimbSkillRequirement != ClimbingCategory.Unclimbable;
 
         #region Init
 
-        public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material)
+        public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material, bool mirrored)
         {
             World = world;
             Id = id;
@@ -66,6 +71,9 @@ namespace BlockmapFramework
             Side = side;
             Shape = shape;
             Material = material;
+            IsMirrored = mirrored;
+
+            if (!Shape.ValidSides.Contains(side)) throw new System.Exception("Invalid wall side error. " + shape.Name + " is not allowed to build in the direction " + side.ToString());
         }
 
         #endregion
@@ -139,8 +147,16 @@ namespace BlockmapFramework
 
         public static Wall Load(World world, WallData data)
         {
-            Wall wall = new Wall(world, data.Id, new Vector3Int(data.CellX, data.CellY, data.CellZ), (Direction)data.Side, WallManager.Instance.GetWallShape((WallShapeId)data.ShapeId), WallManager.Instance.GetWallMaterial((WallMaterialId)data.MaterialId));
-            return wall;
+            return new Wall
+                (
+                world, 
+                data.Id, 
+                new Vector3Int(data.CellX, data.CellY, data.CellZ), 
+                (Direction)data.Side, 
+                WallManager.Instance.GetWallShape((WallShapeId)data.ShapeId), 
+                WallManager.Instance.GetWallMaterial((WallMaterialId)data.MaterialId), 
+                data.IsMirrored
+                );
         }
 
         public WallData Save()
@@ -153,7 +169,8 @@ namespace BlockmapFramework
                 CellZ = GlobalCellCoordinates.z,
                 Side = (int)Side,
                 ShapeId = (int)Shape.Id,
-                MaterialId = (int)Material.Id
+                MaterialId = (int)Material.Id,
+                IsMirrored = IsMirrored
             };
         }
 

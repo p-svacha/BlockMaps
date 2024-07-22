@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WoodFloor051
+  m_Name: WoodParquet
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:

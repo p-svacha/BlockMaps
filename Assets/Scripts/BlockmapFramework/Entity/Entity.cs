@@ -565,8 +565,8 @@ namespace BlockmapFramework
             System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
 
             // Debug
-            bool debugVision = false;
-            if (debugVision)
+            bool debugVisionRay = false;
+            if (debugVisionRay)
             {
                 Color debugColor = Color.red;
                 if (hits.Length > 0) debugColor = Color.blue;

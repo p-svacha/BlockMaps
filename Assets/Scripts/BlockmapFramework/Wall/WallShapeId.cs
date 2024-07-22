@@ -6,6 +6,9 @@ namespace BlockmapFramework
 {
     public enum WallShapeId
     {
-        Solid
+        Solid,
+        Corner,
+        Slope,
+        Window
     }
 }

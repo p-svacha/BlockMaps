@@ -1,4 +1,4 @@
-Shader "Custom/NodeMaterialShader"
+Shader "Custom/NodeMaterialShaderTransparent"
 {
     Properties // Exposed to editor in material insepctor
     {
@@ -11,6 +11,7 @@ Shader "Custom/NodeMaterialShader"
 
         // Texture mode values
         _TextureScale("Texture Scale", Float) = 1
+        _Transparency("Transparency", Range(0, 1)) = 1.0
         _TriplanarBlendSharpness("Blend Sharpness",float) = 1
         _SideStartSteepness("Side Texture Start Steepness",float) = 0.3 // The steepness where side texture starts to show through
         _SideOnlySteepness("Side Texture Only Steepness",float) = 0.7 // The steepness where only side texture is shown
@@ -45,17 +46,17 @@ Shader "Custom/NodeMaterialShader"
 
         SubShader
         {
-        Tags { "RenderType" = "Opaque" }
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" }
         Offset [_Offset], [_Offset]
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows addshadow
+        #pragma surface surf Standard fullforwardshadows addshadow alpha:fade
 
         #pragma target 3.5
-
-        struct Input
+        
+            struct Input
         {
             float2 uv_MainTex;
             float2 uv2_TileOverlayTex;
@@ -69,11 +70,19 @@ Shader "Custom/NodeMaterialShader"
             INTERNAL_DATA
         };
 
+
         #include "Assets/Scripts/BlockmapFramework/Shaders/NodeMaterialShaderBase.cginc"
-        
+
+        // From Transparency property
+        float _Transparency;
+
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
+            // Base node material shader
             NodeMaterialSurf(IN, o);
+
+            // Transparency
+            o.Alpha = _Transparency;
         }
 
         ENDCG

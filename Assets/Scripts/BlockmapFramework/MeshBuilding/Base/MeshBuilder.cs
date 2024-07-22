@@ -155,6 +155,22 @@ namespace BlockmapFramework
         #region Build Functions
 
         #endregion
+
+        /// <summary>
+        /// Adds all meshvertices and the resulting meshriangle to the meshbuilder. Returns a MeshTriangle containing all data.
+        /// <br/> Does not support UVs.
+        /// <br/> UV2 is forced to 0.5/0.5 so it doesn't interfere with shader (BlockMap-specific).
+        /// </summary>
+        public MeshTriangle BuildTriangle(int submeshIndex, Vector3 v1, Vector3 v2, Vector3 v3, bool mirror = false)
+        {
+            MeshVertex mv1 = AddVertex(v1, Vector2.zero, new Vector2(0.5f, 0.5f));
+            MeshVertex mv2 = AddVertex(v2, Vector2.zero, new Vector2(0.5f, 0.5f));
+            MeshVertex mv3 = AddVertex(v3, Vector2.zero, new Vector2(0.5f, 0.5f));
+
+            if (mirror) return AddTriangle(submeshIndex, mv1, mv2, mv3);
+            else return AddTriangle(submeshIndex, mv1, mv3, mv2);
+        }
+
         /// <summary>
         /// Adds all meshvertices and meshtriangles to build a plane. Returns a MeshPlane containing all data.
         /// UV from first to second vector is uv-y-axis
@@ -349,7 +365,47 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Builds a cube onto a given cell, given the relative position and dimensions within the cell.
+        /// Builds a triangle into a given cell, given the relative position of the 3 vertices within the cell.
+        /// <br/>Relative positions are from SW corner and get translated to the given direction.
+        /// </summary>
+        public void BuildTriangle(Vector3Int localCellPos, Direction side, int submesh, Vector3 p1, Vector3 p2, Vector3 p3, bool mirror = false)
+        {
+            // Calculate flat footprint vertex positions
+            List<Vector3> vertices = new List<Vector3>() { p1, p2, p3 };
+
+            // Translate footprint positions based on direction
+            vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
+
+            // Apply offset based on cell position within the chunk
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
+
+            // Build cube
+            BuildTriangle(submesh, vertices[0], vertices[1], vertices[2], mirror);
+        }
+
+        /// <summary>
+        /// Builds a plane into a given cell, given the relative position of the 4 vertices within the cell.
+        /// <br/>Relative positions are from SW corner and get translated to the given direction.
+        /// </summary>
+        public void BuildPlane(Vector3Int localCellPos, Direction side, int submesh, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4, bool mirror = false)
+        {
+            // Calculate flat footprint vertex positions
+            List<Vector3> vertices = new List<Vector3>() { p1, p2, p3, p4 };
+
+            // Translate footprint positions based on direction
+            vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
+
+            // Apply offset based on cell position within the chunk
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
+
+            // Build cube
+            BuildPlane(submesh, vertices[0], vertices[1], vertices[2], vertices[3], Vector2.zero, Vector2.one, mirror);
+        }
+
+        /// <summary>
+        /// Builds a cube into a given cell, given the relative position and dimensions within the cell.
         /// <br/>Relative positions are from SW corner and get translated to the given direction.
         /// </summary>
         public void BuildCube(Vector3Int localCellPos, Direction side, int submesh, Vector3 relativePos, Vector3 relativeDim)
@@ -362,7 +418,7 @@ namespace BlockmapFramework
 
             // Apply offset based on cell position within the chunk
             Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
-            for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
+            for (int i = 0; i < footprint.Count; i++) footprint[i] += nodeOffsetPos;
 
             // Build cube
             BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], relativeDim.y);

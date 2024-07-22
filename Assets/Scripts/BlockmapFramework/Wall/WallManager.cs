@@ -19,6 +19,9 @@ namespace BlockmapFramework
             WallShapes = new Dictionary<WallShapeId, WallShape>()
             { 
                 { WallShapeId.Solid, new WS001_Solid() },
+                { WallShapeId.Corner, new WS002_Corner() },
+                { WallShapeId.Slope, new WS003_Slope() },
+                { WallShapeId.Window, new WS004_Window() },
             };
             WallMaterials = new Dictionary<WallMaterialId, WallMaterial>()
             {

@@ -25,6 +25,7 @@ namespace WorldEditor
         public UI_SelectionPanel MaterialSelection;
         public TMP_InputField AltitudeInput;
         public Toggle HelperGridToggle;
+        public Toggle MirrorToggle;
 
         public override void Init(BlockEditor editor)
         {
@@ -69,6 +70,9 @@ namespace WorldEditor
 
             // H: Toggle helper grid
             if (Input.GetKeyDown(KeyCode.H)) ShowHelperGrid(!HelperGridToggle.isOn);
+
+            // M: Toggle mirrored
+            if (Input.GetKeyDown(KeyCode.M)) SetMirrored(!MirrorToggle.isOn);
         }
 
         private void SetAltitude(int altitude)
@@ -83,6 +87,11 @@ namespace WorldEditor
         {
             Editor.AltitudeHelperPlane.SetActive(show);
             HelperGridToggle.isOn = show;
+        }
+
+        private void SetMirrored(bool show)
+        {
+            MirrorToggle.isOn = show;
         }
 
         private void UpdatePreview()
@@ -101,7 +110,11 @@ namespace WorldEditor
             // Calculate position data
             Vector3Int globalCellPosition = new Vector3Int(hoveredCoordinates.x, BuildAltitude, hoveredCoordinates.y);
             Vector3Int localCellPosition = World.GetLocalCellCoordinates(globalCellPosition);
-            Direction side = World.GetNodeHoverModeSides(BuildAltitude);
+
+            // Get wall side
+            Direction side;
+            if (SelectedWallShape.Id == WallShapeId.Corner) side = World.GetNodeHoverModeCorners(BuildAltitude);
+            else side = World.GetNodeHoverModeSides(BuildAltitude);
 
             // Get if we can build on current hovered position
             Color c = Color.white;
@@ -109,7 +122,7 @@ namespace WorldEditor
 
             // Build preview mesh
             MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-            WallMeshGenerator.DrawWall(previewMeshBuilder, localCellPosition, side, SelectedWallShape, SelectedWallMaterial, isPreview: true);
+            WallMeshGenerator.DrawWall(World, previewMeshBuilder, globalCellPosition, localCellPosition, side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn, isPreview: true);
             previewMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
             BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             BuildPreview.transform.position = World.GetChunk(hoveredCoordinates).WorldPosition; // Position is always based on chunk since there's 1 mesh per chunk
@@ -120,7 +133,11 @@ namespace WorldEditor
             // Calculate position data
             Vector2Int hoveredCoordinates = World.GetHoveredCoordinates(BuildAltitude);
             Vector3Int globalCellPosition = new Vector3Int(hoveredCoordinates.x, BuildAltitude, hoveredCoordinates.y);
-            Direction side = World.GetNodeHoverModeSides(BuildAltitude);
+
+            // Get wall side
+            Direction side;
+            if (SelectedWallShape.Id == WallShapeId.Corner) side = World.GetNodeHoverModeCorners(BuildAltitude);
+            else side = World.GetNodeHoverModeSides(BuildAltitude);
 
             // Make checks if we can build
             if (!World.IsInWorld(hoveredCoordinates)) return;
@@ -128,7 +145,7 @@ namespace WorldEditor
 
             // BUILD THE WALL
             Debug.Log(World == null);
-            World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial);
+            World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn);
         }
 
         public override void HandleRightClick()

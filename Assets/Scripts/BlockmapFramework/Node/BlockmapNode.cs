@@ -321,7 +321,7 @@ namespace BlockmapFramework
             IClimbable nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
             while(nextClimbingPiece != null)
             {
-                if (nextClimbingPiece.ClimbSkillRequirement == ClimbingCategory.Unclimbable) return new List<IClimbable>(); // No climb possible because of unclimbable piece
+                if (!nextClimbingPiece.IsClimbable) return new List<IClimbable>(); // No climb possible because of unclimbable piece
                 climb.Add(nextClimbingPiece);
                 currentAltitude++;
 
@@ -695,7 +695,13 @@ namespace BlockmapFramework
             // Special checks for corner directions
             if(HelperFunctions.GetCorners().Contains(dir))
             {
-                if (Fences.ContainsKey(dir)) return false;
+                if (Fences.ContainsKey(dir)) return false; // Fence on corner
+
+                // Check for wall corner piece
+                int cornerAltitude = Altitude[dir];
+                Vector3Int globalCellCoordinate = new Vector3Int(WorldCoordinates.x, cornerAltitude, WorldCoordinates.y);
+                if (World.GetWall(globalCellCoordinate, dir) != null) return false; // Wall on corner
+
                 if (!HelperFunctions.GetAffectedSides(dir).All(x => IsPassable(x, entity))) return false;
 
                 return true;

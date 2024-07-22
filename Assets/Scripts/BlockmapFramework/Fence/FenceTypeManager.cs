@@ -17,9 +17,9 @@ namespace BlockmapFramework
         {
             FenceTypes = new Dictionary<FenceTypeId, FenceType>()
             {
-                { FenceTypeId.BrickWall, new FT01_BrickWall() },
+                //{ FenceTypeId.BrickWall, new FT01_BrickWall() },
                 { FenceTypeId.WoodenFence, new FT02_WoodenFence() },
-                { FenceTypeId.Cliff, new FT03_Cliff() },
+                //{ FenceTypeId.Cliff, new FT03_Cliff() },
             };
         }
 

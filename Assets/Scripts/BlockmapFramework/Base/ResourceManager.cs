@@ -33,6 +33,7 @@ namespace BlockmapFramework
         public Material Mat_Plaster;
         public Material Mat_TilesWhite;
         public Material Mat_TilesSmallVaried;
+        public Material Mat_Glass;
 
         [Header("Colors")]
         public Color GrassColor;

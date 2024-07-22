@@ -15,5 +15,6 @@ namespace BlockmapFramework
         public int Side { get; set; }
         public int ShapeId { get; set; }
         public int MaterialId { get; set; }
+        public bool IsMirrored { get; set; }
     }
 }

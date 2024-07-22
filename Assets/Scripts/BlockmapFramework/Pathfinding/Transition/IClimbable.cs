@@ -44,5 +44,10 @@ namespace BlockmapFramework
         /// On which node side this climbable is located. The TransformOffset is only applied when climbing on this side.
         /// </summary>
         public Direction ClimbSide { get; }
+
+        /// <summary>
+        /// Returns if this piece is generally climbable.
+        /// </summary>
+        public bool IsClimbable { get; }
     }
 }

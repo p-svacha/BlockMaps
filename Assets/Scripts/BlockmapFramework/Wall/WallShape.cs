@@ -13,9 +13,11 @@ namespace BlockmapFramework
         public abstract WallShapeId Id { get; }
         public abstract string Name { get; }
         public abstract bool BlocksVision { get; }
+        public abstract bool IsClimbable { get; }
         public abstract float Width { get; }
+        public virtual List<Direction> ValidSides => HelperFunctions.GetSides();
         public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/WallShapes/" + Id.ToString());
 
-        public abstract void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material);
+        public abstract void GenerateMesh(World world, MeshBuilder meshBuilder, Vector3Int globalCellPosition, Vector3Int localCellPosition, Direction side, Material material, bool isMirrored);
     }
 }

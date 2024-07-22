@@ -28,7 +28,7 @@ namespace BlockmapFramework
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach(Wall wall in wallsToDraw)
                 {
-                    wall.Shape.GenerateMesh(meshBuilder, wall.LocalCellCoordinates, wall.Side, wall.Material.Material);
+                    wall.Shape.GenerateMesh(chunk.World, meshBuilder, wall.GlobalCellCoordinates, wall.LocalCellCoordinates, wall.Side, wall.Material.Material, wall.IsMirrored);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();
@@ -42,9 +42,9 @@ namespace BlockmapFramework
         /// <summary>
         /// Adds the mesh of a single wall piece to a MeshBuilder.
         /// </summary>
-        public static void DrawWall(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, WallShape shape, WallMaterial material, bool isPreview = false)
+        public static void DrawWall(World world, MeshBuilder meshBuilder, Vector3Int globalCellPosition, Vector3Int localCellPosition, Direction side, WallShape shape, WallMaterial material, bool isMirrored, bool isPreview = false)
         {
-            shape.GenerateMesh(meshBuilder, localCellPosition, side, GetMaterial(material.Material, isPreview));
+            shape.GenerateMesh(world, meshBuilder, globalCellPosition, localCellPosition, side, GetMaterial(material.Material, isPreview), isMirrored);
         }
 
         private static Material GetMaterial(Material mat, bool isPreview)

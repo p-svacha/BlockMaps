@@ -1,12 +1,4 @@
---- Update Corners, Doors and Windows
-
-New wall shape "Corner":
- - only buildable on corners
-
-New wall shape "Window":
- - Doesn't block vision
- - Merges with adjacent windows
- - Has a glass material
+--- Update Slopes, Corners, Doors and Windows
 
 New wall shape "Door":
  - own subclass with state attribute open/close
@@ -50,10 +42,7 @@ Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area a
 	> proc entity drag
 	> tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
 
-- allow overlap corner overlap between wall and fence (a wall can be build on N and a fence can be built on E on same cell)
-- allow wooden fence to be higher than 1
-- remove brickwall fence
-- remove cliff fence
+
 
 - Adjust entity World height (only where its drawn) based on surface it's on - a little higher on conrete etc.
 
@@ -252,6 +241,12 @@ improve vision system performance
 	> Huge: 17 chunks
 	> Enormous: 20 chunks
 	> Random
+
+
+-------- POSSIBLE PROJECT IDEAS WITH FRAMEWORK --------
+
+- EcosystemSimulation3D
+- Solo/Squad RPG (like CDDA)
 
 
 -------- RETIRED IDEAS ------------

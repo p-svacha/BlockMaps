@@ -96,7 +96,7 @@ Material:
     - _Mode: 0
     - _NormalStrength: -0.2
     - _OcclusionStrength: 1
-    - _Offset: -0.1
+    - _Offset: -0.2
     - _Parallax: 0.02
     - _ShowGrid: 0
     - _ShowTileOverlay: 0
@@ -108,6 +108,7 @@ Material:
     - _TextureScale: 0.9
     - _TileOverlayX: 0
     - _TileOverlayY: 0
+    - _Transparency: 1
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
     - _UseTextures: 1

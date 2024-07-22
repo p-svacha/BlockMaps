@@ -8,7 +8,6 @@ namespace BlockmapFramework
     {
         public override FenceTypeId Id => FenceTypeId.WoodenFence;
         public override string Name => "Wooden Fence";
-        public override int MaxHeight => 1;
         public override bool CanBuildOnCorners => true;
         public override bool BlocksVision => false;
 
@@ -25,7 +24,7 @@ namespace BlockmapFramework
 
         private const float POLE_WIDTH = 0.1f;
         private const int NUM_POLES = 2;
-        private const float POLE_HEIGHT = 0.4f;
+        // private const float POLE_HEIGHT = 0.4f;
 
         private const float CROSS_BRACE_START_Y = 0.2f;
         private const float CROSS_BRACE_HEIGHT = 0.1f;
@@ -42,7 +41,7 @@ namespace BlockmapFramework
                 float startX = (poleStep / 2f) + (i * poleStep - (POLE_WIDTH / 2f));
                 float dimX = POLE_WIDTH;
                 float startY = 0f;
-                float dimY = POLE_HEIGHT;
+                float dimY = World.TILE_HEIGHT * height;
                 float startZ = 0f;
                 float dimZ = POLE_WIDTH;
                 Vector3 polePos = new Vector3(startX, startY, startZ);
@@ -50,10 +49,26 @@ namespace BlockmapFramework
                 meshBuilder.BuildCube(node, side, submesh, polePos, poleDims, adjustToNodeSlope: true);
             }
 
-            // Cross brace
+            // Cross braces
+            for (int i = 0; i < height; i++)
+            {
+                // Main cross brace for altitude
+                float braceYPos = (World.TILE_HEIGHT * i) + CROSS_BRACE_START_Y;
+                BuildCrossBrace(meshBuilder, node, side, submesh, braceYPos);
+
+                // Cross brace in between two altitudes
+                if(i > 0) 
+                {
+                    float betweenBraceYPos = (World.TILE_HEIGHT * i) - (CROSS_BRACE_HEIGHT / 2f);
+                    BuildCrossBrace(meshBuilder, node, side, submesh, betweenBraceYPos);
+                }
+            }
+        }
+        private void BuildCrossBrace(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int submesh, float yPos)
+        {
             float cb_x = 0f;
             float cb_dimX = 1f;
-            float cb_y = CROSS_BRACE_START_Y;
+            float cb_y = yPos;
             float cb_dimY = CROSS_BRACE_HEIGHT;
             float cb_z = (POLE_WIDTH - CROSS_BRACE_WIDTH) / 2f;
             float cb_dimZ = CROSS_BRACE_WIDTH;
@@ -61,6 +76,7 @@ namespace BlockmapFramework
             Vector3 cbDims = new Vector3(cb_dimX, cb_dimY, cb_dimZ);
             meshBuilder.BuildCube(node, side, submesh, cbPos, cbDims, adjustToNodeSlope: true);
         }
+
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
             int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Wood, isPreview));
@@ -68,7 +84,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = POLE_WIDTH;
             float startY = 0f;
-            float dimY = POLE_HEIGHT;
+            float dimY = World.TILE_HEIGHT * height;
             float startZ = 0f;
             float dimZ = POLE_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
