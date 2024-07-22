@@ -127,14 +127,14 @@ namespace BlockmapFramework
                 Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
             }
         }
-        protected void SetShaderVisibilityData(List<float> surfaceVisibilityArray)
+        protected void SetShaderVisibilityData(List<float> visibilityArray)
         {
             // Set visibility in all surface mesh materials
             for (int i = 0; i < Renderer.materials.Length; i++)
             {
                 Renderer.materials[i].SetColorArray("_PlayerColors", World.GetAllActors().Select(x => x.Color).ToArray());
                 Renderer.materials[i].SetFloat("_FullVisibility", 0);
-                Renderer.materials[i].SetFloatArray("_TileVisibility", surfaceVisibilityArray);
+                Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
             }
         }
     }

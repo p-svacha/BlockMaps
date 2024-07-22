@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 5392767307661804686}
   - component: {fileID: 9041309258335554347}
   - component: {fileID: 6529614281575137249}
+  - component: {fileID: 8775280700281714778}
   - component: {fileID: 4390155528046239077}
-  - component: {fileID: 5733067412292867280}
   m_Layer: 0
-  m_Name: character_static
+  m_Name: dynamicCharacter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -87,6 +87,29 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8775280700281714778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4727976861285867060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34b67e21889d91345b1205a6d4a71557, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: dynamicCharacter
+  VisionRange: 0
+  Dimensions: {x: 1, y: 3, z: 1}
+  IsPassable: 1
+  BlocksVision: 0
+  RequiresFlatTerrain: 0
+  PlayerColorMaterialIndex: -1
+  MovementSpeed: 0
+  CanSwim: 0
+  ClimbingSkill: 0
+  TargetFlag: {fileID: 0}
 --- !u!64 &4390155528046239077
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -101,22 +124,3 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5495902117074765545, guid: 3dcb124b34f675149bcbddbe48a5680f, type: 3}
---- !u!114 &5733067412292867280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727976861285867060}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca4016ed45aa7d148b795d115f86fc25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Name: Alien
-  VisionRange: 0
-  Dimensions: {x: 1, y: 1, z: 1}
-  IsPassable: 0
-  BlocksVision: 0
-  RequiresFlatTerrain: 0
-  PlayerColorMaterialIndex: -1

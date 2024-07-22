@@ -24,7 +24,7 @@ namespace WorldEditor
             string fullPath = ENTITY_PREFAB_PATH + id;
 
             // Editor character
-            if (idPrefix == "character")
+            if (idPrefix == "dynamicCharacter")
             {
                 fullPath = ENTITY_PREFAB_PATH + idPrefix;
                 EditorMovingEntity prefab = Resources.Load<EditorMovingEntity>(fullPath);

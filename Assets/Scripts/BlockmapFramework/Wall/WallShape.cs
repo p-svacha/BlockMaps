@@ -12,9 +12,9 @@ namespace BlockmapFramework
     {
         public abstract WallShapeId Id { get; }
         public abstract string Name { get; }
-        // public abstract List<Direction> ValidSides { get; }
-        public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/WallShapes/" + Id.ToString());
+        public abstract bool BlocksVision { get; }
         public abstract float Width { get; }
+        public Sprite PreviewSprite => Resources.Load<Sprite>("Editor/Thumbnails/WallShapes/" + Id.ToString());
 
         public abstract void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material);
     }

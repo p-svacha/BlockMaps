@@ -10,7 +10,7 @@ namespace BlockmapFramework
 
         public override WallShapeId Id => WallShapeId.Solid;
         public override string Name => "Solid";
-        // public override List<Direction> ValidSides => HelperFunctions.GetSides();
+        public override bool BlocksVision => true;
         public override float Width => WIDTH;
 
         public override void GenerateMesh(MeshBuilder meshBuilder, Vector3Int localCellPosition, Direction side, Material material)

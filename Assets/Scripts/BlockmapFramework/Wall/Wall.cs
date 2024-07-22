@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -9,7 +10,7 @@ namespace BlockmapFramework
     /// <br/>An instance represents one wall on a single world cell covering a specific direction (side, corner or full cell).
     /// <br/>Each wall consist of a combination of a WallShape and a WallMaterial, which together define how the wall looks and acts.
     /// </summary>
-    public class Wall : IClimbable
+    public class Wall : IClimbable, IVisionTarget
     {
         private World World;
 
@@ -25,7 +26,7 @@ namespace BlockmapFramework
         public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
         public Vector2Int WorldCoordinates => new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
         public Chunk Chunk => World.GetChunk(WorldCoordinates);
-        public Vector3 CenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, GlobalCellCoordinates.y + (World.TILE_HEIGHT / 2), GlobalCellCoordinates.z + 0.5f);
+        public Vector3 CellCenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, (GlobalCellCoordinates.y * World.TILE_HEIGHT) + (World.TILE_HEIGHT / 2), GlobalCellCoordinates.z + 0.5f);
 
         /// <summary>
         /// The side within the cell this wall covers.
@@ -41,6 +42,8 @@ namespace BlockmapFramework
         /// The material this wall is made of.
         /// </summary>
         public WallMaterial Material { get; private set; }
+
+        public float Width => Shape.Width;
 
 
         // IClimbable
@@ -67,12 +70,68 @@ namespace BlockmapFramework
 
         #endregion
 
+        #region Vision Target
+
+        private HashSet<Actor> ExploredBy = new HashSet<Actor>();
+        private HashSet<Entity> SeenBy = new HashSet<Entity>();
+
+        public void AddVisionBy(Entity e)
+        {
+            ExploredBy.Add(e.Owner);
+            SeenBy.Add(e);
+        }
+        public void RemoveVisionBy(Entity e)
+        {
+            SeenBy.Remove(e);
+        }
+        public void AddExploredBy(Actor p)
+        {
+            ExploredBy.Add(p);
+        }
+        public void RemoveExploredBy(Actor p)
+        {
+            ExploredBy.Remove(p);
+        }
+
+        public bool IsVisibleBy(Actor actor)
+        {
+            if (actor == null) return true; // Everything is visible
+            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Wall is seen by an entity of given actor
+
+            return false;
+        }
+        public bool IsExploredBy(Actor actor)
+        {
+            if (actor == null) return true; // Everything is visible
+            return ExploredBy.Contains(actor);
+        }
+
+        #endregion
+
         #region Getters
+
+        public Vector3 GetCenterWorldPosition()
+        {
+            Vector3 cellCenter = CellCenterWorldPosition;
+
+            Vector3 directionOffset = Side switch
+            {
+                Direction.N => new Vector3(0f, 0f, 0.5f - (Width/2)),
+                Direction.E => new Vector3(0.5f - (Width / 2), 0f, 0f),
+                Direction.S => new Vector3(0f, 0f, -(0.5f - (Width / 2))),
+                Direction.W => new Vector3(-(0.5f - (Width / 2)), 0f, 0f),
+                _ => throw new System.Exception("Direction not handled")
+            };
+
+            return cellCenter + directionOffset;
+        }
 
         public override string ToString()
         {
             return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Name + " " + Material.Name;
         }
+
+        public bool BlocksVision => Shape.BlocksVision;
 
         #endregion
 

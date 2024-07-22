@@ -1,15 +1,12 @@
 --- Update Walls V2
 
- - Vision
-	> Vision should be blocked by walls
-	> Not by window glass
-	> Each wall piece has a LastSeenPosition and IsDisovered and IsSeen just like Nodes
-		° Make a general IVisionTarget interface and add it to entities and walls and nodes
-		° Maybe split into IStaticVisionTarget and IDynamicVisionTarget where only the dynamic one includes LastSeenPosition
+fix climb transitions that get created into impassable nodes (i.e. nodes with procedural entities)
+
+improve vision system performance
 
 ---
 
---- Update Doors
+--- Update Doors and Windows
 
 New wall feature "Door":
  - own subclass with state attribute open/close

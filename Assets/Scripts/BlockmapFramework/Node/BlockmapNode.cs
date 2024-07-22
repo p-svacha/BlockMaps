@@ -10,7 +10,7 @@ namespace BlockmapFramework
     /// <br/> A BlockmapNode is on one specific world coordinate but can have different heights for its corners.
     /// <br/> All entities are tied to a BlockmapNode.
     /// </summary>
-    public abstract class BlockmapNode
+    public abstract class BlockmapNode : IVisionTarget
     {
         public int Id { get; private set; }
 
@@ -73,16 +73,6 @@ namespace BlockmapFramework
         /// Ladders that lead to this node
         /// </summary>
         public Dictionary<Direction, Ladder> TargetLadders = new Dictionary<Direction, Ladder>(); 
-
-        /// <summary>
-        /// List containing all players that have explored this node.
-        /// </summary>
-        private HashSet<Actor> ExploredBy = new HashSet<Actor>();
-
-        /// <summary>
-        /// List containing all entities that currently see this node.
-        /// </summary>
-        private HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
         /// The mesh in the world that this node is drawn on.
@@ -251,13 +241,13 @@ namespace BlockmapFramework
             {
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList))
                 {
-                    Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList);
                     Transitions.Add(adjNode, t);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown))
                 {
-                    Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown);
                     Transitions.Add(adjNode, t);
                 }
@@ -280,7 +270,7 @@ namespace BlockmapFramework
             if (!IsFlat(dir)) return false;
             if (!to.IsFlat(oppositeDir)) return false;
 
-                if (climbHeight > 0)
+            if (climbHeight > 0)
             {
                 climb = GetClimbUp(dir);
                 return climb.Count == Mathf.Abs(climbHeight);
@@ -333,6 +323,52 @@ namespace BlockmapFramework
             }
 
             return climb;
+        }
+
+        #endregion
+
+        #region Vision Target
+
+        /// <summary>
+        /// List containing all actors that have explored this node.
+        /// </summary>
+        private HashSet<Actor> ExploredBy = new HashSet<Actor>();
+
+        /// <summary>
+        /// List containing all entities that currently see this node.
+        /// </summary>
+        private HashSet<Entity> SeenBy = new HashSet<Entity>();
+
+        public void AddVisionBy(Entity e)
+        {
+            ExploredBy.Add(e.Owner);
+            SeenBy.Add(e);
+        }
+        public void RemoveVisionBy(Entity e)
+        {
+            SeenBy.Remove(e);
+        }
+        public void AddExploredBy(Actor p)
+        {
+            ExploredBy.Add(p);
+        }
+        public void RemoveExploredBy(Actor p)
+        {
+            ExploredBy.Remove(p);
+        }
+
+        public bool IsVisibleBy(Actor actor)
+        {
+            if (actor == null) return true; // Everything is visible
+            if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
+            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Node is seen by an entity of given actor
+
+            return false;
+        }
+        public bool IsExploredBy(Actor actor)
+        {
+            if (actor == null) return true; // Everything is visible
+            return ExploredBy.Contains(actor);
         }
 
         #endregion
@@ -417,24 +453,6 @@ namespace BlockmapFramework
         public void RemoveZone(Zone z)
         {
             Zones.Remove(z);
-        }
-
-        public void AddVisionBy(Entity e)
-        {
-            ExploredBy.Add(e.Owner);
-            SeenBy.Add(e);
-        }
-        public void RemoveVisionBy(Entity e)
-        {
-            SeenBy.Remove(e);
-        }
-        public void AddExploredBy(Actor p)
-        {
-            ExploredBy.Add(p);
-        }
-        public void RemoveExploredBy(Actor p)
-        {
-            ExploredBy.Remove(p);
         }
 
         #endregion
@@ -647,29 +665,6 @@ namespace BlockmapFramework
         {
             return BaseWorldHeight + (World.TILE_HEIGHT * GetRelativeHeightAt(relativePosition));
         }
-
-        /// <summary>
-        /// Returns if this node is visible for the specified player.
-        /// </summary>
-        public bool IsVisibleBy(Actor actor)
-        {
-            if (actor == null) return true; // Everything is visible
-            if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of player that provides vision
-            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Node is seen by an entity of player
-
-            return false;
-        }
-
-        /// <summary>
-        /// Returns if the node has been explored by the specified player.
-        /// </summary>
-        public bool IsExploredBy(Actor player)
-        {
-            if (player == null) return true; // Everything is visible
-            return ExploredBy.Contains(player);
-        }
-
-        public bool IsSeenBy(Entity e) => SeenBy.Contains(e);
 
         /// <summary>
         /// Returns if an entity can stand on this node.

@@ -175,18 +175,18 @@ namespace BlockmapFramework
         /// Updates the visible nodes on this chunk according to the vision of the specified player.
         /// <br/> Does not change the vision values (SeenBy, ExploredBy) of the nodes, only accesses them.
         /// </summary>
-        public void SetVisibility(Actor player)
+        public void SetVisibility(Actor actor)
         {
             // Node visibility
-            GroundMesh.SetVisibility(player);
-            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(player);
-            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(player);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(player);
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(player);
-            WaterMesh.SetVisibility(player);
+            GroundMesh.SetVisibility(actor);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(actor);
+            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(actor);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(actor);
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
+            WaterMesh.SetVisibility(actor);
 
             // Entity visibility
-            foreach(Entity e in Entities) e.UpdateVisiblity(player);
+            foreach(Entity e in Entities) e.UpdateVisiblity(actor);
         }
 
         public void ShowGrid(bool show)

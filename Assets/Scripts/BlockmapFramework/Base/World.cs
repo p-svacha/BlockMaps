@@ -354,16 +354,7 @@ namespace BlockmapFramework
                 // Hit air node
                 else if (objectHit.gameObject.layer == Layer_AirNode)
                 {
-                    newHoveredAirNode = GetAirNodes(HoveredWorldCoordinates).FirstOrDefault(x => x.BaseAltitude == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-
-                    if (newHoveredAirNode == null) // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-                    {
-                        Vector3 offsetHitPosition = hitPosition + new Vector3(-0.001f, 0f, -0.001f);
-                        Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-
-                        newHoveredAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseAltitude == objectHit.GetComponent<AirNodeMesh>().HeightLevel);
-                        
-                    }
+                    newHoveredAirNode = GetAirNodeFromRaycastHit(hit);
 
                     newHoveredNode = newHoveredAirNode;
                     newHoveredDynamicNode = newHoveredAirNode;
@@ -508,6 +499,22 @@ namespace BlockmapFramework
             }
         }
 
+        public AirNode GetAirNodeFromRaycastHit(RaycastHit hit)
+        {
+            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
+            int altitude = hit.transform.GetComponent<AirNodeMesh>().HeightLevel;
+            AirNode hitAirNode = GetAirNodes(hitCoordinates).FirstOrDefault(x => x.BaseAltitude == altitude);
+            if (hitAirNode != null) return hitAirNode;
+
+            // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+            Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+            AirNode hitOffsetAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseAltitude == altitude);
+            if (hitOffsetAirNode != null) return hitOffsetAirNode;
+
+            // Didnt' find anything
+            return null;
+        }
         public Fence GetFenceFromRaycastHit(RaycastHit hit)
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
@@ -566,7 +573,7 @@ namespace BlockmapFramework
 
             return null;
         }
-        private Wall GetWallFromRaycastHit(RaycastHit hit)
+        public Wall GetWallFromRaycastHit(RaycastHit hit)
         {
             // Check if there is a wall on the exact HoveredWorldCoordinates in the HovereModeSide direction
             WallMesh hitMesh = hit.transform.GetComponent<WallMesh>();
@@ -908,43 +915,53 @@ namespace BlockmapFramework
             // Return new instance
             return instance;
         }
-        public void RemoveEntity(Entity entity)
+        public void RemoveEntity(Entity entityToRemove)
         {
             // De-register entity
-            Entities.Remove(entity.Id);
-            entity.Owner.Entities.Remove(entity);
+            Entities.Remove(entityToRemove.Id);
+            entityToRemove.Owner.Entities.Remove(entityToRemove);
 
-            // Remove seen by on all nodes
+            // Remove entity vision reference on all nodes, entities and walls
             HashSet<Chunk> chunksAffectedByVision = new HashSet<Chunk>();
-            foreach (BlockmapNode node in entity.VisibleNodes)
+            foreach (BlockmapNode node in entityToRemove.CurrentVision.VisibleNodes)
             {
-                node.RemoveVisionBy(entity);
+                node.RemoveVisionBy(entityToRemove);
                 chunksAffectedByVision.Add(node.Chunk);
+            }
+            foreach(Entity e in entityToRemove.CurrentVision.VisibleEntities)
+            {
+                e.RemoveVisionBy(entityToRemove);
+                foreach (BlockmapNode eNode in e.OccupiedNodes) chunksAffectedByVision.Add(eNode.Chunk);
+            }
+            foreach(Wall w in entityToRemove.CurrentVision.VisibleWalls)
+            {
+                w.RemoveVisionBy(entityToRemove);
+                chunksAffectedByVision.Add(w.Chunk);
             }
 
             // Remove node & chunk occupation
-            foreach (BlockmapNode node in entity.OccupiedNodes)
+            foreach (BlockmapNode node in entityToRemove.OccupiedNodes)
             {
-                node.RemoveEntity(entity);
-                node.Chunk.RemoveEntity(entity);
+                node.RemoveEntity(entityToRemove);
+                node.Chunk.RemoveEntity(entityToRemove);
             }
 
             // Redraw chunk meshes if it is a procedural entity
-            if (entity is ProceduralEntity) RedrawNodesAround(entity.OriginNode.WorldCoordinates);
+            if (entityToRemove is ProceduralEntity) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetDimensions().x, entity.GetDimensions().z);
+            UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetDimensions().x, entityToRemove.GetDimensions().z);
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
-            if (entity.Owner == ActiveVisionActor)
+            if (entityToRemove.Owner == ActiveVisionActor)
                 foreach (Chunk c in chunksAffectedByVision)
                     UpdateVisibility(c);
 
             // Destroy
-            entity.DestroySelf();
+            entityToRemove.DestroySelf();
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
-            UpdateVisionOfNearbyEntitiesDelayed(entity.GetWorldCenter());
+            UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
         }
         private void RegisterEntity(Entity entity)
         {
@@ -1164,7 +1181,7 @@ namespace BlockmapFramework
             // Update systems around cell
             UpdateNavmeshAround(newWall.WorldCoordinates);
             RedrawNodesAround(newWall.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(newWall.CenterWorldPosition);
+            UpdateVisionOfNearbyEntitiesDelayed(newWall.CellCenterWorldPosition);
         }
         private void RegisterWall(Wall wall) // add to database and add all references in different objects
         {
@@ -1180,7 +1197,7 @@ namespace BlockmapFramework
             // Update systems around cell
             UpdateNavmeshAround(wall.WorldCoordinates);
             RedrawNodesAround(wall.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(wall.CenterWorldPosition);
+            UpdateVisionOfNearbyEntitiesDelayed(wall.CellCenterWorldPosition);
         }
 
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
@@ -1613,6 +1630,12 @@ namespace BlockmapFramework
             return entities;
         }
 
+        public List<Wall> GetWalls(Vector2Int worldCoordinates)
+        {
+            List<Wall> walls = new List<Wall>();
+            for (int i = 0; i <= MAX_ALTITUDE; i++) walls.AddRange(GetWalls(new Vector3Int(worldCoordinates.x, i, worldCoordinates.y)));
+            return walls;
+        }
         public List<Wall> GetWalls(Vector3Int globalCellCoordinates)
         {
             Vector2Int globalCoordinates2D = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);

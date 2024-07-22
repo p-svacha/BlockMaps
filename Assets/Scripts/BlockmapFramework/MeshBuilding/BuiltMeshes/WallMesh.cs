@@ -43,9 +43,8 @@ namespace BlockmapFramework
                         continue;
                     }
 
-                    visibility = 2; // 2 = visible
-                    //if (walls.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
-                    //else if (walls.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
+                    if (walls.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
+                    else if (walls.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
 
                     visibilityArray.Add(visibility);
                 }
