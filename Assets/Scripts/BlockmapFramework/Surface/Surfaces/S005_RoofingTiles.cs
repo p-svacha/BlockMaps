@@ -10,11 +10,10 @@ namespace BlockmapFramework
 
         public override SurfaceId Id => SurfaceId.RoofingTiles;
         public override string Name => "Roofing Tiles";
-        public override SurfacePropertyId PropertiesId => SurfacePropertyId.Tarmac;
+        public override SurfacePropertyId PropertiesId => SurfacePropertyId.Default;
         public override bool DoBlend => false;
         public override bool UseLongEdges => true;
         public override Color Color => ResourceManager.Singleton.Mat_Brick.color;
-        public override Texture2D Texture => ResourceManager.Singleton.GrassTexture;
 
         #region Draw
 

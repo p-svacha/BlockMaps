@@ -107,9 +107,9 @@ namespace BlockmapFramework
         // Performance Profilers
         static readonly ProfilerMarker pm_SetOriginNode = new ProfilerMarker("SetOriginNode");
         static readonly ProfilerMarker pm_UpdateVision = new ProfilerMarker("UpdateVision");
-        static readonly ProfilerMarker pm_GetVisibleNodes = new ProfilerMarker("GetVisibleNodes");
-        static readonly ProfilerMarker pm_GetNodeVision = new ProfilerMarker("GetNodeVision");
+        static readonly ProfilerMarker pm_GetCurrentVision = new ProfilerMarker("GetCurrentVision");
         static readonly ProfilerMarker pm_Look = new ProfilerMarker("Look");
+        static readonly ProfilerMarker pm_HandleVisibilityChange = new ProfilerMarker("HandleVisibilityChange");
 
         #region Initialize
 
@@ -223,6 +223,8 @@ namespace BlockmapFramework
         {
             pm_UpdateVision.Begin();
 
+            if (VisionRange == 0) return; // This entity cannot see
+
             // Remove entity vision from previously visible nodes, entities and walls
             VisionData previousVision = CurrentVision;
             foreach (BlockmapNode n in previousVision.VisibleNodes) n.RemoveVisionBy(this);
@@ -230,10 +232,11 @@ namespace BlockmapFramework
             foreach (Wall w in previousVision.VisibleWalls) w.RemoveVisionBy(this);
 
             // Get list of everything that this entity currently sees
-            pm_GetVisibleNodes.Begin();
+            pm_GetCurrentVision.Begin();
             CurrentVision = GetCurrentVision();
-            pm_GetVisibleNodes.End();
+            pm_GetCurrentVision.End();
 
+            pm_HandleVisibilityChange.Begin();
             // Add entitiy vision to visible nodes
             Debug.Log(CurrentVision.VisibleNodes.Count + " nodes are visible");
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
@@ -276,6 +279,8 @@ namespace BlockmapFramework
             // Redraw visibility of affected chunks
             Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Owner);
+
+            pm_HandleVisibilityChange.End();
 
             pm_UpdateVision.End();
         }
@@ -510,17 +515,19 @@ namespace BlockmapFramework
                     // Shoot ray at all nodes on coordinate
                     foreach (BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
                     {
-                        pm_GetNodeVision.Begin();
+                        pm_Look.Begin();
                         VisionData nodeRayVision = Look(targetNode.GetCenterWorldPosition());
+                        pm_Look.End();
                         fullVision.AddVisionData(nodeRayVision);
-                        pm_GetNodeVision.End();
 
                         // Shoot ray all entities on node
                         foreach(Entity e in targetNode.Entities)
                         {
                             if (checkedEntities.Contains(e)) continue;
 
+                            pm_Look.Begin();
                             VisionData entityRayVision = Look(e.GetWorldCenter());
+                            pm_Look.End();
                             fullVision.AddVisionData(entityRayVision);
                             checkedEntities.Add(e);
                         }
@@ -529,7 +536,9 @@ namespace BlockmapFramework
                     // Shoot a ray at all walls on coordinate
                     foreach(Wall wall in World.GetWalls(targetWorldCoordinates))
                     {
+                        pm_Look.Begin();
                         VisionData wallRayVision = Look(wall.GetCenterWorldPosition());
+                        pm_Look.End();
                         fullVision.AddVisionData(wallRayVision);
                     }
                 }
@@ -556,9 +565,13 @@ namespace BlockmapFramework
             System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
 
             // Debug
-            Color debugColor = Color.red;
-            if (hits.Length > 0) debugColor = Color.blue;
-            Debug.DrawRay(source, targetPosition - source, debugColor, 60f);
+            bool debugVision = false;
+            if (debugVision)
+            {
+                Color debugColor = Color.red;
+                if (hits.Length > 0) debugColor = Color.blue;
+                Debug.DrawRay(source, targetPosition - source, debugColor, 60f);
+            }
 
             foreach (RaycastHit hit in hits)
             {
@@ -654,7 +667,6 @@ namespace BlockmapFramework
 
                     if (hitFence == null) // Somehow we couldn't detect what fence we hit => just stop search
                     {
-                        Debug.LogWarning("GetFenceFromRaycastHit failed at world position " + hit.point.ToString());
                         return vision;
                     }
 
@@ -672,7 +684,6 @@ namespace BlockmapFramework
 
                     if (hitWall == null) // Somehow we couldn't detect what wall we hit => just stop search
                     {
-                        Debug.LogWarning("GetWallFromRaycastHit failed at world position " + hit.point.ToString());
                         return vision; 
                     }
 

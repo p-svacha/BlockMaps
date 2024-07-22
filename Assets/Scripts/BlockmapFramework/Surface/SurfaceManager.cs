@@ -22,7 +22,7 @@ namespace BlockmapFramework
                 {SurfacePropertyId.Grass, new SP01_Grass() },
                 {SurfacePropertyId.Sand, new SP02_Sand() },
                 {SurfacePropertyId.Water, new SP03_Water() },
-                {SurfacePropertyId.Tarmac, new SP04_Tarmac() },
+                {SurfacePropertyId.Default, new SP04_Default() },
             };
 
             // Define all surfaces
@@ -33,6 +33,8 @@ namespace BlockmapFramework
                 { SurfaceId.Concrete, new S003_Concrete(this) },
                 { SurfaceId.Street, new S004_Street(this) },
                 { SurfaceId.RoofingTiles, new S005_RoofingTiles(this) },
+                { SurfaceId.WoodParquet, new S006_WoodParquet(this) },
+                { SurfaceId.Tiles, new S007_Tiles(this) },
             };
 
             // Pass terrain colors to surface material

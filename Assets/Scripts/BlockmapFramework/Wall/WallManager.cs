@@ -18,11 +18,13 @@ namespace BlockmapFramework
         {
             WallShapes = new Dictionary<WallShapeId, WallShape>()
             { 
-                { WallShapeId.Solid, new WS001_Solid() }
+                { WallShapeId.Solid, new WS001_Solid() },
             };
             WallMaterials = new Dictionary<WallMaterialId, WallMaterial>()
             {
-                { WallMaterialId.Brick, new WM001_Brick() }
+                { WallMaterialId.Brick, new WM001_Brick() },
+                { WallMaterialId.Plaster, new WM002_Plaster() },
+                { WallMaterialId.Tiles, new WM003_Tiles() },
             };
         }
 

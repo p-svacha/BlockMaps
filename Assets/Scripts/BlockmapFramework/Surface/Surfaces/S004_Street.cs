@@ -10,7 +10,7 @@ namespace BlockmapFramework
 
         public override SurfaceId Id => SurfaceId.Street;
         public override string Name => "Street";
-        public override SurfacePropertyId PropertiesId => SurfacePropertyId.Tarmac;
+        public override SurfacePropertyId PropertiesId => SurfacePropertyId.Default;
         public override bool DoBlend => false;
         public override bool UseLongEdges => false;
         public override Color Color => ResourceManager.Singleton.TarmacColor;

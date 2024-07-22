@@ -33,14 +33,14 @@ Shader "Custom/NodeMaterialShader"
          _TileOverlaySize("Overlay Size", Float) = 1
         */
 
-        _Glossiness("Smoothness", Range(0,1)) = 0.5
+        _RoughnessTex("Roughness Texture", 2D) = "white" {}
         _Metallic("Metallic", Range(0,1)) = 0.0
 
         _NormalMap("Normal Map", 2D) = "bump" {}  // New property for the normal map
-        _NormalStrength("Normal Strength", Range(-20, 20)) = 0  // New property for normal strength
+        _NormalStrength("Normal Strength", Range(-2, 2)) = -0.2  // New property for normal strength
 
         _HeightMap("Height Map", 2D) = "white" {}
-        _HeightPower("Height Power", Range(0,.125)) = 0
+        _HeightPower("Height Power", Range(0,.125)) = 0.03
     }
 
         SubShader
@@ -108,8 +108,10 @@ Shader "Custom/NodeMaterialShader"
         float _ZoneBorders[256];
         float _ZoneBorderColors[256]; // Contains player id for each tile, colors are taken from _PlayerColors
 
+        // Roughness Texture
+        sampler2D _RoughnessTex;
+
         // Material attributes
-        half _Glossiness;
         half _Metallic;
 
         float _FullVisibility;
@@ -261,8 +263,15 @@ Shader "Custom/NodeMaterialShader"
 
                 o.Normal.rgb = normalX * blendWeights.x + normalY * blendWeights.y + normalZ * blendWeights.z;
 
+                // Roughness map (triplanar blending)
+                half yRoughness = tex2D(_RoughnessTex, yUV + texOffsetY).r;
+                half xRoughness = tex2D(_RoughnessTex, xUV + texOffsetX).r;
+                half zRoughness = tex2D(_RoughnessTex, zUV + texOffsetZ).r;
+
+                o.Smoothness = 1.0 - (xRoughness * blendWeights.x + yRoughness * blendWeights.y + zRoughness * blendWeights.z);
+
                 // Tint
-                c = (_TextureTint.a * _TextureTint) + ((1 - _TextureTint.a) * c);
+                c.rgb *= _TextureTint.rgb;
             }
 
 
@@ -361,7 +370,7 @@ Shader "Custom/NodeMaterialShader"
 
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
+
             o.Alpha = c.a;
         }
 

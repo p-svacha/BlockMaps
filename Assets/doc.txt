@@ -1,20 +1,31 @@
---- Update Walls V2
+--- Update Corners, Doors and Windows
 
-fix climb transitions that get created into impassable nodes (i.e. nodes with procedural entities)
+New wall shape "Corner":
+ - only buildable on corners
 
-improve vision system performance
+New wall shape "Window":
+ - Doesn't block vision
+ - Merges with adjacent windows
+ - Has a glass material
 
----
-
---- Update Doors and Windows
-
-New wall feature "Door":
+New wall shape "Door":
  - own subclass with state attribute open/close
  - state affects navmesh
  - state affects vision
  - Mesh gen gets impacted by adjacent door
 
 ---
+
+-- Update cutoff and cutout
+
+Limit vision to height feature
+ - Disable all airnode, fence and wallmeshes above height x
+ - Add to WorldDisplayOptions
+
+Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
+ - https://glowfishinteractive.com/dissolving-the-world-part-1/
+
+--
 
 --- Update More Node Shapes
 
@@ -33,16 +44,16 @@ New wall feature "Door":
 
 - fix: characters can walk diagonally through nodes that don't have enough headspace for their height
 
-- limit vision to height (don't draw anything above height x)
-
-- also check entity visibility independently from node visiblity
-- also check wall visibility independently from node visiblity
-
 - Editor improvements:
 	> wall drag
 	> air node drag
 	> proc entity drag
 	> tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
+
+- allow overlap corner overlap between wall and fence (a wall can be build on N and a fence can be built on E on same cell)
+- allow wooden fence to be higher than 1
+- remove brickwall fence
+- remove cliff fence
 
 - Adjust entity World height (only where its drawn) based on surface it's on - a little higher on conrete etc.
 
@@ -63,50 +74,24 @@ New wall feature "Door":
 	> swamp
 	> pool
 
+- textures for entities
+
 - make a list of material indexes colorable in editor
 	> save color in entityData
 
+- Water shader (very small transparency, moving, foam when hitting terrain)
 - Water flowing in one direction
 - Waterfall
-
-- Slopes use more action points
-	> downwards * 1.25
-	> upwards * 1.5
-
-
-- CTF: Upon end game show full visible map
-
-- Seperate check for entity vision independent from node vision
-	> Make some other vision tests
-	> note and fix vision bugs
-
-- CTF: Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
+- water tool rework:
+	> make max depth a const 3
+	> make shoreheight based on mouse pointer y coordinate
 
 - animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
-- CTF: more general modifier system
-	> modifiers have a duration and effect, name, description, icon
-	> move jail time to modifier
-	> add ui for modifiers
-
-- textures for entities
-
-- sloped curb sides downwards => for dirt path
-
-- doors
-	> open and closeable when standing next to
-	> characters get a new dexterity attribute that defines if they can open/close
-
-- window
-	> glass material
-
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
 	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
-
-- interface IWorld for world with documentation
-- also IEntity and IBlockmapNode
 
 - Static entities with weird shapes
 	> adjust collider generation accordingly
@@ -116,17 +101,6 @@ New wall feature "Door":
 	> Make editor script for static entity that allows defining shape and previewing box colliders
 
 - Make vision radius of entities based on their dimensions
-
-- Water shader (very small transparency, moving, foam when hitting terrain)
-
-- CTF: improve AI with job system
-	> if we see enemy character in own zone => CHASE
-	> if we see enemy flag => GO THERE
-	> some "your turn" notification when turn starts
-
-- water tool rework:
-	> make max depth a const 3
-	> make shoreheight based on mouse pointer y coordinate
 
 - strength & destroy
 	> movingentities get a new strength attribute
@@ -194,6 +168,8 @@ New wall feature "Door":
 - add some new static entities
 	> for new static entity ideas watch project zomboid streams
 
+improve vision system performance
+
 - Add additional movement methods (jump/fly)
 - Stealth/Invisibility
 - Teleportation
@@ -212,6 +188,27 @@ New wall feature "Door":
 - Allow entites to have their own nodes
 
 - Add UseTextures attribute to entity shader and support both modes on created models
+
+
+
+- CTF: Slopes use more action points
+	> downwards * 1.25
+	> upwards * 1.5
+
+- CTF: Upon end game show full visible map
+
+- CTF: Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
+
+- CTF: more general modifier system
+	> modifiers have a duration and effect, name, description, icon
+	> move jail time to modifier
+	> add ui for modifiers
+
+
+- CTF: improve AI with job system
+	> if we see enemy character in own zone => CHASE
+	> if we see enemy flag => GO THERE
+	> some "your turn" notification when turn starts
 
 - CTF: Rework hover pathfinding
 	> Hover on unreachable node = no path preview

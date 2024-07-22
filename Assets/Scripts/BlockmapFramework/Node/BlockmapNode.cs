@@ -147,6 +147,7 @@ namespace BlockmapFramework
         /// </summary>
         public void SetStraightAdjacentTransitions()
         {
+            if (!IsPassable()) return;
             SetStraightAdjacentTransition(Direction.N);
             SetStraightAdjacentTransition(Direction.E);
             SetStraightAdjacentTransition(Direction.S);
@@ -186,6 +187,7 @@ namespace BlockmapFramework
         /// </summary>
         public void SetDiagonalAdjacentTransitions()
         {
+            if (!IsPassable()) return;
             SetDiagonalAdjacentTransition(Direction.NE);
             SetDiagonalAdjacentTransition(Direction.NW);
             SetDiagonalAdjacentTransition(Direction.SE);
@@ -229,6 +231,7 @@ namespace BlockmapFramework
 
         public void SetClimbTransitions()
         {
+            if (!IsPassable()) return;
             SetClimbTransition(Direction.N);
             SetClimbTransition(Direction.E);
             SetClimbTransition(Direction.S);
@@ -239,15 +242,17 @@ namespace BlockmapFramework
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
+                if (!adjNode.IsPassable()) continue;
+
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList))
                 {
-                    // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList);
                     Transitions.Add(adjNode, t);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown))
                 {
-                    // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown);
                     Transitions.Add(adjNode, t);
                 }
@@ -316,6 +321,7 @@ namespace BlockmapFramework
             IClimbable nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
             while(nextClimbingPiece != null)
             {
+                if (nextClimbingPiece.ClimbSkillRequirement == ClimbingCategory.Unclimbable) return new List<IClimbable>(); // No climb possible because of unclimbable piece
                 climb.Add(nextClimbingPiece);
                 currentAltitude++;
 

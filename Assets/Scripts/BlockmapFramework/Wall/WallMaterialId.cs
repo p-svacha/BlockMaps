@@ -7,8 +7,7 @@ namespace BlockmapFramework
     public enum WallMaterialId
     {
         Brick,
-        Concrete,
-        Wood,
-        Stone
+        Plaster,
+        Tiles
     }
 }

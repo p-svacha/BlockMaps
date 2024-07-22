@@ -130,7 +130,6 @@ namespace BlockmapFramework
         public void AddWall(Wall w)
         {
             Vector3Int localCoords = w.LocalCellCoordinates;
-            Debug.Log("adding a wall with global " + w.GlobalCellCoordinates.ToString() + " on chunk " + Coordinates.ToString() + " at local pos " + localCoords.ToString());
             if (Walls.ContainsKey(localCoords)) Walls[localCoords].Add(w);
             else Walls.Add(localCoords, new List<Wall>() { w });
         }

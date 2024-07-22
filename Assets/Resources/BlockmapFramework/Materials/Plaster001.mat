@@ -7,11 +7,10 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RoofingTiles
+  m_Name: Plaster001
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _CANSHOWOVERLAYS_ON
   - _FULLVISIBILITY_ON
   - _USETEXTURES_ON
   m_LightmapFlags: 4
@@ -48,11 +47,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
-        m_Texture: {fileID: 2800000, guid: 7f146e625185a0548afd7b11da1b64b9, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2fd5b1166e6604145bab0ff46a0a2b96, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 9e99e3895432ce6409736c382c65ec1b, type: 3}
+        m_Texture: {fileID: 2800000, guid: bc5d8d53bc775d84bae051e6c6d5df5c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -60,7 +59,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 36676615e10c01643a04a841001c7b4c, type: 3}
+        m_Texture: {fileID: 2800000, guid: adb229180b55691499fac3d4bb44fd56, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -71,15 +70,13 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _TileOverlayTex:
-        m_Texture: {fileID: 0}
+    - _RoughnessTex:
+        m_Texture: {fileID: 2800000, guid: 6182a589487117e4f9302ca1e596d420, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _CanShowOverlays: 1
-    - _CanShowTileOverlay: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -90,32 +87,26 @@ Material:
     - _HeightPower: 0.03
     - _Metallic: 0
     - _Mode: 0
-    - _NormalStrength: 0.3
+    - _NormalStrength: -0.2
     - _OcclusionStrength: 1
     - _Offset: 0
     - _Parallax: 0.02
     - _ShowGrid: 0
-    - _ShowTileOverlay: 0
     - _SideOnlySteepness: 0.7
     - _SideStartSteepness: 0.3
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TextureScale: 0.9
-    - _TileOverlayX: 0
-    - _TileOverlayY: 0
+    - _TextureScale: 2.5
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
     - _UseTextures: 1
-    - _ZPriority: 1
     - _ZWrite: 1
     - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.5921569, g: 0.34901962, b: 0.24313727, a: 1}
+    - _Color: {r: 0.83921576, g: 0.81568635, b: 0.8078432, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
     - _TextureTint: {r: 1, g: 1, b: 1, a: 0}
-    - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

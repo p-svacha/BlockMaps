@@ -29,6 +29,10 @@ namespace BlockmapFramework
         public Material Mat_Hedge;
         public Material Mat_Water;
         public Material Mat_Wood;
+        public Material Mat_WoodParquet;
+        public Material Mat_Plaster;
+        public Material Mat_TilesWhite;
+        public Material Mat_TilesSmallVaried;
 
         [Header("Colors")]
         public Color GrassColor;

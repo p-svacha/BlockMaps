@@ -517,8 +517,12 @@ namespace BlockmapFramework
         }
         public Fence GetFenceFromRaycastHit(RaycastHit hit)
         {
+            FenceMesh hitMesh = hit.transform.GetComponent<FenceMesh>();
+            int altitude = hitMesh.Altitude;
+
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxAltitude).ToList();
+            
+            List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, altitude).OrderByDescending(x => x.MaxAltitude).ToList();
             Direction primaryHitSide = GetNodeHoverMode8(hit.point);
             List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
 
@@ -535,31 +539,32 @@ namespace BlockmapFramework
                         }
                     }
                 }
+            }
 
-                // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-                // Do the same detection stuff again with the offset position
-                Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
-                Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-                List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, hit.transform.GetComponent<FenceMesh>().HeightLevel).OrderByDescending(x => x.MaxAltitude).ToList();
-                Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
-                List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
+            // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
+            // Do the same detection stuff again with the offset position
+            Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
+            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
+            List<BlockmapNode> offsetHitNodes = GetNodes(offsetCoordinates, altitude).OrderByDescending(x => x.MaxAltitude).ToList();
+            Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
+            List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
 
-                foreach (BlockmapNode offsetHitNode in offsetHitNodes)
+            foreach (BlockmapNode offsetHitNode in offsetHitNodes)
+            {
+                if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(primaryOffsetSide)) return offsetHitNode.Fences[primaryOffsetSide];
+                else
                 {
-                    if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(primaryOffsetSide)) return offsetHitNode.Fences[primaryOffsetSide];
-                    else
+                    foreach (Direction hitSide in otherPossibleOffsetSides)
                     {
-                        foreach (Direction hitSide in otherPossibleOffsetSides)
+                        if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(hitSide))
                         {
-                            if (offsetHitNode != null && offsetHitNode.Fences.ContainsKey(hitSide))
-                            {
-                                return offsetHitNode.Fences[hitSide];
-                            }
+                            return offsetHitNode.Fences[hitSide];
                         }
                     }
                 }
             }
 
+            Debug.LogWarning("GetFenceFromRaycastHit failed to find a fence at world position: " + hit.point.ToString());
             return null;
         }
         private ProceduralEntity GetProceduralEntityFromRaycastHit(RaycastHit hit)
@@ -621,6 +626,7 @@ namespace BlockmapFramework
             }
 
             // Didn't find anything
+            Debug.LogWarning("GetWallFromRaycastHit failed to find a wall at world position: " + hit.point.ToString());
             return null;
         }
 
@@ -709,6 +715,7 @@ namespace BlockmapFramework
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
             foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
+            foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
 
             foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
 
@@ -718,6 +725,7 @@ namespace BlockmapFramework
         {
             foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
             foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
+            foreach (Wall wall in Walls.Values) wall.AddExploredBy(actor);
 
             foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
 
@@ -1523,13 +1531,13 @@ namespace BlockmapFramework
 
         public Actor GetActor(string name) => Actors.Values.First(x => x.Name == name);
         
-        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int height)
+        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int altitude)
         {
-            return GetNodes(worldCoordinates, height, height);
+            return GetNodes(worldCoordinates, altitude, altitude);
         }
-        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minHeight, int maxHeight)
+        public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int minAltitude, int maxAltitude)
         {
-            return GetNodes(worldCoordinates).Where(x => x.BaseAltitude >= minHeight && x.BaseAltitude <= maxHeight).ToList();
+            return GetNodes(worldCoordinates).Where(x => x.BaseAltitude >= minAltitude && x.BaseAltitude <= maxAltitude).ToList();
         }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {

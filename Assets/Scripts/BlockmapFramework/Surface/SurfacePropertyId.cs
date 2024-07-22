@@ -9,6 +9,6 @@ namespace BlockmapFramework
         Sand,
         Grass,
         Water,
-        Tarmac
+        Default
     }
 }

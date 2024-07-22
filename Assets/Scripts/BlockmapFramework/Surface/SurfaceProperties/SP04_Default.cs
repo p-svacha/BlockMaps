@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class SP04_Tarmac : SurfaceProperties
+    public class SP04_Default : SurfaceProperties
     {
-        public override SurfacePropertyId Id => SurfacePropertyId.Tarmac;
-        public override string Name => "Tarmac";
+        public override SurfacePropertyId Id => SurfacePropertyId.Default;
+        public override string Name => "Default";
         public override float SpeedModifier => 0.9f;
     }
 }

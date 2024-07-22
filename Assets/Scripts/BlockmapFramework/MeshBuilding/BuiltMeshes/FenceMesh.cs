@@ -7,13 +7,13 @@ namespace BlockmapFramework
 {
     public class FenceMesh : ChunkMesh
     {
-        public int HeightLevel { get; private set; }
+        public int Altitude { get; private set; }
 
-        public void Init(Chunk chunk, int level)
+        public void Init(Chunk chunk, int altitude)
         {
             OnInit(chunk);
 
-            HeightLevel = level;
+            Altitude = altitude;
             gameObject.layer = chunk.World.Layer_Fence;
         }
 
@@ -30,7 +30,7 @@ namespace BlockmapFramework
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
 
-                    List<BlockmapNode> nodes = Chunk.World.GetNodes(worldCoordiantes, HeightLevel).ToList();
+                    List<BlockmapNode> nodes = Chunk.World.GetNodes(worldCoordiantes, Altitude).ToList();
 
                     if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
                     else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war

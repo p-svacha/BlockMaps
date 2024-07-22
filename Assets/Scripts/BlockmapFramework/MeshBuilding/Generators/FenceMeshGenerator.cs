@@ -11,15 +11,15 @@ namespace BlockmapFramework
         {
             Dictionary<int, FenceMesh> meshes = new Dictionary<int, FenceMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
+            for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
-                List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.HasFence).ToList();
+                List<BlockmapNode> nodesToDraw = chunk.GetNodes(altitude).Where(x => x.HasFence).ToList();
                 if (nodesToDraw.Count == 0) continue;
 
                 // Generate mesh
-                GameObject meshObject = new GameObject("FenceMesh_" + heightLevel);
+                GameObject meshObject = new GameObject("FenceMesh_" + altitude);
                 FenceMesh mesh = meshObject.AddComponent<FenceMesh>();
-                mesh.Init(chunk, heightLevel);
+                mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (BlockmapNode node in nodesToDraw)
@@ -29,7 +29,7 @@ namespace BlockmapFramework
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();
 
-                meshes.Add(heightLevel, mesh);
+                meshes.Add(altitude, mesh);
             }
 
             return meshes;

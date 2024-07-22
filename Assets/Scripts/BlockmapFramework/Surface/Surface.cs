@@ -12,10 +12,22 @@ namespace BlockmapFramework
         public abstract SurfaceId Id { get; }
         public abstract string Name { get; }
         public abstract SurfacePropertyId PropertiesId { get; }
-        public abstract bool DoBlend { get; } // flag if this surface should blend into adjacent nodes of other surfaces
-        public abstract bool UseLongEdges { get; } // If true, triangles on edge shaped nodes (0001 & 1110) are always built in a way that the edge is long
+
+        /// <summary>
+        /// Flag if this surface should blend into adjacent nodes of other surfaces
+        /// </summary>
+        public abstract bool DoBlend { get; }
+        /// <summary>
+        /// If true, triangles on edge shaped nodes (0001 or 1110) are always built in a way that the edge is long
+        /// <br/>Useful for roofs for example.
+        /// </summary>
+        public abstract bool UseLongEdges { get; }
         public abstract Color Color { get; }
-        public abstract Texture2D Texture { get; }
+
+        /// <summary>
+        /// Used in surface material for blending
+        /// </summary>
+        public virtual Texture2D Texture => ResourceManager.Singleton.GrassTexture;
 
         public SurfaceProperties Properties { get; private set; }
 
