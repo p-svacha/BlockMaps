@@ -88,7 +88,7 @@ namespace WorldEditor
             int height = int.Parse(HeightInput.text);
             if (!World.CanBuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height)) return;
 
-            World.PlaceFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height);
+            World.BuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height);
         }
 
         public override void HandleRightClick()

@@ -144,7 +144,6 @@ namespace WorldEditor
             if (!World.CanBuildWall(globalCellPosition, side)) return;
 
             // BUILD THE WALL
-            Debug.Log(World == null);
             World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn);
         }
 
@@ -153,6 +152,15 @@ namespace WorldEditor
             if (World.HoveredWall == null) return;
 
             World.RemoveWall(World.HoveredWall);
+        }
+
+        public override void HandleMiddleClick()
+        {
+            Wall targetWall = World.HoveredWall;
+            if (targetWall == null) return;
+
+            World.RemoveWall(targetWall);
+            World.BuildWall(targetWall.GlobalCellCoordinates, targetWall.Side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn);
         }
 
 

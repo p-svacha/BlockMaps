@@ -128,6 +128,10 @@ namespace BlockmapFramework
                 Direction.E => new Vector3(0.5f - (Width / 2), 0f, 0f),
                 Direction.S => new Vector3(0f, 0f, -(0.5f - (Width / 2))),
                 Direction.W => new Vector3(-(0.5f - (Width / 2)), 0f, 0f),
+                Direction.NW => new Vector3(-(0.5f - (Width / 2)), 0f, 0.5f - (Width / 2)),
+                Direction.NE => new Vector3(0.5f - (Width / 2), 0f, 0.5f - (Width / 2)),
+                Direction.SW => new Vector3(-(0.5f - (Width / 2)), 0f, -(0.5f - (Width / 2))),
+                Direction.SE => new Vector3(0.5f - (Width / 2), 0f, -(0.5f - (Width / 2))),
                 _ => throw new System.Exception("Direction not handled")
             };
 

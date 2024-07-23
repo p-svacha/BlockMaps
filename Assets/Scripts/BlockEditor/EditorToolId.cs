@@ -19,6 +19,7 @@ namespace WorldEditor
         Water,
         Fence,
         Ladder,
-        Wall
+        Wall,
+        Door
     }
 }

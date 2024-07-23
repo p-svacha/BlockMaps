@@ -1,13 +1,13 @@
 {
   "Name": "playground",
   "ChunkSize": 16,
-  "MaxNodeId": 1025,
-  "MaxEntityId": 0,
-  "MaxWaterBodyId": 0,
-  "MaxActorId": 4,
-  "MaxZoneId": 0,
-  "MaxFenceId": 1,
-  "MaxWallId": 11,
+  "MaxNodeId": 1034,
+  "MaxEntityId": 15,
+  "MaxWaterBodyId": 4,
+  "MaxActorId": 8,
+  "MaxZoneId": 4,
+  "MaxFenceId": 5,
+  "MaxWallId": 15,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -4466,6 +4466,19 @@
           "SubType": 0
         },
         {
+          "Id": 1027,
+          "LocalCoordinateX": 5,
+          "LocalCoordinateY": 5,
+          "Height": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "Type": "Air",
+          "SubType": 2
+        },
+        {
           "Id": 357,
           "LocalCoordinateX": 5,
           "LocalCoordinateY": 6,
@@ -4674,6 +4687,19 @@
           "SubType": 0
         },
         {
+          "Id": 1026,
+          "LocalCoordinateX": 6,
+          "LocalCoordinateY": 5,
+          "Height": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "Type": "Air",
+          "SubType": 2
+        },
+        {
           "Id": 358,
           "LocalCoordinateX": 6,
           "LocalCoordinateY": 6,
@@ -4856,6 +4882,19 @@
           "SubType": 0
         },
         {
+          "Id": 1032,
+          "LocalCoordinateX": 7,
+          "LocalCoordinateY": 3,
+          "Height": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "Type": "Air",
+          "SubType": 2
+        },
+        {
           "Id": 327,
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 4,
@@ -4869,6 +4908,19 @@
           "SubType": 0
         },
         {
+          "Id": 1031,
+          "LocalCoordinateX": 7,
+          "LocalCoordinateY": 4,
+          "Height": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "Type": "Air",
+          "SubType": 2
+        },
+        {
           "Id": 343,
           "LocalCoordinateX": 7,
           "LocalCoordinateY": 5,
@@ -4880,6 +4932,19 @@
           ],
           "Type": "Ground",
           "SubType": 0
+        },
+        {
+          "Id": 1028,
+          "LocalCoordinateX": 7,
+          "LocalCoordinateY": 5,
+          "Height": [
+            9,
+            9,
+            9,
+            9
+          ],
+          "Type": "Air",
+          "SubType": 2
         },
         {
           "Id": 359,
@@ -13369,7 +13434,64 @@
       "ColorB": 0.0
     }
   ],
-  "Entities": [],
+  "Entities": [
+    {
+      "Id": 10,
+      "TypeId": "ladder_1026",
+      "OriginNodeId": 326,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 4,
+      "TypeId": "PE001_6",
+      "OriginNodeId": 357,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 5,
+      "TypeId": "PE001_6",
+      "OriginNodeId": 358,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 6,
+      "TypeId": "PE001_6",
+      "OriginNodeId": 359,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 7,
+      "TypeId": "PE001_2",
+      "OriginNodeId": 1027,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 11,
+      "TypeId": "ladder_1031",
+      "OriginNodeId": 326,
+      "Rotation": "E",
+      "PlayerId": 0
+    },
+    {
+      "Id": 13,
+      "TypeId": "ladder_1032",
+      "OriginNodeId": 295,
+      "Rotation": "N",
+      "PlayerId": 0
+    },
+    {
+      "Id": 14,
+      "TypeId": "ladder_1032",
+      "OriginNodeId": 312,
+      "Rotation": "W",
+      "PlayerId": 0
+    }
+  ],
   "WaterBodies": [],
   "Fences": [],
   "Walls": [

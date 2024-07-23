@@ -33,7 +33,9 @@ namespace WorldEditor
         public Sprite WaterToolSprite;
         public Sprite FenceToolSprite;
         public Sprite WallToolSprite;
+        public Sprite DoorToolSprite;
         public Sprite LadderToolSprite;
+        
 
         [Header("UI")]
         public Color UI_ButtonSelectedColor;

@@ -1,13 +1,13 @@
 {
   "Name": "littlehouse",
   "ChunkSize": 16,
-  "MaxNodeId": 1082,
-  "MaxEntityId": 18,
-  "MaxWaterBodyId": 2,
-  "MaxActorId": 6,
-  "MaxZoneId": 2,
-  "MaxFenceId": 7,
-  "MaxWallId": 190,
+  "MaxNodeId": 1084,
+  "MaxEntityId": 21,
+  "MaxWaterBodyId": 4,
+  "MaxActorId": 8,
+  "MaxZoneId": 4,
+  "MaxFenceId": 9,
+  "MaxWallId": 267,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -14183,6 +14183,13 @@
       "OriginNodeId": 708,
       "Rotation": "W",
       "PlayerId": 0
+    },
+    {
+      "Id": 20,
+      "TypeId": "door_4",
+      "OriginNodeId": 206,
+      "Rotation": "S",
+      "PlayerId": 0
     }
   ],
   "WaterBodies": [],
@@ -14368,42 +14375,42 @@
       "IsMirrored": false
     },
     {
-      "Id": 19,
+      "Id": 258,
       "CellX": 11,
       "CellY": 5,
       "CellZ": 12,
       "Side": 3,
       "ShapeId": 0,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
-      "Id": 20,
+      "Id": 259,
       "CellX": 12,
       "CellY": 5,
       "CellZ": 12,
       "Side": 3,
       "ShapeId": 0,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
-      "Id": 21,
+      "Id": 261,
       "CellX": 13,
       "CellY": 5,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
-      "Id": 22,
+      "Id": 224,
       "CellX": 15,
       "CellY": 5,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
@@ -14578,27 +14585,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 40,
+      "Id": 216,
       "CellX": 18,
       "CellY": 6,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 41,
+      "Id": 215,
       "CellX": 17,
       "CellY": 6,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 42,
+      "Id": 235,
       "CellX": 16,
       "CellY": 6,
       "CellZ": 12,
@@ -14608,27 +14615,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 43,
+      "Id": 223,
       "CellX": 15,
       "CellY": 6,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 44,
+      "Id": 230,
       "CellX": 13,
       "CellY": 6,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 45,
+      "Id": 238,
       "CellX": 12,
       "CellY": 6,
       "CellZ": 12,
@@ -14638,14 +14645,14 @@
       "IsMirrored": false
     },
     {
-      "Id": 46,
+      "Id": 247,
       "CellX": 11,
       "CellY": 6,
       "CellZ": 12,
       "Side": 3,
       "ShapeId": 0,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
       "Id": 47,
@@ -14908,27 +14915,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 81,
+      "Id": 217,
       "CellX": 18,
       "CellY": 7,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 82,
+      "Id": 212,
       "CellX": 17,
       "CellY": 7,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 83,
+      "Id": 234,
       "CellX": 16,
       "CellY": 7,
       "CellZ": 12,
@@ -14938,27 +14945,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 84,
+      "Id": 222,
       "CellX": 15,
       "CellY": 7,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 85,
+      "Id": 232,
       "CellX": 13,
       "CellY": 7,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 86,
+      "Id": 237,
       "CellX": 12,
       "CellY": 7,
       "CellZ": 12,
@@ -14968,14 +14975,14 @@
       "IsMirrored": false
     },
     {
-      "Id": 87,
+      "Id": 251,
       "CellX": 11,
       "CellY": 7,
       "CellZ": 12,
       "Side": 3,
       "ShapeId": 0,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
       "Id": 88,
@@ -15168,27 +15175,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 111,
+      "Id": 218,
       "CellX": 18,
       "CellY": 8,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 112,
+      "Id": 211,
       "CellX": 17,
       "CellY": 8,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 113,
+      "Id": 233,
       "CellX": 16,
       "CellY": 8,
       "CellZ": 12,
@@ -15198,27 +15205,27 @@
       "IsMirrored": false
     },
     {
-      "Id": 114,
+      "Id": 225,
       "CellX": 15,
       "CellY": 8,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 115,
+      "Id": 229,
       "CellX": 13,
       "CellY": 8,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 116,
+      "Id": 236,
       "CellX": 12,
       "CellY": 8,
       "CellZ": 12,
@@ -15228,14 +15235,14 @@
       "IsMirrored": false
     },
     {
-      "Id": 117,
+      "Id": 250,
       "CellX": 11,
       "CellY": 8,
       "CellZ": 12,
       "Side": 3,
       "ShapeId": 0,
       "MaterialId": 1,
-      "IsMirrored": false
+      "IsMirrored": true
     },
     {
       "Id": 118,
@@ -15458,32 +15465,32 @@
       "IsMirrored": false
     },
     {
-      "Id": 145,
+      "Id": 226,
       "CellX": 15,
       "CellY": 9,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 146,
+      "Id": 227,
       "CellX": 14,
       "CellY": 9,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
     {
-      "Id": 147,
+      "Id": 228,
       "CellX": 13,
       "CellY": 9,
       "CellZ": 12,
       "Side": 3,
-      "ShapeId": 0,
+      "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
     },
@@ -15796,6 +15803,46 @@
       "ShapeId": 3,
       "MaterialId": 1,
       "IsMirrored": false
+    },
+    {
+      "Id": 262,
+      "CellX": 18,
+      "CellY": 7,
+      "CellZ": 17,
+      "Side": 1,
+      "ShapeId": 0,
+      "MaterialId": 1,
+      "IsMirrored": true
+    },
+    {
+      "Id": 263,
+      "CellX": 16,
+      "CellY": 7,
+      "CellZ": 17,
+      "Side": 1,
+      "ShapeId": 0,
+      "MaterialId": 1,
+      "IsMirrored": true
+    },
+    {
+      "Id": 264,
+      "CellX": 14,
+      "CellY": 7,
+      "CellZ": 17,
+      "Side": 1,
+      "ShapeId": 0,
+      "MaterialId": 1,
+      "IsMirrored": true
+    },
+    {
+      "Id": 265,
+      "CellX": 12,
+      "CellY": 7,
+      "CellZ": 17,
+      "Side": 1,
+      "ShapeId": 0,
+      "MaterialId": 1,
+      "IsMirrored": true
     }
   ],
   "Zones": []

@@ -13,19 +13,31 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns an uninitialized entity instance according to the given id.
         /// </summary>
-        public Entity GetEntityInstance(World world, string id)
+        public Entity GetEntityInstance(World world, EntityData data)
         {
-            // Check if its a procedural entity
-            string[] attributes = id.Split('_');
+            string[] attributes = data.TypeId.Split('_');
             string baseId = attributes[0];
 
+            // Procedural entity
             if (ProceduralEntities.TryGetValue(baseId, out ProceduralEntity procEntity))
             {
                 int height = int.Parse(attributes[1]);
                 return procEntity.GetInstance(height);
             }
 
-            return GetCustomEntityInstance(world, id);
+            // Ladder entity
+            if (baseId == Ladder.LADDER_ENTITY_NAME)
+            {
+                return Ladder.GetInstance(world, data);
+            }
+
+            // Door entity
+            if (baseId == Door.DOOR_ENTITY_NAME)
+            {
+                return Door.GetInstance(world, data);
+            }
+
+            return GetCustomEntityInstance(world, data.TypeId);
         }
 
         protected abstract Entity GetCustomEntityInstance(World world, string id);

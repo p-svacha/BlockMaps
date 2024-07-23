@@ -72,7 +72,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Ladders that lead to this node
         /// </summary>
-        public Dictionary<Direction, Ladder> TargetLadders = new Dictionary<Direction, Ladder>(); 
+        public Dictionary<Direction, Ladder> TargetLadders = new Dictionary<Direction, Ladder>();
+
+        /// <summary>
+        /// Doors on this node.
+        /// </summary>
+        public Dictionary<Direction, Door> Doors = new Dictionary<Direction, Door>();
 
         /// <summary>
         /// The mesh in the world that this node is drawn on.
@@ -715,6 +720,11 @@ namespace BlockmapFramework
 
                 // Fences
                 if (Fences.ContainsKey(dir)) return false;
+
+                // Doors
+                foreach (Door door in Doors.Values)
+                    if (door.CurrentBlockingDirection == dir)
+                        return false;
 
                 // Walls
                 for(int i = GetMinAltitude(dir); i <= GetMaxAltitude(dir); i++)

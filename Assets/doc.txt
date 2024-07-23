@@ -1,13 +1,3 @@
---- Update Slopes, Corners, Doors and Windows
-
-New wall shape "Door":
- - own subclass with state attribute open/close
- - state affects navmesh
- - state affects vision
- - Mesh gen gets impacted by adjacent door
-
----
-
 -- Update cutoff and cutout
 
 Limit vision to height feature
@@ -34,13 +24,15 @@ Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area a
 
 ---
 
+- Editor: World Generation Tool: Expand by x chunks in direction
+
 - fix: characters can walk diagonally through nodes that don't have enough headspace for their height
 
 - Editor improvements:
-	> wall drag
+	> wall height
 	> air node drag
 	> proc entity drag
-	> tunnel (convert ground node with all walls, entites etc to air node and create new ground node 1 below)
+	> tunnel (convert ground node with all walls, entites etc to air node and create new grass ground node 1 below)
 
 
 

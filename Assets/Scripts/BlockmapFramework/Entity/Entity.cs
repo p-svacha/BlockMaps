@@ -47,7 +47,7 @@ namespace BlockmapFramework
         /// The exact world rotation this entity is rotated at at the moment.
         /// <br/> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
-        public Quaternion WorldRotation { get; private set; }
+        public Quaternion WorldRotation { get; protected set; }
 
         /// <summary>
         /// List of tiles that this entity is currently on.
@@ -101,8 +101,8 @@ namespace BlockmapFramework
         protected GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
         private MeshRenderer Renderer;
         private Projector SelectionIndicator;
-        private MeshCollider MeshCollider; // used for hovering and selecting with cursor
-        private BoxCollider VisionCollider; // used for vision checks for entites
+        public MeshCollider MeshCollider { get; protected set; } // used for hovering and selecting with cursor
+        public Collider VisionCollider { get; protected set; } // used for vision checks for entites
 
         // Performance Profilers
         static readonly ProfilerMarker pm_SetOriginNode = new ProfilerMarker("SetOriginNode");
@@ -163,6 +163,11 @@ namespace BlockmapFramework
             OnInitialized();
         }
 
+        public virtual void RegisterInWorld()
+        {
+            World.RegisterEntity(this);
+        }
+
         /// <summary>
         /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.
         /// </summary>
@@ -172,9 +177,10 @@ namespace BlockmapFramework
             visionColliderObject.transform.SetParent(Wrapper.transform);
             visionColliderObject.transform.localScale = transform.localScale;
             visionColliderObject.layer = World.Layer_EntityVisionCollider;
-            VisionCollider = visionColliderObject.AddComponent<BoxCollider>();
-            VisionCollider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
-            VisionCollider.center = new Vector3(0f, VisionCollider.size.y / 2, 0f);
+            BoxCollider collider = visionColliderObject.AddComponent<BoxCollider>();
+            collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
+            collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+            VisionCollider = collider;
         }
 
         protected virtual void OnInitialized() { }
@@ -390,7 +396,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
-        /// <br/>The world position is always in the center of the entity in the x and z axis and on the bottom in the y axis.
+        /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis.
         /// </summary>
         public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
@@ -772,7 +778,7 @@ namespace BlockmapFramework
         protected virtual void UpdateVisionColliderPosition()
         {
             VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
-            VisionCollider.transform.rotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+            VisionCollider.transform.rotation = WorldRotation;
         }
 
         /// <summary>
@@ -817,15 +823,7 @@ namespace BlockmapFramework
 
         public static Entity Load(World world, EntityData data)
         {
-            if(data.TypeId.StartsWith(LadderEntity.LADDER_ENTITY_NAME))
-            {
-                string[] attributes = data.TypeId.Split('_');
-                int targetNodeId = int.Parse(attributes[1]);
-                world.BuildLadder(world.GetNode(data.OriginNodeId), world.GetNode(targetNodeId), data.Rotation);
-                return null;
-            }
-
-            Entity instance = world.ContentLibrary.GetEntityInstance(world, data.TypeId);
+            Entity instance = world.ContentLibrary.GetEntityInstance(world, data);
             instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.GetActor(data.PlayerId));
             return instance;
         }
