@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace WorldEditor
 {
@@ -17,6 +18,7 @@ namespace WorldEditor
 
         [Header("Elements")]
         public TMP_InputField HeightInput;
+        public Toggle MirrorToggle;
 
         public override void UpdateTool()
         {
@@ -32,12 +34,19 @@ namespace WorldEditor
                 if (Input.mouseScrollDelta.y < 0) SetHeight(Height - 1);
                 if (Input.mouseScrollDelta.y > 0) SetHeight(Height + 1);
             }
+
+            // M: Toggle mirrored
+            if (Input.GetKeyDown(KeyCode.M)) SetMirrored(!MirrorToggle.isOn);
         }
         private void SetHeight(int height)
         {
             if (height < 0) height = 0;
             if (height > World.MAX_ALTITUDE) height = World.MAX_ALTITUDE;
             HeightInput.text = height.ToString();
+        }
+        private void SetMirrored(bool show)
+        {
+            MirrorToggle.isOn = show;
         }
 
         private void UpdatePreview()
@@ -55,10 +64,11 @@ namespace WorldEditor
 
                 // Preview
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                BuildPreview.transform.position = new Vector3(node.GetCenterWorldPosition().x, World.TILE_HEIGHT * node.GetMinAltitude(side), node.GetCenterWorldPosition().z) + Door.GetWorldPositionOffset(side);
+                BuildPreview.transform.position = new Vector3(node.GetCenterWorldPosition().x, World.TILE_HEIGHT * node.GetMinAltitude(side), node.GetCenterWorldPosition().z) + Door.GetWorldPositionOffset(side, MirrorToggle.isOn);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
-                Door.GenerateDoorMesh(previewMeshBuilder, Height, isPreview: true);
+                Door.GenerateDoorMesh(previewMeshBuilder, Height, MirrorToggle.isOn, isPreview: true);
                 previewMeshBuilder.ApplyMesh();
+                BuildPreview.GetComponent<MeshRenderer>().enabled = true;
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
             else
@@ -70,8 +80,9 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
+            if (!World.CanBuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height)) return;
 
-            World.BuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height);
+            World.BuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height, MirrorToggle.isOn);
         }
 
         public override void HandleRightClick()

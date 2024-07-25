@@ -17,7 +17,7 @@ namespace BlockmapFramework
         public int Id { get; private set; }
 
         /// <summary>
-        /// Unique identifier of an entity type.
+        /// Identifier used for instancing the correct type of entity.
         /// <br/> The same id will always result in the same entity attributes (mesh, size, shape, vision, etc.)
         /// </summary>
         public string TypeId { get; protected set; }

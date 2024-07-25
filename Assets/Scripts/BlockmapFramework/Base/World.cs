@@ -1285,9 +1285,9 @@ namespace BlockmapFramework
         {
             return CanBuildOnNodeSide(node, side, height, allowSlopes: false);
         }
-        public void BuildDoor(BlockmapNode node, Direction side, int height)
+        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored)
         {
-            Door instance = Door.GetInstance(node, side, height);
+            Door instance = Door.GetInstance(node, side, height, isMirrored);
             SpawnEntity(instance, node, side, Gaia, isInstance: true);
         }
         public void RemoveDoor(Door door)

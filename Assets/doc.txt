@@ -2,7 +2,10 @@
 
 Limit vision to height feature
  - Disable all airnode, fence and wallmeshes above height x
+ - disable entities above height x
  - Add to WorldDisplayOptions
+ > build bunker map to test
+
 
 Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
  - https://glowfishinteractive.com/dissolving-the-world-part-1/
@@ -55,7 +58,11 @@ Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area a
 	> swamp
 	> pool
 
-- textures for entities
+Rework shader for entities
+ - Allow switch between texture and color mode
+ - Only use transparency shader on moving objects
+ - Allow option to use uv space instead of world space
+	> Apply this to doors
 
 - make a list of material indexes colorable in editor
 	> save color in entityData
@@ -239,6 +246,12 @@ improve vision system performance
 
 - EcosystemSimulation3D
 - Solo/Squad RPG (like CDDA)
+
+
+-------- KNOWN ISSES --------
+
+Camera MSAA Anti-Aliasing is causing black pixel artifacts on air node mesh seams that use the surface shader
+	> so MSAA is turned off for now
 
 
 -------- RETIRED IDEAS ------------

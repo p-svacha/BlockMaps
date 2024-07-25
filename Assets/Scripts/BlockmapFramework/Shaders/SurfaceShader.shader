@@ -3,6 +3,7 @@ Shader "Custom/SurfaceShader"
     Properties // Exposed to editor in material insepctor
     {
         // Draw mode
+        [Toggle] _FullVisibility("Full Visibility", Float) = 1
         [Toggle] _UseTextures("Use Textures", Float) = 0
         _BlendThreshhold("Blend Threshhold", Float) = 0.4
 
@@ -85,8 +86,9 @@ Shader "Custom/SurfaceShader"
         half _Glossiness;
         half _Metallic;
         
-
+        float _FullVisibility;
         float _TileVisibility[324];
+
         float _TileSurfaces[256];
         float _TileBlend_W[256];
         float _TileBlend_E[256];
@@ -167,22 +169,24 @@ Shader "Custom/SurfaceShader"
                 localCoords.y = _ChunkSize - 1;
                 relativePos.y = 1;
             }
+
+            int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
             
 
             // ######################################################################### VISIBILITY #########################################################################
 
-            float visEpsilon = 0.1; // Pixels are drawn by this value over tile edges
+            float visEpsilon = 0.101; // Pixels are drawn by this value over tile edges
             float tileVisibility = _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y)];
-            float drawPixel = (tileVisibility > 0 ||
+            float drawPixel = (_FullVisibility == 1 || tileVisibility > 0 ||
 
-                (relativePos.x < visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 0) || // extension ne
+                (relativePos.x < visEpsilon&& relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 0) || // extension ne
                 (relativePos.x > 1 - visEpsilon && relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 0) || // extension nw
                 (relativePos.x > 1 - visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] > 0) || // extension sw
-                (relativePos.x < visEpsilon && relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 0) || // extension se
+                (relativePos.x < visEpsilon&& relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 0) || // extension se
 
-                (relativePos.x < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] > 0) || // extension east
+                (relativePos.x < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] > 0) || // extension east
                 (relativePos.x > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] > 0) || // extension west
-                (relativePos.y < visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 0) || // extension north
+                (relativePos.y < visEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 0) || // extension north
                 (relativePos.y > 1 - visEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 0)); // extension south
 
 
@@ -191,18 +195,18 @@ Shader "Custom/SurfaceShader"
             }
 
             // ######################################################################### FOG OF WAR #########################################################################
+            
+            float fowEpsilon = 0.01; // Fog of war epsilon
+            float fullVisible = (_FullVisibility == 1 || tileVisibility > 1 ||
 
-            float fowEpsilon = 0.01; // Fog of war is drawn by this value outwards of visibility
-            float fullVisible = (tileVisibility > 1 ||
-
-                (relativePos.x < fowEpsilon && relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
-                (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
+                (relativePos.x < fowEpsilon&& relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y - 1)] > 1) || // extension ne
+                (relativePos.x > 1 - fowEpsilon && relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y - 1)] > 1) || // extension nw
                 (relativePos.x > 1 - fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y + 1)] > 1) || // extension sw
-                (relativePos.x < fowEpsilon && relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 1) || // extension se
+                (relativePos.x < fowEpsilon&& relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y + 1)] > 1) || // extension se
 
                 (relativePos.x < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x - 1, localCoords.y)] > 1) || // extension east
                 (relativePos.x > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x + 1, localCoords.y)] > 1) || // extension west
-                (relativePos.y < fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
+                (relativePos.y < fowEpsilon&& _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y - 1)] > 1) || // extension north
                 (relativePos.y > 1 - fowEpsilon && _TileVisibility[GetVisibilityArrayIndex(localCoords.x, localCoords.y + 1)] > 1)); // extension south
 
             // ######################################################################### BASE #########################################################################
@@ -210,80 +214,86 @@ Shader "Custom/SurfaceShader"
             fixed4 c;
 
             // Get base color
-            int tileIndex = int(localCoords.y + localCoords.x * _ChunkSize);
             int surfaceIndex = _TileSurfaces[tileIndex];
             fixed4 baseColor = GetPixelColor(IN.worldPos.xz, surfaceIndex);
             
             // ######################################################################### BLEND #########################################################################
             
-            if (relativePos.x < _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend nw
-            {
-                fixed4 blendColor_nw = GetPixelColor(IN.worldPos.xz, _TileBlend_NW[tileIndex]);
-                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
-                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+            if (_BlendThreshhold > 0) {
 
-                float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
-                float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+                if (relativePos.x < _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend nw
+                {
+                    fixed4 blendColor_nw = GetPixelColor(IN.worldPos.xz, _TileBlend_NW[tileIndex]);
+                    fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                    fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
 
-                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw);
+                    float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
+                    float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw);
+                }
+
+                else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend ne
+                {
+                    fixed4 blendColor_ne = GetPixelColor(IN.worldPos.xz, _TileBlend_NE[tileIndex]);
+                    fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                    fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+
+                    float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+                    float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_n, blendColor_ne);
+                }
+                else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend se
+                {
+                    fixed4 blendColor_se = GetPixelColor(IN.worldPos.xz, _TileBlend_SE[tileIndex]);
+                    fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                    fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+
+                    float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
+                    float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
+
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_s, blendColor_se);
+                }
+                else if (relativePos.x < _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend sw
+                {
+                    fixed4 blendColor_sw = GetPixelColor(IN.worldPos.xz, _TileBlend_SW[tileIndex]);
+                    fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                    fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+
+                    float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
+                    float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
+
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw);
+                }
+
+                else if (relativePos.x < _BlendThreshhold) // Blend west
+                {
+
+                    fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
+                    c = lerp(baseColor, blendColor_w, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.x));
+                }
+                else if (relativePos.x > 1 - _BlendThreshhold) // Blend east
+                {
+                    fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
+                    c = lerp(baseColor, blendColor_e, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.x)));
+                }
+                else if (relativePos.y > 1 - _BlendThreshhold) // Blend north
+                {
+                    fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
+                    c = lerp(baseColor, blendColor_n, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.y)));
+                }
+                else if (relativePos.y < _BlendThreshhold) // Blend south
+                {
+                    fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
+                    c = lerp(baseColor, blendColor_s, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.y));
+                }
+                else // No blend
+                {
+                    c = baseColor;
+                }
             }
-
-            else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend ne
-            {
-                fixed4 blendColor_ne = GetPixelColor(IN.worldPos.xz, _TileBlend_NE[tileIndex]);
-                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
-                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
-
-                float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
-                float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
-
-                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_n, blendColor_ne);
-            }
-            else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend se
-            {
-                fixed4 blendColor_se = GetPixelColor(IN.worldPos.xz, _TileBlend_SE[tileIndex]);
-                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
-                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
-
-                float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
-                float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
-
-                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_s, blendColor_se);
-            }
-            else if (relativePos.x < _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend sw
-            {
-                fixed4 blendColor_sw = GetPixelColor(IN.worldPos.xz, _TileBlend_SW[tileIndex]);
-                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
-                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
-
-                float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
-                float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
-
-                c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw);
-            }
-
-            else if (relativePos.x < _BlendThreshhold) // Blend west
-            {
-                
-                fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
-                c = lerp(baseColor, blendColor_w, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.x));
-            }
-            else if (relativePos.x > 1 - _BlendThreshhold) // Blend east
-            {
-                fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
-                c = lerp(baseColor, blendColor_e, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.x)));
-            }
-            else if (relativePos.y > 1 - _BlendThreshhold) // Blend north
-            {
-                fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
-                c = lerp(baseColor, blendColor_n, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.y)));
-            }
-            else if (relativePos.y < _BlendThreshhold) // Blend south
-            {
-                fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
-                c = lerp(baseColor, blendColor_s, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.y));
-            }
-            else // No blend
+            else // Blending is disabled
             {
                 c = baseColor;
             }
@@ -321,7 +331,7 @@ Shader "Custom/SurfaceShader"
                 }
             }
 
-            // Overlay texture that gets repeated over multuple tiles
+            // Overlay texture that gets repeated over multiple tiles
             if (_ShowMultiOverlay[tileIndex] == 1)
             {
                 fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
