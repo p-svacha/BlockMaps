@@ -28,6 +28,7 @@ namespace WorldEditor
         public virtual void HandleRightClick() { }
         public virtual void HandleRightDrag() { }
         public virtual void HandleMiddleClick() { }
+        public virtual void HandleKeyboardInputs() { }
 
         public virtual void OnDeselect() { }
         public virtual void OnSelect() { }

@@ -15,6 +15,9 @@ namespace WorldEditor
 
         [Header("Elements")]
         public TMP_Dropdown VisionDropdown;
+        public Toggle VisionCutoffToggle;
+        public TMP_InputField VisionCutoffAltitudeInput;
+
         public Button ResetExplorationButton;
         public Button ExploreEverythingButton;
         public Toggle GridToggle;
@@ -34,8 +37,7 @@ namespace WorldEditor
             TextureToggle.onValueChanged.AddListener((b) => World.ShowTextures(b));
             BlendToggle.onValueChanged.AddListener((b) => World.ShowTileBlending(b));
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
-
-            UpdateValues();
+            VisionCutoffToggle.onValueChanged.AddListener((b) => World.EnableVisionCutoff(b));
         }
         public void OnNewWorld()
         {
@@ -46,6 +48,60 @@ namespace WorldEditor
             List<string> visionOptions = new List<string>() { "Everything" };
             foreach (Actor p in World.GetAllActors()) visionOptions.Add(p.Name);
             VisionDropdown.AddOptions(visionOptions);
+
+            SetVisionCutoffAlitude(10);
+            UpdateUiElements();
+        }
+
+        public void HandleKeyboardInputs()
+        {
+            // G - Toggle Grid
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                World.ToggleGridOverlay();
+                UpdateUiElements();
+            }
+
+            // N - Toggle Navmesh
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                World.ToggleNavmesh();
+                UpdateUiElements();
+            }
+
+            // T - Texture mode
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                World.ToggleTextureMode();
+                UpdateUiElements();
+            }
+
+            // B - Surface blending
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                World.ToggleTileBlending();
+                UpdateUiElements();
+            }
+
+            // V - Toggle vision cutoff
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                World.ToggleVisionCutoff();
+                UpdateUiElements();
+            }
+
+            // Alt + Scroll - Change vision cutoff altitude
+            if (Input.GetKey(KeyCode.LeftAlt))
+            {
+                if (Input.mouseScrollDelta.y < 0) SetVisionCutoffAlitude(World.VisionCutoffAltitude - 1);
+                if (Input.mouseScrollDelta.y > 0) SetVisionCutoffAlitude(World.VisionCutoffAltitude + 1);
+            }
+        }
+
+        private void SetVisionCutoffAlitude(int alt)
+        {
+            World.SetVisionCutoffAltitude(alt);
+            VisionCutoffAltitudeInput.text = World.VisionCutoffAltitude.ToString();
         }
 
         private void VisionDropdown_OnValueChanged(int value)
@@ -69,7 +125,7 @@ namespace WorldEditor
             else return World.GetActor(VisionDropdown.options[VisionDropdown.value].text);
         }
 
-        public void UpdateValues()
+        public void UpdateUiElements()
         {
             gameObject.SetActive(World != null);
             if (World == null) return;
@@ -81,6 +137,7 @@ namespace WorldEditor
             TextureToggle.isOn = World.IsShowingTextures;
             BlendToggle.isOn = World.IsShowingTileBlending;
             NavmeshToggle.isOn = World.IsShowingNavmesh;
+            VisionCutoffToggle.isOn = World.IsVisionCutoffEnabled;
         }
     }
 }

@@ -21,13 +21,6 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            // Ctrl + mouse wheel: change area size
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                if (Input.mouseScrollDelta.y < 0 && AreaSize > 1) AreaSize--;
-                if (Input.mouseScrollDelta.y > 0 && AreaSize < World.ChunkSize) AreaSize++;
-            }
-
             // Update tile overlay
             if (World.HoveredGroundNode != null)
             {
@@ -53,6 +46,16 @@ namespace WorldEditor
                     World.HoveredGroundNode.ShowOverlay(overlayTexture, c, AreaSize);
                 }
                 
+            }
+        }
+
+        public override void HandleKeyboardInputs()
+        {
+            // Ctrl + mouse wheel: change area size
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && AreaSize > 1) AreaSize--;
+                if (Input.mouseScrollDelta.y > 0 && AreaSize < World.ChunkSize) AreaSize++;
             }
         }
 

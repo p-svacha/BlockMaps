@@ -55,11 +55,10 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            HandleInputs();
             UpdatePreview();
         }
 
-        private void HandleInputs()
+        public override void HandleKeyboardInputs()
         {
             // Ctrl + mouse wheel: change altitude
             if (Input.GetKey(KeyCode.LeftControl))

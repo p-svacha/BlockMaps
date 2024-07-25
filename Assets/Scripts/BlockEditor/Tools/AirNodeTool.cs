@@ -46,7 +46,6 @@ namespace WorldEditor
         {
             UpdateHoveredCoordinates();
             UpdatePreview();
-            HandleInputs();
         }
 
         private void UpdateHoveredCoordinates()
@@ -65,7 +64,7 @@ namespace WorldEditor
             BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
         }
 
-        private void HandleInputs()
+        public override void HandleKeyboardInputs()
         {
             // Ctrl + mouse wheel: change altitude
             if (Input.GetKey(KeyCode.LeftControl))

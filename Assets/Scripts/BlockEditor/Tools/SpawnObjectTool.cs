@@ -48,10 +48,6 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            // Rotation change inputs
-            if (Input.GetKeyDown(KeyCode.X)) CurrentRotation = HelperFunctions.GetNextSideDirection(CurrentRotation);
-            if (Input.GetKeyDown(KeyCode.Y)) CurrentRotation = HelperFunctions.GetPreviousSideDirection(CurrentRotation);
-
             // Preview
             if (World.HoveredNode != null)
             {
@@ -65,6 +61,13 @@ namespace WorldEditor
                     mat.color = canPlace ? Color.green : Color.red;
             }
             else BuildPreview.gameObject.SetActive(false);
+        }
+
+        public override void HandleKeyboardInputs()
+        {
+            // X / Y - Rotate object
+            if (Input.GetKeyDown(KeyCode.X)) CurrentRotation = HelperFunctions.GetNextSideDirection(CurrentRotation);
+            if (Input.GetKeyDown(KeyCode.Y)) CurrentRotation = HelperFunctions.GetPreviousSideDirection(CurrentRotation);
         }
 
         public override void HandleLeftClick()

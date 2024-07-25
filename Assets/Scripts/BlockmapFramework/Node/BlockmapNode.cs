@@ -780,7 +780,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Type.ToString() + WorldCoordinates.ToString() +  " alt:" + BaseAltitude + " " + GetSurfaceProperties().Name;
+            return Type.ToString() + WorldCoordinates.ToString() +  " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name;
         }
 
         #endregion

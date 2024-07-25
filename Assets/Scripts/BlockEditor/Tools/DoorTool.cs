@@ -22,20 +22,19 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            HandleInputs();
             UpdatePreview();
         }
 
-        private void HandleInputs()
+        public override void HandleKeyboardInputs()
         {
-            // Ctrl + mouse wheel: change height
+            // Ctrl + Scroll - Change height
             if (Input.GetKey(KeyCode.LeftControl))
             {
                 if (Input.mouseScrollDelta.y < 0) SetHeight(Height - 1);
                 if (Input.mouseScrollDelta.y > 0) SetHeight(Height + 1);
             }
 
-            // M: Toggle mirrored
+            // M - Toggle mirrored
             if (Input.GetKeyDown(KeyCode.M)) SetMirrored(!MirrorToggle.isOn);
         }
         private void SetHeight(int height)

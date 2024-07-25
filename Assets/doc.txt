@@ -1,16 +1,7 @@
--- Update cutoff and cutout
+--- World Generation Update
 
-Limit vision to height feature
- - Disable all airnode, fence and wallmeshes above height x
- - disable entities above height x
- - Add to WorldDisplayOptions
- > build bunker map to test
+---
 
-
-Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
- - https://glowfishinteractive.com/dissolving-the-world-part-1/
-
---
 
 --- Update More Node Shapes
 
@@ -263,3 +254,6 @@ Camera MSAA Anti-Aliasing is causing black pixel artifacts on air node mesh seam
 	> also at entities on node
 
 - Allow movingentities bigger than 1x1
+
+Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
+ - https://glowfishinteractive.com/dissolving-the-world-part-1/

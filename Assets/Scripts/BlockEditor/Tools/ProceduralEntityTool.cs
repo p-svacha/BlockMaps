@@ -51,25 +51,6 @@ namespace WorldEditor
 
         public override void UpdateTool()
         {
-            // Ctrl + mouse wheel: change height
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                if (Input.mouseScrollDelta.y < 0 && HeightInput.text != "")
-                {
-                    int height = int.Parse(HeightInput.text);
-                    if (height > 1) height--;
-                    HeightInput.text = height.ToString();
-                    SelectedEntity.SetHeight(height);
-                }
-                if (Input.mouseScrollDelta.y > 0 && HeightInput.text != "")
-                {
-                    int height = int.Parse(HeightInput.text);
-                    height++;
-                    HeightInput.text = height.ToString();
-                    SelectedEntity.SetHeight(height);
-                }
-            }
-
             // Preview
             if (World.HoveredNode != null)
             {
@@ -88,6 +69,28 @@ namespace WorldEditor
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
             else BuildPreview.SetActive(false);
+        }
+
+        public override void HandleKeyboardInputs()
+        {
+            // Ctrl + mouse wheel: change height
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && HeightInput.text != "")
+                {
+                    int height = int.Parse(HeightInput.text);
+                    if (height > 1) height--;
+                    HeightInput.text = height.ToString();
+                    SelectedEntity.SetHeight(height);
+                }
+                if (Input.mouseScrollDelta.y > 0 && HeightInput.text != "")
+                {
+                    int height = int.Parse(HeightInput.text);
+                    height++;
+                    HeightInput.text = height.ToString();
+                    SelectedEntity.SetHeight(height);
+                }
+            }
         }
 
         public override void HandleLeftClick()

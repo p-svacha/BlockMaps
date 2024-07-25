@@ -37,23 +37,6 @@ namespace WorldEditor
         {
             base.UpdateTool();
 
-            // Ctrl + mouse wheel: change depth
-            if (Input.GetKey(KeyCode.LeftControl))
-            {
-                if (Input.mouseScrollDelta.y < 0 && DepthInput.text != "")
-                {
-                    int depthText = int.Parse(DepthInput.text);
-                    if (depthText > 1) depthText--;
-                    DepthInput.text = depthText.ToString();
-                }
-                if (Input.mouseScrollDelta.y > 0 && DepthInput.text != "")
-                {
-                    int depthText = int.Parse(DepthInput.text);
-                    if(depthText < MAX_DEPTH) depthText++;
-                    DepthInput.text = depthText.ToString();
-                }
-            }
-
             if (World.HoveredGroundNode == null) return;
 
             if (DepthInput.text == "") return;
@@ -98,6 +81,26 @@ namespace WorldEditor
                 if (!Cache[World.HoveredGroundNode].ContainsKey(depth)) Cache[World.HoveredGroundNode].Add(depth, null); 
 
                 WaterPreview.gameObject.SetActive(false);
+            }
+        }
+
+        public override void HandleKeyboardInputs()
+        {
+            // Ctrl + mouse wheel: change depth
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                if (Input.mouseScrollDelta.y < 0 && DepthInput.text != "")
+                {
+                    int depthText = int.Parse(DepthInput.text);
+                    if (depthText > 1) depthText--;
+                    DepthInput.text = depthText.ToString();
+                }
+                if (Input.mouseScrollDelta.y > 0 && DepthInput.text != "")
+                {
+                    int depthText = int.Parse(DepthInput.text);
+                    if (depthText < MAX_DEPTH) depthText++;
+                    DepthInput.text = depthText.ToString();
+                }
             }
         }
 

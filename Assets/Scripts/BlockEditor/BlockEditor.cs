@@ -152,35 +152,10 @@ namespace WorldEditor
             if (Input.GetMouseButtonDown(2) && !isMouseOverUi) CurrentTool.HandleMiddleClick();
 
 
-            if (isUiElementFocussed) return; // no input key checks when a ui element is focussed
+            if (isUiElementFocussed) return; // Don't check for keyboard inputs when a ui element is focussed
 
-            // G - Show/Hide Grid
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                World.ToggleGridOverlay();
-                DisplayOptions.UpdateValues();
-            }
-
-            // P - Visualize Pathfinding
-            if (Input.GetKeyDown(KeyCode.N))
-            {
-                World.ToggleNavmesh();
-                DisplayOptions.UpdateValues();
-            }
-
-            // T - Texture mode
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                World.ToggleTextureMode();
-                DisplayOptions.UpdateValues();
-            }
-
-            // B - Surface blending
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                World.ToggleTileBlending();
-                DisplayOptions.UpdateValues();
-            }
+            DisplayOptions.HandleKeyboardInputs();
+            CurrentTool.HandleKeyboardInputs();
         }
 
         private void UpdateTileInfoText()
@@ -195,7 +170,7 @@ namespace WorldEditor
                 text += "\nShape: " + World.HoveredNode.Shape;
                 text += "\nRelHeight: " + World.HoveredNode.GetRelativeHeightAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             }
-            if (World.HoveredEntity != null) text += "\nEntity:" + World.HoveredEntity.TypeId;
+            if (World.HoveredEntity != null) text += "\nEntity: " + World.HoveredEntity.ToString();
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
             if (World.HoveredFence != null) text += "\nFence: " + World.HoveredFence.ToString();
             if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.ToString();

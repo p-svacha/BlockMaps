@@ -208,6 +208,14 @@ namespace BlockmapFramework
             GroundMesh.ShowTileBlending(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTileBlending(show);
         }
+        public void SetVisionCutoffAltitude(int value)
+        {
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
+            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
+            foreach (Entity e in Entities) e.gameObject.SetActive(e.MinAltitude < value);
+        }
 
         public void DrawZoneBorders()
         {

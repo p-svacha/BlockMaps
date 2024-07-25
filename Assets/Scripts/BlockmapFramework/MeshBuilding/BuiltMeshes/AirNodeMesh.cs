@@ -10,13 +10,13 @@ namespace BlockmapFramework
     /// </summary>
     public class AirNodeMesh : ChunkMesh
     {
-        public int HeightLevel { get; private set; }
+        public int Altitude { get; private set; }
 
         public void Init(Chunk chunk, int level)
         {
             OnInit(chunk);
 
-            HeightLevel = level;
+            Altitude = level;
             gameObject.layer = chunk.World.Layer_AirNode;
         }
 
@@ -37,7 +37,7 @@ namespace BlockmapFramework
                 for (int y = 0; y < Chunk.Size; y++)
                 {
                     // Get node
-                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), HeightLevel).OrderBy(x => x.MaxAltitude).FirstOrDefault();
+                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), Altitude).OrderBy(x => x.MaxAltitude).FirstOrDefault();
 
                     // Base surface
                     int surfaceId = node == null ? -1 : (int)node.Surface.Id;
@@ -101,7 +101,7 @@ namespace BlockmapFramework
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
 
-                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, HeightLevel).ToList();
+                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, Altitude).ToList();
 
                     if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
                     else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war

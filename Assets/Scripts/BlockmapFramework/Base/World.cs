@@ -121,6 +121,8 @@ namespace BlockmapFramework
         public MovingEntity NavmeshEntity { get; private set; }
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
+        public bool IsVisionCutoffEnabled { get; private set; }
+        public int VisionCutoffAltitude { get; private set; }
 
 
         #region Init
@@ -514,7 +516,7 @@ namespace BlockmapFramework
         public AirNode GetAirNodeFromRaycastHit(RaycastHit hit)
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
-            int altitude = hit.transform.GetComponent<AirNodeMesh>().HeightLevel;
+            int altitude = hit.transform.GetComponent<AirNodeMesh>().Altitude;
             AirNode hitAirNode = GetAirNodes(hitCoordinates).FirstOrDefault(x => x.BaseAltitude == altitude);
             if (hitAirNode != null) return hitAirNode;
 
@@ -582,7 +584,7 @@ namespace BlockmapFramework
         private ProceduralEntity GetProceduralEntityFromRaycastHit(RaycastHit hit)
         {
             ProceduralEntityMesh hitMesh = hit.transform.GetComponent<ProceduralEntityMesh>();
-            List<BlockmapNode> hitNodes = GetNodes(HoveredWorldCoordinates, hitMesh.HeightLevel);
+            List<BlockmapNode> hitNodes = GetNodes(HoveredWorldCoordinates, hitMesh.Altitude);
 
             // If the exact node we hit has a procedural entity, return that
             BlockmapNode targetNode = hitNodes.FirstOrDefault(x => x.Entities.Any(e => e is ProceduralEntity));
@@ -840,7 +842,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in belowNodes)
             {
                 foreach (Entity e in node.Entities)
-                    if (e.MaxHeight >= height)
+                    if (e.MaxAltitude >= height)
                         return false;
 
                 foreach (Fence fence in node.Fences.Values)
@@ -1511,6 +1513,28 @@ namespace BlockmapFramework
         {
             foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(IsShowingTileBlending);
         }
+        public void ToggleVisionCutoff()
+        {
+            IsVisionCutoffEnabled = !IsVisionCutoffEnabled;
+            UpdateVisionCutoff();
+        }
+        public void EnableVisionCutoff(bool value)
+        {
+            IsVisionCutoffEnabled = value;
+            UpdateVisionCutoff();
+        }
+        public void SetVisionCutoffAltitude(int value)
+        {
+            VisionCutoffAltitude = value;
+            if (VisionCutoffAltitude < 0) VisionCutoffAltitude = 0;
+            if (VisionCutoffAltitude > MAX_ALTITUDE) VisionCutoffAltitude = MAX_ALTITUDE;
+            
+            if (IsVisionCutoffEnabled) UpdateVisionCutoff();
+        }
+        private void UpdateVisionCutoff()
+        {
+            foreach (Chunk c in Chunks.Values) c.SetVisionCutoffAltitude(IsVisionCutoffEnabled ? VisionCutoffAltitude : -1);
+        }
 
         public void SetActiveVisionActor(Actor actor)
         {
@@ -1703,7 +1727,7 @@ namespace BlockmapFramework
             List<Entity> entities = new List<Entity>();
             foreach (BlockmapNode node in GetNodes(worldCoordinates))
                 foreach (Entity e in node.Entities)
-                    if (e.MinHeight <= maxHeight && e.MaxHeight >= minHeight)
+                    if (e.MinAltitude <= maxHeight && e.MaxAltitude >= minHeight)
                         entities.Add(e);
             return entities;
         }
@@ -1832,7 +1856,7 @@ namespace BlockmapFramework
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().HeightLevel == node.BaseAltitude)
+                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().Altitude == node.BaseAltitude)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;

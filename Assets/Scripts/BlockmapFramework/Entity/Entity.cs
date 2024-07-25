@@ -377,8 +377,8 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public virtual int MinHeight => Mathf.CeilToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT);
-        public virtual int MaxHeight => MinHeight + Dimensions.y - 1;
+        public virtual int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT); // Rounded down to y-position of its center
+        public virtual int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
@@ -722,6 +722,11 @@ namespace BlockmapFramework
             if (previewThumbnail != null)
                 return Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
             return null;
+        }
+
+        public override string ToString()
+        {
+            return Name + " alt:" + MinAltitude + "-" + MaxAltitude + " " + Rotation.ToString();
         }
 
         #endregion
