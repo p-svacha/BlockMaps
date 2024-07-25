@@ -6,6 +6,7 @@ using TMPro;
 using BlockmapFramework;
 using System.Linq;
 using System.IO;
+using BlockmapFramework.WorldGeneration;
 
 namespace WorldEditor
 {
@@ -50,9 +51,9 @@ namespace WorldEditor
         {
             if (ActiveGenerator != null)
             {
-                if (ActiveGenerator.GenerationPhase == GenerationPhase.Done)
+                if (ActiveGenerator.IsDone)
                 {
-                    Editor.SetWorld(ActiveGenerator.GeneratedWorld);
+                    Editor.SetWorld(ActiveGenerator.World);
                     ActiveGenerator = null;
                 }
                 else ActiveGenerator.UpdateGeneration();

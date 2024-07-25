@@ -51,7 +51,7 @@ namespace CaptureTheFlag
         private void StartGame()
         {
             // Set world
-            World = MapGenerator.GeneratedWorld;
+            World = MapGenerator.World;
 
             // Map zones
             LocalPlayerZone = World.GetZone(id: 0);
@@ -181,7 +181,7 @@ namespace CaptureTheFlag
             switch (State)
             {
                 case GameState.Loading:
-                    if (MapGenerator.GenerationPhase == GenerationPhase.Done) StartGame();
+                    if (MapGenerator.IsDone) StartGame();
                     else MapGenerator.UpdateGeneration();
                     break;
 

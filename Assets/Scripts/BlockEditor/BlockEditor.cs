@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using BlockmapFramework;
 using TMPro;
+using BlockmapFramework.WorldGeneration;
 
 namespace WorldEditor
 {
@@ -65,7 +66,8 @@ namespace WorldEditor
             {
                 new FlatWorldGenerator(),
                 new PerlinWorldGenerator(),
-                new CaptureTheFlag.CTFMapGenerator()
+                new CaptureTheFlag.CTFMapGenerator(),
+                new ParcelMapGenerator(),
             };
 
             // Init tools

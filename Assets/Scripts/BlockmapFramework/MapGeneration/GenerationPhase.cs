@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlockmapFramework
+namespace BlockmapFramework.WorldGeneration
 {
     public enum GenerationPhase
     {

@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +28,8 @@ namespace CaptureTheFlag
         protected override void OnGenerationStart()
         {
             GenerationStep = 0;
-            LocalPlayer = GeneratedWorld.GetActor(1);
-            Opponent = GeneratedWorld.GetActor(2);
+            LocalPlayer = World.GetActor(1);
+            Opponent = World.GetActor(2);
         }
         protected override void OnUpdate()
         {
@@ -66,7 +67,7 @@ namespace CaptureTheFlag
         private void ApplyHeightmap()
         {
 
-            foreach (GroundNode n in GeneratedWorld.GetAllGroundNodes())
+            foreach (GroundNode n in World.GetAllGroundNodes())
             {
                 Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -78,7 +79,7 @@ namespace CaptureTheFlag
                 n.SetHeight(nodeHeights);
             }
 
-            GeneratedWorld.DrawNodes();
+            World.DrawNodes();
             GenerationStep++;
         }
 
@@ -90,7 +91,7 @@ namespace CaptureTheFlag
             int p2X = WorldSize - SPAWN_MAP_EDGE_OFFSET;
             CreatePlayerSpawn(Opponent, p2X, Direction.W);
 
-            GeneratedWorld.DrawNodes();
+            World.DrawNodes();
             GenerationStep++;
         }
         /// <summary>
@@ -117,10 +118,10 @@ namespace CaptureTheFlag
                 if (Random.value < 0.5f) flagDistanceX *= -1;
                 if (Random.value < 0.5f) flagDistanceY *= -1;
             }
-            while (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < GeneratedWorld.MinX + CTFGame.JAIL_ZONE_RADIUS ||
-                spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX > GeneratedWorld.MaxX - CTFGame.JAIL_ZONE_RADIUS - 1 ||
-                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY < GeneratedWorld.MinY + CTFGame.JAIL_ZONE_RADIUS ||
-                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > GeneratedWorld.MaxY - CTFGame.JAIL_ZONE_RADIUS - 1);
+            while (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < World.MinX + CTFGame.JAIL_ZONE_RADIUS ||
+                spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX > World.MaxX - CTFGame.JAIL_ZONE_RADIUS - 1 ||
+                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY < World.MinY + CTFGame.JAIL_ZONE_RADIUS ||
+                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > World.MaxY - CTFGame.JAIL_ZONE_RADIUS - 1);
 
             Vector2Int jailZoneCenter = spawnedFlag.OriginNode.WorldCoordinates + new Vector2Int(flagDistanceX, flagDistanceY);
             for (int x = -(CTFGame.JAIL_ZONE_RADIUS - 1); x < CTFGame.JAIL_ZONE_RADIUS; x++)
@@ -130,7 +131,7 @@ namespace CaptureTheFlag
                     jailZoneCoords.Add(jailZoneCenter + new Vector2Int(x, y));
                 }
             }
-            GeneratedWorld.AddZone(jailZoneCoords, player, providesVision: false, showBorders: true);
+            World.AddZone(jailZoneCoords, player, providesVision: false, showBorders: true);
 
             // Flag zone
             HashSet<Vector2Int> flagZoneCoords = new HashSet<Vector2Int>();
@@ -146,7 +147,7 @@ namespace CaptureTheFlag
                     }
                 }
             }
-            Zone flagZone = GeneratedWorld.AddZone(flagZoneCoords, player, providesVision: true, showBorders: true);
+            Zone flagZone = World.AddZone(flagZoneCoords, player, providesVision: true, showBorders: true);
 
             // Humans
             int humansSpawned = 0;
@@ -175,11 +176,11 @@ namespace CaptureTheFlag
             while (attempts < targetAttempts)
             {
                 attempts++;
-                GroundNode n = GeneratedWorld.GetRandomGroundNode();
-                WaterBody b = GeneratedWorld.CanAddWater(n, 3);
+                GroundNode n = World.GetRandomGroundNode();
+                WaterBody b = World.CanAddWater(n, 3);
                 if (b != null)
                 {
-                    GeneratedWorld.AddWaterBody(b, updateNavmesh: false);
+                    World.AddWaterBody(b, updateNavmesh: false);
                     numWaterBodies++;
                 }
             }
@@ -187,7 +188,7 @@ namespace CaptureTheFlag
             // End
             //Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
 
-            GeneratedWorld.DrawNodes();
+            World.DrawNodes();
             GenerationStep++;
         }
 
@@ -203,14 +204,14 @@ namespace CaptureTheFlag
                 attempts++;
 
                 // Take a random surface node, direction and bridge height
-                GroundNode startNode = GeneratedWorld.GetRandomGroundNode();
+                GroundNode startNode = World.GetRandomGroundNode();
                 Direction dir1 = HelperFunctions.GetRandomSideDirection();
                 Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
                 int bridgeHeight = startNode.MaxAltitude + Random.Range(1, 7);
                 List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
 
                 // Go into first direction until the bridge ends
-                GroundNode nextNode = GeneratedWorld.GetAdjacentGroundNode(startNode, dir1);
+                GroundNode nextNode = World.GetAdjacentGroundNode(startNode, dir1);
                 bool isDone = false;
                 bool isValid = false;
                 while(!isDone)
@@ -241,13 +242,13 @@ namespace CaptureTheFlag
                     else
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = GeneratedWorld.GetAdjacentGroundNode(nextNode, dir1);
+                        nextNode = World.GetAdjacentGroundNode(nextNode, dir1);
                     }
                 }
                 if (!isValid) continue;
 
                 // Go into first direction until the bridge ends
-                nextNode = GeneratedWorld.GetAdjacentGroundNode(startNode, dir2);
+                nextNode = World.GetAdjacentGroundNode(startNode, dir2);
                 isDone = false;
                 isValid = false;
                 while (!isDone)
@@ -278,16 +279,16 @@ namespace CaptureTheFlag
                     else
                     {
                         bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = GeneratedWorld.GetAdjacentGroundNode(nextNode, dir2);
+                        nextNode = World.GetAdjacentGroundNode(nextNode, dir2);
                     }
                 }
                 if (!isValid) continue;
 
                 // Build bridge
-                if (bridgeCoordinates.Any(x => !GeneratedWorld.CanBuildAirPath(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
+                if (bridgeCoordinates.Any(x => !World.CanBuildAirPath(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
                 foreach (Vector2Int coords in bridgeCoordinates)
                 {
-                    GeneratedWorld.BuildAirPath(coords, bridgeHeight, SurfaceId.Concrete);
+                    World.BuildAirPath(coords, bridgeHeight, SurfaceId.Concrete);
                 }
                 numBridges++;
             }
@@ -295,7 +296,7 @@ namespace CaptureTheFlag
             // End
             //Debug.Log("Generated " + numBridges + " bridges after " + attempts + " attempts.");
 
-            GeneratedWorld.DrawNodes();
+            World.DrawNodes();
             GenerationStep++;
         }
 
@@ -323,34 +324,34 @@ namespace CaptureTheFlag
 
         private void CreateMapZones()
         {
-            int neutralZoneSize = (int)(GeneratedWorld.Dimensions.x * CTFGame.NEUTRAL_ZONE_SIZE);
-            int playerZoneSize = (GeneratedWorld.Dimensions.x / 2) - (neutralZoneSize / 2);
+            int neutralZoneSize = (int)(World.Dimensions.x * CTFGame.NEUTRAL_ZONE_SIZE);
+            int playerZoneSize = (World.Dimensions.x / 2) - (neutralZoneSize / 2);
             HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> opponentZoneNodes = new HashSet<Vector2Int>();
-            foreach (BlockmapNode node in GeneratedWorld.GetAllGroundNodes())
+            foreach (BlockmapNode node in World.GetAllGroundNodes())
             {
                 if (node.WorldCoordinates.x < playerZoneSize) ownZoneNodes.Add(node.WorldCoordinates);
                 else if (node.WorldCoordinates.x < playerZoneSize + neutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
                 else opponentZoneNodes.Add(node.WorldCoordinates);
             }
-            Zone localPlayerZone = GeneratedWorld.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, showBorders: true);
-            Zone neutralZone = GeneratedWorld.AddZone(neutralZoneNodes, GeneratedWorld.Gaia, providesVision: false, showBorders: true);
-            Zone opponentZone = GeneratedWorld.AddZone(opponentZoneNodes, Opponent, providesVision: false, showBorders: true);
+            Zone localPlayerZone = World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, showBorders: true);
+            Zone neutralZone = World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, showBorders: true);
+            Zone opponentZone = World.AddZone(opponentZoneNodes, Opponent, providesVision: false, showBorders: true);
 
             GenerationStep++;
         }
 
         private void SpawnRandomTree(int x, int y)
         {
-            BlockmapNode targetNode = GeneratedWorld.GetGroundNode(new Vector2Int(x, y));
+            BlockmapNode targetNode = World.GetGroundNode(new Vector2Int(x, y));
             Direction rotation = HelperFunctions.GetRandomSideDirection();
 
             Entity prefab = GetEntityPrefab(GetRandomTreeId());
 
-            if (GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
+            if (World.CanSpawnEntity(prefab, targetNode, rotation))
             {
-                GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, GeneratedWorld.Gaia, updateWorld: false);
+                World.SpawnEntity(prefab, targetNode, rotation, World.Gaia, updateWorld: false);
             }
         }
         private string GetRandomTreeId()

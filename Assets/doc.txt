@@ -1,7 +1,52 @@
 --- World Generation Update
 
+Rework IsPassable so it's cached per node as a Dictionary<Direction, int> where Direction is the side/corner of the node and int is the max height where it's still passable.
+	- 0 = impassable
+
+- Implement some line features for new map gen system
+	> road
+	> rail track
+	> stroad
+	> highway
+	> creek
+	> river
+
+- Implement some parcels and content for them for new mapgen system
+	> forest
+	> park
+	> neighbourhood
+	> industry
+	> mountain (cliff on 1 side)
+	> swamp
+	> pool
+
+- CTF: Improve ctf map generator
+	> New approach: Check XCOM and PZ map generation
+	> Split map into parcels
+	> Parcels have their own generation system on top of height map generation
+	> Parcel generation depends on bordering parcels, roads, rivers, map edge
+	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
+	> Implement rules which parcels can be next to each other
+	> Increase performance
+
+
+	> 1. height map generation
+	> 2. line features (river, road, railroad)
+	> 3. parcel distribution
+	> 4. parcel connection points (to line features and other parcels)
+	> 5. parcel generation
+	> 6. player base generation
+
 ---
 
+
+--- CTF Playtest Update
+
+---
+
+--- Multiplayer Update
+
+---
 
 --- Update More Node Shapes
 
@@ -29,35 +74,18 @@
 	> tunnel (convert ground node with all walls, entites etc to air node and create new grass ground node 1 below)
 
 
-
-- Adjust entity World height (only where its drawn) based on surface it's on - a little higher on conrete etc.
-
-- Implement some line features for new map gen system
-	> road
-	> rail track
-	> stroad
-	> highway
-	> creek
-	> river
-
-- Implement some parcels and content for them for new mapgen system
-	> forest
-	> park
-	> neighbourhood
-	> industry
-	> mountain (cliff on 1 side)
-	> swamp
-	> pool
-
 Rework shader for entities
  - Allow switch between texture and color mode
  - Only use transparency shader on moving objects
  - Allow option to use uv space instead of world space
 	> Apply this to doors
 
-- make a list of material indexes colorable in editor
-	> save color in entityData
+Make a list of material indexes colorable in editor
+ - Save color in new attribute Color in entity and EntityData
+ - all materials with an index present in the list will be given that color
+ - Use for cars
 
+ Water improvements
 - Water shader (very small transparency, moving, foam when hitting terrain)
 - Water flowing in one direction
 - Waterfall
@@ -65,7 +93,7 @@ Rework shader for entities
 	> make max depth a const 3
 	> make shoreheight based on mouse pointer y coordinate
 
-- animation system for walking / climbing entities
+Animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
 - Show entity stats in static entity tool in editor
@@ -197,23 +225,6 @@ improve vision system performance
 	> Cache paths (forever since they can never change atm)
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
-
-- CTF: Improve ctf map generator
-	> New approach: Check XCOM and PZ map generation
-	> Split map into parcels
-	> Parcels have their own generation system on top of height map generation
-	> Parcel generation depends on bordering parcels, roads, rivers, map edge
-	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
-	> Implement rules which parcels can be next to each other
-	> Increase performance
-
-
-	> 1. height map generation
-	> 2. line features (river, road, railroad)
-	> 3. parcel distribution
-	> 4. parcel connection points (to line features and other parcels)
-	> 5. parcel generation
-	> 6. player base generation
 
 - CTF: Rework jail system
 	> 1 Jail that is in neutral area

@@ -768,18 +768,33 @@ namespace BlockmapFramework
         {
             yield return new WaitForFixedUpdate();
 
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
+            System.Diagnostics.Stopwatch fullNavmeshTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch straightTransitionsTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch diagonalTransitionsTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch climbTransitionsTimer = new System.Diagnostics.Stopwatch();
+            fullNavmeshTimer.Start();
+            
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
+
+            straightTransitionsTimer.Start();
             foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
+            straightTransitionsTimer.Stop();
+            Debug.Log("Updating straight transitions took " + straightTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+
+            diagonalTransitionsTimer.Start();
             foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
+            diagonalTransitionsTimer.Stop();
+            Debug.Log("Updating diagonal transitions took " + diagonalTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+
+            climbTransitionsTimer.Start();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+            climbTransitionsTimer.Stop();
+            Debug.Log("Updating climb transitions took " + climbTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
 
             if (isInitialization) IsInitialized = true;
 
-            sw.Stop();
-            Debug.Log("Updating navmesh took " + sw.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            fullNavmeshTimer.Stop();
+            Debug.Log("Updating ALL transitions took " + fullNavmeshTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
 
             UpdateNavmeshDisplayDelayed();
         }
@@ -821,10 +836,11 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
-        public void SetSurface(DynamicNode node, SurfaceId surfaceId)
+        public void SetSurface(DynamicNode node, SurfaceId surfaceId, bool updateWorld = true)
         {
             node.SetSurface(surfaceId);
 
+            if (!updateWorld) return;
             RedrawNodesAround(node.WorldCoordinates);
             UpdateNavmeshDisplayDelayed();
         }
@@ -1647,6 +1663,7 @@ namespace BlockmapFramework
             foreach (Chunk c in Chunks.Values) nodes.AddRange(c.GetAllGroundNodes());
             return nodes;
         }
+        public GroundNode GetGroundNode(int x, int y) => GetGroundNode(new Vector2Int(x, y));
         public GroundNode GetGroundNode(Vector2Int worldCoordinates)
         {
             if (!IsInWorld(worldCoordinates)) return null;

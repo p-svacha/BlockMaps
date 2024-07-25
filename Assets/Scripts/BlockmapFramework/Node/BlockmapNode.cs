@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -83,6 +84,14 @@ namespace BlockmapFramework
         /// The mesh in the world that this node is drawn on.
         /// </summary>
         protected ChunkMesh Mesh { get; private set; }
+
+        // Performance Profilers
+        static readonly ProfilerMarker pm_UpdateDiagTransitions = new ProfilerMarker("Update Diagonal Transitions");
+        static readonly ProfilerMarker pm_IsPassableGeneral = new ProfilerMarker("IsPassable (general)");
+        static readonly ProfilerMarker pm_IsPassableDir = new ProfilerMarker("IsPassable (direction)");
+        static readonly ProfilerMarker pm_IsPassableDirCorner = new ProfilerMarker("Corner checks");
+        static readonly ProfilerMarker pm_IsPassableDirClimbable = new ProfilerMarker("Climbable checks");
+        static readonly ProfilerMarker pm_IsPassableDirHeadspace = new ProfilerMarker("Headspace checks");
 
         #region Initialize
 
@@ -192,11 +201,13 @@ namespace BlockmapFramework
         /// </summary>
         public void SetDiagonalAdjacentTransitions()
         {
+            pm_UpdateDiagTransitions.Begin();
             if (!IsPassable()) return;
             SetDiagonalAdjacentTransition(Direction.NE);
             SetDiagonalAdjacentTransition(Direction.NW);
             SetDiagonalAdjacentTransition(Direction.SE);
             SetDiagonalAdjacentTransition(Direction.SW);
+            pm_UpdateDiagTransitions.End();
         }
         private void SetDiagonalAdjacentTransition(Direction dir)
         {
@@ -251,13 +262,13 @@ namespace BlockmapFramework
 
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList))
                 {
-                    Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList);
                     Transitions.Add(adjNode, t);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown))
                 {
-                    Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
+                    // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown);
                     Transitions.Add(adjNode, t);
                 }
@@ -695,48 +706,79 @@ namespace BlockmapFramework
         public bool IsPassable(Direction dir, Entity entity = null, bool checkClimbables = true)
         {
             // Check if node is generally passable
-            if (!IsPassable(entity)) return false;
+            pm_IsPassableGeneral.Begin();
+            bool generallyPassable = IsPassable(entity);
+            pm_IsPassableGeneral.End();
+            if (!generallyPassable) return false;
 
             // Special checks for corner directions
             if(HelperFunctions.GetCorners().Contains(dir))
             {
-                if (Fences.ContainsKey(dir)) return false; // Fence on corner
-
-                // Check for wall corner piece
-                int cornerAltitude = Altitude[dir];
-                Vector3Int globalCellCoordinate = new Vector3Int(WorldCoordinates.x, cornerAltitude, WorldCoordinates.y);
-                if (World.GetWall(globalCellCoordinate, dir) != null) return false; // Wall on corner
-
-                if (!HelperFunctions.GetAffectedSides(dir).All(x => IsPassable(x, entity))) return false;
-
-                return true;
+                pm_IsPassableDirCorner.Begin();
+                bool isCornerPassable = IsCornerPassable(dir, entity);
+                pm_IsPassableDirCorner.End();
+                if (!isCornerPassable) return false;
             }
-
+            
             // Check if a climbable is blocking
             if (checkClimbables)
             {
-                // Ladders
-                if (SourceLadders.ContainsKey(dir)) return false;
-
-                // Fences
-                if (Fences.ContainsKey(dir)) return false;
-
-                // Doors
-                foreach (Door door in Doors.Values)
-                    if (door.CurrentBlockingDirection == dir)
-                        return false;
-
-                // Walls
-                for(int i = GetMinAltitude(dir); i <= GetMaxAltitude(dir); i++)
-                {
-                    Vector3Int globalCellCoordinates = new Vector3Int(WorldCoordinates.x, i, WorldCoordinates.y);
-                    List<Wall> walls = World.GetWalls(globalCellCoordinates);
-                    foreach (Wall w in walls)
-                        if (w.Side == dir) return false;
-                }
+                pm_IsPassableDirClimbable.Begin();
+                bool isSideBlockedByClimbable = IsSideBlockedByClimbable(dir);
+                pm_IsPassableDirClimbable.End();
+                if (isSideBlockedByClimbable) return false;
             }
 
             // Check if the side has enough head space for the entity
+            pm_IsPassableDirHeadspace.Begin();
+            bool hasEnoughHeadspace = IsThereEnoughHeadspace(dir, entity);
+            pm_IsPassableDirHeadspace.End();
+            if (!hasEnoughHeadspace) return false;
+
+            return true;
+        }
+
+        private bool IsCornerPassable(Direction dir, Entity entity)
+        {
+            if (Fences.ContainsKey(dir)) return false; // Fence on corner
+
+            // Check for wall corner piece
+            int cornerAltitude = Altitude[dir];
+            Vector3Int globalCellCoordinate = new Vector3Int(WorldCoordinates.x, cornerAltitude, WorldCoordinates.y);
+            if (World.GetWall(globalCellCoordinate, dir) != null) return false; // Wall on corner
+
+            if (!HelperFunctions.GetAffectedSides(dir).All(x => IsPassable(x, entity))) return false;
+
+            return true;
+        }
+
+        private bool IsSideBlockedByClimbable(Direction dir)
+        {
+            // Ladders
+            if (SourceLadders.ContainsKey(dir)) return true;
+
+            // Fences
+            if (Fences.ContainsKey(dir)) return true;
+
+            // Doors
+            foreach (Door door in Doors.Values)
+                if (door.CurrentBlockingDirection == dir)
+                    return true;
+
+            // Walls
+            for (int i = GetMinAltitude(dir); i <= GetMaxAltitude(dir); i++)
+            {
+                Vector3Int globalCellCoordinates = new Vector3Int(WorldCoordinates.x, i, WorldCoordinates.y);
+                List<Wall> walls = World.GetWalls(globalCellCoordinates);
+                foreach (Wall w in walls)
+                    if (w.Side == dir) return true;
+            }
+
+            return false;
+        }
+
+        private bool IsThereEnoughHeadspace(Direction dir, Entity entity)
+        {
             int headSpace = GetFreeHeadSpace(dir);
             if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)
             if (entity != null && entity.Height > headSpace) return false; // A node above is blocking the space for the entity

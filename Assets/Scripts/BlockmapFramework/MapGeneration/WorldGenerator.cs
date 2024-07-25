@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
 
-namespace BlockmapFramework
+namespace BlockmapFramework.WorldGeneration
 {
     public abstract class WorldGenerator
     {
@@ -13,8 +13,9 @@ namespace BlockmapFramework
         protected int NumChunks;
         protected int WorldSize;
 
-        public World GeneratedWorld { get; private set; }
-        public GenerationPhase GenerationPhase { get; set; }
+        public World World { get; private set; }
+        protected GenerationPhase GenerationPhase { get; set; }
+        public bool IsDone => GenerationPhase == GenerationPhase.Done;
 
         public void InitGeneration(int chunkSize, int numChunks)
         {
@@ -32,12 +33,14 @@ namespace BlockmapFramework
         {
             // Create empty world to start with
             WorldData data = CreateEmptyWorldData();
-            GeneratedWorld = World.SimpleLoad(data);
+            World = World.SimpleLoad(data);
 
             GenerationPhase = GenerationPhase.Generating;
             OnGenerationStart();
         }
+
         protected abstract void OnGenerationStart();
+
         /// <summary>
         /// Call this in FixedUpdate.
         /// </summary>
@@ -54,21 +57,25 @@ namespace BlockmapFramework
                     break;
 
                 case GenerationPhase.InitializingWorld:
-                    if (GeneratedWorld.IsInitialized) GenerationPhase = GenerationPhase.Done;
+                    if (World.IsInitialized) GenerationPhase = GenerationPhase.Done;
                     break;
             }
         }
+
+        /// <summary>
+        /// Gets called each frame. Should be used to go through the different generation steps while not blocking the program completely.
+        /// </summary>
         protected abstract void OnUpdate();
 
         /// <summary>
-        /// Last step of world generation, after this the world starts being initialized.
+        /// Last step of world generation. When called, the world generator stops it work and the world starts being initialized.
         /// </summary>
         protected void FinishGeneration()
         {
-            foreach (Chunk c in GeneratedWorld.GetAllChunks()) GeneratedWorld.RedrawChunk(c);
+            foreach (Chunk c in World.GetAllChunks()) World.RedrawChunk(c);
 
-            foreach (Entity e in GeneratedWorld.GetAllEntities()) e.UpdateVision();
-            GeneratedWorld.GenerateFullNavmesh();
+            foreach (Entity e in World.GetAllEntities()) e.UpdateVision();
+            World.GenerateFullNavmesh();
 
             GenerationPhase = GenerationPhase.InitializingWorld;
         }
@@ -151,14 +158,14 @@ namespace BlockmapFramework
                 targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
 
                 keepSearching = false;
-                if (!GeneratedWorld.IsInWorld(targetPos)) keepSearching = true;
-                else if (forbiddenNodes != null && forbiddenNodes.Contains(GeneratedWorld.GetGroundNode(targetPos))) keepSearching = true;
+                if (!World.IsInWorld(targetPos)) keepSearching = true;
+                else if (forbiddenNodes != null && forbiddenNodes.Contains(World.GetGroundNode(targetPos))) keepSearching = true;
             }
-            BlockmapNode targetNode = GeneratedWorld.GetGroundNode(targetPos);
+            BlockmapNode targetNode = World.GetGroundNode(targetPos);
 
-            if(GeneratedWorld.CanSpawnEntity(prefab, targetNode, rotation))
+            if(World.CanSpawnEntity(prefab, targetNode, rotation))
             {
-                return GeneratedWorld.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
+                return World.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
             }
 
             return null;

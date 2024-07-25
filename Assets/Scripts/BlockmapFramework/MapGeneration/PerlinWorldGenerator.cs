@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlockmapFramework
+namespace BlockmapFramework.WorldGeneration
 {
     public class PerlinWorldGenerator : WorldGenerator
     {
@@ -37,7 +37,7 @@ namespace BlockmapFramework
 
             else if (GenerationStep == 1) // Adjust height of all nodes
             {
-                foreach (GroundNode n in GeneratedWorld.GetAllGroundNodes())
+                foreach (GroundNode n in World.GetAllGroundNodes())
                 {
                     Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -49,18 +49,18 @@ namespace BlockmapFramework
                     n.SetHeight(nodeHeights);
                 }
 
-                GeneratedWorld.DrawNodes();
+                World.DrawNodes();
                 GenerationStep++;
             }
 
             else if (GenerationStep == 2) // Surface
             {
-                foreach (GroundNode n in GeneratedWorld.GetAllGroundNodes())
+                foreach (GroundNode n in World.GetAllGroundNodes())
                 {
                     if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceId.Sand);
                 }
 
-                GeneratedWorld.DrawNodes();
+                World.DrawNodes();
                 GenerationStep++;
             }
 
