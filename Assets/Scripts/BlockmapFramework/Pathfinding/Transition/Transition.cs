@@ -20,10 +20,16 @@ namespace BlockmapFramework
         public BlockmapNode To { get; private set; }
         public Direction Direction { get; protected set; }
 
-        public Transition(BlockmapNode from, BlockmapNode to)
+        /// <summary>
+        /// The maximum height a moving entity is allowed to have to use this transition.
+        /// </summary>
+        protected int MaxHeight { get; private set; }
+
+        public Transition(BlockmapNode from, BlockmapNode to, int maxHeight)
         {
             From = from;
             To = to;
+            MaxHeight = maxHeight;
         }
 
         /// <summary>
@@ -31,6 +37,7 @@ namespace BlockmapFramework
         /// </summary>
         public virtual bool CanPass(MovingEntity entity)
         {
+            if (entity.Height > MaxHeight) return false;
             if (!From.IsPassable(Direction, entity)) return false;
             if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
 

@@ -39,9 +39,13 @@ namespace BlockmapFramework
             return new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 
-        public override bool IsPassable(Entity entity = null)
+        protected override bool IsGenerallyPassable()
         {
             if (!GroundNode.IsCenterUnderWater) return false; // Surface node on same spot is passable
+            return base.IsGenerallyPassable();
+        }
+        protected override bool CanEntityStandHere(Entity entity)
+        {
             if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
             
             return base.IsPassable(entity);

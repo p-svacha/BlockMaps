@@ -197,9 +197,18 @@ public static class HelperFunctions
         };
     }
 
-    public static List<Direction> GetAllDirections8() => new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
-    public static List<Direction> GetCorners() => new List<Direction>() { Direction.SW, Direction.SE, Direction.NE, Direction.NW };
-    public static List<Direction> GetSides() => new List<Direction>() { Direction.N, Direction.E, Direction.S, Direction.W };
+   
+    private static List<Direction> _Directions8 = new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
+    public static List<Direction> GetAllDirections8() => _Directions8;
+    
+    private static List<Direction> _Directions9 = new List<Direction>() { Direction.None, Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
+    public static List<Direction> GetAllDirections9() => _Directions9;
+    
+    private static List<Direction> _Corners = new List<Direction>() { Direction.SW, Direction.SE, Direction.NE, Direction.NW };
+    public static List<Direction> GetCorners() => _Corners;
+
+    private static List<Direction> _Sides = new List<Direction>() { Direction.N, Direction.E, Direction.S, Direction.W };
+    public static List<Direction> GetSides() => _Sides;
     public static bool IsCorner(Direction dir) => GetCorners().Contains(dir);
     public static bool IsSide(Direction dir) => GetSides().Contains(dir);
 

@@ -60,13 +60,15 @@ namespace WorldEditor
             }
         }
 
-        private void UpdateLoadWorldDropdown()
+        private void UpdateLoadWorldDropdown(string initValue = "")
         {
             LoadDropdown.ClearOptions();
 
             string[] fullPaths = Directory.GetFiles(JsonUtilities.DATA_FILES_PATH, "*.json");
             SavedWorlds = fullPaths.Select(x => System.IO.Path.GetFileNameWithoutExtension(x)).ToList();
             LoadDropdown.AddOptions(SavedWorlds);
+
+            if (initValue != "") LoadDropdown.value = LoadDropdown.options.IndexOf(LoadDropdown.options.First(x => x.text == initValue));
         }
 
         public void GenerateButton_OnClick()
@@ -97,7 +99,7 @@ namespace WorldEditor
             data.Name = SaveNameInput.text;
             JsonUtilities.SaveWorld(data);
 
-            UpdateLoadWorldDropdown();
+            UpdateLoadWorldDropdown(initValue: data.Name);
         }
 
         private void LoadButton_OnClick()

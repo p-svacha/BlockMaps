@@ -61,6 +61,19 @@ namespace BlockmapFramework
         /// </summary>
         public Dictionary<Direction, Transition> WalkTransitions { get; private set; }
 
+        /// <summary>
+        /// Dictionary containing the values of what the maximum height for an entity is so it can still pass through this node in the given direction.
+        /// <br/> Also includes Direction.None for the maximum height of something just standing on this node. This value is not affected by walls, fences, etc.
+        /// <br/>Should be recalculated whenever something near the nodes changes.
+        /// </summary>
+        public Dictionary<Direction, int> MaxPassableHeight { get; private set; }
+
+        /// <summary>
+        /// Dictionary containing the amount of free head space on each direction. Free head space is calculated by checking the first node or wall (only on sides/corners) above this node that blocks the way.
+        /// <br/> Climbables directly on this node are ignored for this value.
+        /// </summary>
+        public Dictionary<Direction, int> FreeHeadSpace { get; private set; }
+
         // Things on this node
         public HashSet<Entity> Entities = new HashSet<Entity>();
         public Dictionary<Direction, Fence> Fences = new Dictionary<Direction, Fence>();
@@ -85,13 +98,9 @@ namespace BlockmapFramework
         /// </summary>
         protected ChunkMesh Mesh { get; private set; }
 
-        // Performance Profilers
-        static readonly ProfilerMarker pm_UpdateDiagTransitions = new ProfilerMarker("Update Diagonal Transitions");
-        static readonly ProfilerMarker pm_IsPassableGeneral = new ProfilerMarker("IsPassable (general)");
-        static readonly ProfilerMarker pm_IsPassableDir = new ProfilerMarker("IsPassable (direction)");
-        static readonly ProfilerMarker pm_IsPassableDirCorner = new ProfilerMarker("Corner checks");
-        static readonly ProfilerMarker pm_IsPassableDirClimbable = new ProfilerMarker("Climbable checks");
-        static readonly ProfilerMarker pm_IsPassableDirHeadspace = new ProfilerMarker("Headspace checks");
+        // Cache
+        private Dictionary<Direction, List<IClimbable>> ClimbUpCache = new Dictionary<Direction, List<IClimbable>>();
+
 
         #region Initialize
 
@@ -108,6 +117,9 @@ namespace BlockmapFramework
             RecalculateShape();
             Transitions = new Dictionary<BlockmapNode, Transition>();
             WalkTransitions = new Dictionary<Direction, Transition>();
+
+            MaxPassableHeight = new Dictionary<Direction, int>();
+            foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight.Add(dir, 0);
         }
 
         /// <summary>
@@ -132,19 +144,85 @@ namespace BlockmapFramework
         #endregion
 
         #region Transitions
+        ///
         /// ************* TRANSITIONS *************
+        /// 
         /// When the navmesh of an area gets updated, a specific order needs to be followed.
         /// Each step needs to be executed for ALL affected nodes before the next step can be executed for ALL affected nodes:
-        /// 1. ResetTransitions()
-        /// 2. SetStraightAdjacentTransitions()
-        /// 3. SetDiagonalAdjacentTransitions()
-        /// 4. SetCliffClimbTransitions()
+        /// 1. RecalcuatePassability()
+        /// 2. ResetTransitions()
+        /// 3. SetStraightAdjacentTransitions()
+        /// 4. SetDiagonalAdjacentTransitions()
+        /// 5. SetCliffClimbTransitions()
+        /// 
+
+
+        /// <summary>
+        /// Recalculates the maximum height an entity is allowed to have so it can still pass through this node for all directions.
         /// </summary>
+        public void RecalcuatePassability()
+        {
+            foreach (Direction corner in HelperFunctions.GetCorners()) MaxPassableHeight[corner] = -1;
+
+            // Set max possible to 0 for all sides if not generally passable
+            if (!IsGenerallyPassable())
+            {
+                foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight[dir] = 0;
+                return;
+            }
+
+            // Get free head space for all directions
+            FreeHeadSpace = RecalculateFreeHeadSpace();
+
+            // Assign general/center headspace first (ignores all walls/fences/etc)
+            MaxPassableHeight[Direction.None] = FreeHeadSpace[Direction.None];
+
+            // Check sides first (since they can also block corners in some cases)
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                // Check if the side is blocked by a climbable. If yes, set maxheight for this side and its corners to 0
+                if (IsSideBlocked(side))
+                {
+                    MaxPassableHeight[side] = 0;
+                    foreach (Direction corner in HelperFunctions.GetAffectedCorners(side))
+                    {
+                        MaxPassableHeight[corner] = 0;
+                    }
+                    continue;
+                }
+
+                // If side is not blocked, calculate the free head space on this side.
+                MaxPassableHeight[side] = FreeHeadSpace[side];
+            }
+
+            // Check corners
+            foreach (Direction corner in HelperFunctions.GetCorners())
+            {
+                // Check if the corner has already been set by the side
+                if (MaxPassableHeight[corner] != -1) continue;
+
+                // Check if there is something right on the corner blocking it
+                if (IsCornerBlocked(corner))
+                {
+                    MaxPassableHeight[corner] = 0;
+                    continue;
+                }
+
+                // If corner is not blocked, calculate the free headspace for all relevant sides and corners and take the minimum out of all of them.
+                // This includes the corner itself and the two affected sides on the same node.
+                int selfCornerHeadspace = FreeHeadSpace[corner];
+                int prevSideHeadspace = MaxPassableHeight[HelperFunctions.GetPreviousDirection8(corner)];
+                int nextSideHeadspace = MaxPassableHeight[HelperFunctions.GetNextDirection8(corner)];
+
+                MaxPassableHeight[corner] = Mathf.Min(selfCornerHeadspace, prevSideHeadspace, nextSideHeadspace);
+            }
+        }
 
         public void ResetTransitions()
         {
             Transitions.Clear();
             WalkTransitions.Clear();
+            ClimbUpCache.Clear();
         }
 
         /// <summary>
@@ -174,14 +252,17 @@ namespace BlockmapFramework
         {
             if (!IsPassable(dir)) return;
 
+            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
-                if (!adjNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) continue;
+                if (!adjNode.IsPassable(oppositeDir)) continue;
 
                 if(ShouldConnectToNodeDirectly(adjNode, dir)) // Connect to node directly
                 {
-                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, adjNode, dir);
+                    int maxHeight = Mathf.Min(FreeHeadSpace[dir], adjNode.FreeHeadSpace[oppositeDir]);
+
+                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, adjNode, dir, maxHeight);
                     Transitions.Add(adjNode, t);
                     WalkTransitions.Add(dir, t);
                 }
@@ -201,13 +282,11 @@ namespace BlockmapFramework
         /// </summary>
         public void SetDiagonalAdjacentTransitions()
         {
-            pm_UpdateDiagTransitions.Begin();
             if (!IsPassable()) return;
             SetDiagonalAdjacentTransition(Direction.NE);
             SetDiagonalAdjacentTransition(Direction.NW);
             SetDiagonalAdjacentTransition(Direction.SE);
             SetDiagonalAdjacentTransition(Direction.SW);
-            pm_UpdateDiagTransitions.End();
         }
         private void SetDiagonalAdjacentTransition(Direction dir)
         {
@@ -220,8 +299,10 @@ namespace BlockmapFramework
 
             if (sideConnectedNodePre == null) return;
             if (sideConnectedNodePost == null) return;
-            if (!sideConnectedNodePre.IsPassable(HelperFunctions.GetMirroredCorner(dir, preDirection))) return;
-            if (!sideConnectedNodePost.IsPassable(HelperFunctions.GetMirroredCorner(dir, postDirection))) return;
+            Direction sideConnectedNodePreDir = HelperFunctions.GetMirroredCorner(dir, preDirection);
+            Direction sideConnectedNodeostDir = HelperFunctions.GetMirroredCorner(dir, postDirection);
+            if (!sideConnectedNodePre.IsPassable(sideConnectedNodePreDir)) return;
+            if (!sideConnectedNodePost.IsPassable(sideConnectedNodeostDir)) return;
 
             // Check if the path N>E results in the same node as E>N - prerequisite to connect diagonal nodes (N & E are examples)
             if (sideConnectedNodePre.WalkTransitions.ContainsKey(postDirection) && sideConnectedNodePost.WalkTransitions.ContainsKey(preDirection) &&
@@ -236,9 +317,15 @@ namespace BlockmapFramework
                 if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(postDirection))) canConnect = false;
                 if (!targetNode.IsPassable(HelperFunctions.GetOppositeDirection(dir))) canConnect = false;
 
+                // Check maximum headspace on the 2 adjacent cells between From and To
+                int sideConnectedNodePreHeadspace = sideConnectedNodePre.FreeHeadSpace[sideConnectedNodePreDir];
+                int sideConnectedNodePostHeadspace = sideConnectedNodePost.FreeHeadSpace[sideConnectedNodeostDir];
+
+                int maxAllowedHeight = Mathf.Min(FreeHeadSpace[dir], targetNode.FreeHeadSpace[HelperFunctions.GetOppositeDirection(dir)], sideConnectedNodePreHeadspace, sideConnectedNodePostHeadspace);
+
                 if (canConnect)
                 {
-                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, targetNode, dir);
+                    AdjacentWalkTransition t = new AdjacentWalkTransition(this, targetNode, dir, maxAllowedHeight);
                     Transitions.Add(targetNode, t);
                     WalkTransitions.Add(dir, t);
                 }
@@ -260,16 +347,16 @@ namespace BlockmapFramework
             {
                 if (!adjNode.IsPassable()) continue;
 
-                if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList))
+                if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList, out int maxHeightSingle))
                 {
                     // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
-                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList);
+                    SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList, maxHeightSingle);
                     Transitions.Add(adjNode, t);
                 }
-                else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown))
+                else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown, out int maxHeightDouble))
                 {
                     // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
-                    DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown);
+                    DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown, maxHeightDouble);
                     Transitions.Add(adjNode, t);
                 }
             }
@@ -278,9 +365,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if SingleClimbTransition should be created between a particular node and another node that is adjacent and higher.
         /// </summary>
-        private bool ShouldCreateSingleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climb)
+        private bool ShouldCreateSingleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climb, out int maxTransitionHeight)
         {
             climb = new List<IClimbable>();
+            maxTransitionHeight = 0;
+
+            if (Transitions.ContainsKey(to)) return false; // Don't check if a transition to the target node already exists
 
             // Calculate some important values
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
@@ -293,20 +383,41 @@ namespace BlockmapFramework
 
             if (climbHeight > 0)
             {
+                if (FreeHeadSpace[Direction.None] <= climbHeight) return false; // A node above is blocking the climb
+
                 climb = GetClimbUp(dir);
+
+                int climbTopAltitude = toAltitude;
+                int freeHeadspaceFrom = World.GetFreeHeadspace(new Vector3Int(WorldCoordinates.x, climbTopAltitude, WorldCoordinates.y)).Where(x => x.Key == Direction.None || x.Key == dir).Min(x => x.Value);
+                int freeHeadSpaceTo = to.FreeHeadSpace[oppositeDir];
+                maxTransitionHeight = Mathf.Min(freeHeadspaceFrom, freeHeadSpaceTo);
+
                 return climb.Count == Mathf.Abs(climbHeight);
             }
             if (climbHeight < 0)
             {
+                if (to.FreeHeadSpace[Direction.None] <= Mathf.Abs(climbHeight)) return false; // A node above is blocking the climb
+
                 climb = to.GetClimbUp(oppositeDir);
                 climb.Reverse();
+
+                int climbTopAltitude = fromAltitude;
+                int freeHeadspaceFrom = FreeHeadSpace[dir];
+                int freeHeadSpaceTo = World.GetFreeHeadspace(new Vector3Int(to.WorldCoordinates.x, climbTopAltitude, to.WorldCoordinates.y)).Where(x => x.Key == Direction.None || x.Key == oppositeDir).Min(x => x.Value);
+                maxTransitionHeight = Mathf.Min(freeHeadspaceFrom, freeHeadSpaceTo);
+
                 return climb.Count == Mathf.Abs(climbHeight);
             }
             return false;
         }
 
-        private bool ShouldCreateDoubleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climbUp, out List<IClimbable> climbDown)
+        private bool ShouldCreateDoubleClimbTransition(BlockmapNode to, Direction dir, out List<IClimbable> climbUp, out List<IClimbable> climbDown, out int maxTransitionHeight)
         {
+            climbUp = new List<IClimbable>();
+            climbDown = new List<IClimbable>();
+            maxTransitionHeight = 0;
+            if (Transitions.ContainsKey(to)) return false; // Don't check if a transition to the target node already exists
+
             // Calculate some important values
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             int fromAltitude = GetMinAltitude(dir);
@@ -316,9 +427,13 @@ namespace BlockmapFramework
             climbDown = to.GetClimbUp(oppositeDir);
             climbDown.Reverse();
 
+            int climbTopAltitude = fromAltitude + climbUp.Count;
+            int freeHeadSpaceClimbUp = World.GetFreeHeadspace(new Vector3Int(WorldCoordinates.x, climbTopAltitude, WorldCoordinates.y))[dir];
+            int freeHeadSpaceClimbDown = World.GetFreeHeadspace(new Vector3Int(to.WorldCoordinates.x, climbTopAltitude, to.WorldCoordinates.y))[oppositeDir];
+            maxTransitionHeight = Mathf.Min(freeHeadSpaceClimbUp, freeHeadSpaceClimbDown);
+
             if (climbUp.Count == 0 || climbDown.Count == 0) return false; // climb up and down doesn't match up
-            if (GetFreeHeadSpace(dir) < climbUp.Count + 1) return false; // not enough headspace at end of climb up
-            if (to.GetFreeHeadSpace(oppositeDir) < climbDown.Count + 1) return false; // not enough headspace at start of climb down
+            if (maxTransitionHeight < 1) return false; // not enough headspace
 
             return (fromAltitude + climbUp.Count - climbDown.Count) == toAltitude;
         }
@@ -328,6 +443,10 @@ namespace BlockmapFramework
         /// </summary>
         public List<IClimbable> GetClimbUp(Direction dir)
         {
+            // Cache
+            if (ClimbUpCache.TryGetValue(dir, out List<IClimbable> cachedClimb)) return cachedClimb;
+
+            // Validation
             if (!HelperFunctions.GetSides().Contains(dir)) throw new System.Exception("A climb can only happen in a side direction (N/E/S/W)");
 
             // Set some important values
@@ -337,13 +456,19 @@ namespace BlockmapFramework
             IClimbable nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
             while(nextClimbingPiece != null)
             {
-                if (!nextClimbingPiece.IsClimbable) return new List<IClimbable>(); // No climb possible because of unclimbable piece
+                if (!nextClimbingPiece.IsClimbable)
+                {
+                    climb = new List<IClimbable>();
+                    ClimbUpCache.Add(dir, climb);
+                    return climb; // No climb possible because of unclimbable piece
+                }
                 climb.Add(nextClimbingPiece);
                 currentAltitude++;
 
                 nextClimbingPiece = World.GetClimbable(new Vector3Int(WorldCoordinates.x, currentAltitude, WorldCoordinates.y), dir);
             }
 
+            ClimbUpCache.Add(dir, climb);
             return climb;
         }
 
@@ -689,101 +814,67 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns if an entity can stand on this node.
-        /// <br/> If entity is null a general check will be made for the navmesh.
+        /// Returns if it is theoretically possible for some entity to stand on this node.
         /// </summary>
-        public virtual bool IsPassable(Entity entity = null)
+        protected virtual bool IsGenerallyPassable()
         {
             if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
-
             return true;
         }
+        /// <summary>
+        /// Returns if an entity can stand on this node.
+        /// </summary>
+        protected virtual bool CanEntityStandHere(Entity e)
+        {
+            return true;
+        }
+
+        public bool IsPassable() => IsPassable(Direction.None);
+        public bool IsPassable(Direction dir) => MaxPassableHeight[dir] > 0;
+        public bool IsPassable(Entity e) => IsPassable(Direction.None, e);
+        public bool IsPassable(Direction dir, Entity e) => MaxPassableHeight[dir] >= e.Height && CanEntityStandHere(e);
 
         /// <summary>
-        /// Returns if an entity can pass through a specific side (N/E/S/W) of this node.
-        /// <br/> If entity is null a general check will be made for the navmesh.
+        /// Returns if the given corner is blocked by a fence or wall.
         /// </summary>
-        public bool IsPassable(Direction dir, Entity entity = null, bool checkClimbables = true)
+        private bool IsCornerBlocked(Direction corner)
         {
-            // Check if node is generally passable
-            pm_IsPassableGeneral.Begin();
-            bool generallyPassable = IsPassable(entity);
-            pm_IsPassableGeneral.End();
-            if (!generallyPassable) return false;
-
-            // Special checks for corner directions
-            if(HelperFunctions.GetCorners().Contains(dir))
-            {
-                pm_IsPassableDirCorner.Begin();
-                bool isCornerPassable = IsCornerPassable(dir, entity);
-                pm_IsPassableDirCorner.End();
-                if (!isCornerPassable) return false;
-            }
-            
-            // Check if a climbable is blocking
-            if (checkClimbables)
-            {
-                pm_IsPassableDirClimbable.Begin();
-                bool isSideBlockedByClimbable = IsSideBlockedByClimbable(dir);
-                pm_IsPassableDirClimbable.End();
-                if (isSideBlockedByClimbable) return false;
-            }
-
-            // Check if the side has enough head space for the entity
-            pm_IsPassableDirHeadspace.Begin();
-            bool hasEnoughHeadspace = IsThereEnoughHeadspace(dir, entity);
-            pm_IsPassableDirHeadspace.End();
-            if (!hasEnoughHeadspace) return false;
-
-            return true;
-        }
-
-        private bool IsCornerPassable(Direction dir, Entity entity)
-        {
-            if (Fences.ContainsKey(dir)) return false; // Fence on corner
+            if (Fences.ContainsKey(corner)) return true; // Fence on corner
 
             // Check for wall corner piece
-            int cornerAltitude = Altitude[dir];
+            int cornerAltitude = Altitude[corner];
             Vector3Int globalCellCoordinate = new Vector3Int(WorldCoordinates.x, cornerAltitude, WorldCoordinates.y);
-            if (World.GetWall(globalCellCoordinate, dir) != null) return false; // Wall on corner
-
-            if (!HelperFunctions.GetAffectedSides(dir).All(x => IsPassable(x, entity))) return false;
-
-            return true;
-        }
-
-        private bool IsSideBlockedByClimbable(Direction dir)
-        {
-            // Ladders
-            if (SourceLadders.ContainsKey(dir)) return true;
-
-            // Fences
-            if (Fences.ContainsKey(dir)) return true;
-
-            // Doors
-            foreach (Door door in Doors.Values)
-                if (door.CurrentBlockingDirection == dir)
-                    return true;
-
-            // Walls
-            for (int i = GetMinAltitude(dir); i <= GetMaxAltitude(dir); i++)
-            {
-                Vector3Int globalCellCoordinates = new Vector3Int(WorldCoordinates.x, i, WorldCoordinates.y);
-                List<Wall> walls = World.GetWalls(globalCellCoordinates);
-                foreach (Wall w in walls)
-                    if (w.Side == dir) return true;
-            }
+            if (World.GetWall(globalCellCoordinate, corner) != null) return true; // Wall on corner
 
             return false;
         }
 
-        private bool IsThereEnoughHeadspace(Direction dir, Entity entity)
+        /// <summary>
+        /// Returns if there is a ladder, fence or door directly blocking this side of the node.
+        /// </summary>
+        private bool IsSideBlocked(Direction side)
         {
-            int headSpace = GetFreeHeadSpace(dir);
-            if (headSpace <= 0) return false; // Another node above this one is blocking this(by overlapping in at least 1 corner)
-            if (entity != null && entity.Height > headSpace) return false; // A node above is blocking the space for the entity
+            // Ladders
+            if (SourceLadders.ContainsKey(side)) return true;
 
-            return true;
+            // Fences
+            if (Fences.ContainsKey(side)) return true;
+
+            // Doors
+            foreach (Door door in Doors.Values)
+                if (door.CurrentBlockingDirection == side)
+                    return true;
+
+            // Walls (in sloped nodes, this checks is a wall within the slope, for flat slopes this for loop gets skipped)
+            for (int i = GetMinAltitude(side); i < GetMaxAltitude(side); i++)
+            {
+                Vector3Int globalCellCoordinates = new Vector3Int(WorldCoordinates.x, i, WorldCoordinates.y);
+                List<Wall> walls = World.GetWalls(globalCellCoordinates);
+                foreach (Wall w in walls)
+                    if (w.Side == side) return true;
+            }
+
+            return false;
         }
 
         public bool IsFlat() => Altitude.Values.All(x => x == Altitude[Direction.SW]);
@@ -797,38 +888,88 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the minimun amount of space (in amount of tiles) that is free above this node in the given direction by checking all corners that are affected by that direction.
-        /// <br/> For example a flat node right above this flat node would be 1.
-        /// <br/> If any corner of an above node overlaps with this node 0 is returned.
-        /// <br/> Direction.None can be passed to check all corners.
+        /// Returns the free head space for all directions. Free headspace refers to the amount of cells that are unblocked by nodes/walls ABOVE this node.
         /// </summary>
-        public int GetFreeHeadSpace(Direction dir)
+        private Dictionary<Direction, int> RecalculateFreeHeadSpace()
         {
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, MaxAltitude, World.MAX_ALTITUDE).Where(x => x != this && x.IsSolid && !World.DoFullyOverlap(this, x)).ToList();
+            Dictionary<Direction, int> headspace = new Dictionary<Direction, int>();
 
-            int minHeight = World.MAX_ALTITUDE;
+            foreach (Direction dir in HelperFunctions.GetAllDirections9()) headspace[dir] = World.MAX_ALTITUDE;
 
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, BaseAltitude, World.MAX_ALTITUDE);
+            List<Wall> wallsOnCoordinate = World.GetWalls(WorldCoordinates);
+
+            // 1. Check corners from nodes above (these block corners, side and center)
             foreach (BlockmapNode node in nodesAbove)
             {
-                foreach(Direction corner in HelperFunctions.GetAffectedCorners(dir))
+                if (node == this) continue;
+
+                foreach (Direction corner in HelperFunctions.GetCorners())
                 {
                     int diff = node.Altitude[corner] - Altitude[corner];
-                    if (diff < minHeight) minHeight = diff;
+                    headspace[corner] = diff;
+                    headspace[HelperFunctions.GetPreviousDirection8(corner)] = diff;
+                    headspace[HelperFunctions.GetNextDirection8(corner)] = diff;
                 }
             }
 
-            return minHeight;
+            // 1b. Center headspace is only affected by nodes above
+            headspace[Direction.None] = Mathf.Min(headspace[Direction.NW], headspace[Direction.NE], headspace[Direction.SW], headspace[Direction.SE]);
+
+            // 2. Check side walls above (these block sides and corners)
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                int sideMinAltitude = GetMinAltitude(side);
+                int sideMaxAltitude = GetMaxAltitude(side);
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != side) continue; // Wall is not on this side
+                    if (wall.MaxAltitude <= sideMinAltitude) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - sideMaxAltitude;
+
+                    if (diff < headspace[side]) headspace[side] = diff;
+
+                    // Also blocks corners
+                    Direction prevDir = HelperFunctions.GetPreviousDirection8(side);
+                    if (diff < headspace[prevDir]) headspace[prevDir] = diff;
+
+                    Direction nextDir = HelperFunctions.GetNextDirection8(side);
+                    if (diff < headspace[nextDir]) headspace[nextDir] = diff;
+                }
+            }
+
+            // 3. Check corner walls (these only block corners)
+            foreach (Direction corner in HelperFunctions.GetCorners())
+            {
+                int nodeAltitde = Altitude[corner];
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != corner) continue; // Wall is not on this corner
+                    if (wall.MaxAltitude < nodeAltitde) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - nodeAltitde;
+
+                    if (diff < headspace[corner]) headspace[corner] = diff;
+                }
+            }
+
+            return headspace;
         }
 
         public override string ToString()
         {
-            return Type.ToString() + WorldCoordinates.ToString() +  " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name;
+            string mph = "MPH:";
+            foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
+            string headspace = "FSH";
+            foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
+            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name; // + "\n" + headspace + "\n" + mph;
         }
 
         #endregion
 
         #region Save / Load
-
+        
         public static BlockmapNode Load(World world, Chunk chunk, NodeData data)
         {
             switch(data.Type)

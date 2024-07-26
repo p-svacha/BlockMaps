@@ -17,7 +17,6 @@ namespace BlockmapFramework
         public int EndHeight { get; private set; }
         public int Height { get; private set; }
         public Direction ClimbDirection { get; private set; } // Side on node that the MovingEntity is at when climbing (it's always on the lower node)
-        public int HeadSpaceRequirement { get; private set; }
         public ClimbingCategory ClimbSkillRequirement { get; private set; }
 
 
@@ -27,7 +26,7 @@ namespace BlockmapFramework
         /// </summary>
         public List<IClimbable> Climb { get; private set; }
 
-        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb) : base(from, to)
+        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb, int maxHeight) : base(from, to, maxHeight)
         {
             Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
@@ -43,9 +42,7 @@ namespace BlockmapFramework
             LowerNode = IsAscend ? From : To;
             HigherNode = IsAscend ? To : From;
 
-            // Calculate head space needed to use this
             ClimbDirection = IsAscend ? dir : oppositeDir;
-            HeadSpaceRequirement = LowerNode.GetFreeHeadSpace(Direction) - Height;
 
             ClimbSkillRequirement = (ClimbingCategory)(climb.Max(x => (int)x.ClimbSkillRequirement));
         }
@@ -62,14 +59,13 @@ namespace BlockmapFramework
 
         public override bool CanPass(MovingEntity entity)
         {
-            // Headspace
-            if (entity.Height > HeadSpaceRequirement) return false;
+            // Entity height
+            if (entity.Height > MaxHeight) return false;
 
             // Climb skill
             if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
 
             // Base requirements (lower node needs to ignore climbables)
-            if (!LowerNode.IsPassable(ClimbDirection, entity, checkClimbables: false)) return false;
             if (!HigherNode.IsPassable(HelperFunctions.GetOppositeDirection(ClimbDirection), entity)) return false;
 
             return true;

@@ -629,6 +629,8 @@ namespace BlockmapFramework
                 {
                     AirNode hitAirNode = World.GetAirNodeFromRaycastHit(hit);
 
+                    if (hitAirNode == null) return vision; // Somehow we couldn't detect what air node we hit => just stop search
+
                     // Mark air node as visible
                     vision.AddVisibleNode(hitAirNode);
 
@@ -671,10 +673,7 @@ namespace BlockmapFramework
                 {
                     Fence hitFence = World.GetFenceFromRaycastHit(hit);
 
-                    if (hitFence == null) // Somehow we couldn't detect what fence we hit => just stop search
-                    {
-                        return vision;
-                    }
+                    if (hitFence == null) return vision; // Somehow we couldn't detect what fence we hit => just stop search
 
                     // Mark node that fence is on as explored
                     vision.AddExploredNode(hitFence.Node);

@@ -234,11 +234,10 @@ namespace BlockmapFramework
             return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
         }
 
-        public override bool IsPassable(Entity entity = null)
+        protected override bool IsGenerallyPassable()
         {
             if (IsCenterUnderWater) return false;
-
-            return base.IsPassable(entity);
+            return base.IsGenerallyPassable();
         }
 
         public bool IsCenterUnderWater => (WaterNode != null && GetCenterWorldPosition().y < WaterNode.WaterBody.WaterSurfaceWorldHeight);

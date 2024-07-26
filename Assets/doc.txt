@@ -1,8 +1,5 @@
 --- World Generation Update
 
-Rework IsPassable so it's cached per node as a Dictionary<Direction, int> where Direction is the side/corner of the node and int is the max height where it's still passable.
-	- 0 = impassable
-
 - Implement some line features for new map gen system
 	> road
 	> rail track

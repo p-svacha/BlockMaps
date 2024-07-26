@@ -23,6 +23,8 @@ namespace BlockmapFramework
         /// The world cell coordiantes of the wall.
         /// </summary>
         public Vector3Int GlobalCellCoordinates { get; private set; }
+        public int MinAltitude => GlobalCellCoordinates.y;
+        public int MaxAltitude => MinAltitude;
         public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
         public Vector2Int WorldCoordinates => new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
         public Chunk Chunk => World.GetChunk(WorldCoordinates);

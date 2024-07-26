@@ -527,6 +527,7 @@ namespace BlockmapFramework
             if (hitOffsetAirNode != null) return hitOffsetAirNode;
 
             // Didnt' find anything
+            Debug.LogWarning("GetAirNodeFromRaycastHit failed to find an air node at world position: " + hit.point.ToString());
             return null;
         }
         public Fence GetFenceFromRaycastHit(RaycastHit hit)
@@ -688,6 +689,72 @@ namespace BlockmapFramework
             return GetNodeHoverModeCorners(altitudeHitPoint);
         }
 
+        /// <summary>
+        /// Returns the amount of headspace for a cell in all directions by checking for nodes and walls (only on side/corner) ABOVE the cell.
+        /// </summary>
+        public Dictionary<Direction, int> GetFreeHeadspace(Vector3Int cellCoordinates)
+        {
+            Dictionary<Direction, int> headspace = new Dictionary<Direction, int>();
+            foreach (Direction dir in HelperFunctions.GetAllDirections9()) headspace[dir] = World.MAX_ALTITUDE;
+
+            Vector2Int worldCoordinates = new Vector2Int(cellCoordinates.x, cellCoordinates.z);
+            int altitude = cellCoordinates.y;
+            List<BlockmapNode> nodesAbove = GetNodes(worldCoordinates, altitude, World.MAX_ALTITUDE);
+            List<Wall> wallsOnCoordinate = GetWalls(worldCoordinates);
+
+            // 1. Check corners from nodes above (these block corners, side and center)
+            foreach (BlockmapNode node in nodesAbove)
+            {
+                foreach (Direction corner in HelperFunctions.GetCorners())
+                {
+                    int diff = node.Altitude[corner] - altitude;
+                    headspace[corner] = diff;
+                    headspace[HelperFunctions.GetPreviousDirection8(corner)] = diff;
+                    headspace[HelperFunctions.GetNextDirection8(corner)] = diff;
+                }
+            }
+
+            // 1b. Center headspace is only affected by nodes above
+            headspace[Direction.None] = Mathf.Min(headspace[Direction.NW], headspace[Direction.NE], headspace[Direction.SW], headspace[Direction.SE]);
+
+            // 2. Check side walls above (these block sides and corners)
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != side) continue; // Wall is not on this side
+                    if (wall.MaxAltitude <= altitude) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - altitude;
+
+                    if (diff < headspace[side]) headspace[side] = diff;
+
+                    // Also blocks corners
+                    Direction prevDir = HelperFunctions.GetPreviousDirection8(side);
+                    if (diff < headspace[prevDir]) headspace[prevDir] = diff;
+
+                    Direction nextDir = HelperFunctions.GetNextDirection8(side);
+                    if (diff < headspace[nextDir]) headspace[nextDir] = diff;
+                }
+            }
+
+            // 3. Check corner walls (these only block corners)
+            foreach (Direction corner in HelperFunctions.GetCorners())
+            {
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != corner) continue; // Wall is not on this corner
+                    if (wall.MaxAltitude < altitude) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - altitude;
+
+                    if (diff < headspace[corner]) headspace[corner] = diff;
+                }
+            }
+
+            return headspace;
+        }
+
         #endregion
 
         #region Actions
@@ -758,6 +825,17 @@ namespace BlockmapFramework
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
+            /*
+            foreach (BlockmapNode node in nodes) node.RecalcuatePassability();
+            foreach (BlockmapNode node in nodes) node.ResetTransitions();
+            foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
+            foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
+            foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+
+            if (isInitialization) IsInitialized = true;
+
+            UpdateNavmeshDisplayDelayed();
+            */
             StartCoroutine(DoUpdateNavmesh(nodes, isInitialization));
         }
         /// <summary>
@@ -769,11 +847,17 @@ namespace BlockmapFramework
             yield return new WaitForFixedUpdate();
 
             System.Diagnostics.Stopwatch fullNavmeshTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch recalcPassabilityTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch straightTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch diagonalTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch climbTransitionsTimer = new System.Diagnostics.Stopwatch();
             fullNavmeshTimer.Start();
-            
+
+            recalcPassabilityTimer.Start();
+            foreach (BlockmapNode node in nodes) node.RecalcuatePassability();
+            recalcPassabilityTimer.Stop();
+            Debug.Log("Recalculating passability took " + recalcPassabilityTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+
             foreach (BlockmapNode node in nodes) node.ResetTransitions();
 
             straightTransitionsTimer.Start();
@@ -786,11 +870,12 @@ namespace BlockmapFramework
             diagonalTransitionsTimer.Stop();
             Debug.Log("Updating diagonal transitions took " + diagonalTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
 
+            
             climbTransitionsTimer.Start();
             foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
             climbTransitionsTimer.Stop();
             Debug.Log("Updating climb transitions took " + climbTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
-
+            
             if (isInitialization) IsInitialized = true;
 
             fullNavmeshTimer.Stop();
@@ -923,8 +1008,8 @@ namespace BlockmapFramework
                 if (occupiedNode is WaterNode waterNode && placePos.y <= waterNode.WaterBody.WaterSurfaceWorldHeight) return false;
                 if (occupiedNode is GroundNode groundNode && groundNode.WaterNode != null && placePos.y <= groundNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
 
-                // Check if anything above that blocks space
-                int headSpace = occupiedNode.GetFreeHeadSpace(Direction.None);
+                // Check if entity can stand here
+                int headSpace = occupiedNode.MaxPassableHeight[Direction.None];
                 if (occupiedNode.BaseAltitude + headSpace < maxHeight) return false;
 
                 // Check if alredy has an entity
@@ -1265,7 +1350,7 @@ namespace BlockmapFramework
                 // Check headspace
                 int targetAltitude = adjNode.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side));
                 int ladderHeight = targetAltitude - sourceAltitude;
-                int headspace = source.GetFreeHeadSpace(side);
+                int headspace = source.FreeHeadSpace[side];
                 if (headspace <= ladderHeight) continue; // a node is blocking the climb
 
                 // Check if a wall would block the ladder
@@ -1343,7 +1428,7 @@ namespace BlockmapFramework
             // Check for each affected corner if enough space is above node
             foreach (Direction corner in HelperFunctions.GetAffectedCorners(side))
             {
-                int freeHeadSpace = node.GetFreeHeadSpace(corner);
+                int freeHeadSpace = node.FreeHeadSpace[corner];
                 if (freeHeadSpace < height) return false;
             }
 
@@ -1651,9 +1736,9 @@ namespace BlockmapFramework
         }
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
-            if (!IsInWorld(worldCoordinates)) return new List<BlockmapNode>();
-
             Chunk chunk = GetChunk(worldCoordinates);
+            if(chunk == null) return new List<BlockmapNode>(); // not in world
+
             return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
         }
 
@@ -1919,9 +2004,6 @@ namespace BlockmapFramework
         /// </summary>
         public bool DoAdjacentHeightsMatch(BlockmapNode fromNode, BlockmapNode toNode, Direction dir)
         {
-            if (toNode.WorldCoordinates != GetWorldCoordinatesInDirection(fromNode.WorldCoordinates, dir))
-                throw new System.Exception("toNode is not adjacent to fromNode in the given direction. fromNode = " + fromNode.WorldCoordinates.ToString() + ", toNode = " + toNode.WorldCoordinates.ToString() + ", direction = " + dir.ToString());
-
             switch (dir)
             {
                 case Direction.N:

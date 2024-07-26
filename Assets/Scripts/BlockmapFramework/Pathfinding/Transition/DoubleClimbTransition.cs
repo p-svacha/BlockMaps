@@ -17,11 +17,9 @@ namespace BlockmapFramework
         public int EndHeight { get; private set; }
         public int HeightUp { get; private set; }
         public int HeightDown { get; private set; }
-        public int HeadSpaceRequirementUp { get; private set; }
-        public int HeadSpaceRequirementDown { get; private set; }
         public ClimbingCategory ClimbSkillRequirement { get; private set; }
 
-        public DoubleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climbUp, List<IClimbable> climbDown) : base(from, to)
+        public DoubleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climbUp, List<IClimbable> climbDown, int maxHeight) : base(from, to, maxHeight)
         {
             Direction = dir;
             ClimbUp = climbUp;
@@ -32,10 +30,6 @@ namespace BlockmapFramework
 
             HeightUp = climbUp.Count;
             HeightDown = climbDown.Count;
-
-            // Calculate head space needed to use this
-            HeadSpaceRequirementUp = From.GetFreeHeadSpace(dir) - HeightUp;
-            HeadSpaceRequirementDown = To.GetFreeHeadSpace(HelperFunctions.GetOppositeDirection(dir)) - HeightDown;
 
             ClimbSkillRequirement = (ClimbingCategory)(climbUp.Concat(climbDown).Max(x => (int)x.ClimbSkillRequirement));
         }
@@ -53,16 +47,11 @@ namespace BlockmapFramework
 
         public override bool CanPass(MovingEntity entity)
         {
-            // Headspace
-            if (entity.Height > HeadSpaceRequirementUp) return false;
-            if (entity.Height > HeadSpaceRequirementDown) return false;
+            // Entity height
+            if (entity.Height > MaxHeight) return false;
 
             // Climb skill
             if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
-
-            // Base requirements (adapted to ignore ladder)
-            if (!From.IsPassable(Direction, entity, checkClimbables: false)) return false;
-            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity, checkClimbables: false)) return false;
 
             return true;
         }
