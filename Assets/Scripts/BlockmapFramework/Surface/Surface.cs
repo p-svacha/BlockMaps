@@ -22,12 +22,12 @@ namespace BlockmapFramework
         /// <br/>Useful for roofs for example.
         /// </summary>
         public abstract bool UseLongEdges { get; }
-        public abstract Color Color { get; }
+        public abstract Color PreviewColor { get; }
 
         /// <summary>
         /// Used in surface material for blending
         /// </summary>
-        public virtual Texture2D Texture => ResourceManager.Singleton.GrassTexture;
+        public virtual Texture2D BlendingTexture => ResourceManager.Singleton.GrassTexture;
 
         public SurfaceProperties Properties { get; private set; }
 

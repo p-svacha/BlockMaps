@@ -5,7 +5,6 @@ Shader "Custom/SurfaceShader"
         // Draw mode
         [Toggle] _FullVisibility("Full Visibility", Float) = 1
         [Toggle] _UseTextures("Use Textures", Float) = 0
-        _BlendThreshhold("Blend Threshhold", Float) = 0.4
 
         // Terrain texture
         _TerrainTextures("Terrain Textures", 2DArray) = "" { }
@@ -29,6 +28,10 @@ Shader "Custom/SurfaceShader"
 
         _Glossiness("Smoothness", Range(0,1)) = 0.5
         _Metallic("Metallic", Range(0,1)) = 0.0
+
+        // Blend values
+        _BlendThreshhold("Blend Threshhold", Range(0,0.5)) = 0.4
+        _BlendNoiseScale("Blend Noise Scale", Range(0.5, 50)) = 10
     }
 
     SubShader
@@ -51,6 +54,7 @@ Shader "Custom/SurfaceShader"
         // Draw mode
         float _UseTextures;
         float _BlendThreshhold;
+        float _BlendNoiseScale;
 
         // Terrain colors
         fixed4 _TerrainColors[256];
@@ -127,20 +131,113 @@ Shader "Custom/SurfaceShader"
         }
 
         // Returns the pixel color on a pixel near the corner of a surface tile where 4 tiles blend
-        fixed4 Get4BlendColor(float blendX, float blendY, fixed4 baseColor, fixed4 adjXColor, fixed4 adjYColor, fixed4 adjCornerColor) 
+        // blendX and blendY are 0 at center and then go upwards up to 1 in the corner
+        fixed4 Get4BlendColor(float relativePosX, float relativePosY, fixed4 baseColor, fixed4 adjXColor, fixed4 adjYColor, fixed4 adjCornerColor, float noiseX, float noiseY)
         {
-            float blendBase = 0.25 + 0.25 * (max(1 - blendX, 1 - blendY)) + 0.5 * (1 - max(blendX, blendY)); // 1 in center, 0.5 on side, 0.25 in corner 
-            float blendCorner = min(blendX, blendY) * 0.25; // 0.25 in corner, 0 on side, 0 in center
-            float blendSideY = (blendY * 0.5) - blendCorner; //max((blendY * 0.5) - (blendX * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
-            float blendSideX = (blendX * 0.5) - blendCorner; // max((blendX * 0.5) - (blendY * 0.5), 0); // 0.25 in corner, 0.5 on side, 0 in center
+            // Add noise to blending
+            float blendNoiseStrengthX = (relativePosX * 0.5) * 4;
+            float blendNoiseValueX = noiseX * blendNoiseStrengthX;
+            float sideBlendX = (relativePosX * 0.5) * blendNoiseValueX;
+            if (sideBlendX < 0) sideBlendX = 0;
+            if (sideBlendX > 1) sideBlendX = 1;
 
-            return (blendBase * baseColor) + (blendCorner * adjCornerColor) + (blendSideY * adjYColor) + (blendSideX * adjXColor);
+            float blendNoiseStrengthY = (relativePosY * 0.5) * 4;
+            float blendNoiseValueY = noiseY * blendNoiseStrengthY;
+            float sideBlendY = (relativePosY * 0.5) * blendNoiseValueY;
+            if (sideBlendY < 0) sideBlendY = 0;
+            if (sideBlendY > 1) sideBlendY = 1;
+
+            // Create lerped colors to both adjacent tiles and also between the two adjacent tiles
+            float4 lerpedColor_ThisToAdjX = lerp(baseColor, adjXColor, sideBlendX);
+            float4 lerpedColor_ThisToAdjY = lerp(baseColor, adjYColor, sideBlendY);
+            float4 lerpedColor_AdjXToCorner = lerp(adjXColor, adjCornerColor, sideBlendY);
+            float4 lerpedColor_AdjYToCorner = lerp(adjYColor, adjCornerColor, sideBlendX);
+
+            // Calculate alpha values for the 4 lerped colors
+            float distanceFromCorner = ((1 - relativePosX) + (1 - relativePosY)) * 0.5; // 0-1
+            float distanceFromCenter = (relativePosX + relativePosY) * 0.5; // 0-1
+            float distanceFromXSide = ((1 - relativePosX) + relativePosY) * 0.5; // 0-1
+            float distanceFromYSide = (relativePosX + (1 - relativePosY)) * 0.5; // 0-1
+
+            float alphaFromCorner = 0.25 * max((distanceFromCenter - 0.5) * 2, 0);
+
+            float alpha_ThisToAdjX = distanceFromYSide - alphaFromCorner; // 0.5 at center, 1 at x side, 0 at y side, 0.25 at corner
+            float alpha_ThisToAdjY = distanceFromXSide - alphaFromCorner; // 0.5 at center, 0 at x side, 1 at y side, 0.25 at corner
+            float alpha_AdjXToCorner = alphaFromCorner; // 0 at center, 0 at x side, 0 at y side, 0.25 at corner
+            float alpha_AdjYToCorner = alphaFromCorner; // 0 at center, 0 at x side, 0 at y side, 0.25 at corner
+            
+            //alpha_ThisToAdjX = 0;
+            //alpha_ThisToAdjY = 0;
+            //alpha_AdjXToCorner = 0;
+            //alpha_AdjYToCorner = 0;
+
+            return (alpha_ThisToAdjX * lerpedColor_ThisToAdjX) + (alpha_ThisToAdjY * lerpedColor_ThisToAdjY) + (alpha_AdjXToCorner * lerpedColor_AdjXToCorner) + (alpha_AdjYToCorner * lerpedColor_AdjYToCorner);
+            //return (baseColorAlpha * baseColor) + (cornerColorAlpha * adjCornerColor) + (adjYColorAlpha * adjYColor) + (adjXColorAlpha * adjXColor);
         }
 
         int GetVisibilityArrayIndex(float x, float y)
         {
             return int((y + 1) + (x + 1) * (_ChunkSize + 2));
         }
+
+        // Blend noise functions
+
+        inline float unity_noise_randomValue(float2 uv)
+        {
+            return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+        }
+
+        inline float unity_noise_interpolate(float a, float b, float t)
+        {
+            return (1.0 - t) * a + (t * b);
+        }
+
+        inline float unity_valueNoise(float2 uv)
+        {
+            float2 i = floor(uv);
+            float2 f = frac(uv);
+            f = f * f * (3.0 - 2.0 * f);
+
+            uv = abs(frac(uv) - 0.5);
+            float2 c0 = i + float2(0.0, 0.0);
+            float2 c1 = i + float2(1.0, 0.0);
+            float2 c2 = i + float2(0.0, 1.0);
+            float2 c3 = i + float2(1.0, 1.0);
+            float r0 = unity_noise_randomValue(c0);
+            float r1 = unity_noise_randomValue(c1);
+            float r2 = unity_noise_randomValue(c2);
+            float r3 = unity_noise_randomValue(c3);
+
+            float bottomOfGrid = unity_noise_interpolate(r0, r1, f.x);
+            float topOfGrid = unity_noise_interpolate(r2, r3, f.x);
+            float t = unity_noise_interpolate(bottomOfGrid, topOfGrid, f.y);
+            return t;
+        }
+
+        void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
+        {
+            float t = 0.0;
+
+            float freq = pow(2.0, float(0));
+            float amp = pow(0.5, float(3 - 0));
+            t += unity_valueNoise(float2(UV.x * Scale / freq, UV.y * Scale / freq)) * amp;
+
+            freq = pow(2.0, float(1));
+            amp = pow(0.5, float(3 - 1));
+            t += unity_valueNoise(float2(UV.x * Scale / freq, UV.y * Scale / freq)) * amp;
+
+            freq = pow(2.0, float(2));
+            amp = pow(0.5, float(3 - 2));
+            t += unity_valueNoise(float2(UV.x * Scale / freq, UV.y * Scale / freq)) * amp;
+
+            Out = t;
+        }
+
+
+
+
+
+        // ######################################################################### SURF START #########################################################################
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
@@ -218,8 +315,11 @@ Shader "Custom/SurfaceShader"
             fixed4 baseColor = GetPixelColor(IN.worldPos.xz, surfaceIndex);
             
             // ######################################################################### BLEND #########################################################################
-            
+
             if (_BlendThreshhold > 0) {
+
+                float noiseValue;
+                Unity_SimpleNoise_float(IN.worldPos.xz, _BlendNoiseScale, noiseValue);
 
                 if (relativePos.x < _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend nw
                 {
@@ -230,9 +330,8 @@ Shader "Custom/SurfaceShader"
                     float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
                     float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
 
-                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw);
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_n, blendColor_nw, noiseValue, 1 - noiseValue);
                 }
-
                 else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y > 1 - _BlendThreshhold) // Blend ne
                 {
                     fixed4 blendColor_ne = GetPixelColor(IN.worldPos.xz, _TileBlend_NE[tileIndex]);
@@ -242,7 +341,7 @@ Shader "Custom/SurfaceShader"
                     float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
                     float blendY = (1 / _BlendThreshhold) * relativePos.y - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
 
-                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_n, blendColor_ne);
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_n, blendColor_ne, 1 - noiseValue, 1 - noiseValue);
                 }
                 else if (relativePos.x > 1 - _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend se
                 {
@@ -253,8 +352,9 @@ Shader "Custom/SurfaceShader"
                     float blendX = (1 / _BlendThreshhold) * relativePos.x - (1 / _BlendThreshhold - 1); // 1 in corner then fade out
                     float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
 
-                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_s, blendColor_se);
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_e, blendColor_s, blendColor_se, 1 - noiseValue, noiseValue);
                 }
+
                 else if (relativePos.x < _BlendThreshhold && relativePos.y < _BlendThreshhold) // Blend sw
                 {
                     fixed4 blendColor_sw = GetPixelColor(IN.worldPos.xz, _TileBlend_SW[tileIndex]);
@@ -264,29 +364,65 @@ Shader "Custom/SurfaceShader"
                     float blendX = 1 - ((1 / _BlendThreshhold) * relativePos.x); // 1 in corner then fade out
                     float blendY = 1 - ((1 / _BlendThreshhold) * relativePos.y); // 1 in corner then fade out
 
-                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw);
+                    c = Get4BlendColor(blendX, blendY, baseColor, blendColor_w, blendColor_s, blendColor_sw, noiseValue, noiseValue);
                 }
 
                 else if (relativePos.x < _BlendThreshhold) // Blend west
                 {
-
                     fixed4 blendColor_w = GetPixelColor(IN.worldPos.xz, _TileBlend_W[tileIndex]);
-                    c = lerp(baseColor, blendColor_w, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.x));
+
+                    float baseBlendValue = (0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.x)); // Lerp-Value for blending without noise [0 - 0.5]
+
+                    float blendNoiseStrength = baseBlendValue * 4;
+                    float blendNoiseValue = noiseValue * blendNoiseStrength;
+
+                    float finalBlendValue = baseBlendValue * blendNoiseValue;
+                    if (finalBlendValue < 0) finalBlendValue = 0;
+                    if (finalBlendValue > 1) finalBlendValue = 1;
+
+                    c = lerp(baseColor, blendColor_w, finalBlendValue);
                 }
                 else if (relativePos.x > 1 - _BlendThreshhold) // Blend east
                 {
                     fixed4 blendColor_e = GetPixelColor(IN.worldPos.xz, _TileBlend_E[tileIndex]);
-                    c = lerp(baseColor, blendColor_e, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.x)));
+                    float baseBlendValue = (0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.x))); // Lerp-Value for blending without noise [0 - 0.5]
+
+                    float blendNoiseStrength = baseBlendValue * 4;
+                    float blendNoiseValue = (1 - noiseValue) * blendNoiseStrength;
+
+                    float finalBlendValue = baseBlendValue * blendNoiseValue;
+                    if (finalBlendValue < 0) finalBlendValue = 0;
+                    if (finalBlendValue > 1) finalBlendValue = 1;
+
+                    c = lerp(baseColor, blendColor_e, finalBlendValue);
                 }
                 else if (relativePos.y > 1 - _BlendThreshhold) // Blend north
                 {
                     fixed4 blendColor_n = GetPixelColor(IN.worldPos.xz, _TileBlend_N[tileIndex]);
-                    c = lerp(baseColor, blendColor_n, 0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.y)));
+                    float baseBlendValue = (0.5 - ((1 / (_BlendThreshhold * 2)) * (1 - relativePos.y))); // Lerp-Value for blending without noise [0 - 0.5]
+
+                    float blendNoiseStrength = baseBlendValue * 4;
+                    float blendNoiseValue = (1 - noiseValue) * blendNoiseStrength;
+
+                    float finalBlendValue = baseBlendValue * blendNoiseValue;
+                    if (finalBlendValue < 0) finalBlendValue = 0;
+                    if (finalBlendValue > 1) finalBlendValue = 1;
+
+                    c = lerp(baseColor, blendColor_n, finalBlendValue);
                 }
                 else if (relativePos.y < _BlendThreshhold) // Blend south
                 {
                     fixed4 blendColor_s = GetPixelColor(IN.worldPos.xz, _TileBlend_S[tileIndex]);
-                    c = lerp(baseColor, blendColor_s, 0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.y));
+                    float baseBlendValue = (0.5 - ((1 / (_BlendThreshhold * 2)) * relativePos.y)); // Lerp-Value for blending without noise [0 - 0.5]
+
+                    float blendNoiseStrength = baseBlendValue * 4;
+                    float blendNoiseValue = noiseValue * blendNoiseStrength;
+
+                    float finalBlendValue = baseBlendValue * blendNoiseValue;
+                    if (finalBlendValue < 0) finalBlendValue = 0;
+                    if (finalBlendValue > 1) finalBlendValue = 1;
+
+                    c = lerp(baseColor, blendColor_s, finalBlendValue);
                 }
                 else // No blend
                 {

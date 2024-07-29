@@ -23,6 +23,7 @@ namespace BlockmapFramework
                 {SurfacePropertyId.Sand, new SP02_Sand() },
                 {SurfacePropertyId.Water, new SP03_Water() },
                 {SurfacePropertyId.Default, new SP04_Default() },
+                {SurfacePropertyId.DirtPath, new SP05_DirtPath() },
             };
 
             // Define all surfaces
@@ -35,12 +36,13 @@ namespace BlockmapFramework
                 { SurfaceId.RoofingTiles, new S005_RoofingTiles(this) },
                 { SurfaceId.WoodParquet, new S006_WoodParquet(this) },
                 { SurfaceId.Tiles, new S007_Tiles(this) },
+                { SurfaceId.DirtPath, new S008_DirtPath(this) },
             };
 
             // Pass terrain colors to surface material
             Color[] terrainColors = new Color[Surfaces.Count];
             int counter = 0;
-            foreach(Surface s in Surfaces.Values) terrainColors[counter++] = s.Color;
+            foreach(Surface s in Surfaces.Values) terrainColors[counter++] = s.PreviewColor;
             ResourceManager.Singleton.SurfaceMaterial.SetColorArray("_TerrainColors", terrainColors);
             
             // Pass terrain textures to surface material
@@ -49,7 +51,7 @@ namespace BlockmapFramework
             foreach (Surface s in Surfaces.Values)
             {
                 int index = counter++;
-                if (s.Texture != null) terrainTexArray.SetPixels32(s.Texture.GetPixels32(), index);
+                if (s.BlendingTexture != null) terrainTexArray.SetPixels32(s.BlendingTexture.GetPixels32(), index);
             }
             terrainTexArray.Apply();
             ResourceManager.Singleton.SurfaceMaterial.SetTexture("_TerrainTextures", terrainTexArray);

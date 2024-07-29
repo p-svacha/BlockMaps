@@ -8,6 +8,6 @@ namespace BlockmapFramework
     {
         public override SurfacePropertyId Id => SurfacePropertyId.Grass;
         public override string Name => "Grass";
-        public override float SpeedModifier => 0.6f;
+        public override float SpeedModifier => 0.55f;
     }
 }

@@ -32,7 +32,7 @@ namespace WorldEditor
             SelectionPanel.Clear();
             foreach (Surface s in SurfaceManager.Instance.GetAllSurfaces())
             {
-                SelectionPanel.AddElement(null, s.Color, s.Name, () => SelectSurface(s.Id));
+                SelectionPanel.AddElement(null, s.PreviewColor, s.Name, () => SelectSurface(s.Id));
             }
             SelectionPanel.SelectFirstElement();
         }

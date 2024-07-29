@@ -24,7 +24,6 @@
 	> Parcel generation depends on bordering parcels, roads, rivers, map edge
 	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
 	> Implement rules which parcels can be next to each other
-	> Increase performance
 
 
 	> 1. height map generation
@@ -47,6 +46,9 @@
 
 --- Update More Node Shapes
 
+Allow 0022 for stairs
+ - In node surface add rule that when 0022 shape draw a stair mesh instead of slope	
+
 (> allow any height diffs on allowed shapes)
 - Remove limit of max height diff within a node
 	> slopes can also go up 2,3,etc.
@@ -60,9 +62,9 @@
 
 ---
 
-- Editor: World Generation Tool: Expand by x chunks in direction
+- Editor: Decreasing tool size in ground sculpting doesn't remove overlay over previous chunks
 
-- fix: characters can walk diagonally through nodes that don't have enough headspace for their height
+- Editor: World Generation Tool: Expand by x chunks in direction
 
 - Editor improvements:
 	> wall height
@@ -127,7 +129,7 @@ Animation system for walking / climbing entities
 
 - Dogs need a nearby master to work
 
-- Jumpong ability
+- Jumping ability
 	> to hop over fences
 	> to hop over gaps
 	> jumping ability 1 = hop over 1 tile gap, hop over 1 tile fence

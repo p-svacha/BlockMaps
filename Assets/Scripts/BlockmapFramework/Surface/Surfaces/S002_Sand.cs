@@ -13,8 +13,8 @@ namespace BlockmapFramework
         public override SurfacePropertyId PropertiesId => SurfacePropertyId.Sand;
         public override bool DoBlend => true;
         public override bool UseLongEdges => false;
-        public override Color Color => ResourceManager.Singleton.SandColor;
-        public override Texture2D Texture => ResourceManager.Singleton.SandTexture;
+        public override Color PreviewColor => ResourceManager.Singleton.SandColor;
+        public override Texture2D BlendingTexture => ResourceManager.Singleton.SandTexture;
 
 
         #region Draw

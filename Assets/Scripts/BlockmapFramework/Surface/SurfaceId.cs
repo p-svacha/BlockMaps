@@ -10,5 +10,6 @@ public enum SurfaceId
     Street,
     RoofingTiles,
     WoodParquet,
-    Tiles
+    Tiles,
+    DirtPath
 }

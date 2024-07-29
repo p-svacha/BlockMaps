@@ -9445,8 +9445,9 @@ MonoBehaviour:
   Mat_TilesWhite: {fileID: 2100000, guid: 597203a244c49c24db0ff2fcabac0e08, type: 2}
   Mat_TilesSmallVaried: {fileID: 2100000, guid: 02bcf0b8c0ac47f4b8fe1668118a9b49, type: 2}
   Mat_Glass: {fileID: 2100000, guid: 5e6482db60192bd4499298728d9bd3e4, type: 2}
-  GrassColor: {r: 0.2, g: 0.3, b: 0.1, a: 1}
-  SandColor: {r: 0.7, g: 0.5, b: 0, a: 1}
+  Mat_DirtPath: {fileID: 2100000, guid: 1ff7a99445d91f647a92f0613db55376, type: 2}
+  GrassColor: {r: 0.32156864, g: 0.34509805, b: 0.21176472, a: 1}
+  SandColor: {r: 0.76470596, g: 0.6156863, b: 0.5019608, a: 1}
   TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
   WaterColor: {r: 0, g: 0.3, b: 0.3, a: 1}
   GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}

@@ -14,7 +14,7 @@ namespace BlockmapFramework
         public override SurfacePropertyId PropertiesId => SurfacePropertyId.Default;
         public override bool DoBlend => false;
         public override bool UseLongEdges => false;
-        public override Color Color => ResourceManager.Singleton.Mat_TilesWhite.color;
+        public override Color PreviewColor => ResourceManager.Singleton.Mat_TilesWhite.color;
 
         #region Draw
 

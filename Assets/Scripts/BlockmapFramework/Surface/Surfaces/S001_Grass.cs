@@ -13,8 +13,8 @@ namespace BlockmapFramework
         public override SurfacePropertyId PropertiesId => SurfacePropertyId.Grass;
         public override bool DoBlend => true;
         public override bool UseLongEdges => false;
-        public override Color Color => ResourceManager.Singleton.GrassColor;
-        public override Texture2D Texture => ResourceManager.Singleton.GrassTexture;
+        public override Color PreviewColor => ResourceManager.Singleton.GrassColor;
+        public override Texture2D BlendingTexture => ResourceManager.Singleton.GrassTexture;
 
         #region Draw
 

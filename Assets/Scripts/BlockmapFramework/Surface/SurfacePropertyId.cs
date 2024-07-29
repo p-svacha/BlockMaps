@@ -9,6 +9,7 @@ namespace BlockmapFramework
         Sand,
         Grass,
         Water,
-        Default
+        Default,
+        DirtPath
     }
 }
