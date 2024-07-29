@@ -17,8 +17,8 @@ namespace WorldEditor
             if (World.HoveredDynamicNode != null)
             {
                 Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode9);
-                bool canIncrease = World.CanChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
-                bool canDecrease = World.CanChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
+                bool canIncrease = World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
+                bool canDecrease = World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
 
                 Color c;
                 if (canIncrease && canDecrease) c = Color.white;
@@ -31,17 +31,17 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredDynamicNode != null && World.CanChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true))
+            if (World.HoveredDynamicNode != null && World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true))
             {
-                World.ChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
+                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
             }
         }
 
         public override void HandleRightClick()
         {
-            if (World.HoveredDynamicNode != null && World.CanChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false))
+            if (World.HoveredDynamicNode != null && World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false))
             {
-                World.ChangeHeight(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
+                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
             }
         }
 

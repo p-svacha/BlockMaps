@@ -25,40 +25,42 @@ namespace BlockmapFramework
             Surface = SurfaceManager.Instance.GetSurface(id);
         }
 
-        public bool CanChangeHeight(Direction mode)
+        public bool CanChangeShape(Direction mode)
         {
-            // Entities: Can't change height in any entity is on the node
+            // Entities: Can't change height in any entity is on the node (includes ladders/doors)
             if (Entities.Count > 0) return false;
-
-            // Ladders: Can't change height if any ladder is affected by height change
-            foreach (Direction ladderDir in TargetLadders.Keys)
-                if (HelperFunctions.DoAffectedCornersOverlap(mode, ladderDir))
-                    return false;
 
             return true;
         }
 
-        public virtual bool CanChangeHeight(Direction mode, bool isIncrease)
+        public virtual bool CanChangeShape(Direction mode, bool isIncrease)
         {
             // General checks no matter if up/down
-            if (!CanChangeHeight(mode)) return false;
+            if (!CanChangeShape(mode)) return false;
 
             // Calculate new heights
-            Dictionary<Direction, int> newHeights = GetNewHeights(mode, isIncrease);
-            if (!World.IsValidNodeHeight(newHeights)) return false;
-            int newBaseHeight = newHeights.Values.Min();
-            int newMaxHeight = newHeights.Values.Max();
+            Dictionary<Direction, int> newAltitude = GetNewHeights(mode, isIncrease);
+            if (!World.IsValidNodeHeight(newAltitude)) return false;
+            int newBaseHeight = newAltitude.Values.Min();
+            int newMaxHeight = newAltitude.Values.Max();
 
             // Check if all heights are within allowed values
-            if (newHeights.Values.Any(x => x < 0)) return false;
-            if (newHeights.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
+            if (newAltitude.Values.Any(x => x < 0)) return false;
+            if (newAltitude.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
 
-            // Check if changing height would intersect the node with another one on the same coordinates
+            // Check that is not passing through another node (meaning that one needs to be clearly above the other)
             List<BlockmapNode> nodesOnCoordinate = World.GetNodes(WorldCoordinates);
-            foreach(BlockmapNode node in nodesOnCoordinate)
+            foreach (BlockmapNode node in nodesOnCoordinate)
             {
                 if (node == this) continue;
-                if (World.DoNodesIntersect(newHeights, node.Altitude)) return false;
+                if (!World.IsAbove(newAltitude, node.Altitude) && !World.IsAbove(node.Altitude, newAltitude)) return false;
+            }
+
+            // Check if no more than 2 corners would overlap with another node
+            foreach (BlockmapNode node in nodesOnCoordinate)
+            {
+                if (node == this) continue;
+                if (World.GetNumOverlappingCorners(newAltitude, node.Altitude) > 2) return false;
             }
 
             // Check if increasing height would lead to a fence intersecting with a node above
@@ -66,7 +68,7 @@ namespace BlockmapFramework
             {
                 foreach (Fence fence in Fences.Values)
                 {
-                    Dictionary<Direction, int> newFenceHeights = fence.GetMaxHeights(newHeights);
+                    Dictionary<Direction, int> newFenceHeights = fence.GetMaxHeights(newAltitude);
                     foreach(BlockmapNode nodeAbove in nodesOnCoordinate)
                     {
                         if (nodeAbove == this) continue;
@@ -94,11 +96,11 @@ namespace BlockmapFramework
                         bool otherSideUnderwater = false;
                         foreach (Direction corner2 in HelperFunctions.GetAffectedCorners(side))
                         {
-                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight) ownSideUnderwater = true;
+                            if (newAltitude[corner2] < adjWater.WaterBody.ShoreHeight) ownSideUnderwater = true;
                             if (adjWater.GroundNode.Altitude[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) otherSideUnderwater = true;
 
                             if (ownSideUnderwater && adjWater.GroundNode.Altitude[HelperFunctions.GetMirroredCorner(corner2, side)] < adjWater.WaterBody.ShoreHeight) return false;
-                            if (newHeights[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
+                            if (newAltitude[corner2] < adjWater.WaterBody.ShoreHeight && otherSideUnderwater) return false;
                         }
                     }
                 }
@@ -114,7 +116,7 @@ namespace BlockmapFramework
                         Dictionary<Direction, int> fenceHeights = fence.MaxHeights;
                         foreach(Direction corner in fenceHeights.Keys)
                         {
-                            if (fenceHeights[corner] > newHeights[corner]) return false;
+                            if (fenceHeights[corner] > newAltitude[corner]) return false;
                         }
                     }
                 }
@@ -122,7 +124,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void ChangeHeight(Direction mode, bool isIncrease)
+        public void ChangeShape(Direction mode, bool isIncrease)
         {
             Dictionary<Direction, int> preChange = new Dictionary<Direction, int>();
             foreach (Direction dir in Altitude.Keys) preChange[dir] = Altitude[dir];
@@ -197,6 +199,11 @@ namespace BlockmapFramework
         public override Surface GetSurface() => Surface;
         public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
         public override int GetSubType() => (int)Surface.Id;
+
+        public override Vector3 GetCenterWorldPosition()
+        {
+            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
+        }
 
         #endregion
     }

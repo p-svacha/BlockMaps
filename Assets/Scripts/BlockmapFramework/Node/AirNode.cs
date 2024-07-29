@@ -19,14 +19,5 @@ namespace BlockmapFramework
         }
 
         #endregion
-
-        #region Getters
-
-        public override Vector3 GetCenterWorldPosition()
-        {
-            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeight(BaseAltitude + ((MaxAltitude - BaseAltitude) * 0.5f)), WorldCoordinates.y + 0.5f);
-        }
-
-        #endregion
     }
 }

@@ -221,17 +221,11 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public override bool CanChangeHeight(Direction mode, bool isIncrease)
+        public override bool CanChangeShape(Direction mode, bool isIncrease)
         {
             if (WaterNode != null) return false;
 
-            return base.CanChangeHeight(mode, isIncrease);
-        }
-
-       
-        public override Vector3 GetCenterWorldPosition()
-        {
-            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
+            return base.CanChangeShape(mode, isIncrease);
         }
 
         protected override bool IsGenerallyPassable()

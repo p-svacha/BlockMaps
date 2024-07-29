@@ -7,6 +7,8 @@ namespace BlockmapFramework.WorldGeneration
 {
     public abstract class WorldGenerator
     {
+        private const int MAX_WORLD_SIZE = 512;
+
         public abstract string Name { get; }
 
         protected int ChunkSize;
@@ -19,8 +21,8 @@ namespace BlockmapFramework.WorldGeneration
 
         public void InitGeneration(int chunkSize, int numChunks)
         {
-            if (chunkSize > 16) throw new System.Exception("Chunk size can't be bigger than 16 due to shader limitations.");
-            if (chunkSize * numChunks > 512) throw new System.Exception("World size can't be bigger than 512.");
+            if (chunkSize != 16) throw new System.Exception("Chunk size must be 16 due to shader limitations.");
+            if (chunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
 
             ChunkSize = chunkSize;
             NumChunks = numChunks;

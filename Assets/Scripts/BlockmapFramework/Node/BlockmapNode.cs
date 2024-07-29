@@ -118,6 +118,8 @@ namespace BlockmapFramework
             Transitions = new Dictionary<BlockmapNode, Transition>();
             WalkTransitions = new Dictionary<Direction, Transition>();
 
+            FreeHeadSpace = new Dictionary<Direction, int>();
+            foreach (Direction dir in HelperFunctions.GetAllDirections9()) FreeHeadSpace.Add(dir, 0);
             MaxPassableHeight = new Dictionary<Direction, int>();
             foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight.Add(dir, 0);
         }
@@ -143,7 +145,7 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Transitions
+        #region Navmesh Transitions
         ///
         /// ************* TRANSITIONS *************
         /// 
@@ -156,6 +158,76 @@ namespace BlockmapFramework
         /// 5. SetCliffClimbTransitions()
         /// 
 
+        /// <summary>
+        /// Recalculates the free head space for all directions. Free headspace refers to the amount of cells that are unblocked by nodes/walls ABOVE this node.
+        /// </summary>
+        private void RecalculateFreeHeadSpace()
+        {
+            foreach (Direction dir in HelperFunctions.GetAllDirections9()) FreeHeadSpace[dir] = World.MAX_ALTITUDE;
+
+            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, BaseAltitude, World.MAX_ALTITUDE);
+            List<Wall> wallsOnCoordinate = World.GetWalls(WorldCoordinates);
+
+            // 1. Check corners from nodes above (these block corners, side and center)
+            foreach (BlockmapNode node in nodesAbove)
+            {
+                if (node == this) continue;
+                if (!node.IsSolid) continue;
+                if (IsAbove(node)) continue;
+
+                foreach (Direction corner in HelperFunctions.GetCorners())
+                {
+                    int diff = node.Altitude[corner] - Altitude[corner];
+                    FreeHeadSpace[corner] = diff;
+
+                    Direction prevDir = HelperFunctions.GetPreviousDirection8(corner);
+                    Direction nextDir = HelperFunctions.GetNextDirection8(corner);
+                    if (diff < FreeHeadSpace[prevDir]) FreeHeadSpace[prevDir] = diff;
+                    if (diff < FreeHeadSpace[nextDir]) FreeHeadSpace[nextDir] = diff;
+                }
+            }
+
+            // 1b. Center headspace is only affected by nodes above
+            FreeHeadSpace[Direction.None] = Mathf.Min(FreeHeadSpace[Direction.NW], FreeHeadSpace[Direction.NE], FreeHeadSpace[Direction.SW], FreeHeadSpace[Direction.SE]);
+
+            // 2. Check side walls above (these block sides and corners)
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                int sideMinAltitude = GetMinAltitude(side);
+                int sideMaxAltitude = GetMaxAltitude(side);
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != side) continue; // Wall is not on this side
+                    if (wall.MaxAltitude < sideMinAltitude) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - sideMaxAltitude;
+
+                    if (diff < FreeHeadSpace[side]) FreeHeadSpace[side] = diff;
+
+                    // Also blocks corners
+                    Direction prevDir = HelperFunctions.GetPreviousDirection8(side);
+                    if (diff < FreeHeadSpace[prevDir]) FreeHeadSpace[prevDir] = diff;
+
+                    Direction nextDir = HelperFunctions.GetNextDirection8(side);
+                    if (diff < FreeHeadSpace[nextDir]) FreeHeadSpace[nextDir] = diff;
+                }
+            }
+
+            // 3. Check corner walls (these only block corners)
+            foreach (Direction corner in HelperFunctions.GetCorners())
+            {
+                int nodeAltitde = Altitude[corner];
+                foreach (Wall wall in wallsOnCoordinate)
+                {
+                    if (wall.Side != corner) continue; // Wall is not on this corner
+                    if (wall.MaxAltitude < nodeAltitde) continue; // Wall is below node
+
+                    int diff = wall.MaxAltitude - nodeAltitde;
+
+                    if (diff < FreeHeadSpace[corner]) FreeHeadSpace[corner] = diff;
+                }
+            }
+        }
 
         /// <summary>
         /// Recalculates the maximum height an entity is allowed to have so it can still pass through this node for all directions.
@@ -172,7 +244,7 @@ namespace BlockmapFramework
             }
 
             // Get free head space for all directions
-            FreeHeadSpace = RecalculateFreeHeadSpace();
+            RecalculateFreeHeadSpace();
 
             // Assign general/center headspace first (ignores all walls/fences/etc)
             MaxPassableHeight[Direction.None] = FreeHeadSpace[Direction.None];
@@ -256,9 +328,10 @@ namespace BlockmapFramework
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {
+                if (!adjNode.IsPassable()) continue;
                 if (!adjNode.IsPassable(oppositeDir)) continue;
 
-                if(ShouldConnectToNodeDirectly(adjNode, dir)) // Connect to node directly
+                if (ShouldConnectToNodeDirectly(adjNode, dir)) // Connect to node directly
                 {
                     int maxHeight = Mathf.Min(FreeHeadSpace[dir], adjNode.FreeHeadSpace[oppositeDir]);
 
@@ -273,7 +346,8 @@ namespace BlockmapFramework
         /// </summary>
         protected virtual bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
-            return World.DoAdjacentHeightsMatch(this, adjNode, dir);
+            if (!World.DoAdjacentHeightsMatch(this, adjNode, dir)) return false;
+            return true;
         }
 
         /// <summary>
@@ -887,74 +961,9 @@ namespace BlockmapFramework
             return false;
         }
 
-        /// <summary>
-        /// Returns the free head space for all directions. Free headspace refers to the amount of cells that are unblocked by nodes/walls ABOVE this node.
-        /// </summary>
-        private Dictionary<Direction, int> RecalculateFreeHeadSpace()
+        public bool IsAbove(BlockmapNode otherNode)
         {
-            Dictionary<Direction, int> headspace = new Dictionary<Direction, int>();
-
-            foreach (Direction dir in HelperFunctions.GetAllDirections9()) headspace[dir] = World.MAX_ALTITUDE;
-
-            List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, BaseAltitude, World.MAX_ALTITUDE);
-            List<Wall> wallsOnCoordinate = World.GetWalls(WorldCoordinates);
-
-            // 1. Check corners from nodes above (these block corners, side and center)
-            foreach (BlockmapNode node in nodesAbove)
-            {
-                if (node == this) continue;
-
-                foreach (Direction corner in HelperFunctions.GetCorners())
-                {
-                    int diff = node.Altitude[corner] - Altitude[corner];
-                    headspace[corner] = diff;
-                    headspace[HelperFunctions.GetPreviousDirection8(corner)] = diff;
-                    headspace[HelperFunctions.GetNextDirection8(corner)] = diff;
-                }
-            }
-
-            // 1b. Center headspace is only affected by nodes above
-            headspace[Direction.None] = Mathf.Min(headspace[Direction.NW], headspace[Direction.NE], headspace[Direction.SW], headspace[Direction.SE]);
-
-            // 2. Check side walls above (these block sides and corners)
-            foreach (Direction side in HelperFunctions.GetSides())
-            {
-                int sideMinAltitude = GetMinAltitude(side);
-                int sideMaxAltitude = GetMaxAltitude(side);
-                foreach (Wall wall in wallsOnCoordinate)
-                {
-                    if (wall.Side != side) continue; // Wall is not on this side
-                    if (wall.MaxAltitude <= sideMinAltitude) continue; // Wall is below node
-
-                    int diff = wall.MaxAltitude - sideMaxAltitude;
-
-                    if (diff < headspace[side]) headspace[side] = diff;
-
-                    // Also blocks corners
-                    Direction prevDir = HelperFunctions.GetPreviousDirection8(side);
-                    if (diff < headspace[prevDir]) headspace[prevDir] = diff;
-
-                    Direction nextDir = HelperFunctions.GetNextDirection8(side);
-                    if (diff < headspace[nextDir]) headspace[nextDir] = diff;
-                }
-            }
-
-            // 3. Check corner walls (these only block corners)
-            foreach (Direction corner in HelperFunctions.GetCorners())
-            {
-                int nodeAltitde = Altitude[corner];
-                foreach (Wall wall in wallsOnCoordinate)
-                {
-                    if (wall.Side != corner) continue; // Wall is not on this corner
-                    if (wall.MaxAltitude < nodeAltitde) continue; // Wall is below node
-
-                    int diff = wall.MaxAltitude - nodeAltitde;
-
-                    if (diff < headspace[corner]) headspace[corner] = diff;
-                }
-            }
-
-            return headspace;
+            return World.IsAbove(Altitude, otherNode.Altitude);
         }
 
         public override string ToString()
@@ -963,7 +972,7 @@ namespace BlockmapFramework
             foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
             string headspace = "FSH";
             foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
-            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name; // + "\n" + headspace + "\n" + mph;
+            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name + "\n" + headspace + "\n" + mph;
         }
 
         #endregion

@@ -28,8 +28,8 @@ namespace WorldEditor
                 {
 
                     Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode9);
-                    bool canIncrease = World.CanChangeHeight(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: true);
-                    bool canDecrease = World.CanChangeHeight(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: false);
+                    bool canIncrease = World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: true);
+                    bool canDecrease = World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: false);
 
                     Color c;
                     if (canIncrease && canDecrease) c = Color.white;
@@ -73,9 +73,9 @@ namespace WorldEditor
         {
             if (AreaSize == 1 && World.NodeHoverMode9 != Direction.None) // Partial height change of single tile
             {
-                if (World.HoveredGroundNode != null && World.CanChangeHeight(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease))
+                if (World.HoveredGroundNode != null && World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease))
                 {
-                    World.ChangeHeight(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease);
+                    World.ChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease);
                 }
             }
             else // Height change of full tile(s)
@@ -90,17 +90,17 @@ namespace WorldEditor
                     if(isIncrease)
                     {
                         int minHeight = nodesInArea.Min(x => x.BaseAltitude);
-                        affectedNodes = nodesInArea.Where(x => x.BaseAltitude == minHeight && x.CanChangeHeight(Direction.None, isIncrease)).ToList();
+                        affectedNodes = nodesInArea.Where(x => x.BaseAltitude == minHeight && x.CanChangeShape(Direction.None, isIncrease)).ToList();
                     }
                     else
                     {
                         int maxHeight = nodesInArea.Max(x => x.MaxAltitude);
-                        affectedNodes = nodesInArea.Where(x => x.MaxAltitude == maxHeight && x.CanChangeHeight(Direction.None, isIncrease: false)).ToList();
+                        affectedNodes = nodesInArea.Where(x => x.MaxAltitude == maxHeight && x.CanChangeShape(Direction.None, isIncrease: false)).ToList();
                     }
 
                     foreach (GroundNode node in affectedNodes)
                     {
-                        node.ChangeHeight(Direction.None, isIncrease);
+                        node.ChangeShape(Direction.None, isIncrease);
                     }
 
                     // Smooth outside edges of affected nodes
@@ -139,10 +139,10 @@ namespace WorldEditor
             GroundNode adjNodeFull = World.GetAdjacentGroundNode(node, dir);
             GroundNode adjNodePost = World.GetAdjacentGroundNode(node, postDir);
 
-            if (adjNodePre != null && adjNodePre.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodePre.CanChangeHeight(Direction.None)) adjNodePre.SetHeight(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodeFull.CanChangeHeight(Direction.None)) adjNodeFull.SetHeight(postDir_Opp, node.Altitude[postDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodeFull.CanChangeHeight(Direction.None)) adjNodeFull.SetHeight(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodePost != null && adjNodePost.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodePost.CanChangeHeight(Direction.None)) adjNodePost.SetHeight(postDir_Opp, node.Altitude[postDir]);
+            if (adjNodePre != null && adjNodePre.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodePre.CanChangeShape(Direction.None)) adjNodePre.SetHeight(preDir_Opp, node.Altitude[preDir]);
+            if (adjNodeFull != null && adjNodeFull.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetHeight(postDir_Opp, node.Altitude[postDir]);
+            if (adjNodeFull != null && adjNodeFull.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetHeight(preDir_Opp, node.Altitude[preDir]);
+            if (adjNodePost != null && adjNodePost.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodePost.CanChangeShape(Direction.None)) adjNodePost.SetHeight(postDir_Opp, node.Altitude[postDir]);
         }
 
         public override void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode)

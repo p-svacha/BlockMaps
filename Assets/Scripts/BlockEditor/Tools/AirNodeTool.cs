@@ -59,7 +59,7 @@ namespace WorldEditor
             BuildPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
             Color previewColor = Color.white;
-            if (!World.CanBuildAirPath(HoveredCoordinates, BuildAltitude)) previewColor = Color.red;
+            if (!World.CanBuildAirNode(HoveredCoordinates, BuildAltitude)) previewColor = Color.red;
 
             BuildPreview.GetComponentInChildren<MeshRenderer>().material.color = previewColor;
         }
@@ -93,7 +93,7 @@ namespace WorldEditor
 
         public override void HandleLeftClick()
         {
-            if (World.CanBuildAirPath(HoveredCoordinates, BuildAltitude))
+            if (World.CanBuildAirNode(HoveredCoordinates, BuildAltitude))
                 World.BuildAirPath(HoveredCoordinates, BuildAltitude, SelectedSurface);
         }
 

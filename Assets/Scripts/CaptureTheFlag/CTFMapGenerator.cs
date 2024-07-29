@@ -285,7 +285,7 @@ namespace CaptureTheFlag
                 if (!isValid) continue;
 
                 // Build bridge
-                if (bridgeCoordinates.Any(x => !World.CanBuildAirPath(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
+                if (bridgeCoordinates.Any(x => !World.CanBuildAirNode(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
                 foreach (Vector2Int coords in bridgeCoordinates)
                 {
                     World.BuildAirPath(coords, bridgeHeight, SurfaceId.Concrete);

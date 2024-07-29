@@ -517,14 +517,48 @@ namespace BlockmapFramework
         {
             Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
             int altitude = hit.transform.GetComponent<AirNodeMesh>().Altitude;
-            AirNode hitAirNode = GetAirNodes(hitCoordinates).FirstOrDefault(x => x.BaseAltitude == altitude);
-            if (hitAirNode != null) return hitAirNode;
+
+            List<AirNode> hitAirNodes = GetAirNodes(hitCoordinates).Where(x => x.BaseAltitude == altitude).ToList();
+            if(hitAirNodes.Count == 1) return hitAirNodes[0];
+            if(hitAirNodes.Count > 1) // Get node that closest matches the hit height if multiple are on that base base height
+            {
+                Vector2 relativePos = new Vector2(hit.point.x % 1f, hit.point.z % 1f);
+                AirNode closestNode = null;
+                float closestDistance = float.MaxValue;
+                foreach(AirNode node in hitAirNodes)
+                {
+                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetRelativeHeightAt(relativePos));
+                    if(distance < closestDistance)
+                    {
+                        closestNode = node;
+                        closestDistance = distance;
+                    }
+                }
+                return closestNode;
+            }
 
             // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
             Vector3 offsetHitPosition = hit.point + new Vector3(-0.001f, 0f, -0.001f);
             Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-            AirNode hitOffsetAirNode = GetAirNodes(offsetCoordinates).FirstOrDefault(x => x.BaseAltitude == altitude);
-            if (hitOffsetAirNode != null) return hitOffsetAirNode;
+
+            List<AirNode> hitOffsetAirNodes = GetAirNodes(offsetCoordinates).Where(x => x.BaseAltitude == altitude).ToList();
+            if (hitOffsetAirNodes.Count == 1) return hitOffsetAirNodes[0];
+            if (hitOffsetAirNodes.Count > 1) // Get node that closest matches the hit height if multiple are on that base base height
+            {
+                Vector2 relativePos = new Vector2(offsetHitPosition.x % 1f, offsetHitPosition.z % 1f);
+                AirNode closestNode = null;
+                float closestDistance = float.MaxValue;
+                foreach (AirNode node in hitOffsetAirNodes)
+                {
+                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetRelativeHeightAt(relativePos));
+                    if (distance < closestDistance)
+                    {
+                        closestNode = node;
+                        closestDistance = distance;
+                    }
+                }
+                return closestNode;
+            }
 
             // Didnt' find anything
             Debug.LogWarning("GetAirNodeFromRaycastHit failed to find an air node at world position: " + hit.point.ToString());
@@ -908,13 +942,13 @@ namespace BlockmapFramework
             UpdateNavmeshDelayed(nodesToUpdate);
         }
 
-        public bool CanChangeHeight(DynamicNode node, Direction mode, bool isIncrease)
+        public bool CanChangeShape(DynamicNode node, Direction mode, bool isIncrease)
         {
-            return node.CanChangeHeight(mode, isIncrease);
+            return node.CanChangeShape(mode, isIncrease);
         }
-        public void ChangeHeight(DynamicNode node, Direction mode, bool isIncrease)
+        public void ChangeShape(DynamicNode node, Direction mode, bool isIncrease)
         {
-            node.ChangeHeight(mode, isIncrease);
+            node.ChangeShape(mode, isIncrease);
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
@@ -930,13 +964,14 @@ namespace BlockmapFramework
             UpdateNavmeshDisplayDelayed();
         }
 
-        public bool CanBuildAirPath(Vector2Int worldCoordinates, int height)
+        public bool CanBuildAirNode(Vector2Int worldCoordinates, int height)
         {
             if (!IsInWorld(worldCoordinates)) return false;
 
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
+            Dictionary<Direction, int> newNodeAltitude = HelperFunctions.GetFlatHeights(height);
 
             // Check if an entity or fence below is blocking this space
             List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
@@ -954,13 +989,16 @@ namespace BlockmapFramework
             // Check if underwater
             WaterNode water = GetWaterNode(worldCoordinates);
             if (water != null && water.WaterBody.ShoreHeight > height) return false;
-
-            // Check overlapping with existing node
-            List<BlockmapNode> sameLevelNodes = GetNodes(worldCoordinates, height);
-            if (sameLevelNodes.Any(x => !IsAbove(HelperFunctions.GetFlatHeights(height), x.Altitude))) return false;
+            
+            // Check if no more than 2 corners would overlap with another node
+            List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
+            foreach (BlockmapNode otherNode in nodesOnCoordinate)
+            {
+                if (GetNumOverlappingCorners(newNodeAltitude, otherNode.Altitude) > 2) return false;
+            }
 
             // Check if overlap with ground
-            if (!IsAbove(HelperFunctions.GetFlatHeights(height), groundNode.Altitude)) return false;
+            if (!IsAbove(newNodeAltitude, groundNode.Altitude)) return false;
 
             return true;
         }
@@ -2036,12 +2074,14 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Checks and returns if two node heights intersect by either fully overlapping or going through each other.
+        /// Returns the amount of overlapping corners between two node altitudes
         /// </summary>
-        public bool DoNodesIntersect(Dictionary<Direction, int> n1, Dictionary<Direction, int> n2)
+        public int GetNumOverlappingCorners(Dictionary<Direction, int> n1, Dictionary<Direction, int> n2)
         {
-            if (!IsAbove(n1, n2) && !IsAbove(n2, n1)) return true; // Neither node is fully above the other one => they intersect
-            return false;
+            int numOverlaps = 0;
+            foreach (var dir in n1.Keys)
+                if (n1[dir] == n2[dir]) numOverlaps++;
+            return numOverlaps;
         }
         public bool IsAbove(Dictionary<Direction, int> topHeight, Dictionary<Direction, int> botHeight) // returns true if at least one corner of topHeight is above botHeight and none of them are below botHeight
         {
