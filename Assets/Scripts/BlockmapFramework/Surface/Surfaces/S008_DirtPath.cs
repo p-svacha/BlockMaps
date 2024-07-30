@@ -15,6 +15,7 @@ namespace BlockmapFramework
         public override bool UseLongEdges => false;
         public override Color PreviewColor => ResourceManager.Singleton.Mat_DirtPath.color;
         public override Texture2D BlendingTexture => (Texture2D)ResourceManager.Singleton.Mat_DirtPath.mainTexture;
+        public override float BlendingTextureScale => ResourceManager.Singleton.Mat_DirtPath.GetFloat("_TextureScale");
 
         #region Draw
 

@@ -8,7 +8,6 @@ Shader "Custom/SurfaceShader"
 
         // Terrain texture
         _TerrainTextures("Terrain Textures", 2DArray) = "" { }
-        _TerrainTextureScale("Terrain Texture Scale", Float) = 0.2
 
         // Overlays
         _FogOfWarColor("Fog of war Color", Color) = (0,0,0,0.5)
@@ -51,8 +50,7 @@ Shader "Custom/SurfaceShader"
         float _ChunkCoordinatesY;
         float _ChunkSize;
 
-        // Draw mode
-        float _UseTextures;
+        // Blending
         float _BlendThreshhold;
         float _BlendNoiseScale;
 
@@ -63,8 +61,9 @@ Shader "Custom/SurfaceShader"
         fixed4 _PlayerColors[8];
 
         // Terrain textures (stored in an array)
+        float _UseTextures;
         UNITY_DECLARE_TEX2DARRAY(_TerrainTextures);
-        float _TerrainTextureScale;
+        float _TerrainTextureScale[256];
 
         // Overlays
         fixed4 _FogOfWarColor;
@@ -123,7 +122,7 @@ Shader "Custom/SurfaceShader"
         // Returns the pixel color for the given surface and position depending on drawmode
         fixed4 GetPixelColor(float2 worldPos2d, int surfaceIndex) {
             if (_UseTextures == 1) {
-                return UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(worldPos2d.x * _TerrainTextureScale, worldPos2d.y * _TerrainTextureScale, surfaceIndex));
+                return UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(worldPos2d.x * _TerrainTextureScale[surfaceIndex], worldPos2d.y * _TerrainTextureScale[surfaceIndex], surfaceIndex));
             }
             else {
                 return _TerrainColors[surfaceIndex];

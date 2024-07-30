@@ -1029,15 +1029,16 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
         }
 
-        public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation)
+        public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation, bool forceHeadspaceRecalc = false)
         {
             HashSet<BlockmapNode> occupiedNodes = entityPrefab.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
 
-            if (occupiedNodes == null) return false; // Terrain below entity is not fully connected and therefore occupiedNodes is null
+            // Terrain below entity is not fully connected and therefore occupiedNodes is null
+            if (occupiedNodes == null) return false;
 
             Vector3 placePos = entityPrefab.GetWorldPosition(this, node, rotation);
-            int minHeight = GetNodeHeight(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
-            int maxHeight = minHeight + entityPrefab.Height; // max y coordinate that this entity will occupy on all occupied tiles
+            int minAltitude = Mathf.FloorToInt(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
+            int maxAltitude = minAltitude + entityPrefab.Height - 1; // max y coordinate that this entity will occupy on all occupied tiles
 
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
@@ -1047,8 +1048,9 @@ namespace BlockmapFramework
                 if (occupiedNode is GroundNode groundNode && groundNode.WaterNode != null && placePos.y <= groundNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
 
                 // Check if entity can stand here
+                if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
                 int headSpace = occupiedNode.MaxPassableHeight[Direction.None];
-                if (occupiedNode.BaseAltitude + headSpace < maxHeight) return false;
+                if (minAltitude + headSpace <= maxAltitude) return false;
 
                 // Check if alredy has an entity
                 if (occupiedNode.Entities.Count > 0) return false;
@@ -1971,10 +1973,6 @@ namespace BlockmapFramework
         public float GetWorldHeight(float heightValue)
         {
             return heightValue * TILE_HEIGHT;
-        }
-        public int GetNodeHeight(float worldHeight)
-        {
-            return (int)(worldHeight / TILE_HEIGHT);
         }
 
         /// <summary>

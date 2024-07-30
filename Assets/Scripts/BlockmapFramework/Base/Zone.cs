@@ -8,7 +8,7 @@ namespace BlockmapFramework
     /// <summary>
     /// A zone represents a set of 2d world coordinates. A zone is the same across all height levels. Provides some functionality for it.
     /// </summary>
-    public class Zone : MonoBehaviour
+    public class Zone
     {
         public int Id { get; private set; }
         private World World;
@@ -31,7 +31,7 @@ namespace BlockmapFramework
             AffectedChunks = new HashSet<Chunk>();
 
             UpdateAffectedNodes();
-            SetBorderStyle(showBorders);
+            SetBorderStyle(showBorders, redraw: false);
         }
 
         /// <summary>
@@ -67,10 +67,14 @@ namespace BlockmapFramework
                 chunk.AddZone(this);
         }
 
-        public void SetBorderStyle(bool visible)
+        public void SetBorderStyle(bool visible, bool redraw)
         {
             IsBorderVisible = visible;
-            foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
+
+            if (redraw)
+            {
+                foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
+            }
         }
 
         #region Getters

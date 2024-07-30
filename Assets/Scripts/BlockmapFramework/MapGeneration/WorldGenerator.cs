@@ -79,7 +79,7 @@ namespace BlockmapFramework.WorldGeneration
             foreach (Entity e in World.GetAllEntities()) e.UpdateVision();
             World.GenerateFullNavmesh();
 
-            GenerationPhase = GenerationPhase.InitializingWorld;
+            GenerationPhase = GenerationPhase.InitializingWorld;;
         }
 
         protected WorldData CreateEmptyWorldData()
@@ -148,28 +148,26 @@ namespace BlockmapFramework.WorldGeneration
         #region Helper Functions
 
         /// <summary>
-        /// Spawns an entity on the surface near the given point and returns the entity instance.
+        /// Spawns an entity on the ground near the given point and returns the entity instance.
         /// </summary>
-        protected Entity SpawnEntityAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
+        protected Entity SpawnEntityOnGroundAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
         {
-            Vector2Int targetPos = Vector2Int.zero;
-            bool keepSearching = true;
-
-            while (keepSearching) // Keep searching until we find a suitable position
+            int maxAttempts = 100;
+            int numAttempts = 0;
+            while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
             {
-                targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
+                Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
 
-                keepSearching = false;
-                if (!World.IsInWorld(targetPos)) keepSearching = true;
-                else if (forbiddenNodes != null && forbiddenNodes.Contains(World.GetGroundNode(targetPos))) keepSearching = true;
-            }
-            BlockmapNode targetNode = World.GetGroundNode(targetPos);
+                if (!World.IsInWorld(targetPos)) continue;
 
-            if(World.CanSpawnEntity(prefab, targetNode, rotation))
-            {
+                BlockmapNode targetNode = World.GetGroundNode(targetPos);
+                if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) continue;
+                if (!World.CanSpawnEntity(prefab, targetNode, rotation, forceHeadspaceRecalc: true)) continue;
+
                 return World.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
             }
 
+            Debug.LogWarning("Could not spawn " + prefab.Name + " around " + pos.ToString() + " after " + maxAttempts + " attempts.");
             return null;
         }
 

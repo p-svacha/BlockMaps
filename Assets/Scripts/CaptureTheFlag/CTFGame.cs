@@ -43,8 +43,8 @@ namespace CaptureTheFlag
             UI.Init(this);
 
             UI.LoadingScreenOverlay.SetActive(true);
-            MapGenerator = new CTFMapGenerator();
-            MapGenerator.InitGeneration(16, 4);
+            MapGenerator = new CTFMapGenerator_Forest();
+            MapGenerator.InitGeneration(16, Random.Range(4, 8 + 1));
             State = GameState.Loading;
         }
 
@@ -131,12 +131,14 @@ namespace CaptureTheFlag
         {
             State = GameState.OpponentTurn;
 
+            UI.ShowTurnIndicator("Opponent Turn");
             foreach (Character c in Opponent.Characters) c.OnStartTurn();
             Opponent.StartTurn();
         }
 
         public void EndOpponentTurn()
         {
+            UI.HideTurnIndicator();
             StartYourTurn();
         }
 

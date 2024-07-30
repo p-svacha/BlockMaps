@@ -28,6 +28,7 @@ namespace BlockmapFramework
         /// Used in surface material for blending
         /// </summary>
         public virtual Texture2D BlendingTexture => ResourceManager.Singleton.GrassTexture;
+        public virtual float BlendingTextureScale => 1f;
 
         public SurfaceProperties Properties { get; private set; }
 

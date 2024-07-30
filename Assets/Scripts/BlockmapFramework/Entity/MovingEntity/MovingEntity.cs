@@ -31,10 +31,20 @@ namespace BlockmapFramework
         // Events
         public event System.Action OnTargetReached;
 
+        // Components
+        private Projector SelectionIndicator;
+
 
         protected override void OnInitialized()
         {
-            if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1 for now.");
+            if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1.");
+
+            // Selection indicator
+            SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
+            SelectionIndicator.transform.SetParent(transform);
+            SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+            SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;
+            SetSelected(false);
 
             IsMoving = false;
         }
@@ -63,6 +73,14 @@ namespace BlockmapFramework
                     transform.rotation = WorldRotation;
                 }
             }
+        }
+
+        /// <summary>
+        /// Shows/hides the selection indicator of this entity.
+        /// </summary>
+        public void SetSelected(bool value)
+        {
+            SelectionIndicator.gameObject.SetActive(value);
         }
 
         /// <summary>

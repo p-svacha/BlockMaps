@@ -48,7 +48,7 @@ namespace BlockmapFramework
         {
             if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
             
-            return base.IsPassable(entity);
+            return base.CanEntityStandHere(entity);
         }
 
         public override Surface GetSurface() => null;

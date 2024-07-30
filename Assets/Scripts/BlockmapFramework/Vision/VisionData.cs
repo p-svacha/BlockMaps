@@ -54,6 +54,7 @@ namespace BlockmapFramework
 
         public void AddExploredNode(BlockmapNode n)
         {
+            if (n == null) return;
             if (!NodeVision.ContainsKey(n)) NodeVision[n] = VisionType.FogOfWar;
         }
         public void AddExploredWall(Wall w)

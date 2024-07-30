@@ -66,7 +66,7 @@ namespace WorldEditor
             {
                 new FlatWorldGenerator(),
                 new PerlinWorldGenerator(),
-                new CaptureTheFlag.CTFMapGenerator(),
+                new CaptureTheFlag.CTFMapGenerator_Forest(),
                 new ParcelMapGenerator(),
             };
 

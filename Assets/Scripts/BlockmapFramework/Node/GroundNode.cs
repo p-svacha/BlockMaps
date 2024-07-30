@@ -45,7 +45,7 @@ namespace BlockmapFramework
 
         private void DrawSides(MeshBuilder meshBuilder)
         {
-            int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Rock);
+            int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Cliff);
             DrawEastSide(meshBuilder, cliffSubmesh);
             DrawWestSide(meshBuilder, cliffSubmesh);
             DrawSouthSide(meshBuilder, cliffSubmesh);

@@ -24,15 +24,6 @@ namespace BlockmapFramework
         {
             GameObject navmeshObj = GameObject.Find("NavmeshVisualizer");
             if(navmeshObj != null) Singleton = navmeshObj.GetComponent<NavmeshVisualizer>();
-        }
-
-        /// <summary>
-        /// Shows the navmesh of the world.
-        /// <br/> If an entity is provided the navmesh will be visualized for that entity.
-        /// </summary>
-        public void Visualize(World world, MovingEntity entity = null)
-        {
-            ClearVisualization();
 
             SurfaceNodeMat = new Material(Shader.Find("Sprites/Default"));
             AirNodeMat = new Material(Shader.Find("Sprites/Default"));
@@ -49,8 +40,17 @@ namespace BlockmapFramework
             WalkTransitionMat.color = Color.white;
             SingleClimbTransitionMat.color = Color.cyan;
             DoubleClimbTransitionMat.color = Color.blue;
+        }
 
-            Vector3 nodeDimensions = new Vector3(NODE_SIZE, NODE_SIZE, NODE_SIZE);
+        /// <summary>
+        /// Shows the navmesh of the world.
+        /// <br/> If an entity is provided the navmesh will be visualized for that entity.
+        /// </summary>
+        public void Visualize(World world, MovingEntity entity = null)
+        {
+            ClearVisualization();
+
+            Vector3 nodeCubeDimensions = new Vector3(NODE_SIZE, NODE_SIZE, NODE_SIZE);
 
             foreach (Chunk chunk in world.GetAllChunks())
             {
@@ -68,7 +68,7 @@ namespace BlockmapFramework
                 {
                     Vector3 nodePos = node.GetCenterWorldPosition() - new Vector3(NODE_SIZE / 2f, NODE_SIZE / 2f, NODE_SIZE / 2f);
                     int nodeSubmesh = nodeMeshBuilder.GetSubmesh(GetNodeSubmeshMaterial(node));
-                    nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeDimensions);
+                    nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeCubeDimensions);
 
                     foreach (Transition t in node.Transitions.Values)
                     {

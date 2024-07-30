@@ -15,6 +15,7 @@ namespace BlockmapFramework
         public override bool UseLongEdges => false;
         public override Color PreviewColor => ResourceManager.Singleton.GrassColor;
         public override Texture2D BlendingTexture => ResourceManager.Singleton.GrassTexture;
+        public override float BlendingTextureScale => 0.2f;
 
         #region Draw
 

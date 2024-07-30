@@ -55,6 +55,11 @@ namespace BlockmapFramework
             }
             terrainTexArray.Apply();
             ResourceManager.Singleton.SurfaceMaterial.SetTexture("_TerrainTextures", terrainTexArray);
+
+            // Pass texture scaling values to surface materials
+            List<float> textureScalingValues = new List<float>();
+            foreach (Surface s in Surfaces.Values) textureScalingValues.Add(s.BlendingTextureScale);
+            ResourceManager.Singleton.SurfaceMaterial.SetFloatArray("_TerrainTextureScale", textureScalingValues);
         }
 
         public static SurfaceManager Instance

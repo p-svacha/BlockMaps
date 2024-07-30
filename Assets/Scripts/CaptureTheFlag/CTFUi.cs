@@ -25,6 +25,9 @@ namespace CaptureTheFlag
         public TextMeshProUGUI TileInfoText;
         public UI_CharacterInfo CharacterInfo;
 
+        public GameObject TurnIndicator;
+        public TextMeshProUGUI TurnIndicatorText;
+
         private Dictionary<Character, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
@@ -48,6 +51,7 @@ namespace CaptureTheFlag
             }
 
             CharacterInfo.gameObject.SetActive(false);
+            TurnIndicator.SetActive(false);
         }
 
         private void Update()
@@ -92,6 +96,16 @@ namespace CaptureTheFlag
         {
             EndGameScreen.SetActive(true);
             EndGameText.text = text;
+        }
+
+        public void ShowTurnIndicator(string text, float hideAfter = 0f)
+        {
+            TurnIndicator.SetActive(true);
+            TurnIndicatorText.text = text;
+        }
+        public void HideTurnIndicator()
+        {
+            TurnIndicator.SetActive(false);
         }
     }
 }

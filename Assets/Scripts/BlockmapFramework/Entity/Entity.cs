@@ -100,7 +100,6 @@ namespace BlockmapFramework
         // Components
         protected GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
         private MeshRenderer Renderer;
-        private Projector SelectionIndicator;
         public MeshCollider MeshCollider { get; protected set; } // used for hovering and selecting with cursor
         public Collider VisionCollider { get; protected set; } // used for vision checks for entites
 
@@ -149,13 +148,6 @@ namespace BlockmapFramework
 
             // Move entity to spawn position
             SetOriginNode(origin);
-
-            // Selection indicator
-            SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
-            SelectionIndicator.transform.SetParent(transform);
-            SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
-            SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;
-            SetSelected(false);
 
             // Player color
             if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Owner.Color;
@@ -244,15 +236,15 @@ namespace BlockmapFramework
 
             pm_HandleVisibilityChange.Begin();
             // Add entitiy vision to visible nodes
-            Debug.Log(CurrentVision.VisibleNodes.Count + " nodes are visible");
+            //Debug.Log(CurrentVision.VisibleNodes.Count + " nodes are visible");
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
-            Debug.Log(CurrentVision.ExploredNodes.Count + " nodes are explored");
+            //Debug.Log(CurrentVision.ExploredNodes.Count + " nodes are explored");
             foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Owner);
 
             // Update last known position and rotation of all currently visible entities
-            Debug.Log(CurrentVision.VisibleEntities.Count + " entities are visible");
+            //Debug.Log(CurrentVision.VisibleEntities.Count + " entities are visible");
             foreach (Entity e in CurrentVision.VisibleEntities) e.AddVisionBy(this);
 
             // Add entity vision to visible walls
@@ -377,8 +369,8 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public virtual int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT); // Rounded down to y-position of its center
-        public virtual int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT) + (Height - 1)); // Rounded up to y-position of its center + height
+        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT); // Rounded down to y-position of its center
+        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
@@ -811,14 +803,6 @@ namespace BlockmapFramework
         {
             LastKnownPosition[p] = null;
             LastKnownRotation[p] = null;
-        }
-
-        /// <summary>
-        /// Shows/hides the selection indicator of this entity.
-        /// </summary>
-        public void SetSelected(bool value)
-        {
-            SelectionIndicator.gameObject.SetActive(value);
         }
 
         #endregion
