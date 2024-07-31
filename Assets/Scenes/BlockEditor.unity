@@ -9426,26 +9426,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4efaa097f155d0e4fbea8fa42e0ab8d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BuildPreviewMaterial: {fileID: 2100000, guid: fce72e1cd0ae2474285375fdd80b50b5, type: 2}
-  SurfaceMaterial: {fileID: 2100000, guid: 473924d3185d1b348929fdd221a92050, type: 2}
-  LadderMaterial: {fileID: 2100000, guid: dda4b16a11c04cd4b99157e9f99c625c, type: 2}
-  Mat_Asphalt: {fileID: 2100000, guid: e3ff98423350ef3488cb3d49298df067, type: 2}
-  Mat_Brick: {fileID: 2100000, guid: ddd598f9978c3f849a159c448b4eeb04, type: 2}
-  Mat_Rock: {fileID: 2100000, guid: 888feb0d5b2b8bc48af2741383c402a8, type: 2}
-  Mat_RoofingTiles: {fileID: 2100000, guid: effc84cd0136c5c4999a7c1a570906cd, type: 2}
-  Mat_Cobblestone: {fileID: 2100000, guid: 523c733375c89144984a614ea337cec8, type: 2}
-  Mat_Concrete: {fileID: 2100000, guid: 8f040e32a5f8d9a45a3059fd459d5c37, type: 2}
-  Mat_ConcreteDark: {fileID: 2100000, guid: 00617540111469d43804b98d11445575, type: 2}
-  Mat_Concrete2: {fileID: 2100000, guid: d9ec8987f7217af43979da0c7e323e0d, type: 2}
-  Mat_Hedge: {fileID: 2100000, guid: 8b55b6b4fb505e64ea92a48c2e9f4962, type: 2}
-  Mat_Water: {fileID: 2100000, guid: d488dfc2c72ee9149a81bc1ae2f6f749, type: 2}
-  Mat_Wood: {fileID: 2100000, guid: 34cb6a0e805287749a1a3c21b11b8577, type: 2}
-  Mat_WoodParquet: {fileID: 2100000, guid: 090bc6607fd783c4e95e22ff4e53e5b9, type: 2}
-  Mat_Plaster: {fileID: 2100000, guid: ae0235a49d94f7440ad0c043eabbf8aa, type: 2}
-  Mat_TilesWhite: {fileID: 2100000, guid: 597203a244c49c24db0ff2fcabac0e08, type: 2}
-  Mat_TilesSmallVaried: {fileID: 2100000, guid: 02bcf0b8c0ac47f4b8fe1668118a9b49, type: 2}
-  Mat_Glass: {fileID: 2100000, guid: 5e6482db60192bd4499298728d9bd3e4, type: 2}
-  Mat_DirtPath: {fileID: 2100000, guid: 1ff7a99445d91f647a92f0613db55376, type: 2}
   GrassColor: {r: 0.32156864, g: 0.34509805, b: 0.21176472, a: 1}
   SandColor: {r: 0.76470596, g: 0.6156863, b: 0.5019608, a: 1}
   TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
@@ -9454,6 +9434,7 @@ MonoBehaviour:
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
   ConcreteTexture: {fileID: 2800000, guid: ec801ad075b375644866ca9eff2ea15b, type: 3}
   WaterTexture: {fileID: 2800000, guid: 2cf8a180b7dbd934f834ab7f8d588d22, type: 3}
+  DirtPathTexture: {fileID: 2800000, guid: 0749da403c407da4495260f01c22129d, type: 3}
   SelectionIndicator: {fileID: 1841773600738071307, guid: 20b217845ce3c4e4397dcdcfbf4e6935, type: 3}
 --- !u!114 &1859474534
 MonoBehaviour:

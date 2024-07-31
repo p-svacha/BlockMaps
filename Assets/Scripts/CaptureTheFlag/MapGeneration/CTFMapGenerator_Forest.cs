@@ -23,8 +23,8 @@ namespace CaptureTheFlag
                 CreateMapZones,
                 CreatePlayerBases,
                 AddWaterBodies,
-                AddBridges,
-                AddForests
+                AddForests,
+                AddPaths
             };
         }
 
@@ -90,113 +90,6 @@ namespace CaptureTheFlag
             World.DrawNodes();
         }
 
-        private void AddBridges()
-        {
-            int numBridges = 0;
-            int attempts = 0;
-
-            int targetAttempts = WorldSize / 4;
-
-            while (attempts < targetAttempts)
-            {
-                attempts++;
-
-                // Take a random surface node, direction and bridge height
-                GroundNode startNode = World.GetRandomGroundNode();
-                Direction dir1 = HelperFunctions.GetRandomSideDirection();
-                Direction dir2 = HelperFunctions.GetOppositeDirection(dir1);
-                int bridgeHeight = startNode.MaxAltitude + Random.Range(1, 7);
-                List<Vector2Int> bridgeCoordinates = new List<Vector2Int>() { startNode.WorldCoordinates };
-
-                // Go into first direction until the bridge ends
-                GroundNode nextNode = World.GetAdjacentGroundNode(startNode, dir1);
-                bool isDone = false;
-                bool isValid = false;
-                while (!isDone)
-                {
-                    // End at world edge
-                    if (nextNode == null)
-                    {
-                        isDone = true;
-                        isValid = false;
-                    }
-
-                    // End
-                    else if (nextNode.IsFlat(dir2) && nextNode.GetMaxAltitude(dir2) == bridgeHeight)
-                    {
-                        isDone = true;
-                        isValid = true;
-                    }
-
-                    // Build and end
-                    else if (nextNode.IsFlat(dir1) && nextNode.GetMaxAltitude(dir1) == bridgeHeight)
-                    {
-                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        isDone = true;
-                        isValid = true;
-                    }
-
-                    // Build and continue
-                    else
-                    {
-                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = World.GetAdjacentGroundNode(nextNode, dir1);
-                    }
-                }
-                if (!isValid) continue;
-
-                // Go into first direction until the bridge ends
-                nextNode = World.GetAdjacentGroundNode(startNode, dir2);
-                isDone = false;
-                isValid = false;
-                while (!isDone)
-                {
-                    // End at world edge
-                    if (nextNode == null)
-                    {
-                        isDone = true;
-                        isValid = false;
-                    }
-
-                    // End
-                    else if (nextNode.IsFlat(dir1) && nextNode.GetMaxAltitude(dir1) == bridgeHeight)
-                    {
-                        isDone = true;
-                        isValid = true;
-                    }
-
-                    // Build and end
-                    else if (nextNode.IsFlat(dir2) && nextNode.GetMaxAltitude(dir2) == bridgeHeight)
-                    {
-                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        isDone = true;
-                        isValid = true;
-                    }
-
-                    // Build and continue
-                    else
-                    {
-                        bridgeCoordinates.Add(nextNode.WorldCoordinates);
-                        nextNode = World.GetAdjacentGroundNode(nextNode, dir2);
-                    }
-                }
-                if (!isValid) continue;
-
-                // Build bridge
-                if (bridgeCoordinates.Any(x => !World.CanBuildAirNode(x, bridgeHeight))) continue; // Don't build if any bridge node can't be built
-                foreach (Vector2Int coords in bridgeCoordinates)
-                {
-                    World.BuildAirPath(coords, bridgeHeight, SurfaceId.Concrete);
-                }
-                numBridges++;
-            }
-
-            // End
-            //Debug.Log("Generated " + numBridges + " bridges after " + attempts + " attempts.");
-
-            World.DrawNodes();
-        }
-
         private void AddForests()
         {
             PerlinNoise forestDensityMap = new PerlinNoise();
@@ -237,6 +130,84 @@ namespace CaptureTheFlag
                 { "log_2x1", 0.3f },
             };
             return HelperFunctions.GetWeightedRandomElement(ids);
+        }
+
+        private const float MIN_PATH_SEGMENT_LENGTH = 3f;
+        private const float MAX_PATH_SEGMENT_LENGTH = 10f;
+        private const float MAX_PATH_ANGLE_CHANGE = 30f;
+        private const int MIN_PATH_THICKNESS = 1;
+        private const int MAX_PATH_THICKNESS = 3;
+        /// <summary>
+        /// Adds some dirt paths to the map with a random walker algorithm.
+        /// </summary>
+        private void AddPaths()
+        {
+            int numStartPoints = NumChunksPerSide / 2;
+
+            for(int i = 0; i < numStartPoints; i++)
+            {
+                Vector2 startPosition = new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
+                float startAngle = Random.Range(0, 360);
+
+                // Create a path going to both directions
+                int thickness = Random.Range(MIN_PATH_THICKNESS, MAX_PATH_THICKNESS + 1);
+                List<GroundNode> path = DrawPath(startPosition, startAngle, thickness);
+                DrawPath(startPosition, startAngle + 180, thickness, existingPath: path);
+            }
+        }
+        /// <summary>
+        /// Draws a path until reaching another path or the map edge
+        /// </summary>
+        private List<GroundNode> DrawPath(Vector2 startPosition, float startAngle, int thickness, List<GroundNode> existingPath = null)
+        {
+            Vector2 currentPosition = startPosition;
+            float currentAngle = startAngle;
+
+            List<GroundNode> allPathNodes = new List<GroundNode>();
+            if (existingPath != null) allPathNodes.AddRange(existingPath);
+
+            bool continuePath = true;
+            while (continuePath)
+            {
+                Vector2 segmentStartPosition = currentPosition;
+
+                float angleChange = Random.Range(-MAX_PATH_ANGLE_CHANGE, MAX_PATH_ANGLE_CHANGE);
+                currentAngle += angleChange;
+
+                float segmentLength = Random.Range(MIN_PATH_SEGMENT_LENGTH, MAX_PATH_SEGMENT_LENGTH);
+
+                Vector2 segmentEndPosition = segmentStartPosition + new Vector2(
+                    Mathf.Sin(Mathf.Deg2Rad * currentAngle) * segmentLength,
+                    Mathf.Cos(Mathf.Deg2Rad * currentAngle) * segmentLength);
+
+                List<Vector2Int> pathCoordinates = HelperFunctions.RasterizeLine(segmentStartPosition, segmentEndPosition, thickness);
+
+                foreach (Vector2Int pc in pathCoordinates)
+                {
+                    GroundNode node = World.GetGroundNode(pc);
+                    if (node == null) continue;
+                    if (!allPathNodes.Contains(node))
+                    {
+                        if (node.Surface.Id == SurfaceId.DirtPath)
+                        {
+                            continuePath = false; // reached other path
+                            break;
+                        }
+                        World.SetSurface(node, SurfaceId.DirtPath, updateWorld: false);
+                        allPathNodes.Add(node);
+
+                        // Remove entity on path
+                        World.RemoveEntities(node, updateWorld: false);
+                    }
+
+                }
+
+                currentPosition = segmentEndPosition;
+
+                if (currentPosition.x < 0 || currentPosition.x > WorldSize || currentPosition.y < 0 || currentPosition.y > WorldSize) continuePath = false; // Reached world edge
+            }
+
+            return allPathNodes;
         }
     }
 }

@@ -35,8 +35,25 @@
 
 ---
 
+--- Entity Update
 
---- CTF Playtest Update
+- Show entity stats in static entity tool in editor
+	> same way as moving entities
+	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
+
+- Static entities with weird shapes
+	> adjust collider generation accordingly
+	> occupiednodes turns into footprint
+	> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
+	> keep dimensions as a general entity attribute, add shape to static entity
+	> Make editor script for static entity that allows defining shape and previewing box colliders
+
+- Make vision radius of entities based on their dimensions
+
+- Static entities types: Like high grass, maize, foliage, debris, puddle
+	> multiple static entities per node: one per type
+
+- Add static entities that include navmesh nodes (like a container or bridge)
 
 ---
 
@@ -59,6 +76,18 @@ Allow 0022 for stairs
 		- also have a getter that gives back the height of each side8 of the node
 		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
 	- all entities have a max slope they can walk
+
+- Expand entity shapes
+	> Rework dimensions attribute of entities
+	> Add new EntityShape class/struct
+	> Each node within dimensions has a defined vision hitbox that can be [Full/None/Wall_N/E/S/W]
+	> make it possible that entities can block a combination of full nodes, sides and corners
+	> Impact vision
+	> Impact navmesh
+
+- Allow entites to have their own nodes
+
+- Add UseTextures attribute to entity shader and support both modes on created models
 
 ---
 
@@ -95,18 +124,7 @@ Make a list of material indexes colorable in editor
 Animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
-- Show entity stats in static entity tool in editor
-	> same way as moving entities
-	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
 
-- Static entities with weird shapes
-	> adjust collider generation accordingly
-	> occupiednodes turns into footprint
-	> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
-	> keep dimensions as a general entity attribute, add shape to static entity
-	> Make editor script for static entity that allows defining shape and previewing box colliders
-
-- Make vision radius of entities based on their dimensions
 
 - strength & destroy
 	> movingentities get a new strength attribute
@@ -142,18 +160,11 @@ Animation system for walking / climbing entities
 	- Can't tag or be tagged, fly at fixed height
 	- Only give vision
 
-- Static entities types: Like high grass, maize, foliage, debris, puddle
-	> multiple static entities per node: one per type
-
-- Add static entities that include navmesh nodes (like a container or bridge)
-
 - fix: water fill algorithm should stop after a while (like 1000 tiles?)
 
 - In terrain blend transitions, only do corner transitions when the corner transition exists
 	> else pass -1 in the blend array and ignore in shader code
 	> also add (global perlin) noise to blending texture
-
-- Procedural Static Entities
 
 - add new item framework
 	- items behave like static entities on map, but way more limited
@@ -182,19 +193,6 @@ improve vision system performance
 - Terrain affinity
 
 - Weather / Temperature (Snow/Mud)
-
-- Expand entity shapes
-	> Rework dimensions attribute of entities
-	> Add new EntityShape class/struct
-	> Each node within dimensions has a defined vision hitbox that can be [Full/None/Wall_N/E/S/W]
-	> make it possible that entities can block a combination of full nodes, sides and corners
-	> Impact vision
-	> Impact navmesh
-
-- Allow entites to have their own nodes
-
-- Add UseTextures attribute to entity shader and support both modes on created models
-
 
 
 - CTF: Slopes use more action points
@@ -254,6 +252,7 @@ improve vision system performance
 Camera MSAA Anti-Aliasing is causing black pixel artifacts on air node mesh seams that use the surface shader
 	> so MSAA is turned off for now
 
+Surface blending in SurfaceShader isn't perfect (but good enough so it's usually not noticable)
 
 -------- RETIRED IDEAS ------------
 

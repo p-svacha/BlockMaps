@@ -1,13 +1,13 @@
 {
   "Name": "testgrounds",
   "ChunkSize": 16,
-  "MaxNodeId": 1130,
-  "MaxEntityId": 22,
-  "MaxWaterBodyId": 18,
-  "MaxActorId": 20,
-  "MaxZoneId": 16,
-  "MaxFenceId": 40,
-  "MaxWallId": 111,
+  "MaxNodeId": 1131,
+  "MaxEntityId": 23,
+  "MaxWaterBodyId": 19,
+  "MaxActorId": 21,
+  "MaxZoneId": 17,
+  "MaxFenceId": 41,
+  "MaxWallId": 112,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,
@@ -8512,7 +8512,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 535,
@@ -8525,7 +8525,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 551,
@@ -8720,7 +8720,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 536,
@@ -8733,7 +8733,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 552,
@@ -8746,7 +8746,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 568,
@@ -8941,7 +8941,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 553,
@@ -8954,7 +8954,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 569,
@@ -8967,7 +8967,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 585,
@@ -9162,7 +9162,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 570,
@@ -9175,7 +9175,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 586,
@@ -9188,7 +9188,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 602,
@@ -9370,7 +9370,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 571,
@@ -9383,7 +9383,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 587,
@@ -9396,7 +9396,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 603,
@@ -9617,7 +9617,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 588,
@@ -9630,7 +9630,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 604,
@@ -9643,7 +9643,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 620,
@@ -9877,7 +9877,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 605,
@@ -9890,7 +9890,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 621,
@@ -10111,7 +10111,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 622,
@@ -10124,7 +10124,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 638,
@@ -10332,7 +10332,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 639,
@@ -10345,7 +10345,7 @@
             5
           ],
           "Type": "Ground",
-          "SubType": 0
+          "SubType": 7
         },
         {
           "Id": 655,

@@ -1073,7 +1073,7 @@ namespace BlockmapFramework
             instance.RegisterInWorld();
 
             // Redraw chunk meshes if it is a procedural entity
-            if (instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
+            if (updateWorld && instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
 
             // Update vision around new entity
             if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.GetCenterWorldPosition());
@@ -1087,7 +1087,7 @@ namespace BlockmapFramework
             // Return new instance
             return instance;
         }
-        public void RemoveEntity(Entity entityToRemove)
+        public void RemoveEntity(Entity entityToRemove, bool updateWorld = true)
         {
             // De-register entity
             Entities.Remove(entityToRemove.Id);
@@ -1119,13 +1119,13 @@ namespace BlockmapFramework
             }
 
             // Redraw chunk meshes if it is a procedural entity
-            if (entityToRemove is ProceduralEntity) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
+            if (updateWorld && entityToRemove is ProceduralEntity) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
 
             // Update pathfinding navmesh
-            UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetDimensions().x, entityToRemove.GetDimensions().z);
+            if(updateWorld) UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetDimensions().x, entityToRemove.GetDimensions().z);
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
-            if (entityToRemove.Owner == ActiveVisionActor)
+            if (updateWorld && entityToRemove.Owner == ActiveVisionActor)
                 foreach (Chunk c in chunksAffectedByVision)
                     UpdateVisibility(c);
 
@@ -1133,7 +1133,11 @@ namespace BlockmapFramework
             entityToRemove.DestroySelf();
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
-            UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
+            if(updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
+        }
+        public void RemoveEntities(BlockmapNode node, bool updateWorld = true)
+        {
+            while (node.Entities.Count > 0) RemoveEntity(node.Entities.First(), updateWorld);
         }
         public void RegisterEntity(Entity entity)
         {

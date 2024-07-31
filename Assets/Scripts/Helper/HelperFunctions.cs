@@ -32,6 +32,66 @@ public static class HelperFunctions
         return Vector3.Lerp(start, end, t);
     }
 
+    /// <summary>
+    /// Rasterizes a line between two points using Bresenham's line algorithm.
+    /// Returns a list of all grid cells that should be filled, considering the specified line thickness.
+    /// </summary>
+    public static List<Vector2Int> RasterizeLine(Vector2 start, Vector2 end, int lineThickness)
+    {
+        List<Vector2Int> points = new List<Vector2Int>();
+
+        float x0 = start.x;
+        float y0 = start.y;
+        float x1 = end.x;
+        float y1 = end.y;
+
+        float dx = Mathf.Abs(x1 - x0);
+        float dy = Mathf.Abs(y1 - y0);
+        float sx = x0 < x1 ? 1f : -1f;
+        float sy = y0 < y1 ? 1f : -1f;
+        float err = dx - dy;
+
+        // Calculate half thickness
+        float additionalWidthOnEachSide = ((lineThickness - 1f) / 2f);
+
+        while (true)
+        {
+            // Add points around the main point to achieve the desired thickness
+            for (float tx = -additionalWidthOnEachSide; tx <= additionalWidthOnEachSide; tx += 0.1f)
+            {
+                for (float ty = -additionalWidthOnEachSide; ty <= additionalWidthOnEachSide; ty += 0.1f)
+                {
+                    // Add point only if it's within the square around the thickness radius
+                    if (Mathf.Abs(tx) + Mathf.Abs(ty) <= additionalWidthOnEachSide)
+                    {
+                        Vector2Int point = new Vector2Int(Mathf.RoundToInt(x0 + tx), Mathf.RoundToInt(y0 + ty));
+                        if (!points.Contains(point))
+                        {
+                            points.Add(point);
+                        }
+                    }
+                }
+            }
+
+            if (Mathf.Abs(x0 - x1) <= 1f && Mathf.Abs(y0 - y1) <= 1f)
+                break;
+
+            float e2 = 2 * err;
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx)
+            {
+                err += dx;
+                y0 += sy;
+            }
+        }
+
+        return points;
+    }
+
     #endregion
 
     #region Random

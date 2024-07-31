@@ -21,8 +21,7 @@ namespace BlockmapFramework
 
         public override void DrawNode(World world, BlockmapNode node, MeshBuilder meshBuilder)
         {
-            int submesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
-            meshBuilder.DrawShapePlane(node, submesh, height: 0f, 0f, 1f, 0f, 1f);
+            NodeMeshGenerator.DrawStandardSurface(node, meshBuilder);
         }
 
         #endregion

@@ -122,7 +122,7 @@ Shader "Custom/SurfaceShader"
         // Returns the pixel color for the given surface and position depending on drawmode
         fixed4 GetPixelColor(float2 worldPos2d, int surfaceIndex) {
             if (_UseTextures == 1) {
-                return UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(worldPos2d.x * _TerrainTextureScale[surfaceIndex], worldPos2d.y * _TerrainTextureScale[surfaceIndex], surfaceIndex));
+                return UNITY_SAMPLE_TEX2DARRAY(_TerrainTextures, float3(worldPos2d.x / _TerrainTextureScale[surfaceIndex], worldPos2d.y / _TerrainTextureScale[surfaceIndex], surfaceIndex));
             }
             else {
                 return _TerrainColors[surfaceIndex];

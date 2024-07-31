@@ -12,8 +12,21 @@ namespace BlockmapFramework.WorldGeneration
         public abstract string Name { get; }
 
         protected int ChunkSize;
-        protected int NumChunks;
-        protected int WorldSize;
+        protected int NumChunksPerSide;
+
+        /// <summary>
+        /// The amount of nodes on each size of the map. (A world with 2x2 chunks has WorldSize = 32).
+        /// </summary>
+        protected int WorldSize { get; private set; }
+
+        /// <summary>
+        /// Amount of ground nodes on the map. (WorldSize^2)
+        /// </summary>
+        protected int WorldArea => WorldSize * WorldSize;
+
+        protected int TotalNumChunks => NumChunksPerSide * NumChunksPerSide;
+
+
 
         public World World { get; private set; }
         protected GenerationPhase GenerationPhase { get; set; }
@@ -25,7 +38,7 @@ namespace BlockmapFramework.WorldGeneration
             if (chunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
 
             ChunkSize = chunkSize;
-            NumChunks = numChunks;
+            NumChunksPerSide = numChunks;
             WorldSize = chunkSize * numChunks;
 
             GenerationPhase = GenerationPhase.InitializingGenerator;
@@ -103,8 +116,8 @@ namespace BlockmapFramework.WorldGeneration
             data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 2", Color.red));
 
             // Create chunks
-            for (int x = 0; x < NumChunks; x++)
-                for (int y = 0; y < NumChunks; y++)
+            for (int x = 0; x < NumChunksPerSide; x++)
+                for (int y = 0; y < NumChunksPerSide; y++)
                     data.Chunks.Add(CreateEmptyChunkData(data, new Vector2Int(x, y)));
 
             return data;
