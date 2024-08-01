@@ -41,7 +41,7 @@ namespace BlockmapFramework
         public int ChunkSize { get; private set; }
         public int MinX, MaxX, MinY, MaxY;
         public Vector2Int Dimensions { get; private set; }
-        public WorldEntityLibrary ContentLibrary { get; private set; }
+        public WorldEntityLibrary EntityLibrary { get; private set; }
 
 
         // Database
@@ -201,7 +201,7 @@ namespace BlockmapFramework
         {
             SimpleInit(data);
 
-            ContentLibrary = entityLibrary;
+            EntityLibrary = entityLibrary;
 
             // Init fences
             foreach (FenceData fenceData in data.Fences)
@@ -1268,7 +1268,8 @@ namespace BlockmapFramework
 
             return CanBuildOnNodeSide(node, side, height, allowSlopes: true);
         }
-        public void BuildFence(FenceType type, BlockmapNode node, Direction side, int height)
+        public void BuildFence(FenceTypeId type, BlockmapNode node, Direction side, int height, bool updateWorld = true) => BuildFence(FenceTypeManager.Instance.GetFenceType(type), node, side, height, updateWorld);
+        public void BuildFence(FenceType type, BlockmapNode node, Direction side, int height, bool updateWorld = true)
         {
             // Adjust height if it's higher than fence type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
@@ -1276,9 +1277,12 @@ namespace BlockmapFramework
             Fence fence = new Fence(type);
             fence.Init(FenceIdCounter++, node, side, height);
 
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+            }
 
             // Register fence
             Fences.Add(fence.Id, fence);
@@ -1393,7 +1397,7 @@ namespace BlockmapFramework
             // Get target node (need to be adjacent, higher up and flat on the target direction)
             int sourceAltitude = source.GetMinAltitude(side);
             Direction targetSide = HelperFunctions.GetOppositeDirection(side);
-            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(source.WorldCoordinates, side);
+            Vector2Int targetCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(source.WorldCoordinates, side);
 
             List<BlockmapNode> adjNodes = GetNodes(targetCoordinates).OrderBy(x => x.GetMaxAltitude(targetSide)).ToList();
             foreach (BlockmapNode adjNode in adjNodes)
@@ -1596,7 +1600,7 @@ namespace BlockmapFramework
             List<Entity> entitiesToUpdate = Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
             if (excludeActor != null) entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != excludeActor).ToList();
 
-            Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
+            //Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
             foreach (Entity e in entitiesToUpdate)
             {
                 e.UpdateVision();
@@ -1613,6 +1617,7 @@ namespace BlockmapFramework
         }
         public void ShowGridOverlay(bool value)
         {
+            if (!IsInitialized) return;
             IsShowingGrid = value;
             UpdateGridOverlay();
         }
@@ -1633,6 +1638,7 @@ namespace BlockmapFramework
         }
         public void ShowNavmesh(bool value)
         {
+            if (!IsInitialized) return;
             IsShowingNavmesh = value;
             UpdateNavmeshDisplayDelayed();
         }
@@ -1656,6 +1662,7 @@ namespace BlockmapFramework
         }
         public void ShowTextures(bool value)
         {
+            if (!IsInitialized) return;
             IsShowingTextures = value;
             UpdateTextureMode();
         }
@@ -1671,6 +1678,7 @@ namespace BlockmapFramework
         }
         public void ShowTileBlending(bool value)
         {
+            if (!IsInitialized) return;
             IsShowingTileBlending = value;
             UpdateTileBlending();
         }
@@ -1711,9 +1719,9 @@ namespace BlockmapFramework
         {
             Camera.SetPosition(e.WorldPosition);
         }
-        public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan)
+        public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan, bool unbreakableFollow = false)
         {
-            Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null);
+            Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null, unbreakableFollow);
         }
 
         #endregion
@@ -1879,12 +1887,12 @@ namespace BlockmapFramework
 
         public List<BlockmapNode> GetAdjacentNodes(Vector2Int worldCoordinates, Direction dir)
         {
-            Vector2Int targetCoordinates = GetWorldCoordinatesInDirection(worldCoordinates, dir);
+            Vector2Int targetCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir);
             return GetNodes(targetCoordinates);
         }
         public GroundNode GetAdjacentGroundNode(Vector2Int worldCoordinates, Direction dir)
         {
-            return GetGroundNode(GetWorldCoordinatesInDirection(worldCoordinates, dir));
+            return GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir));
         }
         public GroundNode GetAdjacentGroundNode(BlockmapNode node, Direction dir)
         {
@@ -1892,7 +1900,7 @@ namespace BlockmapFramework
         }
         public WaterNode GetAdjacentWaterNode(Vector2Int worldCoordinates, Direction dir)
         {
-            return GetWaterNode(GetWorldCoordinatesInDirection(worldCoordinates, dir));
+            return GetWaterNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir));
         }
 
         public List<Entity> GetEntities(Vector2Int worldCoordinates, int minHeight, int maxHeight)
@@ -1930,7 +1938,7 @@ namespace BlockmapFramework
         {
             Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
             int altitude = globalCellCoordinates.y;
-            Vector2Int adjacentCoordinates = GetWorldCoordinatesInDirection(worldCoordinates, side);
+            Vector2Int adjacentCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, side);
             Vector3Int adjacentCellCoordinates = new Vector3Int(adjacentCoordinates.x, altitude, adjacentCoordinates.y);
             Direction oppositeSide = HelperFunctions.GetOppositeDirection(side);
 
@@ -1981,23 +1989,6 @@ namespace BlockmapFramework
 
             Vector2Int localWorldCoordinates = chunk.GetLocalCoordinates(globalWorldCoordinates);
             return new Vector3Int(localWorldCoordinates.x, globalCellCoordinates.y, localWorldCoordinates.y);
-        }
-
-        public Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
-        {
-            return worldCoordinates + GetDirectionVector(dir);
-        }
-        public Vector2Int GetDirectionVector(Direction dir, int distance = 1)
-        {
-            if (dir == Direction.N) return new Vector2Int(0, distance);
-            if (dir == Direction.E) return new Vector2Int(distance, 0);
-            if (dir == Direction.S) return new Vector2Int(0, -distance);
-            if (dir == Direction.W) return new Vector2Int(-distance, 0);
-            if (dir == Direction.NE) return new Vector2Int(distance, distance);
-            if (dir == Direction.NW) return new Vector2Int(-distance, distance);
-            if (dir == Direction.SE) return new Vector2Int(distance, -distance);
-            if (dir == Direction.SW) return new Vector2Int(-distance, -distance);
-            return new Vector2Int(0, 0);
         }
 
         public float GetWorldHeight(float heightValue)

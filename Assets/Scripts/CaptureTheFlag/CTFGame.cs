@@ -107,7 +107,7 @@ namespace CaptureTheFlag
             }
 
             // Update possible moves for all characters
-            foreach (Character teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleMoves();
+            foreach (Character teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
 
             // Update UI
             if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
@@ -125,6 +125,7 @@ namespace CaptureTheFlag
         public void EndYourTurn()
         {
             if (State != GameState.YourTurn) return;
+            if (LocalPlayer.Characters.Any(x => x.IsInAction)) return;
             DeselectCharacter();
 
             StartOpponentTurn();

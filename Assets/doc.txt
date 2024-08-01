@@ -1,46 +1,14 @@
-add voluntary jail action
-mapgen: sometimes add fences around dirt paths
-mapgen: add some unclimbable walls
-improve ai with jobs
+- CTF: improve AI with job system
+	> if we see enemy character in own zone => CHASE
+	> if we see enemy flag => GO THERE
+	> some "your turn" notification when turn starts
+
+mapgen: wide road with cars
+mapgen: house
+mapgen: river
 
 
 
---- World Generation Update
-
-- Implement some line features for new map gen system
-	> road
-	> rail track
-	> stroad
-	> highway
-	> creek
-	> river
-
-- Implement some parcels and content for them for new mapgen system
-	> forest
-	> park
-	> neighbourhood
-	> industry
-	> mountain (cliff on 1 side)
-	> swamp
-	> pool
-
-- CTF: Improve ctf map generator
-	> New approach: Check XCOM and PZ map generation
-	> Split map into parcels
-	> Parcels have their own generation system on top of height map generation
-	> Parcel generation depends on bordering parcels, roads, rivers, map edge
-	> Parcels can be i.e. Forest, Suburb, Reservoir, Industrial area
-	> Implement rules which parcels can be next to each other
-
-
-	> 1. height map generation
-	> 2. line features (river, road, railroad)
-	> 3. parcel distribution
-	> 4. parcel connection points (to line features and other parcels)
-	> 5. parcel generation
-	> 6. player base generation
-
----
 
 --- Entity Update
 
@@ -155,6 +123,10 @@ Animation system for walking / climbing entities
 
 - Dogs need a nearby master to work
 
+Neutral moving entities
+ - Wolves
+ - 1 sneaky wolf
+
 - Jumping ability
 	> to hop over fences
 	> to hop over gaps
@@ -169,10 +141,6 @@ Animation system for walking / climbing entities
 	- Only give vision
 
 - fix: water fill algorithm should stop after a while (like 1000 tiles?)
-
-- In terrain blend transitions, only do corner transitions when the corner transition exists
-	> else pass -1 in the blend array and ignore in shader code
-	> also add (global perlin) noise to blending texture
 
 - add new item framework
 	- items behave like static entities on map, but way more limited
@@ -193,8 +161,6 @@ Animation system for walking / climbing entities
 - add some new static entities
 	> for new static entity ideas watch project zomboid streams
 
-improve vision system performance
-
 - Add additional movement methods (jump/fly)
 - Stealth/Invisibility
 - Teleportation
@@ -211,18 +177,10 @@ improve vision system performance
 
 - CTF: Upon end game show full visible map
 
-- CTF: Fix small bug that opponents sometimes stop moving right after starting moving when camera follows their movement, even though they stay visible
-
 - CTF: more general modifier system
 	> modifiers have a duration and effect, name, description, icon
 	> move jail time to modifier
 	> add ui for modifiers
-
-
-- CTF: improve AI with job system
-	> if we see enemy character in own zone => CHASE
-	> if we see enemy flag => GO THERE
-	> some "your turn" notification when turn starts
 
 - CTF: Rework hover pathfinding
 	> Hover on unreachable node = no path preview

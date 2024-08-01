@@ -246,14 +246,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterSelectionPrefab: {fileID: -2926877491083528891, guid: d5fe18a625927774e8ea8ccb80be4fb3, type: 3}
+  CharacterActionButtonPrefab: {fileID: 126220672121504278, guid: 640f952b6bb6a7c44842a8b759d2ceb5, type: 3}
+  TileInfoText: {fileID: 481135219}
   EndTurnButton: {fileID: 1197625279}
   LoadingScreenOverlay: {fileID: 551375017}
   EndGameScreen: {fileID: 154307795}
   EndGameText: {fileID: 1647951698}
   EndGameMenuButton: {fileID: 1518942855}
   CharacterSelectionContainer: {fileID: 1085779443}
-  TileInfoText: {fileID: 481135219}
   CharacterInfo: {fileID: 953654614}
+  SpecialActionsContainer: {fileID: 544977126}
   TurnIndicator: {fileID: 1555068087}
   TurnIndicatorText: {fileID: 1717861100}
 --- !u!1001 &43901027

@@ -255,8 +255,8 @@ namespace BlockmapFramework
             float offset = (climbDir == climb.ClimbSide) ? climb.ClimbTransformOffset : 0f;
 
             float entityLength = (entity != null) ? entity.WorldSize.x / 2f : 0f;
-            if (isAscend) return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);
-            else return new Vector3(World.GetDirectionVector(Direction).x, 0f, World.GetDirectionVector(Direction).y) * (0.5f + entityLength + offset);
+            if (isAscend) return new Vector3(HelperFunctions.GetDirectionVector(Direction).x, 0f, HelperFunctions.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);
+            else return new Vector3(HelperFunctions.GetDirectionVector(Direction).x, 0f, HelperFunctions.GetDirectionVector(Direction).y) * (0.5f + entityLength + offset);
         }
 
         public override List<Vector3> GetPreviewPath()

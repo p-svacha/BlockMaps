@@ -272,6 +272,23 @@ public static class HelperFunctions
     public static bool IsCorner(Direction dir) => GetCorners().Contains(dir);
     public static bool IsSide(Direction dir) => GetSides().Contains(dir);
 
+    public static Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
+    {
+        return worldCoordinates + GetDirectionVector(dir);
+    }
+    public static Vector2Int GetDirectionVector(Direction dir, int distance = 1)
+    {
+        if (dir == Direction.N) return new Vector2Int(0, distance);
+        if (dir == Direction.E) return new Vector2Int(distance, 0);
+        if (dir == Direction.S) return new Vector2Int(0, -distance);
+        if (dir == Direction.W) return new Vector2Int(-distance, 0);
+        if (dir == Direction.NE) return new Vector2Int(distance, distance);
+        if (dir == Direction.NW) return new Vector2Int(-distance, distance);
+        if (dir == Direction.SE) return new Vector2Int(distance, -distance);
+        if (dir == Direction.SW) return new Vector2Int(-distance, -distance);
+        return new Vector2Int(0, 0);
+    }
+
     /// <summary>
     /// Returns the corner directions that are relevant for a given direction.
     /// </summary>

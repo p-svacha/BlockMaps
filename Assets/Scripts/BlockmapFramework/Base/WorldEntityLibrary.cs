@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -19,10 +20,11 @@ namespace BlockmapFramework
             string baseId = attributes[0];
 
             // Procedural entity
-            if (ProceduralEntities.TryGetValue(baseId, out ProceduralEntity procEntity))
+            if (ProceduralEntityManager.Instance.GetAllProceduralEntityIds().Any(x => x.ToString() == baseId))
             {
+                ProceduralEntityId id = ProceduralEntityManager.Instance.GetAllProceduralEntityIds().First(x => x.ToString() == baseId);
                 int height = int.Parse(attributes[1]);
-                return procEntity.GetInstance(height);
+                return ProceduralEntityManager.Instance.GetProceduralEntityInstance(id, height);
             }
 
             // Ladder entity
@@ -41,10 +43,5 @@ namespace BlockmapFramework
         }
 
         protected abstract Entity GetCustomEntityInstance(World world, string id);
-
-        public Dictionary<string, ProceduralEntity> ProceduralEntities = new Dictionary<string, ProceduralEntity>()
-        {
-            { "PE001", new PE001_Hedge() }
-        };
     }
 }

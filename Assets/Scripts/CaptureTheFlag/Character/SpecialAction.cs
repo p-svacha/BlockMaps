@@ -9,9 +9,9 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class SpecialAction : CharacterAction
     {
-        public SpecialAction(CTFGame game, Character c, float cost) : base(game, c, cost)
-        {
+        public abstract string Name { get; }
+        public abstract Sprite Icon { get; }
 
-        }
+        public SpecialAction(CTFGame game, Character c, float cost) : base(game, c, cost) { }
     }
 }

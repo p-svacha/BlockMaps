@@ -191,6 +191,9 @@ namespace BlockmapFramework.WorldGeneration
             return prefab;
         }
 
+        protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
+        protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
+
         #endregion
     }
 }

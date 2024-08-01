@@ -12,8 +12,10 @@ namespace CaptureTheFlag
 
         [Header("Prefabs")]
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
+        public UI_CharacterAction CharacterActionButtonPrefab;
 
         [Header("Elements")]
+        public TextMeshProUGUI TileInfoText;
         public Button EndTurnButton;
         public GameObject LoadingScreenOverlay;
 
@@ -22,8 +24,8 @@ namespace CaptureTheFlag
         public Button EndGameMenuButton;
 
         public GameObject CharacterSelectionContainer;
-        public TextMeshProUGUI TileInfoText;
         public UI_CharacterInfo CharacterInfo;
+        public GameObject SpecialActionsContainer;
 
         public GameObject TurnIndicator;
         public TextMeshProUGUI TurnIndicatorText;
@@ -83,13 +85,24 @@ namespace CaptureTheFlag
 
         public void SelectCharacter(Character c)
         {
+            // Character Info
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
             CharacterInfo.Init(c);
+
+            // Actions
+            SpecialActionsContainer.SetActive(true);
+            HelperFunctions.DestroyAllChildredImmediately(SpecialActionsContainer);
+            foreach(SpecialAction action in c.PossibleSpecialActions)
+            {
+                UI_CharacterAction actionBtn = Instantiate(CharacterActionButtonPrefab, SpecialActionsContainer.transform);
+                actionBtn.Init(action);
+            }
         }
         public void DeselectCharacter(Character c)
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
+            SpecialActionsContainer.SetActive(false);
         }
 
         public void ShowEndGameScreen(string text)

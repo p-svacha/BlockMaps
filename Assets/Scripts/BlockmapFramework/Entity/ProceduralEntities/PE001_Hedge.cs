@@ -5,15 +5,13 @@ using UnityEngine;
 namespace BlockmapFramework {
     public class PE001_Hedge : ProceduralEntity
     {
-        protected override string BaseTypeId => "PE001";
+        protected override ProceduralEntityId ProceduralId => ProceduralEntityId.PE001;
+        protected override bool PE_BlocksVision => true;
+        protected override string PE_Name => "Hedge";
+
         private const float EDGE_OFFSET = 0.2f;
         private const float BEVEL_HEIGHT = 0.15f;
         private const float BEVEL_WIDTH = 0.1f;
-
-        public PE001_Hedge()
-        {
-            Name = "Hedge";
-        }
 
         public override void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
         {

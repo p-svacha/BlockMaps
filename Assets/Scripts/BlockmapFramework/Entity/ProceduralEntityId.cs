@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace BlockmapFramework
 {
-    public class Action_GoToJail : MonoBehaviour
+    public enum ProceduralEntityId
     {
-
+        PE001,
     }
 }

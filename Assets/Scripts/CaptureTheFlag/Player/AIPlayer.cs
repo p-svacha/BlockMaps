@@ -55,10 +55,10 @@ namespace CaptureTheFlag
             // Check if AI turn is finished
             if (Characters.All(x => !x.IsInAction)) TurnFinished = true;
 
-            // Check if we should follow a new action
+            // Check if we should queue-follow a new action
             foreach (CharacterAction action in Actions.Values)
             {
-                if (action.IsDone) continue;
+                if (action.State != CharacterActionState.Performing) continue;
                 if (action == CurrentFollowedAction) continue;
 
                 // Character is newly visible
@@ -72,25 +72,27 @@ namespace CaptureTheFlag
             // Update the currently followed action
             if (CurrentFollowedAction != null)
             {
-                // Unpause action if camera arrived at character
-                if (CurrentFollowedAction.IsPaused && World.Camera.FollowedEntity == CurrentFollowedAction.Character.Entity)
+                // Wait for camera
+                if (World.Camera.FollowedEntity == CurrentFollowedAction.Character.Entity)
                 {
-                    CurrentFollowedAction.UnpauseAction();
-                }
+                    // Unpause action if camera arrived at character
+                    if (CurrentFollowedAction.IsPaused)
+                    {
+                        CurrentFollowedAction.UnpauseAction();
+                    }
 
-                // Stop following if character moves out of vision or if action is done
-                if (CurrentFollowedAction.IsDone || !CurrentFollowedAction.Character.IsVisibleToLocalPlayer)
-                {
-                    World.Camera.Unfollow();
-                    CurrentFollowedAction = null;
+                    // Stop following if character moves out of vision or if action is done
+                    else if (CurrentFollowedAction.IsDone || !CurrentFollowedAction.Character.IsVisibleToLocalPlayer)
+                    {
+                        World.Camera.Unfollow();
+                        CurrentFollowedAction = null;
+                    }
                 }
             }
-
-            // Get next action to follow
-            else if (ActionsToFollow.Count > 0)
+            else if (ActionsToFollow.Count > 0) // Get next action to follow
             {
                 CurrentFollowedAction = ActionsToFollow.Dequeue();
-                World.CameraPanToFocusEntity(CurrentFollowedAction.Character.Entity, duration: 1f, followAfterPan: true);
+                World.CameraPanToFocusEntity(CurrentFollowedAction.Character.Entity, duration: 1f, followAfterPan: true, unbreakableFollow: true);
             }
             
         }

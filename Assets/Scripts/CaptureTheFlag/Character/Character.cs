@@ -27,7 +27,9 @@ namespace CaptureTheFlag
         public float ActionPoints { get; private set; }
         public float Stamina { get; private set; }
         public int JailTime { get; private set; }
+        public bool IsInJail => JailTime > 0;
         public Dictionary<BlockmapNode, Action_Movement> PossibleMoves { get; private set; }
+        public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         private CharacterAction CurrentAction;
 
 
@@ -55,10 +57,10 @@ namespace CaptureTheFlag
             if (Stamina > MaxStamina) Stamina = MaxStamina;
 
             // No movement if in jail
-            if (JailTime > 0) JailTime--;
-            if (JailTime > 0) ActionPoints = 0;
+            if (IsInJail) JailTime--;
+            if (IsInJail) ActionPoints = 0;
 
-            UpdatePossibleMoves();
+            UpdatePossibleActions();
         }
 
         public void SetCurrentAction(CharacterAction action)
@@ -75,9 +77,10 @@ namespace CaptureTheFlag
             JailTime = turns;
         }
 
-        public void UpdatePossibleMoves()
+        public void UpdatePossibleActions()
         {
             PossibleMoves = GetPossibleMoves();
+            PossibleSpecialActions = GetSpecialActions();
         }
 
         public void ReduceActionAndStamina(float amount)
@@ -160,6 +163,20 @@ namespace CaptureTheFlag
             }
 
             return movements;
+        }
+
+        /// <summary>
+        /// Returns a list of all actions that can be performed via button.
+        /// </summary>
+        /// <returns></returns>
+        private List<SpecialAction> GetSpecialActions()
+        {
+            List<SpecialAction> actions = new List<SpecialAction>();
+
+            // Go to jail
+            if(!IsInJail) actions.Add(new Action_GoToJail(Game, this));
+
+            return actions;
         }
 
         /// <summary>

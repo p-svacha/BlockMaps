@@ -22,11 +22,15 @@ namespace CaptureTheFlag
                 ApplyHeightmap,
                 CreateMapZones,
                 AddWaterBodies,
+                AddHedges,
                 AddForests,
                 AddPaths,
+                AddFencesAroundPaths,
                 CreatePlayerBases,
             };
         }
+
+        #region HeightMap
 
         private void GenerateNoise()
         {
@@ -65,6 +69,10 @@ namespace CaptureTheFlag
             World.DrawNodes();
         }
 
+        #endregion
+
+        #region Water
+
         private void AddWaterBodies()
         {
             int numWaterBodies = 0;
@@ -89,6 +97,60 @@ namespace CaptureTheFlag
 
             World.DrawNodes();
         }
+
+        #endregion
+
+        #region Hedges
+
+        private int MIN_HEDGE_LENGTH = 3;
+        private int MAX_HEDGE_LENGTH = 12;
+
+        private int MIN_HEDGE_HEIGHT = 2;
+        private int MAX_HEDGE_HEIGHT = 4;
+
+        private void AddHedges()
+        {
+            int numHedges = TotalNumChunks / 2;
+            for(int i = 0; i < numHedges; i++)
+            {
+                int hedgeLength = Random.Range(MIN_HEDGE_LENGTH, MAX_HEDGE_LENGTH + 1);
+                int hedgeHeight = Random.Range(MIN_HEDGE_HEIGHT, MAX_HEDGE_HEIGHT + 1);
+
+                Vector2Int position = GetRandomWorldCoordinates();
+                List<Vector2Int> previousPositions = new List<Vector2Int>();
+
+                for(int j = 0; j < hedgeLength; j++)
+                {
+                    previousPositions.Add(position);
+                    if (!World.IsInWorld(position)) break;
+
+                    ProceduralEntity hedge = ProceduralEntityManager.Instance.GetProceduralEntityInstance(ProceduralEntityId.PE001, hedgeHeight);
+                    GroundNode node = World.GetGroundNode(position);
+                    if (World.CanSpawnEntity(hedge, node, Direction.N, forceHeadspaceRecalc: true))
+                    {
+                        World.SpawnEntity(hedge, node, Direction.N, World.Gaia, isInstance: true, updateWorld: false);
+                    }
+                    else
+                    {
+                        GameObject.Destroy(hedge);
+                        break;
+                    }
+
+                    // Next position
+                    int numAttempts = 0;
+                    Vector2Int nextPosition = position;
+                    while (previousPositions.Contains(nextPosition) && numAttempts++ < 10)
+                    {
+                        nextPosition = HelperFunctions.GetWorldCoordinatesInDirection(position, HelperFunctions.GetRandomSideDirection());
+                    }
+                    position = nextPosition;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Trees
 
         private void AddForests()
         {
@@ -132,11 +194,17 @@ namespace CaptureTheFlag
             return HelperFunctions.GetWeightedRandomElement(ids);
         }
 
+        #endregion
+
+        #region Paths
+
         private const float MIN_PATH_SEGMENT_LENGTH = 3f;
         private const float MAX_PATH_SEGMENT_LENGTH = 10f;
         private const float MAX_PATH_ANGLE_CHANGE = 30f;
         private const int MIN_PATH_THICKNESS = 1;
         private const int MAX_PATH_THICKNESS = 3;
+        private const float FENCE_PROBABILITY = 0.65f;
+
         /// <summary>
         /// Adds some dirt paths to the map with a random walker algorithm.
         /// </summary>
@@ -146,7 +214,7 @@ namespace CaptureTheFlag
 
             for(int i = 0; i < numStartPoints; i++)
             {
-                Vector2 startPosition = new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
+                Vector2 startPosition = GetRandomWorldPosition2d();
                 float startAngle = Random.Range(0, 360);
 
                 // Create a path going to both directions
@@ -209,5 +277,59 @@ namespace CaptureTheFlag
 
             return allPathNodes;
         }
+
+        private void AddFencesAroundPaths()
+        {
+            // Create mask of where to create fences
+            PerlinNoise fenceMask = new PerlinNoise();
+            CutoffOperation cutoff = new CutoffOperation(FENCE_PROBABILITY, FENCE_PROBABILITY);
+
+            for (int x = 0; x < WorldSize; x++)
+            {
+                for (int y = 0; y < WorldSize; y++)
+                {
+                    Vector2Int worldCoordinates = new Vector2Int(x, y);
+                    GroundNode node = World.GetGroundNode(worldCoordinates);
+
+                    // Check surface
+                    if (node.Surface.Id != SurfaceId.DirtPath) continue;
+                    if (node.WaterNode != null) continue;
+
+                    // Check mask
+                    float maskValue = cutoff.DoOperation(new GradientNoise[] { fenceMask }, x, y);
+                    if (maskValue != 1) continue;
+
+                    // Try to build fence on all side
+                    foreach(Direction side in HelperFunctions.GetSides())
+                    {
+                        // Don't build if any adjacent node is path too
+                        GroundNode adjNode = World.GetAdjacentGroundNode(worldCoordinates, side);
+                        if (adjNode == null || adjNode.Surface.Id == SurfaceId.DirtPath) continue;
+
+                        
+
+                        GroundNode cornerNodePre = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetPreviousDirection8(side));
+                        if (cornerNodePre == null || cornerNodePre.Surface.Id == SurfaceId.DirtPath)
+                        {
+                            GroundNode adjNodePre = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetPreviousSideDirection(side));
+                            if (adjNodePre == null || adjNodePre.Surface.Id != SurfaceId.DirtPath) continue;
+                        }
+
+                        GroundNode cornerNodePost = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetNextDirection8(side));
+                        if (cornerNodePost == null || cornerNodePost.Surface.Id == SurfaceId.DirtPath)
+                        {
+                            GroundNode adjNodePost = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetNextSideDirection(side));
+                            if (adjNodePost == null || adjNodePost.Surface.Id != SurfaceId.DirtPath) continue;
+                        } 
+                        
+
+                        // Build
+                        World.BuildFence(FenceTypeId.WoodenFence, node, side, 1, updateWorld: false);
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

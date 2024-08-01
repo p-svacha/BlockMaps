@@ -44,7 +44,6 @@ namespace CaptureTheFlag
         private void OnCharacterReachedTarget()
         {
             Character.Entity.OnTargetReached -= OnCharacterReachedTarget;
-            Game.World.Camera.Unfollow(); // Unfollow any entity at the end of movement (needed for opponent turns that camera follows)
             EndAction();
         }
     }

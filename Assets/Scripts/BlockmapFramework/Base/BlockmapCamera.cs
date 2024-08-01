@@ -26,9 +26,11 @@ namespace BlockmapFramework
         private Vector3 PanSourcePosition;
         private Vector3 PanTargetPosition;
         private Entity PostPanFollowEntity;
+        private bool EnableUnbreakableFollowAfterPan;
 
         // Follow
         public Entity FollowedEntity { get; private set; }
+        public bool InUnbreakableFollow; // If true, moving camera is disabled until Unfollow()
 
         // Camera Position
         private float CurrentAngle;
@@ -55,6 +57,7 @@ namespace BlockmapFramework
                     UpdatePosition();
                     FollowedEntity = PostPanFollowEntity;
                     IsPanning = false;
+                    if(EnableUnbreakableFollowAfterPan) InUnbreakableFollow = true;
                 }
 
                 else // Pan in progress
@@ -80,7 +83,6 @@ namespace BlockmapFramework
             if (isUiElementFocussed) return;
             if (IsPanning) return;
 
-
             float moveSpeed = MOVE_SPEED;
             if (Input.GetKey(KeyCode.LeftShift)) moveSpeed = SHIFT_MOVE_SPEED;
 
@@ -95,28 +97,28 @@ namespace BlockmapFramework
                 UpdatePosition();
             }
 
-            if (Input.GetKey(KeyCode.W)) // W - Move camera up
+            if (Input.GetKey(KeyCode.W) && !InUnbreakableFollow) // W - Move camera up
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.A)) // A - Move camera left
+            if (Input.GetKey(KeyCode.A) && !InUnbreakableFollow) // A - Move camera left
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.S)) // S - Move camera down
+            if (Input.GetKey(KeyCode.S) && !InUnbreakableFollow) // S - Move camera down
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.D)) // D - Move camera right
+            if (Input.GetKey(KeyCode.D) && !InUnbreakableFollow) // D - Move camera right
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
@@ -156,7 +158,7 @@ namespace BlockmapFramework
             UpdatePosition();
         }
 
-        public void PanTo(float time, Vector3 targetPos, Entity postPanFollowEntity = null)
+        public void PanTo(float time, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false)
         {
             IsPanning = true;
             PanSourcePosition = CurrentPosition;
@@ -164,10 +166,12 @@ namespace BlockmapFramework
             PanDuration = time;
             PostPanFollowEntity = postPanFollowEntity;
             PanDelay = 0f;
+            EnableUnbreakableFollowAfterPan = unbreakableFollow;
         }
         public void Unfollow()
         {
             FollowedEntity = null;
+            InUnbreakableFollow = false;
         }
 
         public void SetZoom(float height)

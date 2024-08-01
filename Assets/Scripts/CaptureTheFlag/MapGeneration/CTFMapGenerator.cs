@@ -70,7 +70,7 @@ namespace CaptureTheFlag
             Entity flagPrefab = GetEntityPrefab(FLAG_ID);
             Entity spawnedFlag = SpawnEntityOnGroundAround(flagPrefab, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
             int numAttempts = 0;
-            while(spawnedFlag == null && numAttempts++ < 10) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
+            while(spawnedFlag == null && numAttempts++ < 50) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
             {
                 spawnY = Random.Range(SPAWN_MAP_EDGE_OFFSET, WorldSize - SPAWN_MAP_EDGE_OFFSET);
                 spawnAreaCenter = new Vector2Int(spawnX, spawnY);

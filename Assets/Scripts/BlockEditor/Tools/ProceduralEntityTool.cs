@@ -28,8 +28,9 @@ namespace WorldEditor
             base.Init(editor);
             
             EntitySelection.Clear();
-            foreach (ProceduralEntity e in editor.EntityLibrary.ProceduralEntities.Values)
+            foreach (ProceduralEntityId id in ProceduralEntityManager.Instance.GetAllProceduralEntityIds())
             {
+                ProceduralEntity e = ProceduralEntityManager.Instance.GetProceduralEntityInstance(id, 0);
                 EntitySelection.AddElement(e.GetThumbnail(), Color.white, e.Name, () => SelectEntity(e));
             }
 
@@ -100,7 +101,7 @@ namespace WorldEditor
             if (HeightInput.text == "") return;
 
             int height = int.Parse(HeightInput.text);
-            ProceduralEntity instance = SelectedEntity.GetInstance(height);
+            ProceduralEntity instance = SelectedEntity.GetCopy(height);
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
             World.SpawnEntity(instance, World.HoveredNode, DEFAULT_ROTATION, owner, isInstance: true);

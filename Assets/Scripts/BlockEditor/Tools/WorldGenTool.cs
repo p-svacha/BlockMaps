@@ -51,7 +51,7 @@ namespace WorldEditor
         {
             if (ActiveGenerator != null)
             {
-                if (ActiveGenerator.IsDone)
+                if (ActiveGenerator.IsDone && ActiveGenerator.World.IsInitialized)
                 {
                     Editor.SetWorld(ActiveGenerator.World);
                     ActiveGenerator = null;

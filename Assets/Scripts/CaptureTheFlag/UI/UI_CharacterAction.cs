@@ -10,7 +10,14 @@ namespace CaptureTheFlag
     {
         [Header("Elements")]
         public Button Button;
-        public TextMeshProUGUI TilteText;
+        public TextMeshProUGUI TitleText;
         public Image Icon;
+
+        public void Init(SpecialAction action)
+        {
+            Button.onClick.AddListener(action.Perform);
+            TitleText.text = action.Name;
+            Icon.sprite = action.Icon;
+        }
     }
 }

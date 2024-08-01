@@ -272,7 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Button: {fileID: 5563261677323426246}
-  TilteText: {fileID: 5563261676804282776}
+  TitleText: {fileID: 5563261676804282776}
   Icon: {fileID: 5563261678289869837}
 --- !u!1 &5563261678289869839
 GameObject:
