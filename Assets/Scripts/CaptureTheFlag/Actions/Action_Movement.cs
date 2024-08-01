@@ -32,27 +32,13 @@ namespace CaptureTheFlag
             Character.Entity.Move(Path);
         }
 
-        public override void UpdateVisibleOpponentAction()
+        public override void DoPause()
         {
-            // Check if node that the character is currently on is visible to the player
-            bool characterVisible = Character.Entity.IsVisibleBy(Game.LocalPlayer.Actor);
-
-            // Pause movement and move camera to pan to character
-            if(characterVisible && !Game.World.Camera.IsPanning && Game.World.Camera.FollowEntity != Character.Entity)
-            {
-                Character.Entity.PauseMovement();
-                Game.World.CameraPanToFocusEntity(Character.Entity, duration: 1f, followAfterPan: true);
-            }
-            // Unpause and continue movement is camera is following entity
-            else if(characterVisible && Game.World.Camera.FollowEntity == Character.Entity)
-            {
-                Character.Entity.UnpauseMovement();
-            }
-            // Unfollow if character goes out of vision
-            else if(!characterVisible)
-            {
-                Game.World.Camera.Unfollow();
-            }
+            Character.Entity.PauseMovement();
+        }
+        public override void DoUnpause()
+        {
+            Character.Entity.UnpauseMovement();
         }
 
         private void OnCharacterReachedTarget()
@@ -60,11 +46,6 @@ namespace CaptureTheFlag
             Character.Entity.OnTargetReached -= OnCharacterReachedTarget;
             Game.World.Camera.Unfollow(); // Unfollow any entity at the end of movement (needed for opponent turns that camera follows)
             EndAction();
-        }
-
-        public override bool IsVisibleBy(Player p)
-        {
-            return Path.Any(x => x.IsVisibleBy(p.Actor));
         }
     }
 }

@@ -8,6 +8,7 @@ namespace CaptureTheFlag
     {
         Pending,
         Performing,
+        Paused,
         Done
     }
 }

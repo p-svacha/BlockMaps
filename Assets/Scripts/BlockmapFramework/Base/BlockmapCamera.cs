@@ -28,7 +28,7 @@ namespace BlockmapFramework
         private Entity PostPanFollowEntity;
 
         // Follow
-        public Entity FollowEntity { get; private set; }
+        public Entity FollowedEntity { get; private set; }
 
         // Camera Position
         private float CurrentAngle;
@@ -53,7 +53,7 @@ namespace BlockmapFramework
                 {
                     CurrentPosition = PanTargetPosition;
                     UpdatePosition();
-                    FollowEntity = PostPanFollowEntity;
+                    FollowedEntity = PostPanFollowEntity;
                     IsPanning = false;
                 }
 
@@ -67,9 +67,9 @@ namespace BlockmapFramework
 
         private void UpdateFollow()
         {
-            if(FollowEntity != null)
+            if(FollowedEntity != null)
             {
-                CurrentPosition = FollowEntity.WorldPosition;
+                CurrentPosition = FollowedEntity.WorldPosition;
                 UpdatePosition();
             }
         }
@@ -100,28 +100,28 @@ namespace BlockmapFramework
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
-                FollowEntity = null;
+                FollowedEntity = null;
             }
             if (Input.GetKey(KeyCode.A)) // A - Move camera left
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
-                FollowEntity = null;
+                FollowedEntity = null;
             }
             if (Input.GetKey(KeyCode.S)) // S - Move camera down
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
-                FollowEntity = null;
+                FollowedEntity = null;
             }
             if (Input.GetKey(KeyCode.D)) // D - Move camera right
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
-                FollowEntity = null;
+                FollowedEntity = null;
             }
 
             if (Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll down - Zoom out
@@ -167,7 +167,7 @@ namespace BlockmapFramework
         }
         public void Unfollow()
         {
-            FollowEntity = null;
+            FollowedEntity = null;
         }
 
         public void SetZoom(float height)

@@ -25,6 +25,17 @@ namespace CaptureTheFlag
         /// The performing state of this action.
         /// </summary>
         public CharacterActionState State { get; private set; }
+        public bool IsPending => State == CharacterActionState.Pending;
+        public bool IsDone => State == CharacterActionState.Done;
+        public bool IsPaused => State == CharacterActionState.Paused;
+
+        public CharacterAction(CTFGame game, Character c, float cost)
+        {
+            Game = game;
+            Character = c;
+            Cost = cost;
+            State = CharacterActionState.Pending;
+        }
 
         /// <summary>
         /// Start performing this action.
@@ -37,10 +48,20 @@ namespace CaptureTheFlag
         }
         protected abstract void OnStartPerform();
 
-        /// <summary>
-        /// Gets called every frame on opponent actions that are at least partly visible to the player.
-        /// </summary>
-        public abstract void UpdateVisibleOpponentAction();
+        public void PauseAction()
+        {
+            if (State != CharacterActionState.Performing) throw new System.Exception("Can only pause an action that is currently being performed.");
+            DoPause();
+            State = CharacterActionState.Paused;
+        }
+        public  void UnpauseAction()
+        {
+            if (State != CharacterActionState.Paused) throw new System.Exception("Can only unpause an action that is currently paused.");
+            DoUnpause();
+            State = CharacterActionState.Performing;
+        }
+        public abstract void DoPause();
+        public abstract void DoUnpause();
 
         protected void EndAction()
         {
@@ -49,17 +70,6 @@ namespace CaptureTheFlag
             State = CharacterActionState.Done;
         }
 
-        /// <summary>
-        /// Returns if the given player can see any part of this action happening.
-        /// </summary>
-        public abstract bool IsVisibleBy(Player p);
 
-        public CharacterAction(CTFGame game, Character c, float cost)
-        {
-            Game = game;
-            Character = c;
-            Cost = cost;
-            State = CharacterActionState.Pending;
-        }
     }
 }

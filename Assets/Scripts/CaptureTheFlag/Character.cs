@@ -13,6 +13,7 @@ namespace CaptureTheFlag
         public CTFGame Game;
         public MovingEntity Entity { get; private set; }
         public Player Owner { get; private set; }
+        public Player Opponent { get; private set; }
 
         [Header("Attributes")]
         public Sprite Avatar;
@@ -37,12 +38,13 @@ namespace CaptureTheFlag
 
         #region Game Loop
 
-        public void OnStartGame(CTFGame game, Player player)
+        public void OnStartGame(CTFGame game, Player player, Player opponent)
         {
             Game = game;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
             Owner = player;
+            Opponent = opponent;
         }
 
         public void OnStartTurn()
@@ -73,12 +75,29 @@ namespace CaptureTheFlag
             JailTime = turns;
         }
 
-        #endregion
-
         public void UpdatePossibleMoves()
         {
             PossibleMoves = GetPossibleMoves();
         }
+
+        public void ReduceActionAndStamina(float amount)
+        {
+            ActionPoints -= amount;
+            Stamina -= amount;
+        }
+
+        public void SetActionPointsToZero()
+        {
+            ActionPoints = 0;
+        }
+
+        #endregion
+
+        #region Getters
+
+        public bool IsInAction => CurrentAction != null;
+        public BlockmapNode Node => Entity.OriginNode;
+        public bool IsVisibleToLocalPlayer => Entity.IsVisibleBy(Game.LocalPlayer.Actor);
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.
@@ -156,18 +175,7 @@ namespace CaptureTheFlag
             return true;
         }
 
-        public void ReduceActionAndStamina(float amount)
-        {
-            ActionPoints -= amount;
-            Stamina -= amount;
-        }
 
-        public void SetActionPointsToZero()
-        {
-            ActionPoints = 0;
-        }
-
-        public bool IsInAction => CurrentAction != null;
-        public BlockmapNode Node => Entity.OriginNode;
+        #endregion
     }
 }

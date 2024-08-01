@@ -44,7 +44,7 @@ namespace CaptureTheFlag
 
             UI.LoadingScreenOverlay.SetActive(true);
             MapGenerator = new CTFMapGenerator_Forest();
-            MapGenerator.InitGeneration(16, Random.Range(4, 8 + 1));
+            MapGenerator.InitGeneration(16, 4);// Random.Range(4, 8 + 1));
             State = GameState.Loading;
         }
 
@@ -61,6 +61,8 @@ namespace CaptureTheFlag
             // Convert world actors to CTF Players
             LocalPlayer = new Player(World.GetActor(id: 1), World.GetZone(id: 3), World.GetZone(id: 4));
             Opponent = new AIPlayer(World.GetActor(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
+            LocalPlayer.Opponent = Opponent;
+            Opponent.Opponent = LocalPlayer;
 
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;

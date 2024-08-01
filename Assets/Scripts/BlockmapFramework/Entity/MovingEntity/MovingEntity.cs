@@ -34,7 +34,6 @@ namespace BlockmapFramework
         // Components
         private Projector SelectionIndicator;
 
-
         protected override void OnInitialized()
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1.");
@@ -62,7 +61,13 @@ namespace BlockmapFramework
                 {
                     SetOriginNode(currentOriginNode);
 
-                    World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition, callback: UpdateVisibility); // Recalculate vision of all nearby entities (including this)
+                    // Recalculate vision of all nearby entities (including this)
+                    if (BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition, callback: UpdateVisibility);
+                    else // If this entity doesn't block vision, only update the vision of itself and of entities from other actors
+                    {
+                        World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition, callback: UpdateVisibility, excludeActor: Owner);
+                        UpdateVision();
+                    }
                 }
                 if(finishedTransition) ReachNextNode();
 

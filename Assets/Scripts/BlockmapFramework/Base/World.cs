@@ -62,6 +62,9 @@ namespace BlockmapFramework
         private int FenceIdCounter;
         private int WallIdCounter;
 
+        // Database indexes
+        private Dictionary<Vector2Int, List<Wall>> WallsByWorldCoordinates2D = new Dictionary<Vector2Int, List<Wall>>();
+
         // Camera
         public BlockmapCamera Camera { get; private set; }
 
@@ -1354,14 +1357,22 @@ namespace BlockmapFramework
         }
         private void RegisterWall(Wall wall) // add to database and add all references in different objects
         {
+            // Database
             Walls.Add(wall.Id, wall);
-            wall.Chunk.AddWall(wall);
+
+            // Database index by world coordinate 2D
+            if (WallsByWorldCoordinates2D.ContainsKey(wall.WorldCoordinates)) WallsByWorldCoordinates2D[wall.WorldCoordinates].Add(wall);
+            else WallsByWorldCoordinates2D.Add(wall.WorldCoordinates, new List<Wall>() { wall });
+
+            // Reference in chunk
+            wall.Chunk.AddWall(wall); // Reference in chunk
         }
         public void RemoveWall(Wall wall)
         {
             // Deregister
             Walls.Remove(wall.Id);
             wall.Chunk.RemoveWall(wall);
+            WallsByWorldCoordinates2D[wall.WorldCoordinates].Remove(wall);
 
             // Update systems around cell
             UpdateNavmeshAround(wall.WorldCoordinates);
@@ -1574,15 +1585,17 @@ namespace BlockmapFramework
         /// <br/> Is delayed by one frame so all draw calls and vision collider movements can be completed before shooting the vision rays.
         /// <br/> Each entity is additionally delayed by 1 frame to not cause lag spikes.
         /// </summary>
-        public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null)
+        public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null, Actor excludeActor = null)
         {
-            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth, callback));
+            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth, callback, excludeActor));
         }
-        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast, int rangeNorth, System.Action callback)
+        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast, int rangeNorth, System.Action callback, Actor excludeActor)
         {
             yield return new WaitForFixedUpdate();
 
             List<Entity> entitiesToUpdate = Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
+            if (excludeActor != null) entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != excludeActor).ToList();
+
             Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
             foreach (Entity e in entitiesToUpdate)
             {
@@ -1894,9 +1907,8 @@ namespace BlockmapFramework
 
         public List<Wall> GetWalls(Vector2Int worldCoordinates)
         {
-            List<Wall> walls = new List<Wall>();
-            for (int i = 0; i <= MAX_ALTITUDE; i++) walls.AddRange(GetWalls(new Vector3Int(worldCoordinates.x, i, worldCoordinates.y)));
-            return walls;
+            if (WallsByWorldCoordinates2D.TryGetValue(worldCoordinates, out List<Wall> walls)) return walls;
+            else return new List<Wall>();
         }
         public List<Wall> GetWalls(Vector3Int globalCellCoordinates)
         {

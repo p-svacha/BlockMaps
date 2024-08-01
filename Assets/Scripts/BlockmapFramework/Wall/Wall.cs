@@ -26,7 +26,7 @@ namespace BlockmapFramework
         public int MinAltitude => GlobalCellCoordinates.y;
         public int MaxAltitude => MinAltitude;
         public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
-        public Vector2Int WorldCoordinates => new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
+        public Vector2Int WorldCoordinates { get; private set; }
         public Chunk Chunk => World.GetChunk(WorldCoordinates);
         public Vector3 CellCenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, (GlobalCellCoordinates.y * World.TILE_HEIGHT) + (World.TILE_HEIGHT / 2), GlobalCellCoordinates.z + 0.5f);
 
@@ -70,6 +70,7 @@ namespace BlockmapFramework
             World = world;
             Id = id;
             GlobalCellCoordinates = globalCellCoordinates;
+            WorldCoordinates = new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
             Side = side;
             Shape = shape;
             Material = material;

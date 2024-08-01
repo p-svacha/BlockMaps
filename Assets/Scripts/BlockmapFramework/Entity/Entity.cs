@@ -545,6 +545,7 @@ namespace BlockmapFramework
                         // Shoot ray all entities on node
                         foreach (Entity e in targetNode.Entities)
                         {
+                            if (e.Owner == Owner) continue; // Don't check for entities of the same actor since they see them anyway
                             if (checkedEntities.Contains(e)) continue;
 
                             pm_GetWorldCenters.Begin();

@@ -1,10 +1,11 @@
---- World Generation Update
-
 add voluntary jail action
-first enemy movement stutters sometimes
-
 mapgen: sometimes add fences around dirt paths
-improve ai
+mapgen: add some unclimbable walls
+improve ai with jobs
+
+
+
+--- World Generation Update
 
 - Implement some line features for new map gen system
 	> road
@@ -43,6 +44,10 @@ improve ai
 
 --- Entity Update
 
+- Allow static entities to be able to allow having moving entities on them
+	> requires jumping update
+	> add container
+
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
 	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
@@ -63,9 +68,6 @@ improve ai
 
 ---
 
---- Multiplayer Update
-
----
 
 --- Update More Node Shapes
 
@@ -200,6 +202,8 @@ improve vision system performance
 
 - Weather / Temperature (Snow/Mud)
 
+- CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
+- CTF: Multiplayer
 
 - CTF: Slopes use more action points
 	> downwards * 1.25
