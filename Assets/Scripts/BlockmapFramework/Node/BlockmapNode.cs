@@ -683,7 +683,8 @@ namespace BlockmapFramework
         public bool HasFence => Fences.Count > 0;
         public abstract Surface GetSurface();
         public abstract SurfaceProperties GetSurfaceProperties();
-        public abstract Vector3 GetCenterWorldPosition();
+        public Vector3 CenterWorldPosition { get; protected set; }
+        public abstract void RecalculateCenterWorldPosition();
 
         /// <summary>
         /// Returns the minimum altitude on the given side of this node as a y coordinate. 
@@ -719,9 +720,9 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the relative height (compared to BaseHeight) at the relative position within this node.
+        /// Returns the exact altitude (compared to BaseAltitude) at the relative position within this node.
         /// </summary>
-        public float GetRelativeHeightAt(Vector2 relativePosition)
+        public float GetExactLocalAltitudeAt(Vector2 relativePosition)
         {
             relativePosition = new Vector2(Mathf.Clamp01(relativePosition.x), Mathf.Clamp01(relativePosition.y)); // Clamp to [0-1]
 
@@ -884,7 +885,7 @@ namespace BlockmapFramework
         /// </summary>
         public float GetWorldHeightAt(Vector2 relativePosition)
         {
-            return BaseWorldHeight + (World.TILE_HEIGHT * GetRelativeHeightAt(relativePosition));
+            return BaseWorldHeight + (World.TILE_HEIGHT * GetExactLocalAltitudeAt(relativePosition));
         }
 
         /// <summary>

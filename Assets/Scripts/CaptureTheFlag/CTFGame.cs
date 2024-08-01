@@ -68,6 +68,7 @@ namespace CaptureTheFlag
             // Vision
             World.ShowTextures(true);
             World.ShowGridOverlay(true);
+            World.ShowTileBlending(true);
             World.SetActiveVisionActor(LocalPlayer.Actor);
             UI.LoadingScreenOverlay.SetActive(false);
 
@@ -224,7 +225,7 @@ namespace CaptureTheFlag
                 if(SelectedCharacter != null && 
                     World.HoveredNode != null &&
                     !SelectedCharacter.IsInAction
-                    && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Movement move))
+                    && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Action_Movement move))
                 {
                     move.Perform(); // Start movement action
                     UnhighlightNodes(); // Unhighlight nodes
@@ -259,7 +260,7 @@ namespace CaptureTheFlag
             {
                 PathPreview.gameObject.SetActive(true);
 
-                Movement move = SelectedCharacter.PossibleMoves[targetNode];
+                Action_Movement move = SelectedCharacter.PossibleMoves[targetNode];
                 UI.CharacterInfo.ShowActionPreview(move.Cost);
                 Pathfinder.ShowPathPreview(PathPreview, move.Path, 0.1f, new Color(1f, 1f, 1f, 0.5f));
             }

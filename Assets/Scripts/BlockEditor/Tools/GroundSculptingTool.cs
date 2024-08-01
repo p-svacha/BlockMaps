@@ -120,7 +120,7 @@ namespace WorldEditor
                     // Manually update world stuff in one step instead of after each node to increase performance
                     World.UpdateNavmeshAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
                     World.RedrawNodesAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                    World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.GetCenterWorldPosition(), AreaSize, AreaSize);
+                    World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.CenterWorldPosition, AreaSize, AreaSize);
                 }
             }
         }

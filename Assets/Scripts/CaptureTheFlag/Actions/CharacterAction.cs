@@ -54,10 +54,11 @@ namespace CaptureTheFlag
         /// </summary>
         public abstract bool IsVisibleBy(Player p);
 
-        public CharacterAction(CTFGame game, Character c)
+        public CharacterAction(CTFGame game, Character c, float cost)
         {
             Game = game;
             Character = c;
+            Cost = cost;
             State = CharacterActionState.Pending;
         }
     }

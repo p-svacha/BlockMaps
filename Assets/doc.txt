@@ -1,5 +1,11 @@
 --- World Generation Update
 
+add voluntary jail action
+first enemy movement stutters sometimes
+
+mapgen: sometimes add fences around dirt paths
+improve ai
+
 - Implement some line features for new map gen system
 	> road
 	> rail track

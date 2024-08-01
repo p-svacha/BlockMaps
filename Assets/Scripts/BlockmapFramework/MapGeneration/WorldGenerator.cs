@@ -7,7 +7,7 @@ namespace BlockmapFramework.WorldGeneration
 {
     public abstract class WorldGenerator
     {
-        private const int MAX_WORLD_SIZE = 512;
+        public const int MAX_WORLD_SIZE = 512;
 
         public abstract string Name { get; }
 
@@ -165,7 +165,7 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         protected Entity SpawnEntityOnGroundAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
         {
-            int maxAttempts = 100;
+            int maxAttempts = 10;
             int numAttempts = 0;
             while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
             {

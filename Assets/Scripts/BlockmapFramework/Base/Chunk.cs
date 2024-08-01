@@ -185,7 +185,7 @@ namespace BlockmapFramework
             WaterMesh.SetVisibility(actor);
 
             // Entity visibility
-            foreach(Entity e in Entities) e.UpdateVisiblity(actor);
+            foreach(Entity e in Entities) e.UpdateVisibility(actor);
         }
 
         public void ShowGrid(bool show)

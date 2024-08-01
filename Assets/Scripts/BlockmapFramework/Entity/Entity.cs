@@ -108,6 +108,10 @@ namespace BlockmapFramework
         static readonly ProfilerMarker pm_UpdateVision = new ProfilerMarker("UpdateVision");
         static readonly ProfilerMarker pm_GetCurrentVision = new ProfilerMarker("GetCurrentVision");
         static readonly ProfilerMarker pm_Look = new ProfilerMarker("Look");
+        static readonly ProfilerMarker pm_AggregateVisionData = new ProfilerMarker("Aggregate Vision Data");
+        static readonly ProfilerMarker pm_GetWorldCenters = new ProfilerMarker("Get World Centers");
+        static readonly ProfilerMarker pm_GetTargetNodes = new ProfilerMarker("Get Target Nodes");
+        static readonly ProfilerMarker pm_GetTargetWalls = new ProfilerMarker("Get Target Walls");
         static readonly ProfilerMarker pm_HandleVisibilityChange = new ProfilerMarker("HandleVisibilityChange");
 
         #region Initialize
@@ -217,11 +221,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates all references of what this entity currently sees according to its vision range and line of sight rules.
         /// </summary>
-        public void UpdateVision()
+        public void UpdateVision(bool debugVisionRays = false)
         {
             pm_UpdateVision.Begin();
 
-            if (VisionRange == 0) return; // This entity cannot see
+            if (!CanSee) return; // This entity cannot see
 
             // Remove entity vision from previously visible nodes, entities and walls
             VisionData previousVision = CurrentVision;
@@ -231,7 +235,7 @@ namespace BlockmapFramework
 
             // Get list of everything that this entity currently sees
             pm_GetCurrentVision.Begin();
-            CurrentVision = GetCurrentVision();
+            CurrentVision = GetCurrentVision(debugVisionRays);
             pm_GetCurrentVision.End();
 
             pm_HandleVisibilityChange.Begin();
@@ -256,7 +260,7 @@ namespace BlockmapFramework
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVision.VisibleNodes.Concat(previousVision.ExploredNodes));
             changedVisibilityNodes.SymmetricExceptWith(CurrentVision.VisibleNodes.Concat(CurrentVision.ExploredNodes));
-            Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
+            //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
 
             // Add all adjacent nodes as well because vision goes over node edge
             HashSet<BlockmapNode> adjNodes = new HashSet<BlockmapNode>();
@@ -275,7 +279,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode n in changedVisibilityNodes) changedVisibilityChunks.Add(n.Chunk);
 
             // Redraw visibility of affected chunks
-            Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
+            //Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Owner);
 
             pm_HandleVisibilityChange.End();
@@ -291,7 +295,7 @@ namespace BlockmapFramework
         /// <summary>
         /// List containing all entities that currently see this entity.
         /// </summary>
-        private HashSet<Entity> SeenBy = new HashSet<Entity>();
+        protected HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
         /// Stores the exact world position at which each player has seen this entity the last time.
@@ -332,10 +336,15 @@ namespace BlockmapFramework
         #region Draw
 
         /// <summary>
+        /// Updates the visibility according to the current active vision actor.
+        /// </summary>
+        public void UpdateVisibility() => UpdateVisibility(World.ActiveVisionActor);
+
+        /// <summary>
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
         /// <br/> Also Moves the entitiy to the last or currently known position for the given player.
         /// </summary>
-        public virtual void UpdateVisiblity(Actor player)
+        public virtual void UpdateVisibility(Actor player)
         {
             // Entity is currently visible => render normally at current position
             if (IsVisibleBy(player))
@@ -374,6 +383,7 @@ namespace BlockmapFramework
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
+        public bool CanSee => VisionRange > 0;
 
         public Vector3Int GetDimensions()
         {
@@ -399,8 +409,8 @@ namespace BlockmapFramework
             // For y, take the lowest node center out of all occupied nodes
             HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(world, originNode, rotation);
             float y;
-            if (occupiedNodes == null) y = world.GetWorldHeightAt(new Vector2(originNode.WorldCoordinates.x + 0.5f, originNode.WorldCoordinates.y + 0.5f), originNode);
-            else y = GetOccupiedNodes(world, originNode, rotation).Min(x => world.GetWorldHeightAt(new Vector2(x.WorldCoordinates.x + 0.5f, x.WorldCoordinates.y + 0.5f), x));
+            if (occupiedNodes == null) y = originNode.GetWorldHeightAt(new Vector2(0.5f, 0.5f));
+            else y = GetOccupiedNodes(world, originNode, rotation).Min(x => x.GetWorldHeightAt(new Vector2(0.5f, 0.5f)));
 
             // Final position
             return new Vector3(basePosition.x, y, basePosition.y);
@@ -496,79 +506,113 @@ namespace BlockmapFramework
         /// Shoots rays from the entity's current position towards all nodes, entities and walls within vision range.
         /// <br/>Returns several lists containing information about what objects are currenlty visible or should be marked as explored.
         /// </summary>
-        private VisionData GetCurrentVision()
+        private VisionData GetCurrentVision(bool debugVisionRays = false)
         {
-            VisionData fullVision = new VisionData();
-            if (VisionRange == 0) return fullVision; // This entity cannot see
+            VisionData finalVision = new VisionData();
+            if (!CanSee) return finalVision; // This entity cannot see
+
+            // Cache some values
+            float visionRangeSquared = VisionRange * VisionRange;
+            Vector2Int originCoordinates = OriginNode.WorldCoordinates;
+            List<Entity> checkedEntities = new List<Entity>();
+            Vector3 visionRaySource = GetEyePosition();
 
             // Iterate through all world coordinates that could possibly be within vision range
-            HashSet<Entity> checkedEntities = new HashSet<Entity>();
-            for (int x = (int)(-VisionRange - 1); x <= VisionRange; x++)
+            int start = (int)(-VisionRange - 1);
+            for (int x = start; x <= VisionRange; x++)
             {
-                for (int y = (int)(-VisionRange - 1); y <= VisionRange; y++)
+                for (int y = start; y <= VisionRange; y++)
                 {
-                    Vector2Int targetWorldCoordinates = new Vector2Int(OriginNode.WorldCoordinates.x + x, OriginNode.WorldCoordinates.y + y);
+                    Vector2Int targetWorldCoordinates = new Vector2Int(originCoordinates.x + x, originCoordinates.y + y);
                     if (!World.IsInWorld(targetWorldCoordinates)) continue;
 
                     // Shoot ray at all nodes on coordinate
-                    foreach (BlockmapNode targetNode in World.GetNodes(targetWorldCoordinates))
+                    pm_GetTargetNodes.Begin();
+                    List<BlockmapNode> targetNodes = World.GetNodes(targetWorldCoordinates);
+                    pm_GetTargetNodes.End();
+                    foreach (BlockmapNode targetNode in targetNodes)
                     {
+                        if ((targetNode.CenterWorldPosition - visionRaySource).sqrMagnitude > visionRangeSquared) continue;
+
                         pm_Look.Begin();
-                        VisionData nodeRayVision = Look(targetNode.GetCenterWorldPosition());
+                        VisionData nodeRayVision = Look(visionRaySource, targetNode.CenterWorldPosition, debugVisionRays);
                         pm_Look.End();
-                        fullVision.AddVisionData(nodeRayVision);
+
+                        pm_AggregateVisionData.Begin();
+                        finalVision.AddVisionData(nodeRayVision);
+                        pm_AggregateVisionData.End();
 
                         // Shoot ray all entities on node
-                        foreach(Entity e in targetNode.Entities)
+                        foreach (Entity e in targetNode.Entities)
                         {
                             if (checkedEntities.Contains(e)) continue;
 
+                            pm_GetWorldCenters.Begin();
+                            Vector3 entityCenter = e.GetWorldCenter();
+                            pm_GetWorldCenters.End();
+                            if ((entityCenter - visionRaySource).sqrMagnitude > visionRangeSquared) continue;
+                            
+
                             pm_Look.Begin();
-                            VisionData entityRayVision = Look(e.GetWorldCenter());
+                            VisionData entityRayVision = Look(visionRaySource, entityCenter, debugVisionRays);
                             pm_Look.End();
-                            fullVision.AddVisionData(entityRayVision);
+
+                            pm_AggregateVisionData.Begin();
+                            finalVision.AddVisionData(entityRayVision);
                             checkedEntities.Add(e);
+                            pm_AggregateVisionData.End();
                         }
                     }
 
                     // Shoot a ray at all walls on coordinate
-                    foreach(Wall wall in World.GetWalls(targetWorldCoordinates))
+                    pm_GetTargetWalls.Begin();
+                    List<Wall> targetWalls = World.GetWalls(targetWorldCoordinates);
+                    pm_GetTargetWalls.End();
+                    foreach (Wall wall in targetWalls)
                     {
+                        pm_GetWorldCenters.Begin();
+                        Vector3 wallCenter = wall.GetCenterWorldPosition();
+                        pm_GetWorldCenters.End();
+                        if ((wallCenter - visionRaySource).sqrMagnitude > visionRangeSquared) continue;
+
                         pm_Look.Begin();
-                        VisionData wallRayVision = Look(wall.GetCenterWorldPosition());
+                        VisionData wallRayVision = Look(visionRaySource, wallCenter, debugVisionRays);
                         pm_Look.End();
-                        fullVision.AddVisionData(wallRayVision);
+
+                        pm_AggregateVisionData.Begin();
+                        finalVision.AddVisionData(wallRayVision);
+                        pm_AggregateVisionData.End();
                     }
                 }
             }
 
-            return fullVision;
+            return finalVision;
         }
 
         /// <summary>
         /// Shoots a vision ray from this entity's eyes at the given target world position with a range equal to this entity's vision range.
         /// <br/> Returns the vision data containing all objects that are visible and explored from this raycast.
         /// </summary>
-        private VisionData Look(Vector3 targetPosition)
+        private VisionData Look(Vector3 sourcePosition, Vector3 targetPosition, bool debugVisionRay = false)
         {
             VisionData vision = new VisionData();
 
             // Create a ray from eye to target with VisionRange as max range
-            Vector3 source = GetEyePosition();
-            Vector3 direction = targetPosition - source;
+            Vector3 direction = targetPosition - sourcePosition;
 
-            Ray ray = new Ray(source, direction);
-            int layerMask = 1 << World.Layer_GroundNode | 1 << World.Layer_AirNode | 1 << World.Layer_Water | 1 << World.Layer_EntityVisionCollider | 1 << World.Layer_Fence | 1 << World.Layer_Wall;
+            Ray ray = new Ray(sourcePosition, direction);
+            int layerMask = (1 << World.Layer_GroundNode) | (1 << World.Layer_AirNode) |
+                    (1 << World.Layer_Water) | (1 << World.Layer_EntityVisionCollider) |
+                    (1 << World.Layer_Fence) | (1 << World.Layer_Wall);
             RaycastHit[] hits = Physics.RaycastAll(ray, VisionRange, layerMask);
             System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
 
             // Debug
-            bool debugVisionRay = false;
             if (debugVisionRay)
             {
                 Color debugColor = Color.red;
                 if (hits.Length > 0) debugColor = Color.blue;
-                Debug.DrawRay(source, targetPosition - source, debugColor, 60f);
+                Debug.DrawRay(sourcePosition, direction, debugColor, 60f);
             }
 
             foreach (RaycastHit hit in hits)
@@ -638,6 +682,9 @@ namespace BlockmapFramework
                     Vector2Int hitWorldCoordinates = World.GetWorldCoordinates(hitPosition);
                     WaterNode hitWaterNode = World.GetWaterNode(hitWorldCoordinates);
 
+                    // Mark the water node as visible
+                    vision.AddVisibleNode(hitWaterNode);
+
                     // Mark the ground node below the water node as visible
                     vision.AddVisibleNode(hitWaterNode.GroundNode);
 
@@ -656,7 +703,7 @@ namespace BlockmapFramework
                     // Mark all nodes that the entity stands on as explored
                     foreach (BlockmapNode n in hitEntity.OccupiedNodes) vision.AddExploredNode(n);
 
-                    if (!objectHit.transform.parent.GetComponentInChildren<Entity>().BlocksVision) continue; // Continue search if entity doesn't block vision
+                    if (!hitEntity.BlocksVision) continue; // Continue search if entity doesn't block vision
                     else return vision; // End search if entity blocks vision
                 }
 
@@ -704,7 +751,7 @@ namespace BlockmapFramework
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
-            return OriginNode.GetCenterWorldPosition() + new Vector3(0f, (Dimensions.y * World.TILE_HEIGHT) - (World.TILE_HEIGHT * 0.5f), 0f);
+            return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.TILE_HEIGHT) - (World.TILE_HEIGHT * 0.5f), 0f);
         }
 
         public virtual Sprite GetThumbnail()
@@ -732,8 +779,7 @@ namespace BlockmapFramework
             WorldPosition = GetWorldPosition(World, targetNode, Rotation);
             SetOriginNode(targetNode);
 
-            if (BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition()); // Recalculate vision of all nearby entities when blocking vision
-            else UpdateVision(); // Only calculate own vision when being see-through
+            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition); // Recalculate vision of all nearby entities (including this)
         }
 
         /// <summary>
@@ -758,9 +804,6 @@ namespace BlockmapFramework
             // Set new origin
             OriginNode = node;
             UpdateOccupiedNodes();
-
-            // Update visibility since it could have gone out of / into vision
-            UpdateVisiblity(World.ActiveVisionActor);
 
             // Update position of vision collider
             UpdateVisionColliderPosition();

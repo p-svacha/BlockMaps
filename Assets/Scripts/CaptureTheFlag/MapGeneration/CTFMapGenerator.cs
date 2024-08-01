@@ -41,6 +41,7 @@ namespace CaptureTheFlag
                 return;
             }
 
+            Debug.Log("Starting World Generation Step: " + GenerationSteps[CurrentGenerationStep].Method.Name);
             GenerationSteps[CurrentGenerationStep].Invoke();
             CurrentGenerationStep++;
         }
@@ -68,6 +69,13 @@ namespace CaptureTheFlag
             // Flag
             Entity flagPrefab = GetEntityPrefab(FLAG_ID);
             Entity spawnedFlag = SpawnEntityOnGroundAround(flagPrefab, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+            int numAttempts = 0;
+            while(spawnedFlag == null && numAttempts++ < 10) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
+            {
+                spawnY = Random.Range(SPAWN_MAP_EDGE_OFFSET, WorldSize - SPAWN_MAP_EDGE_OFFSET);
+                spawnAreaCenter = new Vector2Int(spawnX, spawnY);
+                spawnedFlag = SpawnEntityOnGroundAround(flagPrefab, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+            }
             
             // Jail zone
             HashSet<Vector2Int> jailZoneCoords = new HashSet<Vector2Int>();
@@ -113,19 +121,19 @@ namespace CaptureTheFlag
             // Humans
             int humansSpawned = 0;
             Entity humanPrefab = GetCharacterPrefab("human");
-            for (int i = 0; i < NUM_HUMANS_PER_PLAYER; i++)
+            while(humansSpawned < NUM_HUMANS_PER_PLAYER)
             {
-                SpawnEntityOnGroundAround(humanPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
-                humansSpawned++;
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(humanPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                if(spawnedCharacter != null) humansSpawned++;
             }
 
             // Dogs
             int dogsSpawned = 0;
             Entity dogPrefab = GetCharacterPrefab("dog");
-            for(int i = 0; i < NUM_DOGS_PER_PLAYER; i++)
+            while (dogsSpawned < NUM_DOGS_PER_PLAYER)
             {
-                SpawnEntityOnGroundAround(dogPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
-                dogsSpawned++;
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(dogPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                if (spawnedCharacter != null) dogsSpawned++;
             }
         }
 

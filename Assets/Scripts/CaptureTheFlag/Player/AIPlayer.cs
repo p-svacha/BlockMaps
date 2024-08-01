@@ -62,7 +62,7 @@ namespace CaptureTheFlag
             if (c.PossibleMoves.Count == 0) return null;
 
             // Move to random reachable node, with heigher weights for nodes that are further west
-            Dictionary<Movement, float> movementProbabilities = new Dictionary<Movement, float>();
+            Dictionary<Action_Movement, float> movementProbabilities = new Dictionary<Action_Movement, float>();
             int maxX = c.PossibleMoves.Max(x => x.Value.Target.WorldCoordinates.x);
             foreach (var possibleMove in c.PossibleMoves)
             {
@@ -70,12 +70,15 @@ namespace CaptureTheFlag
                 movementProbabilities.Add(possibleMove.Value, maxX - possibleMove.Value.Target.WorldCoordinates.x + 1);
             }
 
-            Movement randomMove = HelperFunctions.GetWeightedRandomElement(movementProbabilities);
+            Action_Movement randomMove = HelperFunctions.GetWeightedRandomElement(movementProbabilities);
             TargetNodes.Add(randomMove.Target);
 
             return randomMove;
         }
 
+        /// <summary>
+        /// Gets called every frame during the AI's turn.
+        /// </summary>
         public void UpdateTurn()
         {
             // Check if AI turn is finished

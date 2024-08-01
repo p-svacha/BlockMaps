@@ -170,7 +170,7 @@ namespace WorldEditor
             {
                 text += "\n" + World.HoveredNode.ToString();
                 text += "\nShape: " + World.HoveredNode.Shape;
-                text += "\nRelHeight: " + World.HoveredNode.GetRelativeHeightAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+                text += "\nRelHeight: " + World.HoveredNode.GetExactLocalAltitudeAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             }
             if (World.HoveredEntity != null) text += "\nEntity: " + World.HoveredEntity.ToString();
             if (World.HoveredWaterBody != null) text += "\nWaterbody";

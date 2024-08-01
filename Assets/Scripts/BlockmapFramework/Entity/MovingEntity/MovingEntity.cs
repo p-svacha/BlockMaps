@@ -61,10 +61,11 @@ namespace BlockmapFramework
                 if (OriginNode != currentOriginNode)
                 {
                     SetOriginNode(currentOriginNode);
-                    if (BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition()); // Recalculate vision of all nearby entities when blocking vision
-                    else UpdateVision(); // Only calculate own vision when being see-through
+
+                    World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition, callback: UpdateVisibility); // Recalculate vision of all nearby entities (including this)
                 }
                 if(finishedTransition) ReachNextNode();
+
 
                 // Update transform if visible
                 if(IsVisibleBy(World.ActiveVisionActor))
@@ -158,6 +159,9 @@ namespace BlockmapFramework
         {
             BlockmapNode reachedNode = TargetPath[0];
             TargetPath.RemoveAt(0);
+
+            // Update the last known position of this entity for all actors that can currently see it
+            foreach (Entity e in SeenBy) UpdateLastKnownPositionFor(e.Owner);
 
             // Target not yet reached
             if (TargetPath.Count > 0)

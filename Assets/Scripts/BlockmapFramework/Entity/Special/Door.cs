@@ -125,15 +125,15 @@ namespace BlockmapFramework
             {
                 WorldRotation = Quaternion.Slerp(startingRotation, targetRotation, elapsedTime / rotationDuration);
                 elapsedTime += Time.deltaTime;
-                UpdateVisiblity(World.ActiveVisionActor);
+                UpdateVisibility();
                 yield return null;
             }
 
             WorldRotation = targetRotation;
-            UpdateVisiblity(World.ActiveVisionActor);
+            UpdateVisibility();
 
             UpdateVisionColliderPosition();
-            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.GetCenterWorldPosition());
+            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition);
         }
 
         #endregion

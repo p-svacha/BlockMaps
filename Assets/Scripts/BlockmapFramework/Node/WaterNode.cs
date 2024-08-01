@@ -19,6 +19,7 @@ namespace BlockmapFramework
             WaterBody = waterBody;
             GroundNode = surfaceNode;
             GroundNode.SetWaterNode(this);
+            RecalculateCenterWorldPosition();
         }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
@@ -34,9 +35,9 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public override Vector3 GetCenterWorldPosition()
+        public override void RecalculateCenterWorldPosition()
         {
-            return new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
+            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 
         protected override bool IsGenerallyPassable()

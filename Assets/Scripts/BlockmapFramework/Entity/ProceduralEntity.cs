@@ -30,6 +30,6 @@ namespace BlockmapFramework
         public void BuildMesh(MeshBuilder meshBuilder) => BuildMesh(meshBuilder, OriginNode, Height, isPreview: false);
         public abstract void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false);
 
-        public override void UpdateVisiblity(Actor player) { } // Visibility is handled through ProceduralEntityChunkMesh
+        public override void UpdateVisibility(Actor player) { } // Visibility is handled through ProceduralEntityChunkMesh
     }
 }

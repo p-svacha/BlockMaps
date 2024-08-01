@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     /// <summary>
     /// An action for default moving from one node to another.
     /// </summary>
-    public class Movement : CharacterAction
+    public class Action_Movement : CharacterAction
     {
         /// <summary>
         /// Exact order of nodes that are traversed for this movement, including the origin and target node.
@@ -17,11 +17,10 @@ namespace CaptureTheFlag
         public List<BlockmapNode> Path { get; private set; }
         public BlockmapNode Target { get; private set; }
 
-        public Movement(CTFGame game, Character c, List<BlockmapNode> path, float cost) : base(game, c)
+        public Action_Movement(CTFGame game, Character c, List<BlockmapNode> path, float cost) : base(game, c, cost)
         {
             Path = path;
             Target = path.Last();
-            Cost = cost;
         }
 
         protected override void OnStartPerform()

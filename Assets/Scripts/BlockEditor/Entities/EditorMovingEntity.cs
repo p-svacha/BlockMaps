@@ -48,7 +48,7 @@ namespace WorldEditor
 
         protected override void OnNewPath()
         {
-            TargetFlag.transform.position = Target.GetCenterWorldPosition();
+            TargetFlag.transform.position = Target.CenterWorldPosition;
             TargetFlag.transform.localScale = new Vector3(TargetFlagScale, 1f, TargetFlagScale);
             TargetFlag.GetComponent<MeshRenderer>().material.color = Color.red;
             TargetFlag.gameObject.SetActive(true);

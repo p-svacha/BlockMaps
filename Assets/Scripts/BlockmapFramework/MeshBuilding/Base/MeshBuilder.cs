@@ -437,7 +437,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    float height = node.GetRelativeHeightAt(new Vector2(footprint[i].x, footprint[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.TILE_HEIGHT;
                     footprint[i] += new Vector3(0f, height, 0f);
                 }
             }
@@ -485,7 +485,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    float height = node.GetRelativeHeightAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }
@@ -576,7 +576,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    float height = node.GetRelativeHeightAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }

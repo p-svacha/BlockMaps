@@ -124,6 +124,9 @@ namespace BlockmapFramework
         public bool IsVisionCutoffEnabled { get; private set; }
         public int VisionCutoffAltitude { get; private set; }
 
+        // Cache
+        private static readonly List<BlockmapNode> EmptyNodeList = new List<BlockmapNode>();
+
 
         #region Init
 
@@ -527,7 +530,7 @@ namespace BlockmapFramework
                 float closestDistance = float.MaxValue;
                 foreach(AirNode node in hitAirNodes)
                 {
-                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetRelativeHeightAt(relativePos));
+                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
                     if(distance < closestDistance)
                     {
                         closestNode = node;
@@ -550,7 +553,7 @@ namespace BlockmapFramework
                 float closestDistance = float.MaxValue;
                 foreach (AirNode node in hitOffsetAirNodes)
                 {
-                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetRelativeHeightAt(relativePos));
+                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
                     if (distance < closestDistance)
                     {
                         closestNode = node;
@@ -952,7 +955,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
         }
 
         public void SetSurface(DynamicNode node, SurfaceId surfaceId, bool updateWorld = true)
@@ -1012,7 +1015,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
             RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(newNode.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(newNode.CenterWorldPosition);
         }
         public bool CanRemoveAirNode(AirNode node)
         {
@@ -1026,7 +1029,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
         }
 
         public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation, bool forceHeadspaceRecalc = false)
@@ -1075,11 +1078,8 @@ namespace BlockmapFramework
             // Redraw chunk meshes if it is a procedural entity
             if (updateWorld && instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
 
-            // Update vision around new entity
-            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.GetCenterWorldPosition());
-
-            // Update if the new entity is currently visible
-            if (updateWorld) instance.UpdateVisiblity(ActiveVisionActor);
+            // Update vision around new entity (and then update it's visibility when done)
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.CenterWorldPosition, callback: instance.UpdateVisibility);
 
             // Update pathfinding navmesh
             if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
@@ -1275,7 +1275,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
 
             // Register fence
             Fences.Add(fence.Id, fence);
@@ -1287,7 +1287,7 @@ namespace BlockmapFramework
 
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.GetCenterWorldPosition());
+            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
         }
 
         public bool CanBuildWall(Vector3Int globalCellCoordinates, Direction side)
@@ -1571,19 +1571,26 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Recalculates the vision of all entities that have the given position within their vision range.
-        /// <br/> Is delayed by one frame so all draw calls can be completed before shooting the vision rays.
+        /// <br/> Is delayed by one frame so all draw calls and vision collider movements can be completed before shooting the vision rays.
+        /// <br/> Each entity is additionally delayed by 1 frame to not cause lag spikes.
         /// </summary>
-        public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
+        public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null)
         {
-            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth));
+            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth, callback));
         }
-        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
+        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast, int rangeNorth, System.Action callback)
         {
             yield return new WaitForFixedUpdate();
 
-            List<Entity> entitiesToUpdate = Entities.Values.Where(x => Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
+            List<Entity> entitiesToUpdate = Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
             Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
-            foreach (Entity e in entitiesToUpdate) e.UpdateVision();
+            foreach (Entity e in entitiesToUpdate)
+            {
+                e.UpdateVision();
+                yield return 0;
+            }
+
+            if (callback != null) callback.Invoke();
         }
 
         public void ToggleGridOverlay()
@@ -1750,8 +1757,8 @@ namespace BlockmapFramework
 
             Vector2Int chunkCoordinates = new Vector2Int(chunkCoordinateX, chunkCoordinateY);
 
-            if (Chunks.TryGetValue(chunkCoordinates, out Chunk value)) return value;
-            else return null;
+            Chunks.TryGetValue(chunkCoordinates, out Chunk value);
+            return value;
         }
         public Chunk GetChunk(int worldX, int worldY) => GetChunk(new Vector2Int(worldX, worldY));
         public List<Chunk> GetChunks(Vector2Int chunkCoordinates, int rangeEast, int rangeNorth)
@@ -1781,9 +1788,16 @@ namespace BlockmapFramework
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
             Chunk chunk = GetChunk(worldCoordinates);
-            if(chunk == null) return new List<BlockmapNode>(); // not in world
+            if(chunk == null) return EmptyNodeList; // not in world
 
-            return chunk.GetNodes(chunk.GetLocalCoordinates(worldCoordinates));
+            Vector2Int localCoordinates = GetLocalCoordinates(worldCoordinates);
+            return chunk.GetNodes(localCoordinates);
+        }
+        public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)
+        {
+            int localX = HelperFunctions.Mod(worldCoordinates.x, ChunkSize);
+            int localY = HelperFunctions.Mod(worldCoordinates.y, ChunkSize);
+            return new Vector2Int(localX, localY);
         }
 
         public List<GroundNode> GetAllGroundNodes()
@@ -2033,7 +2047,7 @@ namespace BlockmapFramework
         }
         public BlockmapNode GetRandomPassableNode(Entity entity) // very not performant
         {
-            List<BlockmapNode> candidateNodes = new List<BlockmapNode>();
+            List<BlockmapNode> candidateNodes = EmptyNodeList;
             foreach (Chunk c in Chunks.Values) candidateNodes.AddRange(c.GetAllNodes().Where(x => x.IsPassable(entity)).ToList());
             return candidateNodes[Random.Range(0, candidateNodes.Count)];
         }

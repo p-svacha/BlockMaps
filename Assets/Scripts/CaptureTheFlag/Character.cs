@@ -26,7 +26,7 @@ namespace CaptureTheFlag
         public float ActionPoints { get; private set; }
         public float Stamina { get; private set; }
         public int JailTime { get; private set; }
-        public Dictionary<BlockmapNode, Movement> PossibleMoves { get; private set; }
+        public Dictionary<BlockmapNode, Action_Movement> PossibleMoves { get; private set; }
         private CharacterAction CurrentAction;
 
 
@@ -83,9 +83,9 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.
         /// </summary>
-        private Dictionary<BlockmapNode, Movement> GetPossibleMoves()
+        private Dictionary<BlockmapNode, Action_Movement> GetPossibleMoves()
         {
-            Dictionary<BlockmapNode, Movement> movements = new Dictionary<BlockmapNode, Movement>();
+            Dictionary<BlockmapNode, Action_Movement> movements = new Dictionary<BlockmapNode, Action_Movement>();
 
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
             HashSet<BlockmapNode> visited = new HashSet<BlockmapNode>();
@@ -112,6 +112,7 @@ namespace CaptureTheFlag
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
+                    if (totalCost > Stamina) continue; // not reachable with current stamina
                     if (!t.Value.CanPass(Entity)) continue; // transition not passable for this character
                     if (!t.Key.IsExploredBy(Entity.Owner)) continue; // node not explored
 
@@ -134,7 +135,7 @@ namespace CaptureTheFlag
                         if (!CanStandOn(targetNode)) continue;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Movement(Game, this, nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Action_Movement(Game, this, nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }

@@ -15,6 +15,7 @@ namespace BlockmapFramework
 
         public DynamicNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height)
         {
+            RecalculateCenterWorldPosition();
             Surface = SurfaceManager.Instance.GetSurface(surfaceId);
         }
 
@@ -139,6 +140,7 @@ namespace BlockmapFramework
             else LastHeightChangeWasIncrease = isIncrease;
 
             RecalculateShape();
+            RecalculateCenterWorldPosition();
         }
 
         public void SetHeight(Direction corner, int height)
@@ -155,6 +157,7 @@ namespace BlockmapFramework
                 if (Altitude[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
                 Altitude = newHeights;
                 RecalculateShape();
+                RecalculateCenterWorldPosition();
             }
         }
 
@@ -189,6 +192,7 @@ namespace BlockmapFramework
                     Altitude[dir] = newHeights[dir];
 
                 RecalculateShape();
+                RecalculateCenterWorldPosition();
             }
         }
 
@@ -200,9 +204,9 @@ namespace BlockmapFramework
         public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
         public override int GetSubType() => (int)Surface.Id;
 
-        public override Vector3 GetCenterWorldPosition()
+        public override void RecalculateCenterWorldPosition()
         {
-            return new Vector3(WorldCoordinates.x + 0.5f, World.GetWorldHeightAt(WorldCoordinates + new Vector2(0.5f, 0.5f), this), WorldCoordinates.y + 0.5f);
+            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldHeightAt(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
         }
 
         #endregion

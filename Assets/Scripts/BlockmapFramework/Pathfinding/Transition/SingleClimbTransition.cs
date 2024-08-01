@@ -157,7 +157,7 @@ namespace BlockmapFramework
                         Vector2 entityPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
 
                         // Get 2d position of next node
-                        Vector3 endPosition = To.GetCenterWorldPosition();
+                        Vector3 endPosition = To.CenterWorldPosition;
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
@@ -218,9 +218,9 @@ namespace BlockmapFramework
         public override List<Vector3> GetPreviewPath()
         {
             if(IsAscend)
-                return new List<Vector3>() { From.GetCenterWorldPosition(), GetEndClimbPoint(null, Climb.Last(), Climb.Count - 1), To.GetCenterWorldPosition() };
+                return new List<Vector3>() { From.CenterWorldPosition, GetEndClimbPoint(null, Climb.Last(), Climb.Count - 1), To.CenterWorldPosition };
             else
-                return new List<Vector3>() { From.GetCenterWorldPosition(), GetStartClimbPoint(null, Climb[0], 0), To.GetCenterWorldPosition() };
+                return new List<Vector3>() { From.CenterWorldPosition, GetStartClimbPoint(null, Climb[0], 0), To.CenterWorldPosition };
         }
     }
 }

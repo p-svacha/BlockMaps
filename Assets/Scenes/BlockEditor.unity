@@ -156,10 +156,10 @@ RectTransform:
   m_Father: {fileID: 1997177475}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 170, y: -23.92}
-  m_SizeDelta: {x: 340, y: 47.84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2747991
 MonoBehaviour:
@@ -189,8 +189,11 @@ MonoBehaviour:
     Middleclick on a node to instantly teleport the
     selected entity there.
 
+    Press V to update vision with rays visible in Editor.
 
-    Navmesh is displayed for selected entity.'
+
+    Navmesh
+    is displayed for selected entity.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -9434,7 +9437,6 @@ MonoBehaviour:
   SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
   ConcreteTexture: {fileID: 2800000, guid: ec801ad075b375644866ca9eff2ea15b, type: 3}
   WaterTexture: {fileID: 2800000, guid: 2cf8a180b7dbd934f834ab7f8d588d22, type: 3}
-  DirtPathTexture: {fileID: 2800000, guid: 0749da403c407da4495260f01c22129d, type: 3}
   SelectionIndicator: {fileID: 1841773600738071307, guid: 20b217845ce3c4e4397dcdcfbf4e6935, type: 3}
 --- !u!114 &1859474534
 MonoBehaviour:
@@ -10492,7 +10494,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1997177475
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10509,10 +10511,10 @@ RectTransform:
   m_Father: {fileID: 9765082}
   m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 175, y: -204.74998}
-  m_SizeDelta: {x: 340, y: 47.84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1997177476
 MonoBehaviour:

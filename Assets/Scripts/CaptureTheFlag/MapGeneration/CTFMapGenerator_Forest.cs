@@ -21,10 +21,10 @@ namespace CaptureTheFlag
                 GenerateNoise,
                 ApplyHeightmap,
                 CreateMapZones,
-                CreatePlayerBases,
                 AddWaterBodies,
                 AddForests,
-                AddPaths
+                AddPaths,
+                CreatePlayerBases,
             };
         }
 

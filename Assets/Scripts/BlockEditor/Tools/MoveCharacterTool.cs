@@ -45,6 +45,14 @@ namespace WorldEditor
             UpdatePathPreview();
         }
 
+        public override void HandleKeyboardInputs()
+        {
+            if(Input.GetKeyDown(KeyCode.V))
+            {
+                if (SelectedEntity != null) SelectedEntity.UpdateVision();
+            }
+        }
+
         private void UpdatePathPreview()
         {
             TargetPath = null;
