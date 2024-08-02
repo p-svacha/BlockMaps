@@ -32,6 +32,8 @@ namespace CaptureTheFlag
         public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         private CharacterAction CurrentAction;
 
+        // UI
+        public UI_CharacterLabel UI_Label;
 
         private void Awake()
         {
@@ -47,6 +49,10 @@ namespace CaptureTheFlag
             Stamina = MaxStamina;
             Owner = player;
             Opponent = opponent;
+
+            // Create label
+            UI_Label = Instantiate(game.UI.CharacterLabelPrefab, game.UI.CharacterLabelsContainer.transform);
+            UI_Label.Init(this);
         }
 
         public void OnStartTurn()
@@ -98,9 +104,10 @@ namespace CaptureTheFlag
 
         #region Getters
 
+        public Vector2Int WorldCoordinates => Entity.OriginNode.WorldCoordinates;
         public bool IsInAction => CurrentAction != null;
         public BlockmapNode Node => Entity.OriginNode;
-        public bool IsVisibleToLocalPlayer => Entity.IsVisibleBy(Game.LocalPlayer.Actor);
+        public bool IsVisible => Entity.IsVisibleBy(Game.World.ActiveVisionActor);
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.

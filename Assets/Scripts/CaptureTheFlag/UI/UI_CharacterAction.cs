@@ -8,6 +8,8 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterAction : MonoBehaviour
     {
+        private SpecialAction Action;
+
         [Header("Elements")]
         public Button Button;
         public TextMeshProUGUI TitleText;
@@ -15,9 +17,16 @@ namespace CaptureTheFlag
 
         public void Init(SpecialAction action)
         {
-            Button.onClick.AddListener(action.Perform);
+            Action = action;
+            Button.onClick.AddListener(OnClick);
             TitleText.text = action.Name;
             Icon.sprite = action.Icon;
+        }
+
+        private void OnClick()
+        {
+            Action.Character.Owner.Actions[Action.Character] = Action;
+            Action.Perform();
         }
     }
 }

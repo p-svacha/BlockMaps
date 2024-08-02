@@ -67,7 +67,9 @@ namespace CaptureTheFlag
         {
             Character.SetCurrentAction(null);
             State = CharacterActionState.Done;
+
             Game.OnActionDone(this);
+            if(Game.State != GameState.GameFinished) Character.Owner.OnActionDone(this);
         }
 
 

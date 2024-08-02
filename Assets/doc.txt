@@ -1,14 +1,20 @@
-- CTF: improve AI with job system
-	> if we see enemy character in own zone => CHASE
-	> if we see enemy flag => GO THERE
-	> some "your turn" notification when turn starts
+CTF AI: 
+ - attacker: move towards zone if visible
+ - defender: walk randomly around flag and chase opponents in own half
+
+opponent characters stutter sometimes in between actions
 
 mapgen: wide road with cars
 mapgen: house
 mapgen: river
 
-
-
+Framework: Jumping attribute for moving characters
+- Jumping only works to adjacent tiles
+ - JumpUp defines how many tiles up an entity can jump
+	> Allow jumping over any fence (less cost than climb)
+	> Allows jumping up any cliff
+ - JumpDown defines how many tiles an entity can drop down
+	> drop down has little cost
 
 --- Entity Update
 

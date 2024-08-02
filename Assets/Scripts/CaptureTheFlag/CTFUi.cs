@@ -13,6 +13,7 @@ namespace CaptureTheFlag
         [Header("Prefabs")]
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
         public UI_CharacterAction CharacterActionButtonPrefab;
+        public UI_CharacterLabel CharacterLabelPrefab;
 
         [Header("Elements")]
         public TextMeshProUGUI TileInfoText;
@@ -29,6 +30,8 @@ namespace CaptureTheFlag
 
         public GameObject TurnIndicator;
         public TextMeshProUGUI TurnIndicatorText;
+
+        public GameObject CharacterLabelsContainer;
 
         private Dictionary<Character, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps

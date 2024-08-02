@@ -1591,17 +1591,23 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null, Actor excludeActor = null)
         {
-            StartCoroutine(DoUpdateVisionOfNearbyEntities(position, rangeEast, rangeNorth, callback, excludeActor));
+            List<Entity> entitiesToUpdate = GetNearbyEntities(position, rangeEast, rangeNorth);
+            if (excludeActor != null) entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != excludeActor).ToList();
+            StartCoroutine(DoUpdateVisionOfEntities(entitiesToUpdate, callback));
         }
-        private IEnumerator DoUpdateVisionOfNearbyEntities(Vector3 position, int rangeEast, int rangeNorth, System.Action callback, Actor excludeActor)
+        /// <summary>
+        /// Updates the vision of all given entities over the next few frames and calls callback when done.
+        /// </summary>
+        public void UpdateVisionDelayed(List<Entity> entities, System.Action callback)
+        {
+            StartCoroutine(DoUpdateVisionOfEntities(entities, callback));
+        }
+        private IEnumerator DoUpdateVisionOfEntities(List<Entity> entities, System.Action callback)
         {
             yield return new WaitForFixedUpdate();
 
-            List<Entity> entitiesToUpdate = Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
-            if (excludeActor != null) entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != excludeActor).ToList();
-
             //Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
-            foreach (Entity e in entitiesToUpdate)
+            foreach (Entity e in entities)
             {
                 e.UpdateVision();
                 yield return 0;
@@ -1911,6 +1917,10 @@ namespace BlockmapFramework
                     if (e.MinAltitude <= maxHeight && e.MaxAltitude >= minHeight)
                         entities.Add(e);
             return entities;
+        }
+        public List<Entity> GetNearbyEntities(Vector3 position, int rangeEast = 1, int rangeNorth = 1)
+        {
+            return Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
         }
 
         public List<Wall> GetWalls(Vector2Int worldCoordinates)

@@ -94,13 +94,14 @@ namespace CaptureTheFlag
             action.Character.ReduceActionAndStamina(action.Cost);
 
             // Send all colliding characters to jail (depending on map half)
-            List<Character> characters = GetCharacters(action.Character.Entity.OriginNode);
-            if(LocalPlayerZone.ContainsNode(action.Character.Entity.OriginNode) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
+            BlockmapNode node = action.Character.Entity.OriginNode;
+            List<Character> characters = GetCharacters(node);
+            if(LocalPlayerZone.ContainsNode(node) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
             {
                 foreach (Character opponentCharacter in characters.Where(x => x.Owner == Opponent))
                     SendToJail(opponentCharacter);
             }
-            if (OpponentZone.ContainsNode(action.Character.Entity.OriginNode) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
+            if (OpponentZone.ContainsNode(node) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
             {
                 foreach (Character ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
                     SendToJail(ownCharacter);
@@ -230,8 +231,12 @@ namespace CaptureTheFlag
                     !SelectedCharacter.IsInAction
                     && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Action_Movement move))
                 {
-                    move.Perform(); // Start movement action
-                    UnhighlightNodes(); // Unhighlight nodes
+                    if (LocalPlayer.CanPerformMovement(move))
+                    {
+                        LocalPlayer.Actions[SelectedCharacter] = move;
+                        move.Perform(); // Start movement action
+                        UnhighlightNodes(); // Unhighlight nodes
+                    }
                 }
             }
         }

@@ -319,6 +319,7 @@ namespace BlockmapFramework
         {
             if (actor == null) return true; // Everything is visible
             if (Owner == actor) return true; // This entity belongs to the given actor
+            if (OccupiedNodes.Any(n => n.Zones.Any(z => z.ProvidesVision && z.Actor == actor))) return true; // Entity is inside a zone of actor that provides vision
             if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Entity is seen by an entity of given actor
 
             return false;
@@ -776,10 +777,39 @@ namespace BlockmapFramework
         /// </summary>
         public void Teleport(BlockmapNode targetNode)
         {
+            BlockmapNode sourceNode = OriginNode;
             WorldPosition = GetWorldPosition(World, targetNode, Rotation);
             SetOriginNode(targetNode);
 
-            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition); // Recalculate vision of all nearby entities (including this)
+            // Update vision from entities around source and target position
+            List<Entity> entitiesNearSourcePosition = World.GetNearbyEntities(sourceNode.CenterWorldPosition);
+            List<Entity> entitiesNearTargetPosition = World.GetNearbyEntities(targetNode.CenterWorldPosition);
+            List<Entity> entitiesToUpdate = entitiesNearSourcePosition.Union(entitiesNearTargetPosition).ToList();
+
+            if (BlocksVision) World.UpdateVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
+            else
+            {
+                // Only update the vision of itself and of entities from other actors
+                entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != Owner).ToList(); 
+                World.UpdateVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
+                UpdateVision();
+            }
+        }
+        /// <summary>
+        /// Gets called when the vision of all entities is recalculated after this entity teleported.
+        /// <br/>Updates its visibility and removes last known position of all actors that can't see it anymore.
+        /// </summary>
+        private void OnPostTeleportVisionCalcDone()
+        {
+            // Remove last know position for all players that don't see it anymore
+            foreach(Actor actor in World.GetAllActors())
+            {
+                if (actor == Owner) continue;
+                if (!IsVisibleBy(actor)) LastKnownPosition[actor] = null;
+            }
+
+            // Update visibility
+            UpdateVisibility();
         }
 
         /// <summary>

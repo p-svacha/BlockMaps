@@ -81,7 +81,7 @@ namespace BlockmapFramework
         {
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
             if (isUiElementFocussed) return;
-            if (IsPanning) return;
+            bool canMoveCamera = !InUnbreakableFollow && !IsPanning;
 
             float moveSpeed = MOVE_SPEED;
             if (Input.GetKey(KeyCode.LeftShift)) moveSpeed = SHIFT_MOVE_SPEED;
@@ -97,28 +97,28 @@ namespace BlockmapFramework
                 UpdatePosition();
             }
 
-            if (Input.GetKey(KeyCode.W) && !InUnbreakableFollow) // W - Move camera up
+            if (Input.GetKey(KeyCode.W) && canMoveCamera) // W - Move camera up
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.A) && !InUnbreakableFollow) // A - Move camera left
+            if (Input.GetKey(KeyCode.A) && canMoveCamera) // A - Move camera left
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.S) && !InUnbreakableFollow) // S - Move camera down
+            if (Input.GetKey(KeyCode.S) && canMoveCamera) // S - Move camera down
             {
                 CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
                 UpdatePosition();
                 FollowedEntity = null;
             }
-            if (Input.GetKey(KeyCode.D) && !InUnbreakableFollow) // D - Move camera right
+            if (Input.GetKey(KeyCode.D) && canMoveCamera) // D - Move camera right
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
                 CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
