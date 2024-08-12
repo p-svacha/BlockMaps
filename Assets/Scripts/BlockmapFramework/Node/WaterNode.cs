@@ -62,6 +62,8 @@ namespace BlockmapFramework
             throw new System.NotImplementedException(); // drawn as part of a whole waterbody
         }
 
+        public override string ToStringShort() => "Water (" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
+
         #endregion
     }
 }

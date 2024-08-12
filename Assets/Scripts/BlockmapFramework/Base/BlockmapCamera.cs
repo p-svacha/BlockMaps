@@ -160,6 +160,7 @@ namespace BlockmapFramework
 
         public void PanTo(float time, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false)
         {
+            // Init pan
             IsPanning = true;
             PanSourcePosition = CurrentPosition;
             PanTargetPosition = targetPos;
@@ -167,6 +168,9 @@ namespace BlockmapFramework
             PostPanFollowEntity = postPanFollowEntity;
             PanDelay = 0f;
             EnableUnbreakableFollowAfterPan = unbreakableFollow;
+
+            // Immediately end pan if we are already very close to target position
+            if (Vector3.Distance(CurrentPosition, targetPos) <= 0.01f) PanDelay = PanDuration;
         }
         public void Unfollow()
         {

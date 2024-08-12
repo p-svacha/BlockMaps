@@ -11,11 +11,12 @@ namespace CaptureTheFlag
         public bool TurnFinished { get; private set; }
 
         // AI Behaviour
-        private Dictionary<AICharacterJob, int> JobTable = new Dictionary<AICharacterJob, int>()
+        private Dictionary<AICharacterRole, int> RoleTable = new Dictionary<AICharacterRole, int>()
         {
-            { AICharacterJob.AttackEnemyFlag, 6 },
-            { AICharacterJob.DefendFlag, 2 },
+            { AICharacterRole.Attacker, 6 },
+            { AICharacterRole.Defender, 2 },
         };
+        private Dictionary<Character, AICharacterRole> Roles = new Dictionary<Character, AICharacterRole>();
         private Dictionary<Character, AICharacterJob> Jobs = new Dictionary<Character, AICharacterJob>();
 
         // Camera follow
@@ -29,15 +30,15 @@ namespace CaptureTheFlag
         {
             base.OnStartGame(game);
 
-            // Assign a weighted-random job to all characters
+            // Assign a weighted-random role to all characters
             for (int i = 0; i < Characters.Count; i++)
             {
-                AICharacterJob randomJob = HelperFunctions.GetWeightedRandomElement(JobTable);
-                Jobs.Add(Characters[i], randomJob);
+                AICharacterRole randomRole = HelperFunctions.GetWeightedRandomElement(RoleTable);
+                Roles.Add(Characters[i], randomRole);
+                Jobs.Add(Characters[i], new AIJob_Idle(Characters[i]));
 
                 // Debug
-                Characters[i].Name = randomJob.ToString();
-                Characters[i].UI_Label.Init(Characters[i]);
+                UpdateDebugLabel(Characters[i]);
             }
         }
 
@@ -125,107 +126,93 @@ namespace CaptureTheFlag
             // If there are no more possible moves, take no further action
             if (character.PossibleMoves.Count == 0) return;
 
-            // Get next action for character and assign it
+            // Get next action for character and immediately start it
             CharacterAction newAction = GetNextCharacterAction(character);
-            if (newAction != null) Actions[character] = newAction;
+            if (newAction != null)
+            {
+                Actions[character] = newAction;
+                newAction.Perform();
+            }
         }
 
         #region Private
 
         /// <summary>
-        /// Returns the action the given character will do next this turn depending on their job and game state.
+        /// Sets the name and visible label of a character according to its role and job to easily debug what they are doing.
+        /// </summary>
+        private void UpdateDebugLabel(Character c)
+        {
+            c.Name = Roles[c].ToString() + " | " + Jobs[c].DisplayName;
+            c.UI_Label.Init(c);
+        }
+
+        /// <summary>
+        /// Returns the action the given character will do next this turn.
         /// <br/>Can return null if no further action should be taken by the character.
         /// </summary>
         private CharacterAction GetNextCharacterAction(Character c)
         {
             if (c.PossibleMoves.Count == 0) return null;
 
-            AICharacterJob job = Jobs[c];
+            AICharacterJob currentJob = Jobs[c];
 
-            if (job == AICharacterJob.AttackEnemyFlag)
+            // Ask the current job if (any or a forced) new job should be assigned to the character
+            if(currentJob.ShouldStopJob(out AICharacterJob forcedNewJob))
             {
-                // If we have the enemy flag in vision => move directly towards it
-                if (Opponent.Flag.IsVisibleBy(Actor))
-                    return GetMovementDirectlyTo(c, Opponent.Flag.OriginNode);
-
-                // If we know where enemy flag is => move weighted-randomly towards it
-                if (Opponent.Flag.IsExploredBy(Actor))
-                    return GetWeightedMovementTowards(c, Opponent.Flag.OriginNode.WorldCoordinates);
-
-                // If we don't know where enemy flag is => move weighted-randomly westwards
+                // Assign the job that is getting forced by the current job as the new job
+                if(forcedNewJob != null)
+                {
+                    Jobs[c] = forcedNewJob;
+                    currentJob = forcedNewJob;
+                }
+                // Find a new job based on general rules
                 else
-                    return GetWeightedMovementTowards(c, new Vector2Int(0, c.WorldCoordinates.y));
+                {
+                    AICharacterJob newJob = GetNewCharacterJob(c);
+                    Jobs[c] = newJob;
+                    currentJob = newJob;
+                }
             }
 
-            if(job == AICharacterJob.DefendFlag)
-            {
-                return null;
-            }
+            // Update debug label
+            UpdateDebugLabel(c);
 
-            throw new System.Exception("AICharacterJob " + job.ToString() + " not handled.");
+            // Get action based on job
+            return currentJob.GetNextAction();
         }
 
         /// <summary>
-        /// Returns the possible movement that is most directly towards the given node.
-        /// <br/>Moves onto the node if within range.
+        /// Returns a new job that the given character should do given their role and current game state.
         /// </summary>
-        private Action_Movement GetMovementDirectlyTo(Character c, BlockmapNode targetNode)
+        private AICharacterJob GetNewCharacterJob(Character c)
         {
-            // Check if we can reach the node
-            if (c.PossibleMoves.TryGetValue(targetNode, out Action_Movement directMove)) return directMove;
-
-            // Move as close as possible by finding the first node we can reach while backtracking from flag
-            List<BlockmapNode> path = Pathfinder.GetPath(c.Entity, c.Entity.OriginNode, targetNode, ignoreUnexploredNodes: true);
-            for(int i = 0; i < path.Count; i++)
+            switch(Roles[c])
             {
-                BlockmapNode backtrackNode = path[path.Count - i - 1];
-                if (c.PossibleMoves.TryGetValue(backtrackNode, out Action_Movement closestMove)) return closestMove;
+                case AICharacterRole.Attacker:
+
+                    // If we know where enemy flag is => move directly
+                    if (Opponent.Flag.IsExploredBy(Actor))
+                        return new AIJob_CaptureOpponentFlag(c);
+
+                    // Else chose a random unexplored node in enemy territory to go to
+                    else return new AIJob_SearchForOpponentFlag(c);
+
+                case AICharacterRole.Defender:
+
+                    // Stay idle for now
+                    return new AIJob_Idle(c);
             }
 
-            // Error
-            throw new System.Exception("Couldn't find a direct path towards target node.");
+            throw new System.Exception("Gamestate not handled");
         }
 
         /// <summary>
-        /// Returns a random possible move that is heavily weighted towards a specific world coordinate.
+        /// A role is a macro-level, long-term (mostly for a full game) assignment that dictates what jobs a character can and will do.
         /// </summary>
-        private Action_Movement GetWeightedMovementTowards(Character c, Vector2Int coordinates)
+        private enum AICharacterRole
         {
-            Dictionary<Action_Movement, float> movementDistances = new Dictionary<Action_Movement, float>();
-            Dictionary<Action_Movement, float> movementProbabilities = new Dictionary<Action_Movement, float>();
-
-            foreach (Action_Movement possibleMove in c.PossibleMoves.Values)
-            {
-                if (!CanPerformMovement(possibleMove)) continue; // Can't go on a node that another character is going to already
-                movementDistances.Add(possibleMove, Vector2.Distance(possibleMove.Target.WorldCoordinates, coordinates));
-            }
-
-            if (movementDistances.Count == 0) return null;
-
-            float maxDistance = movementDistances.Values.Max();
-            float minDistance = movementDistances.Values.Min();
-            float distanceRange = maxDistance - minDistance;
-
-            foreach (var possibleMove in movementDistances)
-            {
-                float distance = possibleMove.Value;
-                float weight = Mathf.Pow(distanceRange - (distance - minDistance), 2.5f);
-                weight += 1f; // to avoid zero values
-                movementProbabilities.Add(possibleMove.Key, weight);
-            }
-
-            Action_Movement randomMove = HelperFunctions.GetWeightedRandomElement(movementProbabilities);
-            return randomMove;
-        }
-
-        private enum AICharacterJob
-        {
-            DefendFlag,             // Stay near own flag
-            AttackEnemyFlag,        // Go straight towards enemy flag
-            AttackEnemyCharacter,   // Go straight towards an enemy character in own half
-            Sneak,                  // Go towards enemy flag where noone sees you
-            Retreat,                // Go back to own half
-            Hide                    // Go away from all enemy characters
+            Defender,
+            Attacker
         }
 
         #endregion

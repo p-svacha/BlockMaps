@@ -63,6 +63,9 @@ namespace CaptureTheFlag
         {
             string text = "";
 
+            // Add coordinates
+            if (Game != null && Game.World != null && Game.World.HoveredNode != null) text += "\n" + Game.World.HoveredNode.ToStringShort();
+
             // Add FPS
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;

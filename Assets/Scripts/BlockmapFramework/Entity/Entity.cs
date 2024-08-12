@@ -757,10 +757,13 @@ namespace BlockmapFramework
 
         public virtual Sprite GetThumbnail()
         {
+            return null;
+            /*
             Texture2D previewThumbnail = AssetPreview.GetAssetPreview(gameObject);
             if (previewThumbnail != null)
                 return Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
             return null;
+            */
         }
 
         public override string ToString()

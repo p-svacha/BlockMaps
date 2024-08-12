@@ -976,10 +976,12 @@ namespace BlockmapFramework
             return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name + "\n" + headspace + "\n" + mph;
         }
 
+        public virtual string ToStringShort() => GetSurface().Name + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
+
         #endregion
 
         #region Save / Load
-        
+
         public static BlockmapNode Load(World world, Chunk chunk, NodeData data)
         {
             switch(data.Type)

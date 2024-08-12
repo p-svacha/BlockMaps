@@ -1,12 +1,22 @@
 CTF AI: 
  - attacker: move towards zone if visible
+ - attacker when not knowing where flag is:
+	- either move generally towards west (already implemented)
+	- OR chose a random location in opponent half and follow path there (use pathfinder to "cheat" path)
  - defender: walk randomly around flag and chase opponents in own half
 
-opponent characters stutter sometimes in between actions
+make label half transparent for enemy characters that are explored but not visible (in last known position)
 
-mapgen: wide road with cars
-mapgen: house
-mapgen: river
+Main menu
+Game creation lobby
+
+Release build on github
+
+
+
+mapgen forest: wide road with cars
+mapgen forest: house
+mapgen forest: river
 
 Framework: Jumping attribute for moving characters
 - Jumping only works to adjacent tiles
@@ -44,7 +54,6 @@ Framework: Jumping attribute for moving characters
 
 
 --- Update More Node Shapes
-
 Allow 0022 for stairs
  - In node surface add rule that when 0022 shape draw a stair mesh instead of slope	
 
@@ -70,12 +79,11 @@ Allow 0022 for stairs
 - Allow entites to have their own nodes
 
 - Add UseTextures attribute to entity shader and support both modes on created models
-
 ---
 
-- Editor: Decreasing tool size in ground sculpting doesn't remove overlay over previous chunks
-
-- Editor: World Generation Tool: Expand by x chunks in direction
+- Editor-Bug: Vision cutoff doesn't correctly reset when generating new map
+- Editor-Bug: Decreasing tool size in ground sculpting doesn't remove overlay over previous chunks
+- Editor-Feature: World Generation Tool: Expand by x chunks in direction
 
 - Editor improvements:
 	> wall height
@@ -106,6 +114,8 @@ Make a list of material indexes colorable in editor
 Animation system for walking / climbing entities
 	> silly with just hopping from one side to the other with slight rotation
 
+Sounds
+
 
 
 - strength & destroy
@@ -128,10 +138,6 @@ Animation system for walking / climbing entities
 	> win game when flag is back home
 
 - Dogs need a nearby master to work
-
-Neutral moving entities
- - Wolves
- - 1 sneaky wolf
 
 - Jumping ability
 	> to hop over fences
@@ -173,6 +179,10 @@ Neutral moving entities
 - Terrain affinity
 
 - Weather / Temperature (Snow/Mud)
+
+CTF: Neutral moving entities
+ - Wolves
+ - 1 sneaky wolf
 
 - CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
 - CTF: Multiplayer

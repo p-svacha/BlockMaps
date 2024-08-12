@@ -47,7 +47,7 @@ namespace WorldEditor
 
         public override void HandleKeyboardInputs()
         {
-            if(Input.GetKeyDown(KeyCode.V))
+            if(Input.GetKeyDown(KeyCode.R))
             {
                 if (SelectedEntity != null) SelectedEntity.UpdateVision();
             }

@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/CaptureTheFlag.unity
+    guid: 37ef18eba78e8254b96c451995785ac1
   m_configObjects: {}
