@@ -23,6 +23,11 @@ namespace CaptureTheFlag
             WorldOffset = new Vector3(0f, (c.Entity.Height / 2f) + 0.1f, 0f);
         }
 
+        public void SetLabelText(string text)
+        {
+            NameText.text = text;
+        }
+
         private void Update()
         {
             if (Character == null) return;

@@ -1,8 +1,5 @@
 CTF AI: 
- - attacker: move towards zone if visible
- - attacker when not knowing where flag is:
-	- either move generally towards west (already implemented)
-	- OR chose a random location in opponent half and follow path there (use pathfinder to "cheat" path)
+ - attacker: new flee job that gets activated when in opponent half and opponent nearby
  - defender: walk randomly around flag and chase opponents in own half
 
 make label half transparent for enemy characters that are explored but not visible (in last known position)

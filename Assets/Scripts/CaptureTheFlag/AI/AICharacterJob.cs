@@ -57,7 +57,8 @@ namespace CaptureTheFlag
             }
 
             // Error
-            throw new System.Exception("Couldn't find a direct path towards target node.");
+            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.Entity.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+            return null;
         }
 
         #endregion

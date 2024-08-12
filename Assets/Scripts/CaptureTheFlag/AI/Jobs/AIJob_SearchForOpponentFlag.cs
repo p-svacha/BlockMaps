@@ -25,6 +25,10 @@ namespace CaptureTheFlag
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
             forcedNewJob = null;
+
+            // If we are on or close to our target node, look for new job
+            if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.Transitions.ContainsKey(TargetNode)) return true;
+
             return false;
         }
 

@@ -16,6 +16,8 @@ namespace CaptureTheFlag
         public UI_CharacterLabel CharacterLabelPrefab;
 
         [Header("Elements")]
+        public Button DevModeButton;
+
         public TextMeshProUGUI TileInfoText;
         public Button EndTurnButton;
         public GameObject LoadingScreenOverlay;
@@ -39,6 +41,7 @@ namespace CaptureTheFlag
         public void Init(CTFGame game)
         {
             Game = game;
+            DevModeButton.onClick.AddListener(() => Game.ToggleDevMode());
             EndTurnButton.onClick.AddListener(() => Game.EndYourTurn());
         }
 
@@ -64,7 +67,7 @@ namespace CaptureTheFlag
             string text = "";
 
             // Add coordinates
-            if (Game != null && Game.World != null && Game.World.HoveredNode != null) text += "\n" + Game.World.HoveredNode.ToStringShort();
+            if (Game != null && Game.DevMode && Game.World != null && Game.World.HoveredNode != null) text += "\n" + Game.World.HoveredNode.ToStringShort();
 
             // Add FPS
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
@@ -125,6 +128,20 @@ namespace CaptureTheFlag
         public void HideTurnIndicator()
         {
             TurnIndicator.SetActive(false);
+        }
+
+        public void OnSetDevMode(bool active)
+        {
+            if(active)
+            {
+                DevModeButton.GetComponent<Image>().color = Color.white;
+                DevModeButton.GetComponentInChildren<TextMeshProUGUI>().color = Color.black;
+            }
+            else
+            {
+                DevModeButton.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.2f);
+                DevModeButton.GetComponentInChildren<TextMeshProUGUI>().color = new Color(1f, 1f, 1f, 0.2f);
+            }
         }
     }
 }

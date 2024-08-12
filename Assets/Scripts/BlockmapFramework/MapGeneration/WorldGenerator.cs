@@ -165,8 +165,10 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         protected Entity SpawnEntityOnGroundAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
         {
-            int maxAttempts = 10;
+            int maxAttempts = 50;
+            if (standard_deviation == 0f) maxAttempts = 1;
             int numAttempts = 0;
+
             while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
             {
                 Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);

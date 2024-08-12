@@ -36,9 +36,6 @@ namespace CaptureTheFlag
                 AICharacterRole randomRole = HelperFunctions.GetWeightedRandomElement(RoleTable);
                 Roles.Add(Characters[i], randomRole);
                 Jobs.Add(Characters[i], new AIJob_Idle(Characters[i]));
-
-                // Debug
-                UpdateDebugLabel(Characters[i]);
             }
         }
 
@@ -135,15 +132,27 @@ namespace CaptureTheFlag
             }
         }
 
+        public void OnSetDevMode(bool active)
+        {
+            if(active)
+            {
+                foreach (Character c in Characters) SetDevModeLabel(c);
+            }
+            else
+            {
+                foreach (Character c in Characters) c.UI_Label.Init(c);
+            }
+        }
+
         #region Private
 
         /// <summary>
-        /// Sets the name and visible label of a character according to its role and job to easily debug what they are doing.
+        /// Sets the visible label of a character according to its role and job to easily debug what they are doing.
         /// </summary>
-        private void UpdateDebugLabel(Character c)
+        private void SetDevModeLabel(Character c)
         {
-            c.Name = Roles[c].ToString() + " | " + Jobs[c].DisplayName;
-            c.UI_Label.Init(c);
+            string label = Roles[c].ToString() + " | " + Jobs[c].DisplayName;
+            c.UI_Label.SetLabelText(label);
         }
 
         /// <summary>
@@ -173,9 +182,6 @@ namespace CaptureTheFlag
                     currentJob = newJob;
                 }
             }
-
-            // Update debug label
-            UpdateDebugLabel(c);
 
             // Get action based on job
             return currentJob.GetNextAction();

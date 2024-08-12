@@ -35,6 +35,9 @@ namespace CaptureTheFlag
         public Player LocalPlayer { get; private set; }
         public AIPlayer Opponent { get; private set; }
 
+        // Options
+        public bool DevMode { get; private set; }
+
 
         #region Game Loop
 
@@ -179,9 +182,10 @@ namespace CaptureTheFlag
             HelperFunctions.UnfocusNonInputUiElements();
 
             // V - Vision (debug)
-            if (Input.GetKeyDown(KeyCode.V))
+            if (DevMode && Input.GetKeyDown(KeyCode.V))
             {
                 if (World.ActiveVisionActor == LocalPlayer.Actor) World.SetActiveVisionActor(null);
+                else if (World.ActiveVisionActor == null) World.SetActiveVisionActor(LocalPlayer.Opponent.Actor);
                 else World.SetActiveVisionActor(LocalPlayer.Actor);
             }
 
@@ -353,6 +357,17 @@ namespace CaptureTheFlag
 
             // Update selection panel UI
             if (character.Owner == LocalPlayer) UI.UpdateSelectionPanel(character);
+        }
+
+        public void ToggleDevMode() => SetDevMode(!DevMode);
+        public void SetDevMode(bool active)
+        {
+            DevMode = active;
+
+            UI.OnSetDevMode(DevMode);
+            Opponent.OnSetDevMode(DevMode);
+
+            if (!DevMode) World.SetActiveVisionActor(LocalPlayer.Actor);
         }
 
         #endregion
