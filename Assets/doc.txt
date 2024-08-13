@@ -1,6 +1,8 @@
-CTF AI: 
- - attacker: new flee job that gets activated when in opponent half and opponent nearby
- - defender: walk randomly around flag and chase opponents in own half
+CTF AI:
+ - do character after character
+ - set entity movement speed very high if not visible
+ - always only move a single node
+ - attacker: if can directly catch opponent in own half do it
 
 make label half transparent for enemy characters that are explored but not visible (in last known position)
 

@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     {
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.CaptureOpponentFlag;
-        public override string DisplayName => "Capturing Flag";
+        public override string DevmodeDisplayText => "Capturing Flag";
 
         public AIJob_CaptureOpponentFlag(Character c) : base(c) { }
 

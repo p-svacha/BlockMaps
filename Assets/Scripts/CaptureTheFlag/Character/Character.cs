@@ -108,6 +108,8 @@ namespace CaptureTheFlag
         public bool IsInAction => CurrentAction != null;
         public BlockmapNode Node => Entity.OriginNode;
         public bool IsVisible => Entity.IsVisibleBy(Game.World.ActiveVisionActor);
+        public bool IsVisibleByOpponent => Entity.IsVisibleBy(Owner.Opponent.Actor);
+        public bool IsInOpponentZone => Owner.Opponent.Territory.ContainsNode(Entity.OriginNode);
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.

@@ -8,6 +8,8 @@ namespace CaptureTheFlag
     {
         Idle,
         SearchOpponentFlag,
-        CaptureOpponentFlag
+        CaptureOpponentFlag,
+        TagOpponent,
+        PatrolDefendFlag,
     }
 }

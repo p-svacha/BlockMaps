@@ -62,8 +62,8 @@ namespace CaptureTheFlag
             OpponentZone = World.GetZone(id: 2);
 
             // Convert world actors to CTF Players
-            LocalPlayer = new Player(World.GetActor(id: 1), World.GetZone(id: 3), World.GetZone(id: 4));
-            Opponent = new AIPlayer(World.GetActor(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
+            LocalPlayer = new Player(World.GetActor(id: 1), LocalPlayerZone, World.GetZone(id: 3), World.GetZone(id: 4));
+            Opponent = new AIPlayer(World.GetActor(id: 2), OpponentZone, World.GetZone(id: 5), World.GetZone(id: 6));
             LocalPlayer.Opponent = Opponent;
             Opponent.Opponent = LocalPlayer;
 

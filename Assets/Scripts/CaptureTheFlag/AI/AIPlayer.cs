@@ -11,6 +11,9 @@ namespace CaptureTheFlag
         public bool TurnFinished { get; private set; }
 
         // AI Behaviour
+        private const float MAX_CHASE_DISTANCE = 40;
+        private const float DEFEND_PERIMETER_RADIUS = 40;
+
         private Dictionary<AICharacterRole, int> RoleTable = new Dictionary<AICharacterRole, int>()
         {
             { AICharacterRole.Attacker, 6 },
@@ -19,12 +22,14 @@ namespace CaptureTheFlag
         private Dictionary<Character, AICharacterRole> Roles = new Dictionary<Character, AICharacterRole>();
         private Dictionary<Character, AICharacterJob> Jobs = new Dictionary<Character, AICharacterJob>();
 
+        public List<BlockmapNode> DefendPerimeterNodes;
+
         // Camera follow
         private CharacterAction CurrentFollowedAction; // which action is currently being followed with the camera
         private Queue<CharacterAction> ActionsToFollow = new Queue<CharacterAction>(); // queue containing all character actions that are visible to local player and awaiting to be followed by camera, one after the other
 
 
-        public AIPlayer(Actor actor, Zone jailZone, Zone flagZone) : base(actor, jailZone, flagZone) { }
+        public AIPlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone) : base(actor, territory, jailZone, flagZone) { }
 
         public override void OnStartGame(CTFGame game)
         {
@@ -37,6 +42,9 @@ namespace CaptureTheFlag
                 Roles.Add(Characters[i], randomRole);
                 Jobs.Add(Characters[i], new AIJob_Idle(Characters[i]));
             }
+
+            // Calculate some important things once that will be used for the whole game
+            DefendPerimeterNodes = Flag.OriginNode.GetNodesInRange(DEFEND_PERIMETER_RADIUS).Where(x => !FlagZone.ContainsNode(x)).ToList();
         }
 
         public void StartTurn()
@@ -136,7 +144,7 @@ namespace CaptureTheFlag
         {
             if(active)
             {
-                foreach (Character c in Characters) SetDevModeLabel(c);
+                SetDevModeLabels();
             }
             else
             {
@@ -147,12 +155,15 @@ namespace CaptureTheFlag
         #region Private
 
         /// <summary>
-        /// Sets the visible label of a character according to its role and job to easily debug what they are doing.
+        /// Sets the visible label of all characters according to their role and job to easily debug what they are doing.
         /// </summary>
-        private void SetDevModeLabel(Character c)
+        private void SetDevModeLabels()
         {
-            string label = Roles[c].ToString() + " | " + Jobs[c].DisplayName;
-            c.UI_Label.SetLabelText(label);
+            foreach (Character c in Characters)
+            {
+                string label = Roles[c].ToString() + " | " + Jobs[c].DevmodeDisplayText;
+                c.UI_Label.SetLabelText(label);
+            }
         }
 
         /// <summary>
@@ -183,6 +194,9 @@ namespace CaptureTheFlag
                 }
             }
 
+            // Update dev mode labels
+            if (Game.DevMode) SetDevModeLabels();
+
             // Get action based on job
             return currentJob.GetNextAction();
         }
@@ -205,11 +219,30 @@ namespace CaptureTheFlag
 
                 case AICharacterRole.Defender:
 
-                    // Stay idle for now
-                    return new AIJob_Idle(c);
+                    // If there is a visible opponent nearby
+                    if(ShouldChaseCharacterToDefend(c, out Character target)) return new AIJob_TagOpponent(c, target);
+
+                    // Else just patrol own flag
+                    return new AIJob_PatrolDefendFlag(c);
             }
 
             throw new System.Exception("Gamestate not handled");
+        }
+
+        public bool ShouldChaseCharacterToDefend(Character source, out Character target)
+        {
+            target = null;
+
+            foreach (Character opponentCharacter in Opponent.Characters)
+            {
+                if (opponentCharacter.IsInOpponentZone && opponentCharacter.IsVisibleByOpponent && source.Entity.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
+                {
+                    target = opponentCharacter;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -12,11 +12,11 @@ namespace CaptureTheFlag
     public abstract class AICharacterJob
     {
         public Character Character { get; private set; }
-        public Player Player => Character.Owner;
+        public AIPlayer Player => (AIPlayer)Character.Owner;
         public CTFGame Game => Character.Game;
 
         public abstract AICharacterJobId Id { get; }
-        public abstract string DisplayName { get; }
+        public abstract string DevmodeDisplayText { get; }
 
         public AICharacterJob(Character c)
         {
@@ -48,8 +48,7 @@ namespace CaptureTheFlag
             if (Character.PossibleMoves.TryGetValue(targetNode, out Action_Movement directMove)) return directMove;
 
             // Move as close as possible by finding the first node we can reach while backtracking from flag
-            List<Zone> fordbiddenZones = new List<Zone>() { Character.Owner.FlagZone };
-            List<BlockmapNode> path = Pathfinder.GetPath(Character.Entity, Character.Entity.OriginNode, targetNode, considerUnexploredNodes: false, fordbiddenZones);
+            List<BlockmapNode> path = Pathfinder.GetPath(Character.Entity, Character.Entity.OriginNode, targetNode, considerUnexploredNodes: false, Player.FlagZone.Nodes);
             for (int i = 0; i < path.Count; i++)
             {
                 BlockmapNode backtrackNode = path[path.Count - i - 1];

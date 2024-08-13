@@ -18,7 +18,7 @@ namespace BlockmapFramework
         #region A*
 
         // A* algorithm implementation. https://pavcreations.com/tilemap-based-a-star-algorithm-implementation-in-unity-game/
-        public static List<BlockmapNode> GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<Zone> forbiddenZones = null)
+        public static List<BlockmapNode> GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;
 
@@ -48,7 +48,7 @@ namespace BlockmapFramework
                     if (closedList.Contains(transition.To)) continue;
                     if (!transition.CanPass(entity)) continue;
                     if (considerUnexploredNodes && !transition.To.IsExploredBy(entity.Owner)) continue;
-                    if (forbiddenZones != null && forbiddenZones.Any(x => x.ContainsNode(transition.To))) continue;
+                    if (forbiddenNodes != null && forbiddenNodes.Contains(transition.To)) continue;
 
                     float tentativeGCost = gCosts[currentNode] + GetCCost(transition, entity);
                     if (!gCosts.ContainsKey(transition.To) || tentativeGCost < gCosts[transition.To])

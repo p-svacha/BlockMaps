@@ -46,6 +46,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns the amount of energy is required for the given entity to use this transition.
+        /// <br/>Walking to one adjacent tile has a cost of about 1 - 4 depending on surface. (1.1 for tarmac, 2 for grass, 3.3 for sand).
         /// </summary>
         public abstract float GetMovementCost(MovingEntity entity);
 

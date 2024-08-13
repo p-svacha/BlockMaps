@@ -515,7 +515,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the whole climb when trying to climb up from this node in a given side direction as an IClimbable-List, where each element represents the climbable for one altitude level.
         /// </summary>
-        public List<IClimbable> GetClimbUp(Direction dir)
+        private List<IClimbable> GetClimbUp(Direction dir)
         {
             // Cache
             if (ClimbUpCache.TryGetValue(dir, out List<IClimbable> cachedClimb)) return cachedClimb;
@@ -977,6 +977,54 @@ namespace BlockmapFramework
         }
 
         public virtual string ToStringShort() => GetSurface().Name + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
+
+        /// <summary>
+        /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.
+        /// </summary>
+        public List<BlockmapNode> GetNodesInRange(float maxCost, MovingEntity entity = null)
+        {
+            // Setup
+            Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
+            HashSet<BlockmapNode> visited = new HashSet<BlockmapNode>();
+            Dictionary<BlockmapNode, float> nodeCosts = new Dictionary<BlockmapNode, float>();
+
+            // Start with origin node
+            priorityQueue.Add(this, 0f);
+            nodeCosts.Add(this, 0f);
+
+            while (priorityQueue.Count > 0)
+            {
+                BlockmapNode currentNode = priorityQueue.OrderBy(x => x.Value).First().Key;
+                priorityQueue.Remove(currentNode);
+
+                if (visited.Contains(currentNode)) continue;
+                visited.Add(currentNode);
+
+                foreach (KeyValuePair<BlockmapNode, Transition> t in currentNode.Transitions)
+                {
+                    BlockmapNode toNode = t.Key;
+                    float transitionCost = t.Value.GetMovementCost(entity);
+                    float totalCost = nodeCosts[currentNode] + transitionCost;
+
+                    if (totalCost > maxCost) continue; // not within cost limit
+                    if (entity != null && !t.Value.CanPass(entity)) continue;
+
+                    // Node has not yet been visited or cost is lower than previously lowest cost => Update
+                    if (!nodeCosts.ContainsKey(toNode) || totalCost < nodeCosts[toNode])
+                    {
+                        // Update cost to this node
+                        nodeCosts[toNode] = totalCost;
+
+                        // Add target node to queue to continue search
+                        if (!priorityQueue.ContainsKey(toNode) || priorityQueue[toNode] > totalCost)
+                            priorityQueue[toNode] = totalCost;
+                    }
+                }
+            }
+
+            // No more nodes to check -> target not in range
+            return nodeCosts.Keys.ToList();
+        }
 
         #endregion
 

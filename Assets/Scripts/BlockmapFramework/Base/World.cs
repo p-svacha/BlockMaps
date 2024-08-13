@@ -2128,6 +2128,7 @@ namespace BlockmapFramework
                 if (node1.Altitude[dir] != node2.Altitude[dir]) return false;
             return true;
         }
+
         #endregion
 
         #region Save / Load

@@ -12,7 +12,7 @@ namespace CaptureTheFlag
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.SearchOpponentFlag;
-        public override string DisplayName => "Searching Flag (going to " + TargetNode.ToStringShort() + ")";
+        public override string DevmodeDisplayText => "Searching Flag (going to " + TargetNode.ToStringShort() + ")";
 
         public AIJob_SearchForOpponentFlag(Character c) : base(c)
         {

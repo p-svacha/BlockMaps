@@ -11,6 +11,7 @@ namespace CaptureTheFlag
         public Actor Actor;
         public Entity Flag;
         public List<Character> Characters;
+        public Zone Territory;
         public Zone JailZone;
         public Zone FlagZone;
         public Player Opponent;
@@ -20,7 +21,7 @@ namespace CaptureTheFlag
         /// </summary>
         public Dictionary<Character, CharacterAction> Actions = new Dictionary<Character, CharacterAction>();
 
-        public Player(Actor actor, Zone jailZone, Zone flagZone)
+        public Player(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
         {
             Actor = actor;
 
@@ -31,6 +32,7 @@ namespace CaptureTheFlag
                 if (e.TryGetComponent(out Character c)) Characters.Add(c);
             }
 
+            Territory = territory;
             JailZone = jailZone;
             FlagZone = flagZone;
         }

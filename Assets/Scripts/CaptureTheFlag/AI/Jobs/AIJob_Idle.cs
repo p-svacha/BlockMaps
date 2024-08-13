@@ -8,7 +8,7 @@ namespace CaptureTheFlag
     {
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.Idle;
-        public override string DisplayName => "Idle";
+        public override string DevmodeDisplayText => "Idle";
 
         public AIJob_Idle(Character c) : base(c) { }
 

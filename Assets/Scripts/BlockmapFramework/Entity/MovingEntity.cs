@@ -217,5 +217,64 @@ namespace BlockmapFramework
 
         protected virtual void OnStopMoving() { }
 
+        #region Getters
+
+        /// <summary>
+        /// Returns if the target node is reachable with a path that costs less than the given limit.
+        /// </summary>
+        public bool IsInRange(BlockmapNode targetNode, float maxCost)
+        {
+            // First check if the target node is even close. If not: skip detailed check
+            if (Vector2.Distance(OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
+
+            // Setup
+            Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
+            HashSet<BlockmapNode> visited = new HashSet<BlockmapNode>();
+            Dictionary<BlockmapNode, float> nodeCosts = new Dictionary<BlockmapNode, float>();
+
+            // Start with origin node
+            BlockmapNode sourceNode = OriginNode;
+            priorityQueue.Add(sourceNode, 0f);
+            nodeCosts.Add(sourceNode, 0f);
+
+            while (priorityQueue.Count > 0)
+            {
+                BlockmapNode currentNode = priorityQueue.OrderBy(x => x.Value).First().Key;
+                priorityQueue.Remove(currentNode);
+
+                if (visited.Contains(currentNode)) continue;
+                visited.Add(currentNode);
+
+                foreach (KeyValuePair<BlockmapNode, Transition> t in currentNode.Transitions)
+                {
+                    BlockmapNode toNode = t.Key;
+                    float transitionCost = t.Value.GetMovementCost(this);
+                    float totalCost = nodeCosts[currentNode] + transitionCost;
+
+                    if (totalCost > maxCost) continue; // not in range
+                    if (!t.Value.CanPass(this)) continue; // transition not passable for this character
+
+                    // Check if we reached target
+                    if (toNode == targetNode) return true;
+
+                    // Node has not yet been visited or cost is lower than previously lowest cost => Update
+                    if (!nodeCosts.ContainsKey(toNode) || totalCost < nodeCosts[toNode])
+                    {
+                        // Update cost to this node
+                        nodeCosts[toNode] = totalCost;
+
+                        // Add target node to queue to continue search
+                        if (!priorityQueue.ContainsKey(toNode) || priorityQueue[toNode] > totalCost)
+                            priorityQueue[toNode] = totalCost;
+                    }
+                }
+            }
+
+            // No more nodes to check -> target not in range
+            return false;
+        }
+
+        #endregion
+
     }
 }
