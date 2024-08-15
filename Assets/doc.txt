@@ -1,10 +1,12 @@
 CTF AI:
- - do character after character
- - set entity movement speed very high if not visible
- - always only move a single node
- - attacker: if can directly catch opponent in own half do it
+ - Attacker: new job: Flee if seeing opponent character that sees you too
+ - New role: Flag cheater (go directly towards flag even if not visible)
+ - Attacker roles can change when in own territory
+ - Defender role can change during patrol
 
 make label half transparent for enemy characters that are explored but not visible (in last known position)
+give everyone names
+turn counter and display
 
 Main menu
 Game creation lobby

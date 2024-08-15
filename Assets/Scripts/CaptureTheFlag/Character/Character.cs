@@ -32,6 +32,10 @@ namespace CaptureTheFlag
         public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         private CharacterAction CurrentAction;
 
+        // Attributes
+        private bool IsOverrideMovementSpeedActive;
+        private float NormalMovementSpeed;
+
         // UI
         public UI_CharacterLabel UI_Label;
 
@@ -53,6 +57,8 @@ namespace CaptureTheFlag
             // Create label
             UI_Label = Instantiate(game.UI.CharacterLabelPrefab, game.UI.CharacterLabelsContainer.transform);
             UI_Label.Init(this);
+
+            NormalMovementSpeed = Entity.MovementSpeed;
         }
 
         public void OnStartTurn()
@@ -98,6 +104,20 @@ namespace CaptureTheFlag
         public void SetActionPointsToZero()
         {
             ActionPoints = 0;
+        }
+
+        /// <summary>
+        /// Sets this character's speed to the given value until disabled.
+        /// </summary>
+        public void EnableOverrideMovementSpeed(float overrideSpeed)
+        {
+            Entity.MovementSpeed = overrideSpeed;
+            IsOverrideMovementSpeedActive = true;
+        }
+        public void DisableOverrideMovementSpeed()
+        {
+            Entity.MovementSpeed = NormalMovementSpeed;
+            IsOverrideMovementSpeedActive = false;
         }
 
         #endregion

@@ -11,8 +11,12 @@ namespace CaptureTheFlag
         public bool TurnFinished { get; private set; }
 
         // AI Behaviour
+        private const float INVISIBLE_CHARACTER_SPEED = 50;
         private const float MAX_CHASE_DISTANCE = 40;
         private const float DEFEND_PERIMETER_RADIUS = 40;
+
+        private int CurrentCharacterIndex; // Resets each turn - each character performs all actions before the next one starts
+        private CharacterAction CurrentAction; // Actions are performed one after the other
 
         private Dictionary<AICharacterRole, int> RoleTable = new Dictionary<AICharacterRole, int>()
         {
@@ -49,17 +53,13 @@ namespace CaptureTheFlag
 
         public void StartTurn()
         {
+            // Reset
             TurnFinished = false;
-
-            // Get initial action for each character
+            CurrentCharacterIndex = -1;
+            CurrentAction = null;
             Actions.Clear();
             ActionsToFollow.Clear();
             CurrentFollowedAction = null;
-            foreach (Character c in Characters)
-            {
-                CharacterAction initialAction = GetNextCharacterAction(c);
-                if (initialAction != null) Actions[c] = initialAction;
-            }
         }
 
         /// <summary>
@@ -67,17 +67,42 @@ namespace CaptureTheFlag
         /// </summary>
         public void UpdateTurn()
         {
-            // Start the first unstarted action (they are not started at the same time to avoid lag spikes)
-            CharacterAction firstNonStarted = Actions.Values.FirstOrDefault(x => x.IsPending);
-            if (firstNonStarted != null) firstNonStarted.Perform();
-
-            // Check if AI turn is finished
-            if (Characters.All(x => !x.IsInAction)) TurnFinished = true;
-
-            // Check if we should queue-follow a new action
-            foreach (CharacterAction action in Actions.Values)
+            // Get a new action if the current one is null or done.
+            if(CurrentAction == null || CurrentAction.IsDone)
             {
-                if (action.State != CharacterActionState.Performing) continue;
+                Character currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
+                CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
+
+                if(nextAction == null) // Character is done for this turn => go to next character
+                {
+                    CurrentCharacterIndex++;
+
+                    if (CurrentCharacterIndex == Characters.Count) // If it was last character turn is done
+                    {
+                        TurnFinished = true;
+                    }
+                    else
+                    {
+                        currentCharacter = Characters[CurrentCharacterIndex];
+                        nextAction = GetNextCharacterAction(currentCharacter);
+                    }
+                }
+
+                // Start performing next action immediately
+                if (nextAction != null) 
+                {
+                    Actions[currentCharacter] = nextAction;
+                    CurrentAction = nextAction;
+                    nextAction.Perform();
+                    currentCharacter.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
+                }
+
+
+            }
+
+            // Check if we should queue-follow an action
+            foreach (CharacterAction action in Actions.Values.Where(x => x.State == CharacterActionState.Performing))
+            {
                 if (action == CurrentFollowedAction) continue;
 
                 // Character is newly visible
@@ -97,6 +122,7 @@ namespace CaptureTheFlag
                     // Unpause action if camera arrived at character
                     if (CurrentFollowedAction.IsPaused)
                     {
+                        CurrentFollowedAction.Character.DisableOverrideMovementSpeed();
                         CurrentFollowedAction.UnpauseAction();
                     }
 
@@ -104,6 +130,7 @@ namespace CaptureTheFlag
                     else if (CurrentFollowedAction.IsDone || !CurrentFollowedAction.Character.IsVisible)
                     {
                         World.Camera.Unfollow();
+                        CurrentFollowedAction.Character.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
                         CurrentFollowedAction = null;
                     }
                 }
@@ -124,22 +151,9 @@ namespace CaptureTheFlag
             }
         }
 
-        public override void OnActionDone(CharacterAction action)
-        {
-            Character character = action.Character;
-
-            // If there are no more possible moves, take no further action
-            if (character.PossibleMoves.Count == 0) return;
-
-            // Get next action for character and immediately start it
-            CharacterAction newAction = GetNextCharacterAction(character);
-            if (newAction != null)
-            {
-                Actions[character] = newAction;
-                newAction.Perform();
-            }
-        }
-
+        /// <summary>
+        /// Gets called when dev mode gets activated or deactivated.
+        /// </summary>
         public void OnSetDevMode(bool active)
         {
             if(active)
@@ -151,6 +165,7 @@ namespace CaptureTheFlag
                 foreach (Character c in Characters) c.UI_Label.Init(c);
             }
         }
+
 
         #region Private
 
@@ -206,13 +221,15 @@ namespace CaptureTheFlag
         /// </summary>
         private AICharacterJob GetNewCharacterJob(Character c)
         {
-            switch(Roles[c])
+            // If we can directly tag an opponent, do that no matter the role
+            if (CanTagCharacterDirectly(c, out Character target0)) return new AIJob_TagOpponent(c, target0);
+
+            switch (Roles[c])
             {
                 case AICharacterRole.Attacker:
 
                     // If we know where enemy flag is => move directly
-                    if (Opponent.Flag.IsExploredBy(Actor))
-                        return new AIJob_CaptureOpponentFlag(c);
+                    if (Opponent.Flag.IsExploredBy(Actor)) return new AIJob_CaptureOpponentFlag(c);
 
                     // Else chose a random unexplored node in enemy territory to go to
                     else return new AIJob_SearchForOpponentFlag(c);
@@ -220,7 +237,7 @@ namespace CaptureTheFlag
                 case AICharacterRole.Defender:
 
                     // If there is a visible opponent nearby
-                    if(ShouldChaseCharacterToDefend(c, out Character target)) return new AIJob_TagOpponent(c, target);
+                    if (ShouldChaseCharacterToTag(c, out Character target1)) return new AIJob_TagOpponent(c, target1);
 
                     // Else just patrol own flag
                     return new AIJob_PatrolDefendFlag(c);
@@ -229,7 +246,32 @@ namespace CaptureTheFlag
             throw new System.Exception("Gamestate not handled");
         }
 
-        public bool ShouldChaseCharacterToDefend(Character source, out Character target)
+        /// <summary>
+        /// Returns if the given character can tag an opponent with their possible moves.
+        /// </summary>
+        public bool CanTagCharacterDirectly(Character source, out Character target)
+        {
+            target = null;
+
+            foreach (Character opponentCharacter in Opponent.Characters)
+            {
+                if (!opponentCharacter.IsInOpponentZone) continue;
+                if (!opponentCharacter.IsVisibleByOpponent) continue;
+
+                if (source.PossibleMoves.ContainsKey(opponentCharacter.Node))
+                {
+                    target = opponentCharacter;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns if the given character should chase an opponent by going towards them.
+        /// </summary>
+        public bool ShouldChaseCharacterToTag(Character source, out Character target)
         {
             target = null;
 

@@ -16,13 +16,13 @@ namespace CaptureTheFlag
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
             forcedNewJob = null;
+
             return false;
         }
 
         public override CharacterAction GetNextAction()
         {
-            if (Character.PossibleMoves.Count <= 4) return null;
-            return GetMovementDirectlyTo(Character.Opponent.Flag.OriginNode);
+            return GetMovementTo(Character.Opponent.Flag.OriginNode);
         }
     }
 }

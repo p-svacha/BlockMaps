@@ -18,6 +18,10 @@ namespace BlockmapFramework
         #region A*
 
         // A* algorithm implementation. https://pavcreations.com/tilemap-based-a-star-algorithm-implementation-in-unity-game/
+        /// <summary>
+        /// Returns the shortest path from a source node to a target node for the given entity.
+        /// <br/>Returned path includes both source and target.
+        /// </summary>
         public static List<BlockmapNode> GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;

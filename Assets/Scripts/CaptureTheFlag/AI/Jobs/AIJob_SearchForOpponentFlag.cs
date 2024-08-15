@@ -26,6 +26,13 @@ namespace CaptureTheFlag
         {
             forcedNewJob = null;
 
+            // If we can tag an opponent this turn, do that
+            if (Player.CanTagCharacterDirectly(Character, out Character target0))
+            {
+                forcedNewJob = new AIJob_TagOpponent(Character, target0);
+                return true;
+            }
+
             // If we are on or close to our target node, look for new job
             if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.Transitions.ContainsKey(TargetNode)) return true;
 
@@ -34,8 +41,7 @@ namespace CaptureTheFlag
 
         public override CharacterAction GetNextAction()
         {
-            if (Character.PossibleMoves.Count <= 4) return null;
-            return GetMovementDirectlyTo(TargetNode);
+            return GetSingleNodeMovementTo(TargetNode);
         }
     }
 }

@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
+    /// <summary>
+    /// Job to chases an opponent character in order to tag them.
+    /// </summary>
     public class AIJob_TagOpponent : AICharacterJob
     {
         private Character Target;
@@ -32,8 +35,7 @@ namespace CaptureTheFlag
 
         public override CharacterAction GetNextAction()
         {
-            if (Character.PossibleMoves.Count <= 4) return null;
-            return GetMovementDirectlyTo(Target.Entity.OriginNode);
+            return GetMovementTo(Target.Entity.OriginNode);
         }
     }
 }
