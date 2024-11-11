@@ -453,6 +453,12 @@ public static class HelperFunctions
         return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
     }
 
+    public static Sprite GetTextureAsSprite(string resourcePath)
+    {
+        Texture2D texture = Resources.Load<Texture2D>(resourcePath);
+        return Texture2DToSprite(texture);
+    }
+
     /// <summary>
     /// Sets the Left, Right, Top and Bottom attribute of a RectTransform
     /// </summary>

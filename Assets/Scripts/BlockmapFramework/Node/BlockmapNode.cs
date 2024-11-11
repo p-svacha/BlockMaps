@@ -15,6 +15,8 @@ namespace BlockmapFramework
     {
         public int Id { get; private set; }
 
+        public SurfaceDef SurfaceDef;
+
         /// <summary>
         /// Height of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
@@ -104,15 +106,16 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height)
+        protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef)
         {
             World = world;
             Chunk = chunk;
-            Id = id;
 
+            Id = id;
             LocalCoordinates = new Vector2Int(localCoordinates.x, localCoordinates.y);
             WorldCoordinates = chunk.GetWorldCoordinates(LocalCoordinates);
             Altitude = height;
+            SurfaceDef = surfaceDef;
 
             RecalculateShape();
             Transitions = new Dictionary<BlockmapNode, Transition>();
@@ -597,9 +600,14 @@ namespace BlockmapFramework
         #region Draw
 
         /// <summary>
-        /// Adds all of this nodes vertices and triangles to the given MeshBuilder.
+        /// Draws the surface mesh of this node onto the meshbuilder.
         /// </summary>
-        public abstract void Draw(MeshBuilder meshBuilder);
+        public void DrawSurface(MeshBuilder meshBuilder)
+        {
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.NoRender) return;
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface) NodeMeshGenerator.DrawStandardSurface(this, meshBuilder);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration) SurfaceDef.RenderProperties.CustomRenderFunction(this, meshBuilder);
+        }
 
         /// <summary>
         /// Shows or hides the currently set tile overlay.
@@ -655,6 +663,11 @@ namespace BlockmapFramework
 
         #region Actions
 
+        public void SetSurface(SurfaceDef def)
+        {
+            SurfaceDef = def;
+        }
+
         public void AddEntity(Entity e)
         {
             Entities.Add(e);
@@ -681,8 +694,6 @@ namespace BlockmapFramework
         #region Getters
 
         public bool HasFence => Fences.Count > 0;
-        public abstract Surface GetSurface();
-        public abstract SurfaceProperties GetSurfaceProperties();
         public Vector3 CenterWorldPosition { get; protected set; }
         public abstract void RecalculateCenterWorldPosition();
 
@@ -702,7 +713,7 @@ namespace BlockmapFramework
         {
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
-                if (adjNode.GetSurface() == GetSurface() && World.DoAdjacentHeightsMatch(this, adjNode, dir))
+                if (adjNode.SurfaceDef == SurfaceDef && World.DoAdjacentHeightsMatch(this, adjNode, dir))
                     return true;
             return false;
         }
@@ -858,14 +869,14 @@ namespace BlockmapFramework
                 case "1011":
                 case "0100":
                 case "1110":
-                    if (GetSurface() != null && GetSurface().UseLongEdges) return false;
+                    if (SurfaceDef.RenderProperties.UseLongEdges) return false;
                     else return true;
 
                 case "1000":
                 case "0010":
                 case "0111":
                 case "1101":
-                    if (GetSurface() != null && GetSurface().UseLongEdges) return true;
+                    if (SurfaceDef.RenderProperties.UseLongEdges) return true;
                     else return false;
 
                 case "1010":
@@ -973,10 +984,10 @@ namespace BlockmapFramework
             foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
             string headspace = "FSH";
             foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
-            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " " + GetSurfaceProperties().Name + "\n" + headspace + "\n" + mph;
+            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " prop:" + SurfaceDef.Properties.Label + "\n" + headspace + "\n" + mph;
         }
 
-        public virtual string ToStringShort() => GetSurface().Name + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
+        public virtual string ToStringShort() => SurfaceDef.Label + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
 
         /// <summary>
         /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.
@@ -1035,13 +1046,13 @@ namespace BlockmapFramework
             switch(data.Type)
             {
                 case NodeType.Ground:
-                    return new GroundNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), (SurfaceId)data.SubType);
+                    return new GroundNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
 
                 case NodeType.Air:
-                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), (SurfaceId)data.SubType);
+                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
 
                 case NodeType.Water:
-                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height));
+                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }
@@ -1065,11 +1076,9 @@ namespace BlockmapFramework
                 LocalCoordinateY = LocalCoordinates.y,
                 Height = new int[] { Altitude[Direction.SW], Altitude[Direction.SE], Altitude[Direction.NE], Altitude[Direction.NW] },
                 Type = Type,
-                SubType = GetSubType()
+                SurfaceDef = SurfaceDef.DefName
             };
         }
-
-        public abstract int GetSubType();
 
         #endregion
     }

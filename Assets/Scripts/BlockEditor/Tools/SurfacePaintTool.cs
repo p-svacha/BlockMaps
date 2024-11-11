@@ -12,7 +12,7 @@ namespace WorldEditor
         public override string Name => "Surface Painting";
         public override Sprite Icon => ResourceManager.Singleton.SurfaceToolSprite;
 
-        private SurfaceId SelectedSurface;
+        private SurfaceDef SelectedSurface;
 
         [Header("Elements")]
         public UI_SelectionPanel SelectionPanel;
@@ -22,18 +22,16 @@ namespace WorldEditor
             base.Init(editor);
 
             SelectionPanel.Clear();
-
-            foreach(Surface s in SurfaceManager.Instance.GetAllSurfaces())
+            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs)
             {
-                SelectionPanel.AddElement(null, s.PreviewColor, s.Name, () => SelectSurface(s.Id));
+                SelectionPanel.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectSurface(def));
             }
-
             SelectionPanel.SelectFirstElement();
         }
 
-        public void SelectSurface(SurfaceId surface)
+        public void SelectSurface(SurfaceDef def)
         {
-            SelectedSurface = surface;
+            SelectedSurface = def;
         }
 
         public override void UpdateTool()
@@ -47,6 +45,8 @@ namespace WorldEditor
         {
             if (World.HoveredDynamicNode != null)
             {
+                if (World.HoveredDynamicNode.SurfaceDef == SelectedSurface) return;
+
                 World.SetSurface(World.HoveredDynamicNode, SelectedSurface);
 
                 // Update overlay

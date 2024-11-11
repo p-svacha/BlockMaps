@@ -8,7 +8,7 @@ namespace BlockmapFramework
     /// <summary>
     /// A mesh that contains all geometry for all nodes within one height level in a chunk.
     /// </summary>
-    public class AirNodeMesh : ChunkMesh
+    public class AirNodeMesh : NodeMesh
     {
         public int Altitude { get; private set; }
 
@@ -20,73 +20,10 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_AirNode;
         }
 
-        public override void OnMeshApplied()
+        protected override BlockmapNode GetNode(Vector2Int localCoordinates)
         {
-            base.OnMeshApplied();
-
-            Material surfaceMaterial = GetComponent<MeshRenderer>().materials.FirstOrDefault(x => x.shader.name == "Custom/SurfaceShader");
-            if (surfaceMaterial == null) return;
-
-            // Set surface values for surface materials (textures per node and blending)
-            List<float> surfaceArray = new List<float>();
-            Dictionary<Direction, List<float>> surfaceBlendArrays = new Dictionary<Direction, List<float>>();
-            foreach (Direction dir in HelperFunctions.GetAllDirections8()) surfaceBlendArrays.Add(dir, new List<float>());
-
-            for (int x = 0; x < Chunk.Size; x++)
-            {
-                for (int y = 0; y < Chunk.Size; y++)
-                {
-                    // Get node
-                    AirNode node = World.GetAirNodes(Chunk.GetWorldCoordinates(new Vector2Int(x, y)), Altitude).OrderBy(x => x.MaxAltitude).FirstOrDefault();
-
-                    // Base surface
-                    int surfaceId = node == null ? -1 : (int)node.Surface.Id;
-                    surfaceArray.Add(surfaceId);
-
-                    // Blend for each direction
-                    foreach (Direction dir in HelperFunctions.GetAllDirections8())
-                    {
-                        if (DoBlend(node, dir, out int blendSurfaceId)) surfaceBlendArrays[dir].Add(blendSurfaceId);
-                        else surfaceBlendArrays[dir].Add(surfaceId);
-                    }
-                }
-            }
-
-            // Set blend values for surface material only
-            surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
-            surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlendArrays[Direction.W]);
-            surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlendArrays[Direction.E]);
-            surfaceMaterial.SetFloatArray("_TileBlend_N", surfaceBlendArrays[Direction.N]);
-            surfaceMaterial.SetFloatArray("_TileBlend_S", surfaceBlendArrays[Direction.S]);
-            surfaceMaterial.SetFloatArray("_TileBlend_NW", surfaceBlendArrays[Direction.NW]);
-            surfaceMaterial.SetFloatArray("_TileBlend_NE", surfaceBlendArrays[Direction.NE]);
-            surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlendArrays[Direction.SE]);
-            surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlendArrays[Direction.SW]);
+            return World.GetAirNodes(Chunk.GetWorldCoordinates(localCoordinates), Altitude).OrderBy(x => x.MaxAltitude).FirstOrDefault();
         }
-
-        /// <summary>
-        /// Returns if a source node should have the surface of an adjacent node in a given direction blended into it.
-        /// </summary>
-        private bool DoBlend(BlockmapNode sourceNode, Direction dir, out int blendSurfaceId)
-        {
-            blendSurfaceId = -1;
-
-            if (sourceNode == null) return false;
-            if (!sourceNode.GetSurface().DoBlend) return false; // No blend on this node
-
-            List<BlockmapNode> adjacentNodes = World.GetAdjacentNodes(sourceNode.WorldCoordinates, dir);
-            foreach(BlockmapNode adjNode in adjacentNodes)
-            {
-                if (!World.DoAdjacentHeightsMatch(sourceNode, adjNode, dir)) continue;
-                if (adjNode.GetSurface() == null) continue;
-                if (!adjNode.GetSurface().DoBlend) continue;
-
-                blendSurfaceId = (int)(adjNode.GetSurface().Id);
-                return true;
-            }
-            return false;
-        }
-
 
         public override void SetVisibility(Actor player)
         {
@@ -101,7 +38,7 @@ namespace BlockmapFramework
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
 
-                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, Altitude).ToList();
+                    List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, Altitude);
 
                     if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
                     else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
@@ -123,26 +60,26 @@ namespace BlockmapFramework
         {
             Dictionary<int, AirNodeMesh> meshes = new Dictionary<int, AirNodeMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
+            for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
-                List<AirNode> nodesToDraw = chunk.GetAirNodes(heightLevel);
+                List<AirNode> nodesToDraw = chunk.GetAirNodes(altitude);
                 if (nodesToDraw.Count == 0) continue;
 
                 // Generate mesh
-                GameObject meshObject = new GameObject("AirNodeMesh_" + heightLevel);
+                GameObject meshObject = new GameObject("AirNodeMesh_" + altitude);
                 AirNodeMesh mesh = meshObject.AddComponent<AirNodeMesh>();
-                mesh.Init(chunk, heightLevel);
+                mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (AirNode airNode in nodesToDraw)
                 {
-                    airNode.Draw(meshBuilder);
+                    airNode.DrawSurface(meshBuilder);
                     airNode.SetMesh(mesh);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();
 
-                meshes.Add(heightLevel, mesh);
+                meshes.Add(altitude, mesh);
             }
 
             return meshes;

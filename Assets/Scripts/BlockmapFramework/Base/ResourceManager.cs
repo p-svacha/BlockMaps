@@ -39,6 +39,9 @@ namespace BlockmapFramework
 
         public Material BuildPreviewMaterial { get; private set; }
 
+        /// <summary>
+        /// The material that is capable of blending into adjacent nodes.
+        /// </summary>
         public Material SurfaceMaterial { get; private set; }
         public Material LadderMaterial { get; private set; }
 

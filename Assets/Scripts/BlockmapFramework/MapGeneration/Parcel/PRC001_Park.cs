@@ -12,7 +12,7 @@ namespace BlockmapFramework.WorldGeneration
 
         public override void Generate()
         {
-            FillGround(SurfaceId.Grass);
+            FillGround(SurfaceDefOf.Grass);
         }
     }
 }

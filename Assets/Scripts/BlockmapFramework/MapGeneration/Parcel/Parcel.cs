@@ -33,7 +33,7 @@ namespace BlockmapFramework.WorldGeneration
         public abstract void Generate();
 
         // Helpers
-        protected void FillGround(SurfaceId surface)
+        protected void FillGround(SurfaceDef surface)
         {
             for (int x = Position.x; x < Position.x + Dimensions.x; x++)
             {

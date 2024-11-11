@@ -143,7 +143,7 @@ namespace BlockmapFramework.WorldGeneration
             data.LocalCoordinateY = localCoordinates.y;
             data.Height = new int[] { 5, 5, 5, 5 };
             data.Type = NodeType.Ground;
-            data.SubType = (int)SurfaceId.Grass;
+            data.SurfaceDef = "Grass";
 
             return data;
         }

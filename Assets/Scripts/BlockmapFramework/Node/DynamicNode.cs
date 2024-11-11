@@ -11,20 +11,12 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class DynamicNode : BlockmapNode
     {
-        public Surface Surface { get; private set; }
-
-        public DynamicNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height)
+        public DynamicNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef)
         {
             RecalculateCenterWorldPosition();
-            Surface = SurfaceManager.Instance.GetSurface(surfaceId);
         }
 
         #region Actions
-
-        public void SetSurface(SurfaceId id)
-        {
-            Surface = SurfaceManager.Instance.GetSurface(id);
-        }
 
         public bool CanChangeShape(Direction mode)
         {
@@ -199,10 +191,6 @@ namespace BlockmapFramework
         #endregion
 
         #region Getters
-
-        public override Surface GetSurface() => Surface;
-        public override SurfaceProperties GetSurfaceProperties() => Surface.Properties;
-        public override int GetSubType() => (int)Surface.Id;
 
         public override void RecalculateCenterWorldPosition()
         {

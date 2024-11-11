@@ -256,12 +256,12 @@ namespace CaptureTheFlag
                     if (node == null) continue;
                     if (!allPathNodes.Contains(node))
                     {
-                        if (node.Surface.Id == SurfaceId.DirtPath)
+                        if (node.SurfaceDef == SurfaceDefOf.DirtPath)
                         {
                             continuePath = false; // reached other path
                             break;
                         }
-                        World.SetSurface(node, SurfaceId.DirtPath, updateWorld: false);
+                        World.SetSurface(node, SurfaceDefOf.DirtPath, updateWorld: false);
                         allPathNodes.Add(node);
 
                         // Remove entity on path
@@ -292,7 +292,7 @@ namespace CaptureTheFlag
                     GroundNode node = World.GetGroundNode(worldCoordinates);
 
                     // Check surface
-                    if (node.Surface.Id != SurfaceId.DirtPath) continue;
+                    if (node.SurfaceDef != SurfaceDefOf.DirtPath) continue;
                     if (node.WaterNode != null) continue;
 
                     // Check mask
@@ -304,22 +304,22 @@ namespace CaptureTheFlag
                     {
                         // Don't build if any adjacent node is path too
                         GroundNode adjNode = World.GetAdjacentGroundNode(worldCoordinates, side);
-                        if (adjNode == null || adjNode.Surface.Id == SurfaceId.DirtPath) continue;
+                        if (adjNode == null || adjNode.SurfaceDef == SurfaceDefOf.DirtPath) continue;
 
                         
 
                         GroundNode cornerNodePre = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetPreviousDirection8(side));
-                        if (cornerNodePre == null || cornerNodePre.Surface.Id == SurfaceId.DirtPath)
+                        if (cornerNodePre == null || cornerNodePre.SurfaceDef == SurfaceDefOf.DirtPath)
                         {
                             GroundNode adjNodePre = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetPreviousSideDirection(side));
-                            if (adjNodePre == null || adjNodePre.Surface.Id != SurfaceId.DirtPath) continue;
+                            if (adjNodePre == null || adjNodePre.SurfaceDef != SurfaceDefOf.DirtPath) continue;
                         }
 
                         GroundNode cornerNodePost = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetNextDirection8(side));
-                        if (cornerNodePost == null || cornerNodePost.Surface.Id == SurfaceId.DirtPath)
+                        if (cornerNodePost == null || cornerNodePost.SurfaceDef == SurfaceDefOf.DirtPath)
                         {
                             GroundNode adjNodePost = World.GetAdjacentGroundNode(worldCoordinates, HelperFunctions.GetNextSideDirection(side));
-                            if (adjNodePost == null || adjNodePost.Surface.Id != SurfaceId.DirtPath) continue;
+                            if (adjNodePost == null || adjNodePost.SurfaceDef != SurfaceDefOf.DirtPath) continue;
                         } 
                         
 

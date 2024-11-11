@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using BlockmapFramework;
 using TMPro;
 using BlockmapFramework.WorldGeneration;
+using BlockmapFramework.Defs;
 
 namespace WorldEditor
 {
@@ -49,6 +50,7 @@ namespace WorldEditor
         public World World;
 
         // Editor
+        private bool isInitialized = false;
         public EditorEntityLibrary EntityLibrary { get; private set; }
         float deltaTime; // for fps
         public List<WorldGenerator> Generators;
@@ -57,6 +59,13 @@ namespace WorldEditor
 
         void Start()
         {
+            // Load defs
+            DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
+            DefDatabase<SurfacePropertyDef>.AddDefs(GlobalSurfacePropertyDefs.Defs);
+
+            DefDatabaseRegistry.ResolveAllReferences();
+            DefDatabaseRegistry.OnLoadingDone();
+
             // Init editor content
             EntityLibrary = new EditorEntityLibrary();
             EntityLibrary.Init(this);
@@ -106,6 +115,9 @@ namespace WorldEditor
 
             // Init display options
             DisplayOptions.Init(this);
+
+            // Set initialized to true if everything here did run through without throwing an error
+            isInitialized = true;
         }
 
         public void SetWorld(WorldData data)
@@ -136,6 +148,8 @@ namespace WorldEditor
 
         void Update()
         {
+            if (!isInitialized) return;
+
             UpdateTileInfoText();
 
             CurrentTool.UpdateTool();

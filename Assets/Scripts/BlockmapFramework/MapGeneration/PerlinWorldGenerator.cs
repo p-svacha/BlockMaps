@@ -57,7 +57,7 @@ namespace BlockmapFramework.WorldGeneration
             {
                 foreach (GroundNode n in World.GetAllGroundNodes())
                 {
-                    if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceId.Sand);
+                    if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceDefOf.Sand);
                 }
 
                 World.DrawNodes();

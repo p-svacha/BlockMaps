@@ -1,3 +1,48 @@
+Migration to Def-System
+
+Improve performance of redrawing chunks:
+- don't always repass shader values in NodeMesh - only when necessary
+- also don't always recalculate array indices for shader, only when new surface appears
+- cache Color32[] of textures to faster create Texture2DArray
+
+Defs:
+- ThingDef
+-- SurfaceDef
+-- SurfacePropertyDef
+-- WallShapeDef
+-- WallMaterialDef
+-- FenceDef
+-- StaticObjectDef
+-- CharacterDef
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 CTF AI:
  - Attacker: new job: Flee if seeing opponent character that sees you too
  - New role: Flag cheater (go directly towards flag even if not visible)

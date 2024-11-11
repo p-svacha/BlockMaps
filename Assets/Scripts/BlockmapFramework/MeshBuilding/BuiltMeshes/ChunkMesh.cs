@@ -13,7 +13,6 @@ namespace BlockmapFramework
         protected World World { get; private set; }
         protected Chunk Chunk { get; private set; }
 
-        protected MeshBuilder MeshBuilder;
         public MeshRenderer Renderer { get; private set; }
         private bool[] ShowMultiOverlay;
 
@@ -27,20 +26,6 @@ namespace BlockmapFramework
             ShowMultiOverlay = new bool[256];
         }
 
-        /// <summary>
-        /// Standard method for a chunkmesh to generate its mesh that is unique per chunk (not 1 per altitude level).
-        /// <br/>Currently only used by GroundMesh and WaterMesh
-        /// </summary>
-        public void Draw()
-        {
-            MeshBuilder = new MeshBuilder(gameObject);
-
-            OnDraw();
-
-            MeshBuilder.ApplyMesh();
-            OnMeshApplied();
-        }
-        public virtual void OnDraw() { }
         public virtual void OnMeshApplied()
         {
             Renderer = GetComponent<MeshRenderer>();

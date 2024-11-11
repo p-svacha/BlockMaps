@@ -16,13 +16,18 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_Water;
         }
 
-        public override void OnDraw()
+        public void Draw()
         {
+            MeshBuilder meshBuilder = new MeshBuilder(gameObject);
+
             foreach (WaterNode node in Chunk.GetAllWaterNodes())
             {
-                WaterMeshGenerator.BuildWaterMeshForSingleNode(MeshBuilder, node);
+                WaterMeshGenerator.BuildWaterMeshForSingleNode(meshBuilder, node);
                 node.SetMesh(this);
             }
+
+            meshBuilder.ApplyMesh();
+            OnMeshApplied();
         }
 
 

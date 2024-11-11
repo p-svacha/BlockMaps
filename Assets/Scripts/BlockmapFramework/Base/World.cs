@@ -961,9 +961,9 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
         }
 
-        public void SetSurface(DynamicNode node, SurfaceId surfaceId, bool updateWorld = true)
+        public void SetSurface(DynamicNode node, SurfaceDef surface, bool updateWorld = true)
         {
-            node.SetSurface(surfaceId);
+            node.SetSurface(surface);
 
             if (!updateWorld) return;
             RedrawNodesAround(node.WorldCoordinates);
@@ -1008,12 +1008,12 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildAirPath(Vector2Int worldCoordinates, int height, SurfaceId surface)
+        public void BuildAirPath(Vector2Int worldCoordinates, int height, SurfaceDef surfaceDef)
         {
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), surface);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), surfaceDef);
             RegisterNode(newNode);
 
             UpdateNavmeshAround(newNode.WorldCoordinates);
@@ -1212,7 +1212,7 @@ namespace BlockmapFramework
             List<WaterNode> waterNodes = new List<WaterNode>();
             foreach (GroundNode node in data.CoveredNodes)
             {
-                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight));
+                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight), SurfaceDefOf.Water);
                 waterNodes.Add(waterNode);
                 RegisterNode(waterNode);
             }

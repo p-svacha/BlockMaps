@@ -20,7 +20,7 @@ namespace BlockmapFramework
         /// </summary>
         public WaterNode WaterNode { get; private set; }
 
-        public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceId surfaceId) : base(world, chunk, id, localCoordinates, height, surfaceId) { }
+        public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
         {
@@ -32,18 +32,7 @@ namespace BlockmapFramework
 
         #region Draw
 
-        public override void Draw(MeshBuilder meshBuilder)
-        {
-            DrawSurface(meshBuilder);
-            DrawSides(meshBuilder);
-        }
-
-        private void DrawSurface(MeshBuilder meshBuilder)
-        {
-            Surface.DrawNode(World, this, meshBuilder);
-        }
-
-        private void DrawSides(MeshBuilder meshBuilder)
+        public void DrawSides(MeshBuilder meshBuilder)
         {
             int cliffSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Cliff);
             DrawEastSide(meshBuilder, cliffSubmesh);

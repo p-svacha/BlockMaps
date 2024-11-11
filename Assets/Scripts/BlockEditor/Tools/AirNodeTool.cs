@@ -14,7 +14,7 @@ namespace WorldEditor
         public override Sprite Icon => ResourceManager.Singleton.AirNodeSprite;
 
         private GameObject BuildPreview;
-        private SurfaceId SelectedSurface;
+        private SurfaceDef SelectedSurface;
         private Vector2Int HoveredCoordinates;
         private int BuildAltitude => int.Parse(AltitudeInput.text);
 
@@ -30,16 +30,16 @@ namespace WorldEditor
             SetAltitude(5);
 
             SelectionPanel.Clear();
-            foreach (Surface s in SurfaceManager.Instance.GetAllSurfaces())
+            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs)
             {
-                SelectionPanel.AddElement(null, s.PreviewColor, s.Name, () => SelectSurface(s.Id));
+                SelectionPanel.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectSurface(def));
             }
             SelectionPanel.SelectFirstElement();
         }
 
-        public void SelectSurface(SurfaceId surface)
+        public void SelectSurface(SurfaceDef def)
         {
-            SelectedSurface = surface;
+            SelectedSurface = def;
         }
 
         public override void UpdateTool()

@@ -12,7 +12,7 @@ namespace BlockmapFramework
         public WaterBody WaterBody { get; private set; }
         public GroundNode GroundNode { get; private set; }
 
-        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height) : base(world, chunk, id, localCoordinates, height) { }
+        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
 
         public void Init(WaterBody waterBody, GroundNode surfaceNode)
         {
@@ -50,16 +50,6 @@ namespace BlockmapFramework
             if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
             
             return base.CanEntityStandHere(entity);
-        }
-
-        public override Surface GetSurface() => null;
-        public override SurfaceProperties GetSurfaceProperties() => SurfaceManager.Instance.GetSurfaceProperties(SurfacePropertyId.Water);
-
-        public override int GetSubType() => 0;
-
-        public override void Draw(MeshBuilder meshBuilder)
-        {
-            throw new System.NotImplementedException(); // drawn as part of a whole waterbody
         }
 
         public override string ToStringShort() => "Water (" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
