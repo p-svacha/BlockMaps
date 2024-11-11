@@ -12,8 +12,9 @@ namespace CaptureTheFlag
 
         // AI Behaviour
         private const float INVISIBLE_CHARACTER_SPEED = 50;
-        private const float MAX_CHASE_DISTANCE = 40;
-        private const float DEFEND_PERIMETER_RADIUS = 40;
+
+        private const float MAX_CHASE_DISTANCE = 40; // Transition cost
+        private const float DEFEND_PERIMETER_RADIUS = 40; // Transition cost
 
         private int CurrentCharacterIndex; // Resets each turn - each character performs all actions before the next one starts
         private CharacterAction CurrentAction; // Actions are performed one after the other
@@ -228,6 +229,9 @@ namespace CaptureTheFlag
             {
                 case AICharacterRole.Attacker:
 
+                    // If we should flee, do so
+                    if (ShouldFlee(c)) return new AIJob_Flee(c);
+
                     // If we know where enemy flag is => move directly
                     if (Opponent.Flag.IsExploredBy(Actor)) return new AIJob_CaptureOpponentFlag(c);
 
@@ -255,7 +259,7 @@ namespace CaptureTheFlag
 
             foreach (Character opponentCharacter in Opponent.Characters)
             {
-                if (!opponentCharacter.IsInOpponentZone) continue;
+                if (!opponentCharacter.IsInOpponentTerritory) continue;
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
 
                 if (source.PossibleMoves.ContainsKey(opponentCharacter.Node))
@@ -269,6 +273,22 @@ namespace CaptureTheFlag
         }
 
         /// <summary>
+        /// Returns if a character should flee from an opponent.
+        /// </summary>
+        public bool ShouldFlee(Character c)
+        {
+            if (!c.IsInOpponentTerritory) return false;
+
+            foreach (Character opponentCharacter in Opponent.Characters)
+            {
+                if (!opponentCharacter.IsVisibleByOpponent) continue;
+
+                if (c.Entity.IsVisibleBy(opponentCharacter.Entity)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Returns if the given character should chase an opponent by going towards them.
         /// </summary>
         public bool ShouldChaseCharacterToTag(Character source, out Character target)
@@ -277,7 +297,7 @@ namespace CaptureTheFlag
 
             foreach (Character opponentCharacter in Opponent.Characters)
             {
-                if (opponentCharacter.IsInOpponentZone && opponentCharacter.IsVisibleByOpponent && source.Entity.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
+                if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.Entity.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
                 {
                     target = opponentCharacter;
                     return true;

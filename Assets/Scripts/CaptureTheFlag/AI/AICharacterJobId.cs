@@ -11,5 +11,6 @@ namespace CaptureTheFlag
         CaptureOpponentFlag,
         TagOpponent,
         PatrolDefendFlag,
+        Flee,
     }
 }

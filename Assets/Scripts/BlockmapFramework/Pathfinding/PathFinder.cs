@@ -70,6 +70,18 @@ namespace BlockmapFramework
             return null;
         }
 
+        public static float GetPathCost(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        {
+            List<BlockmapNode> path = GetPath(entity, from, to, considerUnexploredNodes, forbiddenNodes);
+            if (path == null) return float.MaxValue;
+            float cost = 0f;
+            for(int i = 0; i < path.Count - 1; i++)
+            {
+                cost += path[i].Transitions[path[i + 1]].GetMovementCost(entity);
+            }
+            return cost;
+        }
+
         /// <summary>
         /// Assumed cost of that path. This function is not allowed to overestimate the cost. The real cost must be >= this cost.
         /// </summary>

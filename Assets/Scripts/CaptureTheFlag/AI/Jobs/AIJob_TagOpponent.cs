@@ -27,7 +27,7 @@ namespace CaptureTheFlag
             forcedNewJob = null;
 
             if (Target.IsInJail) return true;
-            if (!Target.IsInOpponentZone) return true;
+            if (!Target.IsInOpponentTerritory) return true;
             if (!Target.IsVisibleByOpponent) return true;
 
             return false;

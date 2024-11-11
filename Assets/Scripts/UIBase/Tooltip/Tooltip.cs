@@ -22,8 +22,8 @@ public class Tooltip : MonoBehaviour
 
     public float Width;
     public float Height;
-    private const int MouseOffset = 5;
-    private const int ScreenEdgeOffset = 20;
+    private const int MOUSE_OFFSET = 5; // px
+    private const int SCREEN_EDGE_OFFSET = 5; // px
 
     public void Init(TooltipType type, string title, string text)
     {
@@ -33,11 +33,12 @@ public class Tooltip : MonoBehaviour
         Title.text = title;
         Text.text = text;
 
-        Vector3 position = Input.mousePosition + new Vector3(MouseOffset, MouseOffset, 0);
+        Vector3 position = Input.mousePosition + new Vector3(MOUSE_OFFSET, MOUSE_OFFSET, 0);
         Width = GetComponent<RectTransform>().rect.width;
         Height = GetComponent<RectTransform>().rect.height;
-        if (position.x + Width > Screen.width) position.x = Screen.width - Width - ScreenEdgeOffset;
-        if (position.y - Height < 0) position.y = Height + ScreenEdgeOffset;
+        if (position.x + Width > Screen.width - SCREEN_EDGE_OFFSET) position.x = Screen.width - Width - SCREEN_EDGE_OFFSET;
+        if (position.y - Height < SCREEN_EDGE_OFFSET) position.y = Height + SCREEN_EDGE_OFFSET;
+        if (position.y + Height > Screen.height - SCREEN_EDGE_OFFSET) position.y = Screen.height - Height - SCREEN_EDGE_OFFSET;
         transform.position = position;
     }
 

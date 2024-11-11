@@ -33,6 +33,13 @@ namespace CaptureTheFlag
                 return true;
             }
 
+            // If we should flee, do that
+            if(Player.ShouldFlee(Character))
+            {
+                forcedNewJob = new AIJob_Flee(Character);
+                return true;
+            }
+
             // If we are on or close to our target node, look for new job
             if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.Transitions.ContainsKey(TargetNode)) return true;
 

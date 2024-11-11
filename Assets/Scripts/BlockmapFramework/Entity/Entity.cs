@@ -315,6 +315,10 @@ namespace BlockmapFramework
             SeenBy.Remove(e);
         }
 
+        public bool IsVisibleBy(Entity e)
+        {
+            return SeenBy.Contains(e);
+        }
         public bool IsVisibleBy(Actor actor)
         {
             if (actor == null) return true; // Everything is visible

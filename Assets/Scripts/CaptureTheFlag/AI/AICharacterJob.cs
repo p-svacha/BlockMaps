@@ -14,6 +14,7 @@ namespace CaptureTheFlag
     {
         public Character Character { get; private set; }
         public AIPlayer Player => (AIPlayer)Character.Owner;
+        public Player Opponent => Player.Opponent;
         public CTFGame Game => Character.Game;
 
         public abstract AICharacterJobId Id { get; }

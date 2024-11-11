@@ -18,6 +18,7 @@ Release build on github
 mapgen forest: wide road with cars
 mapgen forest: house
 mapgen forest: river
+mapgen forest: hedges should be straighter
 
 Framework: Jumping attribute for moving characters
 - Jumping only works to adjacent tiles

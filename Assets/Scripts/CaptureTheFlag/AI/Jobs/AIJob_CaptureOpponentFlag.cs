@@ -17,6 +17,20 @@ namespace CaptureTheFlag
         {
             forcedNewJob = null;
 
+            // If we can tag an opponent this turn, do that
+            if (Player.CanTagCharacterDirectly(Character, out Character target0))
+            {
+                forcedNewJob = new AIJob_TagOpponent(Character, target0);
+                return true;
+            }
+
+            // If we should flee, do that
+            if (Player.ShouldFlee(Character))
+            {
+                forcedNewJob = new AIJob_Flee(Character);
+                return true;
+            }
+
             return false;
         }
 
