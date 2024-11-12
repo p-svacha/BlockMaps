@@ -68,11 +68,15 @@ namespace BlockmapFramework
             IsPassable = true;
         }
 
-        public override void RegisterInWorld()
+        public override void OnRegister()
         {
-            base.RegisterInWorld();
             Bottom.SourceLadders.Add(Side, this);
             Top.TargetLadders.Add(HelperFunctions.GetOppositeDirection(Side), this);
+        }
+        public override void OnDeregister()
+        {
+            Bottom.SourceLadders.Remove(Side);
+            Top.TargetLadders.Remove(HelperFunctions.GetOppositeDirection(Side));
         }
 
         public static Ladder GetInstance(World world, EntityData data)

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -11,6 +12,11 @@ namespace BlockmapFramework
     public abstract class NodeMesh : ChunkMesh
     {
         private Dictionary<SurfaceDef, int> SurfaceArrayIndices = new Dictionary<SurfaceDef, int>();
+
+        // Performance Profilers
+        static readonly ProfilerMarker pm_NodeIteration = new ProfilerMarker("NodeIteration");
+        static readonly ProfilerMarker pm_GetBlendNode = new ProfilerMarker("GetBlendNode");
+        static readonly ProfilerMarker pm_PassSurfaceDataArraysToShader = new ProfilerMarker("PassSurfaceDataArraysToShader");
 
         public override void OnMeshApplied()
         {
@@ -32,7 +38,7 @@ namespace BlockmapFramework
             Dictionary<Direction, List<float>> surfaceBlendArrays = new Dictionary<Direction, List<float>>();
             foreach (Direction dir in HelperFunctions.GetAllDirections8()) surfaceBlendArrays.Add(dir, new List<float>());
 
-
+            pm_NodeIteration.Begin();
             for (int x = 0; x < Chunk.Size; x++)
             {
                 for (int y = 0; y < Chunk.Size; y++)
@@ -41,21 +47,23 @@ namespace BlockmapFramework
                     BlockmapNode node = GetNode(new Vector2Int(x, y));
 
                     // Base surface
-                    int surfaceArrayIndex = GetOrSetArrayIndexFor(node);
+                    int surfaceArrayIndex = MaterialManager.GetBlendableSurfaceShaderIndexFor(node.SurfaceDef);
                     surfaceArray.Add(surfaceArrayIndex);
 
                     // Blend for each direction
                     foreach (Direction dir in HelperFunctions.GetAllDirections8())
                     {
-                        BlockmapNode blendNode = GetBlendNode(node, dir);
-                        if(blendNode == null) surfaceBlendArrays[dir].Add(surfaceArrayIndex); // Just take own texture for blending when no blending should be done
-                        else surfaceBlendArrays[dir].Add(GetOrSetArrayIndexFor(blendNode)); // Take index of blending texture
+                        pm_GetBlendNode.Begin();
+                        SurfaceDef blendSurface = GetBlendSurface(node, dir);
+                        surfaceBlendArrays[dir].Add(MaterialManager.GetBlendableSurfaceShaderIndexFor(blendSurface));
+                        pm_GetBlendNode.End();
                     }
                 }
             }
-            
+            pm_NodeIteration.End();
 
             // Set blend values for surface material only
+            pm_PassSurfaceDataArraysToShader.Begin();
             surfaceMaterial.SetFloatArray("_TileSurfaces", surfaceArray);
             surfaceMaterial.SetFloatArray("_TileBlend_W", surfaceBlendArrays[Direction.W]);
             surfaceMaterial.SetFloatArray("_TileBlend_E", surfaceBlendArrays[Direction.E]);
@@ -65,71 +73,26 @@ namespace BlockmapFramework
             surfaceMaterial.SetFloatArray("_TileBlend_NE", surfaceBlendArrays[Direction.NE]);
             surfaceMaterial.SetFloatArray("_TileBlend_SE", surfaceBlendArrays[Direction.SE]);
             surfaceMaterial.SetFloatArray("_TileBlend_SW", surfaceBlendArrays[Direction.SW]);
-
-            // Set arrays in shader that stores values for each surface
-            SetSurfaceShaderArrays(surfaceMaterial);
-        }
-
-        private int GetOrSetArrayIndexFor(BlockmapNode node)
-        {
-            int index = -1;
-            if (node != null && node.SurfaceDef.RenderProperties.SurfaceTexture != null)
-            {
-                if (SurfaceArrayIndices.ContainsKey(node.SurfaceDef)) index = SurfaceArrayIndices[node.SurfaceDef];
-                else
-                {
-                    int newIndex = SurfaceArrayIndices.Count;
-                    SurfaceArrayIndices.Add(node.SurfaceDef, newIndex);
-                    index = newIndex;
-                }
-            }
-            return index;
+            pm_PassSurfaceDataArraysToShader.End();
         }
 
         /// <summary>
-        /// Sets the arrays for colors, textures and texture scaling in the shader of the surface material of this chunk, where each element represents the values for one surface that is used in this mesh.
-        /// <br/>The values or set according to SurfaceArrayIndices.
+        /// Returns the surface that should be blended into the given source node from the adjacent node in the given direction.
+        /// <br/>Returns the source nodes own surface if no blending should be done.
         /// </summary>
-        private void SetSurfaceShaderArrays(Material surfaceMaterialInstance)
+        private SurfaceDef GetBlendSurface(BlockmapNode sourceNode, Direction dir)
         {
-            // Pass terrain colors to shader of surface material of this chunk
-            Color[] terrainColors = new Color[SurfaceArrayIndices.Count];
-            foreach (KeyValuePair<SurfaceDef, int> kvp in SurfaceArrayIndices) terrainColors[kvp.Value] = kvp.Key.RenderProperties.SurfaceColor;
-            surfaceMaterialInstance.SetColorArray("_TerrainColors", terrainColors);
-
-            // Pass terrain textures to shader of surface material of this chunk
-            Texture2DArray terrainTexArray = new Texture2DArray(1024, 1024, SurfaceArrayIndices.Count, TextureFormat.RGBA32, true);
-            foreach (KeyValuePair<SurfaceDef, int> kvp in SurfaceArrayIndices)
-            {
-                terrainTexArray.SetPixels32(kvp.Key.RenderProperties.SurfaceTexture.GetPixels32(), kvp.Value);
-            }
-            terrainTexArray.Apply();
-            surfaceMaterialInstance.SetTexture("_TerrainTextures", terrainTexArray);
-
-            // Pass texture scaling values to shader of surface material of this chunk
-            float[] textureScalingValues = new float[SurfaceArrayIndices.Count];
-            foreach (KeyValuePair<SurfaceDef, int> kvp in SurfaceArrayIndices) textureScalingValues[kvp.Value] = kvp.Key.RenderProperties.SurfaceTextureScale;
-            surfaceMaterialInstance.SetFloatArray("_TerrainTextureScale", textureScalingValues);
-        }
-
-        /// <summary>
-        /// Returns the Node whose surface that should be blended into the given source node from the adjacent node in the given direction.
-        /// <br/>Returns null if no blending should be done.
-        /// </summary>
-        private BlockmapNode GetBlendNode(BlockmapNode sourceNode, Direction dir)
-        {
-            if (sourceNode == null) return null;
-            if (!sourceNode.SurfaceDef.RenderProperties.DoBlend) return null; // No blend on this node
+            if (sourceNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.FlatBlendableSurface) return sourceNode.SurfaceDef; // No blend on this node
 
             List<BlockmapNode> adjacentNodes = World.GetAdjacentNodes(sourceNode.WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjacentNodes)
             {
                 if (!World.DoAdjacentHeightsMatch(sourceNode, adjNode, dir)) continue; // Nodes are not seamlessly adjacent
-                if (!adjNode.SurfaceDef.RenderProperties.DoBlend) continue; // No blend on adjacent node
+                if (adjNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.FlatBlendableSurface) continue; // No blend on adjacent node
 
-                return adjNode;
+                return adjNode.SurfaceDef;
             }
-            return null;
+            return sourceNode.SurfaceDef;
         }
 
         protected abstract BlockmapNode GetNode(Vector2Int localCoordinates);

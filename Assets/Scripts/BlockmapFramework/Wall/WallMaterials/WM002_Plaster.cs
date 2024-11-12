@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public override WallMaterialId Id => WallMaterialId.Plaster;
         public override string Name => "Plaster";
-        public override Material Material => ResourceManager.Singleton.Mat_Plaster;
+        public override Material Material => MaterialManager.LoadMaterial("Plaster");
 
         // Climbing attributes
         public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Unclimbable;

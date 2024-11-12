@@ -39,24 +39,9 @@ namespace BlockmapFramework
         public Action<BlockmapNode, MeshBuilder> CustomRenderFunction { get; init; } = null;
 
         /// <summary>
-        /// If Type is set to FlatBlendableSurface, this color will be used for rendering and blending the node in flat shading mode.
+        /// If Type is set to FlatBlendableSurface, the color, main texture and texture scale of this material will be used for rendering and blending a node with this surface.
         /// </summary>
-        public Color SurfaceColor { get; init; } = new Color(1f, 0.07f, 0.94f);
-
-        /// <summary>
-        /// If Type is set to FlatBlendableSurface, this texture will be used for rendering and blending the node in textured mode.
-        /// </summary>
-        public Texture2D SurfaceTexture { get; init; } = null;
-
-        /// <summary>
-        /// If Type is set to FlatBlendableSurface, this texture scaling will be used for rendering and blending the node in textured mode.
-        /// </summary>
-        public float SurfaceTextureScale { get; init; } = 1f;
-
-        /// <summary>
-        /// Flag if this surface should blend into adjacent nodes that also have this flag.
-        /// </summary>
-        public bool DoBlend { get; init; } = false;
+        public Material SurfaceReferenceMaterial { get; init; } = null;
 
         /// <summary>
         /// If true, triangles on edge shaped nodes (0001 or 1110) are always built in a way that the edge is long

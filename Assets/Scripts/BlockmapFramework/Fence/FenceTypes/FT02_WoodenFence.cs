@@ -32,7 +32,7 @@ namespace BlockmapFramework
 
         public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Wood, isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Wood"), isPreview));
 
             // Poles
             float poleStep = 1f / NUM_POLES;
@@ -79,7 +79,7 @@ namespace BlockmapFramework
 
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Wood, isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Wood"), isPreview));
 
             float startX = 0;
             float dimX = POLE_WIDTH;

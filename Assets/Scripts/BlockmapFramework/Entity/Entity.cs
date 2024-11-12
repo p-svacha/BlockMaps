@@ -159,10 +159,14 @@ namespace BlockmapFramework
             OnInitialized();
         }
 
-        public virtual void RegisterInWorld()
-        {
-            World.RegisterEntity(this);
-        }
+        /// <summary>
+        /// Gets called when an entity gets registered in the world. Useful if subtypes need additional registering in specific places.
+        /// </summary>
+        public virtual void OnRegister() { }
+        /// <summary>
+        /// Gets called when an entity gets de-registered from the world. Useful if subtypes need additional de-registering in specific places.
+        /// </summary>
+        public virtual void OnDeregister() { }
 
         /// <summary>
         /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.

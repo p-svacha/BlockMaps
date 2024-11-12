@@ -49,7 +49,7 @@ namespace BlockmapFramework
 
         private static Material GetMaterial(Material mat, bool isPreview)
         {
-            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
+            if (isPreview) return MaterialManager.BuildPreviewMaterial;
             else return mat;
         }
     }

@@ -1,14 +1,14 @@
 Migration to Def-System
 
 Improve performance of redrawing chunks:
-- don't always repass shader values in NodeMesh - only when necessary
+- save meshbuilders in nodemeshes with vertices and triangles per node, only update affected nodes
+- don't always repass shader values in NodeMesh - only when surface changes
 - also don't always recalculate array indices for shader, only when new surface appears
 - cache Color32[] of textures to faster create Texture2DArray
 
+
 Defs:
 - ThingDef
--- SurfaceDef
--- SurfacePropertyDef
 -- WallShapeDef
 -- WallMaterialDef
 -- FenceDef

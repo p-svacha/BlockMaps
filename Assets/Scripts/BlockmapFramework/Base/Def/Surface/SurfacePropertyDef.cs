@@ -15,6 +15,11 @@ namespace BlockmapFramework
         /// </summary>
         public float MovementSpeedModifier { get; init; } = 1f;
 
+        /// <summary>
+        /// If a surface with this property can be painted on nodes in the editor.
+        /// </summary>
+        public bool Paintable { get; init; } = true;
+
         public override bool Validate()
         {
             if (MovementSpeedModifier <= 0f) throw new Exception(LoadingErrorPrefix + "MovementSpeedModifier must be greater than 0.");

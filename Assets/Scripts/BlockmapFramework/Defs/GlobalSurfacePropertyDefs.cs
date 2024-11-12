@@ -16,7 +16,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Grass",
                 Label = "grass",
                 Description = "Surface property of grassy surfaces",
-                MovementSpeedModifier = 0.5f
+                MovementSpeedModifier = 0.5f,
             },
 
             new SurfacePropertyDef()
@@ -24,7 +24,31 @@ namespace BlockmapFramework.Defs
                 DefName = "Sand",
                 Label = "sand",
                 Description = "Surface property of sandy surfaces",
-                MovementSpeedModifier = 0.35f
+                MovementSpeedModifier = 0.35f,
+            },
+
+            new SurfacePropertyDef()
+            {
+                DefName = "Concrete",
+                Label = "concrete",
+                Description = "Surface property used by many concrete or asphalt-like surfaces",
+                MovementSpeedModifier = 1f,
+            },
+
+            new SurfacePropertyDef()
+            {
+                DefName = "Dirt",
+                Label = "dirt",
+                Description = "Surface property used by soily surfaces",
+                MovementSpeedModifier = 0.8f,
+            },
+
+            new SurfacePropertyDef()
+            {
+                DefName = "Water",
+                Label = "water",
+                Description = "Surface property used by water",
+                MovementSpeedModifier = 0.2f,
             },
         };
     }

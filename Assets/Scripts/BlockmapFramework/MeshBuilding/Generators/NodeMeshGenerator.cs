@@ -13,19 +13,20 @@ namespace BlockmapFramework
         /// Draws a standard surface top that is just 2 triangles with the surface texture.
         /// <br/>Uses the SurfaceMaterial that is capable of blending textures.
         /// </summary>
-        public static void DrawStandardSurface(BlockmapNode node, MeshBuilder meshBuilder)
+        public static void DrawFlatBlendableSurface(BlockmapNode node, MeshBuilder meshBuilder)
         {
-            int surfaceSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
-            meshBuilder.DrawShapePlane(node, surfaceSubmesh, height: 0f, 0f, 1f, 0f, 1f);
+            meshBuilder.DrawShapePlane(node, MaterialManager.BlendbaleSurfaceMaterial, height: 0f, 0f, 1f, 0f, 1f);
         }
+
+
 
         /// <summary>
         /// Builds a surface that connects to adjacent nodes with the same surface and draws a curb to other surfaces.
         /// </summary>
-        public static void BuildBorderedNodeSurface(World world, BlockmapNode node, MeshBuilder meshBuilder, Material mainMaterial, Material curbMaterial, float mainHeight, float curbHeight, float curbWidth)
+        public static void BuildBorderedNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, string mainMaterialSubpath, string curbMaterialSubpath, float mainHeight, float curbHeight, float curbWidth)
         {
-            int mainSubmesh = meshBuilder.GetSubmesh(mainMaterial);
-            int curbSubmesh = meshBuilder.GetSubmesh(curbMaterial);
+            int mainSubmesh = meshBuilder.GetSubmesh(mainMaterialSubpath);
+            int curbSubmesh = meshBuilder.GetSubmesh(curbMaterialSubpath);
 
             // Center plane
             meshBuilder.DrawShapePlane(node, mainSubmesh, mainHeight, curbWidth, 1f - curbWidth, curbWidth, 1f - curbWidth); // top

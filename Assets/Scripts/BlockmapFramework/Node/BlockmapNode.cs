@@ -605,7 +605,7 @@ namespace BlockmapFramework
         public void DrawSurface(MeshBuilder meshBuilder)
         {
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.NoRender) return;
-            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface) NodeMeshGenerator.DrawStandardSurface(this, meshBuilder);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface) NodeMeshGenerator.DrawFlatBlendableSurface(this, meshBuilder);
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration) SurfaceDef.RenderProperties.CustomRenderFunction(this, meshBuilder);
         }
 
@@ -665,6 +665,7 @@ namespace BlockmapFramework
 
         public void SetSurface(SurfaceDef def)
         {
+            if (def == null) throw new System.Exception("Cannot set SurfaceDef to null. That is not allowed.");
             SurfaceDef = def;
         }
 

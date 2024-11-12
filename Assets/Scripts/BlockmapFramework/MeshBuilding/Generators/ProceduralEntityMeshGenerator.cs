@@ -11,25 +11,26 @@ namespace BlockmapFramework
         {
             Dictionary<int, ProceduralEntityMesh> meshes = new Dictionary<int, ProceduralEntityMesh>();
 
-            for (int heightLevel = 0; heightLevel < World.MAX_ALTITUDE; heightLevel++)
+            for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
-                List<BlockmapNode> nodesToDraw = chunk.GetNodes(heightLevel).Where(x => x.Entities.Any(e => e is ProceduralEntity)).ToList();
-                if (nodesToDraw.Count == 0) continue;
+                // Get procedural entities for altitude level
+                List<ProceduralEntity> entitiesToDraw = chunk.GetProceduralEntities(altitude);
+                if (entitiesToDraw.Count == 0) continue;
 
                 // Generate mesh
-                GameObject meshObject = new GameObject("ProceduralEntityMesh_" + heightLevel);
+                GameObject meshObject = new GameObject("ProceduralEntityMesh_" + altitude);
                 ProceduralEntityMesh mesh = meshObject.AddComponent<ProceduralEntityMesh>();
-                mesh.Init(chunk, heightLevel);
+                mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach (BlockmapNode node in nodesToDraw)
+                foreach (ProceduralEntity e in entitiesToDraw)
                 {
-                    foreach (ProceduralEntity e in node.Entities.Where(x => x is ProceduralEntity)) e.BuildMesh(meshBuilder);
+                    e.BuildMesh(meshBuilder);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();
 
-                meshes.Add(heightLevel, mesh);
+                meshes.Add(altitude, mesh);
             }
 
             return meshes;

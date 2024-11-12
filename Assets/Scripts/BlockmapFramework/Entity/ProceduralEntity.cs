@@ -14,6 +14,11 @@ namespace BlockmapFramework
         protected abstract string PE_Name { get; }
         public override Sprite GetThumbnail() => Resources.Load<Sprite>("Editor/Thumbnails/ProceduralEntities/" + Name);
 
+        /// <summary>
+        /// The coordinates in 3d space of the base of this procedural entity.
+        /// </summary>
+        public Vector3Int LocalCellCoordinates => new Vector3Int(OriginNode.LocalCoordinates.x, MinAltitude, OriginNode.LocalCoordinates.y);
+
         public ProceduralEntity GetCopy(int height)
         {
             GameObject obj = new GameObject(Name);
@@ -28,6 +33,15 @@ namespace BlockmapFramework
             BlocksVision = PE_BlocksVision;
             Name = PE_Name;
             Dimensions = new Vector3Int(1, height, 1);
+        }
+
+        public override void OnRegister()
+        {
+            OriginNode.Chunk.RegisterProcEntity(this);
+        }
+        public override void OnDeregister()
+        {
+            OriginNode.Chunk.DeregisterProcEntity(this);
         }
 
         protected string GetTypeId(int height) => ProceduralId.ToString() + "_" + height.ToString();

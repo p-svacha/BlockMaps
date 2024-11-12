@@ -15,7 +15,7 @@ namespace BlockmapFramework {
 
         public override void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
         {
-            Material mat = isPreview ? ResourceManager.Singleton.BuildPreviewMaterial : ResourceManager.Singleton.Mat_Hedge;
+            Material mat = isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Hedge");
             int submesh = meshBuilder.GetSubmesh(mat);
 
             float hedgeWidth = 1f - 2 * EDGE_OFFSET;

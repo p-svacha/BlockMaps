@@ -56,8 +56,8 @@ namespace BlockmapFramework
 
         private static Material GetMaterial(bool isPreview)
         {
-            if (isPreview) return ResourceManager.Singleton.BuildPreviewMaterial;
-            else return ResourceManager.Singleton.LadderMaterial;
+            if (isPreview) return MaterialManager.BuildPreviewMaterial;
+            else return MaterialManager.LoadMaterial("Special/LadderMaterial");
         }
     }
 }

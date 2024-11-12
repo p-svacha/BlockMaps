@@ -23,7 +23,7 @@ namespace BlockmapFramework
 
         public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Cliff, isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Cliff"), isPreview));
 
             Vector3 p1 = new Vector3(0f, 0f, 0f);
             Vector3 p2 = new Vector3(0f, World.TILE_HEIGHT * height, 0f);

@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public override WallMaterialId Id => WallMaterialId.Brick;
         public override string Name => "Brick";
-        public override Material Material => ResourceManager.Singleton.Mat_Brick;
+        public override Material Material => MaterialManager.LoadMaterial("Brick");
 
         // Climbing attributes
         public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Intermediate;

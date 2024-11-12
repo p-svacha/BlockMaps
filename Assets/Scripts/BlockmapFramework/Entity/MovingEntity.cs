@@ -39,7 +39,7 @@ namespace BlockmapFramework
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("MovingEntities can't be bigger than 1x1.");
 
             // Selection indicator
-            SelectionIndicator = Instantiate(ResourceManager.Singleton.SelectionIndicator);
+            SelectionIndicator = Instantiate(Resources.Load<Projector>("BlockmapFramework/Prefabs/SelectionIndicator"));
             SelectionIndicator.transform.SetParent(transform);
             SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
             SelectionIndicator.orthographicSize = Mathf.Max(Dimensions.x, Dimensions.z) * 0.5f;

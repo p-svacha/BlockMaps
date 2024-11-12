@@ -65,6 +65,10 @@ namespace WorldEditor
 
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
+            DefDatabaseRegistry.BindAllDefOfs();
+
+            // Init materials
+            MaterialManager.InitializeBlendableSurfaceMaterial();
 
             // Init editor content
             EntityLibrary = new EditorEntityLibrary();

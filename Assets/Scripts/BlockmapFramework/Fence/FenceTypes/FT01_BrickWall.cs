@@ -25,7 +25,7 @@ namespace BlockmapFramework
 
         public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Brick, isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Brick"), isPreview));
 
             float startX = 0;
             float dimX = 1f;
@@ -39,7 +39,7 @@ namespace BlockmapFramework
         }
         public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(ResourceManager.Singleton.Mat_Brick, isPreview));
+            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Brick"), isPreview));
 
             float startX = 0;
             float dimX = WIDTH;

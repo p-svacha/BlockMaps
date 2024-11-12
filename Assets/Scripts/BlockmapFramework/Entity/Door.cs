@@ -59,10 +59,13 @@ namespace BlockmapFramework
             IsPassable = true;
         }
 
-        public override void RegisterInWorld()
+        public override void OnRegister()
         {
-            base.RegisterInWorld();
             OriginNode.Doors.Add(Rotation, this);
+        }
+        public override void OnDeregister()
+        {
+            OriginNode.Doors.Remove(Rotation);
         }
 
         protected override void CreateVisionCollider()
@@ -202,8 +205,8 @@ namespace BlockmapFramework
 
         public static void GenerateDoorMesh(MeshBuilder meshBuilder, int height, bool isMirrored, bool isPreview)
         {
-            int doorSubmesh = meshBuilder.GetSubmesh(isPreview ? ResourceManager.Singleton.BuildPreviewMaterial : ResourceManager.Singleton.Mat_WoodParquet);
-            int handleSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.LadderMaterial);
+            int doorSubmesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("WoodParquet"));
+            int handleSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Special/LadderMaterial"));
 
             // Anchor point (needed for correct door rotation)
             float anchorPointOffset = DOOR_WIDTH / 2f;

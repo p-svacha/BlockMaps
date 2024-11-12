@@ -29,5 +29,12 @@ namespace BlockmapFramework
         {
             Properties = DefDatabase<SurfacePropertyDef>.GetNamed(SurfacePropertyDefName);
         }
+
+        public override bool Validate()
+        {
+            if (RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface && RenderProperties.SurfaceReferenceMaterial == null) throw new System.Exception($"{LoadingErrorPrefix}SurfaceDefs that have a RenderType of FlatBlendableSurface need to have a SurfaceReferenceMaterial.");
+            if (RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration && RenderProperties.CustomRenderFunction == null) throw new System.Exception($"{LoadingErrorPrefix}SurfaceDefs that have a RenderType of CustomMeshGeneration need to have a CustomRenderFunction.");
+            return base.Validate();
+        }
     }
 }

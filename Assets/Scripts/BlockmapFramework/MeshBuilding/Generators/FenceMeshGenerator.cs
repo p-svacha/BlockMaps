@@ -13,8 +13,9 @@ namespace BlockmapFramework
 
             for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
-                List<BlockmapNode> nodesToDraw = chunk.GetNodes(altitude).Where(x => x.HasFence).ToList();
-                if (nodesToDraw.Count == 0) continue;
+                // Get fences for altitude level
+                List<Fence> fencesToDraw = chunk.GetFences(altitude);
+                if (fencesToDraw.Count == 0) continue;
 
                 // Generate mesh
                 GameObject meshObject = new GameObject("FenceMesh_" + altitude);
@@ -22,9 +23,9 @@ namespace BlockmapFramework
                 mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach (BlockmapNode node in nodesToDraw)
+                foreach (Fence fence in fencesToDraw)
                 {
-                    foreach (Fence fence in node.Fences.Values) DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
+                    DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();

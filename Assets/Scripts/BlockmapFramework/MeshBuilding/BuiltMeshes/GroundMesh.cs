@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -10,6 +11,10 @@ namespace BlockmapFramework
     /// </summary>
     public class GroundMesh : NodeMesh
     {
+        // Performance Profilers
+        static readonly ProfilerMarker pm_DrawNodes = new ProfilerMarker("DrawNodesMeshes");
+        static readonly ProfilerMarker pm_ApplyMesh = new ProfilerMarker("ApplyMesh");
+
         public void Init(Chunk chunk)
         {
             OnInit(chunk);
@@ -21,10 +26,8 @@ namespace BlockmapFramework
         {
             MeshBuilder meshBuilder = new MeshBuilder(gameObject);
 
-            // Create surface material submesh so it always has index 0
-            meshBuilder.GetSubmesh(ResourceManager.Singleton.SurfaceMaterial);
-
             // Draw each node on the mesh builder
+            pm_DrawNodes.Begin();
             foreach (GroundNode node in Chunk.GetAllGroundNodes())
             {
                 // Generate mesh
@@ -32,9 +35,12 @@ namespace BlockmapFramework
                 node.DrawSides(meshBuilder);
                 node.SetMesh(this);
             }
+            pm_DrawNodes.End();
 
+            pm_ApplyMesh.Begin();
             meshBuilder.ApplyMesh();
             OnMeshApplied();
+            pm_ApplyMesh.End();
         }
 
         protected override BlockmapNode GetNode(Vector2Int localCoordinates)

@@ -4,6 +4,7 @@ using UnityEngine;
 using BlockmapFramework;
 using TMPro;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace WorldEditor
 {
@@ -30,7 +31,7 @@ namespace WorldEditor
             SetAltitude(5);
 
             SelectionPanel.Clear();
-            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs)
+            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Properties.Paintable))
             {
                 SelectionPanel.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectSurface(def));
             }

@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public static void BuildFullWaterMesh(MeshBuilder meshBuilder, WaterBody water)
         {
-            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.BuildPreviewMaterial);
+            int waterSubmesh = meshBuilder.GetSubmesh(MaterialManager.BuildPreviewMaterial);
 
             foreach (GroundNode node in water.CoveredNodes)
             {
@@ -24,7 +24,7 @@ namespace BlockmapFramework
 
         public static void BuildWaterMeshForSingleNode(MeshBuilder meshBuilder, WaterNode node)
         {
-            int waterSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Water);
+            int waterSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Water"));
 
             float waterWorldHeight = node.WaterBody.WaterSurfaceWorldHeight;
 

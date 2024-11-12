@@ -89,7 +89,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (!(World.HoveredEntity is Door)) return;
 
-            World.RemoveDoor((World.HoveredEntity as Door));
+            World.RemoveEntity(World.HoveredEntity);
         }
 
         public override void HandleMiddleClick()

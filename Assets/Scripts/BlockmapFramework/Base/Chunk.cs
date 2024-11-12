@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -18,9 +19,19 @@ namespace BlockmapFramework
         public WaterNode[,] WaterNodes { get; private set; }
 
         /// <summary>
+        /// All fences present in this chunk, grouped by local cell coordinates
+        /// </summary>
+        public Dictionary<Vector3Int, List<Fence>> Fences = new Dictionary<Vector3Int, List<Fence>>();
+
+        /// <summary>
         /// All walls present in this chunk, grouped by local cell coordinates
         /// </summary>
         public Dictionary<Vector3Int, List<Wall>> Walls = new Dictionary<Vector3Int, List<Wall>>();
+
+        /// <summary>
+        /// All procedural entities present in this chunk, grouped by local cell coordinates
+        /// </summary>
+        public Dictionary<Vector3Int, List<ProceduralEntity>> ProceduralEntities = new Dictionary<Vector3Int, List<ProceduralEntity>>();
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
@@ -38,6 +49,14 @@ namespace BlockmapFramework
         public Dictionary<int, FenceMesh> FenceMeshes;
         public Dictionary<int, WallMesh> WallMeshes;
         public Dictionary<int, ProceduralEntityMesh> ProceduralEntityMeshes;
+
+        // Performance Profilers
+        static readonly ProfilerMarker pm_GenerateGroundNodeMesh = new ProfilerMarker("GenerateGroundNodeMesh");
+        static readonly ProfilerMarker pm_GenerateWaterMesh = new ProfilerMarker("GenerateWaterMesh");
+        static readonly ProfilerMarker pm_GenerateAirNodeMeshes = new ProfilerMarker("GenerateAirNodeMeshes");
+        static readonly ProfilerMarker pm_GenerateFenceMeshes = new ProfilerMarker("GenerateFenceMeshes");
+        static readonly ProfilerMarker pm_GenerateWallMeshes = new ProfilerMarker("GenerateWallMeshes");
+        static readonly ProfilerMarker pm_GenerateProcEntityMeshes = new ProfilerMarker("GenerateProcEntityMeshes");
 
         /// <summary>
         /// Initializes the block to get all relevant data. Only call this once.
@@ -127,15 +146,35 @@ namespace BlockmapFramework
             Zones.Remove(z);
         }
 
-        public void AddWall(Wall w)
+        public void RegisterFence(Fence f)
+        {
+            Vector3Int localCoords = f.LocalCellCoordinates;
+            if (Fences.ContainsKey(localCoords)) Fences[localCoords].Add(f);
+            else Fences.Add(localCoords, new List<Fence>() { f });
+        }
+        public void DeregisterFence(Fence f)
+        {
+            Fences[f.LocalCellCoordinates].Remove(f);
+        }
+        public void RegisterWall(Wall w)
         {
             Vector3Int localCoords = w.LocalCellCoordinates;
             if (Walls.ContainsKey(localCoords)) Walls[localCoords].Add(w);
             else Walls.Add(localCoords, new List<Wall>() { w });
         }
-        public void RemoveWall(Wall w)
+        public void DeregisterWall(Wall w)
         {
             Walls[w.LocalCellCoordinates].Remove(w);
+        }
+        public void RegisterProcEntity(ProceduralEntity e)
+        {
+            Vector3Int localCoords = e.LocalCellCoordinates;
+            if (ProceduralEntities.ContainsKey(localCoords)) ProceduralEntities[localCoords].Add(e);
+            else ProceduralEntities.Add(localCoords, new List<ProceduralEntity>() { e });
+        }
+        public void DeregisterProcEntity(ProceduralEntity e)
+        {
+            ProceduralEntities[e.LocalCellCoordinates].Remove(e);
         }
 
         #endregion
@@ -148,23 +187,35 @@ namespace BlockmapFramework
         public void DrawMeshes()
         {
             // Ground mesh
+            pm_GenerateGroundNodeMesh.Begin();
             GroundMesh.Draw();
+            pm_GenerateGroundNodeMesh.End();
 
             // Water mesh
+            pm_GenerateWaterMesh.Begin();
             WaterMesh.Draw();
+            pm_GenerateWaterMesh.End();
 
             // Meshes per height level
+            pm_GenerateAirNodeMeshes.Begin();
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) Destroy(mesh.gameObject);
             AirNodeMeshes = AirNodeMesh.GenerateAirNodeMeshes(this);
+            pm_GenerateAirNodeMeshes.End();
 
+            pm_GenerateFenceMeshes.Begin();
             foreach (FenceMesh mesh in FenceMeshes.Values) Destroy(mesh.gameObject);
             FenceMeshes = FenceMeshGenerator.GenerateMeshes(this);
+            pm_GenerateFenceMeshes.End();
 
+            pm_GenerateWallMeshes.Begin();
             foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
+            pm_GenerateWallMeshes.End();
 
+            pm_GenerateProcEntityMeshes.Begin();
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) Destroy(mesh.gameObject);
             ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
+            pm_GenerateProcEntityMeshes.End();
 
             // Chunk position
             transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
@@ -377,6 +428,14 @@ namespace BlockmapFramework
         public List<Wall> GetWalls(int altitude)
         {
             return Walls.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
+        }
+        public List<Fence> GetFences(int altitude)
+        {
+            return Fences.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
+        }
+        public List<ProceduralEntity> GetProceduralEntities(int altitude)
+        {
+            return ProceduralEntities.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
         }
 
         public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)

@@ -33,6 +33,7 @@ namespace BlockmapFramework
 			foreach(T def in defCollection)
             {
 				if (!def.Validate()) throw new System.Exception("Loading Defs aborted due to an invalid Def");
+				if (defsByName.ContainsKey(def.DefName)) throw new System.Exception($"Def with name {def.DefName} has already been loaded for type {def.GetType()}.");
 
 				defsList.Add(def);
 				defsByName.Add(def.DefName, def);

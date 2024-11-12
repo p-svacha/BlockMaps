@@ -113,6 +113,7 @@ namespace BlockmapFramework
             Triangles[triangle.SubmeshIndex].Remove(triangle);
         }
 
+        public int GetSubmesh(string materialSubpath) => GetSubmesh(MaterialManager.LoadMaterial(materialSubpath));
         public int GetSubmesh(Material material)
         {
             if (Submeshes.ContainsKey(material)) return Submeshes[material];
@@ -607,6 +608,16 @@ namespace BlockmapFramework
                 _ => throw new System.Exception("not handled")
             };
         }
+
+        /// <summary>
+        /// Creates a plane parrallel to the surface shape of a node covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.
+        /// </summary>
+        public void DrawShapePlane(BlockmapNode node, string materialSubpath, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false) => DrawShapePlane(node, MaterialManager.LoadMaterial(materialSubpath), height, xStart, xEnd, yStart, yEnd, mirror);
+
+        /// <summary>
+        /// Creates a plane parrallel to the surface shape of a node covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.
+        /// </summary>
+        public void DrawShapePlane(BlockmapNode node, Material material, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false) => DrawShapePlane(node, GetSubmesh(material), height, xStart, xEnd, yStart, yEnd, mirror);
 
         /// <summary>
         /// Creates a plane parrallel to the surface shape of a node covering the area given by the relative values (0-1) xStart, xEnd, yStart, yEnd.

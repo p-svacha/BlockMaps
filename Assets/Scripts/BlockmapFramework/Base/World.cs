@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -130,6 +131,9 @@ namespace BlockmapFramework
         // Cache
         private static readonly List<BlockmapNode> EmptyNodeList = new List<BlockmapNode>();
 
+        // Performance Profilers
+        static readonly ProfilerMarker pm_RedrawChunk = new ProfilerMarker("RedrawChunk");
+
 
         #region Init
 
@@ -207,7 +211,7 @@ namespace BlockmapFramework
             foreach (FenceData fenceData in data.Fences)
             {
                 Fence fence = Fence.Load(this, fenceData);
-                Fences.Add(fence.Id, fence);
+                RegisterFence(fence);
             }
 
             // Init walls
@@ -251,7 +255,7 @@ namespace BlockmapFramework
                     Entity e = Entity.Load(this, entityData);
 
                     // Register entity
-                    e.RegisterInWorld();
+                    RegisterEntity(e);
                 }
 
                 // Draw node meshes because we need to shoot rays to generate navmesh
@@ -815,8 +819,8 @@ namespace BlockmapFramework
             while (node.Fences.Count > 0) DeregisterFence(node.Fences.Values.ToList()[0]);
 
             // Destroy ladders from and to node
-            while (node.SourceLadders.Count > 0) RemoveLadder(node.SourceLadders.Values.ToList()[0]);
-            while (node.TargetLadders.Count > 0) RemoveLadder(node.TargetLadders.Values.ToList()[0]);
+            while (node.SourceLadders.Count > 0) RemoveEntity(node.SourceLadders.Values.ToList()[0]);
+            while (node.TargetLadders.Count > 0) RemoveEntity(node.TargetLadders.Values.ToList()[0]);
 
             // Node
             Nodes.Remove(node.Id); // Global registry
@@ -826,12 +830,6 @@ namespace BlockmapFramework
             if (node is GroundNode groundNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
-        }
-        private void DeregisterFence(Fence fence)
-        {
-            BlockmapNode node = fence.Node;
-            node.Fences.Remove(fence.Side);
-            Fences.Remove(fence.Id);
         }
 
         public Actor AddActor(string name, Color color)
@@ -865,17 +863,6 @@ namespace BlockmapFramework
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
-            /*
-            foreach (BlockmapNode node in nodes) node.RecalcuatePassability();
-            foreach (BlockmapNode node in nodes) node.ResetTransitions();
-            foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
-            foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
-            foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
-
-            if (isInitialization) IsInitialized = true;
-
-            UpdateNavmeshDisplayDelayed();
-            */
             StartCoroutine(DoUpdateNavmesh(nodes, isInitialization));
         }
         /// <summary>
@@ -1076,7 +1063,7 @@ namespace BlockmapFramework
             instance.Init(EntityIdCounter++, this, node, rotation, actor);
 
             // Register new entity
-            instance.RegisterInWorld();
+            RegisterEntity(instance);
 
             // Redraw chunk meshes if it is a procedural entity
             if (updateWorld && instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
@@ -1093,8 +1080,7 @@ namespace BlockmapFramework
         public void RemoveEntity(Entity entityToRemove, bool updateWorld = true)
         {
             // De-register entity
-            Entities.Remove(entityToRemove.Id);
-            entityToRemove.Owner.Entities.Remove(entityToRemove);
+            DeregisterEntity(entityToRemove);
 
             // Remove entity vision reference on all nodes, entities and walls
             HashSet<Chunk> chunksAffectedByVision = new HashSet<Chunk>();
@@ -1146,6 +1132,15 @@ namespace BlockmapFramework
         {
             Entities.Add(entity.Id, entity);
             entity.Owner.Entities.Add(entity);
+
+            entity.OnRegister();
+        }
+        public void DeregisterEntity(Entity entity)
+        {
+            Entities.Remove(entity.Id);
+            entity.Owner.Entities.Remove(entity);
+
+            entity.OnDeregister();
         }
 
         public WaterBody CanAddWater(GroundNode node, int maxDepth) // returns null when cannot
@@ -1274,8 +1269,10 @@ namespace BlockmapFramework
             // Adjust height if it's higher than fence type allows
             if (height > type.MaxHeight) height = type.MaxHeight;
 
+            // Create and register new fence
             Fence fence = new Fence(type);
             fence.Init(FenceIdCounter++, node, side, height);
+            RegisterFence(fence);
 
             if (updateWorld)
             {
@@ -1283,18 +1280,32 @@ namespace BlockmapFramework
                 RedrawNodesAround(node.WorldCoordinates);
                 UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
             }
-
-            // Register fence
+        }
+        public void RegisterFence(Fence fence)
+        {
+            // In world
             Fences.Add(fence.Id, fence);
+
+            // In chunk
+            fence.Node.Chunk.RegisterFence(fence);
         }
         public void RemoveFence(Fence fence)
         {
+            // Deregister
             BlockmapNode node = fence.Node;
             DeregisterFence(fence);
 
+            // Update world
             UpdateNavmeshAround(node.WorldCoordinates);
             RedrawNodesAround(node.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+        }
+        public void DeregisterFence(Fence fence)
+        {
+            BlockmapNode node = fence.Node;
+            Fences.Remove(fence.Id);
+            node.Fences.Remove(fence.Side);
+            node.Chunk.DeregisterFence(fence);
         }
 
         public bool CanBuildWall(Vector3Int globalCellCoordinates, Direction side)
@@ -1361,27 +1372,31 @@ namespace BlockmapFramework
         }
         private void RegisterWall(Wall wall) // add to database and add all references in different objects
         {
-            // Database
+            // In world
             Walls.Add(wall.Id, wall);
 
             // Database index by world coordinate 2D
             if (WallsByWorldCoordinates2D.ContainsKey(wall.WorldCoordinates)) WallsByWorldCoordinates2D[wall.WorldCoordinates].Add(wall);
             else WallsByWorldCoordinates2D.Add(wall.WorldCoordinates, new List<Wall>() { wall });
 
-            // Reference in chunk
-            wall.Chunk.AddWall(wall); // Reference in chunk
+            // In chunk
+            wall.Chunk.RegisterWall(wall);
         }
         public void RemoveWall(Wall wall)
         {
             // Deregister
-            Walls.Remove(wall.Id);
-            wall.Chunk.RemoveWall(wall);
-            WallsByWorldCoordinates2D[wall.WorldCoordinates].Remove(wall);
+            DeregisterWall(wall);
 
             // Update systems around cell
             UpdateNavmeshAround(wall.WorldCoordinates);
             RedrawNodesAround(wall.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(wall.CellCenterWorldPosition);
+        }
+        public void DeregisterWall(Wall wall)
+        {
+            Walls.Remove(wall.Id);
+            wall.Chunk.DeregisterWall(wall);
+            WallsByWorldCoordinates2D[wall.WorldCoordinates].Remove(wall);
         }
 
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
@@ -1436,12 +1451,6 @@ namespace BlockmapFramework
             Ladder instance = Ladder.GetInstance(from, to, side);
             SpawnEntity(instance, from, side, Gaia, isInstance: true);
         }
-        public void RemoveLadder(Ladder ladder)
-        {
-            ladder.Bottom.SourceLadders.Remove(ladder.Side);
-            ladder.Top.TargetLadders.Remove(HelperFunctions.GetOppositeDirection(ladder.Side));
-            RemoveEntity(ladder);
-        }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)
         {
@@ -1451,11 +1460,6 @@ namespace BlockmapFramework
         {
             Door instance = Door.GetInstance(node, side, height, isMirrored);
             SpawnEntity(instance, node, side, Gaia, isInstance: true);
-        }
-        public void RemoveDoor(Door door)
-        {
-            door.OriginNode.Doors.Remove(door.Rotation);
-            RemoveEntity(door);
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
@@ -1553,12 +1557,14 @@ namespace BlockmapFramework
         /// </summary>
         public void RedrawChunk(Chunk chunk)
         {
+            pm_RedrawChunk.Begin();
             chunk.DrawMeshes();
             chunk.SetVisibility(ActiveVisionActor);
             chunk.ShowGrid(IsShowingGrid);
             chunk.ShowTextures(IsShowingTextures);
             chunk.ShowTileBlending(IsShowingTileBlending);
             chunk.DrawZoneBorders();
+            pm_RedrawChunk.End();
         }
 
         /// <summary>

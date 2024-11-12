@@ -20,7 +20,7 @@ namespace BlockmapFramework
         {
             // Define submeshes
             int outsideSubmesh = meshBuilder.GetSubmesh(material);
-            int glassSubmesh = meshBuilder.GetSubmesh(ResourceManager.Singleton.Mat_Glass);
+            int glassSubmesh = meshBuilder.GetSubmesh("Glass");
 
             // Define some positional values
             float xWindowStart = WINDOW_MARGIN;

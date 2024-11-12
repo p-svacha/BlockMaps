@@ -8,7 +8,7 @@ namespace BlockmapFramework
     {
         public override WallMaterialId Id => WallMaterialId.Tiles;
         public override string Name => "Tiles";
-        public override Material Material => ResourceManager.Singleton.Mat_TilesBlue;
+        public override Material Material => MaterialManager.LoadMaterial("TilesBlue");
 
         // Climbing attributes
         public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Unclimbable;

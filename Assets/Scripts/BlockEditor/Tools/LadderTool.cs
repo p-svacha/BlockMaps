@@ -78,7 +78,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (!(World.HoveredEntity is Ladder)) return;
 
-            World.RemoveLadder((World.HoveredEntity as Ladder));
+            World.RemoveEntity(World.HoveredEntity);
         }
 
 
