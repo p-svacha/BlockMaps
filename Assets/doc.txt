@@ -1,23 +1,15 @@
 Migration to Def-System
 
-Improve performance of redrawing chunks:
-- save meshbuilders in nodemeshes with vertices and triangles per node, only update affected nodes
-- don't always repass shader values in NodeMesh - only when surface changes
-- also don't always recalculate array indices for shader, only when new surface appears
-- cache Color32[] of textures to faster create Texture2DArray
-
 
 Defs:
-- ThingDef
--- WallShapeDef
--- WallMaterialDef
 -- FenceDef
 -- StaticObjectDef
 -- CharacterDef
 
 
-
-
+Framework: Make fences procedural entities
+Framework: Jumping
+Framework: Stairs
 
 
 

@@ -448,15 +448,16 @@ public static class HelperFunctions
         for (int i = skipElements; i < numChildren; i++) GameObject.DestroyImmediate(obj.transform.GetChild(0).gameObject);
     }
 
-    public static Sprite Texture2DToSprite(Texture2D tex)
+    public static Sprite TextureToSprite(Texture tex) => TextureToSprite((Texture2D)tex);
+    public static Sprite TextureToSprite(Texture2D tex)
     {
         return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
     }
 
-    public static Sprite GetTextureAsSprite(string resourcePath)
+    public static Sprite TextureToSprite(string resourcePath)
     {
         Texture2D texture = Resources.Load<Texture2D>(resourcePath);
-        return Texture2DToSprite(texture);
+        return TextureToSprite(texture);
     }
 
     /// <summary>

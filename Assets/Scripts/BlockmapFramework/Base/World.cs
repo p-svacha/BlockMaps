@@ -1359,7 +1359,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material, bool mirrored)
+        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored)
         {
             // Create and register new wall
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
@@ -1938,6 +1938,7 @@ namespace BlockmapFramework
         {
             Vector2Int globalCoordinates2D = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
             Chunk chunk = GetChunk(globalCoordinates2D);
+            if (chunk == null) return new List<Wall>();
             Vector2Int localWorldCoordinates = chunk.GetLocalCoordinates(globalCoordinates2D);
             Vector3Int localCellCoordinates = new Vector3Int(localWorldCoordinates.x, globalCellCoordinates.y, localWorldCoordinates.y);
             return chunk.GetWalls(localCellCoordinates);

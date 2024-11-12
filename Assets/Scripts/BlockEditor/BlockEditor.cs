@@ -60,9 +60,7 @@ namespace WorldEditor
         void Start()
         {
             // Load defs
-            DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
-            DefDatabase<SurfacePropertyDef>.AddDefs(GlobalSurfacePropertyDefs.Defs);
-
+            DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

@@ -38,12 +38,12 @@ namespace BlockmapFramework
         /// <summary>
         /// The shape of this wall (i.e. solid, window).
         /// </summary>
-        public WallShape Shape { get; private set; }
+        public WallShapeDef Shape { get; private set; }
 
         /// <summary>
         /// The material this wall is made of.
         /// </summary>
-        public WallMaterial Material { get; private set; }
+        public WallMaterialDef Material { get; private set; }
 
         /// <summary>
         /// Flag if this is the mirrored version of the wall piece.
@@ -57,15 +57,15 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbSkillRequirement => Material.ClimbSkillRequirement;
         public float ClimbCostUp => Material.ClimbCostUp;
         public float ClimbCostDown => Material.ClimbCostDown;
-        public float ClimbSpeedUp => Material.ClimbSpeedUp;
-        public float ClimbSpeedDown => Material.ClimbSpeedDown;
+        public float ClimbSpeedUp => 1f / Material.ClimbCostUp;
+        public float ClimbSpeedDown => 1f / Material.ClimbCostDown;
         public float ClimbTransformOffset => Shape.Width;
         public Direction ClimbSide => Side;
         public bool IsClimbable => Shape.IsClimbable && ClimbSkillRequirement != ClimbingCategory.Unclimbable;
 
         #region Init
 
-        public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShape shape, WallMaterial material, bool mirrored)
+        public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored)
         {
             World = world;
             Id = id;
@@ -76,7 +76,7 @@ namespace BlockmapFramework
             Material = material;
             IsMirrored = mirrored;
 
-            if (!Shape.ValidSides.Contains(side)) throw new System.Exception("Invalid wall side error. " + shape.Name + " is not allowed to build in the direction " + side.ToString());
+            if ((Shape.IsCornerShape && HelperFunctions.IsSide(side)) || !Shape.IsCornerShape && HelperFunctions.IsCorner(side)) throw new System.Exception("Invalid wall side error. " + shape.Label + " is not allowed to build in the direction " + side.ToString());
         }
 
         #endregion
@@ -143,7 +143,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Name + " " + Material.Name;
+            return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Label + " " + Material.Label;
         }
 
         public bool BlocksVision => Shape.BlocksVision;
@@ -160,8 +160,8 @@ namespace BlockmapFramework
                 data.Id, 
                 new Vector3Int(data.CellX, data.CellY, data.CellZ), 
                 (Direction)data.Side, 
-                WallManager.Instance.GetWallShape((WallShapeId)data.ShapeId), 
-                WallManager.Instance.GetWallMaterial((WallMaterialId)data.MaterialId), 
+                DefDatabase<WallShapeDef>.GetNamed(data.WallShapeDef),
+                DefDatabase<WallMaterialDef>.GetNamed(data.WallMaterialDef),
                 data.IsMirrored
                 );
         }
@@ -175,8 +175,8 @@ namespace BlockmapFramework
                 CellY = GlobalCellCoordinates.y,
                 CellZ = GlobalCellCoordinates.z,
                 Side = (int)Side,
-                ShapeId = (int)Shape.Id,
-                MaterialId = (int)Material.Id,
+                WallShapeDef = Shape.DefName,
+                WallMaterialDef = Material.DefName,
                 IsMirrored = IsMirrored
             };
         }

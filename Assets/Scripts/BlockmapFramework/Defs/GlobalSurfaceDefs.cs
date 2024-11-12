@@ -19,7 +19,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Grass",
                 Label = "grass",
                 Description = "Short grass",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceTextureBasePath + "Soil"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
                 SurfacePropertyDefName = "Grass",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -33,7 +33,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Sand",
                 Label = "sand",
                 Description = "Soft sand",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceTextureBasePath + "HotSpringSand"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
                 SurfacePropertyDefName = "Sand",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -47,7 +47,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Concrete",
                 Label = "concrete",
                 Description = "Concrete with a border",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceTextureBasePath + "Concrete"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
                 SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -61,7 +61,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Street",
                 Label = "street",
                 Description = "Street asphalt",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceTextureBasePath + "CrackedConcrete"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
                 SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -75,7 +75,7 @@ namespace BlockmapFramework.Defs
                 DefName = "RoofingTiles",
                 Label = "roofing tiles",
                 Description = "Shingles of a room",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
                 SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -90,7 +90,7 @@ namespace BlockmapFramework.Defs
                 DefName = "WoodParquet",
                 Label = "wooden parquet",
                 Description = "A nice and shiny wooden parquet",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
                 SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -104,7 +104,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Tiles",
                 Label = "tiles",
                 Description = "White big bathroom tiles",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
                 SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -118,7 +118,7 @@ namespace BlockmapFramework.Defs
                 DefName = "DirtPath",
                 Label = "dith path",
                 Description = "A foresty dirt path",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
                 SurfacePropertyDefName = "Dirt",
                 RenderProperties = new SurfaceRenderProperties()
                 {
@@ -132,7 +132,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Water",
                 Label = "water",
                 Description = "Water",
-                UiPreviewSprite = HelperFunctions.GetTextureAsSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
                 SurfacePropertyDefName = "Water",
                 RenderProperties = new SurfaceRenderProperties()
                 {

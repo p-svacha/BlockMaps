@@ -15,8 +15,8 @@ namespace WorldEditor
 
         private int BuildAltitude => int.Parse(AltitudeInput.text);
 
-        private WallShape SelectedWallShape;
-        private WallMaterial SelectedWallMaterial;
+        private WallShapeDef SelectedWallShape;
+        private WallMaterialDef SelectedWallMaterial;
 
         private GameObject BuildPreview;
 
@@ -34,23 +34,23 @@ namespace WorldEditor
             SetAltitude(5);
 
             ShapeSelection.Clear();
-            foreach (WallShape shape in WallManager.Instance.GetAllWallShapes())
-                ShapeSelection.AddElement(shape.PreviewSprite, Color.white, shape.Name, () => SelectWallShape(shape.Id));
+            foreach (WallShapeDef def in DefDatabase<WallShapeDef>.AllDefs)
+                ShapeSelection.AddElement(def.UiPreviewSprite, Color.white, def.Label, () => SelectWallShape(def));
             ShapeSelection.SelectFirstElement();
 
             MaterialSelection.Clear();
-            foreach (WallMaterial material in WallManager.Instance.GetAllWallMaterials())
-                MaterialSelection.AddElement(HelperFunctions.Texture2DToSprite((Texture2D)material.Material.mainTexture), Color.white, material.Name, () => SelectWallMaterial(material.Id));
+            foreach (WallMaterialDef def in DefDatabase<WallMaterialDef>.AllDefs)
+                MaterialSelection.AddElement(def.UiPreviewSprite, Color.white, def.Label, () => SelectWallMaterial(def));
             MaterialSelection.SelectFirstElement();
         }
 
-        private void SelectWallShape(WallShapeId wallShape)
+        private void SelectWallShape(WallShapeDef def)
         {
-            SelectedWallShape = WallManager.Instance.GetWallShape(wallShape);
+            SelectedWallShape = def;
         }
-        private void SelectWallMaterial(WallMaterialId wallMaterial)
+        private void SelectWallMaterial(WallMaterialDef def)
         {
-            SelectedWallMaterial = WallManager.Instance.GetWallMaterial(wallMaterial);
+            SelectedWallMaterial = def;
         }
 
         public override void UpdateTool()
@@ -112,7 +112,7 @@ namespace WorldEditor
 
             // Get wall side
             Direction side;
-            if (SelectedWallShape.Id == WallShapeId.Corner) side = World.GetNodeHoverModeCorners(BuildAltitude);
+            if (SelectedWallShape.IsCornerShape) side = World.GetNodeHoverModeCorners(BuildAltitude);
             else side = World.GetNodeHoverModeSides(BuildAltitude);
 
             // Get if we can build on current hovered position
@@ -135,7 +135,7 @@ namespace WorldEditor
 
             // Get wall side
             Direction side;
-            if (SelectedWallShape.Id == WallShapeId.Corner) side = World.GetNodeHoverModeCorners(BuildAltitude);
+            if (SelectedWallShape.IsCornerShape) side = World.GetNodeHoverModeCorners(BuildAltitude);
             else side = World.GetNodeHoverModeSides(BuildAltitude);
 
             // Make checks if we can build

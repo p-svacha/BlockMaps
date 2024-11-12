@@ -48,7 +48,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The sprite that is used in UI elements for representing this Def.
         /// </summary>
-        public Sprite UiPreviewSprite { get; init; } = null;
+        public virtual Sprite UiPreviewSprite { get; init; } = null;
 
 
         /// <summary>

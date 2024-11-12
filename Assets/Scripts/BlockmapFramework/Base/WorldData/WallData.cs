@@ -13,8 +13,8 @@ namespace BlockmapFramework
         public int CellY { get; set; }
         public int CellZ { get; set; }
         public int Side { get; set; }
-        public int ShapeId { get; set; }
-        public int MaterialId { get; set; }
+        public string WallShapeDef { get; set; }
+        public string WallMaterialDef { get; set; }
         public bool IsMirrored { get; set; }
     }
 }

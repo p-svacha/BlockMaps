@@ -47,15 +47,19 @@ namespace BlockmapFramework
                     BlockmapNode node = GetNode(new Vector2Int(x, y));
 
                     // Base surface
-                    int surfaceArrayIndex = MaterialManager.GetBlendableSurfaceShaderIndexFor(node.SurfaceDef);
+                    int surfaceArrayIndex = node == null ? -1 : MaterialManager.GetBlendableSurfaceShaderIndexFor(node.SurfaceDef);
                     surfaceArray.Add(surfaceArrayIndex);
 
                     // Blend for each direction
                     foreach (Direction dir in HelperFunctions.GetAllDirections8())
                     {
                         pm_GetBlendNode.Begin();
-                        SurfaceDef blendSurface = GetBlendSurface(node, dir);
-                        surfaceBlendArrays[dir].Add(MaterialManager.GetBlendableSurfaceShaderIndexFor(blendSurface));
+                        if (node == null) surfaceBlendArrays[dir].Add(-1);
+                        else
+                        {
+                            SurfaceDef blendSurface = GetBlendSurface(node, dir);
+                            surfaceBlendArrays[dir].Add(MaterialManager.GetBlendableSurfaceShaderIndexFor(blendSurface));
+                        }
                         pm_GetBlendNode.End();
                     }
                 }
@@ -82,6 +86,7 @@ namespace BlockmapFramework
         /// </summary>
         private SurfaceDef GetBlendSurface(BlockmapNode sourceNode, Direction dir)
         {
+            if (sourceNode == null) return sourceNode.SurfaceDef;
             if (sourceNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.FlatBlendableSurface) return sourceNode.SurfaceDef; // No blend on this node
 
             List<BlockmapNode> adjacentNodes = World.GetAdjacentNodes(sourceNode.WorldCoordinates, dir);

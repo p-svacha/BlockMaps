@@ -1,3 +1,4 @@
+using BlockmapFramework.Defs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +16,17 @@ namespace BlockmapFramework
     {
         // Stores all DefDatabase types registered
         private static readonly List<Type> registeredDefDatabases = new List<Type>();
+
+        /// <summary>
+        /// Adds all Defs that are defined in the BlockmapFramework and are useful for all projects to their respective DefDatabases.
+        /// </summary>
+        public static void AddAllGlobalDefs()
+        {
+            DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
+            DefDatabase<SurfacePropertyDef>.AddDefs(GlobalSurfacePropertyDefs.Defs);
+            DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
+            DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
+        }
 
         // Called when a DefDatabase<T> type is accessed for the first time
         public static void RegisterDefDatabase(Type defDatabaseType)
