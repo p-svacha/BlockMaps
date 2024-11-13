@@ -6,9 +6,9 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// Fences are a kind of barrier that are stored on the cell grid seperate of nodes.
     /// <br/>An instance represents one wall on a single world cell covering a specific direction (side, corner or full cell).
     /// <br/>Each wall consist of a combination of a WallShape and a WallMaterial, which together define how the wall looks and acts.
+    /// <br/>Walls exist on their own seperate 3d grid and are not bound to nodes.
     /// </summary>
     public class Wall : IClimbable, IVisionTarget
     {

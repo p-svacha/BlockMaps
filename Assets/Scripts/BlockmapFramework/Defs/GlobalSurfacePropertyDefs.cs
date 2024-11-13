@@ -49,6 +49,7 @@ namespace BlockmapFramework.Defs
                 Label = "water",
                 Description = "Surface property used by water",
                 MovementSpeedModifier = 0.2f,
+                Paintable = false,
             },
         };
     }

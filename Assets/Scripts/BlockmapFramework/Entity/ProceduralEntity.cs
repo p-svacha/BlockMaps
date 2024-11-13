@@ -15,6 +15,11 @@ namespace BlockmapFramework
         public override Sprite GetThumbnail() => Resources.Load<Sprite>("Editor/Thumbnails/ProceduralEntities/" + Name);
 
         /// <summary>
+        /// The local coordinates of the node within the chunk that this entity is on.
+        /// </summary>
+        public Vector2Int LocalCoordinates => OriginNode.LocalCoordinates;
+
+        /// <summary>
         /// The coordinates in 3d space of the base of this procedural entity.
         /// </summary>
         public Vector3Int LocalCellCoordinates => new Vector3Int(OriginNode.LocalCoordinates.x, MinAltitude, OriginNode.LocalCoordinates.y);

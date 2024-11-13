@@ -7,14 +7,31 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// All objects that exist in the world in a specific location (node) are entities.
+    /// <br/>Together with nodes they make up everything in the world.
+    /// </summary>
     public abstract class Entity : MonoBehaviour, IVisionTarget
     {
+        /// <summary>
+        /// The world in which this entity exists.
+        /// </summary>
         public World World { get; protected set; }
+
+        /// <summary>
+        /// The blueprint that defines the looks, attributes and behaviour rules of this entity.
+        /// </summary>
+        public EntityDef Def { get; private set; }
 
         /// <summary>
         /// Unique identifier of this specific entity.
         /// </summary>
         public int Id { get; private set; }
+
+        /// <summary>
+        /// The Unity GameObject that this thing is rendered in.
+        /// </summary>
+        public GameObject GameObject;
 
         /// <summary>
         /// Identifier used for instancing the correct type of entity.
@@ -385,6 +402,10 @@ namespace BlockmapFramework
         #endregion
 
         #region Getters
+
+        public virtual string Label => Def.Label;
+        public virtual string LabelCap => Label.CapitalizeFirst();
+        public virtual string Description => Def.Description;
 
         public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT); // Rounded down to y-position of its center
         public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT) + (Height - 1)); // Rounded up to y-position of its center + height

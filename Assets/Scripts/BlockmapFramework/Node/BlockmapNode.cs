@@ -7,29 +7,36 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// Represents a specific location on the worldmap, which is used for pathfinding.
+    /// Represents a specific location on the worldmap, where entities can be located on.
     /// <br/> A BlockmapNode is on one specific world coordinate but can have different heights for its corners.
-    /// <br/> All entities are tied to a BlockmapNode.
+    /// <br/> BlockmapNodes can have a rendered representation in the world but don't have to.
+    /// <br/> Used for pathfinding.
     /// </summary>
     public abstract class BlockmapNode : IVisionTarget
     {
+        /// <summary>
+        /// Unique identifier of the node.
+        /// </summary>
         public int Id { get; private set; }
 
+        /// <summary>
+        /// The surface that defines many gameplay behaviours of this node.
+        /// </summary>
         public SurfaceDef SurfaceDef;
 
         /// <summary>
-        /// Height of the 4 corners of the node: {SW, SE, NE, NW}
+        /// Altitude of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
         public Dictionary<Direction, int> Altitude { get; protected set; }
 
         /// <summary>
-        /// Lowest y coordinate of this node.
+        /// Lowest altitude of this node.
         /// </summary>
         public int BaseAltitude { get; private set; }
         public float BaseWorldHeight => BaseAltitude * World.TILE_HEIGHT;
 
         /// <summary>
-        /// Highest point of this node.
+        /// Highest altitude of this node.
         /// </summary>
         public int MaxAltitude { get; private set; }
 

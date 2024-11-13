@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// The definition of a surface. Each node has a particular surface.
+    /// The definition of a surface. Each node has a particular surface that defines how the node is rendered and how it behaves.
     /// Each different walkable texure/material is represented by one instance of a SurfaceDef that contains all information and logic of how it is drawn in the world.
     /// </summary>
     public class SurfaceDef : Def

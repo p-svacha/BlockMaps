@@ -19,9 +19,9 @@ namespace BlockmapFramework
         public WaterNode[,] WaterNodes { get; private set; }
 
         /// <summary>
-        /// All fences present in this chunk, grouped by local cell coordinates
+        /// All fences present in this chunk, grouped by local coordinates
         /// </summary>
-        public Dictionary<Vector3Int, List<Fence>> Fences = new Dictionary<Vector3Int, List<Fence>>();
+        public Dictionary<Vector2Int, List<Fence>> Fences = new Dictionary<Vector2Int, List<Fence>>();
 
         /// <summary>
         /// All walls present in this chunk, grouped by local cell coordinates
@@ -29,9 +29,9 @@ namespace BlockmapFramework
         public Dictionary<Vector3Int, List<Wall>> Walls = new Dictionary<Vector3Int, List<Wall>>();
 
         /// <summary>
-        /// All procedural entities present in this chunk, grouped by local cell coordinates
+        /// All procedural entities present in this chunk, grouped by local coordinates
         /// </summary>
-        public Dictionary<Vector3Int, List<ProceduralEntity>> ProceduralEntities = new Dictionary<Vector3Int, List<ProceduralEntity>>();
+        public Dictionary<Vector2Int, List<ProceduralEntity>> ProceduralEntities = new Dictionary<Vector2Int, List<ProceduralEntity>>();
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
@@ -148,13 +148,12 @@ namespace BlockmapFramework
 
         public void RegisterFence(Fence f)
         {
-            Vector3Int localCoords = f.LocalCellCoordinates;
-            if (Fences.ContainsKey(localCoords)) Fences[localCoords].Add(f);
-            else Fences.Add(localCoords, new List<Fence>() { f });
+            if (Fences.ContainsKey(f.LocalCoordinates)) Fences[f.LocalCoordinates].Add(f);
+            else Fences.Add(f.LocalCoordinates, new List<Fence>() { f });
         }
         public void DeregisterFence(Fence f)
         {
-            Fences[f.LocalCellCoordinates].Remove(f);
+            Fences[f.LocalCoordinates].Remove(f);
         }
         public void RegisterWall(Wall w)
         {
@@ -168,13 +167,12 @@ namespace BlockmapFramework
         }
         public void RegisterProcEntity(ProceduralEntity e)
         {
-            Vector3Int localCoords = e.LocalCellCoordinates;
-            if (ProceduralEntities.ContainsKey(localCoords)) ProceduralEntities[localCoords].Add(e);
-            else ProceduralEntities.Add(localCoords, new List<ProceduralEntity>() { e });
+            if (ProceduralEntities.ContainsKey(e.LocalCoordinates)) ProceduralEntities[e.LocalCoordinates].Add(e);
+            else ProceduralEntities.Add(e.LocalCoordinates, new List<ProceduralEntity>() { e });
         }
         public void DeregisterProcEntity(ProceduralEntity e)
         {
-            ProceduralEntities[e.LocalCellCoordinates].Remove(e);
+            ProceduralEntities[e.LocalCoordinates].Remove(e);
         }
 
         #endregion
@@ -229,11 +227,11 @@ namespace BlockmapFramework
         {
             // Node visibility
             GroundMesh.SetVisibility(actor);
+            WaterMesh.SetVisibility(actor);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(actor);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(actor);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(actor);
             foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
-            WaterMesh.SetVisibility(actor);
 
             // Entity visibility
             foreach(Entity e in Entities) e.UpdateVisibility(actor);
@@ -431,11 +429,11 @@ namespace BlockmapFramework
         }
         public List<Fence> GetFences(int altitude)
         {
-            return Fences.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
+            return Fences.Select(x => x.Value).SelectMany(x => x).Where(x => x.Node.BaseAltitude == altitude).ToList();
         }
         public List<ProceduralEntity> GetProceduralEntities(int altitude)
         {
-            return ProceduralEntities.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
+            return ProceduralEntities.Select(x => x.Value).SelectMany(x => x).Where(x => x.OriginNode.BaseAltitude == altitude).ToList();
         }
 
         public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)

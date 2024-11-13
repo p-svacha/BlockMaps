@@ -57,9 +57,9 @@ namespace BlockmapFramework
         public bool IsSloped => !Node.IsFlat(Side);
 
         /// <summary>
-        /// The coordinates in 3d space of the base of the fence.
+        /// The local coordinates of the node within the chunk that this fence is on.
         /// </summary>
-        public Vector3Int LocalCellCoordinates => new Vector3Int(Node.LocalCoordinates.x, MinAltitude, Node.LocalCoordinates.y);
+        public Vector2Int LocalCoordinates => Node.LocalCoordinates;
 
         public bool IsClimbable => ClimbSkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
 
