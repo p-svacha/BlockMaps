@@ -49,7 +49,7 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(MovingEntity entity)
         {
-            float value = (0.5f * (1f / From.SurfaceDef.Properties.MovementSpeedModifier)) + (0.5f * (1f / To.SurfaceDef.Properties.MovementSpeedModifier)); // Cost of moving between start and end tile
+            float value = (0.5f * (1f / From.SurfaceDef.MovementSpeedModifier)) + (0.5f * (1f / To.SurfaceDef.MovementSpeedModifier)); // Cost of moving between start and end tile
 
             // Add cost of climbing
             foreach (IClimbable climb in Climb) value += IsAscend ? climb.ClimbCostUp : climb.ClimbCostDown;
@@ -90,7 +90,7 @@ namespace BlockmapFramework
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.MovementSpeed * Time.deltaTime * From.SurfaceDef.Properties.MovementSpeedModifier);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.MovementSpeed * Time.deltaTime * From.SurfaceDef.MovementSpeedModifier);
 
                         // Calculate y coordinate
                         float y;
@@ -161,7 +161,7 @@ namespace BlockmapFramework
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.MovementSpeed * Time.deltaTime * To.SurfaceDef.Properties.MovementSpeedModifier);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.MovementSpeed * Time.deltaTime * To.SurfaceDef.MovementSpeedModifier);
 
                         // Calculate altitude
                         float y;

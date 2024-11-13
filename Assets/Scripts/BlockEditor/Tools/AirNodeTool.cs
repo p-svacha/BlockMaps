@@ -27,11 +27,12 @@ namespace WorldEditor
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
+            HelperGridToggle.onValueChanged.AddListener((b) => ShowHelperGrid(b));
 
             SetAltitude(5);
 
             SelectionPanel.Clear();
-            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Properties.Paintable))
+            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Paintable))
             {
                 SelectionPanel.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectSurface(def));
             }

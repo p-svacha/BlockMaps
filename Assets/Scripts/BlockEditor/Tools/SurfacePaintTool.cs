@@ -22,7 +22,7 @@ namespace WorldEditor
             base.Init(editor);
 
             SelectionPanel.Clear();
-            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Properties.Paintable))
+            foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Paintable))
             {
                 SelectionPanel.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectSurface(def));
             }

@@ -4,11 +4,15 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// AirNodes make up elevated paths and floors above ground level. They are deformable and removable.
+    /// </summary>
     public class AirNode : DynamicNode
     {
         public override NodeType Type => NodeType.Air;
-        public override bool IsSolid => true;
+        public override bool SupportsEntities => true;
 
         public AirNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
     }
 }
+    

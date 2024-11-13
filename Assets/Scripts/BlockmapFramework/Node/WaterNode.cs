@@ -4,15 +4,18 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// Water nodes make up navigable water bodies.
+    /// </summary>
     public class WaterNode : BlockmapNode
     {
         public override NodeType Type => NodeType.Water;
-        public override bool IsSolid => false;
+        public override bool SupportsEntities => false;
 
         public WaterBody WaterBody { get; private set; }
         public GroundNode GroundNode { get; private set; }
 
-        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
+        public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int altitude) : base(world, chunk, id, localCoordinates, HelperFunctions.GetFlatHeights(altitude), SurfaceDefOf.Water) { }
 
         public void Init(WaterBody waterBody, GroundNode surfaceNode)
         {

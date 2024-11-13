@@ -19,13 +19,13 @@ namespace BlockmapFramework.Defs
                 DefName = "Grass",
                 Label = "grass",
                 Description = "Short grass",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
-                SurfacePropertyDefName = "Grass",
+                MovementSpeedModifier = 0.5f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.FlatBlendableSurface,
                     SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/Grass"),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
             },
 
             new SurfaceDef()
@@ -33,13 +33,13 @@ namespace BlockmapFramework.Defs
                 DefName = "Sand",
                 Label = "sand",
                 Description = "Soft sand",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
-                SurfacePropertyDefName = "Sand",
+                MovementSpeedModifier = 0.35f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.FlatBlendableSurface,
                     SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/Sand"),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
             },
 
             new SurfaceDef()
@@ -47,13 +47,12 @@ namespace BlockmapFramework.Defs
                 DefName = "Concrete",
                 Label = "concrete",
                 Description = "Concrete with a border",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
-                SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "ConcreteDark", "Concrete2", 0.1f, 0.1f, 0.1f),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },
 
             new SurfaceDef()
@@ -61,28 +60,26 @@ namespace BlockmapFramework.Defs
                 DefName = "Street",
                 Label = "street",
                 Description = "Street asphalt",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
-                SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Asphalt", "Cobblestone", 0.05f, 0.05f, 0.2f),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
             },
 
             new SurfaceDef()
             {
                 DefName = "RoofingTiles",
                 Label = "roofing tiles",
-                Description = "Shingles of a room",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
-                SurfacePropertyDefName = "Concrete",
+                Description = "Shingles of a roof",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     UseLongEdges = true,
                     CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "RoofingTiles", height: 0f, 0f, 1f, 0f, 1f),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -90,13 +87,12 @@ namespace BlockmapFramework.Defs
                 DefName = "WoodParquet",
                 Label = "wooden parquet",
                 Description = "A nice and shiny wooden parquet",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
-                SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "WoodParquet", height: 0f, 0f, 1f, 0f, 1f),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -104,13 +100,12 @@ namespace BlockmapFramework.Defs
                 DefName = "Tiles",
                 Label = "tiles",
                 Description = "White big bathroom tiles",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
-                SurfacePropertyDefName = "Concrete",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "TilesWhite", height: 0f, 0f, 1f, 0f, 1f),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -118,13 +113,13 @@ namespace BlockmapFramework.Defs
                 DefName = "DirtPath",
                 Label = "dith path",
                 Description = "A foresty dirt path",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
-                SurfacePropertyDefName = "Dirt",
+                MovementSpeedModifier = 0.8f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.FlatBlendableSurface,
                     SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/DirtPath"),
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -132,13 +127,28 @@ namespace BlockmapFramework.Defs
                 DefName = "Water",
                 Label = "water",
                 Description = "Water",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
-                SurfacePropertyDefName = "Water",
+                MovementSpeedModifier = 0.2f,
+                Paintable = false,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.NoRender,
                 },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
             },
+
+            new SurfaceDef()
+            {
+                DefName = "Void",
+                Label = "void",
+                Description = "Surface used for terrain outside of the playable world.",
+                Impassable = true,
+                Paintable = false,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.NoRender,
+                },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Void"),
+            }
         };
     }
 }

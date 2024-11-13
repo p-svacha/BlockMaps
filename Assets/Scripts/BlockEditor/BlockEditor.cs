@@ -35,6 +35,7 @@ namespace WorldEditor
         public GroundSculptingTool GroundSculptingTool;
         public NodeShapingTool NodeShapingTool;
         public SurfacePaintTool SurfacePaintTool;
+        public VoidTool VoidTool;
         public AirNodeTool AirNodeTool;
         public SpawnCharacterTool SpawnCharacterTool;
         public MoveCharacterTool MoveCharacterTool;
@@ -88,6 +89,7 @@ namespace WorldEditor
                 { EditorToolId.GroundSculpting, GroundSculptingTool },
                 { EditorToolId.NodeShaping, NodeShapingTool },
                 { EditorToolId.SurfacePaint, SurfacePaintTool },
+                { EditorToolId.Void, VoidTool },
                 { EditorToolId.AirNode, AirNodeTool },
                 { EditorToolId.SpawnObject, SpawnObjectTool },
                 { EditorToolId.ProceduralEntity, ProceduralEntityTool },
@@ -184,9 +186,8 @@ namespace WorldEditor
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
             if (World.HoveredNode != null)
             {
-                text += "\n" + World.HoveredNode.ToString();
-                text += "\nShape: " + World.HoveredNode.Shape;
-                text += "\nRelHeight: " + World.HoveredNode.GetExactLocalAltitudeAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+                if(Input.GetKey(KeyCode.LeftAlt)) text += "\n" + World.HoveredNode.DebugInfoLong();
+                else text += "\n" + World.HoveredNode.DebugInfoShort();
             }
             if (World.HoveredEntity != null) text += "\nEntity: " + World.HoveredEntity.ToString();
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
@@ -196,6 +197,7 @@ namespace WorldEditor
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;
             text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
+            text += "\nHold alt for more info";
 
             text = text.TrimStart('\n');
             TileInfoText.text = text;

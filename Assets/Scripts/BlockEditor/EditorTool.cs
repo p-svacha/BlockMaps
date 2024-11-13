@@ -13,6 +13,9 @@ namespace WorldEditor
         public abstract string Name { get; }
         public abstract Sprite Icon { get; }
 
+        /// <summary>
+        /// Gets called once when the editor is stared up
+        /// </summary>
         public virtual void Init(BlockEditor editor)
         {
             Editor = editor;

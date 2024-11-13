@@ -30,6 +30,7 @@ namespace WorldEditor
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
+            HelperGridToggle.onValueChanged.AddListener((b) => ShowHelperGrid(b));
 
             SetAltitude(5);
 

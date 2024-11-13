@@ -20,6 +20,7 @@ namespace WorldEditor
         Fence,
         Ladder,
         Wall,
-        Door
+        Door,
+        Void
     }
 }

@@ -1,6 +1,5 @@
 Migration to Def-System
 
-
 Defs:
 -- FenceDef
 -- StaticObjectDef

@@ -8,12 +8,18 @@ using static BlockmapFramework.BlockmapNode;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// Represents a ground node (the lowest node on that world coordinate) 
+    /// Ground nodes make up the terrain and are the bottom most layer of nodes.
+    /// <br/>There is always exactly one GroundNode per coordinate.
     /// </summary>
     public class GroundNode : DynamicNode
     {
         public override NodeType Type => NodeType.Ground;
-        public override bool IsSolid => true;
+        public override bool SupportsEntities => true;
+
+        /// <summary>
+        /// Returns true if this ground node is void, meaning outside the playable world or an impassable abyss.
+        /// </summary>
+        public bool IsVoid => SurfaceDef == SurfaceDefOf.Void;
 
         /// <summary>
         /// The water node covering this node.
@@ -206,6 +212,19 @@ namespace BlockmapFramework
             WaterNode = waterNode;
         }
 
+
+        public void SetAsVoid()
+        {
+            SetSurface(SurfaceDefOf.Void);
+            SetHeight(World.MAP_EDGE_ALTITUDE);
+        }
+
+        public void UnsetAsVoid(int altitude)
+        {
+            SetSurface(SurfaceDefOf.Grass);
+            SetHeight(altitude);
+        }
+
         #endregion
 
         #region Getters
@@ -220,6 +239,7 @@ namespace BlockmapFramework
         protected override bool IsGenerallyPassable()
         {
             if (IsCenterUnderWater) return false;
+            if (IsVoid) return false;
             return base.IsGenerallyPassable();
         }
 

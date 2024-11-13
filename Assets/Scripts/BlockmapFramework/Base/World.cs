@@ -24,7 +24,9 @@ namespace BlockmapFramework
         /// </summary>
         public const float TILE_HEIGHT = 0.5f;
 
-        public const float MAP_EDGE_HEIGHT = (-1 * TILE_HEIGHT);
+        public const int MAP_EDGE_ALTITUDE = -1;
+
+        public const float MAP_EDGE_HEIGHT = (MAP_EDGE_ALTITUDE * TILE_HEIGHT);
 
         /// <summary>
         /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
@@ -956,6 +958,24 @@ namespace BlockmapFramework
             RedrawNodesAround(node.WorldCoordinates);
             UpdateNavmeshDisplayDelayed();
         }
+        public void SetGroundNodeAsVoid(GroundNode node, bool updateWorld = true)
+        {
+            node.SetAsVoid();
+
+            if (!updateWorld) return;
+            UpdateNavmeshAround(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+            UpdateNavmeshDisplayDelayed();
+        }
+        public void UnsetGroundNodeAsVoid(GroundNode node, int altitude, bool updateWorld = true)
+        {
+            node.UnsetAsVoid(altitude);
+
+            if (!updateWorld) return;
+            UpdateNavmeshAround(node.WorldCoordinates);
+            RedrawNodesAround(node.WorldCoordinates);
+            UpdateNavmeshDisplayDelayed();
+        }
 
         public bool CanBuildAirNode(Vector2Int worldCoordinates, int height)
         {
@@ -1207,7 +1227,7 @@ namespace BlockmapFramework
             List<WaterNode> waterNodes = new List<WaterNode>();
             foreach (GroundNode node in data.CoveredNodes)
             {
-                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, HelperFunctions.GetFlatHeights(data.ShoreHeight), SurfaceDefOf.Water);
+                WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, data.ShoreHeight);
                 waterNodes.Add(waterNode);
                 RegisterNode(waterNode);
             }
@@ -1767,7 +1787,7 @@ namespace BlockmapFramework
         }
         public bool IsValidNodeHeight(Dictionary<Direction, int> height)
         {
-            if (height.Values.Any(x => x < 0)) return false;
+            if (height.Values.Any(x => x < World.MAP_EDGE_ALTITUDE)) return false;
             if (height.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
 
             return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||

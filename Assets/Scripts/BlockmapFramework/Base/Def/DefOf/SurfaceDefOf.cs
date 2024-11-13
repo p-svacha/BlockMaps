@@ -13,5 +13,6 @@ namespace BlockmapFramework
         public static SurfaceDef Sand;
         public static SurfaceDef Grass;
         public static SurfaceDef Tiles;
+        public static SurfaceDef Void;
     }
 }

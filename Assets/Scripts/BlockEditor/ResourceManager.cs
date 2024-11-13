@@ -23,6 +23,7 @@ namespace WorldEditor
         public Sprite GroundSculptingSprite;
         public Sprite NodeShapingSprite;
         public Sprite SurfaceToolSprite;
+        public Sprite VoidToolSprite;
         public Sprite AirNodeSprite;
         public Sprite AirSlopeNodeSprite;
         public Sprite WorldGenSprite;

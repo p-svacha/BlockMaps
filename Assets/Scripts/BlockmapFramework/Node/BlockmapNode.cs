@@ -58,7 +58,11 @@ namespace BlockmapFramework
         public Vector2 WorldCenter2D => WorldCoordinates + new Vector2(0.5f, 0.5f);
         public Vector2Int LocalCoordinates { get; private set; }
         public abstract NodeType Type { get; }
-        public abstract bool IsSolid { get; } // Flag if entities can (generally) be placed on top of this node
+
+        /// <summary>
+        /// Flag if entities can be placed on top of nodes of this type.
+        /// </summary>
+        public abstract bool SupportsEntities { get; }
 
         // Connections
         /// <summary>
@@ -182,7 +186,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in nodesAbove)
             {
                 if (node == this) continue;
-                if (!node.IsSolid) continue;
+                if (!node.SupportsEntities) continue;
                 if (IsAbove(node)) continue;
 
                 foreach (Direction corner in HelperFunctions.GetCorners())
@@ -992,7 +996,29 @@ namespace BlockmapFramework
             foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
             string headspace = "FSH";
             foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
-            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " prop:" + SurfaceDef.Properties.Label + "\n" + headspace + "\n" + mph;
+            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " prop:" + SurfaceDef.Label + "\n" + headspace + "\n" + mph;
+        }
+        public string DebugInfoShort()
+        {
+            return $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}-{MaxAltitude} ({Type})";
+        }
+
+        public string DebugInfoLong()
+        {
+            string text = DebugInfoShort();
+
+            string mph = "Max Passable Height:";
+            foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
+            string headspace = "Free Head Space:";
+            foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
+
+            text += "\nMovement Speed Modifier: " + SurfaceDef.MovementSpeedModifier;
+            text += "\nShape: " + World.HoveredNode.Shape;
+            text += "\nRelHeight: " + World.HoveredNode.GetExactLocalAltitudeAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\n" + mph;
+            text += "\n" + headspace;
+
+            return text;
         }
 
         public virtual string ToStringShort() => SurfaceDef.Label + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
@@ -1060,7 +1086,7 @@ namespace BlockmapFramework
                     return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
 
                 case NodeType.Water:
-                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
+                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height[0]);
             }
             throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
         }
