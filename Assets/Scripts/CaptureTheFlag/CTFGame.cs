@@ -47,7 +47,7 @@ namespace CaptureTheFlag
 
             UI.LoadingScreenOverlay.SetActive(true);
             MapGenerator = new CTFMapGenerator_Forest();
-            MapGenerator.InitGeneration(16, 4);// Random.Range(4, 8 + 1));
+            MapGenerator.StartGeneration(4);// Random.Range(4, 8 + 1));
             State = GameState.Loading;
         }
 

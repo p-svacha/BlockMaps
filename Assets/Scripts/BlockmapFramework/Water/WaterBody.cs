@@ -40,7 +40,7 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public float WaterSurfaceWorldHeight => ((ShoreHeight - 1) * World.TILE_HEIGHT) + (World.WATER_HEIGHT * World.TILE_HEIGHT);
+        public float WaterSurfaceWorldHeight => ((ShoreHeight - 1) * World.NodeHeight) + (World.WATER_HEIGHT * World.NodeHeight);
 
         #endregion
 

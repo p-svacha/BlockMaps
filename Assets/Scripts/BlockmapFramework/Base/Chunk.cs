@@ -6,10 +6,16 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class Chunk : MonoBehaviour
+    public class Chunk
     {
+
+        /// <summary>
+        /// The Unity GameObject of this world.
+        /// </summary>
+        public GameObject ChunkObject;
+
         public Vector2Int Coordinates { get; private set; } // Acts as the unique primary key for each chunk
-        public int Size { get; private set; }
+        public int Size => World.ChunkSize;
         public World World { get; private set; }
 
         public List<BlockmapNode>[,] Nodes { get; private set; } // all nodes per local coordinate
@@ -58,15 +64,11 @@ namespace BlockmapFramework
         static readonly ProfilerMarker pm_GenerateWallMeshes = new ProfilerMarker("GenerateWallMeshes");
         static readonly ProfilerMarker pm_GenerateProcEntityMeshes = new ProfilerMarker("GenerateProcEntityMeshes");
 
-        /// <summary>
-        /// Initializes the block to get all relevant data. Only call this once.
-        /// </summary>
-        public void Init(World world, ChunkData data)
+        public Chunk(World world, Vector2Int coordinates)
         {
             // Init general
-            Size = world.ChunkSize;
             World = world;
-            Coordinates = new Vector2Int(data.ChunkCoordinateX, data.ChunkCoordinateY);
+            Coordinates = coordinates;
 
             // Init  nodes
             Nodes = new List<BlockmapNode>[Size, Size];
@@ -82,14 +84,13 @@ namespace BlockmapFramework
                     AirNodes[x, y] = new List<AirNode>();
                 }
             }
+        }
 
-            foreach (NodeData nodeData in data.Nodes)
-            {
-                BlockmapNode node = BlockmapNode.Load(world, this, nodeData);
-                World.RegisterNode(node);
-            }
+        public void InitGameObjects()
+        {
+            ChunkObject = new GameObject("Chunk " + Coordinates.x + "/" + Coordinates.y);
+            ChunkObject.transform.SetParent(World.WorldObject.transform);
 
-            // Init meshes
             GameObject groundMeshObject = new GameObject("GroundMesh");
             GroundMesh = groundMeshObject.AddComponent<GroundMesh>();
             GroundMesh.Init(this);
@@ -126,6 +127,14 @@ namespace BlockmapFramework
         public void UpdatePathfindingGraphDiagonal()
         {
             foreach (BlockmapNode node in GetAllNodes()) node.SetDiagonalAdjacentTransitions();
+        }
+
+        public void RegisterNode(BlockmapNode node)
+        {
+            Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
+            if (node is GroundNode groundNode) GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = groundNode;
+            else if (node is WaterNode waterNode) WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
+            else if (node is AirNode airNode) AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
         }
 
         public void AddEntity(Entity e)
@@ -196,27 +205,27 @@ namespace BlockmapFramework
 
             // Meshes per height level
             pm_GenerateAirNodeMeshes.Begin();
-            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) Destroy(mesh.gameObject);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) GameObject.Destroy(mesh.gameObject);
             AirNodeMeshes = AirNodeMesh.GenerateAirNodeMeshes(this);
             pm_GenerateAirNodeMeshes.End();
 
             pm_GenerateFenceMeshes.Begin();
-            foreach (FenceMesh mesh in FenceMeshes.Values) Destroy(mesh.gameObject);
+            foreach (FenceMesh mesh in FenceMeshes.Values) GameObject.Destroy(mesh.gameObject);
             FenceMeshes = FenceMeshGenerator.GenerateMeshes(this);
             pm_GenerateFenceMeshes.End();
 
             pm_GenerateWallMeshes.Begin();
-            foreach (WallMesh mesh in WallMeshes.Values) Destroy(mesh.gameObject);
+            foreach (WallMesh mesh in WallMeshes.Values) GameObject.Destroy(mesh.gameObject);
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
             pm_GenerateWallMeshes.End();
 
             pm_GenerateProcEntityMeshes.Begin();
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) Destroy(mesh.gameObject);
+            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) GameObject.Destroy(mesh.gameObject);
             ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
             pm_GenerateProcEntityMeshes.End();
 
             // Chunk position
-            transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
+            ChunkObject.transform.position = new Vector3(Coordinates.x * Size, 0f, Coordinates.y * Size);
         }
 
         /// <summary>
@@ -454,7 +463,7 @@ namespace BlockmapFramework
         #endregion
 
         #region Save / Load
-
+        /*
         public static Chunk Load(World world, ChunkData data)
         {
             GameObject chunkObject = new GameObject("Chunk " + data.ChunkCoordinateX + "/" + data.ChunkCoordinateY);
@@ -484,6 +493,7 @@ namespace BlockmapFramework
                 Nodes = nodeData
             };
         }
+        */
 
         #endregion
     }

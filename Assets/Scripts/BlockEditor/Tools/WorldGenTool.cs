@@ -20,7 +20,6 @@ namespace WorldEditor
         private WorldGenerator ActiveGenerator;
 
         [Header("Elements")]
-        public TMP_InputField ChunkSizeInput;
         public TMP_InputField NumChunksInput;
 
         public TMP_Dropdown GeneratorDropdown;
@@ -51,7 +50,7 @@ namespace WorldEditor
         {
             if (ActiveGenerator != null)
             {
-                if (ActiveGenerator.IsDone && ActiveGenerator.World.IsInitialized)
+                if (ActiveGenerator.IsDone)
                 {
                     Editor.SetWorld(ActiveGenerator.World);
                     ActiveGenerator = null;
@@ -64,7 +63,7 @@ namespace WorldEditor
         {
             LoadDropdown.ClearOptions();
 
-            string[] fullPaths = Directory.GetFiles(JsonUtilities.DATA_FILES_PATH, "*.json");
+            string[] fullPaths = Directory.GetFiles(SaveLoadManager.SaveDataPath, "*.xml");
             SavedWorlds = fullPaths.Select(x => System.IO.Path.GetFileNameWithoutExtension(x)).ToList();
             LoadDropdown.AddOptions(SavedWorlds);
 
@@ -75,20 +74,17 @@ namespace WorldEditor
         {
             if (ActiveGenerator != null) return; // Disabled while in generation process
 
-            if (ChunkSizeInput.text == "") return;
-            int chunkSize = int.Parse(ChunkSizeInput.text);
-
             if (NumChunksInput.text == "") return;
             int numChunks = int.Parse(NumChunksInput.text);
 
-            if (chunkSize * numChunks > WorldGenerator.MAX_WORLD_SIZE) return;
-            if (chunkSize * numChunks < 32) return;
+            if (World.ChunkSize * numChunks > WorldGenerator.MAX_WORLD_SIZE) return;
+            if (World.ChunkSize * numChunks < 32) return;
 
-            if (World != null) Destroy(World.gameObject);
+            if (World != null) Destroy(World.WorldObject);
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
 
             ActiveGenerator = selectedGenerator;
-            ActiveGenerator.InitGeneration(chunkSize, numChunks);
+            ActiveGenerator.StartGeneration(numChunks);
         }
 
         private void SaveButton_OnClick()
@@ -96,25 +92,24 @@ namespace WorldEditor
             if (ActiveGenerator != null) return; // Disabled while in generation process
             if (SaveNameInput.text == "") return;
 
-            WorldData data = Editor.World.Save();
-            data.Name = SaveNameInput.text;
-            JsonUtilities.SaveWorld(data);
-
-            UpdateLoadWorldDropdown(initValue: data.Name);
+            World.Name = SaveNameInput.text;
+            SaveLoadManager.Save(Editor.World, SaveNameInput.text);
+            UpdateLoadWorldDropdown(initValue: SaveNameInput.text);
         }
 
         private void LoadButton_OnClick()
         {
+            
             if (ActiveGenerator != null) return; // Disabled while in generation process
             if (SavedWorlds.Count == 0) return;
 
             string worldToLoad = SavedWorlds[LoadDropdown.value];
 
-            WorldData data = JsonUtilities.LoadWorld(worldToLoad);
-            if (data == null) return;
-            Editor.SetWorld(data);
+            World loadedWorld = SaveLoadManager.Load<World>(worldToLoad);
+            Editor.SetWorld(loadedWorld);
 
             SaveNameInput.text = worldToLoad;
+            
         }
     }
 }

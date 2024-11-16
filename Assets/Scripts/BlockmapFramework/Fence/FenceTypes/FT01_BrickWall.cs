@@ -30,7 +30,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = 1f;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT * height;
+            float dimY = World.NodeHeight * height;
             float startZ = 0f;
             float dimZ = WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);
@@ -44,7 +44,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = WIDTH;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT * height;
+            float dimY = World.NodeHeight * height;
             float startZ = 0f;
             float dimZ = WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);

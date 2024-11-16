@@ -37,7 +37,7 @@ namespace CaptureTheFlag
         {
             if (CurrentGenerationStep == GenerationSteps.Count)
             {
-                FinishGeneration();
+                FinalizeGeneration();
                 return;
             }
 

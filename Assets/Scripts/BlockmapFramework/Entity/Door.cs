@@ -175,7 +175,7 @@ namespace BlockmapFramework
         public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
             Vector3 basePosition = base.GetWorldPosition(world, originNode, rotation);
-            float worldY = World.TILE_HEIGHT * originNode.GetMinAltitude(Rotation);
+            float worldY = World.NodeHeight * originNode.GetMinAltitude(Rotation);
 
             Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, IsMirrored);
             return new Vector3(offsetPosition.x, worldY, offsetPosition.z);
@@ -215,7 +215,7 @@ namespace BlockmapFramework
             else anchorPoint = new Vector2(-anchorPointOffset, -anchorPointOffset);
 
             // Door
-            float doorHeight = height * World.TILE_HEIGHT;
+            float doorHeight = height * World.NodeHeight;
             Vector3 pos = new Vector3(anchorPoint.x, 0f, anchorPoint.y);
             Vector3 dim = new Vector3(1f, doorHeight, DOOR_WIDTH);
             meshBuilder.BuildCube(doorSubmesh, pos, dim);

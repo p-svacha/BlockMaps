@@ -50,6 +50,11 @@ namespace BlockmapFramework
         public BlockmapNode OriginNode { get; private set; }
 
         /// <summary>
+        /// The chunk that the origin of this entity is on.
+        /// </summary>
+        public Chunk Chunk => OriginNode.Chunk;
+
+        /// <summary>
         /// What direction this entity is facing. [N/E/S/W]
         /// </summary>
         public Direction Rotation { get; private set; }
@@ -161,7 +166,7 @@ namespace BlockmapFramework
 
             // Wrap the entity in a wrapper
             Wrapper = new GameObject(Name + "_wrapper");
-            Wrapper.transform.SetParent(World.transform);
+            Wrapper.transform.SetParent(World.WorldObject.transform);
             transform.SetParent(Wrapper.transform);
 
             // Create a collider for entity vision on a seperate object
@@ -195,7 +200,7 @@ namespace BlockmapFramework
             visionColliderObject.transform.localScale = transform.localScale;
             visionColliderObject.layer = World.Layer_EntityVisionCollider;
             BoxCollider collider = visionColliderObject.AddComponent<BoxCollider>();
-            collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.TILE_HEIGHT) / transform.localScale.y, Dimensions.z / transform.localScale.z);
+            collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.NodeHeight) / transform.localScale.y, Dimensions.z / transform.localScale.z);
             collider.center = new Vector3(0f, collider.size.y / 2, 0f);
             VisionCollider = collider;
         }
@@ -407,8 +412,8 @@ namespace BlockmapFramework
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
 
-        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT); // Rounded down to y-position of its center
-        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.TILE_HEIGHT) + (Height - 1)); // Rounded up to y-position of its center + height
+        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.NodeHeight); // Rounded down to y-position of its center
+        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
         public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
@@ -781,7 +786,7 @@ namespace BlockmapFramework
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
-            return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.TILE_HEIGHT) - (World.TILE_HEIGHT * 0.5f), 0f);
+            return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
         }
 
         public virtual Sprite GetThumbnail()

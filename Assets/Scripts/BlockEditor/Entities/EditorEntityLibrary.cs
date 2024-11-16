@@ -29,7 +29,7 @@ namespace WorldEditor
                 fullPath = ENTITY_PREFAB_PATH + idPrefix;
                 EditorMovingEntity prefab = Resources.Load<EditorMovingEntity>(fullPath);
                 if (prefab == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
-                EditorMovingEntity instance = GameObject.Instantiate(prefab, world.transform);
+                EditorMovingEntity instance = GameObject.Instantiate(prefab, world.WorldObject.transform);
                 float movementSpeed = float.Parse(attributes[1]);
                 float vision = float.Parse(attributes[2]);
                 int height = int.Parse(attributes[3]);
@@ -43,7 +43,7 @@ namespace WorldEditor
             // Default
             Entity entity = Resources.Load<Entity>(fullPath);
             if (entity == null) throw new System.Exception("Resource " + fullPath + " could not be loaded.");
-            return GameObject.Instantiate(entity, world.transform);
+            return GameObject.Instantiate(entity, world.WorldObject.transform);
 
             throw new System.Exception("Id " + id + " does not exist.");
         }

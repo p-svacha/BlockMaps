@@ -80,7 +80,7 @@ namespace WorldEditor
             if (altitude < 0) altitude = 0;
             if (altitude > World.MAX_ALTITUDE) altitude = World.MAX_ALTITUDE;
             AltitudeInput.text = altitude.ToString();
-            Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, BuildAltitude * World.TILE_HEIGHT, Editor.AltitudeHelperPlane.transform.position.z);
+            Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, BuildAltitude * World.NodeHeight, Editor.AltitudeHelperPlane.transform.position.z);
         }
 
         private void ShowHelperGrid(bool show)

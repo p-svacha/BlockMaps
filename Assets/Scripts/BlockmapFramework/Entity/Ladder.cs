@@ -100,7 +100,7 @@ namespace BlockmapFramework
         public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
         {
             Vector3 nodeCenter = originNode.CenterWorldPosition;
-            float worldHeight = LadderStartAltitude * World.TILE_HEIGHT;
+            float worldHeight = LadderStartAltitude * World.NodeHeight;
             return new Vector3(nodeCenter.x, worldHeight, nodeCenter.z);
         }
     }

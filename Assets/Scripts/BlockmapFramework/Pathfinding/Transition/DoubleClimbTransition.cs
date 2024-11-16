@@ -224,28 +224,28 @@ namespace BlockmapFramework
         private Vector3 GetClimbUpStartPoint(MovingEntity entity, int index)
         {
             IClimbable climb = ClimbUp[index];
-            float y = (StartHeight + index) * World.TILE_HEIGHT;
+            float y = (StartHeight + index) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb, isAscend: true);
         }
         private Vector3 GetClimbUpEndPoint(MovingEntity entity, int index)
         {
             IClimbable climb = ClimbUp[index];
-            float y = (StartHeight + (index + 1)) * World.TILE_HEIGHT;
+            float y = (StartHeight + (index + 1)) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb, isAscend: true);
         }
         private Vector3 GetClimbDownStartPoint(MovingEntity entity, int index)
         {
             IClimbable climb = ClimbDown[index];
-            float y = (EndHeight + (index + 1)) * World.TILE_HEIGHT;
+            float y = (EndHeight + (index + 1)) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb, isAscend: false);
         }
         private Vector3 GetClimbDownEndPoint(MovingEntity entity, int index)
         {
             IClimbable climb = ClimbDown[index];
-            float y = (EndHeight + index) * World.TILE_HEIGHT;
+            float y = (EndHeight + index) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb, isAscend: false);
         }

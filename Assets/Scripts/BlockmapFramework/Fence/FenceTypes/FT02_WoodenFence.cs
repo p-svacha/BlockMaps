@@ -41,7 +41,7 @@ namespace BlockmapFramework
                 float startX = (poleStep / 2f) + (i * poleStep - (POLE_WIDTH / 2f));
                 float dimX = POLE_WIDTH;
                 float startY = 0f;
-                float dimY = World.TILE_HEIGHT * height;
+                float dimY = World.NodeHeight * height;
                 float startZ = 0f;
                 float dimZ = POLE_WIDTH;
                 Vector3 polePos = new Vector3(startX, startY, startZ);
@@ -53,13 +53,13 @@ namespace BlockmapFramework
             for (int i = 0; i < height; i++)
             {
                 // Main cross brace for altitude
-                float braceYPos = (World.TILE_HEIGHT * i) + CROSS_BRACE_START_Y;
+                float braceYPos = (World.NodeHeight * i) + CROSS_BRACE_START_Y;
                 BuildCrossBrace(meshBuilder, node, side, submesh, braceYPos);
 
                 // Cross brace in between two altitudes
                 if(i > 0) 
                 {
-                    float betweenBraceYPos = (World.TILE_HEIGHT * i) - (CROSS_BRACE_HEIGHT / 2f);
+                    float betweenBraceYPos = (World.NodeHeight * i) - (CROSS_BRACE_HEIGHT / 2f);
                     BuildCrossBrace(meshBuilder, node, side, submesh, betweenBraceYPos);
                 }
             }
@@ -84,7 +84,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = POLE_WIDTH;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT * height;
+            float dimY = World.NodeHeight * height;
             float startZ = 0f;
             float dimZ = POLE_WIDTH;
             Vector3 pos = new Vector3(startX, startY, startZ);

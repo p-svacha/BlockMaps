@@ -11,7 +11,6 @@ namespace BlockmapFramework.WorldGeneration
 
         public abstract string Name { get; }
 
-        protected int ChunkSize;
         protected int NumChunksPerSide;
 
         /// <summary>
@@ -32,23 +31,28 @@ namespace BlockmapFramework.WorldGeneration
         protected GenerationPhase GenerationPhase { get; set; }
         public bool IsDone => GenerationPhase == GenerationPhase.Done;
 
-        public void InitGeneration(int chunkSize, int numChunks)
+        /// <summary>
+        /// Starts a new world generation process with this generator that is continued every time UpdateGeneration() is called until the GenerationPhase is Done.
+        /// </summary>
+        public void StartGeneration(int numChunks)
         {
-            if (chunkSize != 16) throw new System.Exception("Chunk size must be 16 due to shader limitations.");
-            if (chunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
+            Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks.");
 
-            ChunkSize = chunkSize;
+            if (World.ChunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
+
             NumChunksPerSide = numChunks;
-            WorldSize = chunkSize * numChunks;
+            WorldSize = World.ChunkSize * numChunks;
 
             GenerationPhase = GenerationPhase.InitializingGenerator;
         }
 
-        private void StartGeneration()
+        /// <summary>
+        /// First step of the world generation process.
+        /// </summary>
+        private void CreateEmptyWorld()
         {
             // Create empty world to start with
-            WorldData data = CreateEmptyWorldData();
-            World = World.SimpleLoad(data);
+            World = new World(NumChunksPerSide);
 
             GenerationPhase = GenerationPhase.Generating;
             OnGenerationStart();
@@ -64,98 +68,28 @@ namespace BlockmapFramework.WorldGeneration
             switch(GenerationPhase)
             {
                 case GenerationPhase.InitializingGenerator:
-                    StartGeneration();
+                    CreateEmptyWorld();
                     break;
 
-                case GenerationPhase.Generating:
+                case GenerationPhase.Generating: // Generator-specific steps
                     OnUpdate();
-                    break;
-
-                case GenerationPhase.InitializingWorld:
-                    if (World.IsInitialized) GenerationPhase = GenerationPhase.Done;
                     break;
             }
         }
 
         /// <summary>
         /// Gets called each frame. Should be used to go through the different generation steps while not blocking the program completely.
+        /// <br/>When done, call FinalizeGeneration().
         /// </summary>
         protected abstract void OnUpdate();
 
         /// <summary>
-        /// Last step of world generation. When called, the world generator stops it work and the world starts being initialized.
+        /// Last step of world generation. Initiates the world initialization which redraws the finished world, updates the vision of all entities and generates the full navmesh.
         /// </summary>
-        protected void FinishGeneration()
+        protected void FinalizeGeneration()
         {
-            foreach (Chunk c in World.GetAllChunks()) World.RedrawChunk(c);
-
-            foreach (Entity e in World.GetAllEntities()) e.UpdateVision();
-            World.GenerateFullNavmesh();
-
-            GenerationPhase = GenerationPhase.InitializingWorld;;
-        }
-
-        protected WorldData CreateEmptyWorldData()
-        {
-            WorldData data = new WorldData();
-            data.Name = "World";
-            data.ChunkSize = ChunkSize;
-            data.Chunks = new List<ChunkData>();
-            data.Actors = new List<ActorData>();
-            data.Entities = new List<EntityData>();
-            data.WaterBodies = new List<WaterBodyData>();
-            data.Fences = new List<FenceData>();
-
-            data.MaxEntityId = -1;
-            data.MaxZoneId = -1;
-            data.MaxWaterBodyId = -1;
-
-            // Create players
-            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Gaia", Color.white));
-            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 1", Color.blue));
-            data.Actors.Add(CreatePlayerData(data.MaxActorId++, "Player 2", Color.red));
-
-            // Create chunks
-            for (int x = 0; x < NumChunksPerSide; x++)
-                for (int y = 0; y < NumChunksPerSide; y++)
-                    data.Chunks.Add(CreateEmptyChunkData(data, new Vector2Int(x, y)));
-
-            return data;
-        }
-        private ChunkData CreateEmptyChunkData(WorldData worldData, Vector2Int coordinates)
-        {
-            ChunkData chunkData = new ChunkData();
-            chunkData.ChunkCoordinateX = coordinates.x;
-            chunkData.ChunkCoordinateY = coordinates.y;
-            chunkData.Nodes = new List<NodeData>();
-
-            for (int y = 0; y < ChunkSize; y++)
-                for (int x = 0; x < ChunkSize; x++)
-                    chunkData.Nodes.Add(CreateEmptyNodeData(worldData, coordinates, new Vector2Int(x, y)));
-
-            return chunkData;
-        }
-        private NodeData CreateEmptyNodeData(WorldData worldData, Vector2Int chunkCoordinates, Vector2Int localCoordinates)
-        {
-            NodeData data = new NodeData();
-            data.Id = worldData.MaxNodeId++;
-            data.LocalCoordinateX = localCoordinates.x;
-            data.LocalCoordinateY = localCoordinates.y;
-            data.Height = new int[] { 5, 5, 5, 5 };
-            data.Type = NodeType.Ground;
-            data.SurfaceDef = "Grass";
-
-            return data;
-        }
-        private ActorData CreatePlayerData(int id, string name, Color color)
-        {
-            ActorData data = new ActorData();
-            data.Id = id;
-            data.Name = name;
-            data.ColorR = color.r;
-            data.ColorG = color.g;
-            data.ColorB = color.b;
-            return data;
+            Debug.Log($"Finalizing world generation.");
+            GenerationPhase = GenerationPhase.Done;
         }
 
         #region Helper Functions

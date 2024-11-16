@@ -46,7 +46,7 @@ namespace WorldEditor
                     // Preview
                     BuildPreview.SetActive(true);
                     MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                    BuildPreview.transform.position = new Vector3(bottom.CenterWorldPosition.x, World.TILE_HEIGHT * bottom.GetMinAltitude(side), bottom.CenterWorldPosition.z);
+                    BuildPreview.transform.position = new Vector3(bottom.CenterWorldPosition.x, World.NodeHeight * bottom.GetMinAltitude(side), bottom.CenterWorldPosition.z);
                     BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                     LadderMeshGenerator.GenerateLadderMesh(previewMeshBuilder, height, isPreview: true);
                     previewMeshBuilder.ApplyMesh();

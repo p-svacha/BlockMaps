@@ -26,6 +26,7 @@ namespace BlockmapFramework
         /// </summary>
         public WaterNode WaterNode { get; private set; }
 
+        public GroundNode() { }
         public GroundNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
@@ -56,11 +57,11 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xEnd, eastNode == null ? World.MAP_EDGE_HEIGHT : eastNode.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xEnd, (BaseAltitude * World.NodeHeight) + (World.NodeHeight * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
             if(eastNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
@@ -95,11 +96,11 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NE]* World.TILE_HEIGHT, yStart), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NW] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yStart), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NE]* World.NodeHeight, yStart), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, southNode == null ? World.MAP_EDGE_HEIGHT : southNode.Altitude[Direction.NW] * World.NodeHeight, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.NodeHeight) + (World.NodeHeight * 0.5f), yStart), new Vector2(0.5f, 0.5f));
 
             if (southNode == null) meshBuilder.AddPlane(cliffSubmesh, v4, v3, v2, v1); // Map edge
 
@@ -134,11 +135,11 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.SE] * World.TILE_HEIGHT, yStart), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.TILE_HEIGHT, yStart), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, westNode == null ? World.MAP_EDGE_HEIGHT : westNode.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xStart, (BaseAltitude * World.NodeHeight) + (World.NodeHeight * 0.5f), yCenter), new Vector2(0.5f, 0.5f));
 
             if (westNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 
@@ -173,11 +174,11 @@ namespace BlockmapFramework
             float yStart = LocalCoordinates.y;
             float yEnd = LocalCoordinates.y + 1f;
             float yCenter = LocalCoordinates.y + 0.5f;
-            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.TILE_HEIGHT, yEnd), new Vector2(0, 0));
-            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SE] * World.TILE_HEIGHT, yEnd), new Vector2(1, 0));
-            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SW] * World.TILE_HEIGHT, yEnd), new Vector2(0, 1));
-            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.TILE_HEIGHT, yEnd), new Vector2(1, 1));
-            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.TILE_HEIGHT) + (World.TILE_HEIGHT * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
+            MeshVertex v1 = meshBuilder.AddVertex(new Vector3(xEnd, Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2(0, 0));
+            MeshVertex v2 = meshBuilder.AddVertex(new Vector3(xEnd, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SE] * World.NodeHeight, yEnd), new Vector2(1, 0));
+            MeshVertex v3 = meshBuilder.AddVertex(new Vector3(xStart, northNode == null ? World.MAP_EDGE_HEIGHT : northNode.Altitude[Direction.SW] * World.NodeHeight, yEnd), new Vector2(0, 1));
+            MeshVertex v4 = meshBuilder.AddVertex(new Vector3(xStart, Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2(1, 1));
+            MeshVertex cc = meshBuilder.AddVertex(new Vector3(xCenter, (BaseAltitude * World.NodeHeight) + (World.NodeHeight * 0.5f), yEnd), new Vector2(0.5f, 0.5f));
 
             if (northNode == null) meshBuilder.AddPlane(cliffSubmesh, v1, v2, v3, v4); // Map edge
 

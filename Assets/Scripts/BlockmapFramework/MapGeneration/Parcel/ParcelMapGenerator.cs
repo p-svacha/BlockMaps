@@ -52,7 +52,7 @@ namespace BlockmapFramework.WorldGeneration
                     break;
 
                 case ParcelGeneratorStep.Done:
-                    FinishGeneration();
+                    FinalizeGeneration();
                     break;
             }
         }

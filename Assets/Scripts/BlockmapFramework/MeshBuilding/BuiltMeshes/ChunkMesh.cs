@@ -20,7 +20,7 @@ namespace BlockmapFramework
         {
             Chunk = chunk;
             World = chunk.World;
-            transform.SetParent(chunk.transform);
+            transform.SetParent(chunk.ChunkObject.transform);
             transform.localPosition = Vector3.zero;
 
             ShowMultiOverlay = new bool[256];

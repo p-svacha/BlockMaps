@@ -28,7 +28,7 @@ namespace BlockmapFramework
         public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
         public Vector2Int WorldCoordinates { get; private set; }
         public Chunk Chunk => World.GetChunk(WorldCoordinates);
-        public Vector3 CellCenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, (GlobalCellCoordinates.y * World.TILE_HEIGHT) + (World.TILE_HEIGHT / 2), GlobalCellCoordinates.z + 0.5f);
+        public Vector3 CellCenterWorldPosition => new Vector3(GlobalCellCoordinates.x + 0.5f, (GlobalCellCoordinates.y * World.NodeHeight) + (World.NodeHeight / 2), GlobalCellCoordinates.z + 0.5f);
 
         /// <summary>
         /// The side within the cell this wall covers.

@@ -45,7 +45,7 @@ namespace WorldEditor
 
         private void UpdatePreview()
         {
-            CoordinatesPreview.transform.position = new Vector3(HoveredCoordinates.x + 0.5f, World.TILE_HEIGHT * UnvoidAltitude + World.TILE_HEIGHT * 0.1f, HoveredCoordinates.y + 0.5f);
+            CoordinatesPreview.transform.position = new Vector3(HoveredCoordinates.x + 0.5f, World.NodeHeight * UnvoidAltitude + World.NodeHeight * 0.1f, HoveredCoordinates.y + 0.5f);
             CoordinatesPreview.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
             Color previewColor;
@@ -74,7 +74,7 @@ namespace WorldEditor
             if (altitude < 0) altitude = 0;
             if (altitude > World.MAX_ALTITUDE) altitude = World.MAX_ALTITUDE;
             AltitudeInput.text = altitude.ToString();
-            Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, UnvoidAltitude * World.TILE_HEIGHT, Editor.AltitudeHelperPlane.transform.position.z);
+            Editor.AltitudeHelperPlane.transform.position = new Vector3(Editor.AltitudeHelperPlane.transform.position.x, UnvoidAltitude * World.NodeHeight, Editor.AltitudeHelperPlane.transform.position.z);
         }
 
         private void ShowHelperGrid(bool show)
@@ -103,7 +103,7 @@ namespace WorldEditor
         {
             CoordinatesPreview = GameObject.CreatePrimitive(PrimitiveType.Cube);
             GameObject.Destroy(CoordinatesPreview.GetComponent<BoxCollider>());
-            CoordinatesPreview.transform.localScale = new Vector3(1f, World.TILE_HEIGHT * 0.1f, 1f);
+            CoordinatesPreview.transform.localScale = new Vector3(1f, World.NodeHeight * 0.1f, 1f);
 
             ShowHelperGrid(HelperGridToggle.isOn);
             SetAltitude(int.Parse(AltitudeInput.text));

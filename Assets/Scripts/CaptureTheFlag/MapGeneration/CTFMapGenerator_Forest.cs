@@ -66,7 +66,7 @@ namespace CaptureTheFlag
                 n.SetHeight(nodeHeights);
             }
 
-            World.DrawNodes();
+            World.RedrawFullWorld();
         }
 
         #endregion
@@ -95,7 +95,7 @@ namespace CaptureTheFlag
             // End
             //Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
 
-            World.DrawNodes();
+            World.RedrawFullWorld();
         }
 
         #endregion

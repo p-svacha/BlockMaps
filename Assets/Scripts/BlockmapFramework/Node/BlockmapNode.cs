@@ -12,12 +12,12 @@ namespace BlockmapFramework
     /// <br/> BlockmapNodes can have a rendered representation in the world but don't have to.
     /// <br/> Used for pathfinding.
     /// </summary>
-    public abstract class BlockmapNode : IVisionTarget
+    public abstract class BlockmapNode : IVisionTarget, ISaveAndLoadable
     {
         /// <summary>
         /// Unique identifier of the node.
         /// </summary>
-        public int Id { get; private set; }
+        public int Id;
 
         /// <summary>
         /// The surface that defines many gameplay behaviours of this node.
@@ -27,13 +27,13 @@ namespace BlockmapFramework
         /// <summary>
         /// Altitude of the 4 corners of the node: {SW, SE, NE, NW}
         /// </summary>
-        public Dictionary<Direction, int> Altitude { get; protected set; }
+        public Dictionary<Direction, int> Altitude;
 
         /// <summary>
         /// Lowest altitude of this node.
         /// </summary>
         public int BaseAltitude { get; private set; }
-        public float BaseWorldHeight => BaseAltitude * World.TILE_HEIGHT;
+        public float BaseWorldHeight => BaseAltitude * World.NodeHeight;
 
         /// <summary>
         /// Highest altitude of this node.
@@ -54,9 +54,9 @@ namespace BlockmapFramework
         // Node attributes
         public World World { get; private set; }
         public Chunk Chunk { get; private set; }
-        public Vector2Int WorldCoordinates { get; private set; }
+        public Vector2Int WorldCoordinates;
         public Vector2 WorldCenter2D => WorldCoordinates + new Vector2(0.5f, 0.5f);
-        public Vector2Int LocalCoordinates { get; private set; }
+        public Vector2Int LocalCoordinates;
         public abstract NodeType Type { get; }
 
         /// <summary>
@@ -117,16 +117,30 @@ namespace BlockmapFramework
 
         #region Initialize
 
+        /// <summary>
+        /// Default constructor used for loading through reflection.
+        /// </summary>
+        protected BlockmapNode() { }
+
+        /// <summary>
+        /// Constructor used when creating new node at runtime.
+        /// </summary>
         protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef)
         {
-            World = world;
-            Chunk = chunk;
-
             Id = id;
             LocalCoordinates = new Vector2Int(localCoordinates.x, localCoordinates.y);
             WorldCoordinates = chunk.GetWorldCoordinates(LocalCoordinates);
+            
             Altitude = height;
             SurfaceDef = surfaceDef;
+
+            OnCreateOrLoad(world, chunk);
+        }
+
+        public void OnCreateOrLoad(World world, Chunk chunk)
+        {
+            World = world;
+            Chunk = chunk;
 
             RecalculateShape();
             Transitions = new Dictionary<BlockmapNode, Transition>();
@@ -908,7 +922,7 @@ namespace BlockmapFramework
         /// </summary>
         public float GetWorldHeightAt(Vector2 relativePosition)
         {
-            return BaseWorldHeight + (World.TILE_HEIGHT * GetExactLocalAltitudeAt(relativePosition));
+            return BaseWorldHeight + (World.NodeHeight * GetExactLocalAltitudeAt(relativePosition));
         }
 
         /// <summary>
@@ -1075,43 +1089,13 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static BlockmapNode Load(World world, Chunk chunk, NodeData data)
+        public void ExposeDataForSaveAndLoad()
         {
-            switch(data.Type)
-            {
-                case NodeType.Ground:
-                    return new GroundNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
-
-                case NodeType.Air:
-                    return new AirNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), LoadHeight(data.Height), DefDatabase<SurfaceDef>.GetNamed(data.SurfaceDef));
-
-                case NodeType.Water:
-                    return new WaterNode(world, chunk, data.Id, new Vector2Int(data.LocalCoordinateX, data.LocalCoordinateY), data.Height[0]);
-            }
-            throw new System.Exception("Type " + data.Type.ToString() + " not handled.");
-        }
-        private static Dictionary<Direction, int> LoadHeight(int[] height)
-        {
-            return new Dictionary<Direction, int>()
-            {
-                { Direction.SW, height[0] },
-                { Direction.SE, height[1] },
-                { Direction.NE, height[2] },
-                { Direction.NW, height[3] },
-            };
-        }
-
-        public NodeData Save()
-        {
-            return new NodeData
-            {
-                Id = Id,
-                LocalCoordinateX = LocalCoordinates.x,
-                LocalCoordinateY = LocalCoordinates.y,
-                Height = new int[] { Altitude[Direction.SW], Altitude[Direction.SE], Altitude[Direction.NE], Altitude[Direction.NW] },
-                Type = Type,
-                SurfaceDef = SurfaceDef.DefName
-            };
+            SaveLoadManager.SaveOrLoadInt(ref Id, "id");
+            SaveLoadManager.SaveOrLoadVector2Int(ref WorldCoordinates, "worldCoordinates");
+            SaveLoadManager.SaveOrLoadVector2Int(ref LocalCoordinates, "localCoordinates");
+            SaveLoadManager.SaveOrLoadAltitudeDictionary(ref Altitude);
+            SaveLoadManager.SaveOrLoadDef(ref SurfaceDef, "surface");
         }
 
         #endregion

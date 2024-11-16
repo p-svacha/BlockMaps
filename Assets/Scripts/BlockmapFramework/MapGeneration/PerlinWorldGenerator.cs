@@ -49,7 +49,7 @@ namespace BlockmapFramework.WorldGeneration
                     n.SetHeight(nodeHeights);
                 }
 
-                World.DrawNodes();
+                World.RedrawFullWorld();
                 GenerationStep++;
             }
 
@@ -60,13 +60,13 @@ namespace BlockmapFramework.WorldGeneration
                     if (n.WorldCoordinates.x * 10 * Random.value < 5f) n.SetSurface(SurfaceDefOf.Sand);
                 }
 
-                World.DrawNodes();
+                World.RedrawFullWorld();
                 GenerationStep++;
             }
 
             else if(GenerationStep == 3) // Done
             {
-                FinishGeneration();
+                FinalizeGeneration();
             }
         }
     }

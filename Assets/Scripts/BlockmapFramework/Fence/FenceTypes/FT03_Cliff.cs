@@ -26,8 +26,8 @@ namespace BlockmapFramework
             int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Cliff"), isPreview));
 
             Vector3 p1 = new Vector3(0f, 0f, 0f);
-            Vector3 p2 = new Vector3(0f, World.TILE_HEIGHT * height, 0f);
-            Vector3 p3 = new Vector3(1f, World.TILE_HEIGHT * height, 0f);
+            Vector3 p2 = new Vector3(0f, World.NodeHeight * height, 0f);
+            Vector3 p3 = new Vector3(1f, World.NodeHeight * height, 0f);
             Vector3 p4 = new Vector3(1f, 0f, 0f);
 
             meshBuilder.BuildPlane(node, side, submesh, p1, p2, p3, p4, adjustToNodeSlope: true);

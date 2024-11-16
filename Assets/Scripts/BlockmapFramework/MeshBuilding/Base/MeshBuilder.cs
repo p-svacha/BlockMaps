@@ -378,7 +378,7 @@ namespace BlockmapFramework
             vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
 
             // Apply offset based on cell position within the chunk
-            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.NodeHeight, localCellPos.z);
             for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
 
             // Build cube
@@ -398,7 +398,7 @@ namespace BlockmapFramework
             vertices = vertices.Select(x => TranslatePosition(x, side)).ToList();
 
             // Apply offset based on cell position within the chunk
-            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.NodeHeight, localCellPos.z);
             for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
 
             // Build cube
@@ -418,7 +418,7 @@ namespace BlockmapFramework
             footprint = footprint.Select(x => TranslatePosition(x, side)).ToList();
 
             // Apply offset based on cell position within the chunk
-            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.TILE_HEIGHT, localCellPos.z);
+            Vector3 nodeOffsetPos = new Vector3(localCellPos.x, localCellPos.y * World.NodeHeight, localCellPos.z);
             for (int i = 0; i < footprint.Count; i++) footprint[i] += nodeOffsetPos;
 
             // Build cube
@@ -438,7 +438,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.NodeHeight;
                     footprint[i] += new Vector3(0f, height, 0f);
                 }
             }
@@ -486,7 +486,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }
@@ -524,7 +524,7 @@ namespace BlockmapFramework
             bool adjustHeightsToSlope = (HelperFunctions.IsSide(side) && adjustToNodeSlope);
             if (adjustHeightsToSlope)
             {
-                float slope = World.TILE_HEIGHT * (node.Altitude[HelperFunctions.GetPreviousDirection8(side)] - node.Altitude[HelperFunctions.GetNextDirection8(side)]);
+                float slope = World.NodeHeight * (node.Altitude[HelperFunctions.GetPreviousDirection8(side)] - node.Altitude[HelperFunctions.GetNextDirection8(side)]);
                 float startY = 0;
                 if (slope < 0)
                 {
@@ -577,7 +577,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.TILE_HEIGHT;
+                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }

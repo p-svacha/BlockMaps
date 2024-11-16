@@ -27,6 +27,11 @@ namespace BlockmapFramework
         public BlockmapNode Node { get; private set; }
 
         /// <summary>
+        /// The chunk that the fence is on.
+        /// </summary>
+        public Chunk Chunk => Node.Chunk;
+
+        /// <summary>
         /// On what side of the OriginNode this fence is placed on.
         /// </summary>
         public Direction Side { get; private set; }

@@ -63,7 +63,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = 1f;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT;
+            float dimY = World.NodeHeight;
             float startZ = 0f;
             float dimZ = WallWidth;
             Vector3 pos = new Vector3(startX, startY, startZ);
@@ -78,7 +78,7 @@ namespace BlockmapFramework
             float startX = 0;
             float dimX = WallWidth;
             float startY = 0f;
-            float dimY = World.TILE_HEIGHT;
+            float dimY = World.NodeHeight;
             float startZ = 0f;
             float dimZ = WallWidth;
             Vector3 pos = new Vector3(startX, startY, startZ);
@@ -95,27 +95,27 @@ namespace BlockmapFramework
 
             // Front triangle
             Vector3 ft1 = new Vector3(startX, 0f, 0f);
-            Vector3 ft2 = new Vector3(endX, World.TILE_HEIGHT, 0f);
+            Vector3 ft2 = new Vector3(endX, World.NodeHeight, 0f);
             Vector3 ft3 = new Vector3(endX, 0f, 0f);
             meshBuilder.BuildTriangle(localCellPosition, side, submesh, ft1, ft2, ft3, !isMirrored);
 
             // Back triangle
             Vector3 bt1 = new Vector3(startX, 0f, WallWidth);
-            Vector3 bt2 = new Vector3(endX, World.TILE_HEIGHT, WallWidth);
+            Vector3 bt2 = new Vector3(endX, World.NodeHeight, WallWidth);
             Vector3 bt3 = new Vector3(endX, 0f, WallWidth);
             meshBuilder.BuildTriangle(localCellPosition, side, submesh, bt1, bt2, bt3, isMirrored);
 
             // Side plane
             Vector3 sp1 = new Vector3(endX, 0f, 0f);
-            Vector3 sp2 = new Vector3(endX, World.TILE_HEIGHT, 0f);
-            Vector3 sp3 = new Vector3(endX, World.TILE_HEIGHT, WallWidth);
+            Vector3 sp2 = new Vector3(endX, World.NodeHeight, 0f);
+            Vector3 sp3 = new Vector3(endX, World.NodeHeight, WallWidth);
             Vector3 sp4 = new Vector3(endX, 0f, WallWidth);
             meshBuilder.BuildPlane(localCellPosition, side, submesh, sp1, sp2, sp3, sp4, !isMirrored);
 
             // Top sloped plane
             Vector3 tsp1 = new Vector3(startX, 0f, 0f);
-            Vector3 tsp2 = new Vector3(endX, World.TILE_HEIGHT, 0f);
-            Vector3 tsp3 = new Vector3(endX, World.TILE_HEIGHT, WallWidth);
+            Vector3 tsp2 = new Vector3(endX, World.NodeHeight, 0f);
+            Vector3 tsp3 = new Vector3(endX, World.NodeHeight, WallWidth);
             Vector3 tsp4 = new Vector3(startX, 0f, WallWidth);
             meshBuilder.BuildPlane(localCellPosition, side, submesh, tsp1, tsp2, tsp3, tsp4, isMirrored);
         }
@@ -135,8 +135,8 @@ namespace BlockmapFramework
             float windowLength = 1f - 2 * WindowMargin;
 
             float yWindowStart = WindowMargin;
-            float yWindowEnd = World.TILE_HEIGHT - WindowMargin;
-            float windowHeight = World.TILE_HEIGHT - 2 * WindowMargin;
+            float yWindowEnd = World.NodeHeight - WindowMargin;
+            float windowHeight = World.NodeHeight - 2 * WindowMargin;
 
             // check for adjacent windows that we can merge into
             bool connectAbove = ShouldConnectWindowInDirection(world, globalCellPosition, side, Direction.N);

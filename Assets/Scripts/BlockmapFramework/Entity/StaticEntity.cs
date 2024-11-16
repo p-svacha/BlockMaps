@@ -46,7 +46,7 @@ namespace BlockmapFramework
                             height = HeightOverrideHeights[index];
                         }
 
-                        collider.size = new Vector3(1f / transform.localScale.x, (height * World.TILE_HEIGHT) / transform.localScale.y, 1f / transform.localScale.z);
+                        collider.size = new Vector3(1f / transform.localScale.x, (height * World.NodeHeight) / transform.localScale.y, 1f / transform.localScale.z);
                         collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
 
                         VisionCollidersPerCoordinate.Add(localCoords, collider);

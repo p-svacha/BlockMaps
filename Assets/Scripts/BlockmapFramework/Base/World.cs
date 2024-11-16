@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.Profiling;
 using UnityEngine;
@@ -10,9 +11,22 @@ namespace BlockmapFramework
     /// Object representing one world with its own node/pathfinding system. One world is a closed system.
     /// <br/> A world is made up of different chunks.
     /// </summary>
-    public class World : MonoBehaviour
+    public class World : ISaveAndLoadable
     {
-        private WorldData WorldData;
+        /// <summary>
+        /// The Unity GameObject of this world.
+        /// </summary>
+        public GameObject WorldObject;
+
+        /// <summary>
+        /// The amount of chunks on each side of this world.
+        /// </summary>
+        public int NumChunksPerSide;
+
+        /// <summary>
+        /// The amount of nodes on each side of this world.
+        /// </summary>
+        public int NumNodesPerSide => ChunkSize * NumChunksPerSide;
 
         /// <summary>
         /// Maximum y coordiante a tile can have.
@@ -22,11 +36,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Physical height (y) of a tile.
         /// </summary>
-        public const float TILE_HEIGHT = 0.5f;
+        public const float NodeHeight = 0.5f;
 
         public const int MAP_EDGE_ALTITUDE = -1;
 
-        public const float MAP_EDGE_HEIGHT = (MAP_EDGE_ALTITUDE * TILE_HEIGHT);
+        public const float MAP_EDGE_HEIGHT = (MAP_EDGE_ALTITUDE * NodeHeight);
 
         /// <summary>
         /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
@@ -38,18 +52,32 @@ namespace BlockmapFramework
         /// </summary>
         public const float WATER_HEIGHT = 0.9f;
 
-        public string Name { get; private set; }
+        public string Name;
         private int InitializeStep; // Some initialization steps need to happen frames after others, this is to keep count
         public bool IsInitialized { get; private set; }
-        public int ChunkSize { get; private set; }
+
+        /// <summary>
+        /// The amount of nodes on each side on a chunk.
+        /// </summary>
+        public const int ChunkSize = 16;
         public int MinX, MaxX, MinY, MaxY;
         public Vector2Int Dimensions { get; private set; }
         public WorldEntityLibrary EntityLibrary { get; private set; }
 
+        // Fixed Updates
+        private bool updateEntityVisionNextFixedUpdate;
+        private List<Entity> visionUpdateEntities;
+        private System.Action entityVisionUpdateCallback;
+
+        private bool updateNavmeshNextFixedUpdate;
+        private List<BlockmapNode> navmeshUpdateNodes;
+        private bool isNavmeshUpdatePartOfInitialization;
+
+        private bool updateNavmeshDisplayNextFixedUpdate;
 
         // Database
         private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
-        private Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>();
+        private Dictionary<Vector2Int, Chunk> Chunks = new Dictionary<Vector2Int, Chunk>(); // created dynamically - not part of save file
         private Dictionary<int, Actor> Actors = new Dictionary<int, Actor>();
         private Dictionary<int, Entity> Entities = new Dictionary<int, Entity>();
         private Dictionary<int, WaterBody> WaterBodies = new Dictionary<int, WaterBody>();
@@ -139,17 +167,47 @@ namespace BlockmapFramework
 
         #region Init
 
-        /// <summary>
-        /// Initializes the world by only drawing the nodes and creating the actors from the given WorldData.
-        /// <br/> Everything else in the data is discarded. Navmesh will not be generated either.
-        /// </summary>
-        public void SimpleInit(WorldData data)
+        public World()
         {
-            // Init general
-            Name = data.Name;
-            ChunkSize = data.ChunkSize;
-            WorldData = data;
+            OnCreate();
+        }
+        
+        /// <summary>
+        /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass.
+        /// </summary>
+        public World(int numChunksPerSide)
+        {
+            NumChunksPerSide = numChunksPerSide;
 
+            OnCreate();
+
+            // Create initial actors
+            AddActor("Gaia", Color.white);
+            AddActor("Player 1", Color.blue);
+            AddActor("Player 2", Color.red);
+
+            CreateChunksAndGameObjects();
+
+            // Create initial nodes
+            foreach (Chunk chunk in GetAllChunks())
+            {
+                for (int localX = 0; localX < ChunkSize; localX++)
+                {
+                    for (int localY = 0; localY < ChunkSize; localY++)
+                    {
+                        GroundNode node = new GroundNode(this, chunk, NodeIdCounter++, new Vector2Int(localX, localY), HelperFunctions.GetFlatHeights(5), SurfaceDefOf.Grass);
+                        RegisterNode(node);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets called right when loading or creating a world.
+        /// </summary>
+        private void OnCreate()
+        {
+            // Set layers
             Layer_GroundNode = LayerMask.NameToLayer("Terrain");
             Layer_EntityMesh = LayerMask.NameToLayer("EntityMesh");
             Layer_EntityVisionCollider = LayerMask.NameToLayer("EntityVisionCollider");
@@ -158,29 +216,43 @@ namespace BlockmapFramework
             Layer_Fence = LayerMask.NameToLayer("Fence");
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
             Layer_Wall = LayerMask.NameToLayer("Wall");
+        }
 
-            // Init pathfinder
+        private void CreateChunksAndGameObjects()
+        {
+            // Create chunks
+            for (int chunkX = 0; chunkX < NumChunksPerSide; chunkX++)
+            {
+                for (int chunkY = 0; chunkY < NumChunksPerSide; chunkY++)
+                {
+                    Vector2Int chunkCoordinates = new Vector2Int(chunkX, chunkY);
+                    Chunk chunk = new Chunk(this, chunkCoordinates);
+                    RegisterChunk(chunk);
+                }
+            }
+
+            // Create game objects for world and each chunk
+            WorldObject = new GameObject(string.IsNullOrEmpty(Name) ? "World" : Name);
+            foreach (Chunk chunk in GetAllChunks()) chunk.InitGameObjects();
+        }
+
+        /// <summary>
+        /// Starts world initialization which redraws the full world, updates the vision of all entities and generates the full navmesh.
+        /// </summary>
+        public void Initialize()
+        {
+            IsInitialized = false;
+            InitializeStep = 1;
+
+            // Do general initialization that can be done instantly
             Pathfinder.Init(this);
 
-            // Init database id's
-            NodeIdCounter = data.MaxNodeId + 1;
-            EntityIdCounter = data.MaxEntityId + 1;
-            WaterBodyIdCounter = data.MaxWaterBodyId + 1;
-            ActorIdCounter = data.MaxActorId + 1;
-            ZoneIdCounter = data.MaxZoneId + 1;
-            FenceIdCounter = data.MaxFenceId + 1;
-            WallIdCounter = data.MaxWallId + 1;
-
-            // Init actors
-            foreach (ActorData actorData in data.Actors) Actors.Add(actorData.Id, Actor.Load(this, actorData));
-            Gaia = Actors[0];
-
-            // Init nodes
-            foreach (ChunkData chunkData in data.Chunks)
-            {
-                Chunk chunk = Chunk.Load(this, chunkData);
-                Chunks.Add(new Vector2Int(chunkData.ChunkCoordinateX, chunkData.ChunkCoordinateY), chunk);
-            }
+            // Camera
+            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
+            BlockmapNode initialCameraFocusNode = GetGroundNode(new Vector2Int(NumNodesPerSide / 4, NumNodesPerSide / 4));
+            Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseAltitude * NodeHeight, initialCameraFocusNode.WorldCoordinates.y));
+            Camera.SetZoom(10f);
+            Camera.SetAngle(225);
 
             // Calculate world bounds
             MinX = Chunks.Values.Min(x => x.Coordinates.x) * ChunkSize;
@@ -189,56 +261,14 @@ namespace BlockmapFramework
             MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
             Dimensions = new Vector2Int(MaxX - MinX, MaxY - MinY);
 
-            // Init camera
-            Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
-            BlockmapNode initialCameraFocusNode = GetGroundNode(new Vector2Int(0, 0));
-            Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseAltitude * TILE_HEIGHT, initialCameraFocusNode.WorldCoordinates.y));
-            Camera.SetZoom(10f);
-            Camera.SetAngle(225);
-
-            IsInitialized = true;
-        }
-
-        /// <summary>
-        /// Fully initializes the given world data including all objects and generating the full navmesh.
-        /// <br/> Will take a while until finished, wait for IsInitialized = true;
-        /// </summary>
-        public void FullInit(WorldData data, WorldEntityLibrary entityLibrary)
-        {
-            SimpleInit(data);
-
-            EntityLibrary = entityLibrary;
-
-            // Init fences
-            foreach (FenceData fenceData in data.Fences)
-            {
-                Fence fence = Fence.Load(this, fenceData);
-                RegisterFence(fence);
-            }
-
-            // Init walls
-            foreach (WallData wallData in data.Walls)
-            {
-                Wall wall = Wall.Load(this, wallData);
-                RegisterWall(wall);
-            }
-
-            // Init water bodies
-            foreach (WaterBodyData waterData in data.WaterBodies)
-            {
-                WaterBody water = WaterBody.Load(this, waterData);
-                WaterBodies.Add(waterData.Id, water);
-            }
-
-            // Init zones
-            foreach (ZoneData zoneData in data.Zones)
-            {
-                Zone zone = Zone.Load(this, zoneData);
-                Zones.Add(zoneData.Id, zone);
-            }
-
-            IsInitialized = false;
-            InitializeStep = 1;
+            // Init database id's
+            NodeIdCounter = Nodes.Count == 0 ? 0 : Nodes.Max(x => x.Key) + 1;
+            EntityIdCounter = Entities.Count == 0 ? 0 : Entities.Max(x => x.Key) + 1;
+            WaterBodyIdCounter = WaterBodies.Count == 0 ? 0 : WaterBodies.Max(x => x.Key) + 1;
+            ActorIdCounter = Actors.Count == 0 ? 0 : Actors.Max(x => x.Key) + 1;
+            ZoneIdCounter = Zones.Count == 0 ? 0 : Zones.Max(x => x.Key) + 1;
+            FenceIdCounter = Fences.Count == 0 ? 0 : Fences.Max(x => x.Key) + 1;
+            WallIdCounter = Walls.Count == 0 ? 0 : Walls.Max(x => x.Key) + 1;
         }
 
         /// <summary>
@@ -248,26 +278,17 @@ namespace BlockmapFramework
         {
             if (IsInitialized) return;
 
-            // Frame 1 after initilaization: Do stuff that requires drawn node meshes.
+            // Frame 1 after initilaization: General stuff and draw all meshes
             if (InitializeStep == 1)
             {
-                // Init entities
-                foreach (EntityData entityData in WorldData.Entities)
-                {
-                    Entity e = Entity.Load(this, entityData);
-
-                    // Register entity
-                    RegisterEntity(e);
-                }
-
                 // Draw node meshes because we need to shoot rays to generate navmesh
-                DrawNodes();
+                RedrawFullWorld();
 
                 InitializeStep++;
                 return;
             }
 
-            // Frame 2 after initialization: Do stuff that requires entities to be at the correct world position
+            // Frame 2 after initialization: Do stuff that requires drawn node meshes.
             if (InitializeStep == 2)
             {
                 foreach (Entity e in Entities.Values) e.UpdateVision();
@@ -289,7 +310,7 @@ namespace BlockmapFramework
 
         #region Update
 
-        void Update()
+        public void Update()
         {
             // Check if world is done initializing
             if (!IsInitialized)
@@ -301,6 +322,16 @@ namespace BlockmapFramework
             // Regular updates
             UpdateHoveredObjects();
             foreach (Entity e in Entities.Values) e.UpdateEntity();
+        }
+
+        /// <summary>
+        /// Update in sync with physics updates
+        /// </summary>
+        public void FixedUpdate()
+        {
+            if (updateNavmeshNextFixedUpdate) DoUpdateNavmesh();
+            if (updateEntityVisionNextFixedUpdate) DoUpdateVisionOfEntities();
+            if (updateNavmeshDisplayNextFixedUpdate) DoUpdateNavmeshDisplay();
         }
 
         /// <summary>
@@ -354,15 +385,13 @@ namespace BlockmapFramework
                 NodeHoverModeSides = GetNodeHoverModeSides(hitPosition);
                 HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
 
-                // Update chunk
-                newHoveredChunk = objectHit.GetComponentInParent<Chunk>();
-
                 // Hit ground node
                 if (objectHit.gameObject.layer == Layer_GroundNode)
                 {
                     newHoveredGroundNode = GetGroundNode(HoveredWorldCoordinates);
                     newHoveredNode = newHoveredGroundNode;
                     newHoveredDynamicNode = newHoveredGroundNode;
+                    newHoveredChunk = newHoveredGroundNode.Chunk;
                 }
 
                 // Hit air node
@@ -373,7 +402,11 @@ namespace BlockmapFramework
                     newHoveredNode = newHoveredAirNode;
                     newHoveredDynamicNode = newHoveredAirNode;
 
-                    if (newHoveredAirNode != null) HoveredWorldCoordinates = newHoveredAirNode.WorldCoordinates;
+                    if (newHoveredAirNode != null)
+                    {
+                        HoveredWorldCoordinates = newHoveredAirNode.WorldCoordinates;
+                        newHoveredChunk = newHoveredAirNode.Chunk;
+                    }
                 }
 
                 // Hit water node
@@ -392,6 +425,7 @@ namespace BlockmapFramework
 
                         newHoveredGroundNode = hitWaterNode.GroundNode;
                         newHoveredDynamicNode = hitWaterNode.GroundNode;
+                        newHoveredChunk = hitWaterNode.Chunk;
                     }
                 }
 
@@ -399,14 +433,22 @@ namespace BlockmapFramework
                 else if (objectHit.gameObject.layer == Layer_Fence)
                 {
                     newHoveredFence = GetFenceFromRaycastHit(hit);
-                    if (newHoveredFence != null) HoveredWorldCoordinates = newHoveredFence.Node.WorldCoordinates;
+                    if (newHoveredFence != null)
+                    {
+                        HoveredWorldCoordinates = newHoveredFence.Node.WorldCoordinates;
+                        newHoveredChunk = newHoveredFence.Chunk;
+                    }
                 }
 
                 // Hit wall
                 else if (objectHit.gameObject.layer == Layer_Wall)
                 {
                     newHoveredWall = GetWallFromRaycastHit(hit);
-                    if (newHoveredWall != null) HoveredWorldCoordinates = newHoveredWall.WorldCoordinates;
+                    if (newHoveredWall != null)
+                    {
+                        HoveredWorldCoordinates = newHoveredWall.WorldCoordinates;
+                        newHoveredChunk = GetChunk(newHoveredWall.WorldCoordinates);
+                    }
                 }
             }
 
@@ -422,6 +464,7 @@ namespace BlockmapFramework
                 {
                     newHoveredEntity = GetProceduralEntityFromRaycastHit(hit);
                 }
+                if(newHoveredEntity != null && newHoveredChunk == null) newHoveredChunk = newHoveredEntity.Chunk;
             }
 
             // Update currently hovered objects
@@ -699,7 +742,7 @@ namespace BlockmapFramework
         /// </summary>
         private Vector3 GetAltitudeHitPoint(int altitude)
         {
-            var plane = new Plane(Vector3.up, new Vector3(0f, altitude * World.TILE_HEIGHT, 0f));
+            var plane = new Plane(Vector3.up, new Vector3(0f, altitude * World.NodeHeight, 0f));
             var ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
             if (plane.Raycast(ray, out float distance)) return ray.GetPoint(distance);
 
@@ -810,10 +853,7 @@ namespace BlockmapFramework
             Nodes.Add(node.Id, node); // Global registry
 
             // Chunk registry
-            node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);
-            if (node is GroundNode groundNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = groundNode;
-            else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = waterNode;
-            else if (node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(airNode);
+            node.Chunk.RegisterNode(node);
         }
         public void DeregisterNode(BlockmapNode node)
         {
@@ -832,6 +872,10 @@ namespace BlockmapFramework
             if (node is GroundNode groundNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
             else if (node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
+        }
+        public void RegisterChunk(Chunk chunk)
+        {
+            Chunks.Add(chunk.Coordinates, chunk);
         }
 
         public Actor AddActor(string name, Color color)
@@ -865,16 +909,16 @@ namespace BlockmapFramework
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
-            StartCoroutine(DoUpdateNavmesh(nodes, isInitialization));
+            updateNavmeshNextFixedUpdate = true;
+            navmeshUpdateNodes = nodes;
+            isNavmeshUpdatePartOfInitialization = isInitialization;
         }
         /// <summary>
         /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
         /// <br/> All navmesh calculations need to be done through this function.
         /// </summary>
-        private IEnumerator DoUpdateNavmesh(List<BlockmapNode> nodes, bool isInitialization)
+        private void DoUpdateNavmesh()
         {
-            yield return new WaitForFixedUpdate();
-
             System.Diagnostics.Stopwatch fullNavmeshTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch recalcPassabilityTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch straightTransitionsTimer = new System.Diagnostics.Stopwatch();
@@ -883,34 +927,36 @@ namespace BlockmapFramework
             fullNavmeshTimer.Start();
 
             recalcPassabilityTimer.Start();
-            foreach (BlockmapNode node in nodes) node.RecalcuatePassability();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalcuatePassability();
             recalcPassabilityTimer.Stop();
-            Debug.Log("Recalculating passability took " + recalcPassabilityTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            Debug.Log("Recalculating passability took " + recalcPassabilityTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
-            foreach (BlockmapNode node in nodes) node.ResetTransitions();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.ResetTransitions();
 
             straightTransitionsTimer.Start();
-            foreach (BlockmapNode node in nodes) node.SetStraightAdjacentTransitions();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.SetStraightAdjacentTransitions();
             straightTransitionsTimer.Stop();
-            Debug.Log("Updating straight transitions took " + straightTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            Debug.Log("Updating straight transitions took " + straightTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             diagonalTransitionsTimer.Start();
-            foreach (BlockmapNode node in nodes) node.SetDiagonalAdjacentTransitions();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.SetDiagonalAdjacentTransitions();
             diagonalTransitionsTimer.Stop();
-            Debug.Log("Updating diagonal transitions took " + diagonalTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            Debug.Log("Updating diagonal transitions took " + diagonalTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             
             climbTransitionsTimer.Start();
-            foreach (BlockmapNode node in nodes) node.SetClimbTransitions();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.SetClimbTransitions();
             climbTransitionsTimer.Stop();
-            Debug.Log("Updating climb transitions took " + climbTransitionsTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            Debug.Log("Updating climb transitions took " + climbTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
             
-            if (isInitialization) IsInitialized = true;
+            if (isNavmeshUpdatePartOfInitialization) IsInitialized = true;
 
             fullNavmeshTimer.Stop();
-            Debug.Log("Updating ALL transitions took " + fullNavmeshTimer.ElapsedMilliseconds + " ms for " + nodes.Count + " nodes.");
+            Debug.Log("Updating ALL transitions took " + fullNavmeshTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             UpdateNavmeshDisplayDelayed();
+
+            updateNavmeshNextFixedUpdate = false;
         }
         public void GenerateFullNavmesh()
         {
@@ -1077,7 +1123,7 @@ namespace BlockmapFramework
         public Entity SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Actor actor, bool isInstance = false, bool updateWorld = true)
         {
             // Create entity object
-            Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, transform);
+            Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, WorldObject.transform);
 
             // Init
             instance.Init(EntityIdCounter++, this, node, rotation, actor);
@@ -1541,7 +1587,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Generates all meshes of the world.
         /// </summary>
-        public void DrawNodes()
+        public void RedrawFullWorld()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.DrawMeshes();
 
@@ -1617,29 +1663,33 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null, Actor excludeActor = null)
         {
-            List<Entity> entitiesToUpdate = GetNearbyEntities(position, rangeEast, rangeNorth);
-            if (excludeActor != null) entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != excludeActor).ToList();
-            StartCoroutine(DoUpdateVisionOfEntities(entitiesToUpdate, callback));
+            updateEntityVisionNextFixedUpdate = true;
+
+            visionUpdateEntities = GetNearbyEntities(position, rangeEast, rangeNorth);
+            if (excludeActor != null) visionUpdateEntities = visionUpdateEntities.Where(x => x.Owner != excludeActor).ToList();
+            entityVisionUpdateCallback = callback;
         }
         /// <summary>
         /// Updates the vision of all given entities over the next few frames and calls callback when done.
         /// </summary>
         public void UpdateVisionDelayed(List<Entity> entities, System.Action callback)
         {
-            StartCoroutine(DoUpdateVisionOfEntities(entities, callback));
-        }
-        private IEnumerator DoUpdateVisionOfEntities(List<Entity> entities, System.Action callback)
-        {
-            yield return new WaitForFixedUpdate();
+            updateEntityVisionNextFixedUpdate = true;
 
+            visionUpdateEntities = entities;
+            entityVisionUpdateCallback = callback;
+        }
+        private void DoUpdateVisionOfEntities()
+        {
             //Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
-            foreach (Entity e in entities)
+            foreach (Entity e in visionUpdateEntities)
             {
                 e.UpdateVision();
-                yield return 0;
             }
 
-            if (callback != null) callback.Invoke();
+            if (entityVisionUpdateCallback != null) entityVisionUpdateCallback.Invoke();
+
+            updateEntityVisionNextFixedUpdate = false;
         }
 
         public void ToggleGridOverlay()
@@ -1676,15 +1726,16 @@ namespace BlockmapFramework
         }
         public void UpdateNavmeshDisplayDelayed()
         {
-            StartCoroutine(DoUpdateNavmeshDisplay());
+            updateNavmeshDisplayNextFixedUpdate = true;
         }
-        private IEnumerator DoUpdateNavmeshDisplay()
+        private void DoUpdateNavmeshDisplay()
         {
-            if (NavmeshVisualizer.Singleton == null) yield break;
-            yield return new WaitForFixedUpdate();
+            if (NavmeshVisualizer.Singleton == null) return;
             
             if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
+
+            updateNavmeshDisplayNextFixedUpdate = false;
         }
 
         public void ToggleTextureMode()
@@ -1811,6 +1862,7 @@ namespace BlockmapFramework
             Vector2Int chunkCoordinates = new Vector2Int(chunkCoordinateX, chunkCoordinateY);
 
             Chunks.TryGetValue(chunkCoordinates, out Chunk value);
+
             return value;
         }
         public Chunk GetChunk(int worldX, int worldY) => GetChunk(new Vector2Int(worldX, worldY));
@@ -2030,7 +2082,7 @@ namespace BlockmapFramework
 
         public float GetWorldHeight(float heightValue)
         {
-            return heightValue * TILE_HEIGHT;
+            return heightValue * NodeHeight;
         }
 
         /// <summary>
@@ -2160,49 +2212,26 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        /// <summary>
-        /// Loads all data and fully initializes a new world from the data. Generates a full navmesh.
-        /// <br/> Wait for IsInitialized = true before doing stuff.
-        /// </summary>
-        public static World Load(WorldData data, WorldEntityLibrary entityLibrary)
+        public void ExposeDataForSaveAndLoad()
         {
-            GameObject worldObject = new GameObject(data.Name);
-            World world = worldObject.AddComponent<World>();
-            world.FullInit(data, entityLibrary);
-            return world;
-        }
-        /// <summary>
-        /// Only loads and draws nodes and actors. Does not generate navmesh.
-        /// </summary>
-        public static World SimpleLoad(WorldData data)
-        {
-            GameObject worldObject = new GameObject(data.Name);
-            World world = worldObject.AddComponent<World>();
-            world.SimpleInit(data);
-            return world;
-        }
+            SaveLoadManager.SaveOrLoadString(ref Name, "name");
+            SaveLoadManager.SaveOrLoadInt(ref NumChunksPerSide, "numChunksPerSide");
 
-        public WorldData Save()
-        {
-            return new WorldData
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Actors, "actors");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Nodes, "nodes");
+
+            if (SaveLoadManager.IsLoading)
             {
-                Name = Name,
-                ChunkSize = ChunkSize,
-                MaxNodeId = NodeIdCounter,
-                MaxEntityId = EntityIdCounter,
-                MaxWaterBodyId = WaterBodyIdCounter,
-                MaxActorId = ActorIdCounter,
-                MaxZoneId = ZoneIdCounter,
-                MaxFenceId = FenceIdCounter,
-                MaxWallId = WallIdCounter,
-                Chunks = Chunks.Values.Select(x => x.Save()).ToList(),
-                Actors = Actors.Values.Select(x => x.Save()).ToList(),
-                Entities = Entities.Values.Select(x => x.Save()).ToList(),
-                WaterBodies = WaterBodies.Values.Select(x => x.Save()).ToList(),
-                Fences = Fences.Values.Select(x => x.Save()).ToList(),
-                Zones = Zones.Values.Select(x => x.Save()).ToList(),
-                Walls = Walls.Values.Select(x => x.Save()).ToList(),
-            };
+                CreateChunksAndGameObjects();
+
+                foreach(Actor actor in Actors.Values) actor.OnCreateOrLoad(this);
+
+                foreach (BlockmapNode node in Nodes.Values)
+                {
+                    node.OnCreateOrLoad(this, GetChunk(node.WorldCoordinates));
+                    node.Chunk.RegisterNode(node);
+                }
+            }
         }
 
         #endregion

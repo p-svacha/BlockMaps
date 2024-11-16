@@ -1,12 +1,17 @@
 Migration to Def-System
 
+Rework save/load system
+
+new manager is implemented
+
+world, chunk, entity should no longer be monobehaviour
+
+
 Defs:
+-- EntityDef (basically the RW-ThingDef equivalent)
 -- FenceDef
--- StaticObjectDef
--- CharacterDef
 
 
-Framework: Make fences procedural entities
 Framework: Jumping
 Framework: Stairs
 

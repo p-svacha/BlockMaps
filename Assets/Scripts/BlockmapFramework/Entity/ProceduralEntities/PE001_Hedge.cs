@@ -19,7 +19,7 @@ namespace BlockmapFramework {
             int submesh = meshBuilder.GetSubmesh(mat);
 
             float hedgeWidth = 1f - 2 * EDGE_OFFSET;
-            float hedgeHeight = height * World.TILE_HEIGHT - 0.05f;
+            float hedgeHeight = height * World.NodeHeight - 0.05f;
 
             Dictionary<Direction, bool> hasConnection = new Dictionary<Direction, bool>();
             foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, GetTypeId(height)));

@@ -7,42 +7,38 @@ namespace BlockmapFramework
     /// <summary>
     /// An actor inside a BlockMap world.
     /// </summary>
-    public class Actor
+    public class Actor : ISaveAndLoadable
     {
-        public int Id { get; private set; }
-        public string Name { get; private set; }
+        public int Id;
+        public string Name;
         public World World { get; private set; }
-        public Color Color { get; private set; }
+        public Color Color;
 
         public List<Entity> Entities { get; private set; }
 
+        public Actor() { }
         public Actor(World world, int id, string name, Color color)
         {
-            World = world;
+            OnCreateOrLoad(world);
+
             Id = id;
             Name = name;
             Color = color;
+        }
 
+        public void OnCreateOrLoad(World world)
+        {
+            World = world;
             Entities = new List<Entity>();
         }
 
         #region Save / Load
 
-        public static Actor Load(World world, ActorData data)
+        public void ExposeDataForSaveAndLoad()
         {
-            return new Actor(world, data.Id, data.Name, new Color(data.ColorR, data.ColorG, data.ColorB));
-        }
-
-        public ActorData Save()
-        {
-            return new ActorData
-            {
-                Id = Id,
-                Name = Name,
-                ColorR = Color.r,
-                ColorG = Color.g,
-                ColorB = Color.b
-            };
+            SaveLoadManager.SaveOrLoadInt(ref Id, "id");
+            SaveLoadManager.SaveOrLoadString(ref Name, "name");
+            SaveLoadManager.SaveOrLoadColor(ref Color, "color");
         }
 
         #endregion

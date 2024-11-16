@@ -1,13 +1,13 @@
 {
   "Name": "deftest",
   "ChunkSize": 16,
-  "MaxNodeId": 1030,
-  "MaxEntityId": 0,
-  "MaxWaterBodyId": 0,
-  "MaxActorId": 4,
-  "MaxZoneId": 0,
-  "MaxFenceId": 1,
-  "MaxWallId": 1,
+  "MaxNodeId": 1033,
+  "MaxEntityId": 3,
+  "MaxWaterBodyId": 3,
+  "MaxActorId": 7,
+  "MaxZoneId": 3,
+  "MaxFenceId": 4,
+  "MaxWallId": 4,
   "Chunks": [
     {
       "ChunkCoordinateX": 0,

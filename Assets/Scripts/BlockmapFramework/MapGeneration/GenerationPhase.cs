@@ -8,7 +8,6 @@ namespace BlockmapFramework.WorldGeneration
     {
         InitializingGenerator,
         Generating,
-        InitializingWorld,
         Done
     }
 }

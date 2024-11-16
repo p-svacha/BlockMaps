@@ -100,7 +100,7 @@ namespace BlockmapFramework
                             if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
                             if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
                         }
-                        else y = World.TILE_HEIGHT * From.GetMinAltitude(Direction);
+                        else y = World.NodeHeight * From.GetMinAltitude(Direction);
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
@@ -170,7 +170,7 @@ namespace BlockmapFramework
                             y = World.GetWorldHeightAt(newPosition2d, To);
                             if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
                         }
-                        else y = World.TILE_HEIGHT * To.GetMinAltitude(HelperFunctions.GetOppositeDirection(Direction));
+                        else y = World.NodeHeight * To.GetMinAltitude(HelperFunctions.GetOppositeDirection(Direction));
 
                         // Set new position
                         Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);
@@ -193,16 +193,16 @@ namespace BlockmapFramework
         private Vector3 GetStartClimbPoint(MovingEntity entity, IClimbable climb, int index)
         {
             float y;
-            if (IsAscend) y = (StartHeight + index) * World.TILE_HEIGHT;
-            else y = (StartHeight - index) * World.TILE_HEIGHT;
+            if (IsAscend) y = (StartHeight + index) * World.NodeHeight;
+            else y = (StartHeight - index) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb);
         }
         private Vector3 GetEndClimbPoint(MovingEntity entity, IClimbable climb, int index)
         {
             float y;
-            if (IsAscend) y = (StartHeight + (index + 1)) * World.TILE_HEIGHT;
-            else y = (StartHeight - (index + 1)) * World.TILE_HEIGHT;
+            if (IsAscend) y = (StartHeight + (index + 1)) * World.NodeHeight;
+            else y = (StartHeight - (index + 1)) * World.NodeHeight;
 
             return new Vector3(From.WorldCoordinates.x + 0.5f, y, From.WorldCoordinates.y + 0.5f) + GetOffset(entity, climb);
         }

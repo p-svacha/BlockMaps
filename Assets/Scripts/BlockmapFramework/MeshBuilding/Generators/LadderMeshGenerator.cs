@@ -33,17 +33,17 @@ namespace BlockmapFramework
 
             // Left pole
             Vector3 lpl_pos = new Vector3(-LADDER_STEP_LENGTH / 2f - LADDER_POLE_SIZE, 0f, -0.5f);
-            Vector3 lpl_dim = new Vector3(LADDER_POLE_SIZE, height * World.TILE_HEIGHT, LADDER_POLE_SIZE);
+            Vector3 lpl_dim = new Vector3(LADDER_POLE_SIZE, height * World.NodeHeight, LADDER_POLE_SIZE);
             meshBuilder.BuildCube(ladderSubmesh, lpl_pos, lpl_dim);
 
             // Right pole
             Vector3 lpr_pos = new Vector3(LADDER_STEP_LENGTH / 2f, 0f, -0.5f);
-            Vector3 lpr_dim = new Vector3(LADDER_POLE_SIZE, height * World.TILE_HEIGHT, LADDER_POLE_SIZE);
+            Vector3 lpr_dim = new Vector3(LADDER_POLE_SIZE, height * World.NodeHeight, LADDER_POLE_SIZE);
             meshBuilder.BuildCube(ladderSubmesh, lpr_pos, lpr_dim);
 
             // Steps
             float currentY = STEP_INTERVAL;
-            while (currentY < height * World.TILE_HEIGHT)
+            while (currentY < height * World.NodeHeight)
             {
                 Vector3 step_pos = new Vector3(-LADDER_STEP_LENGTH / 2f, currentY, -0.5f + STEP_WIDTH / 2f);
                 Vector3 step_dim = new Vector3(LADDER_STEP_LENGTH, STEP_HEIGHT, STEP_WIDTH);

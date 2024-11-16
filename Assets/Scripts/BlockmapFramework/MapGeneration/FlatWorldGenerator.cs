@@ -11,7 +11,7 @@ namespace BlockmapFramework.WorldGeneration
         protected override void OnGenerationStart() { }
         protected override void OnUpdate()
         {
-            FinishGeneration();
+            FinalizeGeneration();
         }
     }
 }

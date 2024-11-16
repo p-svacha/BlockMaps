@@ -11,7 +11,7 @@ using BlockmapFramework.Defs;
 
 namespace WorldEditor
 {
-    public class BlockEditor : MonoBehaviour
+    public class BlockEditor : BlockmapGame
     {
         [Header("Prefabs")]
         public UI_EditorToolButton EditorToolButtonPrefab;
@@ -46,9 +46,6 @@ namespace WorldEditor
         public LadderTool LadderTool;
         public WallTool WallTool;
         public DoorTool DoorTool;
-
-        [Header("World")]
-        public World World;
 
         // Editor
         private bool isInitialized = false;
@@ -114,7 +111,7 @@ namespace WorldEditor
 
             SelectTool(EditorToolId.WorldGen);
 
-            // Generate world
+            // Start world generation process
             WorldGenTool.GenerateButton_OnClick();
 
             // Init display options
@@ -124,18 +121,9 @@ namespace WorldEditor
             isInitialized = true;
         }
 
-        public void SetWorld(WorldData data)
+        public override void SetWorld(World world)
         {
-            // Set new data
-            SetWorld(World.Load(data, EntityLibrary));
-        }
-        public void SetWorld(World world)
-        {
-            // Clear old data
-            if (World != null) Destroy(World.gameObject);
-
-            // Assign new data
-            World = world;
+            base.SetWorld(world);
 
             // Init hooks
             World.OnHoveredGroundNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -150,9 +138,10 @@ namespace WorldEditor
 
         #region Controls
 
-        void Update()
+        protected override void Update()
         {
             if (!isInitialized) return;
+            base.Update();
 
             UpdateTileInfoText();
 
