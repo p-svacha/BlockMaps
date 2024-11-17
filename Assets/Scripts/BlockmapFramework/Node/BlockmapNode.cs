@@ -150,6 +150,8 @@ namespace BlockmapFramework
             foreach (Direction dir in HelperFunctions.GetAllDirections9()) FreeHeadSpace.Add(dir, 0);
             MaxPassableHeight = new Dictionary<Direction, int>();
             foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight.Add(dir, 0);
+
+            RecalculateCenterWorldPosition();
         }
 
         /// <summary>

@@ -241,6 +241,8 @@ namespace BlockmapFramework
         /// </summary>
         public void Initialize()
         {
+            Debug.Log("WORLD INITIALIZATION STEP 0");
+
             IsInitialized = false;
             InitializeStep = 1;
 
@@ -281,6 +283,7 @@ namespace BlockmapFramework
             // Frame 1 after initilaization: General stuff and draw all meshes
             if (InitializeStep == 1)
             {
+                Debug.Log("WORLD INITIALIZATION STEP 1");
                 // Draw node meshes because we need to shoot rays to generate navmesh
                 RedrawFullWorld();
 
@@ -291,6 +294,7 @@ namespace BlockmapFramework
             // Frame 2 after initialization: Do stuff that requires drawn node meshes.
             if (InitializeStep == 2)
             {
+                Debug.Log("WORLD INITIALIZATION STEP 2");
                 foreach (Entity e in Entities.Values) e.UpdateVision();
 
                 InitializeStep++;
@@ -300,6 +304,7 @@ namespace BlockmapFramework
             // When all post-initialization steps are done, regenerate navmesh and we're good to go
             if (InitializeStep == 3)
             {
+                Debug.Log("WORLD INITIALIZATION STEP 3");
                 GenerateFullNavmesh();
                 InitializeStep++;
                 return;

@@ -115,9 +115,6 @@ namespace BlockmapFramework
                         Type type = Type.GetType(typeName);
                         if (type != null && typeof(ISaveAndLoadable).IsAssignableFrom(type))
                         {
-                            Debug.Log($"Creating instance of type: {type.FullName}");
-                            Debug.Log($"Expected type: {typeof(T).FullName}");
-
                             obj = (T)Activator.CreateInstance(type); // Call empty new() constructor of Type
                             obj.ExposeDataForSaveAndLoad();
                         }
@@ -295,20 +292,21 @@ namespace BlockmapFramework
             {
                 if (reader.ReadToFollowing(label))
                 {
-                    dictionary = new Dictionary<int, T>();
-
-                    while (reader.ReadToFollowing("li"))
+                    using (XmlReader subReader = reader.ReadSubtree())
                     {
-                        string keyString = reader.GetAttribute("Key");
-                        if (!int.TryParse(keyString, out int key))
+                        while (subReader.ReadToFollowing("li"))
                         {
-                            throw new Exception($"Invalid dictionary key '{keyString}' in field '{label}'.");
+                            string keyString = subReader.GetAttribute("Key");
+                            if (!int.TryParse(keyString, out int key))
+                            {
+                                throw new Exception($"Invalid dictionary key '{keyString}' in field '{label}'.");
+                            }
+
+                            T value = default;
+                            SaveOrLoadObject(ref value, "Value");
+
+                            dictionary[key] = value;
                         }
-
-                        T value = default;
-                        SaveOrLoadObject(ref value, "Value");
-
-                        dictionary[key] = value;
                     }
                 }
             }
