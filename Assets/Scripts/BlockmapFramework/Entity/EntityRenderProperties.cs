@@ -35,8 +35,8 @@ namespace BlockmapFramework
         public System.Action<MeshBuilder, int, bool, bool> StandaloneRenderFunction { get; init; } = (meshBuilder, height, isMirrored, isPreview) => throw new System.Exception("StandaloneRenderFunction not defined");
 
         /// <summary>
-        /// The function to retrieve the exact world position of the entity if placed on the given node with the given direction.
+        /// The function to retrieve the exact world position of the entity if placed on the given node with the given properties.
         /// </summary>
-        public System.Func<EntityDef, World, BlockmapNode, Direction, bool, Vector3> GetWorldPositionFunction { get; init; } = (def, world, node, dir, isMirrored) => EntityManager.GetWorldPosition(def, world, node, dir);
+        public System.Func<EntityDef, World, BlockmapNode, Direction, bool, Vector3> GetWorldPositionFunction { get; init; } = EntityManager.GetWorldPosition;
     }
 }

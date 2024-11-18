@@ -23,8 +23,6 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Advanced;
         public float ClimbCostUp => 2.5f;
         public float ClimbCostDown => 1.5f;
-        public float ClimbSpeedUp => 0.3f;
-        public float ClimbSpeedDown => 0.4f;
         public float ClimbTransformOffset => 0f;
         public Direction ClimbSide => Direction.None;
         public bool IsClimbable => true;

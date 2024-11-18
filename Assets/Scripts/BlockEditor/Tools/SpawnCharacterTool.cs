@@ -98,16 +98,17 @@ namespace WorldEditor
             BlockmapNode spawnNode = World.HoveredNode;
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            Entity entity = World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height: int.Parse(HeightInput.text), updateWorld: true);
-            if (entity is EditorMovingEntity editorChar)
+            
+            if (SelectedEntity == EntityDefOf.EditorDynamicCharacter)
             {
+                EditorMovingEntity entity = (EditorMovingEntity)World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height: int.Parse(HeightInput.text), updateWorld: true);
                 float speed = float.Parse(SpeedInput.text);
                 float vision = float.Parse(VisionInput.text);
                 bool canSwim = CanSwimToggle.isOn;
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
-                editorChar.CustomPostInit(speed, vision, canSwim, climbingSkill);
-
+                entity.CustomPostInit(speed, vision, canSwim, climbingSkill);
             }
+            else World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, updateWorld: true);
         }
         public override void HandleRightClick()
         {

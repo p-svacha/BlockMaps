@@ -150,7 +150,6 @@ namespace BlockmapFramework
             Actor = owner;
 
             OnCreated();
-            Init();
         }
 
         /// <summary>
@@ -158,7 +157,7 @@ namespace BlockmapFramework
         /// </summary>
         public void PostLoad()
         {
-            World.RegisterEntity(this);
+            World.RegisterEntity(this, registerInWorld: false, updateWorld: false);
 
             OnPostLoad();
             Init();
@@ -167,7 +166,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Gets called after this Entity got instantiated, either through being spawned or when being loaded.
         /// </summary>
-        private void Init()
+        public void Init()
         {
             // Initialize some objects
             OccupiedNodes = new HashSet<BlockmapNode>();
@@ -178,8 +177,7 @@ namespace BlockmapFramework
             foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
 
             // Set position and rotation
-            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
-            WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
+            ResetWorldPositonAndRotation();
 
             // Initialize comps
             InitializeComps();
@@ -231,19 +229,23 @@ namespace BlockmapFramework
                 MeshObject = new GameObject(Label);
                 MeshObject.layer = World.Layer_EntityMesh;
                 MeshObject.transform.SetParent(Wrapper.transform);
-                MeshFilter meshFilter = MeshObject.AddComponent<MeshFilter>();
 
                 // Mesh
-                if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel) meshFilter.mesh = Def.RenderProperties.Model;
+                if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel)
+                {
+                    MeshFilter meshFilter = MeshObject.AddComponent<MeshFilter>();
+                    meshFilter.mesh = Def.RenderProperties.Model;
+                    MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
+                    MeshCollider = MeshObject.AddComponent<MeshCollider>();
+                }
                 if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
                 {
                     MeshBuilder meshBuilder = new MeshBuilder(MeshObject);
                     Def.RenderProperties.StandaloneRenderFunction(meshBuilder, Height, IsMirrored, false);
-                    meshBuilder.ApplyMesh(addCollider: false);
+                    meshBuilder.ApplyMesh();
+                    MeshRenderer = MeshObject.GetComponent<MeshRenderer>();
+                    MeshCollider = MeshObject.GetComponent<MeshCollider>();
                 }
-
-                MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
-                MeshCollider = MeshObject.AddComponent<MeshCollider>();
 
                 EntityCollider ec = MeshObject.AddComponent<EntityCollider>();
                 ec.Entity = this;
@@ -264,59 +266,56 @@ namespace BlockmapFramework
         /// </summary>
         protected void CreateVisionCollider()
         {
-            if (Def.VisionImpact.ImpactType != EntityVisionImpact.SeeThrough)
+            VisionColliderObject = new GameObject("visionCollider");
+            VisionColliderObject.layer = World.Layer_EntityVisionCollider;
+            VisionColliderObject.transform.SetParent(Wrapper.transform);
+            if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
+
+            if (Def.VisionImpact.VisionColliderType == VisionColliderType.FullBox) // Create a single box collider with the bounds of the whole entity
             {
-                VisionColliderObject = new GameObject("visionCollider");
-                VisionColliderObject.layer = World.Layer_EntityVisionCollider;
-                VisionColliderObject.transform.SetParent(Wrapper.transform);
-                if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
+                BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
+                if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
+                else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
+                collider.center = new Vector3(0f, collider.size.y / 2, 0f);
 
-                if (Def.VisionImpact.ImpactType == EntityVisionImpact.FullBlock) // Create a single box collider with the bounds of the whole entity
-                {
-                    BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
-                    if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
-                    else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
-                    collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+                EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
+                evc.Entity = this;
+            }
+            else if (Def.VisionImpact.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
+            {
+                MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
+                collider.sharedMesh = MeshCollider.sharedMesh;
 
-                    EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
-                    evc.Entity = this;
-                }
-                else if (Def.VisionImpact.ImpactType == EntityVisionImpact.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
+                EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
+                evc.Entity = this;
+            }
+            else if(Def.VisionImpact.VisionColliderType == VisionColliderType.BlockPerNode) // Create a box collider per node, each one with its own height
+            {
+                for (int x = 0; x < Dimensions.x; x++)
                 {
-                    MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
-                    collider.sharedMesh = MeshCollider.sharedMesh;
-
-                    EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
-                    evc.Entity = this;
-                }
-                else if(Def.VisionImpact.ImpactType == EntityVisionImpact.BlockPerNode) // Create a box collider per node, each one with its own height
-                {
-                    for (int x = 0; x < Dimensions.x; x++)
+                    for (int y = 0; y < Dimensions.z; y++)
                     {
-                        for (int y = 0; y < Dimensions.z; y++)
-                        {
-                            Vector2Int localCoords = new Vector2Int(x, y);
+                        Vector2Int localCoords = new Vector2Int(x, y);
 
-                            GameObject perNodeColliderObject = new GameObject("visionCollider_" + x + "_" + y);
-                            perNodeColliderObject.layer = World.Layer_EntityVisionCollider;
-                            perNodeColliderObject.transform.SetParent(Wrapper.transform);
-                            BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
+                        GameObject perNodeColliderObject = new GameObject("visionCollider_" + x + "_" + y);
+                        perNodeColliderObject.layer = World.Layer_EntityVisionCollider;
+                        perNodeColliderObject.transform.SetParent(Wrapper.transform);
+                        BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
 
-                            float height = Dimensions.y; // default height
-                            if (Def.VisionImpact.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
+                        float height = Dimensions.y; // default height
+                        if (Def.VisionImpact.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
 
-                            if (MeshObject != null) collider.size = new Vector3(1f / MeshObject.transform.localScale.x, (height * World.NodeHeight) / MeshObject.transform.localScale.y, 1f / MeshObject.transform.localScale.z);
-                            collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
+                        if (MeshObject != null) collider.size = new Vector3(1f / MeshObject.transform.localScale.x, (height * World.NodeHeight) / MeshObject.transform.localScale.y, 1f / MeshObject.transform.localScale.z);
+                        collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
 
-                            EntityCollider evc = perNodeColliderObject.AddComponent<EntityCollider>();
-                            evc.Entity = this;
-                        }
+                        EntityCollider evc = perNodeColliderObject.AddComponent<EntityCollider>();
+                        evc.Entity = this;
                     }
                 }
             }
         }
 
-        public void DestroySelf()
+        public void DestroyGameObject()
         {
             GameObject.Destroy(Wrapper);
         }
@@ -567,7 +566,7 @@ namespace BlockmapFramework
         public virtual string Description => Def.Description;
 
         public virtual float VisionRange => Def.VisionRange;
-        public virtual bool BlocksVision => Def.VisionImpact.ImpactType != EntityVisionImpact.SeeThrough;
+        public virtual bool BlocksVision => Def.VisionImpact.BlocksVision;
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
 
@@ -858,7 +857,7 @@ namespace BlockmapFramework
                     // Mark node that fence is on as explored
                     vision.AddExploredNode(hitFence.Node);
 
-                    if (!hitFence.Type.BlocksVision) continue; // Continue search if fence doesn't block vision
+                    if (!hitFence.Def.BlocksVision) continue; // Continue search if fence doesn't block vision
                     else return vision; // End search if fence blocks vision
                 }
 
@@ -897,7 +896,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Label + " alt:" + MinAltitude + "-" + MaxAltitude + " " + Rotation.ToString();
+            return $"{Label} ({Def.DefName}) alt: {MinAltitude} - {MaxAltitude} {Rotation}";
         }
 
         #endregion
@@ -918,8 +917,8 @@ namespace BlockmapFramework
         public void Teleport(BlockmapNode targetNode)
         {
             BlockmapNode sourceNode = OriginNode;
-            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
             SetOriginNode(targetNode);
+            ResetWorldPositonAndRotation();
 
             // Update vision from entities around source and target position
             List<Entity> entitiesNearSourcePosition = World.GetNearbyEntities(sourceNode.CenterWorldPosition);
@@ -1006,6 +1005,15 @@ namespace BlockmapFramework
         public void SetWorldRotation(Quaternion quat)
         {
             WorldRotation = quat;
+        }
+
+        /// <summary>
+        /// Sets the WorldPosition and WorldRotation to the default position according to the current OriginNode and Rotation.
+        /// </summary>
+        public virtual void ResetWorldPositonAndRotation()
+        {
+            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
+            WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 
         public void UpdateLastKnownPositionFor(Actor p)

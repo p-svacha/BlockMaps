@@ -4,10 +4,9 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public enum FenceTypeId
+    [DefOf]
+    public static class WallMaterialDefOf
     {
-        BrickWall,
-        WoodenFence,
-        Cliff
+        public static WallMaterialDef Brick;
     }
 }

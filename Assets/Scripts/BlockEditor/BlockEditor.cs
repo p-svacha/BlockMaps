@@ -136,7 +136,7 @@ namespace WorldEditor
             if (!isInitialized) return;
             base.Update();
 
-            UpdateTileInfoText();
+            UpdateHoverInfoText();
 
             CurrentTool.UpdateTool();
 
@@ -160,7 +160,7 @@ namespace WorldEditor
             CurrentTool.HandleKeyboardInputs();
         }
 
-        private void UpdateTileInfoText()
+        private void UpdateHoverInfoText()
         {
             if (World == null) return;
 

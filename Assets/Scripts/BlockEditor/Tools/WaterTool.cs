@@ -58,7 +58,7 @@ namespace WorldEditor
                 //Debug.Log("Water on " + coveredNodes.Count + " nodes: " + s);
 
                 // Update Cache
-                foreach (GroundNode coveredNode in CurrentWaterBody.CoveredNodes)
+                foreach (GroundNode coveredNode in CurrentWaterBody.CoveredGroundNodes)
                 {
                     if (coveredNode.BaseAltitude != World.HoveredGroundNode.BaseAltitude) continue; // only add nodes to cache with same base height
                     if (!Cache.ContainsKey(coveredNode)) Cache.Add(coveredNode, new Dictionary<int, WaterBody>());

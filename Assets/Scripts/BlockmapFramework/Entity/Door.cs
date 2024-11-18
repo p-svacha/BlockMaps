@@ -98,7 +98,22 @@ namespace BlockmapFramework
 
         #endregion
 
+        public override void ResetWorldPositonAndRotation()
+        {
+            base.ResetWorldPositonAndRotation();
+            WorldRotation = IsOpen ? OpenRotation : ClosedRotation;
+        }
+
         #region Getters
+
+        public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
+        {
+            Vector3 basePosition = EntityManager.GetWorldPosition(EntityDefOf.Door, world, originNode, rotation);
+            float worldY = World.NodeHeight * originNode.GetMinAltitude(rotation);
+
+            Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, isMirrored);
+            return new Vector3(offsetPosition.x, worldY, offsetPosition.z);
+        }
 
         public static Vector3 GetWorldPositionOffset(Direction rotation, bool isMirrored)
         {
@@ -127,15 +142,6 @@ namespace BlockmapFramework
                     _ => throw new System.Exception("Direction not handled")
                 };
             }
-        }
-
-        public static Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
-        {
-            Vector3 basePosition = EntityManager.GetWorldPosition(EntityDefOf.Door, world, originNode, rotation);
-            float worldY = World.NodeHeight * originNode.GetMinAltitude(rotation);
-
-            Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, isMirrored);
-            return new Vector3(offsetPosition.x, worldY, offsetPosition.z);
         }
 
         #endregion

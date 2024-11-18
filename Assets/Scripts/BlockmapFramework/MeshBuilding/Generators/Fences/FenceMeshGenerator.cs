@@ -7,6 +7,9 @@ namespace BlockmapFramework
 {
     public static class FenceMeshGenerator
     {
+        /// <summary>
+        /// ChunkMesh
+        /// </summary>
         public static Dictionary<int, FenceMesh> GenerateMeshes(Chunk chunk)
         {
             Dictionary<int, FenceMesh> meshes = new Dictionary<int, FenceMesh>();
@@ -25,7 +28,7 @@ namespace BlockmapFramework
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
                 foreach (Fence fence in fencesToDraw)
                 {
-                    DrawFence(meshBuilder, fence.Type, fence.Node, fence.Side, fence.Height);
+                    DrawFence(meshBuilder, fence.Def, fence.Node, fence.Side, fence.Height);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();
@@ -36,11 +39,13 @@ namespace BlockmapFramework
             return meshes;
         }
 
-        public static void DrawFence(MeshBuilder meshBuilder, FenceType type, BlockmapNode node, Direction side, int height, bool isPreview = false)
+        /// <summary>
+        /// Single fence piece
+        /// </summary>
+        public static void DrawFence(MeshBuilder meshBuilder, FenceDef def, BlockmapNode node, Direction side, int height, bool isPreview = false)
         {
-            if (HelperFunctions.IsSide(side)) type.GenerateSideMesh(meshBuilder, node, side, height, isPreview);
-            else if (HelperFunctions.IsCorner(side)) type.GenerateCornerMesh(meshBuilder, node, side, height, isPreview);
-            else throw new System.Exception("Fences can only be drawn when on side or corner of a node");
+            if(!HelperFunctions.IsSide(side) && !HelperFunctions.IsCorner(side)) throw new System.Exception("Fences can only be drawn when on side or corner of a node");
+            def.GenerateMeshFunction(meshBuilder, node, side, height, isPreview);
         }
     }
 }

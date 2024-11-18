@@ -26,6 +26,7 @@ namespace BlockmapFramework
             DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
             DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(GlobalEntityDefs.Defs);
+            DefDatabase<FenceDef>.AddDefs(GlobalFenceDefs.Defs);
         }
 
         // Called when a DefDatabase<T> type is accessed for the first time

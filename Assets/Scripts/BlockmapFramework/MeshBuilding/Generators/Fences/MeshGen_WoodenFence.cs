@@ -4,39 +4,29 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class FT02_WoodenFence : FenceType
+    public static class MeshGen_WoodenFence
     {
-        public override FenceTypeId Id => FenceTypeId.WoodenFence;
-        public override string Name => "Wooden Fence";
-        public override bool CanBuildOnCorners => true;
-        public override bool BlocksVision => false;
+        private static float POLE_WIDTH = 0.1f;
+        private static int NUM_POLES = 2;
 
+        private static float CROSS_BRACE_START_Y = 0.2f;
+        private static float CROSS_BRACE_HEIGHT = 0.1f;
+        private static float CROSS_BRACE_WIDTH = 0.05f;
 
-        // IClimbable
-        public override ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Basic;
-        public override float ClimbCostUp => 1.8f;
-        public override float ClimbCostDown => 1.1f;
-        public override float ClimbSpeedUp => 0.8f;
-        public override float ClimbSpeedDown => 0.9f;
-        public override float Width => POLE_WIDTH;
-
-        #region Draw
-
-        private const float POLE_WIDTH = 0.1f;
-        private const int NUM_POLES = 2;
-        // private const float POLE_HEIGHT = 0.4f;
-
-        private const float CROSS_BRACE_START_Y = 0.2f;
-        private const float CROSS_BRACE_HEIGHT = 0.1f;
-        private const float CROSS_BRACE_WIDTH = 0.05f;
-
-        public override void GenerateSideMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
+        public static void DrawMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Wood"), isPreview));
+            if (HelperFunctions.IsSide(side)) DrawSide(meshBuilder, node, side, height, isPreview);
+            else if (HelperFunctions.IsCorner(side)) DrawCorner(meshBuilder, node, side, height, isPreview);
+            else throw new System.Exception("Invalid side " + side.ToString());
+        }
+
+        private static void DrawSide(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
+        {
+            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Wood"));
 
             // Poles
             float poleStep = 1f / NUM_POLES;
-            for(int i = 0; i < NUM_POLES; i++)
+            for (int i = 0; i < NUM_POLES; i++)
             {
                 float startX = (poleStep / 2f) + (i * poleStep - (POLE_WIDTH / 2f));
                 float dimX = POLE_WIDTH;
@@ -57,14 +47,14 @@ namespace BlockmapFramework
                 BuildCrossBrace(meshBuilder, node, side, submesh, braceYPos);
 
                 // Cross brace in between two altitudes
-                if(i > 0) 
+                if (i > 0)
                 {
                     float betweenBraceYPos = (World.NodeHeight * i) - (CROSS_BRACE_HEIGHT / 2f);
                     BuildCrossBrace(meshBuilder, node, side, submesh, betweenBraceYPos);
                 }
             }
         }
-        private void BuildCrossBrace(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int submesh, float yPos)
+        private static void BuildCrossBrace(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int submesh, float yPos)
         {
             float cb_x = 0f;
             float cb_dimX = 1f;
@@ -77,9 +67,9 @@ namespace BlockmapFramework
             meshBuilder.BuildCube(node, side, submesh, cbPos, cbDims, adjustToNodeSlope: true);
         }
 
-        public override void GenerateCornerMesh(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
+        private static void DrawCorner(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(GetMaterial(MaterialManager.LoadMaterial("Wood"), isPreview));
+            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Wood"));
 
             float startX = 0;
             float dimX = POLE_WIDTH;
@@ -91,7 +81,5 @@ namespace BlockmapFramework
             Vector3 dim = new Vector3(dimX, dimY, dimZ);
             meshBuilder.BuildCube(node, side, submesh, pos, dim, adjustToNodeSlope: true);
         }
-
-        #endregion
     }
 }

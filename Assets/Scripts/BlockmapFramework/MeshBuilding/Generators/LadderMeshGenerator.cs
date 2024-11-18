@@ -15,9 +15,11 @@ namespace BlockmapFramework
         private const float STEP_HEIGHT = 0.05f;
         private const float STEP_WIDTH = 0.02f;
 
-        public static void GenerateLadderMesh(MeshBuilder meshBuilder, int height, bool isPreview)
+        public static void GenerateLadderMesh(MeshBuilder meshBuilder, int height, bool isMirrored = false, bool isPreview = false)
         {
             int ladderSubmesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
+
+            Debug.Log($"building ladder mesh with height {height}");
 
             // Left pole
             Vector3 lpl_pos = new Vector3(-LADDER_STEP_LENGTH / 2f - LADDER_POLE_SIZE, 0f, -0.5f);
@@ -38,8 +40,6 @@ namespace BlockmapFramework
                 meshBuilder.BuildCube(ladderSubmesh, step_pos, step_dim);
                 currentY += (STEP_INTERVAL + STEP_HEIGHT);
             }
-
-            meshBuilder.ApplyMesh();
         }
 
         private static Material GetMaterial(bool isPreview)

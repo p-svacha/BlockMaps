@@ -19,7 +19,7 @@ namespace BlockmapFramework
             float hedgeHeight = height * World.NodeHeight - 0.05f;
 
             Dictionary<Direction, bool> hasConnection = new Dictionary<Direction, bool>();
-            foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, EntityDefOf.Hedge, height));
+            foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, EntityDefOf.ProcHedge, height));
 
             Dictionary<Direction, float> bevelWidths = new Dictionary<Direction, float>();
             foreach (Direction dir in HelperFunctions.GetSides()) bevelWidths.Add(dir, hasConnection[dir] ? 0f : BEVEL_WIDTH);

@@ -82,7 +82,7 @@ namespace WorldEditor
         public override void HandleRightClick()
         {
             if (World.HoveredEntity == null) return;
-            if (!(World.HoveredEntity is StaticEntity)) return;
+            if (!(World.HoveredEntity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel)) return;
                 
             World.RemoveEntity(World.HoveredEntity);
         }

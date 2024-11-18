@@ -10,9 +10,15 @@ namespace BlockmapFramework
     public class EntityVisionImpactProperties
     {
         /// <summary>
+        /// If true, the entity will block incoming vision rays and stuff behind will not be visible.
+        /// <br/>If false, the entity will be see-through.
+        /// </summary>
+        public bool BlocksVision { get; init; } = true;
+
+        /// <summary>
         /// How this entity affects the vision of other entities.
         /// </summary>
-        public EntityVisionImpact ImpactType { get; init; } = EntityVisionImpact.FullBlock;
+        public VisionColliderType VisionColliderType { get; init; } = VisionColliderType.FullBox;
 
         /// <summary>
         /// If VisionImpact is set to BlockPerNode, the vision collider height of specific local coordinates of the entity (SW -> NE) can be overwritten here.

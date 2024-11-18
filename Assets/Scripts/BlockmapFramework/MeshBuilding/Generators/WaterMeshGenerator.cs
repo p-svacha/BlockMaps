@@ -10,7 +10,7 @@ namespace BlockmapFramework
         {
             int waterSubmesh = meshBuilder.GetSubmesh(MaterialManager.BuildPreviewMaterial);
 
-            foreach (GroundNode node in water.CoveredNodes)
+            foreach (GroundNode node in water.CoveredGroundNodes)
             {
                 MeshVertex sw = meshBuilder.AddVertex(new Vector3(node.WorldCoordinates.x, water.WaterSurfaceWorldHeight, node.WorldCoordinates.y), new Vector2(0f, 0f));
                 MeshVertex se = meshBuilder.AddVertex(new Vector3(node.WorldCoordinates.x + 1, water.WaterSurfaceWorldHeight, node.WorldCoordinates.y), new Vector2(1f, 0f));

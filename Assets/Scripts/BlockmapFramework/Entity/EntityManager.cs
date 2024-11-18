@@ -85,7 +85,7 @@ namespace BlockmapFramework
         /// Returns the world position that an entity of a specific EntityDef would have when placed on the given originNode with the given properties.
         /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis.
         /// </summary>
-        public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation)
+        public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored = false)
         {
             // Take origin node as base position
             Vector3Int dimensions = TranslatedDimensions(def, rotation);
@@ -95,7 +95,7 @@ namespace BlockmapFramework
             HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(def, world, originNode, rotation);
             float y;
             if (occupiedNodes == null) y = originNode.GetWorldHeightAt(new Vector2(0.5f, 0.5f));
-            else y = GetOccupiedNodes(def, world, originNode, rotation).Min(x => x.GetWorldHeightAt(new Vector2(0.5f, 0.5f)));
+            else y = occupiedNodes.Min(x => x.GetWorldHeightAt(new Vector2(0.5f, 0.5f)));
 
             // Final position
             return new Vector3(basePosition.x, y, basePosition.y);

@@ -8,7 +8,7 @@ namespace BlockmapFramework.Defs
     public static class GlobalEntityDefs
     {
         private static string EntityModelBasePath = "Entities/Models/";
-        private static string ThumbnailBasePath = "Editor/Thumbnails/";
+        public static string ThumbnailBasePath = "Editor/Thumbnails/";
 
         public static List<EntityDef> Defs = new List<EntityDef>()
         {
@@ -39,7 +39,7 @@ namespace BlockmapFramework.Defs
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.Batch,
-                    BatchRenderFunction = (meshbuilder, node, height, isPreview) => HedgeMeshGenerator.BuildHedgeMesh(meshbuilder, node, height, isPreview)
+                    BatchRenderFunction = HedgeMeshGenerator.BuildHedgeMesh,
                 }
             },
 
@@ -73,11 +73,17 @@ namespace BlockmapFramework.Defs
                 Description = "A simple door that can be opened and closed.",
                 EntityClass = typeof(Door),
                 VariableHeight = true,
+                Impassable = false,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneGenerated,
-                    StandaloneRenderFunction = (meshBuilder, height, isMirrored, isPreview) => Door.GenerateDoorMesh(meshBuilder, height, isMirrored, isPreview),
+                    StandaloneRenderFunction = Door.GenerateDoorMesh,
+                    GetWorldPositionFunction = Door.GetWorldPosition,
                 },
+                VisionImpact = new EntityVisionImpactProperties()
+                {
+                    VisionColliderType = VisionColliderType.MeshCollider
+                }
             },
 
             new EntityDef()
@@ -87,10 +93,16 @@ namespace BlockmapFramework.Defs
                 Description = "A climbable ladder.",
                 EntityClass = typeof(Ladder),
                 VariableHeight = true,
+                Impassable = false,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneGenerated,
-                    StandaloneRenderFunction = (meshBuilder, height, isMirrored, isPreview) => LadderMeshGenerator.GenerateLadderMesh(meshBuilder, height, isPreview),
+                    StandaloneRenderFunction = LadderMeshGenerator.GenerateLadderMesh,
+                    GetWorldPositionFunction = Ladder.GetLadderWorldPosition,
+                },
+                VisionImpact = new EntityVisionImpactProperties()
+                {
+                    BlocksVision = false,
                 },
             },
         };

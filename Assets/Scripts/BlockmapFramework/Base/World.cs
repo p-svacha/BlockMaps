@@ -247,6 +247,9 @@ namespace BlockmapFramework
             IsInitialized = false;
             InitializeStep = 1;
 
+            // Gaia
+            Gaia = Actors[0];
+
             // Do general initialization that can be done instantly
             Pathfinder.Init(this);
 
@@ -854,9 +857,9 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public void RegisterNode(BlockmapNode node)
+        public void RegisterNode(BlockmapNode node, bool registerInWorld = true)
         {
-            Nodes.Add(node.Id, node); // Global registry
+            if(registerInWorld) Nodes.Add(node.Id, node); // Global registry
 
             // Chunk registry
             node.Chunk.RegisterNode(node);
@@ -1128,29 +1131,36 @@ namespace BlockmapFramework
 
             return true;
         }
+        /// <summary>
+        /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
+        /// </summary>
         public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false, bool updateWorld = true)
         {
-            // Instantiate from def
-            Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
+            if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
 
-            // Init
-            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
+            // Create entity
+            Entity newEntity = CreateEntity(def, node, rotation, actor, height, isMirrored);
+
+            // Initialize entity
+            newEntity.Init();
 
             // Register new entity
-            RegisterEntity(newEntity);
-
-            // Redraw chunk meshes if the entity is draw as a chunk mesh
-            if (updateWorld && def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(node.WorldCoordinates);
-
-            // Update vision around new entity (and then update it's visibility when done)
-            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(newEntity.OriginNode.CenterWorldPosition, callback: newEntity.UpdateVisibility);
-
-            // Update pathfinding navmesh
-            if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, newEntity.GetTranslatedDimensions().x, newEntity.GetTranslatedDimensions().z);
+            RegisterEntity(newEntity, updateWorld);
 
             // Return new instance
             return newEntity;
         }
+
+        /// <summary>
+        /// Creates an instance of an entity from a Def. This entity will not be part of the world until initialized and registered.
+        /// </summary>
+        private Entity CreateEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false)
+        {
+            Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
+            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
+            return newEntity;
+        }
+
         public void RemoveEntity(Entity entityToRemove, bool updateWorld = true)
         {
             // De-register entity
@@ -1193,7 +1203,7 @@ namespace BlockmapFramework
                     UpdateVisibility(c);
 
             // Destroy
-            entityToRemove.DestroySelf();
+            entityToRemove.DestroyGameObject();
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
             if(updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
@@ -1202,11 +1212,21 @@ namespace BlockmapFramework
         {
             while (node.Entities.Count > 0) RemoveEntity(node.Entities.First(), updateWorld);
         }
-        public void RegisterEntity(Entity entity)
+        public void RegisterEntity(Entity entity, bool updateWorld, bool registerInWorld = true)
         {
-            Entities.Add(entity.id, entity);
+            // Register in various registires
+            if(registerInWorld) Entities.Add(entity.id, entity);
             entity.Actor.Entities.Add(entity);
             if(entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
+
+            // Redraw chunk meshes if the entity is draw as a chunk mesh
+            if (updateWorld && entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(entity.OriginNode.WorldCoordinates);
+
+            // Update vision around new entity (and then update it's visibility when done)
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entity.OriginNode.CenterWorldPosition, callback: entity.UpdateVisibility);
+
+            // Update pathfinding navmesh
+            if (updateWorld) UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetTranslatedDimensions().x, entity.GetTranslatedDimensions().z);
 
             entity.OnRegister();
         }
@@ -1224,7 +1244,7 @@ namespace BlockmapFramework
             int shoreHeight = node.BaseAltitude + 1;
             WaterBody waterBody = new WaterBody(); // dummy water body to store data that can later be used to create a real water body
             waterBody.ShoreHeight = shoreHeight;
-            waterBody.CoveredNodes = new List<GroundNode>();
+            waterBody.CoveredGroundNodes = new List<GroundNode>();
 
             List<System.Tuple<GroundNode, Direction>> checkedNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that were already checked for water expansion in one direction
             List<System.Tuple<GroundNode, Direction>> expansionNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
@@ -1242,7 +1262,7 @@ namespace BlockmapFramework
                 expansionNodes.RemoveAt(0);
 
                 if (checkNode == null) continue;
-                if (waterBody.CoveredNodes.Contains(checkNode)) continue;
+                if (waterBody.CoveredGroundNodes.Contains(checkNode)) continue;
                 if (checkedNodes.Contains(check)) continue;
 
                 checkedNodes.Add(check);
@@ -1265,7 +1285,7 @@ namespace BlockmapFramework
                     // Check if we're drowing air nodes
                     if (GetAirNodes(checkNode.WorldCoordinates, shoreHeight - maxDepth, shoreHeight - 1).Count > 0) return null;
 
-                    waterBody.CoveredNodes.Add(checkNode);
+                    waterBody.CoveredGroundNodes.Add(checkNode);
 
                     if (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.N), Direction.S));
                     if (checkNode.Altitude[Direction.NE] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.E), Direction.W));
@@ -1281,7 +1301,7 @@ namespace BlockmapFramework
         {
             // Create a new water nodes for each covered surface node
             List<WaterNode> waterNodes = new List<WaterNode>();
-            foreach (GroundNode node in data.CoveredNodes)
+            foreach (GroundNode node in data.CoveredGroundNodes)
             {
                 WaterNode waterNode = new WaterNode(this, node.Chunk, NodeIdCounter++, node.LocalCoordinates, data.ShoreHeight);
                 waterNodes.Add(waterNode);
@@ -1289,11 +1309,11 @@ namespace BlockmapFramework
             }
 
             // Make a new water body instance with a unique id
-            WaterBody newWaterBody = new WaterBody(WaterBodyIdCounter++, data.ShoreHeight, waterNodes, data.CoveredNodes);
+            WaterBody newWaterBody = new WaterBody(WaterBodyIdCounter++, data.ShoreHeight, waterNodes, data.CoveredGroundNodes);
 
             // Get chunks that will have nodes covered in new water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
-            foreach (BlockmapNode node in newWaterBody.CoveredNodes) affectedChunks.Add(node.Chunk);
+            foreach (BlockmapNode node in newWaterBody.CoveredGroundNodes) affectedChunks.Add(node.Chunk);
 
             // Redraw affected chunks
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
@@ -1312,10 +1332,10 @@ namespace BlockmapFramework
 
             // Get chunks that will had nodes covered in water body
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
-            foreach (GroundNode node in water.CoveredNodes) affectedChunks.Add(node.Chunk);
+            foreach (GroundNode node in water.CoveredGroundNodes) affectedChunks.Add(node.Chunk);
 
             // Remove water node reference from all covered surface nodes
-            foreach (GroundNode node in water.CoveredNodes) node.SetWaterNode(null);
+            foreach (GroundNode node in water.CoveredGroundNodes) node.SetWaterNode(null);
 
             // Deregister deleted water nodes
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
@@ -1327,27 +1347,25 @@ namespace BlockmapFramework
             foreach (Chunk c in affectedChunks) RedrawChunk(c);
         }
 
-        public bool CanBuildFence(FenceType type, BlockmapNode node, Direction side, int height)
+        public bool CanBuildFence(FenceDef def, BlockmapNode node, Direction side, int height)
         {
             List<Direction> affectedSides = HelperFunctions.GetAffectedDirections(side);
 
             // Check if disallowed corner
-            if (HelperFunctions.IsCorner(side) && !type.CanBuildOnCorners) return false;
+            if (HelperFunctions.IsCorner(side) && !def.CanBuildOnCorners) return false;
 
             // Adjust height if it's higher than fence type allows
-            if (height > type.MaxHeight) height = type.MaxHeight;
+            if (height > def.MaxHeight) height = def.MaxHeight;
 
             return CanBuildOnNodeSide(node, side, height, allowSlopes: true);
         }
-        public void BuildFence(FenceTypeId type, BlockmapNode node, Direction side, int height, bool updateWorld = true) => BuildFence(FenceTypeManager.Instance.GetFenceType(type), node, side, height, updateWorld);
-        public void BuildFence(FenceType type, BlockmapNode node, Direction side, int height, bool updateWorld = true)
+        public void BuildFence(FenceDef def, BlockmapNode node, Direction side, int height, bool updateWorld = true)
         {
             // Adjust height if it's higher than fence type allows
-            if (height > type.MaxHeight) height = type.MaxHeight;
+            if (height > def.MaxHeight) height = def.MaxHeight;
 
             // Create and register new fence
-            Fence fence = new Fence(type);
-            fence.Init(FenceIdCounter++, node, side, height);
+            Fence fence = new Fence(this, def, FenceIdCounter++, node, side, height);
             RegisterFence(fence);
 
             if (updateWorld)
@@ -1357,13 +1375,16 @@ namespace BlockmapFramework
                 UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
             }
         }
-        public void RegisterFence(Fence fence)
+        public void RegisterFence(Fence fence, bool registerInWorld = true)
         {
             // In world
-            Fences.Add(fence.Id, fence);
+            if(registerInWorld) Fences.Add(fence.Id, fence);
 
             // In chunk
             fence.Node.Chunk.RegisterFence(fence);
+
+            // On node
+            fence.Node.Fences.Add(fence.Side, fence);
         }
         public void RemoveFence(Fence fence)
         {
@@ -1446,10 +1467,10 @@ namespace BlockmapFramework
             RedrawNodesAround(newWall.WorldCoordinates);
             UpdateVisionOfNearbyEntitiesDelayed(newWall.CellCenterWorldPosition);
         }
-        private void RegisterWall(Wall wall) // add to database and add all references in different objects
+        public void RegisterWall(Wall wall, bool registerInWorld = true) // add to database and add all references in different objects
         {
             // In world
-            Walls.Add(wall.Id, wall);
+            if(registerInWorld) Walls.Add(wall.Id, wall);
 
             // Database index by world coordinate 2D
             if (WallsByWorldCoordinates2D.ContainsKey(wall.WorldCoordinates)) WallsByWorldCoordinates2D[wall.WorldCoordinates].Add(wall);
@@ -1524,8 +1545,10 @@ namespace BlockmapFramework
         }
         public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
         {
-            Ladder ladder = (Ladder)SpawnEntity(EntityDefOf.Ladder, from, side, Gaia);
-            ladder.CustomPostInit(to);
+            Ladder ladder = (Ladder)CreateEntity(EntityDefOf.Ladder, from, side, Gaia);
+            ladder.PreInit(to);
+            ladder.Init();
+            RegisterEntity(ladder, updateWorld: true);
         }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)
@@ -1534,7 +1557,7 @@ namespace BlockmapFramework
         }
         public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored)
         {
-            Door door = (Door)SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored);
+            SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored);
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
@@ -2229,6 +2252,10 @@ namespace BlockmapFramework
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Actors, "actors");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Nodes, "nodes");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Entities, "entities");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Fences, "entities");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Walls, "entities");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref WaterBodies, "entities");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Zones, "entities");
 
             if (SaveLoadManager.IsLoading)
             {
@@ -2237,6 +2264,10 @@ namespace BlockmapFramework
                 foreach (Actor actor in Actors.Values) actor.PostLoad();
                 foreach (BlockmapNode node in Nodes.Values) node.PostLoad();
                 foreach (Entity e in Entities.Values) e.PostLoad();
+                foreach (Fence f in Fences.Values) f.PostLoad();
+                foreach (Wall w in Walls.Values) w.PostLoad();
+                foreach (WaterBody wb in WaterBodies.Values) wb.PostLoad();
+                foreach (Zone z in Zones.Values) z.PostLoad();
             }
         }
 

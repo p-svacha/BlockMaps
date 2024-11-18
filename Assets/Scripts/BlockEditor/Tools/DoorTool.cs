@@ -15,10 +15,17 @@ namespace WorldEditor
 
         private GameObject BuildPreview;
         private int Height => int.Parse(HeightInput.text);
+        private EntityDef SelectedDoor;
 
         [Header("Elements")]
         public TMP_InputField HeightInput;
         public Toggle MirrorToggle;
+
+        public override void Init(BlockEditor editor)
+        {
+            base.Init(editor);
+            SelectedDoor = BlockmapFramework.EntityDefOf.Door;
+        }
 
         public override void UpdateTool()
         {
@@ -63,7 +70,7 @@ namespace WorldEditor
 
                 // Preview
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                BuildPreview.transform.position = new Vector3(node.CenterWorldPosition.x, World.NodeHeight * node.GetMinAltitude(side), node.CenterWorldPosition.z) + Door.GetWorldPositionOffset(side, MirrorToggle.isOn);
+                BuildPreview.transform.position = SelectedDoor.RenderProperties.GetWorldPositionFunction(SelectedDoor, World, node, side, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                 Door.GenerateDoorMesh(previewMeshBuilder, Height, MirrorToggle.isOn, isPreview: true);
                 previewMeshBuilder.ApplyMesh();

@@ -13,8 +13,15 @@ namespace WorldEditor
 
         private int TargetIndex;
         private BlockmapNode TargetNode;
+        private EntityDef SelectedLadder;
 
         private GameObject BuildPreview;
+
+        public override void Init(BlockEditor editor)
+        {
+            base.Init(editor);
+            SelectedLadder = BlockmapFramework.EntityDefOf.Ladder;
+        }
 
         public override void UpdateTool()
         {
@@ -46,7 +53,7 @@ namespace WorldEditor
                     // Preview
                     BuildPreview.SetActive(true);
                     MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                    BuildPreview.transform.position = new Vector3(bottom.CenterWorldPosition.x, World.NodeHeight * bottom.GetMinAltitude(side), bottom.CenterWorldPosition.z);
+                    BuildPreview.transform.position = SelectedLadder.RenderProperties.GetWorldPositionFunction(SelectedLadder, World, bottom, side, false);
                     BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                     LadderMeshGenerator.GenerateLadderMesh(previewMeshBuilder, height, isPreview: true);
                     previewMeshBuilder.ApplyMesh();

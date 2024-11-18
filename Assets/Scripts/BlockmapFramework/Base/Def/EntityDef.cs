@@ -41,9 +41,9 @@ namespace BlockmapFramework
         public Vector3Int Dimensions { get; init; } = new Vector3Int(1, 1, 1);
 
         /// <summary>
-        /// Flag if characters can move through this entity.
+        /// If true, characters can never move on nodes that the entity occupies.
         /// </summary>
-        public bool IsPassable { get; init; } = false;
+        public bool Impassable { get; init; } = true;
 
         /// <summary>
         /// Flag if entity can only be placed when the whole footprint is flat.

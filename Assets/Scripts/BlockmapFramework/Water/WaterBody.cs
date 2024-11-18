@@ -5,15 +5,18 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WaterBody
+    public class WaterBody : ISaveAndLoadable
     {
-        public int Id { get; private set; }
+        private World World;
+
+        private int id;
+        public int Id => id;
         /// <summary>
         /// The first y coordinate where nodes are not covered anymore by this water body.
         /// </summary>
         public int ShoreHeight;
         public List<WaterNode> WaterNodes;
-        public List<GroundNode> CoveredNodes;
+        public List<GroundNode> CoveredGroundNodes;
 
         public int MinX { get; private set; }
         public int MaxX { get; private set; }
@@ -23,20 +26,35 @@ namespace BlockmapFramework
         public WaterBody() { }
         public WaterBody(int id, int shoreHeight, List<WaterNode> waterNodes, List<GroundNode> coveredNodes)
         {
-            Id = id;
+            this.id = id;
             ShoreHeight = shoreHeight;
             WaterNodes = new List<WaterNode>(waterNodes);
-            CoveredNodes = new List<GroundNode>(coveredNodes);
+            CoveredGroundNodes = new List<GroundNode>(coveredNodes);
 
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
+        /// </summary>
+        public void PostLoad()
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called after instancing, either through being spawned or when being loaded.
+        /// </summary>
+        public void Init()
+        {
             // Init references
-            for (int i = 0; i < waterNodes.Count; i++) WaterNodes[i].Init(this, coveredNodes[i]);
-            CoveredNodes = WaterNodes.Select(x => x.GroundNode).ToList();
+            for (int i = 0; i < WaterNodes.Count; i++) WaterNodes[i].Init(this, CoveredGroundNodes[i]);
 
             MinX = WaterNodes.Min(x => x.WorldCoordinates.x);
             MaxX = WaterNodes.Max(x => x.WorldCoordinates.x);
             MinY = WaterNodes.Min(x => x.WorldCoordinates.y);
             MaxY = WaterNodes.Max(x => x.WorldCoordinates.y);
-    }
+        }
 
         #region Getters
 
@@ -46,20 +64,14 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static WaterBody Load(World world, WaterBodyData data)
+        public virtual void ExposeDataForSaveAndLoad()
         {
-            return new WaterBody(data.Id, data.ShoreHeight, data.WaterNodes.Select(x => world.GetNode(x) as WaterNode).ToList(), data.CoveredNodes.Select(x => world.GetNode(x) as GroundNode).ToList());
-        }
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
-        public WaterBodyData Save()
-        {
-            return new WaterBodyData
-            {
-                Id = Id,
-                ShoreHeight = ShoreHeight,
-                WaterNodes = WaterNodes.Select(x => x.Id).ToList(),
-                CoveredNodes = WaterNodes.Select(x => x.GroundNode.Id).ToList()
-            };
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadPrimitive(ref ShoreHeight, "shoreHeight");
+            SaveLoadManager.SaveOrLoadReferenceList(ref WaterNodes, "waterNodes");
+            SaveLoadManager.SaveOrLoadReferenceList(ref CoveredGroundNodes, "coveredGroundNodes");
         }
 
         #endregion

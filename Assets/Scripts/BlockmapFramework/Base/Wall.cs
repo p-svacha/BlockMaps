@@ -10,19 +10,20 @@ namespace BlockmapFramework
     /// <br/>Each wall consist of a combination of a WallShape and a WallMaterial, which together define how the wall looks and acts.
     /// <br/>Walls exist on their own seperate 3d grid and are not bound to nodes.
     /// </summary>
-    public class Wall : IClimbable, IVisionTarget
+    public class Wall : IClimbable, IVisionTarget, ISaveAndLoadable
     {
         private World World;
 
+        private int id;
         /// <summary>
         /// Unique identifier of this specific wall.
         /// </summary>
-        public int Id { get; private set; }
+        public int Id => id;
 
         /// <summary>
         /// The world cell coordiantes of the wall.
         /// </summary>
-        public Vector3Int GlobalCellCoordinates { get; private set; }
+        public Vector3Int GlobalCellCoordinates;
         public int MinAltitude => GlobalCellCoordinates.y;
         public int MaxAltitude => MinAltitude;
         public Vector3Int LocalCellCoordinates => World.GetLocalCellCoordinates(GlobalCellCoordinates);
@@ -33,22 +34,22 @@ namespace BlockmapFramework
         /// <summary>
         /// The side within the cell this wall covers.
         /// </summary>
-        public Direction Side { get; private set; }
+        public Direction Side;
 
         /// <summary>
         /// The shape of this wall (i.e. solid, window).
         /// </summary>
-        public WallShapeDef Shape { get; private set; }
+        public WallShapeDef Shape;
 
         /// <summary>
         /// The material this wall is made of.
         /// </summary>
-        public WallMaterialDef Material { get; private set; }
+        public WallMaterialDef Material;
 
         /// <summary>
         /// Flag if this is the mirrored version of the wall piece.
         /// </summary>
-        public bool IsMirrored { get; private set; }
+        public bool IsMirrored;
 
         public float Width => Shape.Width;
 
@@ -57,18 +58,17 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbSkillRequirement => Material.ClimbSkillRequirement;
         public float ClimbCostUp => Material.ClimbCostUp;
         public float ClimbCostDown => Material.ClimbCostDown;
-        public float ClimbSpeedUp => 1f / Material.ClimbCostUp;
-        public float ClimbSpeedDown => 1f / Material.ClimbCostDown;
         public float ClimbTransformOffset => Shape.Width;
         public Direction ClimbSide => Side;
         public bool IsClimbable => Shape.IsClimbable && ClimbSkillRequirement != ClimbingCategory.Unclimbable;
 
         #region Init
 
+        public Wall() { }
         public Wall(World world, int id, Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored)
         {
             World = world;
-            Id = id;
+            this.id = id;
             GlobalCellCoordinates = globalCellCoordinates;
             WorldCoordinates = new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
             Side = side;
@@ -76,7 +76,16 @@ namespace BlockmapFramework
             Material = material;
             IsMirrored = mirrored;
 
-            if ((Shape.IsCornerShape && HelperFunctions.IsSide(side)) || !Shape.IsCornerShape && HelperFunctions.IsCorner(side)) throw new System.Exception("Invalid wall side error. " + shape.Label + " is not allowed to build in the direction " + side.ToString());
+            if ((Shape.IsCornerShape && HelperFunctions.IsSide(Side)) || !Shape.IsCornerShape && HelperFunctions.IsCorner(Side)) throw new System.Exception("Invalid wall side error. " + Shape.Label + " is not allowed to build in the direction " + Side.ToString());
+        }
+
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
+        /// </summary>
+        public void PostLoad()
+        {
+            WorldCoordinates = new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
+            World.RegisterWall(this, registerInWorld: false);
         }
 
         #endregion
@@ -120,6 +129,8 @@ namespace BlockmapFramework
         #endregion
 
         #region Getters
+        public virtual string Label => Material.LabelCap + " " + Shape.LabelCap;
+        public virtual string Description => Shape.Description;
 
         public Vector3 GetCenterWorldPosition()
         {
@@ -152,33 +163,16 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static Wall Load(World world, WallData data)
+        public virtual void ExposeDataForSaveAndLoad()
         {
-            return new Wall
-                (
-                world, 
-                data.Id, 
-                new Vector3Int(data.CellX, data.CellY, data.CellZ), 
-                (Direction)data.Side, 
-                DefDatabase<WallShapeDef>.GetNamed(data.WallShapeDef),
-                DefDatabase<WallMaterialDef>.GetNamed(data.WallMaterialDef),
-                data.IsMirrored
-                );
-        }
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
-        public WallData Save()
-        {
-            return new WallData
-            {
-                Id = Id,
-                CellX = GlobalCellCoordinates.x,
-                CellY = GlobalCellCoordinates.y,
-                CellZ = GlobalCellCoordinates.z,
-                Side = (int)Side,
-                WallShapeDef = Shape.DefName,
-                WallMaterialDef = Material.DefName,
-                IsMirrored = IsMirrored
-            };
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadDef(ref Material, "material");
+            SaveLoadManager.SaveOrLoadDef(ref Shape, "shape");
+            SaveLoadManager.SaveOrLoadVector3Int(ref GlobalCellCoordinates, "cell");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Side, "side");
+            SaveLoadManager.SaveOrLoadPrimitive(ref IsMirrored, "isMirrored");
         }
 
         #endregion

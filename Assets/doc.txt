@@ -1,18 +1,19 @@
 Migration to Def-System
 
-add entity rendertype StandaloneGenerated for door/ladder
+fix model materials for StandaloneModel
+fix charactertool (+ navmesh)
+fix dynamic character spawn
+fix model scale in spawn object tool
+fix sloped fence climb in world "a""
+
+add all entities from before (trees, cars, log, flag, etc)
+
 allow mirroring for all entites
 	make it affect vision colldiers correctly
 add Node.IsPassable(EntityDef def)
 	use it in SpawnCharacterTool
 
-
-Defs:
--- EntityDef (basically the RW-ThingDef equivalent)
--- FenceDef
-
-
-Framework: Jumping
+Framework: Jumping/Dropping
 Framework: Stairs
 
 

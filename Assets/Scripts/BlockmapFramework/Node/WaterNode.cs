@@ -40,6 +40,7 @@ namespace BlockmapFramework
 
         public override void RecalculateCenterWorldPosition()
         {
+            if (WaterBody == null) return;
             CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 

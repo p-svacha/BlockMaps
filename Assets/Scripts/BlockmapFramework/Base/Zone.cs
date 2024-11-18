@@ -8,30 +8,48 @@ namespace BlockmapFramework
     /// <summary>
     /// A zone represents a set of 2d world coordinates. A zone is the same across all height levels. Provides some functionality for it.
     /// </summary>
-    public class Zone
+    public class Zone : ISaveAndLoadable
     {
-        public int Id { get; private set; }
+        private int id;
+        public int Id => id;
         private World World;
-        public Actor Actor { get; private set; }
-        public HashSet<Vector2Int> WorldCoordinates { get; private set; }
+        public Actor Actor;
+        public HashSet<Vector2Int> WorldCoordinates;
         public List<BlockmapNode> Nodes { get; private set; }
         public HashSet<Chunk> AffectedChunks { get; private set; }
-        public bool IsBorderVisible { get; private set; }
-        public bool ProvidesVision { get; private set; }
+        public bool IsBorderVisible;
+        public bool ProvidesVision;
 
+        public Zone() { }
         public Zone(World world, int id, Actor actor, HashSet<Vector2Int> coordinates, bool providesVision, bool showBorders)
         {
-            Id = id;
+            this.id = id;
             World = world;
             Actor = actor;
             WorldCoordinates = coordinates;
             ProvidesVision = providesVision;
+            IsBorderVisible = showBorders;
 
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
+        /// </summary>
+        public void PostLoad()
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called after instancing, either through being spawned or when being loaded.
+        /// </summary>
+        public void Init()
+        {
             Nodes = new List<BlockmapNode>();
             AffectedChunks = new HashSet<Chunk>();
 
             UpdateAffectedNodes();
-            SetBorderStyle(showBorders, redraw: false);
         }
 
         /// <summary>
@@ -122,21 +140,15 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static Zone Load(World world, ZoneData data)
+        public virtual void ExposeDataForSaveAndLoad()
         {
-            return new Zone(world, data.Id, world.GetActor(data.ActorId), data.Coordinates.Select(x => new Vector2Int(x.Item1, x.Item2)).ToHashSet(), data.ProvidesVision, data.ShowBorders);
-        }
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
-        public ZoneData Save()
-        {
-            return new ZoneData
-            {
-                Id = Id,
-                ActorId = Actor.Id,
-                ShowBorders = IsBorderVisible,
-                ProvidesVision = ProvidesVision,
-                Coordinates = WorldCoordinates.Select(x => new System.Tuple<int, int>(x.x, x.y)).ToList()
-            };
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadReference(ref Actor, "actor");
+            SaveLoadManager.SaveOrLoadPrimitive(ref IsBorderVisible, "isBorderVisible");
+            SaveLoadManager.SaveOrLoadPrimitive(ref ProvidesVision, "providesVision");
+            SaveLoadManager.SaveOrLoadVector2IntSet(ref WorldCoordinates, "coordinates");
         }
 
         #endregion

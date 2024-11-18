@@ -12,7 +12,7 @@ namespace WorldEditor
         public override string Name => "Build Fences";
         public override Sprite Icon => ResourceManager.Singleton.FenceToolSprite;
 
-        private FenceType SelectedFenceType;
+        private FenceDef SelectedFenceDef;
 
         private GameObject BuildPreview;
 
@@ -26,17 +26,17 @@ namespace WorldEditor
             base.Init(editor);
 
             FenceSelection.Clear();
-            foreach (FenceType fence in FenceTypeManager.Instance.GetAllFenceTypes())
-                FenceSelection.AddElement(fence.PreviewSprite, Color.white, fence.Name, () => SelectFenceType(fence.Id));
-
+            foreach (FenceDef def in DefDatabase<FenceDef>.AllDefs)
+            {
+                FenceSelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectFence(def));
+            }
             FenceSelection.SelectFirstElement();
         }
 
-        private void SelectFenceType(FenceTypeId fence)
+        private void SelectFence(FenceDef def)
         {
-            FenceType type = FenceTypeManager.Instance.GetFenceType(fence);
-            SelectedFenceType = type;
-            ClimbabilityText.text = type.ClimbSkillRequirement.ToString();
+            SelectedFenceDef = def;
+            ClimbabilityText.text = def.ClimbSkillRequirement.ToString();
         }
 
         public override void UpdateTool()
@@ -50,7 +50,7 @@ namespace WorldEditor
                 Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode8);
 
                 Color c = Color.white;
-                if (!World.CanBuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;
+                if (!World.CanBuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;
 
                 World.HoveredNode.ShowOverlay(overlayTexture, c);
 
@@ -58,7 +58,7 @@ namespace WorldEditor
                 BuildPreview.SetActive(true);
                 BuildPreview.transform.position = World.HoveredNode.Chunk.WorldPosition;
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                FenceMeshGenerator.DrawFence(previewMeshBuilder, SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height, isPreview: true);
+                FenceMeshGenerator.DrawFence(previewMeshBuilder, SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height, isPreview: true);
                 previewMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
@@ -90,9 +90,9 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (HeightInput.text == "") return;
             int height = int.Parse(HeightInput.text);
-            if (!World.CanBuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height)) return;
+            if (!World.CanBuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height)) return;
 
-            World.BuildFence(SelectedFenceType, World.HoveredNode, World.NodeHoverMode8, height);
+            World.BuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height);
         }
 
         public override void HandleRightClick()

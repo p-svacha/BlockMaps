@@ -28,13 +28,13 @@ namespace BlockmapFramework
         /// <summary>
         /// The movement speed when climbing up.
         /// </summary>
-        public float ClimbSpeedUp { get; }
+        public float ClimbSpeedUp => 1f / ClimbCostUp;
 
         /// <summary>
         /// The movement speed when climbing down.
         /// </summary>
-        public float ClimbSpeedDown { get; }
-        
+        public float ClimbSpeedDown => 1f / ClimbCostDown;
+
         /// <summary>
         /// The world distance from the node edge that a MovingEntity has when climbing this. Basically its width.
         /// </summary>

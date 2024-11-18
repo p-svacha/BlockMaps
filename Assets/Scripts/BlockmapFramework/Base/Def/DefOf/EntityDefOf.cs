@@ -8,7 +8,7 @@ namespace BlockmapFramework
     public static class EntityDefOf
     {
         public static EntityDef Door;
-        public static EntityDef Hedge;
+        public static EntityDef ProcHedge;
         public static EntityDef Ladder;
     }
 }

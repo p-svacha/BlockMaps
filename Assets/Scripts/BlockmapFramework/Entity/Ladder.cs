@@ -42,15 +42,13 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Basic;
         public float ClimbCostUp => 1.6f;
         public float ClimbCostDown => 1.3f;
-        public float ClimbSpeedUp => 0.65f;
-        public float ClimbSpeedDown => 0.75f;
         public float ClimbTransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
         public Direction ClimbSide => Side;
         public bool IsClimbable => true;
 
         #region Init
         
-        public void CustomPostInit(BlockmapNode target)
+        public void PreInit(BlockmapNode target)
         {
             // Ladder specific
             Target = target;
@@ -83,7 +81,7 @@ namespace BlockmapFramework
 
         #endregion
 
-        public static Vector3 GetLadderWorldPosition(BlockmapNode originNode, Direction rotation)
+        public static Vector3 GetLadderWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
         {
             Vector3 nodeCenter = originNode.CenterWorldPosition;
             float worldHeight = originNode.GetMinAltitude(rotation) * World.NodeHeight;

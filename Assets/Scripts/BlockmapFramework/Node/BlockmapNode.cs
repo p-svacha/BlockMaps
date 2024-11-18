@@ -146,7 +146,7 @@ namespace BlockmapFramework
         public void PostLoad()
         {
             Chunk = World.GetChunk(WorldCoordinates);
-            World.RegisterNode(this);
+            World.RegisterNode(this, registerInWorld: false);
 
             Init();
         }
@@ -946,7 +946,7 @@ namespace BlockmapFramework
         /// </summary>
         protected virtual bool IsGenerallyPassable()
         {
-            if (Entities.Any(x => !x.Def.IsPassable)) return false; // An entity is blocking this node
+            if (Entities.Any(x => x.Def.Impassable)) return false; // An entity is blocking this node
             return true;
         }
         /// <summary>
@@ -1047,6 +1047,7 @@ namespace BlockmapFramework
             text += "\nRelHeight: " + World.HoveredNode.GetExactLocalAltitudeAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             text += "\n" + mph;
             text += "\n" + headspace;
+            if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";
 
             return text;
         }

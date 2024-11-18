@@ -126,9 +126,9 @@ namespace CaptureTheFlag
                     if (!World.IsInWorld(position)) break;
 
                     GroundNode node = World.GetGroundNode(position);
-                    if (World.CanSpawnEntity(Hedge, node, Direction.N, forceHeadspaceRecalc: true))
+                    if (World.CanSpawnEntity(ProcHedge, node, Direction.N,hedgeHeight, forceHeadspaceRecalc: true))
                     {
-                        World.SpawnEntity(Hedge, node, Direction.N, World.Gaia, updateWorld: false);
+                        World.SpawnEntity(ProcHedge, node, Direction.N, World.Gaia, hedgeHeight, updateWorld: false);
                     }
 
                     // Next position
@@ -320,7 +320,7 @@ namespace CaptureTheFlag
                         
 
                         // Build
-                        World.BuildFence(FenceTypeId.WoodenFence, node, side, 1, updateWorld: false);
+                        World.BuildFence(FenceDefOf.WoodenFence, node, side, 1, updateWorld: false);
                     }
                 }
             }

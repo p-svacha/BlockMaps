@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using UnityEngine;
 
@@ -424,6 +425,53 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Save and load a Vector3Int.
+        /// </summary>
+        public static void SaveOrLoadVector3Int(ref Vector3Int vector, string label)
+        {
+            if (IsSaving)
+            {
+                writer.WriteElementString(label, vector.x.ToString() + "," + vector.y.ToString() + "," + vector.z.ToString());
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    string value = reader.ReadElementContentAsString();
+                    string[] values = value.Split(',');
+                    vector = new Vector3Int(int.Parse(values[0]), int.Parse(values[1]), int.Parse(values[2]));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save and load a Vector2Int.
+        /// </summary>
+        public static void SaveOrLoadVector2IntSet(ref HashSet<Vector2Int> list, string label)
+        {
+            if (IsSaving)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (Vector2Int v in list) sb.Append(v.x + "," + v.y + ";");
+                writer.WriteElementString(label, sb.ToString().TrimEnd(';'));
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    list = new HashSet<Vector2Int>();
+                    string value = reader.ReadElementContentAsString();
+                    string[] values = value.Split(';');
+                    foreach (string vecString in values)
+                    {
+                        string[] atts = vecString.Split(',');
+                        list.Add(new Vector2Int(int.Parse(values[0]), int.Parse(values[1])));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Save and load a reference to another saveable object. If loading, make sure that the object you're referencing has already been loaded at this point.
         /// </summary>
         public static void SaveOrLoadReference<T>(ref T obj, string label) where T : class, ISaveAndLoadable
@@ -446,9 +494,43 @@ namespace BlockmapFramework
                     else throw new Exception($"Unsupported reference type '{typeof(T)}' for field '{label}'.");
 
                     // Validate that the reference was successfully resolved
-                    if (obj == null)
+                    if (obj == null) throw new Exception($"Failed to resolve reference for type '{typeof(T)}' with ID '{objId}' in field '{label}'.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save and load a list of references to other saveable objects. 
+        /// If loading, make sure that the objects you're referencing have already been loaded at this point.
+        /// </summary>
+        public static void SaveOrLoadReferenceList<T>(ref List<T> list, string label) where T : class, ISaveAndLoadable
+        {
+            if (IsSaving)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (T obj in list) sb.Append(obj.Id + ",");
+                writer.WriteElementString(label, sb.ToString().TrimEnd(','));
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    list = new List<T>();
+                    string value = reader.ReadElementContentAsString();
+                    string[] values = value.Split(',');
+                    foreach(string idString in values)
                     {
-                        throw new Exception($"Failed to resolve reference for type '{typeof(T)}' with ID '{objId}' in field '{label}'.");
+                        T resolvedObj = null;
+                        int objId = int.Parse(idString);
+                        if (typeof(T) == typeof(Actor)) resolvedObj = LoadingWorld.GetActor(objId) as T;
+                        else if (typeof(T) == typeof(BlockmapNode)) resolvedObj = LoadingWorld.GetNode(objId) as T;
+                        else if (typeof(T) == typeof(Entity)) resolvedObj = LoadingWorld.GetEntity(objId) as T;
+                        else throw new Exception($"Unsupported reference type '{typeof(T)}' in list '{label}'.");
+
+                        // Validate that the reference was successfully resolved
+                        if (resolvedObj == null) throw new Exception($"Failed to resolve reference for type '{typeof(T)}' with ID '{objId}' in field '{label}'.");
+
+                        list.Add(resolvedObj);
                     }
                 }
             }

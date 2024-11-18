@@ -9,22 +9,25 @@ namespace BlockmapFramework
     /// Fences are a kind of barrier at the edge or corner of nodes. They follow the node topography and may be climbable.
     /// <br/>An instance represents one fence one one node in the world. All fence-specific attributes are stored in Type.
     /// </summary>
-    public class Fence : IClimbable
+    public class Fence : IClimbable, ISaveAndLoadable
     {
+        private World World;
+
+        private int id;
         /// <summary>
         /// Unique identifier of this specific fence.
         /// </summary>
-        public int Id { get; private set; }
+        public int Id => id;
 
         /// <summary>
-        /// Type containing general properties about the fence.
+        /// Def containing the blueprint of the fence.
         /// </summary>
-        public FenceType Type { get; private set; }
+        public FenceDef Def;
 
         /// <summary>
         /// Node that this fence piece is placed on.
         /// </summary>
-        public BlockmapNode Node { get; private set; }
+        public BlockmapNode Node;
 
         /// <summary>
         /// The chunk that the fence is on.
@@ -34,12 +37,12 @@ namespace BlockmapFramework
         /// <summary>
         /// On what side of the OriginNode this fence is placed on.
         /// </summary>
-        public Direction Side { get; private set; }
+        public Direction Side;
 
         /// <summary>
         /// How many tiles high this fence is, starting at OriginNode.BaseHeight.
         /// </summary>
-        public int Height { get; private set; }
+        public int Height;
 
         /// <summary>
         /// The minimum y coordinate that this fence is taking up.
@@ -69,34 +72,39 @@ namespace BlockmapFramework
         public bool IsClimbable => ClimbSkillRequirement != ClimbingCategory.Unclimbable && !IsSloped;
 
         // IClimbable
-        public ClimbingCategory ClimbSkillRequirement => Type.ClimbSkillRequirement;
-        public float ClimbCostUp => Type.ClimbCostUp;
-        public float ClimbCostDown => Type.ClimbCostDown;
-        public float ClimbSpeedUp => Type.ClimbSpeedUp;
-        public float ClimbSpeedDown => Type.ClimbSpeedDown;
-        public float ClimbTransformOffset => Type.Width;
+        public ClimbingCategory ClimbSkillRequirement => Def.ClimbSkillRequirement;
+        public float ClimbCostUp => Def.ClimbCostUp;
+        public float ClimbCostDown => Def.ClimbCostDown;
+        public float ClimbTransformOffset => Def.Width;
         public Direction ClimbSide => Side;
 
         #region Init
 
-        public Fence(FenceType type)
+        public Fence() { }
+        public Fence(World world, FenceDef def, int id, BlockmapNode node, Direction side, int height)
         {
-            Type = type;
-        }
-
-        public void Init(int id, BlockmapNode node, Direction side, int height)
-        {
-            Id = id;
+            World = world;
+            Def = def;
+            this.id = id;
             Node = node;
             Side = side;
             Height = height;
+        }
 
-            node.Fences.Add(side, this);
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization of this entity.
+        /// </summary>
+        public void PostLoad()
+        {
+            World.RegisterFence(this, registerInWorld: false);
         }
 
         #endregion
 
         #region Getters
+        public virtual string Label => Def.Label;
+        public virtual string LabelCap => Label.CapitalizeFirst();
+        public virtual string Description => Def.Description;
 
         /// <summary>
         /// Returns the y coordinate of where the fence would start when placing on the given node & side.
@@ -122,31 +130,22 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return Node.WorldCoordinates.ToString() + " H:" + Height + "(" + MinAltitude + "-" + MaxAltitude + ") " + Side.ToString() + " " + Type.Name.ToString();
+            return Node.WorldCoordinates.ToString() + " H:" + Height + "(" + MinAltitude + "-" + MaxAltitude + ") " + Side.ToString() + " " + Label.ToString();
         }
 
         #endregion
 
         #region Save / Load
 
-        public static Fence Load(World world, FenceData data)
+        public virtual void ExposeDataForSaveAndLoad()
         {
-            FenceType type = FenceTypeManager.Instance.GetFenceType(data.TypeId);
-            Fence fence = new Fence(type);
-            fence.Init(data.Id, world.GetNode(data.NodeId), data.Side, data.Height);
-            return fence;
-        }
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
-        public FenceData Save()
-        {
-            return new FenceData
-            {
-                Id = Id,
-                TypeId = Type.Id,
-                NodeId = Node.Id,
-                Side = Side,
-                Height = Height
-            };
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadDef(ref Def, "def");
+            SaveLoadManager.SaveOrLoadReference(ref Node, "node");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Side, "side");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Height, "height");
         }
 
         #endregion
