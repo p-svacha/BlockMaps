@@ -51,18 +51,13 @@ namespace BlockmapFramework
         public bool RequiresFlatTerrain { get; init; } = false;
 
         /// <summary>
-        /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
-        /// <br/> -1 means there is no material.
-        /// </summary>
-        public int PlayerColorMaterialIndex { get; init; } = -1;
-
-        /// <summary>
         /// Flag if the height of this entity is not fixed and can have different values.
         /// </summary>
         public bool VariableHeight { get; init; } = false;
 
         public override bool Validate()
         {
+            if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) throw new Exception(LoadingErrorPrefix + "Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
             if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) throw new Exception(LoadingErrorPrefix + "x and z dimensions must be 1 for batch-rendered entities.");
 
             return base.Validate();

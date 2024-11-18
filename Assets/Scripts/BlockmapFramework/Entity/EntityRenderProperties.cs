@@ -17,12 +17,18 @@ namespace BlockmapFramework
         /// <summary>
         /// If RenderType is set to StandaloneModel, this model will be used.
         /// </summary>
-        public Mesh Model { get; init; } = null;
+        public GameObject Model { get; init; } = null;
 
         /// <summary>
         /// If RenderType is set to StandaloneModel, this scaling value will be used for the model.
         /// </summary>
         public float ModelScale { get; init; } = 1f;
+
+        /// <summary>
+        /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
+        /// <br/> -1 means there is no material.
+        /// </summary>
+        public int PlayerColorMaterialIndex { get; init; } = -1;
 
         /// <summary>
         /// If Type is set to Batch, this function will render the entity.

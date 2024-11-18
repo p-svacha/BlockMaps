@@ -10,15 +10,38 @@ namespace BlockmapFramework
     public static class NodeMeshGenerator
     {
         /// <summary>
-        /// Draws a standard surface top that is just 2 triangles with the surface texture.
+        /// Draws a flat-shaded standard surface top that is just 2 triangles with the surface texture.
         /// <br/>Uses the SurfaceMaterial that is capable of blending textures.
         /// </summary>
         public static void DrawFlatBlendableSurface(BlockmapNode node, MeshBuilder meshBuilder)
         {
-            meshBuilder.DrawShapePlane(node, MaterialManager.BlendbaleSurfaceMaterial, height: 0f, 0f, 1f, 0f, 1f);
+            int surfaceSubmesh = meshBuilder.GetSubmesh(MaterialManager.BlendbaleSurfaceMaterial);
+
+            // Surface vertices (all of them are necessary because we cannot reuse vertices if we want flat shading)
+            float xStart = node.LocalCoordinates.x;
+            float xEnd = node.LocalCoordinates.x + 1;
+            float yStart = node.LocalCoordinates.y;
+            float yEnd = node.LocalCoordinates.y + 1;
+            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+
+            if (node.GetTriangleMeshShapeVariant())
+            {
+                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
+                meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
+            }
+            else
+            {
+                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
+                meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
+            }
         }
-
-
 
         /// <summary>
         /// Builds a surface that connects to adjacent nodes with the same surface and draws a curb to other surfaces.

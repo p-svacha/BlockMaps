@@ -23,21 +23,6 @@ namespace BlockmapFramework
             IsMoving = false;
         }
 
-        /// <summary>
-        /// The speed at which this entity moves around in the world.
-        /// </summary>
-        public float MovementSpeed => IsOverrideMovementSpeedActive ? OverrideMovementSpeed : Props.MovementSpeed;
-
-        /// <summary>
-        /// Flag if this entity can pass water nodes.
-        /// </summary>
-        public bool CanSwim => Props.CanSwim;
-
-        /// <summary>
-        /// Maximum climbability of climbables that this entity can climb.
-        /// </summary>
-        public ClimbingCategory ClimbingSkill => Props.ClimbingSkill;
-
         // Const movement rules
         public const int MAX_BASIC_CLIMB_HEIGHT = 2; // in tiles = 0.5m
         public const int MAX_INTERMEDIATE_CLIMB_HEIGHT = 6; // in tiles = 0.5m
@@ -54,9 +39,15 @@ namespace BlockmapFramework
         public List<BlockmapNode> TargetPath { get; private set; }
         public Transition CurrentTransition { get; private set; }
 
-        // Attribute modifiers
-        private bool IsOverrideMovementSpeedActive;
-        private float OverrideMovementSpeed;
+        // Overrides
+        private bool isOverrideMovementSpeedActive;
+        private float overrideMovementSpeed;
+
+        private bool isOverrideCanSwimActive;
+        private bool overrideCanSwim;
+
+        private bool isOverrideClimbSkillActive;
+        private ClimbingCategory overrideClimbSkill;
 
         // Events
         public event System.Action OnTargetReached;
@@ -99,6 +90,8 @@ namespace BlockmapFramework
                 }
             }
         }
+
+        #region Actions
 
         /// <summary>
         /// Finds a path and walks towards the target node
@@ -220,20 +213,52 @@ namespace BlockmapFramework
             OnStopMoving.Invoke();
         }
 
-        /// <summary>
-        /// Sets this character's speed to the given value until disabled.
-        /// </summary>
-        public void EnableOverrideMovementSpeed(float overrideSpeed)
+        public void EnableOverrideMovementSpeed(float value)
         {
-            OverrideMovementSpeed = overrideSpeed;
-            IsOverrideMovementSpeedActive = true;
+            isOverrideMovementSpeedActive = true;
+            overrideMovementSpeed = value;
         }
         public void DisableOverrideMovementSpeed()
         {
-            IsOverrideMovementSpeedActive = false;
+            isOverrideMovementSpeedActive = false;
+        }
+        public void EnableOverrideCanSwim(bool value)
+        {
+            isOverrideCanSwimActive = true;
+            overrideCanSwim = value;
+        }
+        public void DisableOverrideCanSwim()
+        {
+            isOverrideCanSwimActive = false;
+        }
+        public void EnableOverrideClimbSkill(ClimbingCategory value)
+        {
+            isOverrideClimbSkillActive = true;
+            overrideClimbSkill = value;
+        }
+        public void DisableOverrideClimbSkill()
+        {
+            isOverrideClimbSkillActive = false;
         }
 
+        #endregion
+
         #region Getters
+
+        /// <summary>
+        /// The speed at which this entity moves around in the world.
+        /// </summary>
+        public float MovementSpeed => isOverrideMovementSpeedActive ? overrideMovementSpeed : Props.MovementSpeed;
+
+        /// <summary>
+        /// Flag if this entity can pass water nodes.
+        /// </summary>
+        public bool CanSwim => isOverrideCanSwimActive ? overrideCanSwim : Props.CanSwim;
+
+        /// <summary>
+        /// Maximum climbability of climbables that this entity can climb.
+        /// </summary>
+        public ClimbingCategory ClimbingSkill => isOverrideClimbSkillActive ? overrideClimbSkill : Props.ClimbingSkill;
 
         /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.

@@ -182,7 +182,7 @@ namespace BlockmapFramework
             OnCreate();
 
             // Create initial actors
-            AddActor("Gaia", Color.white);
+            Gaia = AddActor("Gaia", Color.white);
             AddActor("Player 1", Color.blue);
             AddActor("Player 2", Color.red);
 
@@ -400,7 +400,11 @@ namespace BlockmapFramework
                     newHoveredGroundNode = GetGroundNode(HoveredWorldCoordinates);
                     newHoveredNode = newHoveredGroundNode;
                     newHoveredDynamicNode = newHoveredGroundNode;
-                    newHoveredChunk = newHoveredGroundNode.Chunk;
+
+                    if (newHoveredGroundNode != null)
+                    {
+                        newHoveredChunk = newHoveredGroundNode.Chunk;
+                    }
                 }
 
                 // Hit air node
@@ -1134,12 +1138,18 @@ namespace BlockmapFramework
         /// <summary>
         /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
         /// </summary>
-        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false, bool updateWorld = true)
+        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false, bool updateWorld = true, System.Action<Entity> preInit = null)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
 
             // Create entity
-            Entity newEntity = CreateEntity(def, node, rotation, actor, height, isMirrored);
+            Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
+
+            // Call OnCreate to initialize all basic info that are passed to SpawnEntity
+            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
+
+            // Call entity-specific PreInit to maybe set more entity-specific values
+            preInit?.Invoke(newEntity);
 
             // Initialize entity
             newEntity.Init();
@@ -1148,16 +1158,6 @@ namespace BlockmapFramework
             RegisterEntity(newEntity, updateWorld);
 
             // Return new instance
-            return newEntity;
-        }
-
-        /// <summary>
-        /// Creates an instance of an entity from a Def. This entity will not be part of the world until initialized and registered.
-        /// </summary>
-        private Entity CreateEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false)
-        {
-            Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
-            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
             return newEntity;
         }
 
@@ -1545,10 +1545,7 @@ namespace BlockmapFramework
         }
         public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
         {
-            Ladder ladder = (Ladder)CreateEntity(EntityDefOf.Ladder, from, side, Gaia);
-            ladder.PreInit(to);
-            ladder.Init();
-            RegisterEntity(ladder, updateWorld: true);
+            SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to));
         }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)

@@ -15,6 +15,7 @@ namespace BlockmapFramework
         public WaterBody WaterBody { get; private set; }
         public GroundNode GroundNode { get; private set; }
 
+        public WaterNode() { }
         public WaterNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, int altitude) : base(world, chunk, id, localCoordinates, HelperFunctions.GetFlatHeights(altitude), SurfaceDefOf.Water) { }
 
         public void Init(WaterBody waterBody, GroundNode surfaceNode)

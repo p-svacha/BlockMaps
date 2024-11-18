@@ -17,10 +17,15 @@ namespace WorldEditor
                 UiPreviewSprite = HelperFunctions.TextureToSprite("Editor/Icons/DynamicCharacter"),
                 EntityClass = typeof(EditorMovingEntity),
                 VariableHeight = true,
+                Impassable = false,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<Mesh>("BlenderImport/character/character_fbx"),
+                    Model = Resources.Load<GameObject>("Entities/Models/BlenderImport/character/character_fbx"),
+                },
+                Components = new List<CompProperties>()
+                {
+                    new CompProperties_Movement() { },
                 },
             }
         };

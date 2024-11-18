@@ -188,11 +188,8 @@ namespace BlockmapFramework
             // Create a collider for entity vision on a seperate object
             CreateVisionCollider();
 
-            // Move entity to spawn position
+            // Move entity to spawn position (also registers it on all nodes)
             SetOriginNode(OriginNode);
-
-            // Player color
-            if (Def.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.PlayerColorMaterialIndex].color = Actor.Color;
 
             // Subclass hook
             OnInitialized();
@@ -206,8 +203,7 @@ namespace BlockmapFramework
             Components = new List<EntityComp>();
             foreach (CompProperties compProps in Def.Components)
             {
-                EntityComp newComp = null;
-                newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
+                EntityComp newComp = newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
                 newComp.Parent = this;
                 Components.Add(newComp);
                 newComp.Initialize(compProps);
@@ -234,9 +230,13 @@ namespace BlockmapFramework
                 if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel)
                 {
                     MeshFilter meshFilter = MeshObject.AddComponent<MeshFilter>();
-                    meshFilter.mesh = Def.RenderProperties.Model;
+                    meshFilter.mesh = Def.RenderProperties.Model.GetComponent<MeshFilter>().sharedMesh;
                     MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
+                    MeshRenderer.sharedMaterials = Def.RenderProperties.Model.GetComponent<MeshRenderer>().sharedMaterials;
                     MeshCollider = MeshObject.AddComponent<MeshCollider>();
+
+                    // Player color
+                    if (Def.RenderProperties.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
                 }
                 if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
                 {
@@ -245,6 +245,9 @@ namespace BlockmapFramework
                     meshBuilder.ApplyMesh();
                     MeshRenderer = MeshObject.GetComponent<MeshRenderer>();
                     MeshCollider = MeshObject.GetComponent<MeshCollider>();
+
+                    // Player color
+                    if (Def.RenderProperties.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
                 }
 
                 EntityCollider ec = MeshObject.AddComponent<EntityCollider>();
@@ -601,7 +604,7 @@ namespace BlockmapFramework
                     }
                 }
             }
-            return null;
+            throw new System.Exception($"Component {typeof(T)} not found on Entity {Label}. Entity has {Components.Count} components.");
         }
 
         /// <summary>

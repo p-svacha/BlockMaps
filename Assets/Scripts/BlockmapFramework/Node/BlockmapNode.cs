@@ -460,6 +460,8 @@ namespace BlockmapFramework
         }
         private void SetClimbTransition(Direction dir)
         {
+            if (!IsFlat(dir)) return;
+
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
             {

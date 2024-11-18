@@ -17,13 +17,13 @@ namespace BlockmapFramework.Defs
                 DefName = "PineSmall",
                 Label = "pine tree (1x1)",
                 Description = "A small pine tree",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(AssetPreview.GetMiniThumbnail(Resources.Load(EntityModelBasePath + "Trees/Fir_Tree"))),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(AssetPreview.GetAssetPreview(Resources.Load(EntityModelBasePath + "Trees/Fir_Tree"))),
                 EntityClass = typeof(Entity),
                 Dimensions = new Vector3Int(1, 3, 1),
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<Mesh>(EntityModelBasePath + "Trees/Fir_Tree"),
+                    Model = Resources.Load<GameObject>(EntityModelBasePath + "Trees/Fir_Tree"),
                     ModelScale = 0.25f,
                 }
             },
@@ -48,12 +48,15 @@ namespace BlockmapFramework.Defs
                 DefName = "Human",
                 Label = "human",
                 Description = "Regular human",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(AssetPreview.GetMiniThumbnail(Resources.Load(EntityModelBasePath + "BlenderImport/human/human_fbx"))),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(AssetPreview.GetAssetPreview(Resources.Load(EntityModelBasePath + "BlenderImport/human/human_fbx"))),
                 EntityClass = typeof(Entity),
+                VisionRange = 10,
+                Impassable = false,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<Mesh>(EntityModelBasePath + "BlenderImport/human/human_fbx"),
+                    Model = Resources.Load<GameObject>(EntityModelBasePath + "BlenderImport/human/human_fbx"),
+                    PlayerColorMaterialIndex = 0,
                 },
                 Components = new List<CompProperties>()
                 {

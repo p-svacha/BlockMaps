@@ -9333,6 +9333,447 @@
           <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
         </Value>
       </li>
+      <li Key="1034">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1034</id>
+          <worldCoordinates>20,20</worldCoordinates>
+          <localCoordinates>4,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1035">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1035</id>
+          <worldCoordinates>20,21</worldCoordinates>
+          <localCoordinates>4,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1036">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1036</id>
+          <worldCoordinates>21,20</worldCoordinates>
+          <localCoordinates>5,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1037">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1037</id>
+          <worldCoordinates>19,20</worldCoordinates>
+          <localCoordinates>3,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1038">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1038</id>
+          <worldCoordinates>20,22</worldCoordinates>
+          <localCoordinates>4,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1039">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1039</id>
+          <worldCoordinates>21,21</worldCoordinates>
+          <localCoordinates>5,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1040">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1040</id>
+          <worldCoordinates>19,21</worldCoordinates>
+          <localCoordinates>3,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1041">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1041</id>
+          <worldCoordinates>22,20</worldCoordinates>
+          <localCoordinates>6,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1042">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1042</id>
+          <worldCoordinates>20,23</worldCoordinates>
+          <localCoordinates>4,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1043">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1043</id>
+          <worldCoordinates>21,22</worldCoordinates>
+          <localCoordinates>5,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1044">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1044</id>
+          <worldCoordinates>19,22</worldCoordinates>
+          <localCoordinates>3,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1045">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1045</id>
+          <worldCoordinates>22,21</worldCoordinates>
+          <localCoordinates>6,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1046">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1046</id>
+          <worldCoordinates>23,20</worldCoordinates>
+          <localCoordinates>7,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1047">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1047</id>
+          <worldCoordinates>20,24</worldCoordinates>
+          <localCoordinates>4,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1048">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1048</id>
+          <worldCoordinates>21,23</worldCoordinates>
+          <localCoordinates>5,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1049">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1049</id>
+          <worldCoordinates>19,23</worldCoordinates>
+          <localCoordinates>3,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1050">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1050</id>
+          <worldCoordinates>22,22</worldCoordinates>
+          <localCoordinates>6,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1051">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1051</id>
+          <worldCoordinates>23,21</worldCoordinates>
+          <localCoordinates>7,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1052">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1052</id>
+          <worldCoordinates>24,20</worldCoordinates>
+          <localCoordinates>8,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1053">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1053</id>
+          <worldCoordinates>20,25</worldCoordinates>
+          <localCoordinates>4,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1054">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1054</id>
+          <worldCoordinates>21,24</worldCoordinates>
+          <localCoordinates>5,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1055">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1055</id>
+          <worldCoordinates>19,24</worldCoordinates>
+          <localCoordinates>3,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1056">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1056</id>
+          <worldCoordinates>22,23</worldCoordinates>
+          <localCoordinates>6,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1057">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1057</id>
+          <worldCoordinates>23,22</worldCoordinates>
+          <localCoordinates>7,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1058">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1058</id>
+          <worldCoordinates>24,21</worldCoordinates>
+          <localCoordinates>8,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1059">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1059</id>
+          <worldCoordinates>25,20</worldCoordinates>
+          <localCoordinates>9,4</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1060">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1060</id>
+          <worldCoordinates>20,26</worldCoordinates>
+          <localCoordinates>4,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1061">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1061</id>
+          <worldCoordinates>21,25</worldCoordinates>
+          <localCoordinates>5,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1062">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1062</id>
+          <worldCoordinates>19,25</worldCoordinates>
+          <localCoordinates>3,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1063">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1063</id>
+          <worldCoordinates>22,24</worldCoordinates>
+          <localCoordinates>6,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1064">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1064</id>
+          <worldCoordinates>23,23</worldCoordinates>
+          <localCoordinates>7,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1065">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1065</id>
+          <worldCoordinates>24,22</worldCoordinates>
+          <localCoordinates>8,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1066">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1066</id>
+          <worldCoordinates>25,21</worldCoordinates>
+          <localCoordinates>9,5</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1067">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1067</id>
+          <worldCoordinates>21,26</worldCoordinates>
+          <localCoordinates>5,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1068">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1068</id>
+          <worldCoordinates>19,26</worldCoordinates>
+          <localCoordinates>3,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1069">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1069</id>
+          <worldCoordinates>22,25</worldCoordinates>
+          <localCoordinates>6,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1070">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1070</id>
+          <worldCoordinates>23,24</worldCoordinates>
+          <localCoordinates>7,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1071">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1071</id>
+          <worldCoordinates>24,23</worldCoordinates>
+          <localCoordinates>8,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1072">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1072</id>
+          <worldCoordinates>25,22</worldCoordinates>
+          <localCoordinates>9,6</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1073">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1073</id>
+          <worldCoordinates>22,26</worldCoordinates>
+          <localCoordinates>6,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1074">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1074</id>
+          <worldCoordinates>23,25</worldCoordinates>
+          <localCoordinates>7,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1075">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1075</id>
+          <worldCoordinates>24,24</worldCoordinates>
+          <localCoordinates>8,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1076">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1076</id>
+          <worldCoordinates>25,23</worldCoordinates>
+          <localCoordinates>9,7</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1077">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1077</id>
+          <worldCoordinates>23,26</worldCoordinates>
+          <localCoordinates>7,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1078">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1078</id>
+          <worldCoordinates>24,25</worldCoordinates>
+          <localCoordinates>8,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1079">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1079</id>
+          <worldCoordinates>25,24</worldCoordinates>
+          <localCoordinates>9,8</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1080">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1080</id>
+          <worldCoordinates>24,26</worldCoordinates>
+          <localCoordinates>8,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1081">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1081</id>
+          <worldCoordinates>25,25</worldCoordinates>
+          <localCoordinates>9,9</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
+      <li Key="1082">
+        <Value Type="BlockmapFramework.WaterNode">
+          <id>1082</id>
+          <worldCoordinates>25,26</worldCoordinates>
+          <localCoordinates>9,10</localCoordinates>
+          <altitude>5,5,5,5</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Water</surface>
+        </Value>
+      </li>
     </nodes>
     <entities>
       <li Key="0">
@@ -9448,6 +9889,36 @@
           <rotation>N</rotation>
           <owner>0</owner>
           <isOpen>True</isOpen>
+        </Value>
+      </li>
+      <li Key="10">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>10</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>504</originNode>
+          <overrideHeight>1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>10</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>True</customCanSwim>
+          <customClimbSkill>Intermediate</customClimbSkill>
+        </Value>
+      </li>
+      <li Key="11">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>11</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>502</originNode>
+          <overrideHeight>1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>10</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>False</customCanSwim>
+          <customClimbSkill>Intermediate</customClimbSkill>
         </Value>
       </li>
     </entities>
@@ -9842,7 +10313,16 @@
         </Value>
       </li>
     </entities>
-    <entities />
+    <entities>
+      <li Key="0">
+        <Value Type="BlockmapFramework.WaterBody">
+          <id>0</id>
+          <shoreHeight>5</shoreHeight>
+          <waterNodes>1034,1035,1036,1037,1038,1039,1040,1041,1042,1043,1044,1045,1046,1047,1048,1049,1050,1051,1052,1053,1054,1055,1056,1057,1058,1059,1060,1061,1062,1063,1064,1065,1066,1067,1068,1069,1070,1071,1072,1073,1074,1075,1076,1077,1078,1079,1080,1081,1082</waterNodes>
+          <coveredGroundNodes>836,837,852,820,838,853,821,868,839,854,822,869,884,840,855,823,870,885,900,841,856,824,871,886,901,916,842,857,825,872,887,902,917,858,826,873,888,903,918,874,889,904,919,890,905,920,906,921,922</coveredGroundNodes>
+        </Value>
+      </li>
+    </entities>
     <entities />
   </Data>
 </Root>

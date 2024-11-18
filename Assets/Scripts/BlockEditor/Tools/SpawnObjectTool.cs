@@ -30,7 +30,7 @@ namespace WorldEditor
             CurrentRotation = Direction.N;
 
             EntitySelection.Clear();
-            foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.RenderProperties.RenderType == EntityRenderType.StandaloneModel))
+            foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.RenderProperties.RenderType == EntityRenderType.StandaloneModel && !x.Components.Any(y => y is CompProperties_Movement)))
             {
                 EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
@@ -56,6 +56,7 @@ namespace WorldEditor
                 BuildPreview.gameObject.SetActive(true);
                 BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
+                BuildPreview.transform.localScale = new Vector3(SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale);
 
                 foreach(Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
                     mat.color = canPlace ? Color.green : Color.red;
@@ -94,7 +95,20 @@ namespace WorldEditor
             // Update preview
             if (BuildPreview != null)
             {
-                BuildPreview.GetComponent<MeshFilter>().mesh = def.RenderProperties.Model;
+                // Get the mesh and materials from the prefab
+                MeshFilter prefabMeshFilter = def.RenderProperties.Model.GetComponent<MeshFilter>();
+                MeshRenderer prefabMeshRenderer = def.RenderProperties.Model.GetComponent<MeshRenderer>();
+
+                if (prefabMeshFilter != null && prefabMeshRenderer != null)
+                {
+                    // Apply mesh
+                    BuildPreview.GetComponent<MeshFilter>().mesh = prefabMeshFilter.sharedMesh;
+
+                    // Apply materials
+                    MeshRenderer previewRenderer = BuildPreview.GetComponent<MeshRenderer>();
+                    previewRenderer.sharedMaterials = prefabMeshRenderer.sharedMaterials;
+                }
+
                 BuildPreview.gameObject.SetActive(false);
             }
         }

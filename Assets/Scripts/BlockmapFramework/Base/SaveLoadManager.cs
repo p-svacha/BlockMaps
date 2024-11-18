@@ -488,9 +488,9 @@ namespace BlockmapFramework
                     int objId = int.Parse(reader.ReadElementContentAsString());
 
                     // Resolve the reference based on the expected type
-                    if (typeof(T) == typeof(Actor)) obj = LoadingWorld.GetActor(objId) as T;
-                    else if (typeof(T) == typeof(BlockmapNode)) obj = LoadingWorld.GetNode(objId) as T;
-                    else if (typeof(T) == typeof(Entity)) obj = LoadingWorld.GetEntity(objId) as T;
+                    if (typeof(Actor).IsAssignableFrom(typeof(T))) obj = LoadingWorld.GetActor(objId) as T;
+                    else if (typeof(BlockmapNode).IsAssignableFrom(typeof(T))) obj = LoadingWorld.GetNode(objId) as T;
+                    else if (typeof(Entity).IsAssignableFrom(typeof(T))) obj = LoadingWorld.GetEntity(objId) as T;
                     else throw new Exception($"Unsupported reference type '{typeof(T)}' for field '{label}'.");
 
                     // Validate that the reference was successfully resolved
@@ -522,9 +522,9 @@ namespace BlockmapFramework
                     {
                         T resolvedObj = null;
                         int objId = int.Parse(idString);
-                        if (typeof(T) == typeof(Actor)) resolvedObj = LoadingWorld.GetActor(objId) as T;
-                        else if (typeof(T) == typeof(BlockmapNode)) resolvedObj = LoadingWorld.GetNode(objId) as T;
-                        else if (typeof(T) == typeof(Entity)) resolvedObj = LoadingWorld.GetEntity(objId) as T;
+                        if (typeof(Actor).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetActor(objId) as T;
+                        else if (typeof(BlockmapNode).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetNode(objId) as T;
+                        else if (typeof(Entity).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetEntity(objId) as T;
                         else throw new Exception($"Unsupported reference type '{typeof(T)}' in list '{label}'.");
 
                         // Validate that the reference was successfully resolved

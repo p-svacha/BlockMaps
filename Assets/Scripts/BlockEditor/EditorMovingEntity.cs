@@ -21,6 +21,8 @@ namespace WorldEditor
 
         private Comp_Movement MovementComp;
 
+        public override float VisionRange => customVisionRange;
+
         protected override void OnInitialized()
         {
             MeshObject.transform.localScale = new Vector3(1f, 1f * Dimensions.y, 1f);
@@ -32,9 +34,13 @@ namespace WorldEditor
             MovementComp = GetComponent<Comp_Movement>();
             MovementComp.OnNewPath += OnNewPath;
             MovementComp.OnStopMoving += OnStopMoving;
+
+            MovementComp.EnableOverrideMovementSpeed(customSpeed);
+            MovementComp.EnableOverrideCanSwim(customCanSwin);
+            MovementComp.EnableOverrideClimbSkill(customClimbSkill);
         }
 
-        public void CustomPostInit(float speed, float visionRange, bool canSwim, ClimbingCategory climbSkill)
+        public void PreInit(float speed, float visionRange, bool canSwim, ClimbingCategory climbSkill)
         {
             customSpeed = speed;
             customVisionRange = visionRange;

@@ -1,12 +1,7 @@
 Migration to Def-System
 
-fix model materials for StandaloneModel
-fix charactertool (+ navmesh)
-fix dynamic character spawn
-fix model scale in spawn object tool
-fix sloped fence climb in world "a""
-
 add all entities from before (trees, cars, log, flag, etc)
+	then delete prefabs
 
 allow mirroring for all entites
 	make it affect vision colldiers correctly

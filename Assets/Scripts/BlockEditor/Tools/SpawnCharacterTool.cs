@@ -98,15 +98,14 @@ namespace WorldEditor
             BlockmapNode spawnNode = World.HoveredNode;
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            
             if (SelectedEntity == EntityDefOf.EditorDynamicCharacter)
             {
-                EditorMovingEntity entity = (EditorMovingEntity)World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height: int.Parse(HeightInput.text), updateWorld: true);
                 float speed = float.Parse(SpeedInput.text);
                 float vision = float.Parse(VisionInput.text);
                 bool canSwim = CanSwimToggle.isOn;
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
-                entity.CustomPostInit(speed, vision, canSwim, climbingSkill);
+                int height = int.Parse(HeightInput.text);
+                World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill));
             }
             else World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, updateWorld: true);
         }
