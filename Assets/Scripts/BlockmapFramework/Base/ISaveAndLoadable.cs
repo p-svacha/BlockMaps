@@ -11,9 +11,14 @@ namespace BlockmapFramework
     public interface ISaveAndLoadable
     {
         /// <summary>
-        /// Define all data here that needs to be saved and loaded with "SaveLoadManager.SaveOrLoadX".
+        /// Defines all data that needs to be saved and loaded with "SaveLoadManager.SaveOrLoadX".
         /// <br/>You can detect if you are in a save or load call by checking SaveLoadManager.iÎsLoading / IsSaving.
         /// </summary>
         public void ExposeDataForSaveAndLoad();
+
+        /// <summary>
+        /// Unique identifier of this object used for easy access in the world databases. (like Actors, Nodes, Entities, etc.)
+        /// </summary>
+        public int Id => 0;
     }
 }

@@ -17,7 +17,8 @@ namespace BlockmapFramework
         /// <summary>
         /// Unique identifier of the node.
         /// </summary>
-        public int Id;
+        private int id;
+        public int Id => id;
 
         /// <summary>
         /// The surface that defines many gameplay behaviours of this node.
@@ -127,21 +128,34 @@ namespace BlockmapFramework
         /// </summary>
         protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef)
         {
-            Id = id;
+            World = world;
+            Chunk = chunk;
+            this.id = id;
             LocalCoordinates = new Vector2Int(localCoordinates.x, localCoordinates.y);
             WorldCoordinates = chunk.GetWorldCoordinates(LocalCoordinates);
             
             Altitude = height;
             SurfaceDef = surfaceDef;
 
-            OnCreateOrLoad(world, chunk);
+            Init();
         }
 
-        public void OnCreateOrLoad(World world, Chunk chunk)
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file.
+        /// </summary>
+        public void PostLoad()
         {
-            World = world;
-            Chunk = chunk;
+            Chunk = World.GetChunk(WorldCoordinates);
+            World.RegisterNode(this);
 
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called after this Entity got instantiated, either through being spawned or when being loaded.
+        /// </summary>
+        public void Init()
+        {
             RecalculateShape();
             Transitions = new Dictionary<BlockmapNode, Transition>();
             WalkTransitions = new Dictionary<Direction, Transition>();
@@ -592,7 +606,7 @@ namespace BlockmapFramework
 
         public void AddVisionBy(Entity e)
         {
-            ExploredBy.Add(e.Owner);
+            ExploredBy.Add(e.Actor);
             SeenBy.Add(e);
         }
         public void RemoveVisionBy(Entity e)
@@ -612,7 +626,7 @@ namespace BlockmapFramework
         {
             if (actor == null) return true; // Everything is visible
             if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
-            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Node is seen by an entity of given actor
+            if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Node is seen by an entity of given actor
 
             return false;
         }
@@ -747,13 +761,13 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Checks and returns if an adjacent node in the given direction with a seamless connection has an entity of the given type prefix.
+        /// Checks and returns if an adjacent node in the given direction with a seamless connection has an entity with the given def and height.
         /// </summary>
-        public bool HasEntityConnection(Direction dir, string typeId)
+        public bool HasEntityConnection(Direction dir, EntityDef def, int entityHeight)
         {
             List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjNodes)
-                if (World.DoAdjacentHeightsMatch(this, adjNode, dir) && adjNode.Entities.Any(x => x.TypeId == typeId))
+                if (World.DoAdjacentHeightsMatch(this, adjNode, dir) && adjNode.Entities.Any(x => x.Def == def && x.Height == entityHeight))
                     return true;
             return false;
         }
@@ -932,7 +946,7 @@ namespace BlockmapFramework
         /// </summary>
         protected virtual bool IsGenerallyPassable()
         {
-            if (Entities.Any(x => !x.IsPassable)) return false; // An entity is blocking this node
+            if (Entities.Any(x => !x.Def.IsPassable)) return false; // An entity is blocking this node
             return true;
         }
         /// <summary>
@@ -1042,7 +1056,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.
         /// </summary>
-        public List<BlockmapNode> GetNodesInRange(float maxCost, MovingEntity entity = null)
+        public List<BlockmapNode> GetNodesInRange(float maxCost, Entity entity = null)
         {
             // Setup
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
@@ -1093,7 +1107,9 @@ namespace BlockmapFramework
 
         public void ExposeDataForSaveAndLoad()
         {
-            SaveLoadManager.SaveOrLoadInt(ref Id, "id");
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
+
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
             SaveLoadManager.SaveOrLoadVector2Int(ref WorldCoordinates, "worldCoordinates");
             SaveLoadManager.SaveOrLoadVector2Int(ref LocalCoordinates, "localCoordinates");
             SaveLoadManager.SaveOrLoadAltitudeDictionary(ref Altitude);

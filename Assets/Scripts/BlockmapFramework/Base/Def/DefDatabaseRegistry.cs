@@ -25,6 +25,7 @@ namespace BlockmapFramework
             DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
             DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
             DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(GlobalEntityDefs.Defs);
         }
 
         // Called when a DefDatabase<T> type is accessed for the first time
@@ -124,7 +125,7 @@ namespace BlockmapFramework
                 }
                 catch (TargetInvocationException e)
                 {
-                    throw new Exception($"Failed to bind Def named '{defName}' in {type}: " + e.InnerException.Message);
+                    Debug.LogWarning($"Failed to bind Def named '{defName}' in {type}: " + e.InnerException.Message);
                 }
             }
         }

@@ -26,24 +26,24 @@ namespace CaptureTheFlag
         protected override void OnStartPerform()
         {
             // Subsribe to OnTargetReached so we know when character is done moving
-            Character.Entity.OnTargetReached += OnCharacterReachedTarget;
+            Character.MovementComp.OnTargetReached += OnCharacterReachedTarget;
 
             // Start movement of character entity
-            Character.Entity.Move(Path);
+            Character.MovementComp.Move(Path);
         }
 
         public override void DoPause()
         {
-            Character.Entity.PauseMovement();
+            Character.MovementComp.PauseMovement();
         }
         public override void DoUnpause()
         {
-            Character.Entity.UnpauseMovement();
+            Character.MovementComp.UnpauseMovement();
         }
 
         private void OnCharacterReachedTarget()
         {
-            Character.Entity.OnTargetReached -= OnCharacterReachedTarget;
+            Character.MovementComp.OnTargetReached -= OnCharacterReachedTarget;
             EndAction();
         }
     }

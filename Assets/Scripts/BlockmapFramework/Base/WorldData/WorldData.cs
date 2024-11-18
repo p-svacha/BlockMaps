@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/*
+
 namespace BlockmapFramework
 {
     [Serializable]
@@ -27,4 +27,3 @@ namespace BlockmapFramework
         public List<ZoneData> Zones { get; set; }
     }
 }
-*/

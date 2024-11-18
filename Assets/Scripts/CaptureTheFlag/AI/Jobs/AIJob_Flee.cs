@@ -57,7 +57,7 @@ namespace CaptureTheFlag
             List<Character> relevantOpponents = new List<Character>();
             foreach (Character opponentCharacter in Opponent.Characters)
             {
-                if (opponentCharacter.Entity.IsInRange(Character.Node, 40)) relevantOpponents.Add(opponentCharacter);
+                if (opponentCharacter.Entity.GetComponent<Comp_Movement>().IsInRange(Character.Node, 40)) relevantOpponents.Add(opponentCharacter);
             }
             return relevantOpponents;
         }

@@ -18,10 +18,11 @@ namespace BlockmapFramework
         /// </summary>
         public GameObject WorldObject;
 
+        private int numChunksPerSide;
         /// <summary>
         /// The amount of chunks on each side of this world.
         /// </summary>
-        public int NumChunksPerSide;
+        public int NumChunksPerSide => numChunksPerSide;
 
         /// <summary>
         /// The amount of nodes on each side of this world.
@@ -62,7 +63,6 @@ namespace BlockmapFramework
         public const int ChunkSize = 16;
         public int MinX, MaxX, MinY, MaxY;
         public Vector2Int Dimensions { get; private set; }
-        public WorldEntityLibrary EntityLibrary { get; private set; }
 
         // Fixed Updates
         private bool updateEntityVisionNextFixedUpdate;
@@ -152,7 +152,7 @@ namespace BlockmapFramework
         // Draw modes
         public bool IsShowingGrid { get; private set; }
         public bool IsShowingNavmesh { get; private set; }
-        public MovingEntity NavmeshEntity { get; private set; }
+        public Entity NavmeshEntity { get; private set; }
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
         public bool IsVisionCutoffEnabled { get; private set; }
@@ -177,7 +177,7 @@ namespace BlockmapFramework
         /// </summary>
         public World(int numChunksPerSide)
         {
-            NumChunksPerSide = numChunksPerSide;
+            this.numChunksPerSide = numChunksPerSide;
 
             OnCreate();
 
@@ -238,6 +238,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Starts world initialization which redraws the full world, updates the vision of all entities and generates the full navmesh.
+        /// <br/>Gets executed once after creating or loading a world.
         /// </summary>
         public void Initialize()
         {
@@ -315,7 +316,7 @@ namespace BlockmapFramework
 
         #region Update
 
-        public void Update()
+        public void Tick()
         {
             // Check if world is done initializing
             if (!IsInitialized)
@@ -326,7 +327,7 @@ namespace BlockmapFramework
 
             // Regular updates
             UpdateHoveredObjects();
-            foreach (Entity e in Entities.Values) e.UpdateEntity();
+            foreach (Entity e in Entities.Values) e.Tick();
         }
 
         /// <summary>
@@ -463,11 +464,11 @@ namespace BlockmapFramework
                 if (hit.transform.gameObject.layer == Layer_EntityMesh)
                 {
                     Transform objectHit = hit.transform;
-                    newHoveredEntity = hit.transform.parent.GetComponentInChildren<Entity>();
+                    newHoveredEntity = objectHit.GetComponent<EntityCollider>().Entity;
                 }
                 else if (hit.transform.gameObject.layer == Layer_ProceduralEntityMesh)
                 {
-                    newHoveredEntity = GetProceduralEntityFromRaycastHit(hit);
+                    newHoveredEntity = GetBatchEntityFromRaycastHit(hit);
                 }
                 if(newHoveredEntity != null && newHoveredChunk == null) newHoveredChunk = newHoveredEntity.Chunk;
             }
@@ -676,14 +677,14 @@ namespace BlockmapFramework
             Debug.LogWarning("GetFenceFromRaycastHit failed to find a fence at world position: " + hit.point.ToString());
             return null;
         }
-        private ProceduralEntity GetProceduralEntityFromRaycastHit(RaycastHit hit)
+        private Entity GetBatchEntityFromRaycastHit(RaycastHit hit)
         {
-            ProceduralEntityMesh hitMesh = hit.transform.GetComponent<ProceduralEntityMesh>();
+            BatchEntityMesh hitMesh = hit.transform.GetComponent<BatchEntityMesh>();
             List<BlockmapNode> hitNodes = GetNodes(HoveredWorldCoordinates, hitMesh.Altitude);
 
             // If the exact node we hit has a procedural entity, return that
-            BlockmapNode targetNode = hitNodes.FirstOrDefault(x => x.Entities.Any(e => e is ProceduralEntity));
-            if (targetNode != null) return targetNode.Entities.First(x => x is ProceduralEntity) as ProceduralEntity;
+            BlockmapNode targetNode = hitNodes.FirstOrDefault(x => x.Entities.Any(e => e.Def.RenderProperties.RenderType == EntityRenderType.Batch));
+            if (targetNode != null) return targetNode.Entities.First(x => x.Def.RenderProperties.RenderType == EntityRenderType.Batch);
 
             return null;
         }
@@ -897,7 +898,7 @@ namespace BlockmapFramework
             foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
             foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
 
-            foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
@@ -907,7 +908,7 @@ namespace BlockmapFramework
             foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
             foreach (Wall wall in Walls.Values) wall.AddExploredBy(actor);
 
-            foreach (Entity entity in Entities.Values.Where(x => x.Owner == actor)) entity.UpdateVision();
+            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
 
             UpdateVisibility();
         }
@@ -1093,16 +1094,18 @@ namespace BlockmapFramework
             UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
         }
 
-        public bool CanSpawnEntity(Entity entityPrefab, BlockmapNode node, Direction rotation, bool forceHeadspaceRecalc = false)
+        public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
         {
-            HashSet<BlockmapNode> occupiedNodes = entityPrefab.GetOccupiedNodes(this, node, rotation); // get nodes that would be occupied when placing the entity on the given node
+            HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, height); // get nodes that would be occupied when placing the entity on the given node
 
             // Terrain below entity is not fully connected and therefore occupiedNodes is null
             if (occupiedNodes == null) return false;
 
-            Vector3 placePos = entityPrefab.GetWorldPosition(this, node, rotation);
+            int actualHeight = def.VariableHeight ? height : def.Dimensions.y;
+
+            Vector3 placePos = def.RenderProperties.GetWorldPositionFunction(def, this, node, rotation, false);
             int minAltitude = Mathf.FloorToInt(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
-            int maxAltitude = minAltitude + entityPrefab.Height - 1; // max y coordinate that this entity will occupy on all occupied tiles
+            int maxAltitude = minAltitude + actualHeight - 1; // max y coordinate that this entity will occupy on all occupied tiles
 
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
@@ -1120,33 +1123,33 @@ namespace BlockmapFramework
                 if (occupiedNode.Entities.Count > 0) return false;
 
                 // Check if flat
-                if (entityPrefab.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
+                if (def.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
             }
 
             return true;
         }
-        public Entity SpawnEntity(Entity prefab, BlockmapNode node, Direction rotation, Actor actor, bool isInstance = false, bool updateWorld = true)
+        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false, bool updateWorld = true)
         {
-            // Create entity object
-            Entity instance = isInstance ? prefab : GameObject.Instantiate(prefab, WorldObject.transform);
+            // Instantiate from def
+            Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
 
             // Init
-            instance.Init(EntityIdCounter++, this, node, rotation, actor);
+            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
 
             // Register new entity
-            RegisterEntity(instance);
+            RegisterEntity(newEntity);
 
-            // Redraw chunk meshes if it is a procedural entity
-            if (updateWorld && instance is ProceduralEntity) RedrawNodesAround(node.WorldCoordinates);
+            // Redraw chunk meshes if the entity is draw as a chunk mesh
+            if (updateWorld && def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(node.WorldCoordinates);
 
             // Update vision around new entity (and then update it's visibility when done)
-            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(instance.OriginNode.CenterWorldPosition, callback: instance.UpdateVisibility);
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(newEntity.OriginNode.CenterWorldPosition, callback: newEntity.UpdateVisibility);
 
             // Update pathfinding navmesh
-            if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, instance.GetDimensions().x, instance.GetDimensions().z);
+            if (updateWorld) UpdateNavmeshAround(node.WorldCoordinates, newEntity.GetTranslatedDimensions().x, newEntity.GetTranslatedDimensions().z);
 
             // Return new instance
-            return instance;
+            return newEntity;
         }
         public void RemoveEntity(Entity entityToRemove, bool updateWorld = true)
         {
@@ -1178,14 +1181,14 @@ namespace BlockmapFramework
                 node.Chunk.RemoveEntity(entityToRemove);
             }
 
-            // Redraw chunk meshes if it is a procedural entity
-            if (updateWorld && entityToRemove is ProceduralEntity) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
+            // Redraw chunk meshes if it is a batch entity
+            if (updateWorld && entityToRemove.Def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
 
             // Update pathfinding navmesh
-            if(updateWorld) UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetDimensions().x, entityToRemove.GetDimensions().z);
+            if(updateWorld) UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z);
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
-            if (updateWorld && entityToRemove.Owner == ActiveVisionActor)
+            if (updateWorld && entityToRemove.Actor == ActiveVisionActor)
                 foreach (Chunk c in chunksAffectedByVision)
                     UpdateVisibility(c);
 
@@ -1201,15 +1204,17 @@ namespace BlockmapFramework
         }
         public void RegisterEntity(Entity entity)
         {
-            Entities.Add(entity.Id, entity);
-            entity.Owner.Entities.Add(entity);
+            Entities.Add(entity.id, entity);
+            entity.Actor.Entities.Add(entity);
+            if(entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
 
             entity.OnRegister();
         }
         public void DeregisterEntity(Entity entity)
         {
-            Entities.Remove(entity.Id);
-            entity.Owner.Entities.Remove(entity);
+            Entities.Remove(entity.id);
+            entity.Actor.Entities.Remove(entity);
+            if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.DeregisterBatchEntity(entity);
 
             entity.OnDeregister();
         }
@@ -1519,8 +1524,8 @@ namespace BlockmapFramework
         }
         public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
         {
-            Ladder instance = Ladder.GetInstance(from, to, side);
-            SpawnEntity(instance, from, side, Gaia, isInstance: true);
+            Ladder ladder = (Ladder)SpawnEntity(EntityDefOf.Ladder, from, side, Gaia);
+            ladder.CustomPostInit(to);
         }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)
@@ -1529,8 +1534,7 @@ namespace BlockmapFramework
         }
         public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored)
         {
-            Door instance = Door.GetInstance(node, side, height, isMirrored);
-            SpawnEntity(instance, node, side, Gaia, isInstance: true);
+            Door door = (Door)SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored);
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
@@ -1671,7 +1675,7 @@ namespace BlockmapFramework
             updateEntityVisionNextFixedUpdate = true;
 
             visionUpdateEntities = GetNearbyEntities(position, rangeEast, rangeNorth);
-            if (excludeActor != null) visionUpdateEntities = visionUpdateEntities.Where(x => x.Owner != excludeActor).ToList();
+            if (excludeActor != null) visionUpdateEntities = visionUpdateEntities.Where(x => x.Actor != excludeActor).ToList();
             entityVisionUpdateCallback = callback;
         }
         /// <summary>
@@ -1718,7 +1722,7 @@ namespace BlockmapFramework
             IsShowingNavmesh = !IsShowingNavmesh;
             UpdateNavmeshDisplayDelayed();
         }
-        public void SetNavmeshEntity(MovingEntity entity)
+        public void SetNavmeshEntity(Entity entity)
         {
             NavmeshEntity = entity;
             UpdateNavmeshDisplayDelayed();
@@ -2219,25 +2223,24 @@ namespace BlockmapFramework
 
         public void ExposeDataForSaveAndLoad()
         {
-            SaveLoadManager.SaveOrLoadString(ref Name, "name");
-            SaveLoadManager.SaveOrLoadInt(ref NumChunksPerSide, "numChunksPerSide");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Name, "name");
+            SaveLoadManager.SaveOrLoadPrimitive(ref numChunksPerSide, "numChunksPerSide");
 
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Actors, "actors");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Nodes, "nodes");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Entities, "entities");
 
             if (SaveLoadManager.IsLoading)
             {
                 CreateChunksAndGameObjects();
 
-                foreach(Actor actor in Actors.Values) actor.OnCreateOrLoad(this);
-
-                foreach (BlockmapNode node in Nodes.Values)
-                {
-                    node.OnCreateOrLoad(this, GetChunk(node.WorldCoordinates));
-                    node.Chunk.RegisterNode(node);
-                }
+                foreach (Actor actor in Actors.Values) actor.PostLoad();
+                foreach (BlockmapNode node in Nodes.Values) node.PostLoad();
+                foreach (Entity e in Entities.Values) e.PostLoad();
             }
         }
+
+        public int Id => 0; // Unused since World is the root object of save data and there is always only one.
 
         #endregion
     }

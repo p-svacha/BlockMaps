@@ -11,7 +11,7 @@ namespace WorldEditor
         public override string Name => "Move Entity";
         public override Sprite Icon => ResourceManager.Singleton.MoveEntityToolSprite;
 
-        private MovingEntity SelectedEntity;
+        private Entity SelectedEntity;
 
         private const float PATH_PREVIEW_WIDTH = 0.1f;
         private Color PATH_PREVIEW_COLOR = new Color(1f, 1f, 1f, 0.5f);
@@ -31,7 +31,7 @@ namespace WorldEditor
             PathPreview.gameObject.SetActive(false);
         }
 
-        public void SelectEntity(MovingEntity e)
+        public void SelectEntity(Entity e)
         {
             if (SelectedEntity != null) SelectedEntity.SetSelected(false);
             SelectedEntity = e;
@@ -60,7 +60,7 @@ namespace WorldEditor
 
             if (SelectedEntity == null) return;
             if (World.HoveredNode == null) return;
-            if (!World.HoveredNode.IsExploredBy(SelectedEntity.Owner)) return;
+            if (!World.HoveredNode.IsExploredBy(SelectedEntity.Actor)) return;
 
             if (SelectedEntity.OriginNode != CacheOriginNode) PathCache.Clear(); // Clear cache when changing node
             CacheOriginNode = SelectedEntity.OriginNode;
@@ -89,9 +89,9 @@ namespace WorldEditor
             // Select entity
             if (World.HoveredEntity != null)
             {
-                if (World.HoveredEntity is MovingEntity)
+                if (World.HoveredEntity.GetComponent<Comp_Movement>() != null)
                 {
-                    SelectEntity((MovingEntity)World.HoveredEntity);
+                    SelectEntity(World.HoveredEntity);
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace WorldEditor
         // Rightclick: Move
         public override void HandleRightClick()
         {
-            if (SelectedEntity != null && TargetPath != null) SelectedEntity.MoveTo(World.HoveredNode);
+            if (SelectedEntity != null && TargetPath != null) SelectedEntity.GetComponent<Comp_Movement>().MoveTo(World.HoveredNode);
         }
 
         // Middleclick: Teleport

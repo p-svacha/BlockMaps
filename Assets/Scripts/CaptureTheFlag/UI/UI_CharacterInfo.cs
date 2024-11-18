@@ -26,7 +26,7 @@ namespace CaptureTheFlag
             TitleText.text = c.Name;
             MovementText.text = c.MovementSkill.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
-            VisionText.text = c.Entity.VisionRange.ToString();
+            VisionText.text = c.Entity.Def.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
         }

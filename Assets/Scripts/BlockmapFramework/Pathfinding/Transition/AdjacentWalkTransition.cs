@@ -14,18 +14,18 @@ namespace BlockmapFramework
             Direction = dir;
         }
 
-        public override float GetMovementCost(MovingEntity entity)
+        public override float GetMovementCost(Entity entity)
         {
             float value = (0.5f * (1f / From.SurfaceDef.MovementSpeedModifier)) + (0.5f * (1f / To.SurfaceDef.MovementSpeedModifier));
             if(HelperFunctions.IsCorner(Direction)) value *= 1.4142f; // Because diagonal
             return value;
         }
 
-        public override void OnTransitionStart(MovingEntity entity)
+        public override void OnTransitionStart(Entity entity)
         {
             entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
         }
-        public override void UpdateEntityMovement(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
+        public override void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode originNode)
         {
             // Get current 2d position of entity
             Vector2 oldPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
@@ -35,7 +35,7 @@ namespace BlockmapFramework
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
 
             // Calculate new 2d world position and coordinates by moving towards next node in 2d
-            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.MovementSpeed * Time.deltaTime * entity.OriginNode.SurfaceDef.MovementSpeedModifier);
+            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.GetComponent<Comp_Movement>().MovementSpeed * Time.deltaTime * entity.OriginNode.SurfaceDef.MovementSpeedModifier);
             Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
 
             // Set origin node according to 2d coordinates

@@ -26,12 +26,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Flag if the door is open or closed.
         /// </summary>
-        public bool IsOpen { get; private set; }
-
-        /// <summary>
-        /// Flag if the door opens to the left instead of to the right.
-        /// </summary>
-        public bool IsMirrored { get; private set; }
+        public bool IsOpen;
 
         /// <summary>
         /// Returns the direction on its OriginNode that this bloor is currently blocking, based on if it is open or closed.
@@ -41,23 +36,15 @@ namespace BlockmapFramework
         private Quaternion ClosedRotation => HelperFunctions.Get2dRotationByDirection(Rotation);
         private Quaternion OpenRotation => IsMirrored ? HelperFunctions.Get2dRotationByDirection(HelperFunctions.GetNextSideDirection(Rotation)) : HelperFunctions.Get2dRotationByDirection(HelperFunctions.GetPreviousSideDirection(Rotation));
 
+
+        // Open/close animation
+        private Quaternion targetRotation;
+        private Quaternion startingRotation;
+        private float elapsedTime;
+        private float rotationDuration = 1f; // Duration for the full rotation in seconds
+        private bool isRotating = false;
+
         #region Init
-
-        public void InitDoor(BlockmapNode node, Direction side, int height, bool isMirrored)
-        {
-            // Door specific
-            DoorHeight = height;
-            DoorMinAltitude = node.GetMinAltitude(side);
-            DoorMaxAltitude = DoorMinAltitude + height - 1;
-            IsMirrored = isMirrored;
-
-            // Entity general
-            Name = "Door";
-            TypeId = DOOR_ENTITY_NAME + "_" + height + "_" + IsMirrored;
-            Dimensions = new Vector3Int(1, height, 1);
-            BlocksVision = true;
-            IsPassable = true;
-        }
 
         public override void OnRegister()
         {
@@ -66,34 +53,6 @@ namespace BlockmapFramework
         public override void OnDeregister()
         {
             OriginNode.Doors.Remove(Rotation);
-        }
-
-        protected override void CreateVisionCollider()
-        {
-            GameObject visionColliderObject = new GameObject("visionCollider");
-            visionColliderObject.transform.SetParent(Wrapper.transform);
-            visionColliderObject.transform.localScale = transform.localScale;
-            visionColliderObject.layer = World.Layer_EntityVisionCollider;
-
-            MeshCollider collider = visionColliderObject.AddComponent<MeshCollider>();
-            collider.sharedMesh = MeshCollider.sharedMesh;
-            VisionCollider = collider;
-        }
-
-        public static Door GetInstance(World world, EntityData data)
-        {
-            string[] attributes = data.TypeId.Split('_');
-            BlockmapNode node = world.GetNode(data.OriginNodeId);
-            int height = int.Parse(attributes[1]);
-            bool isMirrored = attributes.Length > 2 ? bool.Parse(attributes[2]) : false;
-
-            return GetInstance(node, data.Rotation, height, isMirrored);
-        }
-        public static Door GetInstance(BlockmapNode node, Direction side, int height, bool isMirrored)
-        {
-            Door instance = GenerateDoorObject(node, side, height, isMirrored);
-            instance.InitDoor(node, side, height, isMirrored);
-            return instance;
         }
 
         #endregion
@@ -105,39 +64,37 @@ namespace BlockmapFramework
         /// </summary>
         public void Toggle()
         {
-            if (!IsOpen)
-            {
-                StartCoroutine(RotateDoor(ClosedRotation, OpenRotation));
-            }
-            else
-            {
-                StartCoroutine(RotateDoor(OpenRotation, ClosedRotation));
-            }
+            if (isRotating) return; // Prevent toggling during rotation
+
+            startingRotation = WorldRotation;
+            targetRotation = IsOpen ? ClosedRotation : OpenRotation;
+            elapsedTime = 0f;
+            isRotating = true;
 
             IsOpen = !IsOpen;
-
             World.UpdateNavmeshAround(OriginNode.WorldCoordinates);
         }
 
-        private IEnumerator RotateDoor(Quaternion startingRotation, Quaternion targetRotation)
+        protected override void OnTick()
         {
-            float elapsedTime = 0f;
-            float rotationDuration = 1f;
+            if (!isRotating) return;
 
-            while (elapsedTime < rotationDuration)
-            {
-                WorldRotation = Quaternion.Slerp(startingRotation, targetRotation, elapsedTime / rotationDuration);
-                elapsedTime += Time.deltaTime;
-                UpdateVisibility();
-                yield return null;
-            }
+            elapsedTime += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsedTime / rotationDuration);
+            WorldRotation = Quaternion.Slerp(startingRotation, targetRotation, progress);
 
-            WorldRotation = targetRotation;
             UpdateVisibility();
 
-            UpdateVisionColliderPosition();
-            World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition);
+            if (progress >= 1f)
+            {
+                isRotating = false; // Rotation is complete
+                WorldRotation = targetRotation;
+                UpdateVisibility();
+                UpdateVisionColliderPosition();
+                World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition);
+            }
         }
+
 
         #endregion
 
@@ -172,13 +129,24 @@ namespace BlockmapFramework
             }
         }
 
-        public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
+        public static Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
         {
-            Vector3 basePosition = base.GetWorldPosition(world, originNode, rotation);
-            float worldY = World.NodeHeight * originNode.GetMinAltitude(Rotation);
+            Vector3 basePosition = EntityManager.GetWorldPosition(EntityDefOf.Door, world, originNode, rotation);
+            float worldY = World.NodeHeight * originNode.GetMinAltitude(rotation);
 
-            Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, IsMirrored);
+            Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, isMirrored);
             return new Vector3(offsetPosition.x, worldY, offsetPosition.z);
+        }
+
+        #endregion
+
+        #region Save / Load
+
+        public override void ExposeDataForSaveAndLoad()
+        {
+            base.ExposeDataForSaveAndLoad();
+
+            SaveLoadManager.SaveOrLoadPrimitive(ref IsOpen, "isOpen");
         }
 
         #endregion
@@ -191,17 +159,6 @@ namespace BlockmapFramework
         private const float MIN_HANDLE_MARGIN_TOP = 0.2f;
         private const float HANDLE_MARGIN_X = 0.1f;
         private const float HANDLE_SIZE = 0.1f;
-
-        private static Door GenerateDoorObject(BlockmapNode node, Direction side, int height, bool isMirrored)
-        {
-            GameObject doorObject = new GameObject(DOOR_ENTITY_NAME);
-
-            MeshBuilder meshBuilder = new MeshBuilder(doorObject);
-            GenerateDoorMesh(meshBuilder, height, isMirrored, isPreview: false);
-
-            Door door = doorObject.AddComponent<Door>();
-            return door;
-        } 
 
         public static void GenerateDoorMesh(MeshBuilder meshBuilder, int height, bool isMirrored, bool isPreview)
         {

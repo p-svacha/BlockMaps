@@ -11,16 +11,16 @@ namespace BlockmapFramework
         /// <summary>
         /// Node that the bottom of the ladder is standing on
         /// </summary>
-        public BlockmapNode Bottom { get; private set; }
+        public BlockmapNode Bottom => OriginNode;
         /// <summary>
-        /// Node that the top of the ladder leads to. Always adjacent to Source.
+        /// Node that the top of the ladder leads to. Always adjacent to OriginNode.
         /// </summary>
-        public BlockmapNode Top { get; private set; }
+        public BlockmapNode Target;
 
         /// <summary>
         /// The side that the ladder stands on on Source. [N/E/S/W]
         /// </summary>
-        public Direction Side { get; private set; }
+        public Direction Side => Rotation;
 
         /// <summary>
         /// Height at which the ladder starts.
@@ -49,59 +49,52 @@ namespace BlockmapFramework
         public bool IsClimbable => true;
 
         #region Init
-
-        public void InitLadder(BlockmapNode source, BlockmapNode target, Direction side)
+        
+        public void CustomPostInit(BlockmapNode target)
         {
             // Ladder specific
-            Bottom = source;
-            Top = target;
-            Side = side;
-            LadderEndAltitude = target.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side));
-            LadderStartAltitude = source.GetMinAltitude(side);
+            Target = target;
+            LadderEndAltitude = target.GetMaxAltitude(HelperFunctions.GetOppositeDirection(Side));
+            LadderStartAltitude = Bottom.GetMinAltitude(Side);
             LadderHeight = LadderEndAltitude - LadderStartAltitude;
 
             // Entity general
-            Name = "Ladder";
-            TypeId = LADDER_ENTITY_NAME + "_" + Top.Id;
-            Dimensions = new Vector3Int(1, LadderHeight, 1);
-            BlocksVision = false;
-            IsPassable = true;
+            overrideHeight = LadderHeight;
         }
+
+        protected override void OnPostLoad()
+        {
+            LadderEndAltitude = Target.GetMaxAltitude(HelperFunctions.GetOppositeDirection(Side));
+            LadderStartAltitude = Bottom.GetMinAltitude(Side);
+            LadderHeight = LadderEndAltitude - LadderStartAltitude;
+        }
+
 
         public override void OnRegister()
         {
             Bottom.SourceLadders.Add(Side, this);
-            Top.TargetLadders.Add(HelperFunctions.GetOppositeDirection(Side), this);
+            Target.TargetLadders.Add(HelperFunctions.GetOppositeDirection(Side), this);
         }
         public override void OnDeregister()
         {
             Bottom.SourceLadders.Remove(Side);
-            Top.TargetLadders.Remove(HelperFunctions.GetOppositeDirection(Side));
-        }
-
-        public static Ladder GetInstance(World world, EntityData data)
-        {
-            string[] attributes = data.TypeId.Split('_');
-            int targetNodeId = int.Parse(attributes[1]);
-            BlockmapNode sourceNode = world.GetNode(data.OriginNodeId);
-            BlockmapNode targetNode = world.GetNode(targetNodeId);
-
-            return GetInstance(sourceNode, targetNode, data.Rotation);
-        }
-        public static Ladder GetInstance(BlockmapNode source, BlockmapNode target, Direction side)
-        {
-            Ladder instance = LadderMeshGenerator.GenerateLadderObject(source, target, side);
-            instance.InitLadder(source, target, side);
-            return instance;
+            Target.TargetLadders.Remove(HelperFunctions.GetOppositeDirection(Side));
         }
 
         #endregion
 
-        public override Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
+        public static Vector3 GetLadderWorldPosition(BlockmapNode originNode, Direction rotation)
         {
             Vector3 nodeCenter = originNode.CenterWorldPosition;
-            float worldHeight = LadderStartAltitude * World.NodeHeight;
+            float worldHeight = originNode.GetMinAltitude(rotation) * World.NodeHeight;
             return new Vector3(nodeCenter.x, worldHeight, nodeCenter.z);
+        }
+
+        public override void ExposeDataForSaveAndLoad()
+        {
+            base.ExposeDataForSaveAndLoad();
+
+            SaveLoadManager.SaveOrLoadReference(ref Target, "topNode");
         }
     }
 }

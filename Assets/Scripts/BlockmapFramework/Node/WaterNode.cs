@@ -50,7 +50,10 @@ namespace BlockmapFramework
         }
         protected override bool CanEntityStandHere(Entity entity)
         {
-            if (entity != null && entity is MovingEntity e && !e.CanSwim) return false; // Moving entities can only be on water when they can swim
+            if (entity == null) return false;
+            Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
+            if (moveComp == null) return false;
+            if (!moveComp.CanSwim) return false;
             
             return base.CanEntityStandHere(entity);
         }

@@ -16,7 +16,7 @@ namespace WorldEditor
         public override Sprite Icon => ResourceManager.Singleton.ProceduralEntitySprite;
 
         private GameObject BuildPreview;
-        private ProceduralEntity SelectedEntity;
+        private EntityDef SelectedEntity;
 
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
@@ -28,10 +28,9 @@ namespace WorldEditor
             base.Init(editor);
             
             EntitySelection.Clear();
-            foreach (ProceduralEntityId id in ProceduralEntityManager.Instance.GetAllProceduralEntityIds())
+            foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.RenderProperties.RenderType == EntityRenderType.Batch))
             {
-                ProceduralEntity e = ProceduralEntityManager.Instance.GetProceduralEntityInstance(id, 0);
-                EntitySelection.AddElement(e.GetThumbnail(), Color.white, e.Name, () => SelectEntity(e));
+                EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
 
             EntitySelection.SelectFirstElement();
@@ -45,9 +44,9 @@ namespace WorldEditor
             PlayerDropdown.AddOptions(playerOptions);
         }
 
-        public void SelectEntity(ProceduralEntity e)
+        public void SelectEntity(EntityDef def)
         {
-            SelectedEntity = e;
+            SelectedEntity = def;
         }
 
         public override void UpdateTool()
@@ -65,7 +64,7 @@ namespace WorldEditor
                 BuildPreview.SetActive(true);
                 BuildPreview.transform.position = World.HoveredNode.Chunk.WorldPosition;
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                SelectedEntity.BuildMesh(previewMeshBuilder, World.HoveredNode, height, isPreview: true);
+                SelectedEntity.RenderProperties.BatchRenderFunction(previewMeshBuilder, World.HoveredNode, height, true);
                 previewMeshBuilder.ApplyMesh(addCollider: false, castShadows: false);
                 BuildPreview.GetComponent<MeshRenderer>().material.color = c;
             }
@@ -82,14 +81,12 @@ namespace WorldEditor
                     int height = int.Parse(HeightInput.text);
                     if (height > 1) height--;
                     HeightInput.text = height.ToString();
-                    SelectedEntity.SetHeight(height);
                 }
                 if (Input.mouseScrollDelta.y > 0 && HeightInput.text != "")
                 {
                     int height = int.Parse(HeightInput.text);
                     height++;
                     HeightInput.text = height.ToString();
-                    SelectedEntity.SetHeight(height);
                 }
             }
         }
@@ -101,16 +98,15 @@ namespace WorldEditor
             if (HeightInput.text == "") return;
 
             int height = int.Parse(HeightInput.text);
-            ProceduralEntity instance = SelectedEntity.GetCopy(height);
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            World.SpawnEntity(instance, World.HoveredNode, DEFAULT_ROTATION, owner, isInstance: true);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, owner, height);
         }
 
         public override void HandleRightClick()
         {
             if (World.HoveredEntity == null) return;
-            if (!(World.HoveredEntity is ProceduralEntity)) return;
+            if (World.HoveredEntity.Def.RenderProperties.RenderType != EntityRenderType.Batch) return;
 
             World.RemoveEntity(World.HoveredEntity);
         }

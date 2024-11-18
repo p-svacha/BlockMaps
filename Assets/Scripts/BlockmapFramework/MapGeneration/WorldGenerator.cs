@@ -97,7 +97,7 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Spawns an entity on the ground near the given point and returns the entity instance.
         /// </summary>
-        protected Entity SpawnEntityOnGroundAround(Entity prefab, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
+        protected Entity SpawnEntityOnGroundAround(EntityDef def, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
         {
             int maxAttempts = 50;
             if (standard_deviation == 0f) maxAttempts = 1;
@@ -111,20 +111,13 @@ namespace BlockmapFramework.WorldGeneration
 
                 BlockmapNode targetNode = World.GetGroundNode(targetPos);
                 if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) continue;
-                if (!World.CanSpawnEntity(prefab, targetNode, rotation, forceHeadspaceRecalc: true)) continue;
+                if (!World.CanSpawnEntity(def, targetNode, rotation, forceHeadspaceRecalc: true)) continue;
 
-                return World.SpawnEntity(prefab, targetNode, rotation, player, updateWorld: false);
+                return World.SpawnEntity(def, targetNode, rotation, player, updateWorld: false);
             }
 
-            Debug.LogWarning("Could not spawn " + prefab.Name + " around " + pos.ToString() + " after " + maxAttempts + " attempts.");
+            Debug.LogWarning("Could not spawn " + def.Label + " around " + pos.ToString() + " after " + maxAttempts + " attempts.");
             return null;
-        }
-
-        protected Entity GetEntityPrefab(string id)
-        {
-            string fullPath = "Entities/Prefabs/" + id;
-            Entity prefab = Resources.Load<Entity>(fullPath);
-            return prefab;
         }
 
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));

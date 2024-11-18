@@ -11,8 +11,11 @@ namespace BlockmapFramework
     /// All objects that exist in the world in a specific location (node) are entities.
     /// <br/>Together with nodes they make up everything in the world.
     /// </summary>
-    public abstract class Entity : MonoBehaviour, IVisionTarget
+    public class Entity : IVisionTarget, ISaveAndLoadable
     {
+        public int id;
+        public int Id => id;
+
         /// <summary>
         /// The world in which this entity exists.
         /// </summary>
@@ -21,33 +24,17 @@ namespace BlockmapFramework
         /// <summary>
         /// The blueprint that defines the looks, attributes and behaviour rules of this entity.
         /// </summary>
-        public EntityDef Def { get; private set; }
+        public EntityDef Def;
 
         /// <summary>
-        /// Unique identifier of this specific entity.
+        /// Components that add custom behaviour to this entity.
         /// </summary>
-        public int Id { get; private set; }
-
-        /// <summary>
-        /// The Unity GameObject that this thing is rendered in.
-        /// </summary>
-        public GameObject GameObject;
-
-        /// <summary>
-        /// Identifier used for instancing the correct type of entity.
-        /// <br/> The same id will always result in the same entity attributes (mesh, size, shape, vision, etc.)
-        /// </summary>
-        public string TypeId { get; protected set; }
-
-        /// <summary>
-        /// Display name.
-        /// </summary>
-        public string Name;
+        public List<EntityComp> Components;
 
         /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
         /// </summary>
-        public BlockmapNode OriginNode { get; private set; }
+        public BlockmapNode OriginNode;
 
         /// <summary>
         /// The chunk that the origin of this entity is on.
@@ -57,7 +44,17 @@ namespace BlockmapFramework
         /// <summary>
         /// What direction this entity is facing. [N/E/S/W]
         /// </summary>
-        public Direction Rotation { get; private set; }
+        public Direction Rotation;
+
+        /// <summary>
+        /// For entities with a variable height, this value is used for height.
+        /// </summary>
+        protected int overrideHeight;
+
+        /// <summary>
+        /// Flag if this is the mirrored variant of the entity.
+        /// </summary>
+        public bool IsMirrored;
 
         /// <summary>
         /// The exact world position this entity is at the moment.
@@ -85,45 +82,41 @@ namespace BlockmapFramework
         /// <summary>
         /// Who this entity belongs to.
         /// </summary>
-        public Actor Owner { get; private set; }
-        /// <summary>
-        /// How far this entity can see.
-        /// </summary>
-        public float VisionRange;
+        public Actor Actor;
 
-        [SerializeField]
+        // GameObjects
         /// <summary>
-        /// Size of this entity in all 3 dimensions.
+        /// Root GameObject of all GameObjects belonging to this entity.
         /// </summary>
-        protected Vector3Int Dimensions;
+        protected GameObject Wrapper;
 
         /// <summary>
-        /// Flag if other entities can move through this entity.
+        /// The GameObject that holds the MeshRenderer and MeshCollider for standalone entities.
+        /// <br/>Null for entities that are not standalone.
         /// </summary>
-        public bool IsPassable;
+        public GameObject MeshObject;
 
         /// <summary>
-        /// Flag if this entity blocks the vision from other entities.
+        /// The MeshRenderer that renders standalone entities.
+        /// <br/>Null for entities that are not standalone.
         /// </summary>
-        public bool BlocksVision;
+        private MeshRenderer MeshRenderer;
 
         /// <summary>
-        /// Flag if entity can only be placed when the whole footprint is flat.
+        /// The collider that is used for hovering and selecting the entity with the cursor.
+        /// <br/>Null for entities that are not standalone. Detection there is handled with custom logic in World.UpdateHoveredObjects.
         /// </summary>
-        public bool RequiresFlatTerrain;
+        public MeshCollider MeshCollider { get; protected set; }
 
-        // Visual
         /// <summary>
-        /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
-        /// <br/> -1 means there is no material.
+        /// The object holding the vision collider(s) that are used for the vision sytem.
         /// </summary>
-        public int PlayerColorMaterialIndex = -1;
+        public GameObject VisionColliderObject { get; protected set; }
 
-        // Components
-        protected GameObject Wrapper; // Root GameObject of all GameObjects belonging to this entity
-        private MeshRenderer Renderer;
-        public MeshCollider MeshCollider { get; protected set; } // used for hovering and selecting with cursor
-        public Collider VisionCollider { get; protected set; } // used for vision checks for entites
+        /// <summary>
+        /// Object that gets activated when this entity is selected.
+        /// </summary>
+        private Projector SelectionIndicator;
 
         // Performance Profilers
         static readonly ProfilerMarker pm_SetOriginNode = new ProfilerMarker("SetOriginNode");
@@ -138,88 +131,243 @@ namespace BlockmapFramework
 
         #region Initialize
 
-        public void Init(int id, World world, BlockmapNode origin, Direction rotation, Actor player)
+        public Entity() { }
+
+        /// <summary>
+        /// Gets called after this Entity got instantiated when spawned in the world.
+        /// </summary>
+        public void OnCreate(EntityDef def, int id, World world, BlockmapNode origin, int height, Direction rotation, Actor owner, bool isMirrored)
         {
-            Id = id;
-            if (string.IsNullOrEmpty(TypeId)) TypeId = Name;
+            Def = def;
 
-            Renderer = GetComponent<MeshRenderer>();
+            if (!Def.VariableHeight && height != -1) throw new System.Exception($"Cannot create entity with def {def.DefName} with a custom height because that def doesn't support variable heights.");
 
+            this.id = id;
+            World = world;
+            OriginNode = origin;
+            overrideHeight = height;
+            Rotation = rotation;
+            Actor = owner;
+
+            OnCreated();
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization of this entity.
+        /// </summary>
+        public void PostLoad()
+        {
+            World.RegisterEntity(this);
+
+            OnPostLoad();
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called after this Entity got instantiated, either through being spawned or when being loaded.
+        /// </summary>
+        private void Init()
+        {
+            // Initialize some objects
             OccupiedNodes = new HashSet<BlockmapNode>();
             CurrentVision = new VisionData();
-
             LastKnownPosition = new Dictionary<Actor, Vector3?>();
-            foreach (Actor p in world.GetAllActors()) LastKnownPosition.Add(p, null);
+            foreach (Actor p in World.GetAllActors()) LastKnownPosition.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
-            foreach (Actor p in world.GetAllActors()) LastKnownRotation.Add(p, null);
+            foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
 
-            World = world;
-            Owner = player;
-            Rotation = rotation;
-            WorldPosition = GetWorldPosition(world, origin, rotation);
+            // Set position and rotation
+            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
 
-            // Create a mesh collider for selecting the entity
-            gameObject.layer = World.Layer_EntityMesh;
-            MeshCollider = GetComponent<MeshCollider>();
-            if (MeshCollider == null && GetComponent<MeshRenderer>() != null) MeshCollider = gameObject.AddComponent<MeshCollider>();
+            // Initialize comps
+            InitializeComps();
 
-            // Wrap the entity in a wrapper
-            Wrapper = new GameObject(Name + "_wrapper");
-            Wrapper.transform.SetParent(World.WorldObject.transform);
-            transform.SetParent(Wrapper.transform);
+            // Initialize game objects
+            InitializeGameObject();
 
             // Create a collider for entity vision on a seperate object
             CreateVisionCollider();
 
             // Move entity to spawn position
-            SetOriginNode(origin);
+            SetOriginNode(OriginNode);
 
             // Player color
-            if (PlayerColorMaterialIndex != -1) Renderer.materials[PlayerColorMaterialIndex].color = Owner.Color;
+            if (Def.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.PlayerColorMaterialIndex].color = Actor.Color;
 
+            // Subclass hook
             OnInitialized();
         }
+
+        /// <summary>
+        /// Creates all components 
+        /// </summary>
+        private void InitializeComps()
+        {
+            Components = new List<EntityComp>();
+            foreach (CompProperties compProps in Def.Components)
+            {
+                EntityComp newComp = null;
+                newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
+                newComp.Parent = this;
+                Components.Add(newComp);
+                newComp.Initialize(compProps);
+            }
+        }
+
+        /// <summary>
+        /// Creates the Unity GameObjects related to this entity.
+        /// </summary>
+        private void InitializeGameObject()
+        {
+            // Create a wrapper that acts as a container for all entity-related objects (mesh, mesh collider, vision collider)
+            Wrapper = new GameObject(Label + "_wrapper");
+            Wrapper.transform.SetParent(World.WorldObject.transform);
+
+            // Create object that holds the mesh and mesh collider
+            if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
+            {
+                MeshObject = new GameObject(Label);
+                MeshObject.layer = World.Layer_EntityMesh;
+                MeshObject.transform.SetParent(Wrapper.transform);
+                MeshFilter meshFilter = MeshObject.AddComponent<MeshFilter>();
+
+                // Mesh
+                if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel) meshFilter.mesh = Def.RenderProperties.Model;
+                if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
+                {
+                    MeshBuilder meshBuilder = new MeshBuilder(MeshObject);
+                    Def.RenderProperties.StandaloneRenderFunction(meshBuilder, Height, IsMirrored, false);
+                    meshBuilder.ApplyMesh(addCollider: false);
+                }
+
+                MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
+                MeshCollider = MeshObject.AddComponent<MeshCollider>();
+
+                EntityCollider ec = MeshObject.AddComponent<EntityCollider>();
+                ec.Entity = this;
+
+                MeshObject.transform.localScale = new Vector3(Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale);
+
+                // Selection indicator
+                SelectionIndicator = GameObject.Instantiate(Resources.Load<Projector>("BlockmapFramework/Prefabs/SelectionIndicator"));
+                SelectionIndicator.transform.SetParent(MeshObject != null ? MeshObject.transform : Wrapper.transform);
+                SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+                SelectionIndicator.orthographicSize = 0.5f;
+                SetSelected(false);
+            }
+        }
+
+        /// <summary>
+        /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.
+        /// </summary>
+        protected void CreateVisionCollider()
+        {
+            if (Def.VisionImpact.ImpactType != EntityVisionImpact.SeeThrough)
+            {
+                VisionColliderObject = new GameObject("visionCollider");
+                VisionColliderObject.layer = World.Layer_EntityVisionCollider;
+                VisionColliderObject.transform.SetParent(Wrapper.transform);
+                if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
+
+                if (Def.VisionImpact.ImpactType == EntityVisionImpact.FullBlock) // Create a single box collider with the bounds of the whole entity
+                {
+                    BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
+                    if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
+                    else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
+                    collider.center = new Vector3(0f, collider.size.y / 2, 0f);
+
+                    EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
+                    evc.Entity = this;
+                }
+                else if (Def.VisionImpact.ImpactType == EntityVisionImpact.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
+                {
+                    MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
+                    collider.sharedMesh = MeshCollider.sharedMesh;
+
+                    EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
+                    evc.Entity = this;
+                }
+                else if(Def.VisionImpact.ImpactType == EntityVisionImpact.BlockPerNode) // Create a box collider per node, each one with its own height
+                {
+                    for (int x = 0; x < Dimensions.x; x++)
+                    {
+                        for (int y = 0; y < Dimensions.z; y++)
+                        {
+                            Vector2Int localCoords = new Vector2Int(x, y);
+
+                            GameObject perNodeColliderObject = new GameObject("visionCollider_" + x + "_" + y);
+                            perNodeColliderObject.layer = World.Layer_EntityVisionCollider;
+                            perNodeColliderObject.transform.SetParent(Wrapper.transform);
+                            BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
+
+                            float height = Dimensions.y; // default height
+                            if (Def.VisionImpact.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
+
+                            if (MeshObject != null) collider.size = new Vector3(1f / MeshObject.transform.localScale.x, (height * World.NodeHeight) / MeshObject.transform.localScale.y, 1f / MeshObject.transform.localScale.z);
+                            collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
+
+                            EntityCollider evc = perNodeColliderObject.AddComponent<EntityCollider>();
+                            evc.Entity = this;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void DestroySelf()
+        {
+            GameObject.Destroy(Wrapper);
+        }
+
+        #endregion
+
+        #region Hooks
+
+        /// <summary>
+        /// Gets called right after the entity has been created and before it has been initialized.
+        /// </summary>
+        protected virtual void OnCreated() { }
+
+        /// <summary>
+        /// Gets called when loading a world after all values have been loaded from the save file and before initialization of this entity.
+        /// </summary>
+        protected virtual void OnPostLoad() { }
 
         /// <summary>
         /// Gets called when an entity gets registered in the world. Useful if subtypes need additional registering in specific places.
         /// </summary>
         public virtual void OnRegister() { }
+
         /// <summary>
         /// Gets called when an entity gets de-registered from the world. Useful if subtypes need additional de-registering in specific places.
         /// </summary>
         public virtual void OnDeregister() { }
 
         /// <summary>
-        /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.
+        /// Gets called when main intialization is done so subtype-specific initialization steps can be performed.
         /// </summary>
-        protected virtual void CreateVisionCollider()
-        {
-            GameObject visionColliderObject = new GameObject("visionCollider");
-            visionColliderObject.transform.SetParent(Wrapper.transform);
-            visionColliderObject.transform.localScale = transform.localScale;
-            visionColliderObject.layer = World.Layer_EntityVisionCollider;
-            BoxCollider collider = visionColliderObject.AddComponent<BoxCollider>();
-            collider.size = new Vector3(Dimensions.x / transform.localScale.x, (Dimensions.y * World.NodeHeight) / transform.localScale.y, Dimensions.z / transform.localScale.z);
-            collider.center = new Vector3(0f, collider.size.y / 2, 0f);
-            VisionCollider = collider;
-        }
-
         protected virtual void OnInitialized() { }
 
-        public void DestroySelf()
-        {
-            Destroy(Wrapper);
-        }
+        /// <summary>
+        /// Gets called every tick.
+        /// </summary>
+        protected virtual void OnTick() { }
 
         #endregion
 
         #region Update
 
         /// <summary>
-        /// Gets called every frame by the world.
+        /// Gets called every tick.
         /// </summary>
-        public virtual void UpdateEntity() { }
+        public void Tick()
+        {
+            foreach (EntityComp comp in Components) comp.Tick();
+
+            OnTick();
+        }
 
         /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode and Dimensions of the entity. 
@@ -270,7 +418,7 @@ namespace BlockmapFramework
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
             //Debug.Log(CurrentVision.ExploredNodes.Count + " nodes are explored");
-            foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Owner);
+            foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Actor);
 
             // Update last known position and rotation of all currently visible entities
             //Debug.Log(CurrentVision.VisibleEntities.Count + " entities are visible");
@@ -280,7 +428,7 @@ namespace BlockmapFramework
             foreach (Wall w in CurrentVision.VisibleWalls) w.AddVisionBy(this);
 
             // Set walls as explored
-            foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Owner);
+            foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
 
             // Find nodes where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVision.VisibleNodes.Concat(previousVision.ExploredNodes));
@@ -305,7 +453,7 @@ namespace BlockmapFramework
 
             // Redraw visibility of affected chunks
             //Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
-            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Owner);
+            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Actor);
 
             pm_HandleVisibilityChange.End();
 
@@ -320,7 +468,7 @@ namespace BlockmapFramework
         /// <summary>
         /// List containing all entities that currently see this entity.
         /// </summary>
-        protected HashSet<Entity> SeenBy = new HashSet<Entity>();
+        public HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
         /// Stores the exact world position at which each player has seen this entity the last time.
@@ -333,7 +481,7 @@ namespace BlockmapFramework
 
         public void AddVisionBy(Entity e)
         {
-            UpdateLastKnownPositionFor(e.Owner);
+            UpdateLastKnownPositionFor(e.Actor);
             SeenBy.Add(e);
         }
         public void RemoveVisionBy(Entity e)
@@ -348,9 +496,9 @@ namespace BlockmapFramework
         public bool IsVisibleBy(Actor actor)
         {
             if (actor == null) return true; // Everything is visible
-            if (Owner == actor) return true; // This entity belongs to the given actor
+            if (Actor == actor) return true; // This entity belongs to the given actor
             if (OccupiedNodes.Any(n => n.Zones.Any(z => z.ProvidesVision && z.Actor == actor))) return true; // Entity is inside a zone of actor that provides vision
-            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Entity is seen by an entity of given actor
+            if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Entity is seen by an entity of given actor
 
             return false;
         }
@@ -376,32 +524,38 @@ namespace BlockmapFramework
         /// </summary>
         public virtual void UpdateVisibility(Actor player)
         {
-            // Entity is currently visible => render normally at current position
-            if (IsVisibleBy(player))
+            if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return;
+            if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
+
+            if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
             {
-                Renderer.enabled = true;
-                Renderer.material.SetColor("_TintColor", Color.clear);
+                // Entity is currently visible => render normally at current position
+                if (IsVisibleBy(player))
+                {
+                    MeshRenderer.enabled = true;
+                    MeshRenderer.material.SetColor("_TintColor", Color.clear);
 
-                transform.position = WorldPosition;
-                transform.rotation = WorldRotation;
+                    MeshObject.transform.position = WorldPosition;
+                    MeshObject.transform.rotation = WorldRotation;
 
-                foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0);
+                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
+                }
+
+                // Entity was explored before but not currently visible => render transparent at last known position
+                else if (IsExploredBy(player))
+                {
+                    MeshRenderer.enabled = true;
+                    MeshRenderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
+
+                    MeshObject.transform.position = LastKnownPosition[player].Value;
+                    MeshObject.transform.rotation = LastKnownRotation[player].Value;
+
+                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.5f);
+                }
+
+                // Entity was not yet explored => don't render it
+                else MeshRenderer.enabled = false;
             }
-
-            // Entity was explored before but not currently visible => render transparent at last known position
-            else if (IsExploredBy(player))
-            {
-                Renderer.enabled = true;
-                Renderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
-
-                transform.position = LastKnownPosition[player].Value;
-                transform.rotation = LastKnownRotation[player].Value;
-
-                foreach (Material m in Renderer.materials) m.SetFloat("_Transparency", 0.5f);
-            }
-
-            // Entity was not yet explored => don't render it
-            else Renderer.enabled = false;
         }
 
         #endregion
@@ -412,48 +566,55 @@ namespace BlockmapFramework
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
 
-        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(World, OriginNode, Rotation).y / World.NodeHeight); // Rounded down to y-position of its center
-        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(World, OriginNode, Rotation).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
+        public virtual float VisionRange => Def.VisionRange;
+        public virtual bool BlocksVision => Def.VisionImpact.ImpactType != EntityVisionImpact.SeeThrough;
+        public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
+        public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
+
+        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
+        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldHeight(Height);
-        public Vector3 WorldSize => Vector3.Scale(GetComponent<MeshFilter>().mesh.bounds.size, transform.localScale);
+        public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
         public bool CanSee => VisionRange > 0;
 
-        public Vector3Int GetDimensions()
+        /// <summary>
+        /// Returns the dimensions of this object taking into account its current rotation.
+        /// </summary>
+        public Vector3Int GetTranslatedDimensions()
         {
-            return GetDimensions(Rotation);
+            return EntityManager.TranslatedDimensions(Def, Rotation, overrideHeight);
         }
-        public Vector3Int GetDimensions(Direction rotation)
+
+        /// <summary>
+        /// Retrieve a specific comp of this entity (or null if it doesn't have it).
+        /// </summary>
+        public T GetComponent<T>() where T : EntityComp
         {
-            if (rotation == Direction.N || rotation == Direction.S) return Dimensions;
-            if (rotation == Direction.E || rotation == Direction.W) return new Vector3Int(Dimensions.z, Dimensions.y, Dimensions.x);
-            throw new System.Exception(rotation.ToString() + " is not a valid rotation");
+            if (Components != null)
+            {
+                int i = 0;
+                for (int count = Components.Count; i < count; i++)
+                {
+                    if (Components[i] is T result)
+                    {
+                        return result;
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
         /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis.
         /// </summary>
-        public virtual Vector3 GetWorldPosition(World world, BlockmapNode originNode, Direction rotation)
-        {
-            // Take origin node as base position
-            Vector3Int dimensions = GetDimensions(rotation);
-            Vector2 basePosition = originNode.WorldCoordinates + new Vector2(dimensions.x * 0.5f, dimensions.z * 0.5f);
-
-            // For y, take the lowest node center out of all occupied nodes
-            HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(world, originNode, rotation);
-            float y;
-            if (occupiedNodes == null) y = originNode.GetWorldHeightAt(new Vector2(0.5f, 0.5f));
-            else y = GetOccupiedNodes(world, originNode, rotation).Min(x => x.GetWorldHeightAt(new Vector2(0.5f, 0.5f)));
-
-            // Final position
-            return new Vector3(basePosition.x, y, basePosition.y);
-        }
+        public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, bool isMirrored) => Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, isMirrored);
 
         /// <summary>
         /// Returns the world position of the center of this entity.
         /// </summary>
-        public virtual Vector3 GetWorldCenter() => GetWorldPosition(World, OriginNode, Rotation) + new Vector3(0f, WorldHeight / 2f, 0f);
+        public virtual Vector3 GetWorldCenter() => GetWorldPosition(OriginNode, Rotation, IsMirrored) + new Vector3(0f, WorldHeight / 2f, 0f);
 
         /// <summary>
         /// Returns the translated local coordinate in x/y direction depending the rotation of the entity.
@@ -471,70 +632,14 @@ namespace BlockmapFramework
             };
         }
 
+        /// <summary>
+        /// Returns all nodes this entity is currently occupying (as in standing on). 
+        /// </summary>
         public HashSet<BlockmapNode> GetOccupiedNodes()
         {
-            return GetOccupiedNodes(World, OriginNode, Rotation);
+            return EntityManager.GetOccupiedNodes(Def, World, OriginNode, Rotation, overrideHeight);
         }
-        /// <summary>
-        /// Returns all nodes that would be occupied by this entity when placed on the given originNode with the given rotation.
-        /// <br/> Returns null if entity can't be placed on that null.
-        /// </summary>
-        public HashSet<BlockmapNode> GetOccupiedNodes(World world, BlockmapNode originNode, Direction rotation)
-        {
-            HashSet<BlockmapNode> nodes = new HashSet<BlockmapNode>() { originNode };
 
-            Vector3Int dimensions = GetDimensions(rotation);
-
-            // For each x, try to connect all the way up and see if everything is connected
-            BlockmapNode yBaseNode = originNode;
-            BlockmapNode cornerNodeNW = null;
-
-            for (int x = 0; x < dimensions.x; x++)
-            {
-                // Try going east
-                if (x > 0)
-                {
-                    Vector2Int eastCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(yBaseNode.WorldCoordinates, Direction.E);
-                    List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
-                    BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yBaseNode, x, Direction.E));
-                    if (eastNode == null) return null;
-
-                    yBaseNode = eastNode;
-                    nodes.Add(yBaseNode);
-                }
-
-                BlockmapNode yNode = yBaseNode;
-                for (int y = 0; y < dimensions.z - 1; y++)
-                {
-                    // Try going north
-                    Vector2Int northCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(yNode.WorldCoordinates, Direction.N);
-                    List<BlockmapNode> candidateNodesNorth = world.GetNodes(northCoordinates);
-                    BlockmapNode northNode = candidateNodesNorth.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yNode, x, Direction.N));
-                    if (northNode == null) return null;
-
-                    yNode = northNode;
-                    nodes.Add(yNode);
-                    if (x == 0 && y == dimensions.z - 2) cornerNodeNW = yNode;
-                }
-            }
-
-            // Now we have all nodes of the footprint
-            // Also check if NW -> NE is fully connected to make sure its valid
-            if (dimensions.z > 1)
-            {
-                for (int i = 0; i < dimensions.x - 1; i++)
-                {
-                    Vector2Int eastCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(cornerNodeNW.WorldCoordinates, Direction.E);
-                    List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
-                    BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(cornerNodeNW, x, Direction.E));
-
-                    if (eastNode == null) return null;
-                    else cornerNodeNW = eastNode;
-                }
-            }
-
-            return nodes;
-        }
 
         /// <summary>
         /// Shoots rays from the entity's current position towards all nodes, entities and walls within vision range.
@@ -579,7 +684,7 @@ namespace BlockmapFramework
                         // Shoot ray all entities on node
                         foreach (Entity e in targetNode.Entities)
                         {
-                            if (e.Owner == Owner) continue; // Don't check for entities of the same actor since they see them anyway
+                            if (e.Actor == Actor) continue; // Don't check for entities of the same actor since they see them anyway
                             if (checkedEntities.Contains(e)) continue;
 
                             pm_GetWorldCenters.Begin();
@@ -654,9 +759,6 @@ namespace BlockmapFramework
             {
                 GameObject objectHit = hit.transform.gameObject;
 
-                // If the thing we hit is ourselves, go to the next thing
-                if (objectHit.transform.parent == transform.parent) continue;
-
                 // Hit ground node
                 if(objectHit.layer == World.Layer_GroundNode)
                 {
@@ -730,7 +832,11 @@ namespace BlockmapFramework
                 // Hit entity (vision collider)
                 if (objectHit.layer == World.Layer_EntityVisionCollider)
                 {
-                    Entity hitEntity = objectHit.transform.parent.GetComponentInChildren<Entity>();
+                    // Get the entity we hit from the collider
+                    Entity hitEntity = objectHit.GetComponent<EntityCollider>().Entity;
+
+                    // If the thing we hit is ourselves, go to the next thing
+                    if (hitEntity == this) continue;
 
                     // Mark entity as visible
                     vision.AddVisibleEntity(hitEntity);
@@ -789,20 +895,9 @@ namespace BlockmapFramework
             return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
         }
 
-        public virtual Sprite GetThumbnail()
-        {
-            return null;
-            /*
-            Texture2D previewThumbnail = AssetPreview.GetAssetPreview(gameObject);
-            if (previewThumbnail != null)
-                return Sprite.Create(previewThumbnail, new Rect(0.0f, 0.0f, previewThumbnail.width, previewThumbnail.height), new Vector2(0.5f, 0.5f), 100.0f);
-            return null;
-            */
-        }
-
         public override string ToString()
         {
-            return Name + " alt:" + MinAltitude + "-" + MaxAltitude + " " + Rotation.ToString();
+            return Label + " alt:" + MinAltitude + "-" + MaxAltitude + " " + Rotation.ToString();
         }
 
         #endregion
@@ -810,12 +905,20 @@ namespace BlockmapFramework
         #region Setters
 
         /// <summary>
+        /// Shows/hides the selection indicator of this entity.
+        /// </summary>
+        public void SetSelected(bool value)
+        {
+            SelectionIndicator.gameObject.SetActive(value);
+        }
+
+        /// <summary>
         /// Instantly teleports this entity to the given node.
         /// </summary>
         public void Teleport(BlockmapNode targetNode)
         {
             BlockmapNode sourceNode = OriginNode;
-            WorldPosition = GetWorldPosition(World, targetNode, Rotation);
+            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
             SetOriginNode(targetNode);
 
             // Update vision from entities around source and target position
@@ -827,7 +930,7 @@ namespace BlockmapFramework
             else
             {
                 // Only update the vision of itself and of entities from other actors
-                entitiesToUpdate = entitiesToUpdate.Where(x => x.Owner != Owner).ToList(); 
+                entitiesToUpdate = entitiesToUpdate.Where(x => x.Actor != Actor).ToList(); 
                 World.UpdateVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
                 UpdateVision();
             }
@@ -841,7 +944,7 @@ namespace BlockmapFramework
             // Remove last know position for all players that don't see it anymore
             foreach(Actor actor in World.GetAllActors())
             {
-                if (actor == Owner) continue;
+                if (actor == Actor) continue;
                 if (!IsVisibleBy(actor)) LastKnownPosition[actor] = null;
             }
 
@@ -854,13 +957,14 @@ namespace BlockmapFramework
         /// </summary>
         public void SetHeight(int height)
         {
-            Dimensions = new Vector3Int(Dimensions.x, height, Dimensions.z);
+            if (!Def.VariableHeight) throw new System.Exception($"Cannot set height of an entity without variable height (defName = {Def.DefName}");
+            this.overrideHeight = height;
         }
 
         /// <summary>
         /// Changes the origin node and updates all relevant information with it.
         /// </summary>
-        protected void SetOriginNode(BlockmapNode node)
+        public void SetOriginNode(BlockmapNode node)
         {
             pm_SetOriginNode.Begin();
 
@@ -881,10 +985,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates the position of all vision colliders according to the current OriginNode and rotation of this entity.
         /// </summary>
-        protected virtual void UpdateVisionColliderPosition()
+        protected void UpdateVisionColliderPosition()
         {
-            VisionCollider.transform.position = GetWorldPosition(World, OriginNode, Rotation);
-            VisionCollider.transform.rotation = WorldRotation;
+            VisionColliderObject.transform.position = GetWorldPosition(OriginNode, Rotation, IsMirrored);
+            VisionColliderObject.transform.rotation = WorldRotation;
         }
 
         /// <summary>
@@ -919,23 +1023,17 @@ namespace BlockmapFramework
 
         #region Save / Load
 
-        public static Entity Load(World world, EntityData data)
+        public virtual void ExposeDataForSaveAndLoad()
         {
-            Entity instance = world.EntityLibrary.GetEntityInstance(world, data);
-            instance.Init(data.Id, world, world.GetNode(data.OriginNodeId), data.Rotation, world.GetActor(data.PlayerId));
-            return instance;
-        }
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
-        public EntityData Save()
-        {
-            return new EntityData
-            {
-                Id = Id,
-                TypeId = TypeId,
-                OriginNodeId = OriginNode.Id,
-                Rotation = Rotation,
-                PlayerId = Owner.Id
-            };
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadDef(ref Def, "def");
+            SaveLoadManager.SaveOrLoadReference(ref OriginNode, "originNode");
+            SaveLoadManager.SaveOrLoadPrimitive(ref overrideHeight, "overrideHeight");
+            SaveLoadManager.SaveOrLoadPrimitive(ref IsMirrored, "isMirrored");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Rotation, "rotation");
+            SaveLoadManager.SaveOrLoadReference(ref Actor, "owner");
         }
 
         #endregion

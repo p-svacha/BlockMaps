@@ -15,10 +15,7 @@ namespace WorldEditor
     {
         [Header("Prefabs")]
         public UI_EditorToolButton EditorToolButtonPrefab;
-        public EditorMovingEntity CharacterPrefab;
         public GameObject ArrowPrefab;
-        public List<StaticEntity> StaticEntities;
-        public List<MovingEntity> MovingEntityPresets;
 
         [Header("Elements")]
         public GameObject ToolButtonContainer;
@@ -49,7 +46,6 @@ namespace WorldEditor
 
         // Editor
         private bool isInitialized = false;
-        public EditorEntityLibrary EntityLibrary { get; private set; }
         float deltaTime; // for fps
         public List<WorldGenerator> Generators;
         private Dictionary<EditorToolId, EditorTool> Tools;
@@ -59,16 +55,13 @@ namespace WorldEditor
         {
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
+            DefDatabase<EntityDef>.AddDefs(EditorDefs.EntityDefs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();
 
             // Init materials
             MaterialManager.InitializeBlendableSurfaceMaterial();
-
-            // Init editor content
-            EntityLibrary = new EditorEntityLibrary();
-            EntityLibrary.Init(this);
 
             // Init generators
             Generators = new List<WorldGenerator>()

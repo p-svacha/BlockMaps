@@ -14,9 +14,9 @@ namespace WorldEditor
         public override string Name => "Spawn Object";
         public override Sprite Icon => ResourceManager.Singleton.StaticEntitySprite;
 
-        private StaticEntity BuildPreview;
+        private GameObject BuildPreview;
 
-        private StaticEntity SelectedEntity;
+        private EntityDef SelectedEntity;
         private Direction CurrentRotation;
 
         [Header("Elements")]
@@ -30,9 +30,9 @@ namespace WorldEditor
             CurrentRotation = Direction.N;
 
             EntitySelection.Clear();
-            foreach (StaticEntity e in editor.StaticEntities)
+            foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.RenderProperties.RenderType == EntityRenderType.StandaloneModel))
             {
-                EntitySelection.AddElement(e.GetThumbnail(), Color.white, e.Name, () => SelectEntity(e));
+                EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
 
             EntitySelection.SelectFirstElement();
@@ -54,7 +54,7 @@ namespace WorldEditor
                 bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
 
                 BuildPreview.gameObject.SetActive(true);
-                BuildPreview.transform.position = BuildPreview.GetWorldPosition(World, World.HoveredNode, CurrentRotation);
+                BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
 
                 foreach(Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
@@ -87,18 +87,24 @@ namespace WorldEditor
             World.RemoveEntity(World.HoveredEntity);
         }
 
-        public void SelectEntity(StaticEntity e)
+        public void SelectEntity(EntityDef def)
         {
-            SelectedEntity = e;
+            SelectedEntity = def;
 
             // Update preview
-            if(BuildPreview != null) GameObject.Destroy(BuildPreview.gameObject);
-            BuildPreview = Instantiate(SelectedEntity);
-            BuildPreview.gameObject.SetActive(false);
+            if (BuildPreview != null)
+            {
+                BuildPreview.GetComponent<MeshFilter>().mesh = def.RenderProperties.Model;
+                BuildPreview.gameObject.SetActive(false);
+            }
         }
 
         public override void OnSelect()
         {
+            BuildPreview = new GameObject("BuildPreview");
+            BuildPreview.AddComponent<MeshFilter>();
+            BuildPreview.AddComponent<MeshRenderer>();
+
             SelectEntity(SelectedEntity);
         }
         public override void OnDeselect()

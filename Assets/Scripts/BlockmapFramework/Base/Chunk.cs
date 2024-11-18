@@ -35,9 +35,9 @@ namespace BlockmapFramework
         public Dictionary<Vector3Int, List<Wall>> Walls = new Dictionary<Vector3Int, List<Wall>>();
 
         /// <summary>
-        /// All procedural entities present in this chunk, grouped by local coordinates
+        /// All batch-rendered entities present in this chunk, grouped by local coordinates
         /// </summary>
-        public Dictionary<Vector2Int, List<ProceduralEntity>> ProceduralEntities = new Dictionary<Vector2Int, List<ProceduralEntity>>();
+        public Dictionary<Vector2Int, List<Entity>> BatchEntities = new Dictionary<Vector2Int, List<Entity>>();
 
         /// <summary>
         /// All entities that currently occupy at least one node on this chunk.
@@ -54,7 +54,7 @@ namespace BlockmapFramework
         public WaterMesh WaterMesh;
         public Dictionary<int, FenceMesh> FenceMeshes;
         public Dictionary<int, WallMesh> WallMeshes;
-        public Dictionary<int, ProceduralEntityMesh> ProceduralEntityMeshes;
+        public Dictionary<int, BatchEntityMesh> ProceduralEntityMeshes;
 
         // Performance Profilers
         static readonly ProfilerMarker pm_GenerateGroundNodeMesh = new ProfilerMarker("GenerateGroundNodeMesh");
@@ -102,7 +102,7 @@ namespace BlockmapFramework
             AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
             FenceMeshes = new Dictionary<int, FenceMesh>();
             WallMeshes = new Dictionary<int, WallMesh>();
-            ProceduralEntityMeshes = new Dictionary<int, ProceduralEntityMesh>();
+            ProceduralEntityMeshes = new Dictionary<int, BatchEntityMesh>();
         }
 
         #region Actions
@@ -174,14 +174,14 @@ namespace BlockmapFramework
         {
             Walls[w.LocalCellCoordinates].Remove(w);
         }
-        public void RegisterProcEntity(ProceduralEntity e)
+        public void RegisterBatchEntity(Entity e)
         {
-            if (ProceduralEntities.ContainsKey(e.LocalCoordinates)) ProceduralEntities[e.LocalCoordinates].Add(e);
-            else ProceduralEntities.Add(e.LocalCoordinates, new List<ProceduralEntity>() { e });
+            if (BatchEntities.ContainsKey(e.OriginNode.LocalCoordinates)) BatchEntities[e.OriginNode.LocalCoordinates].Add(e);
+            else BatchEntities.Add(e.OriginNode.LocalCoordinates, new List<Entity>() { e });
         }
-        public void DeregisterProcEntity(ProceduralEntity e)
+        public void DeregisterBatchEntity(Entity e)
         {
-            ProceduralEntities[e.LocalCoordinates].Remove(e);
+            BatchEntities[e.OriginNode.LocalCoordinates].Remove(e);
         }
 
         #endregion
@@ -220,7 +220,7 @@ namespace BlockmapFramework
             pm_GenerateWallMeshes.End();
 
             pm_GenerateProcEntityMeshes.Begin();
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) GameObject.Destroy(mesh.gameObject);
+            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) GameObject.Destroy(mesh.gameObject);
             ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
             pm_GenerateProcEntityMeshes.End();
 
@@ -240,7 +240,7 @@ namespace BlockmapFramework
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(actor);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(actor);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(actor);
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
+            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
 
             // Entity visibility
             foreach(Entity e in Entities) e.UpdateVisibility(actor);
@@ -258,7 +258,7 @@ namespace BlockmapFramework
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.ShowTextures(show);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
+            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
         public void ShowTileBlending(bool show)
@@ -271,8 +271,8 @@ namespace BlockmapFramework
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
-            foreach (ProceduralEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
-            foreach (Entity e in Entities) e.gameObject.SetActive(e.MinAltitude < value);
+            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.gameObject.SetActive(mesh.Altitude < value);
+            foreach (Entity e in Entities.Where(e => e.MeshObject != null)) e.MeshObject.SetActive(e.MinAltitude < value);
         }
 
         public void DrawZoneBorders()
@@ -440,9 +440,9 @@ namespace BlockmapFramework
         {
             return Fences.Select(x => x.Value).SelectMany(x => x).Where(x => x.Node.BaseAltitude == altitude).ToList();
         }
-        public List<ProceduralEntity> GetProceduralEntities(int altitude)
+        public List<Entity> GetBatchEntities(int altitude)
         {
-            return ProceduralEntities.Select(x => x.Value).SelectMany(x => x).Where(x => x.OriginNode.BaseAltitude == altitude).ToList();
+            return BatchEntities.Select(x => x.Value).SelectMany(x => x).Where(x => x.OriginNode.BaseAltitude == altitude).ToList();
         }
 
         public Vector2Int GetLocalCoordinates(Vector2Int worldCoordinates)

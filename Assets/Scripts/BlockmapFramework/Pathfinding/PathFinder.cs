@@ -22,7 +22,7 @@ namespace BlockmapFramework
         /// Returns the shortest path from a source node to a target node for the given entity.
         /// <br/>Returned path includes both source and target.
         /// </summary>
-        public static List<BlockmapNode> GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        public static List<BlockmapNode> GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;
 
@@ -51,7 +51,7 @@ namespace BlockmapFramework
                 {
                     if (closedList.Contains(transition.To)) continue;
                     if (!transition.CanPass(entity)) continue;
-                    if (considerUnexploredNodes && !transition.To.IsExploredBy(entity.Owner)) continue;
+                    if (considerUnexploredNodes && !transition.To.IsExploredBy(entity.Actor)) continue;
                     if (forbiddenNodes != null && forbiddenNodes.Contains(transition.To)) continue;
 
                     float tentativeGCost = gCosts[currentNode] + GetCCost(transition, entity);
@@ -70,7 +70,7 @@ namespace BlockmapFramework
             return null;
         }
 
-        public static float GetPathCost(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        public static float GetPathCost(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             List<BlockmapNode> path = GetPath(entity, from, to, considerUnexploredNodes, forbiddenNodes);
             if (path == null) return float.MaxValue;
@@ -93,7 +93,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Real cost of going from one node to another.
         /// </summary>
-        private static float GetCCost(Transition t, MovingEntity e)
+        private static float GetCCost(Transition t, Entity e)
         {
             return t.GetMovementCost(e);
         }

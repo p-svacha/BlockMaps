@@ -37,7 +37,7 @@ namespace CaptureTheFlag
 
             // Update position
             if (Width == 0) Width = GetComponent<RectTransform>().sizeDelta.x;
-            Vector3 targetWorldPosition = Character.Entity.transform.position + WorldOffset;
+            Vector3 targetWorldPosition = Character.MeshObject.transform.position + WorldOffset;
 
             Vector3 screenPosition = Character.Game.World.Camera.Camera.WorldToScreenPoint(targetWorldPosition);
             screenPosition = screenPosition + new Vector3(-Width / 2, 0f, 0f);

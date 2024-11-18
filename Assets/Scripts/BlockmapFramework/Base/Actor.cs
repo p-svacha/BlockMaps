@@ -9,7 +9,9 @@ namespace BlockmapFramework
     /// </summary>
     public class Actor : ISaveAndLoadable
     {
-        public int Id;
+        private int id;
+        public int Id => id;
+
         public string Name;
         public World World { get; private set; }
         public Color Color;
@@ -19,16 +21,21 @@ namespace BlockmapFramework
         public Actor() { }
         public Actor(World world, int id, string name, Color color)
         {
-            OnCreateOrLoad(world);
-
-            Id = id;
+            World = world;
+            this.id = id;
             Name = name;
             Color = color;
+
+            Init();
         }
 
-        public void OnCreateOrLoad(World world)
+        public void PostLoad()
         {
-            World = world;
+            Init();
+        }
+
+        private void Init()
+        {
             Entities = new List<Entity>();
         }
 
@@ -36,8 +43,10 @@ namespace BlockmapFramework
 
         public void ExposeDataForSaveAndLoad()
         {
-            SaveLoadManager.SaveOrLoadInt(ref Id, "id");
-            SaveLoadManager.SaveOrLoadString(ref Name, "name");
+            if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
+
+            SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Name, "name");
             SaveLoadManager.SaveOrLoadColor(ref Color, "color");
         }
 

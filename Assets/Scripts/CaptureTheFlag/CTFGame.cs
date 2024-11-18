@@ -214,7 +214,7 @@ namespace CaptureTheFlag
         {
             // Update hovered character
             Character hoveredCharacter = null;
-            if(World.HoveredEntity != null) World.HoveredEntity.TryGetComponent(out hoveredCharacter);
+            if (World.HoveredEntity != null && World.HoveredEntity is Character c) hoveredCharacter = c;
 
             // Left click - Select character
             if(Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
@@ -376,7 +376,7 @@ namespace CaptureTheFlag
 
         public List<Character> GetCharacters(BlockmapNode node)
         {
-            return node.Entities.Where(x => x.TryGetComponent(out Character character)).Select(x => x.GetComponent<Character>()).ToList();
+            return node.Entities.Where(x => x is Character).Select(x => (Character)x).ToList();
         }
 
         #endregion

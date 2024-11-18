@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class ProceduralEntityMesh : ChunkMesh
+    public class BatchEntityMesh : ChunkMesh
     {
         public int Altitude { get; private set; }
 

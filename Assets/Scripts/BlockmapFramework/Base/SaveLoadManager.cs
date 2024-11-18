@@ -21,6 +21,11 @@ namespace BlockmapFramework
         private static XmlReader reader;
 
         /// <summary>
+        /// The world object that is currently being loaded.
+        /// </summary>
+        public static World LoadingWorld;
+
+        /// <summary>
         /// Saves the root object to the specified file.
         /// </summary>
         /// <typeparam name="T">The type of the root object, which must implement IExposable.</typeparam>
@@ -55,12 +60,11 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Loads an object of type T from a specified XML file.
+        /// Loads a world from a specified XML file.
         /// </summary>
-        /// <typeparam name="T">The type of the object to load, which must implement IExposable.</typeparam>
         /// <param name="fileName">The name of the XML file to load from.</param>
         /// <returns>The deserialized object of type T.</returns>
-        public static T Load<T>(string fileName) where T : class, ISaveAndLoadable
+        public static World Load(string fileName)
         {
             IsLoading = true;
 
@@ -71,11 +75,11 @@ namespace BlockmapFramework
                 reader = XmlReader.Create(fileStream);
                 reader.ReadToFollowing("Root");
 
-                T rootObject = null;
-                SaveOrLoadObject(ref rootObject, "Data");
+                LoadingWorld = null;
+                SaveOrLoadObject(ref LoadingWorld, "Data");
 
                 EndLoad();
-                return rootObject;
+                return LoadingWorld;
             }
         }
 
@@ -128,9 +132,27 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Save and load a bool.
+        /// </summary>
+        public static void SaveOrLoadPrimitive(ref bool value, string label)
+        {
+            if (IsSaving)
+            {
+                writer.WriteElementString(label, value.ToString());
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    value = bool.Parse(reader.ReadElementContentAsString());
+                }
+            }
+        }
+
+        /// <summary>
         /// Save and load an int.
         /// </summary>
-        public static void SaveOrLoadInt(ref int value, string label)
+        public static void SaveOrLoadPrimitive(ref int value, string label)
         {
             if (IsSaving)
             {
@@ -146,9 +168,27 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Save and load a float.
+        /// </summary>
+        public static void SaveOrLoadPrimitive(ref float value, string label)
+        {
+            if (IsSaving)
+            {
+                writer.WriteElementString(label, value.ToString());
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    value = float.Parse(reader.ReadElementContentAsString());
+                }
+            }
+        }
+
+        /// <summary>
         /// Save and load a string.
         /// </summary>
-        public static void SaveOrLoadString(ref string value, string label)
+        public static void SaveOrLoadPrimitive(ref string value, string label)
         {
             if (IsSaving)
             {
@@ -159,6 +199,34 @@ namespace BlockmapFramework
                 if (reader.ReadToFollowing(label))
                 {
                     value = reader.ReadElementContentAsString();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save or load an enum.
+        /// </summary>
+        public static void SaveOrLoadPrimitive<T>(ref T value, string label) where T : Enum
+        {
+            if (IsSaving)
+            {
+                // Save the enum as a string for readability.
+                writer.WriteElementString(label, value.ToString());
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    string enumString = reader.ReadElementContentAsString();
+                    try
+                    {
+                        // Parse the string back into the enum type.
+                        value = (T)Enum.Parse(typeof(T), enumString);
+                    }
+                    catch (ArgumentException)
+                    {
+                        throw new Exception($"Failed to parse enum value '{enumString}' for enum type '{typeof(T).Name}' in field '{label}'.");
+                    }
                 }
             }
         }
@@ -351,6 +419,37 @@ namespace BlockmapFramework
                     string value = reader.ReadElementContentAsString();
                     string[] values = value.Split(',');
                     vector = new Vector2Int(int.Parse(values[0]), int.Parse(values[1]));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save and load a reference to another saveable object. If loading, make sure that the object you're referencing has already been loaded at this point.
+        /// </summary>
+        public static void SaveOrLoadReference<T>(ref T obj, string label) where T : class, ISaveAndLoadable
+        {
+            if (IsSaving)
+            {
+                writer.WriteElementString(label, obj.Id.ToString());
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    // Read the ID of the referenced object
+                    int objId = int.Parse(reader.ReadElementContentAsString());
+
+                    // Resolve the reference based on the expected type
+                    if (typeof(T) == typeof(Actor)) obj = LoadingWorld.GetActor(objId) as T;
+                    else if (typeof(T) == typeof(BlockmapNode)) obj = LoadingWorld.GetNode(objId) as T;
+                    else if (typeof(T) == typeof(Entity)) obj = LoadingWorld.GetEntity(objId) as T;
+                    else throw new Exception($"Unsupported reference type '{typeof(T)}' for field '{label}'.");
+
+                    // Validate that the reference was successfully resolved
+                    if (obj == null)
+                    {
+                        throw new Exception($"Failed to resolve reference for type '{typeof(T)}' with ID '{objId}' in field '{label}'.");
+                    }
                 }
             }
         }

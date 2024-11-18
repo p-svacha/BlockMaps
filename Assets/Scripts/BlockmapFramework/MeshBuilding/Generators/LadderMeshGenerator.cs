@@ -15,18 +15,6 @@ namespace BlockmapFramework
         private const float STEP_HEIGHT = 0.05f;
         private const float STEP_WIDTH = 0.02f;
 
-        public static Ladder GenerateLadderObject(BlockmapNode node, BlockmapNode target, Direction side)
-        {
-            GameObject ladderObject = new GameObject("Ladder");
-
-            MeshBuilder meshBuilder = new MeshBuilder(ladderObject);
-            int height = target.GetMaxAltitude(HelperFunctions.GetOppositeDirection(side)) - node.GetMinAltitude(side);
-            GenerateLadderMesh(meshBuilder, height, isPreview: false);
-
-            Ladder ladder = ladderObject.AddComponent<Ladder>();
-            return ladder;
-        }
-
         public static void GenerateLadderMesh(MeshBuilder meshBuilder, int height, bool isPreview)
         {
             int ladderSubmesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));

@@ -2,18 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlockmapFramework {
-    public class PE001_Hedge : ProceduralEntity
+namespace BlockmapFramework
+{
+    public static class HedgeMeshGenerator
     {
-        protected override ProceduralEntityId ProceduralId => ProceduralEntityId.PE001;
-        protected override bool PE_BlocksVision => true;
-        protected override string PE_Name => "Hedge";
-
         private const float EDGE_OFFSET = 0.2f;
         private const float BEVEL_HEIGHT = 0.15f;
         private const float BEVEL_WIDTH = 0.1f;
 
-        public override void BuildMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
+        public static void BuildHedgeMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
         {
             Material mat = isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Hedge");
             int submesh = meshBuilder.GetSubmesh(mat);
@@ -22,7 +19,7 @@ namespace BlockmapFramework {
             float hedgeHeight = height * World.NodeHeight - 0.05f;
 
             Dictionary<Direction, bool> hasConnection = new Dictionary<Direction, bool>();
-            foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, GetTypeId(height)));
+            foreach (Direction dir in HelperFunctions.GetAllDirections8()) hasConnection.Add(dir, node.HasEntityConnection(dir, EntityDefOf.Hedge, height));
 
             Dictionary<Direction, float> bevelWidths = new Dictionary<Direction, float>();
             foreach (Direction dir in HelperFunctions.GetSides()) bevelWidths.Add(dir, hasConnection[dir] ? 0f : BEVEL_WIDTH);
@@ -60,15 +57,15 @@ namespace BlockmapFramework {
                         Direction.W => new Vector3(EDGE_OFFSET, hedgeHeight, hedgeWidth),
                         _ => throw new System.Exception("invalid direction")
                     };
-                    
+
                     meshBuilder.BuildCubeWithBevelledTop(node, submesh, pos, dim, BEVEL_HEIGHT, bevelWidthsSide);
                 }
             }
 
             // Edge connections
-            foreach(Direction dir in HelperFunctions.GetCorners())
+            foreach (Direction dir in HelperFunctions.GetCorners())
             {
-                if(HelperFunctions.GetAffectedDirections(dir).TrueForAll(x => hasConnection[x]))
+                if (HelperFunctions.GetAffectedDirections(dir).TrueForAll(x => hasConnection[x]))
                 {
                     Vector3 pos = dir switch
                     {

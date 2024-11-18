@@ -1,10 +1,10 @@
 Migration to Def-System
 
-Rework save/load system
-
-new manager is implemented
-
-world, chunk, entity should no longer be monobehaviour
+add entity rendertype StandaloneGenerated for door/ladder
+allow mirroring for all entites
+	make it affect vision colldiers correctly
+add Node.IsPassable(EntityDef def)
+	use it in SpawnCharacterTool
 
 
 Defs:

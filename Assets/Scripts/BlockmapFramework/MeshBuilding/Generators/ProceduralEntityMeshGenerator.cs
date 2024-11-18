@@ -7,25 +7,25 @@ namespace BlockmapFramework
 {
     public static class ProceduralEntityMeshGenerator
     {
-        public static Dictionary<int, ProceduralEntityMesh> GenerateMeshes(Chunk chunk)
+        public static Dictionary<int, BatchEntityMesh> GenerateMeshes(Chunk chunk)
         {
-            Dictionary<int, ProceduralEntityMesh> meshes = new Dictionary<int, ProceduralEntityMesh>();
+            Dictionary<int, BatchEntityMesh> meshes = new Dictionary<int, BatchEntityMesh>();
 
             for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
                 // Get procedural entities for altitude level
-                List<ProceduralEntity> entitiesToDraw = chunk.GetProceduralEntities(altitude);
+                List<Entity> entitiesToDraw = chunk.GetBatchEntities(altitude);
                 if (entitiesToDraw.Count == 0) continue;
 
                 // Generate mesh
                 GameObject meshObject = new GameObject("ProceduralEntityMesh_" + altitude);
-                ProceduralEntityMesh mesh = meshObject.AddComponent<ProceduralEntityMesh>();
+                BatchEntityMesh mesh = meshObject.AddComponent<BatchEntityMesh>();
                 mesh.Init(chunk, altitude);
 
                 MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach (ProceduralEntity e in entitiesToDraw)
+                foreach (Entity e in entitiesToDraw)
                 {
-                    e.BuildMesh(meshBuilder);
+                    e.Def.RenderProperties.BatchRenderFunction(meshBuilder, e.OriginNode, e.Height, false);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();

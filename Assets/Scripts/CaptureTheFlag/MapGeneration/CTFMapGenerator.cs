@@ -12,7 +12,7 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class CTFMapGenerator : WorldGenerator
     {
-        public const string FLAG_ID = "flag";
+        public const string FLAG_ID = "CtfFlag";
 
         // Rules
         private const int SPAWN_MAP_EDGE_OFFSET = 10;
@@ -67,14 +67,13 @@ namespace CaptureTheFlag
             Vector2Int spawnAreaCenter = new Vector2Int(spawnX, spawnY);
 
             // Flag
-            Entity flagPrefab = GetEntityPrefab(FLAG_ID);
-            Entity spawnedFlag = SpawnEntityOnGroundAround(flagPrefab, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+            Entity spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
             int numAttempts = 0;
             while(spawnedFlag == null && numAttempts++ < 50) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
             {
                 spawnY = Random.Range(SPAWN_MAP_EDGE_OFFSET, WorldSize - SPAWN_MAP_EDGE_OFFSET);
                 spawnAreaCenter = new Vector2Int(spawnX, spawnY);
-                spawnedFlag = SpawnEntityOnGroundAround(flagPrefab, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+                spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
             }
             
             // Jail zone
@@ -120,19 +119,17 @@ namespace CaptureTheFlag
 
             // Humans
             int humansSpawned = 0;
-            Entity humanPrefab = GetCharacterPrefab("human");
             while(humansSpawned < NUM_HUMANS_PER_PLAYER)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(humanPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if(spawnedCharacter != null) humansSpawned++;
             }
 
             // Dogs
             int dogsSpawned = 0;
-            Entity dogPrefab = GetCharacterPrefab("dog");
             while (dogsSpawned < NUM_DOGS_PER_PLAYER)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(dogPrefab, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if (spawnedCharacter != null) dogsSpawned++;
             }
         }
@@ -157,13 +154,6 @@ namespace CaptureTheFlag
             Zone localPlayerZone = World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, showBorders: true);
             Zone neutralZone = World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, showBorders: true);
             Zone opponentZone = World.AddZone(opponentZoneNodes, Opponent, providesVision: false, showBorders: true);
-        }
-
-        private Entity GetCharacterPrefab(string id)
-        {
-            string fullPath = "CaptureTheFlag/Characters/" + id;
-            Entity prefab = Resources.Load<Entity>(fullPath);
-            return prefab;
         }
     }
 }

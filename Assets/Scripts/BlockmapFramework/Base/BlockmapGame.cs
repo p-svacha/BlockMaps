@@ -29,7 +29,7 @@ namespace BlockmapFramework
 
         protected virtual void Update()
         {
-            World?.Update();
+            World?.Tick();
         }
 
         protected virtual void FixedUpdate()

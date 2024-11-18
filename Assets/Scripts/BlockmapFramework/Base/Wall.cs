@@ -88,7 +88,7 @@ namespace BlockmapFramework
 
         public void AddVisionBy(Entity e)
         {
-            ExploredBy.Add(e.Owner);
+            ExploredBy.Add(e.Actor);
             SeenBy.Add(e);
         }
         public void RemoveVisionBy(Entity e)
@@ -107,7 +107,7 @@ namespace BlockmapFramework
         public bool IsVisibleBy(Actor actor)
         {
             if (actor == null) return true; // Everything is visible
-            if (SeenBy.FirstOrDefault(x => x.Owner == actor) != null) return true; // Wall is seen by an entity of given actor
+            if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Wall is seen by an entity of given actor
 
             return false;
         }

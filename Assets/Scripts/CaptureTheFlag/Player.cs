@@ -28,8 +28,8 @@ namespace CaptureTheFlag
             Characters = new List<Character>();
             foreach (Entity e in actor.Entities)
             {
-                if (e.TypeId == CTFMapGenerator.FLAG_ID) Flag = e;
-                if (e.TryGetComponent(out Character c)) Characters.Add(c);
+                if (e.Def.DefName == CTFMapGenerator.FLAG_ID) Flag = e;
+                if (e is Character c) Characters.Add(c);
             }
 
             Territory = territory;

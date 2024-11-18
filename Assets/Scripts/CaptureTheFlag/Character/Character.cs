@@ -6,12 +6,13 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class Character : MonoBehaviour
+    public class Character : Entity
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
         public CTFGame Game;
-        public MovingEntity Entity { get; private set; }
+        public Entity Entity { get; private set; }
+        public Comp_Movement MovementComp { get; private set; }
         public Player Owner { get; private set; }
         public Player Opponent { get; private set; }
 
@@ -32,17 +33,17 @@ namespace CaptureTheFlag
         public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         private CharacterAction CurrentAction;
 
-        // Attributes
-        private bool IsOverrideMovementSpeedActive;
-        private float NormalMovementSpeed;
-
         // UI
         public UI_CharacterLabel UI_Label;
 
-        private void Awake()
+        #region Init
+
+        protected override void OnInitialized()
         {
-            Entity = GetComponent<MovingEntity>(); 
+            MovementComp = GetComponent<Comp_Movement>();
         }
+
+        #endregion
 
         #region Game Loop
 
@@ -55,10 +56,8 @@ namespace CaptureTheFlag
             Opponent = opponent;
 
             // Create label
-            UI_Label = Instantiate(game.UI.CharacterLabelPrefab, game.UI.CharacterLabelsContainer.transform);
+            UI_Label = GameObject.Instantiate(game.UI.CharacterLabelPrefab, game.UI.CharacterLabelsContainer.transform);
             UI_Label.Init(this);
-
-            NormalMovementSpeed = Entity.MovementSpeed;
         }
 
         public void OnStartTurn()
@@ -106,20 +105,6 @@ namespace CaptureTheFlag
             ActionPoints = 0;
         }
 
-        /// <summary>
-        /// Sets this character's speed to the given value until disabled.
-        /// </summary>
-        public void EnableOverrideMovementSpeed(float overrideSpeed)
-        {
-            Entity.MovementSpeed = overrideSpeed;
-            IsOverrideMovementSpeedActive = true;
-        }
-        public void DisableOverrideMovementSpeed()
-        {
-            Entity.MovementSpeed = NormalMovementSpeed;
-            IsOverrideMovementSpeedActive = false;
-        }
-
         #endregion
 
         #region Getters
@@ -165,7 +150,7 @@ namespace CaptureTheFlag
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
                     if (totalCost > Stamina) continue; // not reachable with current stamina
                     if (!t.Value.CanPass(Entity)) continue; // transition not passable for this character
-                    if (!t.Key.IsExploredBy(Entity.Owner)) continue; // node not explored
+                    if (!t.Key.IsExploredBy(Entity.Actor)) continue; // node not explored
 
                     // Node has not yet been visited or cost is lower than previously lowest cost => Update
                     if(!nodeCosts.ContainsKey(targetNode) || totalCost < nodeCosts[targetNode])

@@ -15,7 +15,7 @@ namespace WorldEditor
         public override string Name => "Spawn Character";
         public override Sprite Icon => ResourceManager.Singleton.MovingEntitySprite;
 
-        private int SelectedEntityIndex;
+        private EntityDef SelectedEntity;
 
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
@@ -32,17 +32,10 @@ namespace WorldEditor
             base.Init(editor);
 
             EntitySelection.Clear();
-            // Add variable MovingEntity to selection
-            EntitySelection.AddElement(ResourceManager.Singleton.DynamicEntitySprite, Color.white, "Dynamic", () => SelectEntity(0));
-
-            // Add preset
-            for (int i = 0; i < editor.MovingEntityPresets.Count; i++)
+            foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.Components.Any(x => x is CompProperties_Movement)))
             {
-                int j = i;
-                MovingEntity preset = editor.MovingEntityPresets[j];
-                EntitySelection.AddElement(preset.GetThumbnail(), Color.white, preset.name, () => SelectEntity(j + 1));
+                EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
-
             EntitySelection.SelectFirstElement();
         }
 
@@ -54,11 +47,11 @@ namespace WorldEditor
             PlayerDropdown.AddOptions(playerOptions);
         }
 
-        public void SelectEntity(int index)
+        public void SelectEntity(EntityDef def)
         {
-            SelectedEntityIndex = index;
+            SelectedEntity = def;
 
-            if(index == 0) // Dynamic preset
+            if(def == EntityDefOf.EditorDynamicCharacter)
             {
                 SetAttributesInteractable(true);
             }
@@ -66,7 +59,7 @@ namespace WorldEditor
             else // Fixed preset
             {
                 SetAttributesInteractable(false);
-                DisplayAttributesOf(Editor.MovingEntityPresets[index - 1]);
+                DisplayAttributesOf(def);
             }
         }
 
@@ -78,20 +71,21 @@ namespace WorldEditor
             CanSwimToggle.interactable = value;
             ClimbingSkillDropdown.interactable = value;
         }
-        private void DisplayAttributesOf(MovingEntity e)
+        private void DisplayAttributesOf(EntityDef def)
         {
-            SpeedInput.text = e.MovementSpeed.ToString();
-            VisionInput.text = e.VisionRange.ToString();
-            HeightInput.text = e.Height.ToString();
-            CanSwimToggle.isOn = e.CanSwim;
-            ClimbingSkillDropdown.value = (int)e.ClimbingSkill;
+            CompProperties_Movement movementProps = (CompProperties_Movement)def.Components.First(x => x is CompProperties_Movement);
+            SpeedInput.text = movementProps.MovementSpeed.ToString();
+            VisionInput.text = def.VisionRange.ToString();
+            HeightInput.text = def.Dimensions.y.ToString();
+            CanSwimToggle.isOn = movementProps.CanSwim;
+            ClimbingSkillDropdown.value = (int)movementProps.ClimbingSkill;
         }
 
         public override void UpdateTool()
         {
             if (World.HoveredNode != null)
             {
-                bool canSpawn = World.HoveredNode.IsPassable(Editor.CharacterPrefab);
+                bool canSpawn = World.HoveredNode.IsPassable();
                 World.HoveredNode.ShowOverlay(ResourceManager.Singleton.TileSelector, canSpawn ? Color.white : Color.red);
             }
         }
@@ -99,32 +93,26 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
-            if (!World.HoveredNode.IsPassable(Editor.CharacterPrefab)) return;
+            if (!World.HoveredNode.IsPassable()) return;
 
             BlockmapNode spawnNode = World.HoveredNode;
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            if (SelectedEntityIndex == 0) // Dynamic preset
+            Entity entity = World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height: int.Parse(HeightInput.text), updateWorld: true);
+            if (entity is EditorMovingEntity editorChar)
             {
-                EditorMovingEntity newCharacter = Instantiate(Editor.CharacterPrefab);
                 float speed = float.Parse(SpeedInput.text);
                 float vision = float.Parse(VisionInput.text);
-                int height = int.Parse(HeightInput.text);
                 bool canSwim = CanSwimToggle.isOn;
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
-                newCharacter.PreInit(speed, vision, height, canSwim, climbingSkill);
+                editorChar.CustomPostInit(speed, vision, canSwim, climbingSkill);
 
-                World.SpawnEntity(newCharacter, spawnNode, Direction.N, owner, isInstance: true);
-            }
-            else // Fixed preset
-            {
-                World.SpawnEntity(Editor.MovingEntityPresets[SelectedEntityIndex - 1], spawnNode, Direction.N, owner, updateWorld: true);
             }
         }
         public override void HandleRightClick()
         {
             if (World.HoveredEntity == null) return;
-            if (!(World.HoveredEntity is MovingEntity)) return;
+            if (World.HoveredEntity.GetComponent<Comp_Movement>() == null) return;
 
             World.RemoveEntity(World.HoveredEntity);
         }

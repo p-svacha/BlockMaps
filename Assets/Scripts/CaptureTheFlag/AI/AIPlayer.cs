@@ -95,7 +95,7 @@ namespace CaptureTheFlag
                     Actions[currentCharacter] = nextAction;
                     CurrentAction = nextAction;
                     nextAction.Perform();
-                    currentCharacter.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
+                    currentCharacter.MovementComp.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
                 }
 
 
@@ -123,7 +123,7 @@ namespace CaptureTheFlag
                     // Unpause action if camera arrived at character
                     if (CurrentFollowedAction.IsPaused)
                     {
-                        CurrentFollowedAction.Character.DisableOverrideMovementSpeed();
+                        CurrentFollowedAction.Character.MovementComp.DisableOverrideMovementSpeed();
                         CurrentFollowedAction.UnpauseAction();
                     }
 
@@ -131,7 +131,7 @@ namespace CaptureTheFlag
                     else if (CurrentFollowedAction.IsDone || !CurrentFollowedAction.Character.IsVisible)
                     {
                         World.Camera.Unfollow();
-                        CurrentFollowedAction.Character.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
+                        CurrentFollowedAction.Character.MovementComp.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
                         CurrentFollowedAction = null;
                     }
                 }
@@ -297,7 +297,7 @@ namespace CaptureTheFlag
 
             foreach (Character opponentCharacter in Opponent.Characters)
             {
-                if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.Entity.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
+                if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.MovementComp.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
                 {
                     target = opponentCharacter;
                     return true;

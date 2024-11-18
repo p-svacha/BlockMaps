@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static BlockmapFramework.EntityDefOf;
 
 namespace CaptureTheFlag
 {
@@ -124,16 +125,10 @@ namespace CaptureTheFlag
                     previousPositions.Add(position);
                     if (!World.IsInWorld(position)) break;
 
-                    ProceduralEntity hedge = ProceduralEntityManager.Instance.GetProceduralEntityInstance(ProceduralEntityId.PE001, hedgeHeight);
                     GroundNode node = World.GetGroundNode(position);
-                    if (World.CanSpawnEntity(hedge, node, Direction.N, forceHeadspaceRecalc: true))
+                    if (World.CanSpawnEntity(Hedge, node, Direction.N, forceHeadspaceRecalc: true))
                     {
-                        World.SpawnEntity(hedge, node, Direction.N, World.Gaia, isInstance: true, updateWorld: false);
-                    }
-                    else
-                    {
-                        GameObject.Destroy(hedge);
-                        break;
+                        World.SpawnEntity(Hedge, node, Direction.N, World.Gaia, updateWorld: false);
                     }
 
                     // Next position
@@ -175,23 +170,24 @@ namespace CaptureTheFlag
             BlockmapNode targetNode = World.GetGroundNode(new Vector2Int(x, y));
             Direction rotation = HelperFunctions.GetRandomSideDirection();
 
-            Entity prefab = GetEntityPrefab(GetRandomTreeId());
+            EntityDef def = GetRandomTreeDef();
 
-            if (World.CanSpawnEntity(prefab, targetNode, rotation, forceHeadspaceRecalc: true))
+            if (World.CanSpawnEntity(def, targetNode, rotation, forceHeadspaceRecalc: true))
             {
-                World.SpawnEntity(prefab, targetNode, rotation, World.Gaia, updateWorld: false);
+                World.SpawnEntity(def, targetNode, rotation, World.Gaia, updateWorld: false);
             }
         }
-        private string GetRandomTreeId()
+        private EntityDef GetRandomTreeDef()
         {
-            Dictionary<string, float> ids = new Dictionary<string, float>()
+            Dictionary<string, float> candidateDefNames = new Dictionary<string, float>()
             {
-                { "tree01", 1f },
-                { "tree02", 3f },
-                { "tree03", 1f },
-                { "log_2x1", 0.3f },
+                { "PineSmall", 1f },
+                { "PineMedium", 3f },
+                { "PineBig", 1f },
+                { "LogSmall", 0.3f },
             };
-            return HelperFunctions.GetWeightedRandomElement(ids);
+            string chosenDef = HelperFunctions.GetWeightedRandomElement(candidateDefNames);
+            return DefDatabase<EntityDef>.GetNamed(chosenDef);
         }
 
         #endregion

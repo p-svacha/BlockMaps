@@ -13,6 +13,7 @@ namespace BlockmapFramework
         public List<int> HeightOverrideHeights; // Set in inspector, acts as value for HeightOverridePositions
         private Dictionary<Vector2Int, BoxCollider> VisionCollidersPerCoordinate; // If some heights are overriden, this lists includes all vision colliders
 
+        /*
         protected override void CreateVisionCollider()
         {
             if (HeightOverridePositions.Count != HeightOverrideHeights.Count) throw new System.Exception("The 2 lists HeightOverridePositions and HeightOverrideHeights act as a dictionary and must have the same length.");
@@ -54,7 +55,9 @@ namespace BlockmapFramework
                 }
             }
         }
+        */
 
+        /*
         protected override void UpdateVisionColliderPosition()
         {
             if (HeightOverridePositions.Count == 0) // Set position of single box collider for whole entity
@@ -80,5 +83,6 @@ namespace BlockmapFramework
                 }
             }
         }
+        */
     }
 }

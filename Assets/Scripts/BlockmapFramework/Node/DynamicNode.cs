@@ -12,10 +12,7 @@ namespace BlockmapFramework
     public abstract class DynamicNode : BlockmapNode
     {
         public DynamicNode() { }
-        public DynamicNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef)
-        {
-            RecalculateCenterWorldPosition();
-        }
+        public DynamicNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef) : base(world, chunk, id, localCoordinates, height, surfaceDef) { }
 
         #region Actions
 
