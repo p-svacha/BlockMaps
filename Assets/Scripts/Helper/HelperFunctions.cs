@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -447,11 +448,20 @@ public static class HelperFunctions
         int numChildren = obj.transform.childCount;
         for (int i = skipElements; i < numChildren; i++) GameObject.DestroyImmediate(obj.transform.GetChild(0).gameObject);
     }
-
+    
     public static Sprite TextureToSprite(Texture tex) => TextureToSprite((Texture2D)tex);
     public static Sprite TextureToSprite(Texture2D tex)
     {
+        if (tex == null) return null;
         return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+    }
+    public static Sprite GetAssetPreviewSprite(string path)
+    {
+        Object asset = Resources.Load(path);
+        if (asset == null) throw new System.Exception($"Could not find asset with path {path}.");
+        Texture2D assetPreviewTexture = AssetPreview.GetAssetPreview(asset);
+        //if (assetPreviewTexture == null) throw new System.Exception($"Could not create asset preview texture of {asset} ({path}).");
+        return TextureToSprite(assetPreviewTexture);
     }
 
     public static Sprite TextureToSprite(string resourcePath)

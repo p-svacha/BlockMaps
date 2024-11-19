@@ -25,5 +25,12 @@ namespace BlockmapFramework
         /// Maximum climbability of climbables that this entity can climb.
         /// </summary>
         public ClimbingCategory ClimbingSkill { get; init; } = ClimbingCategory.None;
+
+        public override bool Validate(EntityDef parent)
+        {
+            if (parent.Impassable) parent.ThrowValidationError("Entities capable of movement cannot be impassable.");
+
+            return base.Validate(parent);
+        }
     }
 }

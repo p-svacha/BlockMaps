@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static BlockmapFramework.EntityDefOf;
 
 namespace CaptureTheFlag
 {
@@ -94,7 +93,7 @@ namespace CaptureTheFlag
             }
 
             // End
-            //Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
+            Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
 
             World.RedrawFullWorld();
         }
@@ -126,9 +125,9 @@ namespace CaptureTheFlag
                     if (!World.IsInWorld(position)) break;
 
                     GroundNode node = World.GetGroundNode(position);
-                    if (World.CanSpawnEntity(ProcHedge, node, Direction.N,hedgeHeight, forceHeadspaceRecalc: true))
+                    if (World.CanSpawnEntity(EntityDefOf.ProcHedge, node, Direction.N,hedgeHeight, forceHeadspaceRecalc: true))
                     {
-                        World.SpawnEntity(ProcHedge, node, Direction.N, World.Gaia, hedgeHeight, updateWorld: false);
+                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, World.Gaia, hedgeHeight, updateWorld: false);
                     }
 
                     // Next position
@@ -231,8 +230,10 @@ namespace CaptureTheFlag
             if (existingPath != null) allPathNodes.AddRange(existingPath);
 
             bool continuePath = true;
-            while (continuePath)
+            int length = 0;
+            while (continuePath && length < 500)
             {
+                length++;
                 Vector2 segmentStartPosition = currentPosition;
 
                 float angleChange = Random.Range(-MAX_PATH_ANGLE_CHANGE, MAX_PATH_ANGLE_CHANGE);

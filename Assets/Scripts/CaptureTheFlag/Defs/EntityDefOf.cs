@@ -11,5 +11,6 @@ namespace CaptureTheFlag
         public static EntityDef Flag;
         public static EntityDef Human;
         public static EntityDef Dog;
+        public static EntityDef ProcHedge;
     }
 }

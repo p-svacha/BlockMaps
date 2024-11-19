@@ -302,7 +302,7 @@ namespace BlockmapFramework
 
                         GameObject perNodeColliderObject = new GameObject("visionCollider_" + x + "_" + y);
                         perNodeColliderObject.layer = World.Layer_EntityVisionCollider;
-                        perNodeColliderObject.transform.SetParent(Wrapper.transform);
+                        perNodeColliderObject.transform.SetParent(VisionColliderObject.transform);
                         BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
 
                         float height = Dimensions.y; // default height
@@ -890,7 +890,7 @@ namespace BlockmapFramework
         /// Returns the world position at which the "eyes" of this entity currently located.
         /// <br/> Rays for calculating vision are shot from this position.
         /// </summary>
-        public Vector3 GetEyePosition()
+        private Vector3 GetEyePosition()
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 

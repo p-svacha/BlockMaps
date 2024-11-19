@@ -79,6 +79,7 @@ namespace CaptureTheFlag
             // Jail zone
             HashSet<Vector2Int> jailZoneCoords = new HashSet<Vector2Int>();
             int flagDistanceX, flagDistanceY;
+            numAttempts = 0;
             do
             {
                 flagDistanceX = Random.Range(CTFGame.JAIL_ZONE_MIN_FLAG_DISTANCE, CTFGame.JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
@@ -86,10 +87,10 @@ namespace CaptureTheFlag
                 if (Random.value < 0.5f) flagDistanceX *= -1;
                 if (Random.value < 0.5f) flagDistanceY *= -1;
             }
-            while (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < World.MinX + CTFGame.JAIL_ZONE_RADIUS ||
+            while (numAttempts++ < 10 && (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < World.MinX + CTFGame.JAIL_ZONE_RADIUS ||
                 spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX > World.MaxX - CTFGame.JAIL_ZONE_RADIUS - 1 ||
                 spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY < World.MinY + CTFGame.JAIL_ZONE_RADIUS ||
-                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > World.MaxY - CTFGame.JAIL_ZONE_RADIUS - 1);
+                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > World.MaxY - CTFGame.JAIL_ZONE_RADIUS - 1));
 
             Vector2Int jailZoneCenter = spawnedFlag.OriginNode.WorldCoordinates + new Vector2Int(flagDistanceX, flagDistanceY);
             for (int x = -(CTFGame.JAIL_ZONE_RADIUS - 1); x < CTFGame.JAIL_ZONE_RADIUS; x++)
@@ -119,7 +120,8 @@ namespace CaptureTheFlag
 
             // Humans
             int humansSpawned = 0;
-            while(humansSpawned < NUM_HUMANS_PER_PLAYER)
+            numAttempts = 0;
+            while(humansSpawned < NUM_HUMANS_PER_PLAYER && numAttempts++ < 10)
             {
                 Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if(spawnedCharacter != null) humansSpawned++;
@@ -127,7 +129,8 @@ namespace CaptureTheFlag
 
             // Dogs
             int dogsSpawned = 0;
-            while (dogsSpawned < NUM_DOGS_PER_PLAYER)
+            numAttempts = 0;
+            while (dogsSpawned < NUM_DOGS_PER_PLAYER && numAttempts++ < 10)
             {
                 Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if (spawnedCharacter != null) dogsSpawned++;
@@ -140,8 +143,8 @@ namespace CaptureTheFlag
         /// </summary>
         protected void CreateMapZones()
         {
-            int neutralZoneSize = (int)(World.Dimensions.x * CTFGame.NEUTRAL_ZONE_SIZE);
-            int playerZoneSize = (World.Dimensions.x / 2) - (neutralZoneSize / 2);
+            int neutralZoneSize = (int)(WorldSize * CTFGame.NEUTRAL_ZONE_SIZE);
+            int playerZoneSize = (WorldSize / 2) - (neutralZoneSize / 2);
             HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> opponentZoneNodes = new HashSet<Vector2Int>();

@@ -57,8 +57,12 @@ namespace BlockmapFramework
 
         public override bool Validate()
         {
-            if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) throw new Exception(LoadingErrorPrefix + "Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
-            if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) throw new Exception(LoadingErrorPrefix + "x and z dimensions must be 1 for batch-rendered entities.");
+            if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) ThrowValidationError("Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
+            if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) ThrowValidationError("x and z dimensions must be 1 for batch-rendered entities.");
+
+            foreach (CompProperties props in Components)
+                if(!props.Validate(this))
+                    return false;
 
             return base.Validate();
         }

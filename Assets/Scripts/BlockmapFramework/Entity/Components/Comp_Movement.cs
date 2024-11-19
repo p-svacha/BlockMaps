@@ -129,7 +129,7 @@ namespace BlockmapFramework
             TargetPath = path;
             Target = path.Last();
             IsMoving = true;
-            OnNewPath.Invoke();
+            OnNewPath?.Invoke();
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace BlockmapFramework
             CurrentTransition = null;
             TargetPath = null;
             Target = null;
-            OnStopMoving.Invoke();
+            OnStopMoving?.Invoke();
         }
 
         public void EnableOverrideMovementSpeed(float value)

@@ -33,10 +33,10 @@ namespace BlockmapFramework
 
         public override bool Validate()
         {
-            if (RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface && RenderProperties.SurfaceReferenceMaterial == null) throw new Exception($"{LoadingErrorPrefix}SurfaceDefs that have a RenderType of FlatBlendableSurface need to have a SurfaceReferenceMaterial.");
-            if (RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration && RenderProperties.CustomRenderFunction == null) throw new Exception($"{LoadingErrorPrefix}SurfaceDefs that have a RenderType of CustomMeshGeneration need to have a CustomRenderFunction.");
-            if (MovementSpeedModifier <= 0f) throw new Exception(LoadingErrorPrefix + "MovementSpeedModifier must be greater than 0.");
-            if (MovementSpeedModifier > 1f) throw new Exception(LoadingErrorPrefix + "MovementSpeedModifier must not be greater than 1 since that would break pathfinding.");
+            if (RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface && RenderProperties.SurfaceReferenceMaterial == null) ThrowValidationError("SurfaceDefs that have a RenderType of FlatBlendableSurface need to have a SurfaceReferenceMaterial.");
+            if (RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration && RenderProperties.CustomRenderFunction == null) ThrowValidationError("SurfaceDefs that have a RenderType of CustomMeshGeneration need to have a CustomRenderFunction.");
+            if (MovementSpeedModifier <= 0f) ThrowValidationError("MovementSpeedModifier must be greater than 0.");
+            if (MovementSpeedModifier > 1f) ThrowValidationError("MovementSpeedModifier must not be greater than 1 since that would break pathfinding.");
             return base.Validate();
         }
     }

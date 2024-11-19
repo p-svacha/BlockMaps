@@ -21,7 +21,7 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class Def
     {
-        protected string LoadingErrorPrefix => "Error on loading Def '" + DefName + "' of type " + GetType() + ": ";
+        private string LoadingErrorPrefix => "Error on loading Def '" + DefName + "' of type " + GetType() + ": ";
 
         /// <summary>
         /// The name of this Def. It is used as a unique identifier within the same type.
@@ -61,9 +61,13 @@ namespace BlockmapFramework
         /// </summary>
         public virtual bool Validate()
         {
-            if (DefName == null) throw new Exception(LoadingErrorPrefix + "DefName must not be null.");
-            if (DefName == "") throw new Exception(LoadingErrorPrefix + "DefName must not be empty.");
+            if (DefName == null) ThrowValidationError("DefName must not be null.");
+            if (DefName == "") ThrowValidationError("DefName must not be empty.");
             return true;
+        }
+        public void ThrowValidationError(string msg)
+        {
+            throw new Exception(LoadingErrorPrefix + msg);
         }
         
     }

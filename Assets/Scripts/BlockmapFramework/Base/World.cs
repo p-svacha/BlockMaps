@@ -62,7 +62,6 @@ namespace BlockmapFramework
         /// </summary>
         public const int ChunkSize = 16;
         public int MinX, MaxX, MinY, MaxY;
-        public Vector2Int Dimensions { get; private set; }
 
         // Fixed Updates
         private bool updateEntityVisionNextFixedUpdate;
@@ -265,7 +264,6 @@ namespace BlockmapFramework
             MaxX = Chunks.Values.Max(x => x.Coordinates.x) * ChunkSize + (ChunkSize - 1);
             MinY = Chunks.Values.Min(x => x.Coordinates.y) * ChunkSize;
             MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
-            Dimensions = new Vector2Int(MaxX - MinX, MaxY - MinY);
 
             // Init database id's
             NodeIdCounter = Nodes.Count == 0 ? 0 : Nodes.Max(x => x.Key) + 1;
@@ -1626,6 +1624,7 @@ namespace BlockmapFramework
             UpdateNavmeshDisplayDelayed();
             UpdateTextureMode();
             UpdateTileBlending();
+            UpdateZoneBorders();
         }
 
         /// <summary>
@@ -1735,6 +1734,10 @@ namespace BlockmapFramework
         private void UpdateGridOverlay()
         {
             foreach (Chunk chunk in Chunks.Values) chunk.ShowGrid(IsShowingGrid);
+        }
+        private void UpdateZoneBorders()
+        {
+            foreach (Chunk chunk in Chunks.Values) chunk.DrawZoneBorders();
         }
 
         public void ToggleNavmesh()

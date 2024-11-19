@@ -11,5 +11,10 @@ namespace BlockmapFramework
     public abstract class CompProperties
     {
         public Type CompClass { get; init; } = null;
+
+        public virtual bool Validate(EntityDef parent)
+        {
+            return true;
+        }
     }
 }

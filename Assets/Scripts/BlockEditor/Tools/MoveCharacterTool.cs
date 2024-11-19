@@ -49,7 +49,7 @@ namespace WorldEditor
         {
             if(Input.GetKeyDown(KeyCode.R))
             {
-                if (SelectedEntity != null) SelectedEntity.UpdateVision();
+                if (SelectedEntity != null) SelectedEntity.UpdateVision(debugVisionRays: true);
             }
         }
 
