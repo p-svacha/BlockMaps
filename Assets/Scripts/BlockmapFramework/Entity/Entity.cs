@@ -220,7 +220,7 @@ namespace BlockmapFramework
             Wrapper.transform.SetParent(World.WorldObject.transform);
 
             // Create object that holds the mesh and mesh collider
-            if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
+            if(IsStandaloneEntity)
             {
                 MeshObject = new GameObject(Label);
                 MeshObject.layer = World.Layer_EntityMesh;
@@ -234,9 +234,6 @@ namespace BlockmapFramework
                     MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
                     MeshRenderer.sharedMaterials = Def.RenderProperties.Model.GetComponent<MeshRenderer>().sharedMaterials;
                     MeshCollider = MeshObject.AddComponent<MeshCollider>();
-
-                    // Player color
-                    if (Def.RenderProperties.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
                 }
                 if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
                 {
@@ -245,14 +242,23 @@ namespace BlockmapFramework
                     meshBuilder.ApplyMesh();
                     MeshRenderer = MeshObject.GetComponent<MeshRenderer>();
                     MeshCollider = MeshObject.GetComponent<MeshCollider>();
-
-                    // Player color
-                    if (Def.RenderProperties.PlayerColorMaterialIndex != -1) MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
                 }
 
+                // Player color
+                if (Def.RenderProperties.PlayerColorMaterialIndex != -1)
+                {
+                    MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
+                    MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].SetColor("_TintColor", Actor.Color);
+                }
+
+                // Draw mode
+                ShowTextures(World.IsShowingTextures);
+
+                // Reference entity in its collider
                 EntityCollider ec = MeshObject.AddComponent<EntityCollider>();
                 ec.Entity = this;
 
+                // Scale
                 MeshObject.transform.localScale = new Vector3(Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale);
 
                 // Selection indicator
@@ -529,7 +535,7 @@ namespace BlockmapFramework
             if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return;
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
 
-            if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
+            if (IsStandaloneEntity)
             {
                 // Entity is currently visible => render normally at current position
                 if (IsVisibleBy(player))
@@ -558,6 +564,17 @@ namespace BlockmapFramework
                 // Entity was not yet explored => don't render it
                 else MeshRenderer.enabled = false;
             }
+        }
+
+        /// <summary>
+        /// Sets the draw mode of this entity to textured or flat mode. Only works for standalone entites, else it's handled through the batch mesh.
+        /// </summary>
+        public void ShowTextures(bool show)
+        {
+            if (!IsStandaloneEntity) throw new System.Exception($"Cannot set draw mode of an entity that's not drawn as a standalone object. ({Label} / DefName = {Def.DefName})");
+
+            for (int i = 0; i < MeshRenderer.materials.Length; i++)
+                MeshRenderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
         }
 
         #endregion
@@ -896,6 +913,11 @@ namespace BlockmapFramework
 
             return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
         }
+
+        /// <summary>
+        /// Returns if this entity is drawn as its own object with its own MeshObject.
+        /// </summary>
+        public bool IsStandaloneEntity => Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated;
 
         public override string ToString()
         {

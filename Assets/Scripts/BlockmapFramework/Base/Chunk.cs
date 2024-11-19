@@ -259,6 +259,7 @@ namespace BlockmapFramework
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.ShowTextures(show);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
+            foreach (Entity entity in Entities.Where(x => x.IsStandaloneEntity)) entity.ShowTextures(show);
             WaterMesh.ShowTextures(show);
         }
         public void ShowTileBlending(bool show)

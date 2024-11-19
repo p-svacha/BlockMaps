@@ -3,10 +3,12 @@ Shader "Custom/EntityShader"
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _TintColor("Tint", Color) = (1,1,1,0)
+        _TintColor("Texture Tint", Color) = (1,1,1,0)
         _Transparency("Transparency", Range(0,1)) = 0
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [Toggle] _UseTextures("Use Textures", Float) = 0
+        [Toggle] _OnlyFlatShading("Only Flat Shading", Float) = 0
+        _Glossiness ("Smoothness", Range(0,1)) = 0.0
         _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
@@ -34,11 +36,15 @@ Shader "Custom/EntityShader"
         fixed4 _Color;
         fixed4 _TintColor;
         half _Transparency;
+        float _UseTextures;
+        float _OnlyFlatShading;
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            fixed4 c;
+            if (_UseTextures == 1 && _OnlyFlatShading == 0) c = tex2D(_MainTex, IN.uv_MainTex);
+            else c = _Color;
 
             // Tint
             c = _TintColor.a * _TintColor + (1 - _TintColor.a) * c;

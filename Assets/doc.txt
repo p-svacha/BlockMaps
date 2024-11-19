@@ -3,10 +3,6 @@ Migration to Def-System
 allow mirroring for all entites
 	make it affect vision colldiers correctly
 
-add IsTexture attribute to EntityShader
-	Entities should be created with correct uv's then
-	make sure toggling draw mode works for standalonemodel entities
-
 Framework: Jumping/Dropping
 Framework: Stairs
 

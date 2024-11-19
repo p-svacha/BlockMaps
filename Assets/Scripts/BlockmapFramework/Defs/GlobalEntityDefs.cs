@@ -259,6 +259,22 @@ namespace BlockmapFramework.Defs
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "log_2x1/log_2x1_fbx"),
                 },
             },
+
+            new EntityDef()
+            {
+                DefName = "Crate",
+                Label = "crate",
+                Description = "A crate.",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "crate/crate01_fbx"),
+                EntityClass = typeof(Entity),
+                Dimensions = new Vector3Int(2, 2, 2),
+                RequiresFlatTerrain = true,
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "crate/crate01_fbx"),
+                },
+            },
         };
     }
 }
