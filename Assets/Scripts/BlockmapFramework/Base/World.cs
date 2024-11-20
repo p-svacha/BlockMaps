@@ -1144,7 +1144,7 @@ namespace BlockmapFramework
             Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
 
             // Call OnCreate to initialize all basic info that are passed to SpawnEntity
-            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored: false);
+            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored);
 
             // Call entity-specific PreInit to maybe set more entity-specific values
             preInit?.Invoke(newEntity);

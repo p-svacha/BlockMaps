@@ -93,6 +93,11 @@ public static class HelperFunctions
         return points;
     }
 
+    public static void SetAsMirrored(GameObject obj)
+    {
+        obj.transform.localScale = new Vector3(obj.transform.localScale.x * -1f, obj.transform.localScale.y, obj.transform.localScale.z);
+    }
+
     #endregion
 
     #region Random

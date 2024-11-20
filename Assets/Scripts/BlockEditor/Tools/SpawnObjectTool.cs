@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace WorldEditor
 {
@@ -22,6 +23,7 @@ namespace WorldEditor
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
         public UI_SelectionPanel EntitySelection;
+        public Toggle MirrorToggle;
 
         public override void Init(BlockEditor editor)
         {
@@ -57,8 +59,9 @@ namespace WorldEditor
                 BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
                 BuildPreview.transform.localScale = new Vector3(SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale);
+                if (MirrorToggle.isOn) HelperFunctions.SetAsMirrored(BuildPreview);
 
-                foreach(Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
+                foreach (Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
                     mat.color = canPlace ? Color.green : Color.red;
             }
             else BuildPreview.gameObject.SetActive(false);
@@ -69,6 +72,14 @@ namespace WorldEditor
             // X / Y - Rotate object
             if (Input.GetKeyDown(KeyCode.X)) CurrentRotation = HelperFunctions.GetNextSideDirection(CurrentRotation);
             if (Input.GetKeyDown(KeyCode.Y)) CurrentRotation = HelperFunctions.GetPreviousSideDirection(CurrentRotation);
+
+            // M: Toggle mirrored
+            if (Input.GetKeyDown(KeyCode.M)) SetMirrored(!MirrorToggle.isOn);
+        }
+
+        private void SetMirrored(bool show)
+        {
+            MirrorToggle.isOn = show;
         }
 
         public override void HandleLeftClick()
@@ -77,13 +88,13 @@ namespace WorldEditor
             if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
 
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner, isMirrored: MirrorToggle.isOn);
         }
 
         public override void HandleRightClick()
         {
             if (World.HoveredEntity == null) return;
-            if (!(World.HoveredEntity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel)) return;
+            if (!World.HoveredEntity.IsStandaloneEntity) return;
                 
             World.RemoveEntity(World.HoveredEntity);
         }

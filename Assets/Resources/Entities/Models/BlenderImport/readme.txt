@@ -4,6 +4,7 @@ In Blender:
 -----------------------------
 - Assets are made in blender
 - 1 Unit in Blender equals 1 unit/tile/node in Unity
+- When pressing Numpad-7 in blender, the bottom left corner is the SW (0/0) corner on the entity in default (N) rotation.
 - Origin point needs to be 0/0/0 point (Shift+S > Cursor to World Origin)
 - Models need to be centered in the x/y axis and go upwards in the blender-z-axis (except if they should clip through the ground)
 - Create materials and assign faces to the correct materials

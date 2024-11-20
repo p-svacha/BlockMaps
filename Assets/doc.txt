@@ -1,7 +1,6 @@
 Migration to Def-System
 
-allow mirroring for all entites
-	make it affect vision colldiers correctly
+add EntityNodes
 
 Framework: Jumping/Dropping
 Framework: Stairs
