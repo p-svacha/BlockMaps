@@ -66,10 +66,11 @@ namespace BlockmapFramework
         public abstract bool SupportsEntities { get; }
 
         // Connections
+        public List<Transition> Transitions { get; private set; }
         /// <summary>
-        /// ALL transition going out from this node to other nodes. Dictionary key is the target node.
+        /// All transition going out from this node to other nodes grouped by target node.
         /// </summary>
-        public Dictionary<BlockmapNode, Transition> Transitions { get; private set; }
+        public Dictionary<BlockmapNode, List<Transition>> TransitionsByTarget { get; private set; }
         /// <summary>
         /// All transitions going out from this node to adjacent nodes (in all 8 directions) that can be reached with normal walking in that direction.
         /// </summary>
@@ -157,7 +158,8 @@ namespace BlockmapFramework
         public void Init()
         {
             RecalculateShape();
-            Transitions = new Dictionary<BlockmapNode, Transition>();
+            Transitions = new List<Transition>();
+            TransitionsByTarget = new Dictionary<BlockmapNode, List<Transition>>();
             WalkTransitions = new Dictionary<Direction, Transition>();
 
             FreeHeadSpace = new Dictionary<Direction, int>();
@@ -190,17 +192,121 @@ namespace BlockmapFramework
         #endregion
 
         #region Navmesh Transitions
-        ///
-        /// ************* TRANSITIONS *************
-        /// 
-        /// When the navmesh of an area gets updated, a specific order needs to be followed.
-        /// Each step needs to be executed for ALL affected nodes before the next step can be executed for ALL affected nodes:
-        /// 1. RecalcuatePassability()
-        /// 2. ResetTransitions()
-        /// 3. SetStraightAdjacentTransitions()
-        /// 4. SetDiagonalAdjacentTransitions()
-        /// 5. SetCliffClimbTransitions()
-        /// 
+        //
+        // ************* TRANSITIONS *************
+        // 
+        // When the navmesh of an area gets updated, a specific order needs to be followed.
+        // Each step needs to be executed for ALL affected nodes before the next step can be executed for ALL affected nodes:
+        // 1. RecalcuatePassability()
+        // 2. ResetTransitions()
+        // 3. SetStraightAdjacentTransitions()
+        // 4. SetDiagonalAdjacentTransitions()
+        // 5. SetCliffClimbTransitions()
+
+        
+        /// <summary>
+        /// Returns the cheapest transition for the given entity to get from this node to the specified target node.
+        /// <br/>Returns null if no transition to the target node exists.
+        /// </summary>
+        public Transition GetCheapestTransition(Entity entity, BlockmapNode target)
+        {
+            Transition cheapestTransition = null;
+            float cheapestCost = float.MaxValue;
+            foreach(Transition t in TransitionsByTarget[target])
+            {
+                float cost = t.GetMovementCost(entity);
+                if(cost < cheapestCost)
+                {
+                    cheapestCost = cost;
+                    cheapestTransition = t;
+                }
+            }
+            return cheapestTransition;
+        }
+
+        /// <summary>
+        /// Clears all transitions of this node.
+        /// </summary>
+        public void ResetTransitions()
+        {
+            Transitions.Clear();
+            TransitionsByTarget.Clear();
+            WalkTransitions.Clear();
+            ClimbUpCache.Clear();
+        }
+
+        /// <summary>
+        /// All transitions should be added through this function.
+        /// </summary>
+        private void AddTransition(Transition t, bool isWalkTransition)
+        {
+            Transitions.Add(t);
+            if (TransitionsByTarget.ContainsKey(t.To)) TransitionsByTarget[t.To].Add(t);
+            else TransitionsByTarget.Add(t.To, new List<Transition>() { t });
+
+            if (isWalkTransition) WalkTransitions.Add(t.Direction, t);
+        }
+
+        /// <summary>
+        /// Recalculates the maximum height an entity is allowed to have so it can still pass through this node for all directions.
+        /// </summary>
+        public void RecalcuatePassability()
+        {
+            foreach (Direction corner in HelperFunctions.GetCorners()) MaxPassableHeight[corner] = -1;
+
+            // Set max possible to 0 for all sides if not generally passable
+            if (!IsGenerallyPassable())
+            {
+                foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight[dir] = 0;
+                return;
+            }
+
+            // Get free head space for all directions
+            RecalculateFreeHeadSpace();
+
+            // Assign general/center headspace first (ignores all walls/fences/etc)
+            MaxPassableHeight[Direction.None] = FreeHeadSpace[Direction.None];
+
+            // Check sides first (since they can also block corners in some cases)
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                // Check if the side is blocked by a climbable. If yes, set maxheight for this side and its corners to 0
+                if (IsSideBlocked(side))
+                {
+                    MaxPassableHeight[side] = 0;
+                    foreach (Direction corner in HelperFunctions.GetAffectedCorners(side))
+                    {
+                        MaxPassableHeight[corner] = 0;
+                    }
+                    continue;
+                }
+
+                // If side is not blocked, calculate the free head space on this side.
+                MaxPassableHeight[side] = FreeHeadSpace[side];
+            }
+
+            // Check corners
+            foreach (Direction corner in HelperFunctions.GetCorners())
+            {
+                // Check if the corner has already been set by the side
+                if (MaxPassableHeight[corner] != -1) continue;
+
+                // Check if there is something right on the corner blocking it
+                if (IsCornerBlocked(corner))
+                {
+                    MaxPassableHeight[corner] = 0;
+                    continue;
+                }
+
+                // If corner is not blocked, calculate the free headspace for all relevant sides and corners and take the minimum out of all of them.
+                // This includes the corner itself and the two affected sides on the same node.
+                int selfCornerHeadspace = FreeHeadSpace[corner];
+                int prevSideHeadspace = MaxPassableHeight[HelperFunctions.GetPreviousDirection8(corner)];
+                int nextSideHeadspace = MaxPassableHeight[HelperFunctions.GetNextDirection8(corner)];
+
+                MaxPassableHeight[corner] = Mathf.Min(selfCornerHeadspace, prevSideHeadspace, nextSideHeadspace);
+            }
+        }
 
         /// <summary>
         /// Recalculates the free head space for all directions. Free headspace refers to the amount of cells that are unblocked by nodes/walls ABOVE this node.
@@ -274,82 +380,6 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Recalculates the maximum height an entity is allowed to have so it can still pass through this node for all directions.
-        /// </summary>
-        public void RecalcuatePassability()
-        {
-            foreach (Direction corner in HelperFunctions.GetCorners()) MaxPassableHeight[corner] = -1;
-
-            // Set max possible to 0 for all sides if not generally passable
-            if (!IsGenerallyPassable())
-            {
-                foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight[dir] = 0;
-                return;
-            }
-
-            // Get free head space for all directions
-            RecalculateFreeHeadSpace();
-
-            // Assign general/center headspace first (ignores all walls/fences/etc)
-            MaxPassableHeight[Direction.None] = FreeHeadSpace[Direction.None];
-
-            // Check sides first (since they can also block corners in some cases)
-            foreach (Direction side in HelperFunctions.GetSides())
-            {
-                // Check if the side is blocked by a climbable. If yes, set maxheight for this side and its corners to 0
-                if (IsSideBlocked(side))
-                {
-                    MaxPassableHeight[side] = 0;
-                    foreach (Direction corner in HelperFunctions.GetAffectedCorners(side))
-                    {
-                        MaxPassableHeight[corner] = 0;
-                    }
-                    continue;
-                }
-
-                // If side is not blocked, calculate the free head space on this side.
-                MaxPassableHeight[side] = FreeHeadSpace[side];
-            }
-
-            // Check corners
-            foreach (Direction corner in HelperFunctions.GetCorners())
-            {
-                // Check if the corner has already been set by the side
-                if (MaxPassableHeight[corner] != -1) continue;
-
-                // Check if there is something right on the corner blocking it
-                if (IsCornerBlocked(corner))
-                {
-                    MaxPassableHeight[corner] = 0;
-                    continue;
-                }
-
-                // If corner is not blocked, calculate the free headspace for all relevant sides and corners and take the minimum out of all of them.
-                // This includes the corner itself and the two affected sides on the same node.
-                int selfCornerHeadspace = FreeHeadSpace[corner];
-                int prevSideHeadspace = MaxPassableHeight[HelperFunctions.GetPreviousDirection8(corner)];
-                int nextSideHeadspace = MaxPassableHeight[HelperFunctions.GetNextDirection8(corner)];
-
-                MaxPassableHeight[corner] = Mathf.Min(selfCornerHeadspace, prevSideHeadspace, nextSideHeadspace);
-            }
-        }
-
-        public void ResetTransitions()
-        {
-            Transitions.Clear();
-            WalkTransitions.Clear();
-            ClimbUpCache.Clear();
-        }
-
-        /// <summary>
-        /// Removes
-        /// </summary>
-        public void RemoveTransition(BlockmapNode target)
-        {
-            Transitions.Remove(target);
-        }
-
-        /// <summary>
         /// Updates the straight neighbours by applying the general rule:
         /// If there is an adjacent passable node in the direction with matching heights, connect it as a neighbour.
         /// </summary>
@@ -380,8 +410,7 @@ namespace BlockmapFramework
                     int maxHeight = Mathf.Min(FreeHeadSpace[dir], adjNode.FreeHeadSpace[oppositeDir]);
 
                     AdjacentWalkTransition t = new AdjacentWalkTransition(this, adjNode, dir, maxHeight);
-                    Transitions.Add(adjNode, t);
-                    WalkTransitions.Add(dir, t);
+                    AddTransition(t, isWalkTransition: true);
                 }
             }
         }
@@ -444,8 +473,7 @@ namespace BlockmapFramework
                 if (canConnect)
                 {
                     AdjacentWalkTransition t = new AdjacentWalkTransition(this, targetNode, dir, maxAllowedHeight);
-                    Transitions.Add(targetNode, t);
-                    WalkTransitions.Add(dir, t);
+                    AddTransition(t, isWalkTransition: true);
                 }
             }
         }
@@ -466,18 +494,19 @@ namespace BlockmapFramework
             foreach (BlockmapNode adjNode in adjNodes)
             {
                 if (!adjNode.IsPassable()) continue;
+                if (!adjNode.IsFlat(HelperFunctions.GetOppositeDirection(dir))) continue;
 
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList, out int maxHeightSingle))
                 {
                     // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList, maxHeightSingle);
-                    Transitions.Add(adjNode, t);
+                    AddTransition(t, isWalkTransition: false);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown, out int maxHeightDouble))
                 {
                     // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown, maxHeightDouble);
-                    Transitions.Add(adjNode, t);
+                    AddTransition(t, isWalkTransition: false);
                 }
             }
         }
@@ -490,16 +519,11 @@ namespace BlockmapFramework
             climb = new List<IClimbable>();
             maxTransitionHeight = 0;
 
-            if (Transitions.ContainsKey(to)) return false; // Don't check if a transition to the target node already exists
-
             // Calculate some important values
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             int fromAltitude = GetMinAltitude(dir);
             int toAltitude = to.GetMaxAltitude(oppositeDir);
             int climbHeight = toAltitude - fromAltitude;
-
-            if (!IsFlat(dir)) return false;
-            if (!to.IsFlat(oppositeDir)) return false;
 
             if (climbHeight > 0)
             {
@@ -536,7 +560,6 @@ namespace BlockmapFramework
             climbUp = new List<IClimbable>();
             climbDown = new List<IClimbable>();
             maxTransitionHeight = 0;
-            if (Transitions.ContainsKey(to)) return false; // Don't check if a transition to the target node already exists
 
             // Calculate some important values
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
@@ -1078,14 +1101,14 @@ namespace BlockmapFramework
                 if (visited.Contains(currentNode)) continue;
                 visited.Add(currentNode);
 
-                foreach (KeyValuePair<BlockmapNode, Transition> t in currentNode.Transitions)
+                foreach (Transition t in currentNode.Transitions)
                 {
-                    BlockmapNode toNode = t.Key;
-                    float transitionCost = t.Value.GetMovementCost(entity);
+                    BlockmapNode toNode = t.To;
+                    float transitionCost = t.GetMovementCost(entity);
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > maxCost) continue; // not within cost limit
-                    if (entity != null && !t.Value.CanPass(entity)) continue;
+                    if (entity != null && !t.CanPass(entity)) continue;
 
                     // Node has not yet been visited or cost is lower than previously lowest cost => Update
                     if (!nodeCosts.ContainsKey(toNode) || totalCost < nodeCosts[toNode])

@@ -15,12 +15,12 @@ namespace WorldEditor
 
         private const float PATH_PREVIEW_WIDTH = 0.1f;
         private Color PATH_PREVIEW_COLOR = new Color(1f, 1f, 1f, 0.5f);
-        private List<BlockmapNode> TargetPath;
+        private NavigationPath TargetPath;
         private LineRenderer PathPreview;
 
         // Cache
         private BlockmapNode CacheOriginNode;
-        private Dictionary<BlockmapNode, List<BlockmapNode>> PathCache = new Dictionary<BlockmapNode, List<BlockmapNode>>();
+        private Dictionary<BlockmapNode, NavigationPath> PathCache = new Dictionary<BlockmapNode, NavigationPath>();
 
         public override void Init(BlockEditor editor)
         {
@@ -65,14 +65,14 @@ namespace WorldEditor
             if (SelectedEntity.OriginNode != CacheOriginNode) PathCache.Clear(); // Clear cache when changing node
             CacheOriginNode = SelectedEntity.OriginNode;
 
-            if(PathCache.TryGetValue(World.HoveredNode, out List<BlockmapNode> cachedPath)) // A path to the hovered node is cached 
+            if(PathCache.TryGetValue(World.HoveredNode, out NavigationPath cachedPath)) // A path to the hovered node is cached 
             {
-                TargetPath = cachedPath == null ? null : new List<BlockmapNode>(cachedPath);
+                TargetPath = cachedPath == null ? null : new NavigationPath(cachedPath);
             }
             else // A path to the hovered node is not yet cached
             {
                 TargetPath = Pathfinder.GetPath(SelectedEntity, SelectedEntity.OriginNode, World.HoveredNode);
-                PathCache.Add(World.HoveredNode, TargetPath == null ? null : new List<BlockmapNode>(TargetPath)); // add to cache
+                PathCache.Add(World.HoveredNode, TargetPath == null ? null : new NavigationPath(TargetPath)); // add to cache
             }
 
             if (TargetPath == null) return;

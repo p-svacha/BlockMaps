@@ -205,7 +205,7 @@ namespace BlockmapFramework
             foreach (CompProperties compProps in Def.Components)
             {
                 EntityComp newComp = newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
-                newComp.Parent = this;
+                newComp.Entity = this;
                 Components.Add(newComp);
                 newComp.Initialize(compProps);
             }
@@ -880,7 +880,7 @@ namespace BlockmapFramework
                     // Mark node that fence is on as explored
                     vision.AddExploredNode(hitFence.Node);
 
-                    if (!hitFence.Def.BlocksVision) continue; // Continue search if fence doesn't block vision
+                    if (!hitFence.BlocksVision) continue; // Continue search if fence doesn't block vision
                     else return vision; // End search if fence blocks vision
                 }
 

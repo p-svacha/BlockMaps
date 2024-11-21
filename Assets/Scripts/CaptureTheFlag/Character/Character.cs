@@ -126,12 +126,12 @@ namespace CaptureTheFlag
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
             HashSet<BlockmapNode> visited = new HashSet<BlockmapNode>();
             Dictionary<BlockmapNode, float> nodeCosts = new Dictionary<BlockmapNode, float>();
-            Dictionary<BlockmapNode, List<BlockmapNode>> nodePaths = new Dictionary<BlockmapNode, List<BlockmapNode>>();
+            Dictionary<BlockmapNode, NavigationPath> nodePaths = new Dictionary<BlockmapNode, NavigationPath>();
 
             // Start with origin node
             priorityQueue.Add(Entity.OriginNode, 0f);
             nodeCosts.Add(Entity.OriginNode, 0f);
-            nodePaths.Add(Entity.OriginNode, new List<BlockmapNode>() { Entity.OriginNode });
+            nodePaths.Add(Entity.OriginNode, new NavigationPath(Entity.OriginNode));
 
             while(priorityQueue.Count > 0)
             {
@@ -141,16 +141,16 @@ namespace CaptureTheFlag
                 if (visited.Contains(currentNode)) continue;
                 visited.Add(currentNode);
 
-                foreach(KeyValuePair<BlockmapNode, Transition> t in currentNode.Transitions)
+                foreach(Transition t in currentNode.Transitions)
                 {
-                    BlockmapNode targetNode = t.Key;
-                    float transitionCost = t.Value.GetMovementCost(Entity) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
+                    BlockmapNode targetNode = t.To;
+                    float transitionCost = t.GetMovementCost(Entity) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
                     if (totalCost > Stamina) continue; // not reachable with current stamina
-                    if (!t.Value.CanPass(Entity)) continue; // transition not passable for this character
-                    if (!t.Key.IsExploredBy(Entity.Actor)) continue; // node not explored
+                    if (!t.CanPass(Entity)) continue; // transition not passable for this character
+                    if (!t.To.IsExploredBy(Entity.Actor)) continue; // node not explored
 
                     // Node has not yet been visited or cost is lower than previously lowest cost => Update
                     if(!nodeCosts.ContainsKey(targetNode) || totalCost < nodeCosts[targetNode])
@@ -159,8 +159,8 @@ namespace CaptureTheFlag
                         nodeCosts[targetNode] = totalCost;
 
                         // Update path to this node.
-                        List<BlockmapNode> path = new List<BlockmapNode>(nodePaths[currentNode]);
-                        path.Add(targetNode);
+                        NavigationPath path = new NavigationPath(nodePaths[currentNode]);
+                        path.AddTransition(t);
                         nodePaths[targetNode] = path;
 
                         // Add target node to queue to continue search

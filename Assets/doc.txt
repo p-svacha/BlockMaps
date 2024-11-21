@@ -1,17 +1,38 @@
-Migration to Def-System
 
-add EntityNodes
 
-Framework: Jumping/Dropping
+
+Framework: Hopping/Dropping
 Framework: Stairs
 
+Map Generation Features:
+	- Select a feature, click on a node, and then it does something
+	- i.e. Builds a house there
 
 
 
 
 
 
+--- Entity Nodes
 
+make it possible to define invisible EntityNodes per entity
+	> List<EntityNodeData>, where key is the local cell and value is the node altitudes
+	> Can be defined up to 1 higher than entity height (like a crate has height 2, but a node could be defined at (0/2/0) with altitude (0,0,0,0) to make it walkable on top)
+	> if it is forbid placing airnodes there
+	> maybe an easy option to just add entity nodes everywhere at the top of the entity
+
+EntityNodeData:
+	Vector3Int pos, Dictionary<Direction, int> altitude, SurfaceDef surface
+
+vision of entity node is based on entity
+add HoveredEntityNode to world
+	> make it possible to add fences/other entites on EntityNodes 
+
+same with invisible EntityWalls for climbability
+	> List<EntityWallData>
+	> EntityWallData = Vector2Int + Direction + WallMaterialDef
+
+---
 
 
 

@@ -18,6 +18,8 @@ namespace WorldEditor
         private float customVisionRange;
         private bool customCanSwin;
         private ClimbingCategory customClimbSkill;
+        private int customMaxHopUpDistance;
+        private int customMaxHopDownDistance;
 
         private Comp_Movement MovementComp;
 
@@ -40,12 +42,14 @@ namespace WorldEditor
             MovementComp.EnableOverrideClimbSkill(customClimbSkill);
         }
 
-        public void PreInit(float speed, float visionRange, bool canSwim, ClimbingCategory climbSkill)
+        public void PreInit(float speed, float visionRange, bool canSwim, ClimbingCategory climbSkill, int maxHopDistance, int maxDropDistance)
         {
             customSpeed = speed;
             customVisionRange = visionRange;
             customCanSwin = canSwim;
             customClimbSkill = climbSkill;
+            customMaxHopUpDistance = maxHopDistance;
+            customMaxHopDownDistance = maxDropDistance;
         }
 
         private void GoToRandomNode()
@@ -79,6 +83,8 @@ namespace WorldEditor
             SaveLoadManager.SaveOrLoadPrimitive(ref customVisionRange, "customVisionRange");
             SaveLoadManager.SaveOrLoadPrimitive(ref customCanSwin, "customCanSwim");
             SaveLoadManager.SaveOrLoadPrimitive(ref customClimbSkill, "customClimbSkill");
+            SaveLoadManager.SaveOrLoadPrimitive(ref customMaxHopUpDistance, "customMaxHopUpDistance");
+            SaveLoadManager.SaveOrLoadPrimitive(ref customMaxHopDownDistance, "customMaxHopDownDistance");
         }
     }
 }

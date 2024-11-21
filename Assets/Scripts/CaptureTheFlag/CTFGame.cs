@@ -279,7 +279,7 @@ namespace CaptureTheFlag
             // Can not move there in this turn
             else
             {
-                List<BlockmapNode> path = Pathfinder.GetPath(SelectedCharacter.Entity, SelectedCharacter.Entity.OriginNode, targetNode, considerUnexploredNodes: true);
+                NavigationPath path = Pathfinder.GetPath(SelectedCharacter.Entity, SelectedCharacter.Entity.OriginNode, targetNode, considerUnexploredNodes: true);
                 if (path == null) return; // no viable path there
 
                 PathPreview.gameObject.SetActive(true);

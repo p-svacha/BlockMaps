@@ -24,6 +24,8 @@ namespace WorldEditor
         public TMP_InputField HeightInput;
         public Toggle CanSwimToggle;
         public TMP_Dropdown ClimbingSkillDropdown;
+        public TMP_InputField MaxHopUpDistanceInput;
+        public TMP_InputField MaxHopDownDistanceInput;
 
         public UI_SelectionPanel EntitySelection;
 
@@ -70,6 +72,8 @@ namespace WorldEditor
             HeightInput.interactable = value;
             CanSwimToggle.interactable = value;
             ClimbingSkillDropdown.interactable = value;
+            MaxHopUpDistanceInput.interactable = value;
+            MaxHopDownDistanceInput.interactable = value;
         }
         private void DisplayAttributesOf(EntityDef def)
         {
@@ -79,6 +83,8 @@ namespace WorldEditor
             HeightInput.text = def.Dimensions.y.ToString();
             CanSwimToggle.isOn = movementProps.CanSwim;
             ClimbingSkillDropdown.value = (int)movementProps.ClimbingSkill;
+            MaxHopUpDistanceInput.text = movementProps.MaxHopUpDistance.ToString();
+            MaxHopDownDistanceInput.text = movementProps.MaxHopDownDistance.ToString();
         }
 
         public override void UpdateTool()
@@ -105,7 +111,9 @@ namespace WorldEditor
                 bool canSwim = CanSwimToggle.isOn;
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
                 int height = int.Parse(HeightInput.text);
-                World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill));
+                int maxHopUpDistance = int.Parse(MaxHopUpDistanceInput.text);
+                int maxHopDownDistance = int.Parse(MaxHopDownDistanceInput.text);
+                World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill, maxHopUpDistance, maxHopDownDistance));
             }
             else World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, updateWorld: true);
         }

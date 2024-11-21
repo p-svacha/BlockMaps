@@ -13,8 +13,8 @@ namespace BlockmapFramework
         /// <summary>
         /// The parent this component is attached to.
         /// </summary>
-        public Entity Parent;
-        public World World => Parent.World;
+        public Entity Entity;
+        public World World => Entity.World;
 
         /// <summary>
         /// The properties defining the behaviour rules of this comp.

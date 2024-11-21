@@ -14,13 +14,12 @@ namespace CaptureTheFlag
         /// <summary>
         /// Exact order of nodes that are traversed for this movement, including the origin and target node.
         /// </summary>
-        public List<BlockmapNode> Path { get; private set; }
-        public BlockmapNode Target { get; private set; }
+        public NavigationPath Path { get; private set; }
+        public BlockmapNode Target => Path.Target;
 
-        public Action_Movement(CTFGame game, Character c, List<BlockmapNode> path, float cost) : base(game, c, cost)
+        public Action_Movement(CTFGame game, Character c, NavigationPath path, float cost) : base(game, c, cost)
         {
             Path = path;
-            Target = path.Last();
         }
 
         protected override void OnStartPerform()
@@ -29,7 +28,7 @@ namespace CaptureTheFlag
             Character.MovementComp.OnTargetReached += OnCharacterReachedTarget;
 
             // Start movement of character entity
-            Character.MovementComp.Move(Path);
+            Character.MovementComp.MoveAlong(Path);
         }
 
         public override void DoPause()

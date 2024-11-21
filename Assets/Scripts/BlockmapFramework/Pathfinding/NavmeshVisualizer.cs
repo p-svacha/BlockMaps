@@ -70,7 +70,7 @@ namespace BlockmapFramework
                     int nodeSubmesh = nodeMeshBuilder.GetSubmesh(GetNodeSubmeshMaterial(node));
                     nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeCubeDimensions);
 
-                    foreach (Transition t in node.Transitions.Values)
+                    foreach (Transition t in node.Transitions)
                     {
                         if (entity != null && !t.CanPass(entity)) continue;
 

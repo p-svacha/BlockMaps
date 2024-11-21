@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using static WorldEditor.BlockEditor;
 using static BlockmapFramework.BlockmapNode;
+using BlockmapFramework.MeshBuilding;
 
 namespace BlockmapFramework
 {

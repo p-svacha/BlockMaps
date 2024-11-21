@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static BlockmapFramework.BlockmapNode;
 
 namespace BlockmapFramework
 {
@@ -22,16 +21,17 @@ namespace BlockmapFramework
         /// Returns the shortest path from a source node to a target node for the given entity.
         /// <br/>Returned path includes both source and target.
         /// </summary>
-        public static List<BlockmapNode> GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        public static NavigationPath GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;
 
             List<BlockmapNode> openList = new List<BlockmapNode>() { from }; // tiles that are queued for searching
             List<BlockmapNode> closedList = new List<BlockmapNode>(); // tiles that have already been searched
 
-            Dictionary<BlockmapNode, float> gCosts = new Dictionary<BlockmapNode, float>(); // G-Costs are the estimated distance from the source node to any other node
-            Dictionary<BlockmapNode, float> fCosts = new Dictionary<BlockmapNode, float>(); // F-Costs are the combined cost
-            Dictionary<BlockmapNode, BlockmapNode> previousTiles = new Dictionary<BlockmapNode, BlockmapNode>();
+            Dictionary<BlockmapNode, float> gCosts = new Dictionary<BlockmapNode, float>(); // G-Costs are the accumulated real costs from the source node to any other node
+            Dictionary<BlockmapNode, float> fCosts = new Dictionary<BlockmapNode, float>(); // F-Costs are the combined cost (assumed(h) + real(g)) from the source node to any other node
+            Dictionary<BlockmapNode, Transition> transitionToNodes = new Dictionary<BlockmapNode, Transition>(); // Stores for each node which transition comes before it to get there the shortest way
+            Dictionary<Transition, Transition> transitionToTransitions = new Dictionary<Transition, Transition>(); // Stores for each transition which transition comes before it to get there the shortest way
 
             gCosts.Add(from, 0);
             fCosts.Add(from, gCosts[from] + GetHCost(from, to));
@@ -41,13 +41,13 @@ namespace BlockmapFramework
                 BlockmapNode currentNode = GetLowestFCostNode(openList, fCosts);
                 if (currentNode == to) // Reached goal
                 {
-                    return GetFinalPath(to, previousTiles);
+                    return GetFinalPath(to, transitionToNodes, transitionToTransitions);
                 }
 
                 openList.Remove(currentNode);
                 closedList.Add(currentNode);
 
-                foreach (Transition transition in currentNode.Transitions.Values)
+                foreach (Transition transition in currentNode.Transitions)
                 {
                     if (closedList.Contains(transition.To)) continue;
                     if (!transition.CanPass(entity)) continue;
@@ -57,7 +57,9 @@ namespace BlockmapFramework
                     float tentativeGCost = gCosts[currentNode] + GetCCost(transition, entity);
                     if (!gCosts.ContainsKey(transition.To) || tentativeGCost < gCosts[transition.To])
                     {
-                        previousTiles[transition.To] = currentNode;
+                        transitionToNodes[transition.To] = transition;
+                        if(currentNode != from) transitionToTransitions[transition] = transitionToNodes[transition.From];
+
                         gCosts[transition.To] = tentativeGCost;
                         fCosts[transition.To] = tentativeGCost + GetHCost(transition.To, to);
 
@@ -70,16 +72,14 @@ namespace BlockmapFramework
             return null;
         }
 
+        /// <summary>
+        /// Returns the cost of going from any one node to any other for a specified entity when taking the cheapest possible path.
+        /// </summary>
         public static float GetPathCost(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
-            List<BlockmapNode> path = GetPath(entity, from, to, considerUnexploredNodes, forbiddenNodes);
+            NavigationPath path = GetPath(entity, from, to, considerUnexploredNodes, forbiddenNodes);
             if (path == null) return float.MaxValue;
-            float cost = 0f;
-            for(int i = 0; i < path.Count - 1; i++)
-            {
-                cost += path[i].Transitions[path[i + 1]].GetMovementCost(entity);
-            }
-            return cost;
+            else return path.GetCost(entity);
         }
 
         /// <summary>
@@ -113,25 +113,37 @@ namespace BlockmapFramework
             return lowestCostTile;
         }
 
-        private static List<BlockmapNode> GetFinalPath(BlockmapNode to, Dictionary<BlockmapNode, BlockmapNode> previousTiles)
+        /// <summary>
+        /// Returns the final path to the given target node with all the intermediary steps that have been cached.
+        /// </summary>
+        private static NavigationPath GetFinalPath(BlockmapNode to, Dictionary<BlockmapNode, Transition> transitionToNodes, Dictionary<Transition, Transition> transitionToTransitions)
         {
-            List<BlockmapNode> path = new List<BlockmapNode>();
-            path.Add(to);
-            BlockmapNode currentTile = to;
-            while (previousTiles.ContainsKey(currentTile))
+            List<BlockmapNode> nodes = new List<BlockmapNode>(); // reversed list of traversed nodes
+            List<Transition> transitions = new List<Transition>(); // reversed list of traversed transitions
+
+            nodes.Add(to);
+            Transition currentTransition = transitionToNodes[to];
+            transitions.Add(currentTransition);
+
+            while (transitionToTransitions.ContainsKey(currentTransition))
             {
-                path.Add(previousTiles[currentTile]);
-                currentTile = previousTiles[currentTile];
+                nodes.Add(currentTransition.From);
+                transitions.Add(transitionToTransitions[currentTransition]);
+                currentTransition = transitionToTransitions[currentTransition];
             }
-            path.Reverse();
-            return path;
+            nodes.Add(currentTransition.From);
+
+            nodes.Reverse();
+            transitions.Reverse();
+
+            return new NavigationPath(nodes, transitions);
         }
 
         #endregion
 
         #region Preview
 
-        public static void ShowPathPreview(LineRenderer line, List<BlockmapNode> path, float width, Color color)
+        public static void ShowPathPreview(LineRenderer line, NavigationPath path, float width, Color color)
         {
             line.material = new Material(Shader.Find("Sprites/Default"));
             line.startWidth = width;
@@ -139,16 +151,16 @@ namespace BlockmapFramework
             line.startColor = color;
             line.endColor = color;
 
-            List<Vector3> transitionPath = new List<Vector3>();
-            for(int i = 0; i < path.Count - 1; i++)
+            List<Vector3> completePathLine = new List<Vector3>();
+            foreach(Transition t in path.Transitions)
             {
-                transitionPath.AddRange(path[i].Transitions[path[i + 1]].GetPreviewPath());
+                completePathLine.AddRange(t.GetPreviewPath());
             }
 
-            line.positionCount = transitionPath.Count;
-            for (int i = 0; i < transitionPath.Count; i++)
+            line.positionCount = completePathLine.Count;
+            for (int i = 0; i < completePathLine.Count; i++)
             {
-                line.SetPosition(i, transitionPath[i] + new Vector3(0f, NavmeshVisualizer.TRANSITION_Y_OFFSET, 0f));
+                line.SetPosition(i, completePathLine[i] + new Vector3(0f, NavmeshVisualizer.TRANSITION_Y_OFFSET, 0f));
             }
         }
 

@@ -105,6 +105,7 @@ namespace BlockmapFramework
         public virtual string Label => Def.Label;
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
+        public virtual bool BlocksVision => Def.BlocksVision;
 
         /// <summary>
         /// Returns the y coordinate of where the fence would start when placing on the given node & side.

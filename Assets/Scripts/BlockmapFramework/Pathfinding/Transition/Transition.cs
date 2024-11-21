@@ -18,17 +18,18 @@ namespace BlockmapFramework
         protected World World => From.World;
         public BlockmapNode From { get; private set; }
         public BlockmapNode To { get; private set; }
-        public Direction Direction { get; protected set; }
+        public Direction Direction { get; private set; }
 
         /// <summary>
         /// The maximum height a moving entity is allowed to have to use this transition.
         /// </summary>
         protected int MaxHeight { get; private set; }
 
-        public Transition(BlockmapNode from, BlockmapNode to, int maxHeight)
+        public Transition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight)
         {
             From = from;
             To = to;
+            Direction = dir;
             MaxHeight = maxHeight;
         }
 

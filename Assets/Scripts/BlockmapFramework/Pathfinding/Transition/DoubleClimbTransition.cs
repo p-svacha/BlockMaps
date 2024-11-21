@@ -19,9 +19,8 @@ namespace BlockmapFramework
         public int HeightDown { get; private set; }
         public ClimbingCategory ClimbSkillRequirement { get; private set; }
 
-        public DoubleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climbUp, List<IClimbable> climbDown, int maxHeight) : base(from, to, maxHeight)
+        public DoubleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climbUp, List<IClimbable> climbDown, int maxHeight) : base(from, to, dir, maxHeight)
         {
-            Direction = dir;
             ClimbUp = climbUp;
             ClimbDown = climbDown;
 

@@ -16,8 +16,8 @@ namespace BlockmapFramework
         {
             base.Initialize(props);
 
-            if (Parent.Dimensions.x != 1 || Parent.Dimensions.z != 1) throw new System.Exception("Moving entities can't be bigger than 1x1.");
-            if (Parent.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel && Parent.Def.RenderProperties.RenderType != EntityRenderType.StandaloneGenerated) 
+            if (Entity.Dimensions.x != 1 || Entity.Dimensions.z != 1) throw new System.Exception("Moving entities can't be bigger than 1x1.");
+            if (Entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel && Entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneGenerated) 
                 throw new System.Exception("Moving entities must have standalone rendering.");
 
             IsMoving = false;
@@ -35,8 +35,8 @@ namespace BlockmapFramework
         public int ClimbIndex { get; set; }
 
         // Pathfinding
-        public BlockmapNode Target { get; private set; }
-        public List<BlockmapNode> TargetPath { get; private set; }
+        public NavigationPath TargetPath { get; private set; }
+        public BlockmapNode Target => TargetPath.Target;
         public Transition CurrentTransition { get; private set; }
 
         // Overrides
@@ -48,6 +48,12 @@ namespace BlockmapFramework
 
         private bool isOverrideClimbSkillActive;
         private ClimbingCategory overrideClimbSkill;
+
+        private bool isOverrideMaxHopUpDistanceActive;
+        private int overrideMaxHopUpDistance;
+
+        private bool isOverrideMaxHopDownDistanceActive;
+        private int overrideMaxHopDownDistance;
 
         // Events
         public event System.Action OnTargetReached;
@@ -65,28 +71,28 @@ namespace BlockmapFramework
             // Movement
             if (IsMoving && !IsMovementPaused)
             {
-                CurrentTransition.UpdateEntityMovement(Parent, out bool finishedTransition, out BlockmapNode currentOriginNode);
+                CurrentTransition.UpdateEntityMovement(Entity, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
-                if (Parent.OriginNode != currentOriginNode)
+                if (Entity.OriginNode != currentOriginNode)
                 {
-                    Parent.SetOriginNode(currentOriginNode);
+                    Entity.SetOriginNode(currentOriginNode);
 
                     // Recalculate vision of all nearby entities (including this)
-                    if (Parent.BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(Parent.OriginNode.CenterWorldPosition, callback: Parent.UpdateVisibility);
+                    if (Entity.BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.CenterWorldPosition, callback: Entity.UpdateVisibility);
                     else // If this entity doesn't block vision, only update the vision of itself and of entities from other actors
                     {
-                        World.UpdateVisionOfNearbyEntitiesDelayed(Parent.OriginNode.CenterWorldPosition, callback: Parent.UpdateVisibility, excludeActor: Parent.Actor);
-                        Parent.UpdateVision();
+                        World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.CenterWorldPosition, callback: Entity.UpdateVisibility, excludeActor: Entity.Actor);
+                        Entity.UpdateVision();
                     }
                 }
                 if (finishedTransition) ReachNextNode();
 
 
                 // Update transform if visible
-                if (Parent.IsVisibleBy(World.ActiveVisionActor))
+                if (Entity.IsVisibleBy(World.ActiveVisionActor))
                 {
-                    Parent.MeshObject.transform.position = Parent.WorldPosition;
-                    Parent.MeshObject.transform.rotation = Parent.WorldRotation;
+                    Entity.MeshObject.transform.position = Entity.WorldPosition;
+                    Entity.MeshObject.transform.rotation = Entity.WorldRotation;
                 }
             }
         }
@@ -99,35 +105,37 @@ namespace BlockmapFramework
         public void MoveTo(BlockmapNode target)
         {
             // Get node where to start from. If we are moving take the next node in our current path. Else just where we are standing now.
-            BlockmapNode startNode = IsMoving ? TargetPath[0] : Parent.OriginNode;
+            BlockmapNode startNode = IsMoving ? CurrentTransition.To : Entity.OriginNode;
 
             // Find path to target
-            List<BlockmapNode> path = Pathfinder.GetPath(Parent, startNode, target);
+            NavigationPath path = Pathfinder.GetPath(Entity, startNode, target);
+
+            // If we are still moving, add that transition we're currently on as the first transition of the path
+            if (IsMoving) path.Transitions.Insert(0, CurrentTransition);
 
             // Check if we found a valid path
-            if (path == null || path.Count == 0)
+            if (path == null)
             {
                 Stop();
                 return;
             }
 
             // Set new path
-            Move(path);
+            MoveAlong(path);
         }
 
         /// <summary>
         /// Starts moving according to the given path.
         /// </summary>
-        public void Move(List<BlockmapNode> path)
+        public void MoveAlong(NavigationPath path)
         {
             if (!IsMoving) // If we are standing still, set the first transition and discard the first node since its the one we stand on and therefore already reached it.
             {
-                SetCurrentTransition(path[0].Transitions[path[1]]);
-                path.RemoveAt(0);
+                SetCurrentTransition(path.Transitions[0]);
+                path.RemoveFirstNode();
             }
 
             TargetPath = path;
-            Target = path.Last();
             IsMoving = true;
             OnNewPath?.Invoke();
         }
@@ -150,7 +158,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Recalculates the path to the current target.
         /// </summary>
-        private void UpdateTargetPath()
+        private void FindNewPathToTarget()
         {
             MoveTo(Target);
         }
@@ -160,45 +168,47 @@ namespace BlockmapFramework
         /// </summary>
         private void ReachNextNode()
         {
-            BlockmapNode reachedNode = TargetPath[0];
-            TargetPath.RemoveAt(0);
+            BlockmapNode reachedNode = CurrentTransition.To;
+            TargetPath.RemoveFirstTransition();
 
             // Update the last known position of this entity for all actors that can currently see it
-            foreach (Entity e in Parent.SeenBy) Parent.UpdateLastKnownPositionFor(e.Actor);
+            foreach (Entity e in Entity.SeenBy) Entity.UpdateLastKnownPositionFor(e.Actor);
 
-            // Target not yet reached
-            if (TargetPath.Count > 0)
+            // Target reached
+            if(reachedNode == Target)
             {
-                BlockmapNode newNextNode = TargetPath[0];
-                reachedNode.Transitions.TryGetValue(newNextNode, out Transition newTransition);
+                Stop();
+                OnTargetReached?.Invoke();
+            }
+            // Target not yet reached
+            else
+            {
+                Transition newTransition = TargetPath.Transitions[0];
+                BlockmapNode newNextNode = newTransition.To;
 
                 // TargetPath is still valid => take that path
-                if (newTransition != null && newTransition.CanPass(Parent))
+                if (newTransition != null && newTransition.CanPass(Entity))
                 {
                     IsMoving = true;
-                    newNextNode.AddEntity(Parent);
+                    newNextNode.AddEntity(Entity);
+                    TargetPath.RemoveFirstNode();
                     SetCurrentTransition(newTransition);
                 }
                 // TargetPath is no longer valid, find new path
                 else
                 {
                     // Debug.Log("Target path no longer valid, finding new path");
-                    UpdateTargetPath();
+                    FindNewPathToTarget();
                 }
 
             }
-            // Target reached
-            else
-            {
-                Stop();
-                OnTargetReached?.Invoke();
-            }
+
         }
 
         private void SetCurrentTransition(Transition t)
         {
             CurrentTransition = t;
-            CurrentTransition.OnTransitionStart(Parent);
+            CurrentTransition.OnTransitionStart(Entity);
         }
 
         /// <summary>
@@ -209,9 +219,12 @@ namespace BlockmapFramework
             IsMoving = false;
             CurrentTransition = null;
             TargetPath = null;
-            Target = null;
             OnStopMoving?.Invoke();
         }
+
+        #endregion
+
+        #region Override Actions
 
         public void EnableOverrideMovementSpeed(float value)
         {
@@ -222,6 +235,7 @@ namespace BlockmapFramework
         {
             isOverrideMovementSpeedActive = false;
         }
+
         public void EnableOverrideCanSwim(bool value)
         {
             isOverrideCanSwimActive = true;
@@ -231,6 +245,7 @@ namespace BlockmapFramework
         {
             isOverrideCanSwimActive = false;
         }
+
         public void EnableOverrideClimbSkill(ClimbingCategory value)
         {
             isOverrideClimbSkillActive = true;
@@ -239,6 +254,26 @@ namespace BlockmapFramework
         public void DisableOverrideClimbSkill()
         {
             isOverrideClimbSkillActive = false;
+        }
+
+        public void EnableOverrideMaxHopDistance(int value)
+        {
+            isOverrideMaxHopUpDistanceActive = true;
+            overrideMaxHopUpDistance = value;
+        }
+        public void DisableOverrideMaxHopDistance()
+        {
+            isOverrideMaxHopUpDistanceActive = false;
+        }
+
+        public void EnableOverrideMaxDropDistance(int value)
+        {
+            isOverrideMaxHopDownDistanceActive = true;
+            overrideMaxHopDownDistance = value;
+        }
+        public void DisableOverrideMaxDropDistance()
+        {
+            isOverrideMaxHopDownDistanceActive = false;
         }
 
         #endregion
@@ -261,12 +296,22 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbingSkill => isOverrideClimbSkillActive ? overrideClimbSkill : Props.ClimbingSkill;
 
         /// <summary>
+        /// The maximum height the entity can hop upwards to an adjacent node.
+        /// </summary>
+        public int MaxHopUpDistance => isOverrideMaxHopUpDistanceActive ? overrideMaxHopUpDistance : Props.MaxHopUpDistance;
+
+        /// <summary>
+        /// The maximum height the entity can hop downwards to an adjacent node.
+        /// </summary>
+        public int MaxHopDownDistance => isOverrideMaxHopDownDistanceActive ? overrideMaxHopDownDistance : Props.MaxHopDownDistance;
+
+        /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.
         /// </summary>
         public bool IsInRange(BlockmapNode targetNode, float maxCost)
         {
             // First check if the target node is even close. If not: skip detailed check
-            if (Vector2.Distance(Parent.OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
+            if (Vector2.Distance(Entity.OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
 
             // Setup
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
@@ -274,7 +319,7 @@ namespace BlockmapFramework
             Dictionary<BlockmapNode, float> nodeCosts = new Dictionary<BlockmapNode, float>();
 
             // Start with origin node
-            BlockmapNode sourceNode = Parent.OriginNode;
+            BlockmapNode sourceNode = Entity.OriginNode;
             priorityQueue.Add(sourceNode, 0f);
             nodeCosts.Add(sourceNode, 0f);
 
@@ -286,14 +331,14 @@ namespace BlockmapFramework
                 if (visited.Contains(currentNode)) continue;
                 visited.Add(currentNode);
 
-                foreach (KeyValuePair<BlockmapNode, Transition> t in currentNode.Transitions)
+                foreach (Transition t in currentNode.Transitions)
                 {
-                    BlockmapNode toNode = t.Key;
-                    float transitionCost = t.Value.GetMovementCost(Parent);
+                    BlockmapNode toNode = t.To;
+                    float transitionCost = t.GetMovementCost(Entity);
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > maxCost) continue; // not in range
-                    if (!t.Value.CanPass(Parent)) continue; // transition not passable for this character
+                    if (!t.CanPass(Entity)) continue; // transition not passable for this character
 
                     // Check if we reached target
                     if (toNode == targetNode) return true;

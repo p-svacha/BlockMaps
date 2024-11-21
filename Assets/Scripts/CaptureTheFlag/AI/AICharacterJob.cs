@@ -46,13 +46,13 @@ namespace CaptureTheFlag
         protected Action_Movement GetSingleNodeMovementTo(BlockmapNode targetNode)
         {
             // Get path to target
-            List<BlockmapNode> path = GetPath(targetNode);
+            NavigationPath path = GetPath(targetNode);
 
             // Check if the path contains an adjacent move
-            foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.Count == 2))
+            foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.IsSingleTransitionPath()))
             {
-                if (Player.Opponent.Characters.Any(x => x.Node == movement.Path[1])) continue; // Don't go there if an opponent is on that node
-                if (path[1] == movement.Path[1]) return movement;
+                if (Player.Opponent.Characters.Any(x => x.Node == movement.Target)) continue; // Don't go there if an opponent is on that node
+                if (path.Target == movement.Target) return movement;
             }
 
             // No path found
@@ -71,11 +71,11 @@ namespace CaptureTheFlag
             if (Character.PossibleMoves.TryGetValue(targetNode, out Action_Movement directMove)) return directMove;
 
             // Move as close as possible by finding the first node we can reach while backtracking from flag
-            List<BlockmapNode> path = GetPath(targetNode);
+            NavigationPath path = GetPath(targetNode);
             if (path == null) return null; // no path to target
-            for (int i = 0; i < path.Count; i++)
+            for (int i = 0; i < path.Nodes.Count; i++)
             {
-                BlockmapNode backtrackNode = path[path.Count - i - 1];
+                BlockmapNode backtrackNode = path.Nodes[path.Nodes.Count - i - 1];
                 if (Character.PossibleMoves.TryGetValue(backtrackNode, out Action_Movement closestMove) && Character.Owner.CanPerformMovement(closestMove)) return closestMove;
             }
 
@@ -87,7 +87,7 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns the fastest possible path to the given node without going the own flag zone.
         /// </summary>
-        private List<BlockmapNode> GetPath(BlockmapNode targetNode)
+        private NavigationPath GetPath(BlockmapNode targetNode)
         {
             return Pathfinder.GetPath(Character.Entity, Character.Entity.OriginNode, targetNode, considerUnexploredNodes: false, Player.FlagZone.Nodes);
         }

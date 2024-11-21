@@ -9,10 +9,7 @@ namespace BlockmapFramework
     /// </summary>
     public class AdjacentWalkTransition : Transition
     {
-        public AdjacentWalkTransition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight) : base(from, to, maxHeight)
-        {
-            Direction = dir;
-        }
+        public AdjacentWalkTransition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight) : base(from, to, dir, maxHeight) { }
 
         public override float GetMovementCost(Entity entity)
         {

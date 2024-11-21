@@ -12,19 +12,29 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// The speed at which this entity moves around in the world.
+        /// The speed at which the entity moves around in the world.
         /// </summary>
         public float MovementSpeed { get; init; } = 1f;
 
         /// <summary>
-        /// Flag if this entity can pass water nodes.
+        /// Flag if the entity can pass water nodes.
         /// </summary>
         public bool CanSwim { get; init; } = true;
 
         /// <summary>
-        /// Maximum climbability of climbables that this entity can climb.
+        /// Maximum climbability of climbables that the entity can climb.
         /// </summary>
         public ClimbingCategory ClimbingSkill { get; init; } = ClimbingCategory.None;
+
+        /// <summary>
+        /// The maximum height the entity can hop upwards to an adjacent node.
+        /// </summary>
+        public int MaxHopUpDistance { get; init; } = 0;
+
+        /// <summary>
+        /// The maximum height the entity can drop downwards to an adjacent node.
+        /// </summary>
+        public int MaxHopDownDistance { get; init; } = 0;
 
         public override bool Validate(EntityDef parent)
         {

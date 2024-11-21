@@ -41,7 +41,7 @@ namespace CaptureTheFlag
             }
 
             // If we are on or close to our target node, look for new job
-            if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.Transitions.ContainsKey(TargetNode)) return true;
+            if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
 
             return false;
         }

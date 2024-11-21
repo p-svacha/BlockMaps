@@ -26,9 +26,8 @@ namespace BlockmapFramework
         /// </summary>
         public List<IClimbable> Climb { get; private set; }
 
-        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb, int maxHeight) : base(from, to, maxHeight)
+        public SingleClimbTransition(BlockmapNode from, BlockmapNode to, Direction dir, List<IClimbable> climb, int maxHeight) : base(from, to, dir, maxHeight)
         {
-            Direction = dir;
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             Climb = climb;
 
