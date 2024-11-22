@@ -110,15 +110,15 @@ namespace BlockmapFramework
             // Find path to target
             NavigationPath path = Pathfinder.GetPath(Entity, startNode, target);
 
-            // If we are still moving, add that transition we're currently on as the first transition of the path
-            if (IsMoving) path.Transitions.Insert(0, CurrentTransition);
-
             // Check if we found a valid path
             if (path == null)
             {
                 Stop();
                 return;
             }
+
+            // If we are still moving, add that transition we're currently on as the first transition of the path
+            if (IsMoving) path.Transitions.Insert(0, CurrentTransition);
 
             // Set new path
             MoveAlong(path);

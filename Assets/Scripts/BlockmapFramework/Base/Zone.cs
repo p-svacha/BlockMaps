@@ -8,10 +8,10 @@ namespace BlockmapFramework
     /// <summary>
     /// A zone represents a set of 2d world coordinates. A zone is the same across all height levels. Provides some functionality for it.
     /// </summary>
-    public class Zone : ISaveAndLoadable
+    public class Zone : WorldDatabaseObject, ISaveAndLoadable
     {
         private int id;
-        public int Id => id;
+        public override int Id => id;
         private World World;
         public Actor Actor;
         public HashSet<Vector2Int> WorldCoordinates;
@@ -33,10 +33,7 @@ namespace BlockmapFramework
             Init();
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             Init();
         }

@@ -14,7 +14,7 @@ namespace BlockmapFramework
             OnInit(chunk);
 
             Altitude = level;
-            gameObject.layer = chunk.World.Layer_Wall;
+            gameObject.layer = chunk.World.Layer_WallMesh;
         }
 
         public override void SetVisibility(Actor player)

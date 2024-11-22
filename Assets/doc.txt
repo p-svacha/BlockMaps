@@ -1,5 +1,13 @@
+Entity.UpdateVision() -> Fix OnVisibilityChanged so it also recongizes changed batch entities and walls
+	> Create new WorldObject class for all world db objects (has id, PostLoad)
 
 
+wall visibility doesn't get updated after it is built
+vision rays go through corners sometimes
+
+fix weird vision bug in window corner
+-- Always also update all visibility after updating vision!!!
+-- Check if the OnVisibilityChanged works correctly in last part of Entity.UpdateVision()
 
 Framework: Hopping/Dropping
 Framework: Stairs

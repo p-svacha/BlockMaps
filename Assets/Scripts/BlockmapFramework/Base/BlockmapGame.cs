@@ -32,6 +32,11 @@ namespace BlockmapFramework
             World?.Tick();
         }
 
+        protected virtual void LateUpdate()
+        {
+            //World?.LateUpdate();
+        }
+
         protected virtual void FixedUpdate()
         {
             World?.FixedUpdate();

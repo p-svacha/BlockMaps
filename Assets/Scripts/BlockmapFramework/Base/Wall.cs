@@ -10,15 +10,12 @@ namespace BlockmapFramework
     /// <br/>Each wall consist of a combination of a WallShape and a WallMaterial, which together define how the wall looks and acts.
     /// <br/>Walls exist on their own seperate 3d grid and are not bound to nodes.
     /// </summary>
-    public class Wall : IClimbable, IVisionTarget, ISaveAndLoadable
+    public class Wall : WorldDatabaseObject, IClimbable, IVisionTarget, ISaveAndLoadable
     {
         private World World;
 
         private int id;
-        /// <summary>
-        /// Unique identifier of this specific wall.
-        /// </summary>
-        public int Id => id;
+        public override int Id => id;
 
         /// <summary>
         /// The world cell coordiantes of the wall.
@@ -53,6 +50,9 @@ namespace BlockmapFramework
 
         public float Width => Shape.Width;
 
+        // GameObject
+        private GameObject VisionColliderObject;
+
 
         // IClimbable
         public ClimbingCategory ClimbSkillRequirement => Material.ClimbSkillRequirement;
@@ -77,15 +77,63 @@ namespace BlockmapFramework
             IsMirrored = mirrored;
 
             if ((Shape.IsCornerShape && HelperFunctions.IsSide(Side)) || !Shape.IsCornerShape && HelperFunctions.IsCorner(Side)) throw new System.Exception("Invalid wall side error. " + Shape.Label + " is not allowed to build in the direction " + Side.ToString());
+
+            Init();
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             WorldCoordinates = new Vector2Int(GlobalCellCoordinates.x, GlobalCellCoordinates.z);
             World.RegisterWall(this, registerInWorld: false);
+
+            Init();
+        }
+
+        /// <summary>
+        /// Gets called after this Wall got instantiated, either through being spawned or when being loaded.
+        /// </summary>
+        private void Init()
+        {
+            CreateVisionCollider();
+        }
+
+        private void CreateVisionCollider()
+        {
+            VisionColliderObject = new GameObject("visionCollider_wall_" + Id);
+            VisionColliderObject.layer = World.Layer_WallVisionCollider;
+            VisionColliderObject.transform.SetParent(Chunk.ChunkObject.transform);
+
+            BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
+            collider.size = GetVisionColliderSize();
+            collider.center = GetVisionColliderCenter();
+
+            WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
+            evc.Object = this;
+        }
+
+        private Vector3 GetVisionColliderSize()
+        {
+            if(Side == Direction.E || Side == Direction.W) return new Vector3(Shape.Width, World.NodeHeight, 1f);
+            else if(Side == Direction.S || Side == Direction.N) return new Vector3(1f, World.NodeHeight, Shape.Width);
+            else return new Vector3(Shape.Width, World.NodeHeight, Shape.Width);
+        }
+
+        private Vector3 GetVisionColliderCenter()
+        {
+            Vector3 centerPos = new Vector3(LocalCellCoordinates.x + 0.5f, (LocalCellCoordinates.y * World.NodeHeight) + (World.NodeHeight * 0.5f), LocalCellCoordinates.z + 0.5f);
+            centerPos += Chunk.ChunkObject.transform.position;
+
+            if (Side == Direction.W) return centerPos + new Vector3(-0.5f + (Shape.Width * 0.5f), 0f, 0f);
+            if (Side == Direction.E) return centerPos + new Vector3(0.5f - (Shape.Width * 0.5f), 0f, 0f);
+            if (Side == Direction.S) return centerPos + new Vector3(0f, 0f, -0.5f + (Shape.Width * 0.5f));
+            if (Side == Direction.N) return centerPos + new Vector3(0f, 0f, 0.5f - (Shape.Width * 0.5f));
+
+            if (Side == Direction.SE) return centerPos + new Vector3(0.5f - (Shape.Width * 0.5f), 0f, -0.5f + (Shape.Width * 0.5f));
+            if (Side == Direction.SW) return centerPos + new Vector3(-0.5f + (Shape.Width * 0.5f), 0f, -0.5f + (Shape.Width * 0.5f));
+            if (Side == Direction.NE) return centerPos + new Vector3(0.5f - (Shape.Width * 0.5f), 0f, 0.5f - (Shape.Width * 0.5f));
+            if (Side == Direction.NW) return centerPos + new Vector3(-0.5f + (Shape.Width * 0.5f), 0f, 0.5f - (Shape.Width * 0.5f));
+
+            return centerPos;
         }
 
         #endregion

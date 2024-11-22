@@ -11,10 +11,10 @@ namespace BlockmapFramework
     /// All objects that exist in the world in a specific location (node) are entities.
     /// <br/>Together with nodes they make up everything in the world.
     /// </summary>
-    public class Entity : IVisionTarget, ISaveAndLoadable
+    public class Entity : WorldDatabaseObject, IVisionTarget, ISaveAndLoadable
     {
         public int id;
-        public int Id => id;
+        public override int Id => id;
 
         /// <summary>
         /// The world in which this entity exists.
@@ -153,10 +153,7 @@ namespace BlockmapFramework
             OnCreated();
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file and before initialization of this entity.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             World.RegisterEntity(this, registerInWorld: false, updateWorld: false);
 
@@ -260,8 +257,8 @@ namespace BlockmapFramework
                 ShowTextures(World.IsShowingTextures);
 
                 // Reference entity in its collider
-                EntityCollider ec = MeshObject.AddComponent<EntityCollider>();
-                ec.Entity = this;
+                WorldObjectCollider ec = MeshObject.AddComponent<WorldObjectCollider>();
+                ec.Object = this;
 
                 // Selection indicator
                 SelectionIndicator = GameObject.Instantiate(Resources.Load<Projector>("BlockmapFramework/Prefabs/SelectionIndicator"));
@@ -289,16 +286,16 @@ namespace BlockmapFramework
                 else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
                 collider.center = new Vector3(0f, collider.size.y / 2, 0f);
 
-                EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
-                evc.Entity = this;
+                WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
+                evc.Object = this;
             }
             else if (Def.VisionImpact.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
             {
                 MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
                 collider.sharedMesh = MeshCollider.sharedMesh;
 
-                EntityCollider evc = VisionColliderObject.AddComponent<EntityCollider>();
-                evc.Entity = this;
+                WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
+                evc.Object = this;
             }
             else if(Def.VisionImpact.VisionColliderType == VisionColliderType.BlockPerNode) // Create a box collider per node, each one with its own height
             {
@@ -320,8 +317,8 @@ namespace BlockmapFramework
                         collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
                         if (IsMirrored) collider.center = new Vector3(collider.center.x * -1f, collider.center.y, collider.center.z);
 
-                        EntityCollider evc = perNodeColliderObject.AddComponent<EntityCollider>();
-                        evc.Entity = this;
+                        WorldObjectCollider evc = perNodeColliderObject.AddComponent<WorldObjectCollider>();
+                        evc.Object = this;
                     }
                 }
             }
@@ -441,7 +438,7 @@ namespace BlockmapFramework
             // Set walls as explored
             foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
 
-            // Find nodes where the visibility changed
+            // Find nodes and walls where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVision.VisibleNodes.Concat(previousVision.ExploredNodes));
             changedVisibilityNodes.SymmetricExceptWith(CurrentVision.VisibleNodes.Concat(CurrentVision.ExploredNodes));
             //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
@@ -765,17 +762,9 @@ namespace BlockmapFramework
             Ray ray = new Ray(sourcePosition, direction);
             int layerMask = (1 << World.Layer_GroundNode) | (1 << World.Layer_AirNode) |
                     (1 << World.Layer_Water) | (1 << World.Layer_EntityVisionCollider) |
-                    (1 << World.Layer_Fence) | (1 << World.Layer_Wall);
+                    (1 << World.Layer_Fence) | (1 << World.Layer_WallVisionCollider);
             RaycastHit[] hits = Physics.RaycastAll(ray, VisionRange, layerMask);
             System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
-
-            // Debug
-            if (debugVisionRay)
-            {
-                Color debugColor = Color.red;
-                if (hits.Length > 0) debugColor = Color.blue;
-                Debug.DrawRay(sourcePosition, direction, debugColor, 60f);
-            }
 
             foreach (RaycastHit hit in hits)
             {
@@ -799,6 +788,8 @@ namespace BlockmapFramework
                     if (!isCloseToEdge)
                     {
                         vision.AddVisibleNode(hitGroundNode);
+
+                        if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                         return vision;
                     }
 
@@ -815,6 +806,7 @@ namespace BlockmapFramework
                         if (xFrac > 1f - epsilon && yFrac < epsilon) vision.AddExploredNode(World.GetAdjacentGroundNode(hitWorldCoordinates, Direction.SE));
                         if (yFrac < epsilon) vision.AddExploredNode(World.GetAdjacentGroundNode(hitWorldCoordinates, Direction.S));
 
+                        if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                         return vision;
                     }
                 }
@@ -830,6 +822,7 @@ namespace BlockmapFramework
                     vision.AddVisibleNode(hitAirNode);
 
                     // Stop search as air nodes always block vision
+                    if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                     return vision;
                 }
 
@@ -848,6 +841,7 @@ namespace BlockmapFramework
                     vision.AddVisibleNode(hitWaterNode.GroundNode);
 
                     // Stop search as water nodes always block vision
+                    if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                     return vision;
                 }
 
@@ -855,7 +849,7 @@ namespace BlockmapFramework
                 if (objectHit.layer == World.Layer_EntityVisionCollider)
                 {
                     // Get the entity we hit from the collider
-                    Entity hitEntity = objectHit.GetComponent<EntityCollider>().Entity;
+                    Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
                     // If the thing we hit is ourselves, go to the next thing
                     if (hitEntity == this) continue;
@@ -867,7 +861,11 @@ namespace BlockmapFramework
                     foreach (BlockmapNode n in hitEntity.OccupiedNodes) vision.AddExploredNode(n);
 
                     if (!hitEntity.BlocksVision) continue; // Continue search if entity doesn't block vision
-                    else return vision; // End search if entity blocks vision
+                    else
+                    {
+                        if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
+                        return vision; // End search if entity blocks vision
+                    }
                 }
 
                 // Hit fence
@@ -881,29 +879,54 @@ namespace BlockmapFramework
                     vision.AddExploredNode(hitFence.Node);
 
                     if (!hitFence.BlocksVision) continue; // Continue search if fence doesn't block vision
-                    else return vision; // End search if fence blocks vision
+                    else
+                    {
+                        if(debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
+                        return vision; // End search if fence blocks vision
+                    }
                 }
 
                 // Hit wall
-                if (objectHit.layer == World.Layer_Wall)
+                if (objectHit.layer == World.Layer_WallVisionCollider)
                 {
-                    Wall hitWall = World.GetWallFromRaycastHit(hit);
-
-                    if (hitWall == null) // Somehow we couldn't detect what wall we hit => just stop search
-                    {
-                        return vision; 
-                    }
+                    Wall hitWall = (Wall)objectHit.GetComponent<WorldObjectCollider>().Object;
 
                     // Mark wall as visible
                     vision.AddVisibleWall(hitWall);
 
                     if (!hitWall.BlocksVision) continue; // Continue search if wall doesn't block vision
-                    else return vision; // End search if wall blocks vision
+                    else
+                    {
+                        if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
+                        return vision; // End search if wall blocks vision
+                    }
                 }
             }
 
             // Nothing more to see
+            if (debugVisionRay) ShowDebugUnblockedVisionRay(sourcePosition, targetPosition, vision.ExploredNodes.Count > 0 || vision.ExploredWalls.Count > 0 ? Color.green : Color.blue);
             return vision;
+        }
+
+        private void ShowDebugBlockedVisionRay(Vector3 source, Vector3 rayTarget, Vector3 blockedHitPoint)
+        {
+            float debugDrawDuration = 60f; // seconds
+
+            Color segment1Color = Color.yellow;
+            Vector3 segment1Source = source;
+            Vector3 segment1Target = blockedHitPoint;
+            Debug.DrawRay(segment1Source, segment1Target - segment1Source, segment1Color, debugDrawDuration);
+
+            Color segment2Color = Color.red;
+            Vector3 segment2Source = blockedHitPoint;
+            Vector3 segment2Target = rayTarget;
+            Debug.DrawRay(segment2Source, segment2Target - segment2Source, segment2Color, debugDrawDuration);
+        }
+        private void ShowDebugUnblockedVisionRay(Vector3 source, Vector3 rayTarget, Color c)
+        {
+            float debugDrawDuration = 60f; // seconds
+            Debug.DrawRay(source, rayTarget - source, c, debugDrawDuration);
+
         }
 
         /// <summary>

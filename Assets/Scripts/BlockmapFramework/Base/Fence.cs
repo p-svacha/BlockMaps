@@ -9,15 +9,12 @@ namespace BlockmapFramework
     /// Fences are a kind of barrier at the edge or corner of nodes. They follow the node topography and may be climbable.
     /// <br/>An instance represents one fence one one node in the world. All fence-specific attributes are stored in Type.
     /// </summary>
-    public class Fence : IClimbable, ISaveAndLoadable
+    public class Fence : WorldDatabaseObject, IClimbable, ISaveAndLoadable
     {
         private World World;
 
         private int id;
-        /// <summary>
-        /// Unique identifier of this specific fence.
-        /// </summary>
-        public int Id => id;
+        public override int Id => id;
 
         /// <summary>
         /// Def containing the blueprint of the fence.
@@ -91,10 +88,7 @@ namespace BlockmapFramework
             Height = height;
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file and before initialization of this entity.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             World.RegisterFence(this, registerInWorld: false);
         }

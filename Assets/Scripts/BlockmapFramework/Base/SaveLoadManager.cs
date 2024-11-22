@@ -474,7 +474,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Save and load a reference to another saveable object. If loading, make sure that the object you're referencing has already been loaded at this point.
         /// </summary>
-        public static void SaveOrLoadReference<T>(ref T obj, string label) where T : class, ISaveAndLoadable
+        public static void SaveOrLoadReference<T>(ref T obj, string label) where T : WorldDatabaseObject
         {
             if (IsSaving)
             {
@@ -503,7 +503,7 @@ namespace BlockmapFramework
         /// Save and load a list of references to other saveable objects. 
         /// If loading, make sure that the objects you're referencing have already been loaded at this point.
         /// </summary>
-        public static void SaveOrLoadReferenceList<T>(ref List<T> list, string label) where T : class, ISaveAndLoadable
+        public static void SaveOrLoadReferenceList<T>(ref List<T> list, string label) where T : WorldDatabaseObject
         {
             if (IsSaving)
             {

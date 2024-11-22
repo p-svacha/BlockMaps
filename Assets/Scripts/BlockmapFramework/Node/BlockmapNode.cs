@@ -12,13 +12,13 @@ namespace BlockmapFramework
     /// <br/> BlockmapNodes can have a rendered representation in the world but don't have to.
     /// <br/> Used for pathfinding.
     /// </summary>
-    public abstract class BlockmapNode : IVisionTarget, ISaveAndLoadable
+    public abstract class BlockmapNode : WorldDatabaseObject, IVisionTarget, ISaveAndLoadable
     {
         /// <summary>
         /// Unique identifier of the node.
         /// </summary>
         private int id;
-        public int Id => id;
+        public override int Id => id;
 
         /// <summary>
         /// The surface that defines many gameplay behaviours of this node.
@@ -141,10 +141,7 @@ namespace BlockmapFramework
             Init();
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             Chunk = World.GetChunk(WorldCoordinates);
             World.RegisterNode(this, registerInWorld: false);

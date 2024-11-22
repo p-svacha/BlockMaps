@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class WaterBody : ISaveAndLoadable
+    public class WaterBody : WorldDatabaseObject, ISaveAndLoadable
     {
         private World World;
 
         private int id;
-        public int Id => id;
+        public override int Id => id;
         /// <summary>
         /// The first y coordinate where nodes are not covered anymore by this water body.
         /// </summary>
@@ -34,10 +34,7 @@ namespace BlockmapFramework
             Init();
         }
 
-        /// <summary>
-        /// Gets called when loading a world after all values have been loaded from the save file and before initialization.
-        /// </summary>
-        public void PostLoad()
+        public override void PostLoad()
         {
             Init();
         }

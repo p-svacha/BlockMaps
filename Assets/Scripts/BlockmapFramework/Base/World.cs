@@ -64,15 +64,17 @@ namespace BlockmapFramework
         public int MinX, MaxX, MinY, MaxY;
 
         // Fixed Updates
-        private bool updateEntityVisionNextFixedUpdate;
+        private const int NumDelayedUpdateFrames = 2;
+
+        private int updateEntityVisionDelay = 0;
         private List<Entity> visionUpdateEntities;
         private System.Action entityVisionUpdateCallback;
 
-        private bool updateNavmeshNextFixedUpdate;
+        private int updateNavmeshDelay = 0;
         private List<BlockmapNode> navmeshUpdateNodes;
         private bool isNavmeshUpdatePartOfInitialization;
 
-        private bool updateNavmeshDisplayNextFixedUpdate;
+        private int updateNavmeshDisplayDelay = 0;
 
         // Database
         private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
@@ -117,7 +119,8 @@ namespace BlockmapFramework
         public int Layer_Water;
         public int Layer_Fence;
         public int Layer_ProceduralEntityMesh;
-        public int Layer_Wall;
+        public int Layer_WallMesh;
+        public int Layer_WallVisionCollider;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -214,7 +217,8 @@ namespace BlockmapFramework
             Layer_Water = LayerMask.NameToLayer("Water");
             Layer_Fence = LayerMask.NameToLayer("Fence");
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
-            Layer_Wall = LayerMask.NameToLayer("Wall");
+            Layer_WallMesh = LayerMask.NameToLayer("WallMesh");
+            Layer_WallVisionCollider = LayerMask.NameToLayer("WallVisionCollider");
         }
 
         private void CreateChunksAndGameObjects()
@@ -331,14 +335,24 @@ namespace BlockmapFramework
             foreach (Entity e in Entities.Values) e.Tick();
         }
 
-        /// <summary>
-        /// Update in sync with physics updates
-        /// </summary>
         public void FixedUpdate()
         {
-            if (updateNavmeshNextFixedUpdate) DoUpdateNavmesh();
-            if (updateEntityVisionNextFixedUpdate) DoUpdateVisionOfEntities();
-            if (updateNavmeshDisplayNextFixedUpdate) DoUpdateNavmeshDisplay();
+            // Update navmesh/vision from changes that were made to meshes the previous frame
+            if (updateNavmeshDelay > 0)
+            {
+                updateNavmeshDelay--;
+                if(updateNavmeshDelay == 0) DoUpdateNavmesh();
+            }
+            if (updateEntityVisionDelay > 0)
+            {
+                updateEntityVisionDelay--;
+                if(updateEntityVisionDelay == 0) DoUpdateVisionOfEntities();
+            }
+            if (updateNavmeshDisplayDelay > 0)
+            {
+                updateNavmeshDisplayDelay--;
+                if(updateNavmeshDisplayDelay == 0) DoUpdateNavmeshDisplay();
+            }
         }
 
         /// <summary>
@@ -379,7 +393,7 @@ namespace BlockmapFramework
             Wall newHoveredWall = null;
 
             // Shoot a raycast on ground and air layers to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence | 1 << Layer_Wall))
+            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence | 1 << Layer_WallMesh))
             {
                 Transform objectHit = hit.transform;
 
@@ -452,7 +466,7 @@ namespace BlockmapFramework
                 }
 
                 // Hit wall
-                else if (objectHit.gameObject.layer == Layer_Wall)
+                else if (objectHit.gameObject.layer == Layer_WallMesh)
                 {
                     newHoveredWall = GetWallFromRaycastHit(hit);
                     if (newHoveredWall != null)
@@ -469,7 +483,7 @@ namespace BlockmapFramework
                 if (hit.transform.gameObject.layer == Layer_EntityMesh)
                 {
                     Transform objectHit = hit.transform;
-                    newHoveredEntity = objectHit.GetComponent<EntityCollider>().Entity;
+                    newHoveredEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
                 }
                 else if (hit.transform.gameObject.layer == Layer_ProceduralEntityMesh)
                 {
@@ -581,19 +595,20 @@ namespace BlockmapFramework
 
         public AirNode GetAirNodeFromRaycastHit(RaycastHit hit)
         {
-            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
+            Vector3 adjustedHitPosition = hit.point + new Vector3(0.001f, 0f, 0.001f); // This fixes the bug where hitting a mesh on a coordinate border sometimes returns 12.9999 instead of 13.
+            Vector2Int hitCoordinates = GetWorldCoordinates(adjustedHitPosition);
             int altitude = hit.transform.GetComponent<AirNodeMesh>().Altitude;
 
             List<AirNode> hitAirNodes = GetAirNodes(hitCoordinates).Where(x => x.BaseAltitude == altitude).ToList();
             if(hitAirNodes.Count == 1) return hitAirNodes[0];
             if(hitAirNodes.Count > 1) // Get node that closest matches the hit height if multiple are on that base base height
             {
-                Vector2 relativePos = new Vector2(hit.point.x % 1f, hit.point.z % 1f);
+                Vector2 relativePos = new Vector2(adjustedHitPosition.x % 1f, adjustedHitPosition.z % 1f);
                 AirNode closestNode = null;
                 float closestDistance = float.MaxValue;
                 foreach(AirNode node in hitAirNodes)
                 {
-                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
+                    float distance = Mathf.Abs((adjustedHitPosition.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
                     if(distance < closestDistance)
                     {
                         closestNode = node;
@@ -616,7 +631,7 @@ namespace BlockmapFramework
                 float closestDistance = float.MaxValue;
                 foreach (AirNode node in hitOffsetAirNodes)
                 {
-                    float distance = Mathf.Abs((hit.point.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
+                    float distance = Mathf.Abs((offsetHitPosition.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
                     if (distance < closestDistance)
                     {
                         closestNode = node;
@@ -635,11 +650,12 @@ namespace BlockmapFramework
             FenceMesh hitMesh = hit.transform.GetComponent<FenceMesh>();
             int altitude = hitMesh.Altitude;
 
-            Vector2Int hitCoordinates = GetWorldCoordinates(hit.point);
+            Vector3 adjustedHitPosition = hit.point + new Vector3(0.001f, 0f, 0.001f); // This fixes the bug where hitting a mesh on a coordinate border sometimes returns 12.9999 instead of 13.
+            Vector2Int hitCoordinates = GetWorldCoordinates(adjustedHitPosition);
 
             List<BlockmapNode> hitNodes = GetNodes(hitCoordinates, altitude).OrderByDescending(x => x.MaxAltitude).ToList();
-            Direction primaryHitSide = GetNodeHoverMode8(hit.point);
-            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
+            Direction primaryHitSide = GetNodeHoverMode8(adjustedHitPosition);
+            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(adjustedHitPosition);
 
             foreach (BlockmapNode hitNode in hitNodes)
             {
@@ -679,7 +695,7 @@ namespace BlockmapFramework
                 }
             }
 
-            Debug.LogWarning("GetFenceFromRaycastHit failed to find a fence at world position: " + hit.point.ToString());
+            Debug.LogWarning($"GetFenceFromRaycastHit failed to find a fence at world position: {hit.point}. Initial hit coordinates were {hitCoordinates} and offset coordinates were {offsetCoordinates}.");
             return null;
         }
         private Entity GetBatchEntityFromRaycastHit(RaycastHit hit)
@@ -696,12 +712,14 @@ namespace BlockmapFramework
         public Wall GetWallFromRaycastHit(RaycastHit hit)
         {
             // Check if there is a wall on the exact HoveredWorldCoordinates in the HovereModeSide direction
-            Vector2Int hitWorldCoordinate = GetWorldCoordinates(hit.point);
+            Vector3 adjustedHitPosition = hit.point + new Vector3(0.001f, 0f, 0.001f); // This fixes the bug where hitting a mesh on a coordinate border sometimes returns 12.9999 instead of 13.
+            Vector2Int hitWorldCoordinate = GetWorldCoordinates(adjustedHitPosition);
+
             WallMesh hitMesh = hit.transform.GetComponent<WallMesh>();
             int altitude = hitMesh.Altitude;
             Vector3Int globalCellCoordinates = new Vector3Int(hitWorldCoordinate.x, altitude, hitWorldCoordinate.y);
             Direction primaryHitSide = NodeHoverModeSides;
-            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(hit.point);
+            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(adjustedHitPosition);
 
             List<Wall> cellWalls = GetWalls(globalCellCoordinates);
             if (cellWalls != null)
@@ -920,7 +938,7 @@ namespace BlockmapFramework
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
-            updateNavmeshNextFixedUpdate = true;
+            updateNavmeshDelay = NumDelayedUpdateFrames;
             navmeshUpdateNodes = nodes;
             isNavmeshUpdatePartOfInitialization = isInitialization;
         }
@@ -966,8 +984,6 @@ namespace BlockmapFramework
             Debug.Log("Updating ALL transitions took " + fullNavmeshTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             UpdateNavmeshDisplayDelayed();
-
-            updateNavmeshNextFixedUpdate = false;
         }
         public void GenerateFullNavmesh()
         {
@@ -1687,11 +1703,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Recalculates the vision of all entities that have the given position within their vision range.
         /// <br/> Is delayed by one frame so all draw calls and vision collider movements can be completed before shooting the vision rays.
-        /// <br/> Each entity is additionally delayed by 1 frame to not cause lag spikes.
         /// </summary>
         public void UpdateVisionOfNearbyEntitiesDelayed(Vector3 position, int rangeEast = 1, int rangeNorth = 1, System.Action callback = null, Actor excludeActor = null)
         {
-            updateEntityVisionNextFixedUpdate = true;
+            updateEntityVisionDelay = NumDelayedUpdateFrames;
 
             visionUpdateEntities = GetNearbyEntities(position, rangeEast, rangeNorth);
             if (excludeActor != null) visionUpdateEntities = visionUpdateEntities.Where(x => x.Actor != excludeActor).ToList();
@@ -1702,7 +1717,7 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisionDelayed(List<Entity> entities, System.Action callback)
         {
-            updateEntityVisionNextFixedUpdate = true;
+            updateEntityVisionDelay = NumDelayedUpdateFrames;
 
             visionUpdateEntities = entities;
             entityVisionUpdateCallback = callback;
@@ -1716,8 +1731,6 @@ namespace BlockmapFramework
             }
 
             if (entityVisionUpdateCallback != null) entityVisionUpdateCallback.Invoke();
-
-            updateEntityVisionNextFixedUpdate = false;
         }
 
         public void ToggleGridOverlay()
@@ -1758,7 +1771,7 @@ namespace BlockmapFramework
         }
         public void UpdateNavmeshDisplayDelayed()
         {
-            updateNavmeshDisplayNextFixedUpdate = true;
+            updateNavmeshDisplayDelay = NumDelayedUpdateFrames;
         }
         private void DoUpdateNavmeshDisplay()
         {
@@ -1766,8 +1779,6 @@ namespace BlockmapFramework
             
             if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
-
-            updateNavmeshDisplayNextFixedUpdate = false;
         }
 
         public void ToggleTextureMode()

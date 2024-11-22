@@ -29,6 +29,10 @@ namespace BlockmapFramework.Defs
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "human/human_fbx"),
                     PlayerColorMaterialIndex = 0,
                 },
+                VisionImpact = new EntityVisionImpactProperties()
+                {
+                    BlocksVision = false,
+                },
                 Components = new List<CompProperties>()
                 {
                     new CompProperties_Movement()

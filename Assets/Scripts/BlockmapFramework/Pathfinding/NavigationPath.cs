@@ -88,7 +88,7 @@ namespace BlockmapFramework
             if (Transitions.Count != Nodes.Count) throw new System.Exception("Can't remove first transition if the current starting point of this path is already a node.");
 
             Transitions.RemoveAt(0);
-        }
+        }   
 
         #endregion
 

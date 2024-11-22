@@ -7,10 +7,10 @@ namespace BlockmapFramework
     /// <summary>
     /// An actor inside a BlockMap world.
     /// </summary>
-    public class Actor : ISaveAndLoadable
+    public class Actor : WorldDatabaseObject, ISaveAndLoadable
     {
         private int id;
-        public int Id => id;
+        public override int Id => id;
 
         public string Name;
         public World World { get; private set; }
@@ -29,7 +29,7 @@ namespace BlockmapFramework
             Init();
         }
 
-        public void PostLoad()
+        public override void PostLoad()
         {
             Init();
         }
