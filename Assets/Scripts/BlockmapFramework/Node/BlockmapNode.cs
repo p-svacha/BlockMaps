@@ -198,9 +198,10 @@ namespace BlockmapFramework
         // 2. ResetTransitions()
         // 3. SetStraightAdjacentTransitions()
         // 4. SetDiagonalAdjacentTransitions()
-        // 5. SetCliffClimbTransitions()
+        // 5. SetClimbTransitions()
 
-        
+
+
         /// <summary>
         /// Returns the cheapest transition for the given entity to get from this node to the specified target node.
         /// <br/>Returns null if no transition to the target node exists.
@@ -473,6 +474,48 @@ namespace BlockmapFramework
                     AddTransition(t, isWalkTransition: true);
                 }
             }
+        }
+
+        public void SetHopTransitions()
+        {
+            if (!IsPassable()) return;
+            SetHopTransition(Direction.N);
+            SetHopTransition(Direction.E);
+            SetHopTransition(Direction.S);
+            SetHopTransition(Direction.W);
+        }
+        private void SetHopTransition(Direction dir)
+        {
+            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+            List<BlockmapNode> adjNodes = World.GetAdjacentNodes(WorldCoordinates, dir);
+            foreach (BlockmapNode adjNode in adjNodes)
+            {
+                if (!adjNode.IsPassable()) continue;
+
+                if(ShouldCreateHopTransition(adjNode, dir, out HopTransition t))
+                {
+                    AddTransition(t, isWalkTransition: false);
+                }
+            }
+        }
+        private bool ShouldCreateHopTransition(BlockmapNode to, Direction dir, out HopTransition t)
+        {
+            t = null;
+            if (WalkTransitions.Any(x => x.Value.To == to)) return false; // A walk transition already exists to that node
+
+            Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
+            int hopStartAltitude = GetMinAltitude(dir); // The altitude where the character takes off
+            int hopEndAltitude = to.GetMinAltitude(oppositeDir); // The altitude where character lands
+
+            int hopTopAltitudeThis = GetMaxAltitude(dir); // The altitude the character has to reach to be able to get out from this node
+            int hopTopAltitudeAdj = to.GetMaxAltitude(oppositeDir); // The altitude the character has to reach to be able to enter the other node
+            int hopTopAltitude = Mathf.Max(hopTopAltitudeThis, hopTopAltitudeAdj); // The maxiumum altitude the character has to reach during the hop
+
+            int hopUpDistance = hopTopAltitude - hopStartAltitude;
+            int hopDownDistance = hopTopAltitude - hopEndAltitude;
+
+            t = new HopTransition(this, to, dir, World.MAX_ALTITUDE, hopUpDistance, hopDownDistance);
+            return true;
         }
 
         public void SetClimbTransitions()

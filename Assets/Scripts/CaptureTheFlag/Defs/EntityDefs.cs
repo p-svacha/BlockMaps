@@ -7,7 +7,6 @@ namespace CaptureTheFlag
 {
     public static class EntityDefs
     {
-        private static string EntityModelBasePath = "Entities/Models/";
         private static string BlenderImportBasePath = "Entities/Models/BlenderImport/";
         public static string ThumbnailBasePath = "Editor/Thumbnails/";
 

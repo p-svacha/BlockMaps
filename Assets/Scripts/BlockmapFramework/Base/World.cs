@@ -952,6 +952,7 @@ namespace BlockmapFramework
             System.Diagnostics.Stopwatch recalcPassabilityTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch straightTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch diagonalTransitionsTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch hopTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch climbTransitionsTimer = new System.Diagnostics.Stopwatch();
             fullNavmeshTimer.Start();
 
@@ -972,7 +973,11 @@ namespace BlockmapFramework
             diagonalTransitionsTimer.Stop();
             Debug.Log("Updating diagonal transitions took " + diagonalTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
-            
+            hopTransitionsTimer.Start();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.SetHopTransitions();
+            hopTransitionsTimer.Stop();
+            Debug.Log("Updating diagonal transitions took " + hopTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
+
             climbTransitionsTimer.Start();
             foreach (BlockmapNode node in navmeshUpdateNodes) node.SetClimbTransitions();
             climbTransitionsTimer.Stop();

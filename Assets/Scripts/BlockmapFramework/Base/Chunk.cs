@@ -107,28 +107,6 @@ namespace BlockmapFramework
 
         #region Actions
 
-        public void ResetNavmeshConnections()
-        {
-            foreach (BlockmapNode node in GetAllNodes()) node.ResetTransitions();
-        }
-
-        /// <summary>
-        /// Updates the connected nodes in Directions W,E,S,N for all nodes in this chunk.
-        /// </summary>
-        public void UpdatePathfindingGraphStraight()
-        {
-            foreach (BlockmapNode node in GetAllNodes()) node.SetStraightAdjacentTransitions();
-        }
-
-        /// <summary>
-        /// Updates the connected nodes in Directions NW,NE,SW,SE for all nodes in this chunk.
-        /// <br/> This function requires UpdatePathfindingGraphStraight() to be called on all chunks before. Else it won't work correctly
-        /// </summary>
-        public void UpdatePathfindingGraphDiagonal()
-        {
-            foreach (BlockmapNode node in GetAllNodes()) node.SetDiagonalAdjacentTransitions();
-        }
-
         public void RegisterNode(BlockmapNode node)
         {
             Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Add(node);

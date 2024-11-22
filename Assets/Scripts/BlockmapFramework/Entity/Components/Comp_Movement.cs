@@ -33,6 +33,8 @@ namespace BlockmapFramework
         public bool IsMovementPaused { get; private set; }
         public ClimbPhase ClimbPhase { get; set; }
         public int ClimbIndex { get; set; }
+        public int TransitionPathIndex { get; set; }
+        public float TransitionSpeed { get; set; }
 
         // Pathfinding
         public NavigationPath TargetPath { get; private set; }

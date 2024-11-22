@@ -40,6 +40,8 @@ namespace BlockmapFramework.Defs
                         MovementSpeed = 2f,
                         CanSwim = true,
                         ClimbingSkill = ClimbingCategory.Advanced,
+                        MaxHopUpDistance = 2,
+                        MaxHopDownDistance = 5,
                     },
                 },
             },
@@ -67,6 +69,8 @@ namespace BlockmapFramework.Defs
                         MovementSpeed = 6f,
                         CanSwim = true,
                         ClimbingSkill = ClimbingCategory.None,
+                        MaxHopUpDistance = 1,
+                        MaxHopDownDistance = 3,
                     },
                 },
             },
@@ -82,7 +86,7 @@ namespace BlockmapFramework.Defs
                 {
                     RenderType = EntityRenderType.Batch,
                     BatchRenderFunction = HedgeMeshGenerator.BuildHedgeMesh,
-                }
+                },
             },
 
             new EntityDef()
@@ -101,7 +105,7 @@ namespace BlockmapFramework.Defs
                 },
                 VisionImpact = new EntityVisionImpactProperties()
                 {
-                    VisionColliderType = VisionColliderType.MeshCollider
+                    VisionColliderType = VisionColliderType.MeshCollider,
                 }
             },
 

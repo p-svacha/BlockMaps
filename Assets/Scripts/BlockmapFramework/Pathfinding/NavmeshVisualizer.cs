@@ -19,6 +19,7 @@ namespace BlockmapFramework
         private Material WalkTransitionMat;
         private Material SingleClimbTransitionMat;
         private Material DoubleClimbTransitionMat;
+        private Material HopTransitionMat;
 
         private void Awake()
         {
@@ -37,9 +38,12 @@ namespace BlockmapFramework
             WalkTransitionMat = new Material(Shader.Find("Sprites/Default"));
             SingleClimbTransitionMat = new Material(Shader.Find("Sprites/Default"));
             DoubleClimbTransitionMat = new Material(Shader.Find("Sprites/Default"));
+            HopTransitionMat = new Material(Shader.Find("Sprites/Default"));
             WalkTransitionMat.color = Color.white;
             SingleClimbTransitionMat.color = Color.cyan;
             DoubleClimbTransitionMat.color = Color.blue;
+            HopTransitionMat.color = Color.yellow;
+
         }
 
         /// <summary>
@@ -76,7 +80,7 @@ namespace BlockmapFramework
 
                         int transitionSubmesh = transitionMeshBuilder.GetSubmesh(GetTransitionSubmeshMaterial(t));
                         float width = t.GetMovementCost(entity) * TRANSITION_WIDTH;
-                        List<Vector3> linePath = t.GetPreviewPath();
+                        List<Vector3> linePath = new List<Vector3>(t.GetPreviewPath());
 
                         // Adapt last point (to differentiate where it starts (within the node) and where it ends (before the node))
                         Vector3 last = linePath[linePath.Count - 1];
@@ -124,6 +128,7 @@ namespace BlockmapFramework
             if (t is AdjacentWalkTransition) return WalkTransitionMat;
             if (t is SingleClimbTransition) return SingleClimbTransitionMat;
             if (t is DoubleClimbTransition) return DoubleClimbTransitionMat;
+            if (t is HopTransition) return HopTransitionMat;
             throw new System.Exception("Transition type " + t.GetType().ToString() + " not handled.");
         }
 

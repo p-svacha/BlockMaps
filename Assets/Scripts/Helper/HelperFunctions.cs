@@ -98,6 +98,39 @@ public static class HelperFunctions
         obj.transform.localScale = new Vector3(obj.transform.localScale.x * -1f, obj.transform.localScale.y, obj.transform.localScale.z);
     }
 
+    /// <summary>
+    /// Creates a list of points along a parabolic arc between start and end.
+    /// </summary>
+    /// <param name="start">Starting point of the arc.</param>
+    /// <param name="end">Ending point of the arc.</param>
+    /// <param name="height">Maximum height of the arc.</param>
+    /// <param name="segments">Number of segments the arc is divided into.</param>
+    /// <returns>A list of Vector3 points along the arc.</returns>
+    public static List<Vector3> CreateArc(Vector3 start, Vector3 end, float height, int segments)
+    {
+        List<Vector3> arcPoints = new List<Vector3>();
+
+        // Add the start point
+        arcPoints.Add(start);
+
+        // Calculate the arc
+        for (int i = 1; i <= segments; i++)
+        {
+            float t = i / (float)segments; // Normalized parameter (0 to 1)
+
+            // Linear interpolation between start and end
+            Vector3 linearPoint = Vector3.Lerp(start, end, t);
+
+            // Add vertical parabolic height
+            float parabolicHeight = 4 * height * t * (1 - t); // Parabolic equation
+            linearPoint.y += parabolicHeight;
+
+            arcPoints.Add(linearPoint);
+        }
+
+        return arcPoints;
+    }
+
     #endregion
 
     #region Random

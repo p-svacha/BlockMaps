@@ -58,7 +58,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates the position of an entity using this transition in 1 frame.
         /// <br/> Returns if the entity has finished this transition as an out param.
-        /// <br/> Also returns the node that the entity is currently on (its origin node) as an additional out param.
+        /// <br/> Returns the node that the entity is currently on (its origin node) as an out param.
         /// </summary>
         public abstract void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode currentNode);
 

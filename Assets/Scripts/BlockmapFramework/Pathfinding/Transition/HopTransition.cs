@@ -9,26 +9,84 @@ namespace BlockmapFramework
     /// </summary>
     public class HopTransition : Transition
     {
-        public HopTransition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight) : base(from, to, dir, maxHeight) { }
+        // Cost
+        private const float BaseCost = 1f;
+        private const float CostPerHopUpAltitude = 1f;
+        private const float CostPerHopDownAltitude = 0.2f;
+
+        // Hop path
+        private List<Vector3> HopArc;
+        private const float TransitionSpeed = 5f;
+
+        /// <summary>
+        /// The required distance an entity must be able to hop up to use this transition.
+        /// </summary>
+        public int HopUpDistance { get; private set; }
+
+        /// <summary>
+        /// The required distance an entity must be able to hop down to use this transition.
+        /// </summary>
+        public int HopDownDistance { get; private set; }
+
+        public HopTransition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight, int hopUpDistance, int hopDownDistance) : base(from, to, dir, maxHeight)
+        {
+            HopUpDistance = hopUpDistance;
+            HopDownDistance = hopDownDistance;
+
+            HopArc = HelperFunctions.CreateArc(from.CenterWorldPosition, to.CenterWorldPosition, Mathf.Max(hopUpDistance, hopDownDistance) * World.NodeHeight * 0.75f, segments: 12);
+        }
+
+        public override bool CanPass(Entity entity)
+        {
+            Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
+            if (moveComp.MaxHopUpDistance < HopUpDistance) return false;
+            if (moveComp.MaxHopDownDistance < HopDownDistance) return false;
+
+            return base.CanPass(entity);
+        }
 
         public override float GetMovementCost(Entity entity)
         {
-            throw new System.NotImplementedException();
+            return BaseCost + (HopUpDistance * CostPerHopUpAltitude) + (HopDownDistance * CostPerHopDownAltitude);
         }
 
         public override List<Vector3> GetPreviewPath()
         {
-            throw new System.NotImplementedException();
+            return HopArc;
         }
 
         public override void OnTransitionStart(Entity entity)
         {
-            throw new System.NotImplementedException();
+            Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
+
+            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
+            moveComp.TransitionPathIndex = 0;
+            moveComp.TransitionSpeed = TransitionSpeed;
         }
 
         public override void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode currentNode)
         {
-            throw new System.NotImplementedException();
+            finishedTransition = false;
+            Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
+
+            // Calculate the current segment end point
+            Vector3 segmentEnd = HopArc[moveComp.TransitionPathIndex + 1];
+
+            // Move the entity based on the current speed
+            Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, segmentEnd, moveComp.TransitionSpeed * Time.deltaTime);
+
+            if (Vector3.Distance(segmentEnd, newPosition) < 0.01f) // reached segment end point
+            {
+                moveComp.TransitionPathIndex++;
+                if (moveComp.TransitionPathIndex == HopArc.Count - 1)
+                {
+                    finishedTransition = true;
+                    newPosition = To.CenterWorldPosition;
+                }
+            }
+            currentNode = moveComp.TransitionPathIndex > HopArc.Count / 2 ? To : From;
+
+            entity.SetWorldPosition(newPosition);
         }
     }
 }

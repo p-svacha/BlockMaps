@@ -440,7 +440,9 @@ namespace BlockmapFramework
 
             // Find nodes and walls where the visibility changed
             HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVision.VisibleNodes.Concat(previousVision.ExploredNodes));
+            HashSet<Wall> changedVisibilityWalls = new HashSet<Wall>(previousVision.VisibleWalls.Concat(previousVision.ExploredWalls));
             changedVisibilityNodes.SymmetricExceptWith(CurrentVision.VisibleNodes.Concat(CurrentVision.ExploredNodes));
+            changedVisibilityWalls.SymmetricExceptWith(CurrentVision.VisibleWalls.Concat(CurrentVision.ExploredWalls));
             //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
 
             // Add all adjacent nodes as well because vision goes over node edge
@@ -458,6 +460,7 @@ namespace BlockmapFramework
             // Get chunks where visibility changed
             HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
             foreach (BlockmapNode n in changedVisibilityNodes) changedVisibilityChunks.Add(n.Chunk);
+            foreach (Wall w in changedVisibilityWalls) changedVisibilityChunks.Add(w.Chunk);
 
             // Redraw visibility of affected chunks
             //Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
