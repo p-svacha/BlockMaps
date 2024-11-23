@@ -15,7 +15,13 @@ namespace BlockmapFramework
         /// <summary>
         /// Nodes with this RenderType will be rendered flat (according to node shape) and can blend with other nodes of this type.
         /// </summary>
-        FlatBlendableSurface,
+        Default_Blend,
+
+        /// <summary>
+        /// Nodes with this RenderType will be rendered flat (according to node shape) and won't blend with other nodes.
+        /// <br/>They also support stairs.
+        /// </summary>
+        Default_NoBlend,
 
         /// <summary>
         /// Nodes with this RenderType will have a custom render logic defined in CustomRenderFunction.
@@ -39,9 +45,11 @@ namespace BlockmapFramework
         public Action<BlockmapNode, MeshBuilder> CustomRenderFunction { get; init; } = null;
 
         /// <summary>
-        /// If Type is set to FlatBlendableSurface, the color, main texture and texture scale of this material will be used for rendering and blending a node with this surface.
+        /// Name of the material that is used for default rendered nodes.
+        /// <br/>If Type is set to FlatSurface_Blend, the color, main texture and texture scale of the blendable surface reference material with this name will be used for rendering and blending a node with this surface.
+        /// <br/>If Type is set to FlatSurface_NoBlend, the material with this name will be used.
         /// </summary>
-        public Material SurfaceReferenceMaterial { get; init; } = null;
+        public string MaterialName { get; init; } = null;
 
         /// <summary>
         /// If true, triangles on edge shaped nodes (0001 or 1110) are always built in a way that the edge is long

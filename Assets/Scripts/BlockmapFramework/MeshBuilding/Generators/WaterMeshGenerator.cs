@@ -27,7 +27,6 @@ namespace BlockmapFramework
         {
             int waterSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Water"));
 
-            Debug.Log(node.WaterBody == null);
             float waterWorldHeight = node.WaterBody.WaterSurfaceWorldHeight;
 
             MeshVertex sw = meshBuilder.AddVertex(new Vector3(node.LocalCoordinates.x, waterWorldHeight, node.LocalCoordinates.y), new Vector2(0f, 0f));

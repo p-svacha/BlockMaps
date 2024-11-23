@@ -82,6 +82,7 @@ namespace BlockmapFramework
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
             if (isUiElementFocussed) return;
             bool canMoveCamera = !InUnbreakableFollow && !IsPanning;
+            bool isMouseOverUi = HelperFunctions.IsMouseOverUi();
 
             float moveSpeed = MOVE_SPEED;
             if (Input.GetKey(KeyCode.LeftShift)) moveSpeed = SHIFT_MOVE_SPEED;
@@ -126,12 +127,12 @@ namespace BlockmapFramework
                 FollowedEntity = null;
             }
 
-            if (Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll down - Zoom out
+            if (!isMouseOverUi && Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll down - Zoom out
             {
                 CurrentZoom += ZOOM_SPEED;
                 UpdatePosition();
             }
-            if (Input.mouseScrollDelta.y > 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll up - Zoom in
+            if (!isMouseOverUi && Input.mouseScrollDelta.y > 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll up - Zoom in
             {
                 CurrentZoom -= ZOOM_SPEED;
                 UpdatePosition();

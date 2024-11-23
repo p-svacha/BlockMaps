@@ -31,7 +31,7 @@ namespace BlockmapFramework
 
             // Calculate new heights
             Dictionary<Direction, int> newAltitude = GetNewHeights(mode, isIncrease);
-            if (!World.IsValidNodeHeight(newAltitude)) return false;
+            if (!IsValidShape(newAltitude)) return false;
             int newBaseHeight = newAltitude.Values.Min();
             int newMaxHeight = newAltitude.Values.Max();
 
@@ -123,7 +123,7 @@ namespace BlockmapFramework
             Altitude = GetNewHeights(mode, isIncrease);
 
             // Don't apply change if resulting shape is not valid
-            if (!World.IsValidNodeHeight(Altitude))
+            if (!IsValidShape(Altitude))
             {
                 foreach (Direction dir in HelperFunctions.GetCorners()) Altitude[dir] = preChange[dir];
             }
@@ -145,7 +145,7 @@ namespace BlockmapFramework
                 else newHeights[dir] = Altitude[dir];
             }
 
-            if(World.IsValidNodeHeight(newHeights))
+            if(IsValidShape(newHeights))
             {
                 if (Altitude[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
                 Altitude = newHeights;
@@ -183,7 +183,7 @@ namespace BlockmapFramework
         /// </summary>
         public void SetHeight(Dictionary<Direction, int> newHeights)
         {
-            if (World.IsValidNodeHeight(newHeights))
+            if (IsValidShape(newHeights))
             {
                 foreach (Direction dir in HelperFunctions.GetCorners())
                     Altitude[dir] = newHeights[dir];
@@ -199,6 +199,14 @@ namespace BlockmapFramework
         public void SetHeight(int altitude)
         {
             SetHeight(HelperFunctions.GetFlatHeights(altitude));
+        }
+
+        protected virtual bool IsValidShape(Dictionary<Direction, int> altitude)
+        {
+            if (altitude.Values.Any(x => x < World.MAP_EDGE_ALTITUDE)) return false;
+            if (altitude.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
+
+            return true;
         }
 
         #endregion

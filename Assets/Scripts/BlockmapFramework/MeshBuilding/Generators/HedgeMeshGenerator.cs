@@ -77,7 +77,7 @@ namespace BlockmapFramework
                     };
                     Vector3 dim = new Vector3(EDGE_OFFSET, hedgeHeight, EDGE_OFFSET);
 
-                    meshBuilder.BuildCube(node, submesh, pos, dim);
+                    meshBuilder.BuildCube(node, submesh, pos, dim, adjustToNodeShape: true);
                 }
             }
         }

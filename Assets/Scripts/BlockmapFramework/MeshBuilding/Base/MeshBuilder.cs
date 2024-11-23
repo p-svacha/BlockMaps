@@ -175,15 +175,15 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Adds all meshvertices and meshtriangles to build a plane. Returns a MeshPlane containing all data.
-        /// UV from first to second vector is uv-y-axis
+        /// UV from first to second vector is uv-x-axis
         /// <br/> UV2 is forced to 0.5/0.5 so it doesn't interfere with shader (BlockMap-specific).
         /// </summary>
         public MeshPlane BuildPlane(int submeshIndex, Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, Vector2 uvStart, Vector2 uvEnd, bool mirror = false)
         {
-            MeshVertex mv1 = AddVertex(v1, uvStart, new Vector2(0.5f, 0.5f));
-            MeshVertex mv2 = AddVertex(v2, new Vector2(uvStart.x, uvEnd.y), new Vector2(0.5f, 0.5f));
-            MeshVertex mv3 = AddVertex(v3, uvEnd, new Vector2(0.5f, 0.5f));
-            MeshVertex mv4 = AddVertex(v4, new Vector2(uvEnd.x, uvStart.y), new Vector2(0.5f, 0.5f));
+            MeshVertex mv1 = AddVertex(v1, uvStart);
+            MeshVertex mv2 = AddVertex(v2, new Vector2(uvEnd.x, uvStart.y));
+            MeshVertex mv3 = AddVertex(v3, uvEnd);
+            MeshVertex mv4 = AddVertex(v4, new Vector2(uvStart.x, uvEnd.y));
 
             if (mirror)
             {
@@ -231,7 +231,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Adds all MeshVertices and MeshTriangles to build a cube given a footprint (4 vertices) and a height.
         /// </summary>
-        public void BuildCube(int submeshIndex, Vector3 vb1, Vector3 vb2, Vector3 vb3, Vector3 vb4, float height)
+        public void BuildCube(int submeshIndex, Vector3 vb1, Vector3 vb2, Vector3 vb3, Vector3 vb4, float height, Vector2? topUvStart = null, Vector2? topUvEnd = null)
         {
             Vector3 vt1 = vb1 + new Vector3(0f, height, 0f);
             Vector3 vt2 = vb2 + new Vector3(0f, height, 0f);
@@ -241,7 +241,7 @@ namespace BlockmapFramework
             // bot
             BuildPlane(submeshIndex, vb4, vb3, vb2, vb1, Vector2.zero, Vector2.one);
             // top
-            BuildPlane(submeshIndex, vt1, vt2, vt3, vt4, Vector2.zero, Vector2.one);
+            BuildPlane(submeshIndex, vt1, vt2, vt3, vt4, topUvStart ?? Vector2.zero, topUvEnd ?? Vector2.zero);
 
             // south
             BuildPlane(submeshIndex, vb1, vb2, vt2, vt1, Vector2.zero, Vector2.one);
@@ -429,18 +429,21 @@ namespace BlockmapFramework
         /// <summary>
         /// Builds a cube onto a node, given the relative position and dimensions on that node.
         /// </summary>
-        public void BuildCube(BlockmapNode node, int submesh, Vector3 relPos, Vector3 relDim)
+        public void BuildCube(BlockmapNode node, int submesh, Vector3 relPos, Vector3 relDim, bool adjustToNodeShape)
         {
             // Calculate flat footprint vertex positions
             List<Vector3> footprint = GetFootprint(relPos, relDim);
 
             // Apply height offsets from slope to footprint
-            if (!node.IsFlat())
+            if (adjustToNodeShape)
             {
-                for (int i = 0; i < 4; i++)
+                if (!node.IsFlat())
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.NodeHeight;
-                    footprint[i] += new Vector3(0f, height, 0f);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.NodeHeight;
+                        footprint[i] += new Vector3(0f, height, 0f);
+                    }
                 }
             }
 
@@ -451,7 +454,7 @@ namespace BlockmapFramework
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
 
             // Build cube
-            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], relDim.y);
+            BuildCube(submesh, footprint[0], footprint[1], footprint[2], footprint[3], relDim.y, topUvStart: new Vector2(relPos.x, relPos.z), topUvEnd: new Vector2(relPos.x + relDim.x, relPos.z + relDim.z));
         }
 
         /// <summary>

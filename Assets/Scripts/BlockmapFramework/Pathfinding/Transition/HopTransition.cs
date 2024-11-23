@@ -15,7 +15,7 @@ namespace BlockmapFramework
 
         // Cost
         private const float BaseCost = 1f;
-        private const float CostPerHopUpAltitude = 1f;
+        private const float CostPerHopUpAltitude = 2f;
         private const float CostPerHopDownAltitude = 0.2f;
 
         // Hop path

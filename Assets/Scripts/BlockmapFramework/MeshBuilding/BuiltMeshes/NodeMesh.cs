@@ -87,13 +87,13 @@ namespace BlockmapFramework
         private SurfaceDef GetBlendSurface(BlockmapNode sourceNode, Direction dir)
         {
             if (sourceNode == null) return sourceNode.SurfaceDef;
-            if (sourceNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.FlatBlendableSurface) return sourceNode.SurfaceDef; // No blend on this node
+            if (sourceNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.Default_Blend) return sourceNode.SurfaceDef; // No blend on this node
 
             List<BlockmapNode> adjacentNodes = World.GetAdjacentNodes(sourceNode.WorldCoordinates, dir);
             foreach (BlockmapNode adjNode in adjacentNodes)
             {
                 if (!World.DoAdjacentHeightsMatch(sourceNode, adjNode, dir)) continue; // Nodes are not seamlessly adjacent
-                if (adjNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.FlatBlendableSurface) continue; // No blend on adjacent node
+                if (adjNode.SurfaceDef.RenderProperties.Type != SurfaceRenderType.Default_Blend) continue; // No blend on adjacent node
 
                 return adjNode.SurfaceDef;
             }

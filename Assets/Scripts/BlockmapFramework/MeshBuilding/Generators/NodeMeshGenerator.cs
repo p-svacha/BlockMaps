@@ -12,11 +12,17 @@ namespace BlockmapFramework
     {
         /// <summary>
         /// Draws a flat-shaded standard surface top that is just 2 triangles with the surface texture.
-        /// <br/>Uses the SurfaceMaterial that is capable of blending textures.
+        /// <br/>Or draws a basic stairs if shape is stairs.
         /// </summary>
-        public static void DrawFlatBlendableSurface(BlockmapNode node, MeshBuilder meshBuilder)
+        public static void DrawDefaultNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, Material material)
         {
-            int surfaceSubmesh = meshBuilder.GetSubmesh(MaterialManager.BlendbaleSurfaceMaterial);
+            if (node is AirNode airNode && airNode.IsStairs)
+            {
+                BuildStairs(meshBuilder, node, 0f, material);
+                return;
+            }
+
+            int surfaceSubmesh = meshBuilder.GetSubmesh(material);
 
             // Surface vertices (all of them are necessary because we cannot reuse vertices if we want flat shading)
             float xStart = node.LocalCoordinates.x;
@@ -49,6 +55,12 @@ namespace BlockmapFramework
         /// </summary>
         public static void BuildBorderedNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, string mainMaterialSubpath, string curbMaterialSubpath, float mainHeight, float curbHeight, float curbWidth)
         {
+            if(node is AirNode airNode && airNode.IsStairs)
+            {
+                BuildStairs(meshBuilder, node, mainHeight, MaterialManager.LoadMaterial(mainMaterialSubpath));
+                return;
+            }
+
             int mainSubmesh = meshBuilder.GetSubmesh(mainMaterialSubpath);
             int curbSubmesh = meshBuilder.GetSubmesh(curbMaterialSubpath);
 
@@ -171,6 +183,24 @@ namespace BlockmapFramework
                     new Vector2(1f, 1f),
                     mirror: true
                     );
+            }
+        }
+
+        private static void BuildStairs(MeshBuilder meshBuilder, BlockmapNode node, float additionalStepHeight, Material material)
+        {
+            int submesh = meshBuilder.GetSubmesh(material);
+            int numSteps = 5;
+            float stepSize = (1f / numSteps);
+
+            for (int i = 0; i < numSteps; i++)
+            {
+                float startPos =  stepSize * i;
+                float stepHeight = stepSize + additionalStepHeight;
+
+                if (node.Shape == "0022") meshBuilder.BuildCube(node, submesh, new Vector3(0f, startPos, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
+                else if (node.Shape == "2002") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, 1f - startPos - stepSize, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
+                else if (node.Shape == "2200") meshBuilder.BuildCube(node, submesh, new Vector3(0f, 1f - startPos - stepSize, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
+                else if (node.Shape == "0220") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, startPos, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
             }
         }
     }

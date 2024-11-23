@@ -238,6 +238,18 @@ namespace BlockmapFramework
             return base.CanChangeShape(mode, isIncrease);
         }
 
+        protected override bool IsValidShape(Dictionary<Direction, int> altitude)
+        {
+            // Not allowed that the altitude change between 2 corners is greater than 1
+            if (Mathf.Abs(altitude[Direction.SE] - altitude[Direction.SW]) > 1 ||
+            Mathf.Abs(altitude[Direction.SW] - altitude[Direction.NW]) > 1 ||
+            Mathf.Abs(altitude[Direction.NW] - altitude[Direction.NE]) > 1 ||
+            Mathf.Abs(altitude[Direction.NE] - altitude[Direction.SE]) > 1)
+                return false;
+
+            return base.IsValidShape(altitude);
+        }
+
         protected override bool IsGenerallyPassable()
         {
             if (IsCenterUnderWater) return false;

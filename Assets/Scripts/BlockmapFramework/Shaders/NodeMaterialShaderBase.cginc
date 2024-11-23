@@ -285,8 +285,11 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
 
     if (_ShowGrid == 1)
     {
-        fixed4 gridColor = tex2D(_GridTex, IN.uv2_GridTex) * _GridColor;
-        c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
+        if (isFacingUpwards == 1)
+        {
+            fixed4 gridColor = tex2D(_GridTex, IN.uv2_GridTex) * _GridColor;
+            c = (gridColor.a * gridColor) + ((1 - gridColor.a) * c);
+        }
     }
 
     // ######################################################################### FOG OF WAR TINT ###############################################################

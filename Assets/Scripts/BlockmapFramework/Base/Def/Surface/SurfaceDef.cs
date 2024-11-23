@@ -33,7 +33,7 @@ namespace BlockmapFramework
 
         public override bool Validate()
         {
-            if (RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface && RenderProperties.SurfaceReferenceMaterial == null) ThrowValidationError("SurfaceDefs that have a RenderType of FlatBlendableSurface need to have a SurfaceReferenceMaterial.");
+            if ((RenderProperties.Type == SurfaceRenderType.Default_Blend || RenderProperties.Type == SurfaceRenderType.Default_NoBlend)  && RenderProperties.MaterialName == null) ThrowValidationError("SurfaceDefs that have a default RenderType need to have a Material defined.");
             if (RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration && RenderProperties.CustomRenderFunction == null) ThrowValidationError("SurfaceDefs that have a RenderType of CustomMeshGeneration need to have a CustomRenderFunction.");
             if (MovementSpeedModifier <= 0f) ThrowValidationError("MovementSpeedModifier must be greater than 0.");
             if (MovementSpeedModifier > 1f) ThrowValidationError("MovementSpeedModifier must not be greater than 1 since that would break pathfinding.");

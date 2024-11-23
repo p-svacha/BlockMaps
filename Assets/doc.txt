@@ -1,4 +1,6 @@
-Framework: Stairs
+fence drag
+tree texture
+wall height
 
 Map Generation Features:
 	- Select a feature, click on a node, and then it does something

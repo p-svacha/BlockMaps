@@ -1877,28 +1877,11 @@ namespace BlockmapFramework
         public Wall GetWall(int id) => Walls[id];
 
 
-        /// <summary>
-        /// Returns if the given world coordinates exist in this world.
-        /// </summary>
         public bool IsInWorld(Vector2Int worldCoordinates)
         {
             return GetChunk(worldCoordinates) != null;
         }
-        public bool IsValidNodeHeight(Dictionary<Direction, int> height)
-        {
-            if (height.Values.Any(x => x < World.MAP_EDGE_ALTITUDE)) return false;
-            if (height.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
 
-            return !(Mathf.Abs(height[Direction.SE] - height[Direction.SW]) > 1 ||
-            Mathf.Abs(height[Direction.SW] - height[Direction.NW]) > 1 ||
-            Mathf.Abs(height[Direction.NW] - height[Direction.NE]) > 1 ||
-            Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
-        }
-
-
-        /// <summary>
-        /// Returns the chunk that the given world coordinates are on.
-        /// </summary>
         public Chunk GetChunk(Vector2Int worldCoordinates)
         {
             int chunkCoordinateX = worldCoordinates.x / ChunkSize;
@@ -2069,19 +2052,20 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns if the given side of the given cell is blocked by something. (Fence / Wall / Ladder)
+        /// Returns if the given side of the given cell is blocked by something. (Fence / Wall / Ladder / Door)
         /// </summary>
         public bool IsBlocked(Vector3Int globalCellCoordinates, Direction side)
         {
             // Check if a wall is there
             if (GetWall(globalCellCoordinates, side) != null) return true;
 
-            // Check if a fence/ladder is there
+            // Check if a fence/ladder/door is there
             int altitude = globalCellCoordinates.y;
             List<BlockmapNode> nodesOnCoordinate = GetNodes(new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z));
             foreach(BlockmapNode node in nodesOnCoordinate)
             {
                 if (node.Fences.TryGetValue(side, out Fence fence) && fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude) return true;
+                if (node.Doors.Any(x => x.Value.CurrentBlockingDirection == side && x.Value.MinAltitude <= altitude && x.Value.MaxAltitude >= altitude)) return true;
                 if (node.SourceLadders.TryGetValue(side, out Ladder ladder) && ladder.MinAltitude <= altitude && ladder.MaxAltitude >= altitude) return true;
             }
 

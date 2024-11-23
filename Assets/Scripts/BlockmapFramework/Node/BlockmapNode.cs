@@ -177,12 +177,11 @@ namespace BlockmapFramework
             Shape = GetShape(Altitude);
         }
 
-        protected string GetShape(Dictionary<Direction, int> height)
+        protected string GetShape(Dictionary<Direction, int> altitude)
         {
-            List<int> distinctHeights = height.Values.Distinct().OrderBy(x => x).ToList();
-            int baseHeight = height.Values.Min();
+            int baseHeight = altitude.Values.Min();
             string binaryShape = "";
-            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += distinctHeights.IndexOf(height[dir]);
+            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += (altitude[dir] - baseHeight).ToString();
             return binaryShape;
         }
 
@@ -760,7 +759,8 @@ namespace BlockmapFramework
         public void DrawSurface(MeshBuilder meshBuilder)
         {
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.NoRender) return;
-            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.FlatBlendableSurface) NodeMeshGenerator.DrawFlatBlendableSurface(this, meshBuilder);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_Blend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.BlendbaleSurfaceMaterial);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_NoBlend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.LoadMaterial(SurfaceDef.RenderProperties.MaterialName));
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration) SurfaceDef.RenderProperties.CustomRenderFunction(this, meshBuilder);
         }
 
@@ -901,6 +901,11 @@ namespace BlockmapFramework
                 case "1100": return (1f - relativePosition.y);
                 case "0110": return relativePosition.x;
 
+                case "0022": return 2f * relativePosition.y;
+                case "2002": return 2f * (1f - relativePosition.x);
+                case "2200": return 2f * (1f - relativePosition.y);
+                case "0220": return 2f * relativePosition.x;
+
                 case "0001":
                     if(GetTriangleMeshShapeVariant())
                     {
@@ -996,7 +1001,7 @@ namespace BlockmapFramework
                     else return 1f - (relativePosition.y - relativePosition.x);
             }
 
-            throw new System.Exception("Case not yet implemented. Shape " + Shape + " relative height implementation is missing.");
+            throw new System.Exception("Case not yet implemented. Shape " + Shape + ". GetExactLocalAltitudeAt() implementation is missing.");
         }
 
         /// <summary>
@@ -1015,6 +1020,10 @@ namespace BlockmapFramework
                 case "1001":
                 case "1012":
                 case "1210":
+                case "2200":
+                case "0220":
+                case "0022":
+                case "2002":
                     return true;
 
                 case "2101":
@@ -1044,7 +1053,7 @@ namespace BlockmapFramework
                     else return false;
             }
 
-            throw new System.Exception();
+            throw new System.Exception("Case not yet implemented. Shape " + Shape + ". GetTriangleMeshShapeVariant() implementation is missing.");
         }
 
         /// <summary>

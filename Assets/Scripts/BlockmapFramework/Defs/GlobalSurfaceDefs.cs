@@ -22,8 +22,8 @@ namespace BlockmapFramework.Defs
                 MovementSpeedModifier = 0.5f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.FlatBlendableSurface,
-                    SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/Grass"),
+                    Type = SurfaceRenderType.Default_Blend,
+                    MaterialName = "Grass",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
             },
@@ -36,8 +36,8 @@ namespace BlockmapFramework.Defs
                 MovementSpeedModifier = 0.35f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.FlatBlendableSurface,
-                    SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/Sand"),
+                    Type = SurfaceRenderType.Default_Blend,
+                    MaterialName = "Sand",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
             },
@@ -75,9 +75,9 @@ namespace BlockmapFramework.Defs
                 Description = "Shingles of a roof",
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.CustomMeshGeneration,
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "RoofingTiles",
                     UseLongEdges = true,
-                    CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "RoofingTiles", height: 0f, 0f, 1f, 0f, 1f),
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
             },
@@ -89,8 +89,8 @@ namespace BlockmapFramework.Defs
                 Description = "A nice and shiny wooden parquet",
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.CustomMeshGeneration,
-                    CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "WoodParquet", height: 0f, 0f, 1f, 0f, 1f),
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "WoodParquet",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
             },
@@ -102,8 +102,8 @@ namespace BlockmapFramework.Defs
                 Description = "White big bathroom tiles",
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.CustomMeshGeneration,
-                    CustomRenderFunction = (node, meshBuilder) => meshBuilder.DrawShapePlane(node, "TilesWhite", height: 0f, 0f, 1f, 0f, 1f),
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "TilesWhite",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
             },
@@ -116,8 +116,8 @@ namespace BlockmapFramework.Defs
                 MovementSpeedModifier = 0.8f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
-                    Type = SurfaceRenderType.FlatBlendableSurface,
-                    SurfaceReferenceMaterial = MaterialManager.LoadMaterial("BlendSurfaceReferenceMaterials/DirtPath"),
+                    Type = SurfaceRenderType.Default_Blend,
+                    MaterialName = "DirtPath",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
             },
