@@ -25,7 +25,7 @@ namespace BlockmapFramework.Defs
                 Label = "plaster",
                 Description = "White smooth plaster",
                 Material = MaterialManager.LoadMaterial("Plaster"),
-                ClimbSkillRequirement = ClimbingCategory.None,
+                ClimbSkillRequirement = ClimbingCategory.Unclimbable,
             },
 
             new WallMaterialDef()
@@ -34,7 +34,7 @@ namespace BlockmapFramework.Defs
                 Label = "tiles",
                 Description = "Small blue bathroom tiles",
                 Material = MaterialManager.LoadMaterial("TilesBlue"),
-                ClimbSkillRequirement = ClimbingCategory.None,
+                ClimbSkillRequirement = ClimbingCategory.Unclimbable,
             },
         };
     }

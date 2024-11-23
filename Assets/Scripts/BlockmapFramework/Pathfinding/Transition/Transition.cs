@@ -39,8 +39,6 @@ namespace BlockmapFramework
         public virtual bool CanPass(Entity entity)
         {
             if (entity.Height > MaxHeight) return false;
-            if (!From.IsPassable(Direction, entity)) return false;
-            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
 
             return true;
         }

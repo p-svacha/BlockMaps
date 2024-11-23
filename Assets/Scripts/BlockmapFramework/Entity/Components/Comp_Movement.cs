@@ -10,6 +10,8 @@ namespace BlockmapFramework
     /// </summary>
     public class Comp_Movement : EntityComp
     {
+        public const int MaxEntityHeight = 5;
+
         public CompProperties_Movement Props => (CompProperties_Movement)props;
 
         public override void Initialize(CompProperties props)
@@ -97,6 +99,11 @@ namespace BlockmapFramework
                     Entity.MeshObject.transform.rotation = Entity.WorldRotation;
                 }
             }
+        }
+
+        public override void Validate()
+        {
+            if (Entity.Height > MaxEntityHeight) throw new System.Exception($"Height cannot be greater than {MaxEntityHeight} for moving entities.");
         }
 
         #region Actions
@@ -258,7 +265,7 @@ namespace BlockmapFramework
             isOverrideClimbSkillActive = false;
         }
 
-        public void EnableOverrideMaxHopDistance(int value)
+        public void EnableOverrideMaxHopUpDistance(int value)
         {
             isOverrideMaxHopUpDistanceActive = true;
             overrideMaxHopUpDistance = value;
@@ -268,7 +275,7 @@ namespace BlockmapFramework
             isOverrideMaxHopUpDistanceActive = false;
         }
 
-        public void EnableOverrideMaxDropDistance(int value)
+        public void EnableOverrideMaxHopDownDistance(int value)
         {
             isOverrideMaxHopDownDistanceActive = true;
             overrideMaxHopDownDistance = value;

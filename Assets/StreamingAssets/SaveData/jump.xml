@@ -9270,6 +9270,393 @@
           <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
         </Value>
       </li>
+      <li Key="1027">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1027</id>
+          <worldCoordinates>13,10</worldCoordinates>
+          <localCoordinates>13,10</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1028">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1028</id>
+          <worldCoordinates>14,10</worldCoordinates>
+          <localCoordinates>14,10</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1029">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1029</id>
+          <worldCoordinates>15,10</worldCoordinates>
+          <localCoordinates>15,10</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1030">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1030</id>
+          <worldCoordinates>16,10</worldCoordinates>
+          <localCoordinates>0,10</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1031">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1031</id>
+          <worldCoordinates>17,10</worldCoordinates>
+          <localCoordinates>1,10</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1032">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1032</id>
+          <worldCoordinates>17,9</worldCoordinates>
+          <localCoordinates>1,9</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1033">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1033</id>
+          <worldCoordinates>17,8</worldCoordinates>
+          <localCoordinates>1,8</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1034">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1034</id>
+          <worldCoordinates>17,7</worldCoordinates>
+          <localCoordinates>1,7</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1035">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1035</id>
+          <worldCoordinates>17,6</worldCoordinates>
+          <localCoordinates>1,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1036">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1036</id>
+          <worldCoordinates>16,6</worldCoordinates>
+          <localCoordinates>0,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1037">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1037</id>
+          <worldCoordinates>15,6</worldCoordinates>
+          <localCoordinates>15,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1038">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1038</id>
+          <worldCoordinates>14,6</worldCoordinates>
+          <localCoordinates>14,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1039">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1039</id>
+          <worldCoordinates>13,6</worldCoordinates>
+          <localCoordinates>13,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1040">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1040</id>
+          <worldCoordinates>13,7</worldCoordinates>
+          <localCoordinates>13,7</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1041">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1041</id>
+          <worldCoordinates>13,8</worldCoordinates>
+          <localCoordinates>13,8</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1042">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1042</id>
+          <worldCoordinates>13,9</worldCoordinates>
+          <localCoordinates>13,9</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1043">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1043</id>
+          <worldCoordinates>14,9</worldCoordinates>
+          <localCoordinates>14,9</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1044">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1044</id>
+          <worldCoordinates>14,8</worldCoordinates>
+          <localCoordinates>14,8</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1045">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1045</id>
+          <worldCoordinates>14,7</worldCoordinates>
+          <localCoordinates>14,7</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1046">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1046</id>
+          <worldCoordinates>15,7</worldCoordinates>
+          <localCoordinates>15,7</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1047">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1047</id>
+          <worldCoordinates>16,7</worldCoordinates>
+          <localCoordinates>0,7</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1048">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1048</id>
+          <worldCoordinates>16,8</worldCoordinates>
+          <localCoordinates>0,8</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1049">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1049</id>
+          <worldCoordinates>16,9</worldCoordinates>
+          <localCoordinates>0,9</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1050">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1050</id>
+          <worldCoordinates>15,9</worldCoordinates>
+          <localCoordinates>15,9</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1051">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1051</id>
+          <worldCoordinates>15,8</worldCoordinates>
+          <localCoordinates>15,8</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1052">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1052</id>
+          <worldCoordinates>14,9</worldCoordinates>
+          <localCoordinates>14,9</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1053">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1053</id>
+          <worldCoordinates>14,8</worldCoordinates>
+          <localCoordinates>14,8</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1054">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1054</id>
+          <worldCoordinates>14,7</worldCoordinates>
+          <localCoordinates>14,7</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1055">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1055</id>
+          <worldCoordinates>15,7</worldCoordinates>
+          <localCoordinates>15,7</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1056">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1056</id>
+          <worldCoordinates>16,7</worldCoordinates>
+          <localCoordinates>0,7</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1057">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1057</id>
+          <worldCoordinates>16,8</worldCoordinates>
+          <localCoordinates>0,8</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1058">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1058</id>
+          <worldCoordinates>16,9</worldCoordinates>
+          <localCoordinates>0,9</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1059">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1059</id>
+          <worldCoordinates>15,9</worldCoordinates>
+          <localCoordinates>15,9</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1060">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1060</id>
+          <worldCoordinates>15,8</worldCoordinates>
+          <localCoordinates>15,8</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1061">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1061</id>
+          <worldCoordinates>15,8</worldCoordinates>
+          <localCoordinates>15,8</localCoordinates>
+          <altitude>8,8,8,8</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1062">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1062</id>
+          <worldCoordinates>17,9</worldCoordinates>
+          <localCoordinates>1,9</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1064">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1064</id>
+          <worldCoordinates>11,22</worldCoordinates>
+          <localCoordinates>11,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1065">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1065</id>
+          <worldCoordinates>6,22</worldCoordinates>
+          <localCoordinates>6,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1066">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1066</id>
+          <worldCoordinates>7,22</worldCoordinates>
+          <localCoordinates>7,6</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1067">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1067</id>
+          <worldCoordinates>8,22</worldCoordinates>
+          <localCoordinates>8,6</localCoordinates>
+          <altitude>8,8,8,8</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1068">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1068</id>
+          <worldCoordinates>2,22</worldCoordinates>
+          <localCoordinates>2,6</localCoordinates>
+          <altitude>6,6,6,6</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1069">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1069</id>
+          <worldCoordinates>1,22</worldCoordinates>
+          <localCoordinates>1,6</localCoordinates>
+          <altitude>7,7,7,7</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
+      <li Key="1070">
+        <Value Type="BlockmapFramework.AirNode">
+          <id>1070</id>
+          <worldCoordinates>0,22</worldCoordinates>
+          <localCoordinates>0,6</localCoordinates>
+          <altitude>8,8,8,8</altitude>
+          <surface Type="BlockmapFramework.SurfaceDef">Concrete</surface>
+        </Value>
+      </li>
     </nodes>
     <entities>
       <li Key="0">
@@ -9283,9 +9670,1338 @@
           <owner>1</owner>
         </Value>
       </li>
+      <li Key="1">
+        <Value Type="BlockmapFramework.Ladder">
+          <id>1</id>
+          <def Type="BlockmapFramework.EntityDef">Ladder</def>
+          <originNode>517</originNode>
+          <overrideHeight>1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <topNode>1036</topNode>
+        </Value>
+      </li>
+      <li Key="2">
+        <Value Type="BlockmapFramework.Ladder">
+          <id>2</id>
+          <def Type="BlockmapFramework.EntityDef">Ladder</def>
+          <originNode>553</originNode>
+          <overrideHeight>2</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>W</rotation>
+          <owner>0</owner>
+          <topNode>1062</topNode>
+        </Value>
+      </li>
+      <li Key="6">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>6</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>491</originNode>
+          <overrideHeight>1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>2</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>True</customCanSwim>
+          <customClimbSkill>Advanced</customClimbSkill>
+          <customMaxHopUpDistance>10</customMaxHopUpDistance>
+          <customMaxHopDownDistance>10</customMaxHopDownDistance>
+        </Value>
+      </li>
+      <li Key="7">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>7</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>490</originNode>
+          <overrideHeight>2</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>2</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>True</customCanSwim>
+          <customClimbSkill>Advanced</customClimbSkill>
+          <customMaxHopUpDistance>10</customMaxHopUpDistance>
+          <customMaxHopDownDistance>10</customMaxHopDownDistance>
+        </Value>
+      </li>
+      <li Key="8">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>8</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>489</originNode>
+          <overrideHeight>3</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>2</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>True</customCanSwim>
+          <customClimbSkill>Advanced</customClimbSkill>
+          <customMaxHopUpDistance>10</customMaxHopUpDistance>
+          <customMaxHopDownDistance>10</customMaxHopDownDistance>
+        </Value>
+      </li>
+      <li Key="10">
+        <Value Type="WorldEditor.EditorMovingEntity">
+          <id>10</id>
+          <def Type="BlockmapFramework.EntityDef">EditorDynamicCharacter</def>
+          <originNode>320</originNode>
+          <overrideHeight>1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <rotation>N</rotation>
+          <owner>0</owner>
+          <customSpeed>2</customSpeed>
+          <customVisionRange>10</customVisionRange>
+          <customCanSwim>True</customCanSwim>
+          <customClimbSkill>Advanced</customClimbSkill>
+          <customMaxHopUpDistance>0</customMaxHopUpDistance>
+          <customMaxHopDownDistance>10</customMaxHopDownDistance>
+        </Value>
+      </li>
     </entities>
-    <entities />
-    <entities />
+    <entities>
+      <li Key="0">
+        <Value Type="BlockmapFramework.Fence">
+          <id>0</id>
+          <def Type="BlockmapFramework.FenceDef">WoodenFence</def>
+          <node>1028</node>
+          <side>N</side>
+          <height>1</height>
+        </Value>
+      </li>
+      <li Key="1">
+        <Value Type="BlockmapFramework.Fence">
+          <id>1</id>
+          <def Type="BlockmapFramework.FenceDef">WoodenFence</def>
+          <node>539</node>
+          <side>S</side>
+          <height>1</height>
+        </Value>
+      </li>
+      <li Key="2">
+        <Value Type="BlockmapFramework.Fence">
+          <id>2</id>
+          <def Type="BlockmapFramework.FenceDef">WoodenFence</def>
+          <node>251</node>
+          <side>S</side>
+          <height>2</height>
+        </Value>
+      </li>
+      <li Key="3">
+        <Value Type="BlockmapFramework.Fence">
+          <id>3</id>
+          <def Type="BlockmapFramework.FenceDef">WoodenFence</def>
+          <node>1030</node>
+          <side>N</side>
+          <height>1</height>
+        </Value>
+      </li>
+      <li Key="4">
+        <Value Type="BlockmapFramework.Fence">
+          <id>4</id>
+          <def Type="BlockmapFramework.FenceDef">WoodenFence</def>
+          <node>1033</node>
+          <side>E</side>
+          <height>1</height>
+        </Value>
+      </li>
+    </entities>
+    <entities>
+      <li Key="0">
+        <Value Type="BlockmapFramework.Wall">
+          <id>0</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>13,5,6</cell>
+          <side>SW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="1">
+        <Value Type="BlockmapFramework.Wall">
+          <id>1</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>13,5,10</cell>
+          <side>NW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="2">
+        <Value Type="BlockmapFramework.Wall">
+          <id>2</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>17,5,6</cell>
+          <side>SE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="3">
+        <Value Type="BlockmapFramework.Wall">
+          <id>3</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>17,5,10</cell>
+          <side>NE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="4">
+        <Value Type="BlockmapFramework.Wall">
+          <id>4</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>14,6,7</cell>
+          <side>SW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="5">
+        <Value Type="BlockmapFramework.Wall">
+          <id>5</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>16,6,7</cell>
+          <side>SE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="6">
+        <Value Type="BlockmapFramework.Wall">
+          <id>6</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>14,6,9</cell>
+          <side>NW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="7">
+        <Value Type="BlockmapFramework.Wall">
+          <id>7</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>16,6,9</cell>
+          <side>NE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="8">
+        <Value Type="BlockmapFramework.Wall">
+          <id>8</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>15,7,8</cell>
+          <side>NW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="9">
+        <Value Type="BlockmapFramework.Wall">
+          <id>9</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>15,7,8</cell>
+          <side>NE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="10">
+        <Value Type="BlockmapFramework.Wall">
+          <id>10</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>15,7,8</cell>
+          <side>SE</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="11">
+        <Value Type="BlockmapFramework.Wall">
+          <id>11</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Brick</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Corner</shape>
+          <cell>15,7,8</cell>
+          <side>SW</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="27">
+        <Value Type="BlockmapFramework.Wall">
+          <id>27</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>12,6,7</cell>
+          <side>E</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="29">
+        <Value Type="BlockmapFramework.Wall">
+          <id>29</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>13,7,5</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="26">
+        <Value Type="BlockmapFramework.Wall">
+          <id>26</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>13,5,8</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="25">
+        <Value Type="BlockmapFramework.Wall">
+          <id>25</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>12,5,9</cell>
+          <side>E</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="24">
+        <Value Type="BlockmapFramework.Wall">
+          <id>24</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>13,6,10</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="30">
+        <Value Type="BlockmapFramework.Wall">
+          <id>30</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>14,7,6</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="31">
+        <Value Type="BlockmapFramework.Wall">
+          <id>31</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>16,7,10</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="32">
+        <Value Type="BlockmapFramework.Wall">
+          <id>32</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>18,7,8</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="33">
+        <Value Type="BlockmapFramework.Wall">
+          <id>33</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>11,5,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="34">
+        <Value Type="BlockmapFramework.Wall">
+          <id>34</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>10,6,25</cell>
+          <side>E</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="35">
+        <Value Type="BlockmapFramework.Wall">
+          <id>35</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>11,7,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="36">
+        <Value Type="BlockmapFramework.Wall">
+          <id>36</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>10,5,23</cell>
+          <side>E</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="37">
+        <Value Type="BlockmapFramework.Wall">
+          <id>37</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,22</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="38">
+        <Value Type="BlockmapFramework.Wall">
+          <id>38</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="40">
+        <Value Type="BlockmapFramework.Wall">
+          <id>40</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="41">
+        <Value Type="BlockmapFramework.Wall">
+          <id>41</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,24</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="42">
+        <Value Type="BlockmapFramework.Wall">
+          <id>42</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="43">
+        <Value Type="BlockmapFramework.Wall">
+          <id>43</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="44">
+        <Value Type="BlockmapFramework.Wall">
+          <id>44</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="45">
+        <Value Type="BlockmapFramework.Wall">
+          <id>45</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="46">
+        <Value Type="BlockmapFramework.Wall">
+          <id>46</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,24</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="48">
+        <Value Type="BlockmapFramework.Wall">
+          <id>48</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="49">
+        <Value Type="BlockmapFramework.Wall">
+          <id>49</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="50">
+        <Value Type="BlockmapFramework.Wall">
+          <id>50</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="51">
+        <Value Type="BlockmapFramework.Wall">
+          <id>51</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,22</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="53">
+        <Value Type="BlockmapFramework.Wall">
+          <id>53</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="54">
+        <Value Type="BlockmapFramework.Wall">
+          <id>54</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="55">
+        <Value Type="BlockmapFramework.Wall">
+          <id>55</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="56">
+        <Value Type="BlockmapFramework.Wall">
+          <id>56</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="57">
+        <Value Type="BlockmapFramework.Wall">
+          <id>57</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,24</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="58">
+        <Value Type="BlockmapFramework.Wall">
+          <id>58</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="71">
+        <Value Type="BlockmapFramework.Wall">
+          <id>71</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="60">
+        <Value Type="BlockmapFramework.Wall">
+          <id>60</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="61">
+        <Value Type="BlockmapFramework.Wall">
+          <id>61</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,26</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="62">
+        <Value Type="BlockmapFramework.Wall">
+          <id>62</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="63">
+        <Value Type="BlockmapFramework.Wall">
+          <id>63</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="64">
+        <Value Type="BlockmapFramework.Wall">
+          <id>64</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="65">
+        <Value Type="BlockmapFramework.Wall">
+          <id>65</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,26</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="66">
+        <Value Type="BlockmapFramework.Wall">
+          <id>66</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="67">
+        <Value Type="BlockmapFramework.Wall">
+          <id>67</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="68">
+        <Value Type="BlockmapFramework.Wall">
+          <id>68</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="69">
+        <Value Type="BlockmapFramework.Wall">
+          <id>69</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,26</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="70">
+        <Value Type="BlockmapFramework.Wall">
+          <id>70</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="72">
+        <Value Type="BlockmapFramework.Wall">
+          <id>72</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,22</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="73">
+        <Value Type="BlockmapFramework.Wall">
+          <id>73</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="74">
+        <Value Type="BlockmapFramework.Wall">
+          <id>74</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="76">
+        <Value Type="BlockmapFramework.Wall">
+          <id>76</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,24</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="78">
+        <Value Type="BlockmapFramework.Wall">
+          <id>78</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="81">
+        <Value Type="BlockmapFramework.Wall">
+          <id>81</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,23</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="82">
+        <Value Type="BlockmapFramework.Wall">
+          <id>82</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,25</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="83">
+        <Value Type="BlockmapFramework.Wall">
+          <id>83</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,24</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="85">
+        <Value Type="BlockmapFramework.Wall">
+          <id>85</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>11,5,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="86">
+        <Value Type="BlockmapFramework.Wall">
+          <id>86</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>11,6,22</cell>
+          <side>E</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="87">
+        <Value Type="BlockmapFramework.Wall">
+          <id>87</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>11,6,23</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="88">
+        <Value Type="BlockmapFramework.Wall">
+          <id>88</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,28</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="89">
+        <Value Type="BlockmapFramework.Wall">
+          <id>89</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="90">
+        <Value Type="BlockmapFramework.Wall">
+          <id>90</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="91">
+        <Value Type="BlockmapFramework.Wall">
+          <id>91</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="92">
+        <Value Type="BlockmapFramework.Wall">
+          <id>92</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="93">
+        <Value Type="BlockmapFramework.Wall">
+          <id>93</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,28</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="94">
+        <Value Type="BlockmapFramework.Wall">
+          <id>94</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="95">
+        <Value Type="BlockmapFramework.Wall">
+          <id>95</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="96">
+        <Value Type="BlockmapFramework.Wall">
+          <id>96</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="97">
+        <Value Type="BlockmapFramework.Wall">
+          <id>97</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,29</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="98">
+        <Value Type="BlockmapFramework.Wall">
+          <id>98</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,28</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="99">
+        <Value Type="BlockmapFramework.Wall">
+          <id>99</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,12,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="100">
+        <Value Type="BlockmapFramework.Wall">
+          <id>100</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,27</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="101">
+        <Value Type="BlockmapFramework.Wall">
+          <id>101</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,20</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="102">
+        <Value Type="BlockmapFramework.Wall">
+          <id>102</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="103">
+        <Value Type="BlockmapFramework.Wall">
+          <id>103</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,20</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="104">
+        <Value Type="BlockmapFramework.Wall">
+          <id>104</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="105">
+        <Value Type="BlockmapFramework.Wall">
+          <id>105</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="106">
+        <Value Type="BlockmapFramework.Wall">
+          <id>106</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="107">
+        <Value Type="BlockmapFramework.Wall">
+          <id>107</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,20</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="108">
+        <Value Type="BlockmapFramework.Wall">
+          <id>108</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="109">
+        <Value Type="BlockmapFramework.Wall">
+          <id>109</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="111">
+        <Value Type="BlockmapFramework.Wall">
+          <id>111</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,19</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="112">
+        <Value Type="BlockmapFramework.Wall">
+          <id>112</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,20</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="113">
+        <Value Type="BlockmapFramework.Wall">
+          <id>113</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,21</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="114">
+        <Value Type="BlockmapFramework.Wall">
+          <id>114</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,22</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="115">
+        <Value Type="BlockmapFramework.Wall">
+          <id>115</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="116">
+        <Value Type="BlockmapFramework.Wall">
+          <id>116</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,5,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="117">
+        <Value Type="BlockmapFramework.Wall">
+          <id>117</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="118">
+        <Value Type="BlockmapFramework.Wall">
+          <id>118</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,6,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="119">
+        <Value Type="BlockmapFramework.Wall">
+          <id>119</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="120">
+        <Value Type="BlockmapFramework.Wall">
+          <id>120</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,7,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="121">
+        <Value Type="BlockmapFramework.Wall">
+          <id>121</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="122">
+        <Value Type="BlockmapFramework.Wall">
+          <id>122</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,8,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="123">
+        <Value Type="BlockmapFramework.Wall">
+          <id>123</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="124">
+        <Value Type="BlockmapFramework.Wall">
+          <id>124</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,9,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="125">
+        <Value Type="BlockmapFramework.Wall">
+          <id>125</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="126">
+        <Value Type="BlockmapFramework.Wall">
+          <id>126</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,10,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="127">
+        <Value Type="BlockmapFramework.Wall">
+          <id>127</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Slope</shape>
+          <cell>19,11,31</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="128">
+        <Value Type="BlockmapFramework.Wall">
+          <id>128</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Slope</shape>
+          <cell>19,12,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="129">
+        <Value Type="BlockmapFramework.Wall">
+          <id>129</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>19,11,30</cell>
+          <side>W</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="130">
+        <Value Type="BlockmapFramework.Wall">
+          <id>130</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>3,5,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="131">
+        <Value Type="BlockmapFramework.Wall">
+          <id>131</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>4,5,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="132">
+        <Value Type="BlockmapFramework.Wall">
+          <id>132</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>4,6,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="133">
+        <Value Type="BlockmapFramework.Wall">
+          <id>133</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>5,5,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="134">
+        <Value Type="BlockmapFramework.Wall">
+          <id>134</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>5,6,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="135">
+        <Value Type="BlockmapFramework.Wall">
+          <id>135</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>5,7,21</cell>
+          <side>N</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="136">
+        <Value Type="BlockmapFramework.Wall">
+          <id>136</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>0,7,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="137">
+        <Value Type="BlockmapFramework.Wall">
+          <id>137</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>0,6,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="138">
+        <Value Type="BlockmapFramework.Wall">
+          <id>138</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>1,6,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="139">
+        <Value Type="BlockmapFramework.Wall">
+          <id>139</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>0,5,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="140">
+        <Value Type="BlockmapFramework.Wall">
+          <id>140</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>1,5,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+      <li Key="142">
+        <Value Type="BlockmapFramework.Wall">
+          <id>142</id>
+          <material Type="BlockmapFramework.WallMaterialDef">Plaster</material>
+          <shape Type="BlockmapFramework.WallShapeDef">Solid</shape>
+          <cell>2,5,22</cell>
+          <side>S</side>
+          <isMirrored>False</isMirrored>
+        </Value>
+      </li>
+    </entities>
     <entities />
     <entities />
   </Data>

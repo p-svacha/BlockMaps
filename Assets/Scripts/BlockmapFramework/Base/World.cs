@@ -173,7 +173,7 @@ namespace BlockmapFramework
         {
             OnCreate();
         }
-        
+
         /// <summary>
         /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass.
         /// </summary>
@@ -341,17 +341,17 @@ namespace BlockmapFramework
             if (updateNavmeshDelay > 0)
             {
                 updateNavmeshDelay--;
-                if(updateNavmeshDelay == 0) DoUpdateNavmesh();
+                if (updateNavmeshDelay == 0) DoUpdateNavmesh();
             }
             if (updateEntityVisionDelay > 0)
             {
                 updateEntityVisionDelay--;
-                if(updateEntityVisionDelay == 0) DoUpdateVisionOfEntities();
+                if (updateEntityVisionDelay == 0) DoUpdateVisionOfEntities();
             }
             if (updateNavmeshDisplayDelay > 0)
             {
                 updateNavmeshDisplayDelay--;
-                if(updateNavmeshDisplayDelay == 0) DoUpdateNavmeshDisplay();
+                if (updateNavmeshDisplayDelay == 0) DoUpdateNavmeshDisplay();
             }
         }
 
@@ -489,7 +489,7 @@ namespace BlockmapFramework
                 {
                     newHoveredEntity = GetBatchEntityFromRaycastHit(hit);
                 }
-                if(newHoveredEntity != null && newHoveredChunk == null) newHoveredChunk = newHoveredEntity.Chunk;
+                if (newHoveredEntity != null && newHoveredChunk == null) newHoveredChunk = newHoveredEntity.Chunk;
             }
 
             // Update currently hovered objects
@@ -600,16 +600,16 @@ namespace BlockmapFramework
             int altitude = hit.transform.GetComponent<AirNodeMesh>().Altitude;
 
             List<AirNode> hitAirNodes = GetAirNodes(hitCoordinates).Where(x => x.BaseAltitude == altitude).ToList();
-            if(hitAirNodes.Count == 1) return hitAirNodes[0];
-            if(hitAirNodes.Count > 1) // Get node that closest matches the hit height if multiple are on that base base height
+            if (hitAirNodes.Count == 1) return hitAirNodes[0];
+            if (hitAirNodes.Count > 1) // Get node that closest matches the hit height if multiple are on that base base height
             {
                 Vector2 relativePos = new Vector2(adjustedHitPosition.x % 1f, adjustedHitPosition.z % 1f);
                 AirNode closestNode = null;
                 float closestDistance = float.MaxValue;
-                foreach(AirNode node in hitAirNodes)
+                foreach (AirNode node in hitAirNodes)
                 {
                     float distance = Mathf.Abs((adjustedHitPosition.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
-                    if(distance < closestDistance)
+                    if (distance < closestDistance)
                     {
                         closestNode = node;
                         closestDistance = distance;
@@ -879,7 +879,7 @@ namespace BlockmapFramework
 
         public void RegisterNode(BlockmapNode node, bool registerInWorld = true)
         {
-            if(registerInWorld) Nodes.Add(node.Id, node); // Global registry
+            if (registerInWorld) Nodes.Add(node.Id, node); // Global registry
 
             // Chunk registry
             node.Chunk.RegisterNode(node);
@@ -976,13 +976,13 @@ namespace BlockmapFramework
             hopTransitionsTimer.Start();
             foreach (BlockmapNode node in navmeshUpdateNodes) node.SetHopTransitions();
             hopTransitionsTimer.Stop();
-            Debug.Log("Updating diagonal transitions took " + hopTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
+            Debug.Log("Updating hop transitions took " + hopTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             climbTransitionsTimer.Start();
             foreach (BlockmapNode node in navmeshUpdateNodes) node.SetClimbTransitions();
             climbTransitionsTimer.Stop();
             Debug.Log("Updating climb transitions took " + climbTransitionsTimer.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
-            
+
             if (isNavmeshUpdatePartOfInitialization) IsInitialized = true;
 
             fullNavmeshTimer.Stop();
@@ -1080,7 +1080,7 @@ namespace BlockmapFramework
             // Check if underwater
             WaterNode water = GetWaterNode(worldCoordinates);
             if (water != null && water.WaterBody.ShoreHeight > height) return false;
-            
+
             // Check if no more than 2 corners would overlap with another node
             List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
             foreach (BlockmapNode otherNode in nodesOnCoordinate)
@@ -1214,7 +1214,7 @@ namespace BlockmapFramework
             if (updateWorld && entityToRemove.Def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(entityToRemove.OriginNode.WorldCoordinates);
 
             // Update pathfinding navmesh
-            if(updateWorld) UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z);
+            if (updateWorld) UpdateNavmeshAround(entityToRemove.OriginNode.WorldCoordinates, entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z);
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
             if (updateWorld && entityToRemove.Actor == ActiveVisionActor)
@@ -1225,7 +1225,7 @@ namespace BlockmapFramework
             entityToRemove.DestroyGameObject();
 
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
-            if(updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
         }
         public void RemoveEntities(BlockmapNode node, bool updateWorld = true)
         {
@@ -1234,9 +1234,9 @@ namespace BlockmapFramework
         public void RegisterEntity(Entity entity, bool updateWorld, bool registerInWorld = true)
         {
             // Register in various registires
-            if(registerInWorld) Entities.Add(entity.id, entity);
+            if (registerInWorld) Entities.Add(entity.id, entity);
             entity.Actor.Entities.Add(entity);
-            if(entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
+            if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
 
             // Redraw chunk meshes if the entity is draw as a chunk mesh
             if (updateWorld && entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(entity.OriginNode.WorldCoordinates);
@@ -1397,7 +1397,7 @@ namespace BlockmapFramework
         public void RegisterFence(Fence fence, bool registerInWorld = true)
         {
             // In world
-            if(registerInWorld) Fences.Add(fence.Id, fence);
+            if (registerInWorld) Fences.Add(fence.Id, fence);
 
             // In chunk
             fence.Node.Chunk.RegisterFence(fence);
@@ -1431,7 +1431,7 @@ namespace BlockmapFramework
             List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
             List<Direction> affectedSides = HelperFunctions.GetAffectedDirections(side);
 
-            
+
             foreach (BlockmapNode nodeOnCoordinate in nodesOnCoordinate)
             {
                 // Check if we would overlap a fence
@@ -1456,7 +1456,7 @@ namespace BlockmapFramework
                 }
 
                 // Check if we would overlap a door
-                foreach(Door door in nodeOnCoordinate.Doors.Values)
+                foreach (Door door in nodeOnCoordinate.Doors.Values)
                 {
                     if (HelperFunctions.DoAffectedCornersOverlap(side, door.Rotation))
                     {
@@ -1489,7 +1489,7 @@ namespace BlockmapFramework
         public void RegisterWall(Wall wall, bool registerInWorld = true) // add to database and add all references in different objects
         {
             // In world
-            if(registerInWorld) Walls.Add(wall.Id, wall);
+            if (registerInWorld) Walls.Add(wall.Id, wall);
 
             // Database index by world coordinate 2D
             if (WallsByWorldCoordinates2D.ContainsKey(wall.WorldCoordinates)) WallsByWorldCoordinates2D[wall.WorldCoordinates].Add(wall);
@@ -1781,7 +1781,7 @@ namespace BlockmapFramework
         private void DoUpdateNavmeshDisplay()
         {
             if (NavmeshVisualizer.Singleton == null) return;
-            
+
             if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
         }
@@ -1832,7 +1832,7 @@ namespace BlockmapFramework
             VisionCutoffAltitude = value;
             if (VisionCutoffAltitude < 0) VisionCutoffAltitude = 0;
             if (VisionCutoffAltitude > MAX_ALTITUDE) VisionCutoffAltitude = MAX_ALTITUDE;
-            
+
             if (IsVisionCutoffEnabled) UpdateVisionCutoff();
         }
         private void UpdateVisionCutoff()
@@ -1895,7 +1895,7 @@ namespace BlockmapFramework
             Mathf.Abs(height[Direction.NE] - height[Direction.SE]) > 1);
         }
 
-        
+
         /// <summary>
         /// Returns the chunk that the given world coordinates are on.
         /// </summary>
@@ -1917,19 +1917,19 @@ namespace BlockmapFramework
         public List<Chunk> GetChunks(Vector2Int chunkCoordinates, int rangeEast, int rangeNorth)
         {
             List<Chunk> chunks = new List<Chunk>();
-            for(int x = 0; x <= rangeEast; x++)
+            for (int x = 0; x <= rangeEast; x++)
             {
-                for(int y = 0; y <= rangeNorth; y++)
+                for (int y = 0; y <= rangeNorth; y++)
                 {
                     Vector2Int coordinates = chunkCoordinates + new Vector2Int(x, y);
-                    if(Chunks.ContainsKey(coordinates)) chunks.Add(Chunks[coordinates]);
+                    if (Chunks.ContainsKey(coordinates)) chunks.Add(Chunks[coordinates]);
                 }
             }
             return chunks;
         }
 
         public Actor GetActor(string name) => Actors.Values.First(x => x.Name == name);
-        
+
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int altitude)
         {
             return GetNodes(worldCoordinates, altitude, altitude);
@@ -1941,7 +1941,7 @@ namespace BlockmapFramework
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates)
         {
             Chunk chunk = GetChunk(worldCoordinates);
-            if(chunk == null) return EmptyNodeList; // not in world
+            if (chunk == null) return EmptyNodeList; // not in world
 
             Vector2Int localCoordinates = GetLocalCoordinates(worldCoordinates);
             return chunk.GetNodes(localCoordinates);
@@ -1970,9 +1970,9 @@ namespace BlockmapFramework
         public List<GroundNode> GetGroundNodes(Vector2Int worldCoordinates, int rangeEast, int rangeNorth)
         {
             List<GroundNode> nodes = new List<GroundNode>();
-            for(int x = 0; x < rangeEast; x++)
+            for (int x = 0; x < rangeEast; x++)
             {
-                for(int y = 0; y < rangeNorth; y++)
+                for (int y = 0; y < rangeNorth; y++)
                 {
                     Vector2Int coordinates = worldCoordinates + new Vector2Int(x, y);
                     GroundNode node = GetGroundNode(coordinates);
@@ -2069,6 +2069,26 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Returns if the given side of the given cell is blocked by something. (Fence / Wall / Ladder)
+        /// </summary>
+        public bool IsBlocked(Vector3Int globalCellCoordinates, Direction side)
+        {
+            // Check if a wall is there
+            if (GetWall(globalCellCoordinates, side) != null) return true;
+
+            // Check if a fence/ladder is there
+            int altitude = globalCellCoordinates.y;
+            List<BlockmapNode> nodesOnCoordinate = GetNodes(new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z));
+            foreach(BlockmapNode node in nodesOnCoordinate)
+            {
+                if (node.Fences.TryGetValue(side, out Fence fence) && fence.MinAltitude <= altitude && fence.MaxAltitude >= altitude) return true;
+                if (node.SourceLadders.TryGetValue(side, out Ladder ladder) && ladder.MinAltitude <= altitude && ladder.MaxAltitude >= altitude) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// If present, returns the climbable (cliff, ladder, fence, wall) on the given side of a specific cell.
         /// </summary>
         public IClimbable GetClimbable(Vector3Int globalCellCoordinates, Direction side)
@@ -2145,7 +2165,7 @@ namespace BlockmapFramework
                 Transform objectHit = hit.transform;
 
                 // We hit the ground mesh we are looking for
-                if(node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_GroundNode)
+                if (node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_GroundNode)
                 {
                     Vector3 hitPosition = hit.point;
                     return Mathf.Max(hitPosition.y, node.BaseWorldHeight);
@@ -2159,7 +2179,7 @@ namespace BlockmapFramework
                 }
 
                 // We hit the water mesh we are looking for
-                if(node.Type == NodeType.Water && objectHit.gameObject.layer == Layer_Water)
+                if (node.Type == NodeType.Water && objectHit.gameObject.layer == Layer_Water)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
@@ -2239,7 +2259,11 @@ namespace BlockmapFramework
                 if (n1[dir] == n2[dir]) numOverlaps++;
             return numOverlaps;
         }
-        public bool IsAbove(Dictionary<Direction, int> topHeight, Dictionary<Direction, int> botHeight) // returns true if at least one corner of topHeight is above botHeight and none of them are below botHeight
+
+        /// <summary>
+        /// Returns true if at least one corner of topHeight is above botHeight and none of them are below botHeight
+        /// </summary>
+        public bool IsAbove(Dictionary<Direction, int> topHeight, Dictionary<Direction, int> botHeight)
         {
             bool isAbove = false;
             foreach (Direction dir in HelperFunctions.GetCorners())
@@ -2249,6 +2273,7 @@ namespace BlockmapFramework
             }
             return isAbove;
         }
+
         public bool DoFullyOverlap(BlockmapNode node1, BlockmapNode node2)
         {
             foreach (Direction dir in HelperFunctions.GetCorners())

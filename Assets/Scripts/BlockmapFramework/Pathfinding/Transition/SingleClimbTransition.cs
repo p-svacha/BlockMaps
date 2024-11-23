@@ -58,16 +58,13 @@ namespace BlockmapFramework
 
         public override bool CanPass(Entity entity)
         {
-            // Entity height
-            if (entity.Height > MaxHeight) return false;
-
             // Climb skill
             if ((int)entity.GetComponent<Comp_Movement>().ClimbingSkill < (int)ClimbSkillRequirement) return false;
 
-            // Base requirements (lower node needs to ignore climbables)
+            // Higher node needs to be passable in climb direction
             if (!HigherNode.IsPassable(HelperFunctions.GetOppositeDirection(ClimbDirection), entity)) return false;
 
-            return true;
+            return base.CanPass(entity);
         }
 
         public override void OnTransitionStart(Entity entity)

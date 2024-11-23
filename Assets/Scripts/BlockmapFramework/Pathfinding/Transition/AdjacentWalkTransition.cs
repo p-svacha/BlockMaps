@@ -18,6 +18,14 @@ namespace BlockmapFramework
             return value;
         }
 
+        public override bool CanPass(Entity entity)
+        {
+            if (!From.IsPassable(Direction, entity)) return false;
+            if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
+
+            return base.CanPass(entity);
+        }
+
         public override void OnTransitionStart(Entity entity)
         {
             entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));

@@ -9,6 +9,10 @@ namespace BlockmapFramework
     /// </summary>
     public class HopTransition : Transition
     {
+        // Limits
+        public const int MaxHopUpDistance = 6;
+        public const int MaxHopDownDistance = 10;
+
         // Cost
         private const float BaseCost = 1f;
         private const float CostPerHopUpAltitude = 1f;
@@ -33,7 +37,8 @@ namespace BlockmapFramework
             HopUpDistance = hopUpDistance;
             HopDownDistance = hopDownDistance;
 
-            HopArc = HelperFunctions.CreateArc(from.CenterWorldPosition, to.CenterWorldPosition, Mathf.Max(hopUpDistance, hopDownDistance) * World.NodeHeight * 0.75f, segments: 12);
+            float arcHeight = (Mathf.Max(hopUpDistance, hopDownDistance) * World.NodeHeight);
+            HopArc = HelperFunctions.CreateArc(from.CenterWorldPosition, to.CenterWorldPosition, arcHeight, segments: 12);
         }
 
         public override bool CanPass(Entity entity)

@@ -1,9 +1,3 @@
-FIXED: wall visibility doesn't get updated after it is built
-
-add fence/wall/entity support for hop transitions
-add maxheight support for hop transitions
-
-Framework: Hopping/Dropping
 Framework: Stairs
 
 Map Generation Features:

@@ -326,7 +326,7 @@ namespace BlockmapFramework
                 foreach (Direction corner in HelperFunctions.GetCorners())
                 {
                     int diff = node.Altitude[corner] - Altitude[corner];
-                    FreeHeadSpace[corner] = diff;
+                    if (diff < FreeHeadSpace[corner]) FreeHeadSpace[corner] = diff;
 
                     Direction prevDir = HelperFunctions.GetPreviousDirection8(corner);
                     Direction nextDir = HelperFunctions.GetNextDirection8(corner);
@@ -492,29 +492,78 @@ namespace BlockmapFramework
             {
                 if (!adjNode.IsPassable()) continue;
 
-                if(ShouldCreateHopTransition(adjNode, dir, out HopTransition t))
+                for (int i = 1; i < Comp_Movement.MaxEntityHeight; i++)
                 {
-                    AddTransition(t, isWalkTransition: false);
+                    if (ShouldCreateHopTransition(adjNode, dir, i, out HopTransition t))
+                    {
+                        AddTransition(t, isWalkTransition: false);
+                    }
                 }
             }
         }
-        private bool ShouldCreateHopTransition(BlockmapNode to, Direction dir, out HopTransition t)
+        private bool ShouldCreateHopTransition(BlockmapNode to, Direction dir, int entityHeight, out HopTransition t)
         {
             t = null;
-            if (WalkTransitions.Any(x => x.Value.To == to)) return false; // A walk transition already exists to that node
+            if (WalkTransitions.Any(x => x.Value.To == to)) return false; // Can already walk there
 
             Direction oppositeDir = HelperFunctions.GetOppositeDirection(dir);
             int hopStartAltitude = GetMinAltitude(dir); // The altitude where the character takes off
             int hopEndAltitude = to.GetMinAltitude(oppositeDir); // The altitude where character lands
 
-            int hopTopAltitudeThis = GetMaxAltitude(dir); // The altitude the character has to reach to be able to get out from this node
-            int hopTopAltitudeAdj = to.GetMaxAltitude(oppositeDir); // The altitude the character has to reach to be able to enter the other node
-            int hopTopAltitude = Mathf.Max(hopTopAltitudeThis, hopTopAltitudeAdj); // The maxiumum altitude the character has to reach during the hop
+            // Calculate the altitude the entity needs to reach to hop over all obstacles between the nodes for the given entity height
+            int baseHopTopAltitudeThis = GetMaxAltitude(dir);
+            int baseHopTopAltitudeAdj = to.GetMaxAltitude(oppositeDir);
+            int hopTopAltitude = Mathf.Max(baseHopTopAltitudeThis, baseHopTopAltitudeAdj);
 
+            bool checkIfAltitudeBlocked = true;
+            while(checkIfAltitudeBlocked)
+            {
+                bool isBlocked = false;
+                for(int i = 0; i < entityHeight; i++)
+                {
+                    int altitudeToCheck = hopTopAltitude + i;
+                    bool isAltitudeBlocked = World.IsBlocked(new Vector3Int(WorldCoordinates.x, altitudeToCheck, WorldCoordinates.y), dir) || World.IsBlocked(new Vector3Int(to.WorldCoordinates.x, altitudeToCheck, to.WorldCoordinates.y), oppositeDir);
+                    if(isAltitudeBlocked)
+                    {
+                        isBlocked = true;
+                        break;
+                    }
+                }
+
+                if (isBlocked)
+                {
+                    hopTopAltitude++;
+
+                    if (hopTopAltitude - hopStartAltitude > HopTransition.MaxHopUpDistance) return false; // Hop up would be greater than the max allowed height
+                    if (hopTopAltitude - hopEndAltitude > HopTransition.MaxHopDownDistance) return false; // Hop down would be greater than the max allowed height
+                }
+                else checkIfAltitudeBlocked = false;
+            }
+
+            // Calculate the max height an entity can have to take this transition
+            int maxAllowedEntityHeight = Comp_Movement.MaxEntityHeight;
+            for(int i = 1; i < Comp_Movement.MaxEntityHeight + 1; i++)
+            {
+                int altitudeToCheck = hopTopAltitude + i;
+                bool isBlocked = World.IsBlocked(new Vector3Int(WorldCoordinates.x, altitudeToCheck, WorldCoordinates.y), dir) || World.IsBlocked(new Vector3Int(to.WorldCoordinates.x, altitudeToCheck, to.WorldCoordinates.y), oppositeDir);
+                if(isBlocked)
+                {
+                    maxAllowedEntityHeight = i;
+                    break;
+                }
+            }
+
+            // Calculate up and down distances of the transition
             int hopUpDistance = hopTopAltitude - hopStartAltitude;
             int hopDownDistance = hopTopAltitude - hopEndAltitude;
 
-            t = new HopTransition(this, to, dir, World.MAX_ALTITUDE, hopUpDistance, hopDownDistance);
+            if (hopUpDistance > HopTransition.MaxHopUpDistance) return false; // Hop up would be greater than the max allowed height
+            if (hopDownDistance > HopTransition.MaxHopDownDistance) return false; // Hop down would be greater than the max allowed height
+
+            if (FreeHeadSpace[Direction.None] <= hopUpDistance) return false; // not enough space above this node for hop up
+            if (to.FreeHeadSpace[Direction.None] <= hopDownDistance) return false; // not enough space above adjacent node node for hop down
+
+            t = new HopTransition(this, to, dir, maxAllowedEntityHeight, hopUpDistance, hopDownDistance);
             return true;
         }
 
@@ -1080,6 +1129,9 @@ namespace BlockmapFramework
             return false;
         }
 
+        /// <summary>
+        /// Returns if this node is fully above the given other node.
+        /// </summary>
         public bool IsAbove(BlockmapNode otherNode)
         {
             return World.IsAbove(Altitude, otherNode.Altitude);

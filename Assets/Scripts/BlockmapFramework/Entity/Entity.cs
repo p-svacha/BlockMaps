@@ -166,6 +166,9 @@ namespace BlockmapFramework
         /// </summary>
         public void Init()
         {
+            // Validate
+            if (Height <= 0) throw new System.Exception($"Cannot create an entity with height = {Height}. Must be positive.");
+
             // Initialize some objects
             OccupiedNodes = new HashSet<BlockmapNode>();
             CurrentVision = new VisionData();
@@ -177,7 +180,7 @@ namespace BlockmapFramework
             // Set position and rotation
             ResetWorldPositonAndRotation();
 
-            // Initialize comps
+            // Initialize components
             InitializeComps();
 
             // Initialize game objects
@@ -205,6 +208,15 @@ namespace BlockmapFramework
                 newComp.Entity = this;
                 Components.Add(newComp);
                 newComp.Initialize(compProps);
+
+                try
+                {
+                    newComp.Validate();
+                }
+                catch(System.Exception e)
+                {
+                    throw new System.Exception($"The EntityComp {newComp.GetType()} is not valid on the entity {Label} (DefName={Def.DefName}).\nReason: {e.Message}");
+                }
             }
         }
 

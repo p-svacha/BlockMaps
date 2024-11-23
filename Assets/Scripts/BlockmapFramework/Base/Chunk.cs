@@ -406,6 +406,13 @@ namespace BlockmapFramework
             return GetAirNodes(localCoordinates.x, localCoordinates.y);
         }
 
+
+        public Wall GetWall(Vector3Int localCellCoordinates, Direction side)
+        {
+            if (Walls.TryGetValue(localCellCoordinates, out List<Wall> walls))
+                return walls.FirstOrDefault(x => x.Side == side);
+            return null;
+        }
         public List<Wall> GetWalls(Vector3Int localCellCoordinates)
         {
             if (!Walls.ContainsKey(localCellCoordinates)) return new List<Wall>();

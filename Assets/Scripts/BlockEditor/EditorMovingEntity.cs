@@ -40,6 +40,8 @@ namespace WorldEditor
             MovementComp.EnableOverrideMovementSpeed(customSpeed);
             MovementComp.EnableOverrideCanSwim(customCanSwin);
             MovementComp.EnableOverrideClimbSkill(customClimbSkill);
+            MovementComp.EnableOverrideMaxHopUpDistance(customMaxHopUpDistance);
+            MovementComp.EnableOverrideMaxHopDownDistance(customMaxHopDownDistance);
         }
 
         public void PreInit(float speed, float visionRange, bool canSwim, ClimbingCategory climbSkill, int maxHopDistance, int maxDropDistance)
