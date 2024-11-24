@@ -759,8 +759,8 @@ namespace BlockmapFramework
         public void DrawSurface(MeshBuilder meshBuilder)
         {
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.NoRender) return;
-            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_Blend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.BlendbaleSurfaceMaterial);
-            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_NoBlend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.LoadMaterial(SurfaceDef.RenderProperties.MaterialName));
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_Blend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.BlendbaleSurfaceMaterial, height: 0f);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_NoBlend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.LoadMaterial(SurfaceDef.RenderProperties.MaterialName), SurfaceDef.RenderProperties.Height);
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration) SurfaceDef.RenderProperties.CustomRenderFunction(this, meshBuilder);
         }
 
@@ -861,6 +861,8 @@ namespace BlockmapFramework
         /// Returns the maximum altitude on the given side of this node as a y coordinate. 
         /// </summary>
         public int GetMaxAltitude(Direction side) => Altitude.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Max(x => x.Value);
+
+        public Vector3Int BaseCellCoordinates => new Vector3Int(WorldCoordinates.x, BaseAltitude, WorldCoordinates.y);
 
         /// <summary>
         /// Checks and returns if a node with the same surface exists in the given direction with a matching height to this node.

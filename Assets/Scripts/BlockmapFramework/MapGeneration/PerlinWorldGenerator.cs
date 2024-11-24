@@ -46,7 +46,7 @@ namespace BlockmapFramework.WorldGeneration
                         { Direction.NE, HeightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
                         { Direction.NW, HeightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
                     };
-                    n.SetHeight(nodeHeights);
+                    n.SetAltitude(nodeHeights);
                 }
 
                 World.RedrawFullWorld();

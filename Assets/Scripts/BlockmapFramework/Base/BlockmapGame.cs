@@ -9,7 +9,7 @@ namespace BlockmapFramework
     /// </summary>
     public class BlockmapGame : MonoBehaviour
     {
-        public World World { get; private set; }
+        public World World { get; protected set; }
 
         /// <summary>
         /// Takes a World object as an input and creates all Unity GameObjects for that world.

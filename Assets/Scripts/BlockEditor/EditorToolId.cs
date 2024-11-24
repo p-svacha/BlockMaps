@@ -21,6 +21,7 @@ namespace WorldEditor
         Ladder,
         Wall,
         Door,
-        Void
+        Void,
+        MapGenFeature,
     }
 }

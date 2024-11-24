@@ -80,7 +80,7 @@ namespace WorldEditor
             if (World.ChunkSize * numChunks > WorldGenerator.MAX_WORLD_SIZE) return;
             if (World.ChunkSize * numChunks < 32) return;
 
-            if (World != null) Destroy(World.WorldObject);
+            if (World != null) Editor.DestroyWorld();
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
 
             ActiveGenerator = selectedGenerator;

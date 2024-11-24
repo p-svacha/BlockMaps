@@ -991,12 +991,12 @@ namespace BlockmapFramework
             List<Entity> entitiesNearTargetPosition = World.GetNearbyEntities(targetNode.CenterWorldPosition);
             List<Entity> entitiesToUpdate = entitiesNearSourcePosition.Union(entitiesNearTargetPosition).ToList();
 
-            if (BlocksVision) World.UpdateVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
+            if (BlocksVision) World.UpdateEntityVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
             else
             {
                 // Only update the vision of itself and of entities from other actors
                 entitiesToUpdate = entitiesToUpdate.Where(x => x.Actor != Actor).ToList(); 
-                World.UpdateVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
+                World.UpdateEntityVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
                 UpdateVision();
             }
         }

@@ -1,10 +1,11 @@
-fence drag
-tree texture
-wall height
-
-Map Generation Features:
+Map Features:
 	- Select a feature, click on a node, and then it does something
 	- i.e. Builds a house there
+
+Map Modifiers:
+	- a function that affects the whole map
+	- basically a step of map gen process
+
 
 
 
@@ -70,14 +71,6 @@ mapgen forest: house
 mapgen forest: river
 mapgen forest: hedges should be straighter
 
-Framework: Jumping attribute for moving characters
-- Jumping only works to adjacent tiles
- - JumpUp defines how many tiles up an entity can jump
-	> Allow jumping over any fence (less cost than climb)
-	> Allows jumping up any cliff
- - JumpDown defines how many tiles an entity can drop down
-	> drop down has little cost
-
 --- Entity Update
 
 - Allow static entities to be able to allow having moving entities on them
@@ -105,10 +98,6 @@ Framework: Jumping attribute for moving characters
 ---
 
 
---- Update More Node Shapes
-Allow 0022 for stairs
- - In node surface add rule that when 0022 shape draw a stair mesh instead of slope	
-
 (> allow any height diffs on allowed shapes)
 - Remove limit of max height diff within a node
 	> slopes can also go up 2,3,etc.
@@ -129,8 +118,6 @@ Allow 0022 for stairs
 	> Impact navmesh
 
 - Allow entites to have their own nodes
-
-- Add UseTextures attribute to entity shader and support both modes on created models
 ---
 
 - Editor-Bug: Vision cutoff doesn't correctly reset when generating new map
@@ -139,13 +126,14 @@ Allow 0022 for stairs
 
 - Editor improvements:
 	> wall height
+	> wall tool: click on existing wall to change shape/material (as long as side is valid for selected shape)
 	> air node drag
 	> proc entity drag
+	> fence drag (same side along direction, i.e. if placed east you can drag along x axis and always place east)
 	> tunnel (convert ground node with all walls, entites etc to air node and create new grass ground node 1 below)
 
 
 Rework shader for entities
- - Allow switch between texture and color mode
  - Only use transparency shader on moving objects
  - Allow option to use uv space instead of world space
 	> Apply this to doors
@@ -220,7 +208,7 @@ Sounds
 - sound & smell
 	hearing & smelling
 
-- tunnel?
+- dig/tunnel?
 
 - add some new static entities
 	> for new static entity ideas watch project zomboid streams
@@ -235,6 +223,9 @@ Sounds
 CTF: Neutral moving entities
  - Wolves
  - 1 sneaky wolf
+
+ CTF: more logic for dogs
+  - can get distracted
 
 - CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
 - CTF: Multiplayer
@@ -300,5 +291,5 @@ Surface blending in SurfaceShader isn't perfect (but good enough so it's usually
 
 - Allow movingentities bigger than 1x1
 
-Add a dissovlce cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
+Add a dissolve cutout feature to NodeMaterialShader that can dissolve an area around a specific screen space coordinate:
  - https://glowfishinteractive.com/dissolving-the-world-part-1/

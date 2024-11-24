@@ -7,6 +7,7 @@ namespace BlockmapFramework
     [DefOf]
     public static class WallShapeDefOf
     {
+        public static WallShapeDef Solid;
         public static WallShapeDef Corner;
         public static WallShapeDef Window;
     }

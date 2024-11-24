@@ -218,13 +218,13 @@ namespace BlockmapFramework
         public void SetAsVoid()
         {
             SetSurface(SurfaceDefOf.Void);
-            SetHeight(World.MAP_EDGE_ALTITUDE);
+            SetAltitude(World.MAP_EDGE_ALTITUDE);
         }
 
         public void UnsetAsVoid(int altitude)
         {
             SetSurface(SurfaceDefOf.Grass);
-            SetHeight(altitude);
+            SetAltitude(altitude);
         }
 
         #endregion

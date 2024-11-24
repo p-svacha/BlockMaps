@@ -139,10 +139,10 @@ namespace WorldEditor
             GroundNode adjNodeFull = World.GetAdjacentGroundNode(node, dir);
             GroundNode adjNodePost = World.GetAdjacentGroundNode(node, postDir);
 
-            if (adjNodePre != null && adjNodePre.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodePre.CanChangeShape(Direction.None)) adjNodePre.SetHeight(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetHeight(postDir_Opp, node.Altitude[postDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetHeight(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodePost != null && adjNodePost.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodePost.CanChangeShape(Direction.None)) adjNodePost.SetHeight(postDir_Opp, node.Altitude[postDir]);
+            if (adjNodePre != null && adjNodePre.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodePre.CanChangeShape(Direction.None)) adjNodePre.SetAltitude(preDir_Opp, node.Altitude[preDir]);
+            if (adjNodeFull != null && adjNodeFull.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetAltitude(postDir_Opp, node.Altitude[postDir]);
+            if (adjNodeFull != null && adjNodeFull.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetAltitude(preDir_Opp, node.Altitude[preDir]);
+            if (adjNodePost != null && adjNodePost.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodePost.CanChangeShape(Direction.None)) adjNodePost.SetAltitude(postDir_Opp, node.Altitude[postDir]);
         }
 
         public override void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode)

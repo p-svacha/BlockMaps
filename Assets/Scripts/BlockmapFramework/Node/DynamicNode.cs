@@ -136,12 +136,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Sets the height of a single corner.
         /// </summary>
-        public void SetHeight(Direction corner, int height)
+        public void SetAltitude(Direction corner, int altitude)
         {
             Dictionary<Direction, int> newHeights = new Dictionary<Direction, int>();
             foreach(Direction dir in HelperFunctions.GetCorners())
             {
-                if (dir == corner) newHeights[dir] = height;
+                if (dir == corner) newHeights[dir] = altitude;
                 else newHeights[dir] = Altitude[dir];
             }
 
@@ -181,12 +181,12 @@ namespace BlockmapFramework
         /// <summary>
         /// Sets the height of all corners
         /// </summary>
-        public void SetHeight(Dictionary<Direction, int> newHeights)
+        public void SetAltitude(Dictionary<Direction, int> newAltitude)
         {
-            if (IsValidShape(newHeights))
+            if (IsValidShape(newAltitude))
             {
                 foreach (Direction dir in HelperFunctions.GetCorners())
-                    Altitude[dir] = newHeights[dir];
+                    Altitude[dir] = newAltitude[dir];
 
                 RecalculateShape();
                 RecalculateCenterWorldPosition();
@@ -196,9 +196,9 @@ namespace BlockmapFramework
         /// <summary>
         /// Sets the node to be flat on the given altitude.
         /// </summary>
-        public void SetHeight(int altitude)
+        public void SetAltitude(int altitude)
         {
-            SetHeight(HelperFunctions.GetFlatHeights(altitude));
+            SetAltitude(HelperFunctions.GetFlatHeights(altitude));
         }
 
         protected virtual bool IsValidShape(Dictionary<Direction, int> altitude)

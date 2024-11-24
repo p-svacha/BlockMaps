@@ -63,7 +63,7 @@ namespace CaptureTheFlag
                         { Direction.NE, HeightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
                         { Direction.NW, HeightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
                     };
-                n.SetHeight(nodeHeights);
+                n.SetAltitude(nodeHeights);
             }
 
             World.RedrawFullWorld();
@@ -135,7 +135,7 @@ namespace CaptureTheFlag
                     Vector2Int nextPosition = position;
                     while (previousPositions.Contains(nextPosition) && numAttempts++ < 10)
                     {
-                        nextPosition = HelperFunctions.GetWorldCoordinatesInDirection(position, HelperFunctions.GetRandomSideDirection());
+                        nextPosition = HelperFunctions.GetWorldCoordinatesInDirection(position, HelperFunctions.GetRandomSide());
                     }
                     position = nextPosition;
                 }
@@ -167,7 +167,7 @@ namespace CaptureTheFlag
         private void SpawnRandomTree(int x, int y)
         {
             BlockmapNode targetNode = World.GetGroundNode(new Vector2Int(x, y));
-            Direction rotation = HelperFunctions.GetRandomSideDirection();
+            Direction rotation = HelperFunctions.GetRandomSide();
 
             EntityDef def = GetRandomTreeDef();
 

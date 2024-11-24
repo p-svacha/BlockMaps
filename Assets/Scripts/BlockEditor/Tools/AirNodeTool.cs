@@ -96,7 +96,7 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.CanBuildAirNode(HoveredCoordinates, BuildAltitude))
-                World.BuildAirPath(HoveredCoordinates, BuildAltitude, SelectedSurface);
+                World.BuildAirNode(HoveredCoordinates, BuildAltitude, SelectedSurface);
         }
 
         public override void HandleRightClick()

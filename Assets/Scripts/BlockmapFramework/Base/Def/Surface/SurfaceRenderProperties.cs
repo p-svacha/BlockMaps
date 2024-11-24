@@ -52,6 +52,11 @@ namespace BlockmapFramework
         public string MaterialName { get; init; } = null;
 
         /// <summary>
+        /// If Type is set to FlatSurface_NoBlend, nodes will have this height.
+        /// </summary>
+        public float Height { get; init; } = 0f;
+
+        /// <summary>
         /// If true, triangles on edge shaped nodes (0001 or 1110) are always built in a way that the edge is long
         /// <br/>Useful for roofs for example.
         /// </summary>

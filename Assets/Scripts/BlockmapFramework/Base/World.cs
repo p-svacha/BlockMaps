@@ -997,6 +997,10 @@ namespace BlockmapFramework
 
             UpdateNavmeshDelayed(nodesToUpdate, isInitialization: true);
         }
+
+        /// <summary>
+        /// Recalculates the navmesh of all chunks around the given coordinates.
+        /// </summary>
         public void UpdateNavmeshAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
         {
             // Get nodes that need update
@@ -1055,31 +1059,31 @@ namespace BlockmapFramework
             UpdateNavmeshDisplayDelayed();
         }
 
-        public bool CanBuildAirNode(Vector2Int worldCoordinates, int height)
+        public bool CanBuildAirNode(Vector2Int worldCoordinates, int altitude)
         {
             if (!IsInWorld(worldCoordinates)) return false;
 
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
             GroundNode groundNode = chunk.GetGroundNode(localCoordinates);
-            Dictionary<Direction, int> newNodeAltitude = HelperFunctions.GetFlatHeights(height);
+            Dictionary<Direction, int> newNodeAltitude = HelperFunctions.GetFlatHeights(altitude);
 
             // Check if an entity or fence below is blocking this space
-            List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, height);
+            List<BlockmapNode> belowNodes = GetNodes(worldCoordinates, 0, altitude);
             foreach (BlockmapNode node in belowNodes)
             {
                 foreach (Entity e in node.Entities)
-                    if (e.MaxAltitude >= height)
+                    if (e.MaxAltitude >= altitude)
                         return false;
 
                 foreach (Fence fence in node.Fences.Values)
-                    if (fence.MaxAltitude >= height)
+                    if (fence.MaxAltitude >= altitude)
                         return false;
             }
 
             // Check if underwater
             WaterNode water = GetWaterNode(worldCoordinates);
-            if (water != null && water.WaterBody.ShoreHeight > height) return false;
+            if (water != null && water.WaterBody.ShoreHeight > altitude) return false;
 
             // Check if no more than 2 corners would overlap with another node
             List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
@@ -1093,17 +1097,22 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildAirPath(Vector2Int worldCoordinates, int height, SurfaceDef surfaceDef)
+        public void BuildAirNode(Vector2Int worldCoordinates, int altitude, SurfaceDef surfaceDef, bool updateWorld = true)
         {
+            if (!CanBuildAirNode(worldCoordinates, altitude)) return;
+
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
 
-            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(height), surfaceDef);
+            AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(altitude), surfaceDef);
             RegisterNode(newNode);
 
-            UpdateNavmeshAround(newNode.WorldCoordinates);
-            RedrawNodesAround(newNode.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(newNode.CenterWorldPosition);
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(newNode.WorldCoordinates);
+                RedrawNodesAround(newNode.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(newNode.CenterWorldPosition);
+            }
         }
         public bool CanRemoveAirNode(AirNode node)
         {
@@ -1426,6 +1435,8 @@ namespace BlockmapFramework
 
         public bool CanBuildWall(Vector3Int globalCellCoordinates, Direction side)
         {
+            if (!IsInWorld(new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z))) return false;
+
             int altitude = globalCellCoordinates.y;
             Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
             List<BlockmapNode> nodesOnCoordinate = GetNodes(worldCoordinates);
@@ -1475,16 +1486,21 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored)
+        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored = false, bool updateWorld = true)
         {
+            if (!CanBuildWall(globalCellCoordinates, side)) return;
+
             // Create and register new wall
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
             RegisterWall(newWall);
 
             // Update systems around cell
-            UpdateNavmeshAround(newWall.WorldCoordinates);
-            RedrawNodesAround(newWall.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(newWall.CellCenterWorldPosition);
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(newWall.WorldCoordinates);
+                RedrawNodesAround(newWall.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(newWall.CellCenterWorldPosition);
+            }
         }
         public void RegisterWall(Wall wall, bool registerInWorld = true) // add to database and add all references in different objects
         {
@@ -1639,7 +1655,7 @@ namespace BlockmapFramework
         {
             foreach (Chunk chunk in Chunks.Values) chunk.DrawMeshes();
 
-            SetActiveVisionActor(null);
+            SetActiveVisionActor(ActiveVisionActor);
 
             UpdateGridOverlay();
             UpdateNavmeshDisplayDelayed();
@@ -1706,6 +1722,24 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Updates the vision of all entities.
+        /// </summary>
+        public void UpdateVisionOfAllEntitiesDelayed()
+        {
+            UpdateEntityVisionDelayed(Entities.Values.ToList(), null);
+        }
+
+
+        /// <summary>
+        /// Updates the vision of all entities nearby the given coordinates.
+        /// </summary>
+        public void UpdateEntityVisionAround(Vector2Int worldCoordinates, int rangeEast = 1, int rangeNorth = 1)
+        {
+            Vector3 pos = new Vector3(worldCoordinates.x, 5f, worldCoordinates.y);
+            UpdateVisionOfNearbyEntitiesDelayed(pos, rangeEast, rangeNorth);
+        }
+
+        /// <summary>
         /// Recalculates the vision of all entities that have the given position within their vision range.
         /// <br/> Is delayed by one frame so all draw calls and vision collider movements can be completed before shooting the vision rays.
         /// </summary>
@@ -1720,7 +1754,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates the vision of all given entities over the next few frames and calls callback when done.
         /// </summary>
-        public void UpdateVisionDelayed(List<Entity> entities, System.Action callback)
+        public void UpdateEntityVisionDelayed(List<Entity> entities, System.Action callback)
         {
             updateEntityVisionDelay = NumDelayedUpdateFrames;
 

@@ -188,11 +188,8 @@ public static class HelperFunctions
         return new Vector2Int(Mathf.RoundToInt(x), Mathf.RoundToInt(y));
     }
 
-    public static Direction GetRandomSideDirection()
-    {
-        List<Direction> sides = GetSides();
-        return sides[Random.Range(0, sides.Count)];
-    }
+    public static Direction GetRandomSide() => GetSides().RandomElement();
+    public static Direction GetRandomCorner() => GetCorners().RandomElement();
 
     #endregion
 

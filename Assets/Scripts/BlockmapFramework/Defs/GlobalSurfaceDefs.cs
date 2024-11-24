@@ -19,7 +19,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Grass",
                 Label = "grass",
                 Description = "Short grass",
-                MovementSpeedModifier = 0.5f,
+                MovementSpeedModifier = 0.6f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,
@@ -148,6 +148,21 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.NoRender,
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Void"),
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "CorrugatedSteel",
+                Label = "corrugated steel",
+                Description = "Shiny corrugated steel.",
+                MovementSpeedModifier = 0.7f,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "CorrugatedSteel",
+                    Height = 0.1f,
+                },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "CorrugatedSteel005/CorrugatedSteel005_1K-JPG_Color"),
             }
         };
     }

@@ -13,6 +13,8 @@ namespace WorldEditor
         public abstract string Name { get; }
         public abstract Sprite Icon { get; }
 
+        protected const string IconBasePath = "Editor/Icons/";
+
         /// <summary>
         /// Gets called once when the editor is stared up
         /// </summary>

@@ -43,6 +43,7 @@ namespace WorldEditor
         public LadderTool LadderTool;
         public WallTool WallTool;
         public DoorTool DoorTool;
+        public MapGenFeatureTool MapGenFeatureTool;
 
         // Editor
         private bool isInitialized = false;
@@ -89,6 +90,7 @@ namespace WorldEditor
                 { EditorToolId.Door, DoorTool },
                 { EditorToolId.Ladder, LadderTool },
                 { EditorToolId.Water, WaterTool },
+                { EditorToolId.MapGenFeature, MapGenFeatureTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
                 { EditorToolId.MoveCharacter, MoveCharacterTool },
             };
@@ -128,6 +130,12 @@ namespace WorldEditor
             // Feedback
             foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
             DisplayOptions.OnNewWorld();
+        }
+
+        public void DestroyWorld()
+        {
+            Destroy(World.WorldObject);
+            World = null;
         }
 
         #region Controls

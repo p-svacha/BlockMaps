@@ -67,13 +67,13 @@ namespace CaptureTheFlag
             Vector2Int spawnAreaCenter = new Vector2Int(spawnX, spawnY);
 
             // Flag
-            Entity spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+            Entity spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSide());
             int numAttempts = 0;
             while(spawnedFlag == null && numAttempts++ < 50) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
             {
                 spawnY = Random.Range(SPAWN_MAP_EDGE_OFFSET, WorldSize - SPAWN_MAP_EDGE_OFFSET);
                 spawnAreaCenter = new Vector2Int(spawnX, spawnY);
-                spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSideDirection());
+                spawnedFlag = SpawnEntityOnGroundAround(EntityDefOf.Flag, player, spawnAreaCenter, 0f, HelperFunctions.GetRandomSide());
             }
             
             // Jail zone

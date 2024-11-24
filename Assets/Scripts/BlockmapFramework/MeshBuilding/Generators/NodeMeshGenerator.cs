@@ -13,8 +13,9 @@ namespace BlockmapFramework
         /// <summary>
         /// Draws a flat-shaded standard surface top that is just 2 triangles with the surface texture.
         /// <br/>Or draws a basic stairs if shape is stairs.
+        /// <br/>If height is set to a value > 0, a cube will drawn instead of a plane.
         /// </summary>
-        public static void DrawDefaultNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, Material material)
+        public static void DrawDefaultNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, Material material, float height)
         {
             if (node is AirNode airNode && airNode.IsStairs)
             {
@@ -24,30 +25,34 @@ namespace BlockmapFramework
 
             int surfaceSubmesh = meshBuilder.GetSubmesh(material);
 
-            // Surface vertices (all of them are necessary because we cannot reuse vertices if we want flat shading)
-            float xStart = node.LocalCoordinates.x;
-            float xEnd = node.LocalCoordinates.x + 1;
-            float yStart = node.LocalCoordinates.y;
-            float yEnd = node.LocalCoordinates.y + 1;
-            MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
-            MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
-            MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
-            MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
-            MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+            if (height == 0f)
+            {
+                // Surface vertices (all of them are necessary because we cannot reuse vertices if we want flat shading)
+                float xStart = node.LocalCoordinates.x;
+                float xEnd = node.LocalCoordinates.x + 1;
+                float yStart = node.LocalCoordinates.y;
+                float yEnd = node.LocalCoordinates.y + 1;
+                MeshVertex v1a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+                MeshVertex v1b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.SW] * World.NodeHeight, yStart), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(0f, 0f));
+                MeshVertex v2a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+                MeshVertex v2b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.SE] * World.NodeHeight, yStart), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)node.LocalCoordinates.y / node.Chunk.Size), new Vector2(1f, 0f));
+                MeshVertex v3a = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+                MeshVertex v3b = meshBuilder.AddVertex(new Vector3(xEnd, node.Altitude[Direction.NE] * World.NodeHeight, yEnd), new Vector2((float)(node.LocalCoordinates.x + 1) / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(1f, 1f));
+                MeshVertex v4a = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
+                MeshVertex v4b = meshBuilder.AddVertex(new Vector3(xStart, node.Altitude[Direction.NW] * World.NodeHeight, yEnd), new Vector2((float)node.LocalCoordinates.x / node.Chunk.Size, (float)(node.LocalCoordinates.y + 1) / node.Chunk.Size), new Vector2(0f, 1f));
 
-            if (node.GetTriangleMeshShapeVariant())
-            {
-                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
-                meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
+                if (node.GetTriangleMeshShapeVariant())
+                {
+                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
+                    meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
+                }
+                else
+                {
+                    meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
+                    meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
+                }
             }
-            else
-            {
-                meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
-                meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
-            }
+            else meshBuilder.BuildCube(node, surfaceSubmesh, Vector3.zero, new Vector3(1f, height, 1f), adjustToNodeShape: true);
         }
 
         /// <summary>
