@@ -471,6 +471,15 @@ public static class HelperFunctions
         throw new System.Exception("direction not handled");
     }
 
+    public static Vector2Int GetCornerCoordinates(Vector2Int dimensions, Direction corner)
+    {
+        if (corner == Direction.SW) return new Vector2Int(0, 0);
+        if (corner == Direction.SE) return new Vector2Int(dimensions.x - 1, 0);
+        if (corner == Direction.NE) return new Vector2Int(dimensions.x - 1, dimensions.y - 1);
+        if (corner == Direction.NW) return new Vector2Int(0, dimensions.y - 1);
+        throw new System.Exception($"{corner} is not a valid corner direction.");
+    }
+
     #endregion
 
     #region UI

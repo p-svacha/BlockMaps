@@ -39,7 +39,7 @@ namespace BlockmapFramework.Defs
                     {
                         MovementSpeed = 2f,
                         CanSwim = true,
-                        ClimbingSkill = ClimbingCategory.Advanced,
+                        ClimbingSkill = ClimbingCategory.Intermediate,
                         MaxHopUpDistance = 2,
                         MaxHopDownDistance = 5,
                     },

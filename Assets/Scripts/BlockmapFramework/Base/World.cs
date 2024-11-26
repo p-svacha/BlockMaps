@@ -1488,7 +1488,9 @@ namespace BlockmapFramework
         }
         public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored = false, bool updateWorld = true)
         {
-            if (!CanBuildWall(globalCellCoordinates, side)) return;
+            //if (!CanBuildWall(globalCellCoordinates, side)) return;
+
+            if (shape == WallShapeDefOf.Corner) Debug.Log("we make corner");
 
             // Create and register new wall
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);

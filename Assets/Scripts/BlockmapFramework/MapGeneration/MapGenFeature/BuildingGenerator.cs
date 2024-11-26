@@ -33,17 +33,21 @@ namespace BlockmapFramework.WorldGeneration
             Vector2Int buildingPosInParcel = new Vector2Int(parcel.Dimensions.x / 2 - buildingSizeX / 2, parcel.Dimensions.y / 2 - buildingSizeY / 2);
 
             // Generate footprint (inside/outside)
-            Dictionary<Vector2Int, int> buildingHeight = new Dictionary<Vector2Int, int>();
+            Dictionary<Vector2Int, int> buildingHeight = new Dictionary<Vector2Int, int>(); // walls to divide inside from outside
+            Dictionary<Vector2Int, int> roofAltitude = new Dictionary<Vector2Int, int>(); // altitude at which roof nodes get built
+            Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars = new Dictionary<Vector2Int, Dictionary<Direction, bool>>(); // corner pillars from ground to roof
             for (int x = 0; x < buildingSizeX; x++)
             {
                 for (int z = 0; z < buildingSizeY; z++)
                 {
                     buildingHeight.Add(new Vector2Int(x, z), baseBuildingHeight);
+                    roofAltitude.Add(new Vector2Int(x, z), baseBuildingHeight);
+                    cornerPillars.Add(new Vector2Int(x, z), new Dictionary<Direction, bool>() { { Direction.SW, false }, { Direction.SE, false }, { Direction.NE, false }, { Direction.NW, false } });
                 }
             }
 
             int numCutCorners = Random.Range(0, 2 + 1);
-            for(int i = 0; i < numCutCorners; i++) OffsetCorner(buildingDimensions, buildingHeight);
+            for(int i = 0; i < numCutCorners; i++) OffsetCorner(buildingDimensions, baseBuildingHeight, buildingHeight, roofAltitude, cornerPillars);
 
             // Remove entities
             for (int x = 0; x < buildingSizeX; x++)
@@ -88,42 +92,58 @@ namespace BlockmapFramework.WorldGeneration
                 }
             }
 
-            // Place walls and roof
+            // Place walls
             for (int x = 0; x < buildingSizeX; x++)
             {
                 for (int z = 0; z < buildingSizeY; z++)
                 {
                     Vector2Int localCoord = new Vector2Int(x, z);
+                    Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
                     int localHeight = buildingHeight[localCoord];
-                    if (localHeight == 0) continue; // not inside building -> no walls needed
 
                     // Check if wall is needed in any direction
-                    Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
-
-                    foreach (Direction side in HelperFunctions.GetSides())
+                    if (localHeight > 0)
                     {
-                        if (!buildingHeight.TryGetValue(HelperFunctions.GetWorldCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight != localHeight)
+                        foreach (Direction side in HelperFunctions.GetSides())
                         {
-                            // Wall above floor
-                            for (int y = adjHeight; y < localHeight; y++)
+                            if (!buildingHeight.TryGetValue(HelperFunctions.GetWorldCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight != localHeight)
                             {
-                                world.BuildWall(new Vector3Int(worldCoord.x, node.BaseAltitude + y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
-                            }
-
-                            // Wall below floor (to ground)
-                            if(adjHeight == 0)
-                            {
-                                GroundNode groundNode = world.GetGroundNode(worldCoord);
-                                for (int y = groundNode.BaseAltitude; y < floorAltitude; y++)
+                                // Wall above floor
+                                for (int y = adjHeight; y < localHeight; y++)
                                 {
-                                    world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
+                                    world.BuildWall(new Vector3Int(worldCoord.x, floorAltitude + y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
+                                }
+
+                                // Wall below floor (to ground)
+                                if (adjHeight == 0)
+                                {
+                                    GroundNode groundNode = world.GetGroundNode(worldCoord);
+                                    for (int y = groundNode.BaseAltitude; y < floorAltitude; y++)
+                                    {
+                                        world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
+                                    }
                                 }
                             }
                         }
                     }
 
                     // Roof
-                    world.BuildAirNode(worldCoord, node.BaseAltitude + buildingHeight[localCoord], SurfaceDefOf.CorrugatedSteel, updateWorld: false);
+                    if(roofAltitude[localCoord] > 0) world.BuildAirNode(worldCoord, floorAltitude + roofAltitude[localCoord], SurfaceDefOf.CorrugatedSteel, updateWorld: false);
+
+                    // Pillar
+                    foreach (Direction corner in cornerPillars[localCoord].Keys)
+                    {
+                        if (cornerPillars[localCoord][corner])
+                        {
+                            GroundNode groundNode = world.GetGroundNode(worldCoord);
+                            Debug.Log($"haspilar: {groundNode.Altitude[corner]} - {roofAltitude[localCoord]}");
+
+                            for (int y = groundNode.Altitude[corner]; y < floorAltitude + roofAltitude[localCoord]; y++)
+                            {
+                                world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), corner, WallShapeDefOf.Corner, wallMaterial, updateWorld: false);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -133,27 +153,79 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Cuts or raises a random corner out of the footprint
         /// </summary>
-        private static void OffsetCorner(Vector2Int parcelSize, Dictionary<Vector2Int, int> buildingHeight)
+        private static void OffsetCorner(Vector2Int buildingSize, int baseBuildingHeight, Dictionary<Vector2Int, int> buildingHeight, Dictionary<Vector2Int, int> roofAltitude, Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars)
         {
-            int cutLengthX = Random.Range(2, ((int)(parcelSize.x * 0.75f)) + 1);
-            int cutLengthY = Random.Range(2, ((int)(parcelSize.y * 0.75f)) + 1);
+            int cutLengthX = Random.Range(2, ((int)(buildingSize.x * 0.75f)) + 1);
+            int cutLengthY = Random.Range(2, ((int)(buildingSize.y * 0.75f)) + 1);
 
-            int newHeight = Random.value < 0.5f ? 0 : Random.Range(6, 7 + 1);
+            bool cutCorner = Random.value < 0.5f;
 
             Direction corner = HelperFunctions.GetRandomCorner();
 
-            int startX = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.E) ? 0 : parcelSize.x - cutLengthX;
-            int endX = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.E) ? cutLengthX : parcelSize.x;
-            int startY = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.S) ? 0 : parcelSize.y - cutLengthY;
-            int endY = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.S) ? cutLengthY : parcelSize.y;
+            int startX = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.W) ? 0 : buildingSize.x - cutLengthX;
+            int endX = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.W) ? cutLengthX : buildingSize.x;
+            int startY = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.S) ? 0 : buildingSize.y - cutLengthY;
+            int endY = HelperFunctions.GetAffectedDirections(corner).Contains(Direction.S) ? cutLengthY : buildingSize.y;
 
-            Debug.Log($"Cutting corner {corner} with x={cutLengthX} and y={cutLengthY}.");
-
-            for (int x = startX; x < endX; x++)
+            if (cutCorner)
             {
-                for(int y = startY; y < endY; y++)
+                bool keepRoof = Random.value < 0.5f;
+
+                for (int x = startX; x < endX; x++)
                 {
-                    buildingHeight[new Vector2Int(x, y)] = newHeight;
+                    for (int y = startY; y < endY; y++)
+                    {
+                        Vector2Int localCoord = new Vector2Int(x, y);
+                        buildingHeight[localCoord] = 0;
+
+                        // Roof
+                        if (keepRoof)
+                        {
+                            roofAltitude[localCoord] = baseBuildingHeight;
+                        }
+                        else // Remove roof
+                        {
+                            roofAltitude[localCoord] = 0;
+                        }
+                    }
+                }
+
+                if (keepRoof)
+                {
+                    // Chance to add pillar
+                    Dictionary<PillarType, float> pillarTypeWeights = new Dictionary<PillarType, float>()
+                    {
+                        { PillarType.None, 1f },
+                        { PillarType.Small, 1f },
+                        { PillarType.Big, 1f },
+                    };
+
+                    PillarType pillar = pillarTypeWeights.GetWeightedRandomElement();
+                    
+                    Debug.Log($"Adding pillar in corner {corner}");
+
+                    if (pillar == PillarType.Big)
+                    {
+                        buildingHeight[HelperFunctions.GetCornerCoordinates(buildingSize, corner)] = baseBuildingHeight;
+                    }
+                    else if (pillar == PillarType.Small)
+                    {
+                        cornerPillars[HelperFunctions.GetCornerCoordinates(buildingSize, corner)][corner] = true;
+                    }
+                }
+            }
+
+            else // Raise corner 
+            {
+                int newHeight = Random.Range(6, 7 + 1);
+                for (int x = startX; x < endX; x++)
+                {
+                    for (int y = startY; y < endY; y++)
+                    {
+                        Vector2Int localCoord = new Vector2Int(x, y);
+                        buildingHeight[localCoord] = newHeight;
+                        roofAltitude[localCoord] = newHeight;
+                    }
                 }
             }
         }
@@ -163,4 +235,15 @@ namespace BlockmapFramework.WorldGeneration
             return DefDatabase<WallMaterialDef>.AllDefs.RandomElement();
         }
     }
+
+    #region Enums
+
+    public enum PillarType
+    {
+        None,
+        Big,
+        Small
+    }
+
+    #endregion
 }

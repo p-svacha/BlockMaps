@@ -99,7 +99,7 @@ namespace BlockmapFramework
 
         private void CreateVisionCollider()
         {
-            VisionColliderObject = new GameObject("visionCollider_wall_" + Id);
+            VisionColliderObject = new GameObject("visionCollider_" + Shape.Label + "_" + Id);
             VisionColliderObject.layer = World.Layer_WallVisionCollider;
             VisionColliderObject.transform.SetParent(Chunk.ChunkObject.transform);
 

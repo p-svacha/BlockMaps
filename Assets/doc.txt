@@ -2,6 +2,23 @@ Map Features:
 	- Select a feature, click on a node, and then it does something
 	- i.e. Builds a house there
 
+
+Building Generator:
+(/) chance for roof over cut corner
+(/) 	> chance for pilla in corner
+chance for flat outisde floor in cut corner
+doors
+green wall type
+chance for different walls on same building
+lowest wall piece black metal material
+drainage pipe scenery entity
+path towards building door (with stairs if necessary)
+overhang roof
+basement floor if any ground node is x tiles below floor altitude (x = floor height)
+bench
+
+add to ctf map gen
+
 Map Modifiers:
 	- a function that affects the whole map
 	- basically a step of map gen process
@@ -94,6 +111,14 @@ mapgen forest: hedges should be straighter
 	> multiple static entities per node: one per type
 
 - Add static entities that include navmesh nodes (like a container or bridge)
+
+---
+
+--- New cover layer for Nodes
+
+New CoverLayerDef
+nodes can have different layers stacked on top of each other
+examples are AutumnLeaves, Snow, Moss
 
 ---
 
