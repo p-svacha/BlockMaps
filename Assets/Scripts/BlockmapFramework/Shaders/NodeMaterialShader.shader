@@ -5,12 +5,15 @@ Shader "Custom/NodeMaterialShader"
         [Toggle] _FullVisibility("Full Visibility", Float) = 1
         [Toggle] _UseTextures("Use Textures", Float) = 0
         _MainTex("Texture", 2D) = "none" {}
+        _TextureRotation("Texture Rotation", Range(0, 360)) = 0
+        _TextureScale("Texture Scale", Float) = 1
         _TextureTint("Texture Tint", Color) = (1,1,1,0)
+
         _Color("Color", Color) = (1,1,1,1)
         _Offset("Render Priority (lowest renders first, use 0.1 steps)", float) = 0
 
         // Texture mode values
-        _TextureScale("Texture Scale", Float) = 1
+        
         _TriplanarBlendSharpness("Blend Sharpness",float) = 1
         _SideStartSteepness("Side Texture Start Steepness",float) = 0.3 // The steepness where side texture starts to show through
         _SideOnlySteepness("Side Texture Only Steepness",float) = 0.7 // The steepness where only side texture is shown

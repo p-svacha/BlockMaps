@@ -19,7 +19,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The minimun climbing skill a character needs to be able to climb a wall with this material.
         /// </summary>
-        public ClimbingCategory ClimbSkillRequirement { get; init; } = ClimbingCategory.Advanced;
+        public ClimbingCategory ClimbSkillRequirement { get; init; } = ClimbingCategory.Unclimbable;
 
         /// <summary>
         /// The cost of climbing up one wall piece with this material. Must be at least 1.

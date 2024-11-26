@@ -71,7 +71,7 @@ namespace WorldEditor
                 new FlatWorldGenerator(),
                 new PerlinWorldGenerator(),
                 new CaptureTheFlag.CTFMapGenerator_Forest(),
-                new ParcelMapGenerator(),
+                new RegionMapGenerator(),
             };
 
             // Init tools
@@ -158,7 +158,7 @@ namespace WorldEditor
             if (Input.GetMouseButton(0) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
 
             if (Input.GetMouseButtonDown(1) && !isMouseOverUi) CurrentTool.HandleRightClick();
-            if (Input.GetMouseButton(1) && !isMouseOverUi) CurrentTool.HandleLeftDrag();
+            if (Input.GetMouseButton(1) && !isMouseOverUi) CurrentTool.HandleRightDrag();
 
             if (Input.GetMouseButtonDown(2) && !isMouseOverUi) CurrentTool.HandleMiddleClick();
 

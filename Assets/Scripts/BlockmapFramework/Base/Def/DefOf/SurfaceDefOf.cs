@@ -16,5 +16,6 @@ namespace BlockmapFramework
         public static SurfaceDef Tiles;
         public static SurfaceDef Void;
         public static SurfaceDef Water;
+        public static SurfaceDef WoodParquet;
     }
 }

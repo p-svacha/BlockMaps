@@ -17,6 +17,7 @@ namespace BlockmapFramework.Defs
                 Label = "brick",
                 Description = "Just red bricks",
                 Material = MaterialManager.LoadMaterial("Brick"),
+                ClimbSkillRequirement = ClimbingCategory.Advanced,
             },
 
             new WallMaterialDef()
@@ -25,7 +26,6 @@ namespace BlockmapFramework.Defs
                 Label = "plaster",
                 Description = "White smooth plaster",
                 Material = MaterialManager.LoadMaterial("Plaster"),
-                ClimbSkillRequirement = ClimbingCategory.Unclimbable,
             },
 
             new WallMaterialDef()
@@ -34,8 +34,14 @@ namespace BlockmapFramework.Defs
                 Label = "tiles",
                 Description = "Small blue bathroom tiles",
                 Material = MaterialManager.LoadMaterial("TilesBlue"),
-                ClimbSkillRequirement = ClimbingCategory.Unclimbable,
             },
+
+            new WallMaterialDef()
+            {
+                DefName = "CorrugatedSteel",
+                Label = "corrugated steel",
+                Material = MaterialManager.LoadMaterial("CorrugatedSteel"),
+            }
         };
     }
 }

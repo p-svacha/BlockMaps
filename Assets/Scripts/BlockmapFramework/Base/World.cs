@@ -1514,15 +1514,21 @@ namespace BlockmapFramework
             // In chunk
             wall.Chunk.RegisterWall(wall);
         }
-        public void RemoveWall(Wall wall)
+        public void RemoveWall(Wall wall, bool updateWorld = true)
         {
+            // Destroy vision collider
+            GameObject.Destroy(wall.VisionColliderObject);
+
             // Deregister
             DeregisterWall(wall);
 
             // Update systems around cell
-            UpdateNavmeshAround(wall.WorldCoordinates);
-            RedrawNodesAround(wall.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(wall.CellCenterWorldPosition);
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(wall.WorldCoordinates);
+                RedrawNodesAround(wall.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(wall.CellCenterWorldPosition);
+            }
         }
         public void DeregisterWall(Wall wall)
         {

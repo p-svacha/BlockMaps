@@ -9,10 +9,12 @@ float _ChunkSize;
 
 // Draw mode
 sampler2D _MainTex;
+float _TextureRotation;
+float _TextureScale;
 fixed4 _TextureTint;
+
 fixed4 _Color;
 float _UseTextures;
-float _TextureScale;
 float _TriplanarBlendSharpness;
 float _SideStartSteepness;
 float _SideOnlySteepness;
@@ -67,6 +69,14 @@ float _TileVisibility[324];
 int GetVisibilityArrayIndex(float x, float y)
 {
     return int((y + 1) + (x + 1) * (_ChunkSize + 2));
+}
+
+float2 RotateUV(float2 uv, float rotationAngle) {
+    float rad = radians(rotationAngle);
+    float cosTheta = cos(rad);
+    float sinTheta = sin(rad);
+    float2x2 rotationMatrix = float2x2(cosTheta, -sinTheta, sinTheta, cosTheta);
+    return mul(rotationMatrix, uv);
 }
 
 void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
@@ -150,6 +160,13 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
         half2 yUV = IN.worldPos.xz / _TextureScale;
         half2 xUV = IN.worldPos.zy / _TextureScale;
         half2 zUV = IN.worldPos.xy / _TextureScale;
+
+        // Get rotated uv's
+        float rotation = _TextureRotation;
+
+        yUV = RotateUV(yUV, rotation);
+        xUV = RotateUV(xUV, rotation);
+        zUV = RotateUV(zUV, rotation);
 
         // Get the absolute value of the world normal.
         // Put the blend weights to the power of BlendSharpness: The higher the value, the sharper the transition between the planar maps will be.

@@ -127,12 +127,12 @@ namespace BlockmapFramework
                 FollowedEntity = null;
             }
 
-            if (!isMouseOverUi && Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll down - Zoom out
+            if (!isMouseOverUi && Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftShift)) // Scroll down - Zoom out
             {
                 CurrentZoom += ZOOM_SPEED;
                 UpdatePosition();
             }
-            if (!isMouseOverUi && Input.mouseScrollDelta.y > 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt)) // Scroll up - Zoom in
+            if (!isMouseOverUi && Input.mouseScrollDelta.y > 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftShift)) // Scroll up - Zoom in
             {
                 CurrentZoom -= ZOOM_SPEED;
                 UpdatePosition();

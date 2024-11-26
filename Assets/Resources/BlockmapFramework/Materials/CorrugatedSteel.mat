@@ -105,6 +105,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TextureRotation: 90
     - _TextureScale: 3
     - _TileOverlayX: 0
     - _TileOverlayY: 0

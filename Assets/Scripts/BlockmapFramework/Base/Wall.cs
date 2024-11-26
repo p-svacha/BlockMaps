@@ -51,7 +51,7 @@ namespace BlockmapFramework
         public float Width => Shape.Width;
 
         // GameObject
-        private GameObject VisionColliderObject;
+        public GameObject VisionColliderObject;
 
 
         // IClimbable

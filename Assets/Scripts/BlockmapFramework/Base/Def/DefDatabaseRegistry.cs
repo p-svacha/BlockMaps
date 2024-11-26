@@ -1,4 +1,5 @@
 using BlockmapFramework.Defs;
+using BlockmapFramework.WorldGeneration;
 using System;
 using System.Collections;
 using System.Collections.Generic;

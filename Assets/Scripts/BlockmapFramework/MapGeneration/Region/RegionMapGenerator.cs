@@ -7,14 +7,14 @@ namespace BlockmapFramework.WorldGeneration
     /// <summary>
     /// An XCOM inspired map generator that first splits the world into different 2d parcels of certain types. Parcels then get filled by their own parcel generators based on the type.
     /// </summary>
-    public class ParcelMapGenerator : WorldGenerator
+    public class RegionMapGenerator : WorldGenerator
     {
         public override string Name => "Parcels";
 
         private ParcelGeneratorStep GenerationStep;
 
         private int CurrentParcelIndex = 0;
-        private List<Parcel> Parcels;
+        private List<Region> Parcels;
 
         // Parcel probabilities
         private Dictionary<ParcelType, float> ParcelTable = new Dictionary<ParcelType, float>()
@@ -27,7 +27,7 @@ namespace BlockmapFramework.WorldGeneration
 
         protected override void OnGenerationStart()
         {
-            Parcels = new List<Parcel>();
+            Parcels = new List<Region>();
             CurrentParcelIndex = 0;
 
             GenerationStep = ParcelGeneratorStep.SplitMapIntoParcels;
@@ -106,16 +106,16 @@ namespace BlockmapFramework.WorldGeneration
             }
         }
 
-        private Parcel GetRandomParcel(Vector2Int position, Vector2Int dimensions)
+        private Region GetRandomParcel(Vector2Int position, Vector2Int dimensions)
         {
             ParcelType randomType = HelperFunctions.GetWeightedRandomElement(ParcelTable);
 
             return randomType switch
             {
-                ParcelType.Park => new PRC001_Park(World, position, dimensions),
-                ParcelType.UrbanBlock => new PRC002_UrbanBlock(World, position, dimensions),
-                ParcelType.Industry => new PRC003_Industry(World, position, dimensions),
-                ParcelType.Forest => new PRC004_Forest(World, position, dimensions),
+                ParcelType.Park => new REG001_Park(World, position, dimensions),
+                ParcelType.UrbanBlock => new REG002_UrbanBlock(World, position, dimensions),
+                ParcelType.Industry => new REG003_Industry(World, position, dimensions),
+                ParcelType.Forest => new REG004_Forest(World, position, dimensions),
                 _ => throw new System.Exception("ParcelType initialization for " + randomType.ToString() + " not handled.")
             };
         }
