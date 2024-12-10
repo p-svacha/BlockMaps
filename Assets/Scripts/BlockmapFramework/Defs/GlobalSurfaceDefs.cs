@@ -46,7 +46,20 @@ namespace BlockmapFramework.Defs
             {
                 DefName = "Concrete",
                 Label = "concrete",
-                Description = "Concrete with a border",
+                Description = "Simple flat concrete",
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "ConcreteLight"
+                },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "Sidewalk",
+                Label = "sidewalk",
+                Description = "Raised concrete sidewalk with a border",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
@@ -59,7 +72,7 @@ namespace BlockmapFramework.Defs
             {
                 DefName = "Street",
                 Label = "street",
-                Description = "Street asphalt",
+                Description = "Street asphalt with a cobblestone border",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,

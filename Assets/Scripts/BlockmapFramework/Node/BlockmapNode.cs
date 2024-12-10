@@ -170,7 +170,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Calculates the base height, relative heights and shape according th this nodes heights.
         /// </summary>
-        protected void RecalculateShape()
+        public void RecalculateShape()
         {
             BaseAltitude = Altitude.Values.Min();
             MaxAltitude = Altitude.Values.Max();
@@ -1055,7 +1055,8 @@ namespace BlockmapFramework
                     else return false;
             }
 
-            throw new System.Exception("Case not yet implemented. Shape " + Shape + ". GetTriangleMeshShapeVariant() implementation is missing.");
+            return true;
+            throw new System.Exception($"Case not yet implemented. Shape {Shape}. GetTriangleMeshShapeVariant() implementation is missing. Node: {DebugInfoShort()}");
         }
 
         /// <summary>

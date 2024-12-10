@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,43 +107,18 @@ namespace WorldEditor
                     // Smooth outside edges of affected nodes
                     if (SmoothEdgeToggle.isOn)
                     {
-                        foreach(GroundNode node in affectedNodes)
-                        {
-                            foreach (Direction side in HelperFunctions.GetSides())
-                            {
-                                GroundNode adjNode = World.GetAdjacentGroundNode(node, side);
-                                if (affectedNodes.Contains(adjNode)) continue;
-                                SmoothNodeEdge(node, side);
-                            }
-                        }
+                        Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, coordinates, new Vector2Int(AreaSize, AreaSize)));
+                        modifiedArea.UpdateWorld();
                     }
 
-                    // Manually update world stuff in one step instead of after each node to increase performance
-                    World.UpdateNavmeshAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                    World.RedrawNodesAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                    World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.CenterWorldPosition, AreaSize, AreaSize);
+                    else
+                    {
+                        World.UpdateNavmeshAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
+                        World.RedrawNodesAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
+                        World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.CenterWorldPosition, AreaSize, AreaSize);
+                    }
                 }
             }
-        }
-
-        /// <summary>
-        /// Smooths out the edge outside one side of a node
-        /// </summary>
-        private void SmoothNodeEdge(GroundNode node, Direction dir)
-        {
-            Direction preDir = HelperFunctions.GetPreviousDirection8(dir);
-            Direction preDir_Opp = HelperFunctions.GetOppositeDirection(preDir);
-            Direction postDir = HelperFunctions.GetNextDirection8(dir);
-            Direction postDir_Opp = HelperFunctions.GetOppositeDirection(postDir);
-
-            GroundNode adjNodePre = World.GetAdjacentGroundNode(node, preDir);
-            GroundNode adjNodeFull = World.GetAdjacentGroundNode(node, dir);
-            GroundNode adjNodePost = World.GetAdjacentGroundNode(node, postDir);
-
-            if (adjNodePre != null && adjNodePre.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodePre.CanChangeShape(Direction.None)) adjNodePre.SetAltitude(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetAltitude(postDir_Opp, node.Altitude[postDir]);
-            if (adjNodeFull != null && adjNodeFull.Altitude[preDir_Opp] != node.Altitude[preDir] && adjNodeFull.CanChangeShape(Direction.None)) adjNodeFull.SetAltitude(preDir_Opp, node.Altitude[preDir]);
-            if (adjNodePost != null && adjNodePost.Altitude[postDir_Opp] != node.Altitude[postDir] && adjNodePost.CanChangeShape(Direction.None)) adjNodePost.SetAltitude(postDir_Opp, node.Altitude[postDir]);
         }
 
         public override void OnHoveredGroundNodeChanged(GroundNode oldNode, GroundNode newNode)

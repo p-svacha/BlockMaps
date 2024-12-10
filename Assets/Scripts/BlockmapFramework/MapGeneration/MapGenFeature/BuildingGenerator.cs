@@ -32,9 +32,10 @@ namespace BlockmapFramework.WorldGeneration
             Vector2Int buildingDimensions = new Vector2Int(buildingSizeX, buildingSizeY);
             Vector2Int buildingPosInParcel = new Vector2Int(parcel.Dimensions.x / 2 - buildingSizeX / 2, parcel.Dimensions.y / 2 - buildingSizeY / 2);
 
-            // Generate footprint (inside/outside)
-            Dictionary<Vector2Int, int> buildingHeight = new Dictionary<Vector2Int, int>(); // walls to divide inside from outside
+            // Generate dictionaries that define the building blueprint
+            Dictionary<Vector2Int, int> buildingHeight = new Dictionary<Vector2Int, int>(); // for walls to divide inside from outside (walls are created between different heights to close the gap between them)
             Dictionary<Vector2Int, int> roofAltitude = new Dictionary<Vector2Int, int>(); // altitude at which roof nodes get built
+            Dictionary<Vector2Int, SurfaceDef> groundSurfaces = new Dictionary<Vector2Int, SurfaceDef>(); // If values are set here, these ground nodes will be flattened and converted to that surface
             Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars = new Dictionary<Vector2Int, Dictionary<Direction, bool>>(); // corner pillars from ground to roof
             for (int x = 0; x < buildingSizeX; x++)
             {
@@ -42,14 +43,15 @@ namespace BlockmapFramework.WorldGeneration
                 {
                     buildingHeight.Add(new Vector2Int(x, z), baseBuildingHeight);
                     roofAltitude.Add(new Vector2Int(x, z), baseBuildingHeight);
+                    groundSurfaces.Add(new Vector2Int(x, z), null);
                     cornerPillars.Add(new Vector2Int(x, z), new Dictionary<Direction, bool>() { { Direction.SW, false }, { Direction.SE, false }, { Direction.NE, false }, { Direction.NW, false } });
                 }
             }
 
             int numCutCorners = Random.Range(0, 2 + 1);
-            for(int i = 0; i < numCutCorners; i++) OffsetCorner(buildingDimensions, baseBuildingHeight, buildingHeight, roofAltitude, cornerPillars);
+            for(int i = 0; i < numCutCorners; i++) OffsetCorner(buildingDimensions, baseBuildingHeight, buildingHeight, roofAltitude, groundSurfaces, cornerPillars);
 
-            // Remove entities
+            // Remove existing entities that would be in the way
             for (int x = 0; x < buildingSizeX; x++)
             {
                 for (int z = 0; z < buildingSizeY; z++)
@@ -72,22 +74,30 @@ namespace BlockmapFramework.WorldGeneration
                 for (int z = 0; z < buildingSizeY; z++)
                 {
                     Vector2Int localCoord = new Vector2Int(x, z);
-                    int localHeight = buildingHeight[localCoord];
-                    if (localHeight == 0) continue;
-
                     Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
-
                     GroundNode ground = world.GetGroundNode(worldCoord);
 
-                    if (ground.BaseAltitude >= floorAltitude) // adjust ground
+                    // Inside floor
+                    int localHeight = buildingHeight[localCoord];
+                    if (localHeight > 0)
+                    {
+                        if (ground.BaseAltitude >= floorAltitude) // adjust ground
+                        {
+                            ground.SetAltitude(floorAltitude);
+                            ground.SetSurface(floor);
+                        }
+                        else // Create air node
+                        {
+                            if (ground.MaxAltitude == floorAltitude) ground.SetAltitude(floorAltitude - 1); // lower ground 1 if it would intersect new air node
+                            world.BuildAirNode(worldCoord, floorAltitude, floor, updateWorld: false);
+                        }
+                    }
+
+                    // Outside (terrace) floor
+                    if(groundSurfaces[localCoord] != null)
                     {
                         ground.SetAltitude(floorAltitude);
-                        ground.SetSurface(floor);
-                    }
-                    else // Create air node
-                    {
-                        if(ground.MaxAltitude == floorAltitude) ground.SetAltitude(floorAltitude - 1); // lower ground 1 if it would intersect new air node
-                        world.BuildAirNode(worldCoord, floorAltitude, floor, updateWorld: false);
+                        ground.SetSurface(groundSurfaces[localCoord]);
                     }
                 }
             }
@@ -153,7 +163,7 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Cuts or raises a random corner out of the footprint
         /// </summary>
-        private static void OffsetCorner(Vector2Int buildingSize, int baseBuildingHeight, Dictionary<Vector2Int, int> buildingHeight, Dictionary<Vector2Int, int> roofAltitude, Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars)
+        private static void OffsetCorner(Vector2Int buildingSize, int baseBuildingHeight, Dictionary<Vector2Int, int> buildingHeight, Dictionary<Vector2Int, int> roofAltitude, Dictionary<Vector2Int, SurfaceDef> groundSurfaces, Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars)
         {
             int cutLengthX = Random.Range(2, ((int)(buildingSize.x * 0.75f)) + 1);
             int cutLengthY = Random.Range(2, ((int)(buildingSize.y * 0.75f)) + 1);
@@ -211,6 +221,20 @@ namespace BlockmapFramework.WorldGeneration
                     else if (pillar == PillarType.Small)
                     {
                         cornerPillars[HelperFunctions.GetCornerCoordinates(buildingSize, corner)][corner] = true;
+                    }
+                }
+
+                bool makeTerrace = Random.value < 0.5f; // if true, flattens the ground and turns it into concrete
+
+                if(makeTerrace)
+                {
+                    for (int x = startX; x < endX; x++)
+                    {
+                        for (int y = startY; y < endY; y++)
+                        {
+                            Vector2Int localCoord = new Vector2Int(x, y);
+                            groundSurfaces[localCoord] = SurfaceDefOf.Concrete;
+                        }
                     }
                 }
             }

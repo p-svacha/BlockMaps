@@ -1,13 +1,12 @@
-Map Features:
-	- Select a feature, click on a node, and then it does something
-	- i.e. Builds a house there
-
-
 Building Generator:
 (/) chance for roof over cut corner
 (/) 	> chance for pilla in corner
 chance for flat outisde floor in cut corner
+	> add smoothing
 doors
+	> prefer concrete area if there
+	> else take a random outside wall
+	> chance for 1-3 doors
 green wall type
 chance for different walls on same building
 lowest wall piece black metal material
@@ -16,6 +15,8 @@ path towards building door (with stairs if necessary)
 overhang roof
 basement floor if any ground node is x tiles below floor altitude (x = floor height)
 bench
+round corner pillars
+metal wall material (use for small round pillars)
 
 add to ctf map gen
 
@@ -26,6 +27,9 @@ Map Modifiers:
 
 
 
+Increase performance of detecting climb transitions on empty perlin map
+maybe also other steps
+Goal: 512 x 512 map in 10 seconds preferred, 20 max. Now it takes like 50
 
 
 

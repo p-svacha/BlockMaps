@@ -38,9 +38,9 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         public void UpdateWorld()
         {
-            World.RedrawNodesAround(CornerSW, Dimensions.x, Dimensions.y);
-            World.UpdateNavmeshAround(CornerSW, Dimensions.x, Dimensions.y);
-            World.UpdateEntityVisionAround(CornerSW, Dimensions.x, Dimensions.y);
+            World.RedrawNodesAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
+            World.UpdateNavmeshAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
+            World.UpdateEntityVisionAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
         }
     }
 }
