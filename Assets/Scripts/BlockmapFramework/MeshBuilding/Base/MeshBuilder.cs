@@ -441,14 +441,14 @@ namespace BlockmapFramework
                 {
                     for (int i = 0; i < 4; i++)
                     {
-                        float height = node.GetExactLocalAltitudeAt(new Vector2(footprint[i].x, footprint[i].z)) * World.NodeHeight;
+                        float height = node.GetLocalShapeAltitude(new Vector2(footprint[i].x, footprint[i].z)) * World.NodeHeight;
                         footprint[i] += new Vector3(0f, height, 0f);
                     }
                 }
             }
 
             // Apply offset based on node position on chunk to footprint
-            float worldHeight = node.BaseWorldHeight;
+            float worldHeight = node.BaseWorldAltitude;
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
@@ -490,13 +490,13 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
+                    float height = node.GetLocalShapeAltitude(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }
 
             // Apply offset based on node position on chunk to footprint
-            float worldHeight = node.BaseWorldHeight;
+            float worldHeight = node.BaseWorldAltitude;
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
             for (int i = 0; i < vertices.Count; i++) vertices[i] += nodeOffsetPos;
 
@@ -581,7 +581,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    float height = node.GetExactLocalAltitudeAt(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
+                    float height = node.GetLocalShapeAltitude(new Vector2(vertices[i].x, vertices[i].z)) * World.NodeHeight;
                     vertices[i] += new Vector3(0f, height, 0f);
                 }
             }
@@ -628,19 +628,19 @@ namespace BlockmapFramework
         /// </summary>
         public void DrawShapePlane(BlockmapNode node, int submesh, float height, float xStart, float xEnd, float yStart, float yEnd, bool mirror = false)
         {
-            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldHeightAt(new Vector2(xStart, yStart)) + height, node.LocalCoordinates.y + yStart);
+            Vector3 v_SW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldShapeAltitude(new Vector2(xStart, yStart)) + height, node.LocalCoordinates.y + yStart);
             Vector2 v_SW_uv = new Vector2(xStart, yStart);
             MeshVertex v_SW = AddVertex(v_SW_pos, v_SW_uv);
 
-            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldHeightAt(new Vector2(xEnd, yStart)) + height, node.LocalCoordinates.y + yStart);
+            Vector3 v_SE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldShapeAltitude(new Vector2(xEnd, yStart)) + height, node.LocalCoordinates.y + yStart);
             Vector2 v_SE_uv = new Vector2(xEnd, yStart);
             MeshVertex v_SE = AddVertex(v_SE_pos, v_SE_uv);
 
-            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldHeightAt(new Vector2(xEnd, yEnd)) + height, node.LocalCoordinates.y + yEnd);
+            Vector3 v_NE_pos = new Vector3(node.LocalCoordinates.x + xEnd, node.GetWorldShapeAltitude(new Vector2(xEnd, yEnd)) + height, node.LocalCoordinates.y + yEnd);
             Vector2 v_NE_uv = new Vector2(xEnd, yEnd);
             MeshVertex v_NE = AddVertex(v_NE_pos, v_NE_uv);
 
-            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldHeightAt(new Vector2(xStart, yEnd)) + height, node.LocalCoordinates.y + yEnd);
+            Vector3 v_NW_pos = new Vector3(node.LocalCoordinates.x + xStart, node.GetWorldShapeAltitude(new Vector2(xStart, yEnd)) + height, node.LocalCoordinates.y + yEnd);
             Vector2 v_NW_uv = new Vector2(xStart, yEnd);
             MeshVertex v_NW = AddVertex(v_NW_pos, v_NW_uv);
 

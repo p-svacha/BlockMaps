@@ -117,7 +117,7 @@ namespace WorldEditor
             if (ParcelInputY.text == "") return;
 
             Parcel = new Parcel(World, World.HoveredNode.WorldCoordinates, new Vector2Int(int.Parse(ParcelInputX.text), int.Parse(ParcelInputY.text)));
-            float worldAltitude = World.HoveredNode.BaseWorldHeight;
+            float worldAltitude = World.HoveredNode.BaseWorldAltitude;
             float previewHeight = 2f;
 
             MeshBuilder meshBuilder = new MeshBuilder(ParcelPreview);

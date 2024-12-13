@@ -77,7 +77,7 @@ namespace BlockmapFramework
                         Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, moveComp.MovementSpeed * Time.deltaTime * From.SurfaceDef.MovementSpeedModifier);
 
                         // Calculate altitude
-                        float y = World.GetWorldHeightAt(newPosition2d, From);
+                        float y = World.GetWorldAltitudeAt(newPosition2d, From);
                         if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
 
                         // Set new position
@@ -198,7 +198,7 @@ namespace BlockmapFramework
                         Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, moveComp.MovementSpeed * Time.deltaTime * To.SurfaceDef.MovementSpeedModifier);
 
                         // Calculate altitude
-                        float y = World.GetWorldHeightAt(newPosition2d, To);
+                        float y = World.GetWorldAltitudeAt(newPosition2d, To);
                         if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
 
                         // Set new position

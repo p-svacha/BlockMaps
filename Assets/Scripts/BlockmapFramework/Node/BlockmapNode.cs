@@ -34,7 +34,7 @@ namespace BlockmapFramework
         /// Lowest altitude of this node.
         /// </summary>
         public int BaseAltitude { get; private set; }
-        public float BaseWorldHeight => BaseAltitude * World.NodeHeight;
+        public float BaseWorldAltitude => BaseAltitude * World.NodeHeight;
 
         /// <summary>
         /// Highest altitude of this node.
@@ -889,122 +889,70 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the exact altitude (compared to BaseAltitude) at the relative position within this node.
+        /// Returns the local altitude on the node on the given local position (0f-1f) purely based on the nodes shape.
         /// </summary>
-        public float GetExactLocalAltitudeAt(Vector2 relativePosition)
+        public float GetLocalShapeAltitude(Vector2 localPosition)
         {
-            relativePosition = new Vector2(Mathf.Clamp01(relativePosition.x), Mathf.Clamp01(relativePosition.y)); // Clamp to [0-1]
+            float x = localPosition.x;
+            float y = localPosition.y;
 
-            switch (Shape)
+            float altA = Altitude[Direction.SW] - BaseAltitude;
+            float altB = Altitude[Direction.SE] - BaseAltitude;
+            float altC = Altitude[Direction.NE] - BaseAltitude;
+            float altD = Altitude[Direction.NW] - BaseAltitude;
+
+            float altitude;
+
+            if (GetTriangleMeshShapeVariant())
             {
-                case "0000": return 0;
-                case "0011": return relativePosition.y;
-                case "1001": return (1f - relativePosition.x);
-                case "1100": return (1f - relativePosition.y);
-                case "0110": return relativePosition.x;
-
-                case "0022": return 2f * relativePosition.y;
-                case "2002": return 2f * (1f - relativePosition.x);
-                case "2200": return 2f * (1f - relativePosition.y);
-                case "0220": return 2f * relativePosition.x;
-
-                case "0001":
-                    if(GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x > relativePosition.y) return 0f;
-                        else return relativePosition.y - relativePosition.x;
-                    }
-                    else return Mathf.Min(1f - relativePosition.x, relativePosition.y);
-                case "0010":
-                    if (!GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x + relativePosition.y < 1) return 0f;
-                        else return relativePosition.y + relativePosition.x - 1f;
-                    }
-                    else return Mathf.Min(relativePosition.x, relativePosition.y);
-                case "0100":
-                    if (GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x < relativePosition.y) return 0f;
-                        else return relativePosition.x - relativePosition.y;
-                    }
-                    else return Mathf.Min(relativePosition.x, 1f - relativePosition.y);
-                case "1000":
-                    if (!GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x + relativePosition.y > 1) return 0f;
-                        else return -(relativePosition.x + relativePosition.y - 1f);
-                    }
-                    else return Mathf.Min(1f - relativePosition.x, 1f - relativePosition.y);
-
-                case "1110":
-                    if (GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x > relativePosition.y) return 1f;
-                        else return 1f - (relativePosition.y - relativePosition.x);
-                    }
-                    else return Mathf.Max(relativePosition.x, 1f - relativePosition.y);
-                case "1101":
-                    if (!GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x + relativePosition.y < 1) return 1f;
-                        else return 1f - (relativePosition.y + relativePosition.x - 1f);
-                    }
-                    else return Mathf.Max(1f - relativePosition.x, 1f - relativePosition.y);
-                case "1011":
-                    if (GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x < relativePosition.y) return 1f;
-                        else return 1f - (relativePosition.x - relativePosition.y);
-                    }
-                    else return Mathf.Max(1f - relativePosition.x, relativePosition.y);
-                case "0111":
-                    if (!GetTriangleMeshShapeVariant())
-                    {
-                        if (relativePosition.x + relativePosition.y > 1) return 1f;
-                        else return relativePosition.y + relativePosition.x;
-                    }
-                    else return Mathf.Max(relativePosition.x, relativePosition.y);
-
-                case "1010":
-                    if(LastHeightChangeWasIncrease)
-                    {
-                        if (relativePosition.x + relativePosition.y < 1) return -(relativePosition.x + relativePosition.y - 1f);
-                        else return relativePosition.y + relativePosition.x - 1f;
-                    }
-                    else
-                    {
-                        if (relativePosition.x > relativePosition.y) return 1f - (relativePosition.x - relativePosition.y);
-                        else return 1f - (relativePosition.y - relativePosition.x);
-                    }
-                case "0101":
-                    if (LastHeightChangeWasIncrease)
-                    {
-                        if (relativePosition.x > relativePosition.y) return relativePosition.x - relativePosition.y;
-                        else return relativePosition.y - relativePosition.x;
-                    }
-                    else
-                    {
-                        if (relativePosition.x + relativePosition.y > 1) return 1f - (relativePosition.y + relativePosition.x - 1f);
-                        else return relativePosition.y + relativePosition.x;
-                    }
-
-                case "2101":
-                    if (relativePosition.x + relativePosition.y < 1) return 1f + (-(relativePosition.x + relativePosition.y - 1f));
-                    else return 1f - (relativePosition.y + relativePosition.x - 1f);
-                case "0121":
-                    if (relativePosition.x + relativePosition.y > 1) return 1f + (relativePosition.y + relativePosition.x - 1f);
-                    else return relativePosition.y + relativePosition.x;
-                case "1012":
-                    if (relativePosition.x < relativePosition.y) return 1f + (relativePosition.y - relativePosition.x);
-                    else return 1f - (relativePosition.x - relativePosition.y);
-                case "1210":
-                    if (relativePosition.x > relativePosition.y) return 1f + (relativePosition.x - relativePosition.y);
-                    else return 1f - (relativePosition.y - relativePosition.x);
+                if (y <= x)
+                {
+                    // Use triangle A-C-B
+                    // Altitude = (1 - x)*altA + y*altC + (x - y)*altB
+                    altitude = (1f - x) * altA + (y) * altC + (x - y) * altB;
+                }
+                else
+                {
+                    // Use triangle A-D-C
+                    // Altitude = (1 - y)*altA + (y - x)*altD + x*altC
+                    altitude = (1f - y) * altA + (y - x) * altD + (x) * altC;
+                }
+            }
+            else
+            {
+                // Alternate Triangles: divided by line D->B (y = 1 - x)
+                if (y <= 1f - x)
+                {
+                    // Triangle A-D-B
+                    // Alt = (1 - x - y)*A + y*D + x*B
+                    altitude = (1f - x - y) * altA + y * altD + x * altB;
+                }
+                else
+                {
+                    // Triangle B-D-C
+                    // Alt = (1 - y)*B + (1 - x)*D + (x + y - 1)*C
+                    altitude = (1f - y) * altB + (1f - x) * altD + (x + y - 1f) * altC;
+                }
             }
 
-            throw new System.Exception("Case not yet implemented. Shape " + Shape + ". GetExactLocalAltitudeAt() implementation is missing.");
+            return altitude;
         }
+
+        /// <summary>
+        /// Returns the world altitude on the given local position (0f-1f) purely based on the nodes shape.
+        /// </summary>
+        public float GetWorldShapeAltitude(Vector2 localPosition)
+        {
+            return BaseWorldAltitude + (World.NodeHeight * GetLocalShapeAltitude(localPosition));
+        }
+
+        /// <summary>
+        /// Returns the exact world y position for the given local position (0f-1f) on this node based on its mesh by shooting a ray from above onto this node.
+        /// </summary>
+        public float GetWorldMeshAltitude(Vector2 relativePosition)
+        {
+            return World.GetWorldAltitudeAt(WorldCoordinates + relativePosition, this);
+        }   
 
         /// <summary>
         /// Returns how the triangles should be built to draw the mesh of this node.
@@ -1055,16 +1003,7 @@ namespace BlockmapFramework
                     else return false;
             }
 
-            return true;
             throw new System.Exception($"Case not yet implemented. Shape {Shape}. GetTriangleMeshShapeVariant() implementation is missing. Node: {DebugInfoShort()}");
-        }
-
-        /// <summary>
-        /// Returns the world y position for the relative position (0f-1f) on this node.
-        /// </summary>
-        public float GetWorldHeightAt(Vector2 relativePosition)
-        {
-            return BaseWorldHeight + (World.NodeHeight * GetExactLocalAltitudeAt(relativePosition));
         }
 
         /// <summary>
@@ -1173,7 +1112,9 @@ namespace BlockmapFramework
 
             text += "\nMovement Speed Modifier: " + SurfaceDef.MovementSpeedModifier;
             text += "\nShape: " + World.HoveredNode.Shape;
-            text += "\nRelHeight: " + World.HoveredNode.GetExactLocalAltitudeAt(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nLocal Shape Altitude: " + World.HoveredNode.GetLocalShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Shape Altitude: " + World.HoveredNode.GetWorldShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Mesh Altitude: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             text += "\n" + mph;
             text += "\n" + headspace;
             if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";

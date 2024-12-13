@@ -69,7 +69,15 @@ namespace WorldEditor
         {
             ApplyHeightChange(isIncrease: false);
         }
-        
+
+        public override void HandleMiddleClick()
+        {
+            if (World.HoveredGroundNode == null) return;
+
+            Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)));
+            modifiedArea.UpdateWorld();
+        }
+
         private void ApplyHeightChange(bool isIncrease)
         {
             if (AreaSize == 1 && World.NodeHoverMode9 != Direction.None) // Partial height change of single tile

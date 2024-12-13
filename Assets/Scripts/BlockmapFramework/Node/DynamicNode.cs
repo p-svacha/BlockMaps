@@ -211,13 +211,10 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Getters
 
         public override void RecalculateCenterWorldPosition()
         {
-            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldHeightAt(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
+            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldMeshAltitude(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
         }
-
-        #endregion
     }
 }

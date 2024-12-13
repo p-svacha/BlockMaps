@@ -608,7 +608,7 @@ namespace BlockmapFramework
                 float closestDistance = float.MaxValue;
                 foreach (AirNode node in hitAirNodes)
                 {
-                    float distance = Mathf.Abs((adjustedHitPosition.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
+                    float distance = Mathf.Abs((adjustedHitPosition.y % 1f) - node.GetWorldMeshAltitude(relativePos));
                     if (distance < closestDistance)
                     {
                         closestNode = node;
@@ -631,7 +631,7 @@ namespace BlockmapFramework
                 float closestDistance = float.MaxValue;
                 foreach (AirNode node in hitOffsetAirNodes)
                 {
-                    float distance = Mathf.Abs((offsetHitPosition.y % 1f) - node.GetExactLocalAltitudeAt(relativePos));
+                    float distance = Mathf.Abs((offsetHitPosition.y % 1f) - node.GetWorldMeshAltitude(relativePos));
                     if (distance < closestDistance)
                     {
                         closestNode = node;
@@ -2180,10 +2180,10 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the exact world height (y-coordinate) of the given node at the given position.
+        /// Returns the exact world height (y-coordinate) of the given node at the given position by shooting a ray at it from above.
         /// <br/> Only works when the node mesh is drawn.
         /// </summary>
-        public float GetWorldHeightAt(Vector2 worldPosition2d, BlockmapNode node)
+        public float GetWorldAltitudeAt(Vector2 worldPosition2d, BlockmapNode node)
         {
             RaycastHit[] hits = Physics.RaycastAll(new Vector3(worldPosition2d.x, 20f, worldPosition2d.y), -Vector3.up, 1000f);
             foreach (RaycastHit hit in hits)
@@ -2194,7 +2194,7 @@ namespace BlockmapFramework
                 if (node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_GroundNode)
                 {
                     Vector3 hitPosition = hit.point;
-                    return Mathf.Max(hitPosition.y, node.BaseWorldHeight);
+                    return Mathf.Max(hitPosition.y, node.BaseWorldAltitude);
                 }
 
                 // We hit the air node mesh of the level we are looking for
@@ -2212,7 +2212,7 @@ namespace BlockmapFramework
                 }
             }
 
-            return node.BaseWorldHeight; // fallback
+            return node.BaseWorldAltitude; // fallback
 
             throw new System.Exception("World height not found for node of type " + node.Type.ToString());
         }

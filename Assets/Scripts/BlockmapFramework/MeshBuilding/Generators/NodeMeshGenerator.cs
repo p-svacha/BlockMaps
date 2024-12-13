@@ -91,7 +91,7 @@ namespace BlockmapFramework
         /// </summary>
         private static float GetVertexHeight(BlockmapNode node, float x, float y)
         {
-            return node.GetWorldHeightAt(new Vector2(x, y));
+            return node.GetWorldShapeAltitude(new Vector2(x, y));
         }
 
         private static void DrawEdge(MeshBuilder meshBuilder, BlockmapNode node, Direction dir, int mainSubmesh, int curbSubmesh, float xStart, float xEnd, float yStart, float yEnd, float mainHeight, float curbHeight)

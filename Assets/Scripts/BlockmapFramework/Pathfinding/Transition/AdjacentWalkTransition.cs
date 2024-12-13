@@ -48,7 +48,7 @@ namespace BlockmapFramework
             else originNode = To;
 
             // Calculate altitude (y-coordinate) on new position
-            float y = World.GetWorldHeightAt(newPosition2d, originNode);
+            float y = World.GetWorldAltitudeAt(newPosition2d, originNode);
             if (originNode.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
 
             // Set new position

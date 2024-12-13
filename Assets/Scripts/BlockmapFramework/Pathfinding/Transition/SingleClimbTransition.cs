@@ -94,7 +94,7 @@ namespace BlockmapFramework
                         float y;
                         if (World.IsOnNode(newPosition2d, From))
                         {
-                            y = World.GetWorldHeightAt(newPosition2d, From);
+                            y = World.GetWorldAltitudeAt(newPosition2d, From);
                             if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
                             if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
                         }
@@ -165,7 +165,7 @@ namespace BlockmapFramework
                         float y;
                         if (World.IsOnNode(newPosition2d, To))
                         {
-                            y = World.GetWorldHeightAt(newPosition2d, To);
+                            y = World.GetWorldAltitudeAt(newPosition2d, To);
                             if (To.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
                         }
                         else y = World.NodeHeight * To.GetMinAltitude(HelperFunctions.GetOppositeDirection(Direction));

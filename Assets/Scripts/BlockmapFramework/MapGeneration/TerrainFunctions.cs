@@ -7,6 +7,8 @@ namespace BlockmapFramework.WorldGeneration
     public static class TerrainFunctions
     {
 
+        public static void SmoothOutside(BlockmapNode node) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one));
+
         /// <summary>
         /// Smooths the ground area outside the given parcel so there are no hard edges around the parcel.
         /// <br/>Starts with the ring outside the parcel and then goes more and more outside until there are no gaps left.
@@ -305,6 +307,7 @@ namespace BlockmapFramework.WorldGeneration
                         if (groundNode == null) continue;
 
                         groundNode.RecalculateShape();
+                        groundNode.RecalculateCenterWorldPosition();
                     }
                 }
 

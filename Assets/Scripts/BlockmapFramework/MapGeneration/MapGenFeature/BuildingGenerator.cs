@@ -98,6 +98,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         ground.SetAltitude(floorAltitude);
                         ground.SetSurface(groundSurfaces[localCoord]);
+                        TerrainFunctions.SmoothOutside(ground);
                     }
                 }
             }
