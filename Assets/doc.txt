@@ -1,8 +1,4 @@
 Building Generator:
-(/) chance for roof over cut corner
-(/) 	> chance for pilla in corner
-chance for flat outisde floor in cut corner
-	> add smoothing
 doors
 	> prefer concrete area if there
 	> else take a random outside wall
@@ -127,16 +123,7 @@ examples are AutumnLeaves, Snow, Moss
 ---
 
 
-(> allow any height diffs on allowed shapes)
-- Remove limit of max height diff within a node
-	> slopes can also go up 2,3,etc.
-	> keep shape requirements (max 2 different heights per node)
-> implement climb/hillwalk system for slopes
-	- have a slope value for each transition that is 0 for flat, +1 for going 1 tile up, -1 for going 1 down etc
-		- for that have a getter for each node that gives back the height on the center of the node
-		- also have a getter that gives back the height of each side8 of the node
-		- then for the transition calculate the slope origin.center to origin.dir * 0.5 + target.oppositedir to target.center * 0.5
-	- all entities have a max slope they can walk
+- Add MaxSteepness movement attribute and disallow walking on very steep nodes
 
 - Expand entity shapes
 	> Rework dimensions attribute of entities
@@ -154,6 +141,7 @@ examples are AutumnLeaves, Snow, Moss
 - Editor-Feature: World Generation Tool: Expand by x chunks in direction
 
 - Editor improvements:
+	> pipette: press a button when hovering a wall/air node/fence etc. to instantly switch selection to that type
 	> wall height
 	> wall tool: click on existing wall to change shape/material (as long as side is valid for selected shape)
 	> air node drag
@@ -311,9 +299,6 @@ Camera MSAA Anti-Aliasing is causing black pixel artifacts on air node mesh seam
 Surface blending in SurfaceShader isn't perfect (but good enough so it's usually not noticable)
 
 -------- RETIRED IDEAS ------------
-
-- Disallow 0101 and 1010 shapes
-- Disallow 2110 and 0112 shapes
 
 - Shoot multiple rays at a node to check vision (if performance allows)
 	> also at entities on node

@@ -201,10 +201,17 @@ namespace BlockmapFramework
             SetAltitude(HelperFunctions.GetFlatHeights(altitude));
         }
 
-        protected virtual bool IsValidShape(Dictionary<Direction, int> altitude)
+        private bool IsValidShape(Dictionary<Direction, int> altitude)
         {
             if (altitude.Values.Any(x => x < World.MAP_EDGE_ALTITUDE)) return false;
             if (altitude.Values.Any(x => x > World.MAX_ALTITUDE)) return false;
+
+            // Not allowed that the altitude change between 2 corners is greater than World.MAX_NODE_STEEPNESS
+            if (Mathf.Abs(altitude[Direction.SE] - altitude[Direction.SW]) > World.MAX_NODE_STEEPNESS ||
+            Mathf.Abs(altitude[Direction.SW] - altitude[Direction.NW]) > World.MAX_NODE_STEEPNESS ||
+            Mathf.Abs(altitude[Direction.NW] - altitude[Direction.NE]) > World.MAX_NODE_STEEPNESS ||
+            Mathf.Abs(altitude[Direction.NE] - altitude[Direction.SE]) > World.MAX_NODE_STEEPNESS)
+                return false;
 
             return true;
         }

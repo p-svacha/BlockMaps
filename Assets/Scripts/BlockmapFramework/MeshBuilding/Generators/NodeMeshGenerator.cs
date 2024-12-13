@@ -202,10 +202,10 @@ namespace BlockmapFramework
                 float startPos =  stepSize * i;
                 float stepHeight = stepSize + additionalStepHeight;
 
-                if (node.Shape == "0022") meshBuilder.BuildCube(node, submesh, new Vector3(0f, startPos, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
-                else if (node.Shape == "2002") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, 1f - startPos - stepSize, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
-                else if (node.Shape == "2200") meshBuilder.BuildCube(node, submesh, new Vector3(0f, 1f - startPos - stepSize, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
-                else if (node.Shape == "0220") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, startPos, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
+                if (node.Shape == "0011") meshBuilder.BuildCube(node, submesh, new Vector3(0f, startPos, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
+                else if (node.Shape == "1001") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, 1f - startPos - stepSize, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
+                else if (node.Shape == "1100") meshBuilder.BuildCube(node, submesh, new Vector3(0f, 1f - startPos - stepSize, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
+                else if (node.Shape == "0110") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, startPos, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
             }
         }
     }

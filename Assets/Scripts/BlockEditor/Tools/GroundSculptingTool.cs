@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 namespace WorldEditor
 {
@@ -19,6 +20,7 @@ namespace WorldEditor
 
         [Header("Elements")]
         public Toggle SmoothEdgeToggle;
+        public TMP_InputField SmoothStepInput;
 
         public override void UpdateTool()
         {
@@ -74,7 +76,7 @@ namespace WorldEditor
         {
             if (World.HoveredGroundNode == null) return;
 
-            Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)));
+            Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
             modifiedArea.UpdateWorld();
         }
 
@@ -115,7 +117,7 @@ namespace WorldEditor
                     // Smooth outside edges of affected nodes
                     if (SmoothEdgeToggle.isOn)
                     {
-                        Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, coordinates, new Vector2Int(AreaSize, AreaSize)));
+                        Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, coordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
                         modifiedArea.UpdateWorld();
                     }
 

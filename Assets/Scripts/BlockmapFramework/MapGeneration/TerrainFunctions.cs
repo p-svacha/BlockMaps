@@ -7,14 +7,15 @@ namespace BlockmapFramework.WorldGeneration
     public static class TerrainFunctions
     {
 
-        public static void SmoothOutside(BlockmapNode node) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one));
+        public static void SmoothOutside(BlockmapNode node, int smoothStep) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep);
 
         /// <summary>
         /// Smooths the ground area outside the given parcel so there are no hard edges around the parcel.
         /// <br/>Starts with the ring outside the parcel and then goes more and more outside until there are no gaps left.
+        /// <br/>Smooth step defines the targeted steepness along the smoothed area.
         /// <br/>Returns the modified area as a new parcel.
         /// </summary>
-        public static Parcel SmoothOutside(World world, Parcel parcel)
+        public static Parcel SmoothOutside(World world, Parcel parcel, int smoothStep = 1)
         {
             bool anotherLayerRequired;
 
@@ -55,25 +56,25 @@ namespace BlockmapFramework.WorldGeneration
                             groundNode.Altitude[Direction.SW] = westGroundNode.Altitude[Direction.SE];
 
                             // Check if we have to adjust east side too so it's not too steep
-                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] > 1)
+                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] + 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] < -1)
+                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] - 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
 
-                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] > 1)
+                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] + 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] < -1)
+                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] - 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -88,25 +89,25 @@ namespace BlockmapFramework.WorldGeneration
                             groundNode.Altitude[Direction.SE] = eastGroundNode.Altitude[Direction.SW];
 
                             // Check if we have to adjust west side too so it's not too steep
-                            if(groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] > 1)
+                            if(groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] + 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] < -1)
+                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] - 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
 
-                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] > 1)
+                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] + 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] < -1)
+                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] - 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -121,25 +122,25 @@ namespace BlockmapFramework.WorldGeneration
                             groundNode.Altitude[Direction.SW] = southGroundNode.Altitude[Direction.NW];
 
                             // Check if we have to adjust south side too so it's not too steep
-                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.SE] > 1)
+                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.SE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.SE] + 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.SE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.SE] < -1)
+                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.SE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.SE] - 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.SE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
 
-                            if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.SW] > 1)
+                            if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.SW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.SW] + 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.SW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.SW] < -1)
+                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.SW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.SW] - 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.SW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -154,25 +155,25 @@ namespace BlockmapFramework.WorldGeneration
                             groundNode.Altitude[Direction.NW] = northGroundNode.Altitude[Direction.SW];
 
                             // Check if we have to adjust south side too so it's not too steep
-                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.NE] > 1)
+                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.NE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.NE] + 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.NE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.NE] < -1)
+                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.NE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.NE] - 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.NE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
 
-                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.NW] > 1)
+                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.NW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.NW] + 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.NW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.NW] < -1)
+                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.NW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.NW] - 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.NW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -208,14 +209,14 @@ namespace BlockmapFramework.WorldGeneration
                             GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E));
                             groundNode.Altitude[Direction.SE] = eGroundNode.Altitude[Direction.SW];
 
-                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] > 1)
+                            if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] + 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] < -1)
+                            else if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] - 1;
+                                groundNode.Altitude[Direction.SW] = groundNode.Altitude[Direction.SE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -232,14 +233,14 @@ namespace BlockmapFramework.WorldGeneration
                             GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W));
                             groundNode.Altitude[Direction.SW] = wGroundNode.Altitude[Direction.SE];
 
-                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] > 1)
+                            if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] + 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] < -1)
+                            else if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] - 1;
+                                groundNode.Altitude[Direction.SE] = groundNode.Altitude[Direction.SW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -256,14 +257,14 @@ namespace BlockmapFramework.WorldGeneration
                             GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W));
                             groundNode.Altitude[Direction.NW] = wGroundNode.Altitude[Direction.NE];
 
-                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] > 1)
+                            if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] + 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] < -1)
+                            else if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] - 1;
+                                groundNode.Altitude[Direction.NE] = groundNode.Altitude[Direction.NW] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }
@@ -280,14 +281,14 @@ namespace BlockmapFramework.WorldGeneration
                             GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E));
                             groundNode.Altitude[Direction.NE] = eGroundNode.Altitude[Direction.NW];
 
-                            if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] > 1)
+                            if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] > smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] + 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] + smoothStep;
                                 anotherLayerRequired = true;
                             }
-                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] < -1)
+                            else if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] < -smoothStep)
                             {
-                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] - 1;
+                                groundNode.Altitude[Direction.NW] = groundNode.Altitude[Direction.NE] - smoothStep;
                                 anotherLayerRequired = true;
                             }
                         }

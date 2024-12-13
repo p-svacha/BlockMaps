@@ -42,10 +42,15 @@ namespace BlockmapFramework
         public int MaxAltitude { get; private set; }
 
         /// <summary>
-        /// Shape is saved in a string with 4 chars, where each char is a corner (SW, SE, NE, NW) storing the height above the min height of the node.
+        /// Shape is a string that stores for each corner (SW, SE, NE, NW) if it is raised (1) or equal the base altitude of the node (0).
         /// <br/> For example "1001" is a west-facing up-slope.
         /// </summary>
         public string Shape { get; protected set; }
+
+        /// <summary>
+        /// How steep the slope of this node is. Equals the maximum altitude difference between two adjacent corners.
+        /// </summary>
+        public int Steepness { get; protected set; }
 
         /// <summary>
         /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
@@ -175,14 +180,28 @@ namespace BlockmapFramework
             BaseAltitude = Altitude.Values.Min();
             MaxAltitude = Altitude.Values.Max();
             Shape = GetShape(Altitude);
+            Steepness = GetSteepness(Altitude);
         }
 
         protected string GetShape(Dictionary<Direction, int> altitude)
         {
-            int baseHeight = altitude.Values.Min();
+            int baseAlt = altitude.Values.Min();
             string binaryShape = "";
-            foreach (Direction dir in HelperFunctions.GetCorners()) binaryShape += (altitude[dir] - baseHeight).ToString();
+            foreach (Direction dir in HelperFunctions.GetCorners())
+            {
+                if (altitude[dir] == baseAlt) binaryShape += "0";
+                else binaryShape += "1";
+            }
             return binaryShape;
+        }
+        protected int GetSteepness(Dictionary<Direction, int> altitude)
+        {
+            return Mathf.Max(
+                Mathf.Abs(altitude[Direction.SE] - altitude[Direction.SW]),
+                Mathf.Abs(altitude[Direction.SW] - altitude[Direction.NW]),
+                Mathf.Abs(altitude[Direction.NW] - altitude[Direction.NE]),
+                Mathf.Abs(altitude[Direction.NE] - altitude[Direction.SE])
+            );
         }
 
         #endregion
@@ -968,17 +987,7 @@ namespace BlockmapFramework
                 case "0110":
                 case "0011":
                 case "1001":
-                case "1012":
-                case "1210":
-                case "2200":
-                case "0220":
-                case "0022":
-                case "2002":
                     return true;
-
-                case "2101":
-                case "0121":
-                    return false;
 
                 case "0001":
                 case "1011":

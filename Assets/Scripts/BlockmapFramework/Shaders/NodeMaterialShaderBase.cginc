@@ -150,7 +150,7 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
     fixed4 c = _Color;
 
     float dotProduct = dot(WorldNormalVector(IN, o.Normal), float3(0, 1, 0));
-    float isFacingUpwards = (dotProduct > 0.7);
+    float isFacingUpwards = (dotProduct > 0.4);
 
     // ######################################################################### TRIPLANAR TEXTURE #########################################################################
 

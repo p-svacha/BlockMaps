@@ -33,6 +33,7 @@ namespace BlockmapFramework
         /// Maximum y coordiante a tile can have.
         /// </summary>
         public const int MAX_ALTITUDE = 30;
+        public const int MAX_NODE_STEEPNESS = 4;
 
         /// <summary>
         /// Physical height (y) of a tile.
