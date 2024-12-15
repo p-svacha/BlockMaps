@@ -89,7 +89,7 @@ Material:
     - _Mode: 0
     - _NormalStrength: -0.2
     - _OcclusionStrength: 1
-    - _Offset: 0.1
+    - _Offset: 0.2
     - _Parallax: 0.02
     - _ShowGrid: 0
     - _SideOnlySteepness: 0.7
@@ -97,6 +97,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TextureRotation: 0
     - _TextureScale: 2.5
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0

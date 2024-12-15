@@ -23,6 +23,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AOMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -59,6 +63,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MetallicMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -68,6 +76,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -89,10 +101,11 @@ Material:
     - _GlossyReflections: 1
     - _HeightPower: 0
     - _Metallic: 0
+    - _MetallicPower: 0
     - _Mode: 0
     - _NormalStrength: 0
     - _OcclusionStrength: 1
-    - _Offset: 0.1
+    - _Offset: 0.008
     - _Parallax: 0.02
     - _ShowGrid: 0
     - _ShowTileOverlay: 0
@@ -101,11 +114,13 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TextureRotation: 0
     - _TextureScale: 1
     - _TileOverlayX: 0
     - _TileOverlayY: 0
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
+    - _UseAO: 0
     - _UseTextures: 1
     - _ZPriority: 0
     - _ZWrite: 1

@@ -111,6 +111,7 @@ namespace WorldEditor
                 bool canSwim = CanSwimToggle.isOn;
                 ClimbingCategory climbingSkill = (ClimbingCategory)ClimbingSkillDropdown.value;
                 int height = int.Parse(HeightInput.text);
+                if (height > Comp_Movement.MaxEntityHeight) return;
                 int maxHopUpDistance = int.Parse(MaxHopUpDistanceInput.text);
                 int maxHopDownDistance = int.Parse(MaxHopDownDistanceInput.text);
                 World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill, maxHopUpDistance, maxHopDownDistance));

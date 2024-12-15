@@ -3,14 +3,14 @@ Shader "Custom/NodeMaterialShader"
     Properties // Exposed to editor in material insepctor
     {
         [Toggle] _FullVisibility("Full Visibility", Float) = 1
-        [Toggle] _UseTextures("Use Textures", Float) = 0
+        [Toggle] _UseTextures("Use Textures", Float) = 1
         _MainTex("Texture", 2D) = "none" {}
         _TextureRotation("Texture Rotation", Range(0, 360)) = 0
         _TextureScale("Texture Scale", Float) = 1
         _TextureTint("Texture Tint", Color) = (1,1,1,0)
 
         _Color("Color", Color) = (1,1,1,1)
-        _Offset("Render Priority (lowest renders first, use 0.1 steps)", float) = 0
+        _Offset("Render Priority (lowest renders first, use 0.004 steps)", float) = 0
 
         // Texture mode values
         
@@ -37,13 +37,18 @@ Shader "Custom/NodeMaterialShader"
         */
 
         _RoughnessTex("Roughness Texture", 2D) = "white" {}
-        _Metallic("Metallic", Range(0,1)) = 0.0
 
         _NormalMap("Normal Map", 2D) = "bump" {}  // New property for the normal map
-        _NormalStrength("Normal Strength", Range(-2, 2)) = -0.2  // New property for normal strength
+        _NormalStrength("Normal Strength", Range(-2, 2)) = 0  // New property for normal strength
 
         _HeightMap("Height Map", 2D) = "white" {}
-        _HeightPower("Height Power", Range(0,.125)) = 0.03
+        _HeightPower("Height Power", Range(0,.125)) = 0
+
+        _MetallicMap("Metallic Map", 2D) = "black" {}
+        _MetallicPower("Metallic Power", Range(0,1)) = 0
+
+        [Toggle] _UseAO("Use Ambient Occlusion?", Float) = 0
+        _AOMap("Ambient Occlusion Map", 2D) = "white" {}
     }
 
         SubShader

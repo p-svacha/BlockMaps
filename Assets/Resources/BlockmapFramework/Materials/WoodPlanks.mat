@@ -7,14 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ConcreteLight
+  m_Name: WoodPlanks
   m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _CANSHOWOVERLAYS_ON
-  - _CANSHOWTILEOVERLAY_ON
   - _FULLVISIBILITY_ON
   - _SHOWGRID_ON
+  - _USEAO_ON
   - _USETEXTURES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -26,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _AOMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7e63e367740d6004893477d62795aeba, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -54,11 +53,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HeightMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: f0a0225e57712564a98abf750cca23fc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ec801ad075b375644866ca9eff2ea15b, type: 3}
+        m_Texture: {fileID: 2800000, guid: bedb3a0cee3b7784bab33ad0e6f8db25, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -66,11 +65,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8d8c766c5bef42744b68a18f9e428e31, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5e0a4750ff721dd45a737c894d275591, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -85,54 +84,42 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _TileOverlayTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _CanShowOverlays: 1
-    - _CanShowTileOverlay: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _FullVisibility: 1
     - _GlossMapScale: 1
-    - _Glossiness: 0
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _HeightPower: 0
     - _Metallic: 0
-    - _MetallicPower: 0
+    - _MetallicPower: 1
     - _Mode: 0
-    - _NormalStrength: 0
+    - _NormalStrength: 0.1
     - _OcclusionStrength: 1
     - _Offset: 0
     - _Parallax: 0.02
     - _ShowGrid: 1
-    - _ShowTileOverlay: 0
     - _SideOnlySteepness: 0.7
     - _SideStartSteepness: 0.3
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TextureRotation: 0
-    - _TextureScale: 10
-    - _TileOverlayX: 0
-    - _TileOverlayY: 0
+    - _TextureScale: 2
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
-    - _UseAO: 0
+    - _UseAO: 1
     - _UseTextures: 1
-    - _ZPriority: 0
     - _ZWrite: 1
     - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
+    - _Color: {r: 0.34901962, g: 0.27058825, b: 0.22352943, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
     - _TextureTint: {r: 1, g: 1, b: 1, a: 0}
-    - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -950,12 +950,18 @@ namespace BlockmapFramework
         private void DoUpdateNavmesh()
         {
             System.Diagnostics.Stopwatch fullNavmeshTimer = new System.Diagnostics.Stopwatch();
+            System.Diagnostics.Stopwatch recalcWorldPos = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch recalcPassabilityTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch straightTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch diagonalTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch hopTransitionsTimer = new System.Diagnostics.Stopwatch();
             System.Diagnostics.Stopwatch climbTransitionsTimer = new System.Diagnostics.Stopwatch();
             fullNavmeshTimer.Start();
+
+            recalcWorldPos.Start();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalculateCenterWorldPosition();
+            recalcWorldPos.Stop();
+            Debug.Log("Recalculating node world positions took " + recalcWorldPos.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
             recalcPassabilityTimer.Start();
             foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalcuatePassability();
@@ -1098,9 +1104,9 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildAirNode(Vector2Int worldCoordinates, int altitude, SurfaceDef surfaceDef, bool updateWorld = true)
+        public AirNode BuildAirNode(Vector2Int worldCoordinates, int altitude, SurfaceDef surfaceDef, bool updateWorld = true)
         {
-            if (!CanBuildAirNode(worldCoordinates, altitude)) return;
+            if (!CanBuildAirNode(worldCoordinates, altitude)) return null;
 
             Chunk chunk = GetChunk(worldCoordinates);
             Vector2Int localCoordinates = chunk.GetLocalCoordinates(worldCoordinates);
@@ -1114,6 +1120,8 @@ namespace BlockmapFramework
                 RedrawNodesAround(newNode.WorldCoordinates);
                 UpdateVisionOfNearbyEntitiesDelayed(newNode.CenterWorldPosition);
             }
+
+            return newNode;
         }
         public bool CanRemoveAirNode(AirNode node)
         {
@@ -1587,18 +1595,18 @@ namespace BlockmapFramework
 
             return possibleTargetNodes;
         }
-        public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side)
+        public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side, bool updateWorld = true)
         {
-            SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to));
+            SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to), isMirrored: false, updateWorld: updateWorld);
         }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)
         {
             return CanBuildOnNodeSide(node, side, height, allowSlopes: false);
         }
-        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored)
+        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld = true)
         {
-            SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored);
+            SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored, updateWorld);
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)

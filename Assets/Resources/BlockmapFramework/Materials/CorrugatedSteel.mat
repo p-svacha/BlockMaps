@@ -13,6 +13,7 @@ Material:
   m_InvalidKeywords:
   - _CANSHOWOVERLAYS_ON
   - _FULLVISIBILITY_ON
+  - _USEAO_ON
   - _USETEXTURES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -23,6 +24,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AOMap:
+        m_Texture: {fileID: 2800000, guid: 108c8d60e3cc27c498145b43f69c0e97, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -59,6 +64,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MetallicMap:
+        m_Texture: {fileID: 2800000, guid: 46185c5805ffb044484986593869e511, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _NormalMap:
         m_Texture: {fileID: 2800000, guid: 75185d4e7530c1743bbf091e3067d5ca, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -93,10 +102,11 @@ Material:
     - _GlossyReflections: 1
     - _HeightPower: 0.02
     - _Metallic: 0.5
+    - _MetallicPower: 0.1
     - _Mode: 0
     - _NormalStrength: -0.2
     - _OcclusionStrength: 1
-    - _Offset: -0.35
+    - _Offset: -0.004
     - _Parallax: 0.02
     - _ShowGrid: 0
     - _ShowTileOverlay: 0
@@ -112,6 +122,7 @@ Material:
     - _Transparency: 1
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
+    - _UseAO: 1
     - _UseTextures: 1
     - _ZPriority: 1
     - _ZWrite: 1

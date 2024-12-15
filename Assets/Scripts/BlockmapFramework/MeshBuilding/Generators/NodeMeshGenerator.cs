@@ -195,17 +195,19 @@ namespace BlockmapFramework
         {
             int submesh = meshBuilder.GetSubmesh(material);
             int numSteps = 5;
-            float stepSize = (1f / numSteps);
+            float stepWidthInterval = (1f / numSteps);
+            float stepHeightInterval = ((node.Steepness * World.NodeHeight) / numSteps);
 
             for (int i = 0; i < numSteps; i++)
             {
-                float startPos =  stepSize * i;
-                float stepHeight = stepSize + additionalStepHeight;
+                float startPosXZ =  stepWidthInterval * i;
+                float startPosY = stepHeightInterval * i;
+                float stepHeight = stepHeightInterval + additionalStepHeight;
 
-                if (node.Shape == "0011") meshBuilder.BuildCube(node, submesh, new Vector3(0f, startPos, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
-                else if (node.Shape == "1001") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, 1f - startPos - stepSize, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
-                else if (node.Shape == "1100") meshBuilder.BuildCube(node, submesh, new Vector3(0f, 1f - startPos - stepSize, startPos), new Vector3(1f, stepHeight, stepSize), adjustToNodeShape: false);
-                else if (node.Shape == "0110") meshBuilder.BuildCube(node, submesh, new Vector3(startPos, startPos, 0f), new Vector3(stepSize, stepHeight, 1f), adjustToNodeShape: false);
+                if (node.Shape == "0011") meshBuilder.BuildCube(node, submesh, new Vector3(0f, startPosY, startPosXZ), new Vector3(1f, stepHeight, stepWidthInterval), adjustToNodeShape: false);
+                else if (node.Shape == "1001") meshBuilder.BuildCube(node, submesh, new Vector3(startPosXZ, (node.Steepness * World.NodeHeight) - startPosY - stepHeightInterval, 0f), new Vector3(stepWidthInterval, stepHeight, 1f), adjustToNodeShape: false);
+                else if (node.Shape == "1100") meshBuilder.BuildCube(node, submesh, new Vector3(0f, (node.Steepness * World.NodeHeight) - startPosY - stepHeightInterval, startPosXZ), new Vector3(1f, stepHeight, stepWidthInterval), adjustToNodeShape: false);
+                else if (node.Shape == "0110") meshBuilder.BuildCube(node, submesh, new Vector3(startPosXZ, startPosY, 0f), new Vector3(stepWidthInterval, stepHeight, 1f), adjustToNodeShape: false);
             }
         }
     }

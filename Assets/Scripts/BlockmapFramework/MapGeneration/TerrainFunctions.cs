@@ -308,7 +308,6 @@ namespace BlockmapFramework.WorldGeneration
                         if (groundNode == null) continue;
 
                         groundNode.RecalculateShape();
-                        groundNode.RecalculateCenterWorldPosition();
                     }
                 }
 

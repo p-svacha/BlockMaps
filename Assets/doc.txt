@@ -1,11 +1,10 @@
 Building Generator:
-doors
-	> prefer concrete area if there
-	> else take a random outside wall
-	> chance for 1-3 doors
+(/) doors
+(/) lowest wall piece black metal material
+(/) windows
+¨ladders outside
 green wall type
 chance for different walls on same building
-lowest wall piece black metal material
 drainage pipe scenery entity
 path towards building door (with stairs if necessary)
 overhang roof
@@ -25,7 +24,9 @@ Map Modifiers:
 
 Increase performance of detecting climb transitions on empty perlin map
 maybe also other steps
-Goal: 512 x 512 map in 10 seconds preferred, 20 max. Now it takes like 50
+Goal: 512 x 512 map (32 chunks) in 10 seconds preferred, 20 max. Now it takes like 50
+
+fix are for hop transitions - arc always has a height of 1 and going further down/up is just straight
 
 
 

@@ -12,6 +12,11 @@ namespace BlockmapFramework.WorldGeneration
     {
         private const int MinSize = 5;
 
+        private static List<WallMaterialDef> WallMaterials = new List<WallMaterialDef>()
+        {
+            WallMaterialDefOf.Brick,
+            WallMaterialDefOf.WoodPlanks,
+        };
 
         public static void GenerateBuilding(Parcel parcel, BlockmapNode node)
         {
@@ -21,7 +26,7 @@ namespace BlockmapFramework.WorldGeneration
             World world = parcel.World;
 
 
-            WallMaterialDef wallMaterial = WallMaterialDefOf.Brick;
+            WallMaterialDef mainWallMaterial = GetRandomMaterial();
             SurfaceDef floor = SurfaceDefOf.WoodParquet;
 
             int floorAltitude = node.BaseAltitude;
@@ -37,6 +42,19 @@ namespace BlockmapFramework.WorldGeneration
             Dictionary<Vector2Int, int> roofAltitude = new Dictionary<Vector2Int, int>(); // altitude at which roof nodes get built
             Dictionary<Vector2Int, SurfaceDef> groundSurfaces = new Dictionary<Vector2Int, SurfaceDef>(); // If values are set here, these ground nodes will be flattened and converted to that surface
             Dictionary<Vector2Int, Dictionary<Direction, bool>> cornerPillars = new Dictionary<Vector2Int, Dictionary<Direction, bool>>(); // corner pillars from ground to roof
+
+            // Generate noises used when placing the building
+            Dictionary<Direction, PerlinNoise> windowNoises = new Dictionary<Direction, PerlinNoise>();
+            foreach (Direction side in HelperFunctions.GetSides())
+            {
+                windowNoises.Add(side, new PerlinNoise() { Scale = 0.2f });
+            }
+
+            // Declare dictionaries that are filled when placing the building
+            Dictionary<Vector2Int, BlockmapNode> buildingFloorNodes = new Dictionary<Vector2Int, BlockmapNode>(); // the erdgeschoss node for each coordinate
+
+            bool useDarkMetalFoundation = Random.value < 0.5f;
+
             for (int x = 0; x < buildingSizeX; x++)
             {
                 for (int z = 0; z < buildingSizeY; z++)
@@ -85,11 +103,13 @@ namespace BlockmapFramework.WorldGeneration
                         {
                             ground.SetAltitude(floorAltitude);
                             ground.SetSurface(floor);
+                            buildingFloorNodes.Add(localCoord, ground);
                         }
                         else // Create air node
                         {
                             if (ground.MaxAltitude == floorAltitude) ground.SetAltitude(floorAltitude - 1); // lower ground 1 if it would intersect new air node
-                            world.BuildAirNode(worldCoord, floorAltitude, floor, updateWorld: false);
+                            AirNode newNode = world.BuildAirNode(worldCoord, floorAltitude, floor, updateWorld: false);
+                            buildingFloorNodes.Add(localCoord, newNode);
                         }
                     }
 
@@ -103,7 +123,7 @@ namespace BlockmapFramework.WorldGeneration
                 }
             }
 
-            // Place walls
+            // Place walls / doors
             for (int x = 0; x < buildingSizeX; x++)
             {
                 for (int z = 0; z < buildingSizeY; z++)
@@ -111,28 +131,53 @@ namespace BlockmapFramework.WorldGeneration
                     Vector2Int localCoord = new Vector2Int(x, z);
                     Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
                     int localHeight = buildingHeight[localCoord];
+                    int ceilingAltidude = floorAltitude + localHeight;
+                    GroundNode groundNode = world.GetGroundNode(worldCoord);
 
                     // Check if wall is needed in any direction
-                    if (localHeight > 0)
+                    if (localHeight > 0) // This node is inside building
                     {
                         foreach (Direction side in HelperFunctions.GetSides())
                         {
-                            if (!buildingHeight.TryGetValue(HelperFunctions.GetWorldCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight != localHeight)
-                            {
-                                // Wall above floor
-                                for (int y = adjHeight; y < localHeight; y++)
-                                {
-                                    world.BuildWall(new Vector3Int(worldCoord.x, floorAltitude + y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
-                                }
+                            // Check if it is a wall leading to the outside of the building
+                            bool isWallToOutsideBuilding = (!buildingHeight.TryGetValue(HelperFunctions.GetWorldCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight == 0);
+                            
+                            // Check if it is a wall due to different ceiling height
+                            bool isWallWithinBuilding = (adjHeight > 0 && adjHeight < localHeight);
 
-                                // Wall below floor (to ground)
-                                if (adjHeight == 0)
+                            if (isWallToOutsideBuilding)
+                            {
+                                // Check if we want a door here
+                                bool placeDoor = Random.value < 0.05f;
+                                int doorHeight = 4;
+                                if(placeDoor) world.BuildDoor(buildingFloorNodes[localCoord], side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
+
+                                bool placeWindow = !placeDoor && windowNoises[side].GetValue(worldCoord.x, worldCoord.y) > 0.65f;
+                                int windowLowerMargin = 2;
+                                int windowHeight = 2;
+
+                                // Wall from ground to ceiling
+                                for (int y = groundNode.BaseAltitude; y < ceilingAltidude; y++)
                                 {
-                                    GroundNode groundNode = world.GetGroundNode(worldCoord);
-                                    for (int y = groundNode.BaseAltitude; y < floorAltitude; y++)
+                                    if (!placeDoor || (y < floorAltitude || y >= floorAltitude + doorHeight))
                                     {
-                                        world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, WallShapeDefOf.Solid, wallMaterial, updateWorld: false);
+                                        WallMaterialDef wallMat = mainWallMaterial;
+                                        if (useDarkMetalFoundation && y <= floorAltitude) wallMat = WallMaterialDefOf.MetalDark;
+
+                                        WallShapeDef wallShape = WallShapeDefOf.Solid;
+                                        if (placeWindow && (y >= floorAltitude + windowLowerMargin && y < floorAltitude + windowLowerMargin + windowHeight)) wallShape = WallShapeDefOf.Window;
+
+                                        world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, wallShape, wallMat, updateWorld: false);
                                     }
+                                }
+                            }
+                            else if (isWallWithinBuilding)
+                            {
+                                // Wall from lower adjacent ceiling height to this ceiling height
+                                int adjCeilAltitude = floorAltitude + adjHeight;
+                                for (int y = adjCeilAltitude; y < ceilingAltidude; y++)
+                                {
+                                    world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, WallShapeDefOf.Solid, mainWallMaterial, updateWorld: false);
                                 }
                             }
                         }
@@ -146,12 +191,11 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         if (cornerPillars[localCoord][corner])
                         {
-                            GroundNode groundNode = world.GetGroundNode(worldCoord);
                             Debug.Log($"haspilar: {groundNode.Altitude[corner]} - {roofAltitude[localCoord]}");
 
                             for (int y = groundNode.Altitude[corner]; y < floorAltitude + roofAltitude[localCoord]; y++)
                             {
-                                world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), corner, WallShapeDefOf.Corner, wallMaterial, updateWorld: false);
+                                world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), corner, WallShapeDefOf.Corner, mainWallMaterial, updateWorld: false);
                             }
                         }
                     }
@@ -257,7 +301,7 @@ namespace BlockmapFramework.WorldGeneration
 
         private static WallMaterialDef GetRandomMaterial()
         {
-            return DefDatabase<WallMaterialDef>.AllDefs.RandomElement();
+            return WallMaterials.RandomElement();
         }
     }
 

@@ -19,6 +19,9 @@ float _TriplanarBlendSharpness;
 float _SideStartSteepness;
 float _SideOnlySteepness;
 
+// Roughness Map
+sampler2D _RoughnessTex;
+
 // Normal Map
 sampler2D _NormalMap;
 half _NormalStrength;
@@ -26,6 +29,14 @@ half _NormalStrength;
 // Height Map
 sampler2D _HeightMap;
 float _HeightPower;
+
+// Metallic Map
+sampler2D _MetallicMap;
+float _MetallicPower;
+
+// Ambient Occlusion Map
+float _UseAO;
+sampler2D _AOMap;
 
 // Player colors
 fixed4 _PlayerColors[8];
@@ -56,12 +67,6 @@ fixed4 _MultiOverlayColor;
 float _ZoneBorderWidth;
 float _ZoneBorders[256];
 float _ZoneBorderColors[256]; // Contains player id for each tile, colors are taken from _PlayerColors
-
-// Roughness Texture
-sampler2D _RoughnessTex;
-
-// Material attributes
-half _Metallic;
 
 float _FullVisibility;
 float _TileVisibility[324];
@@ -161,22 +166,19 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
         half2 xUV = IN.worldPos.zy / _TextureScale;
         half2 zUV = IN.worldPos.xy / _TextureScale;
 
-        // Get rotated uv's
+        // Get rotated UVs
         float rotation = _TextureRotation;
-
         yUV = RotateUV(yUV, rotation);
         xUV = RotateUV(xUV, rotation);
         zUV = RotateUV(zUV, rotation);
 
-        // Get the absolute value of the world normal.
-        // Put the blend weights to the power of BlendSharpness: The higher the value, the sharper the transition between the planar maps will be.
+        // Get the absolute value of the world normal, put the blend weights to the power of the sharpness
         half3 blendWeights = pow(abs(WorldNormalVector(IN, o.Normal)), _TriplanarBlendSharpness);
 
-        // ----- TRIPLANAR ------
-        // Divide our blend mask by the sum of it's components, this will make x+y+z=1
+        // Normalize blend weights so x+y+z=1
         blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
 
-        // Define how much of alpha is top texture
+        // Determine top texture strength based on steepness
         float steepness = 1 - blendWeights.y;
         float topTextureStrength;
         if (steepness < _SideStartSteepness)
@@ -192,33 +194,58 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
             topTextureStrength = 0;
         }
 
-
-        // Get offset for height map
+        // Get offset for height map (parallax)
         float2 texOffsetY = ParallaxOffset(tex2D(_HeightMap, yUV).g, _HeightPower, IN.viewDir);
         float2 texOffsetX = ParallaxOffset(tex2D(_HeightMap, xUV).g, _HeightPower, IN.viewDir);
         float2 texOffsetZ = ParallaxOffset(tex2D(_HeightMap, zUV).g, _HeightPower, IN.viewDir);
 
-        // Now do texture samples from our diffuse maps with each of the 3 UV set's we've just made.
-        // Blend top with side texture according to how much the surface normal points vertically (y-direction)
+        // Ambient Occlusion
+        if (_UseAO == 1)
+        {
+            half yAO = tex2D(_AOMap, yUV + texOffsetY).r;
+            half xAO = tex2D(_AOMap, xUV + texOffsetX).r;
+            half zAO = tex2D(_AOMap, zUV + texOffsetZ).r;
+
+            // Blend AO values using the same weights as other maps
+            half finalAO = xAO * blendWeights.x + yAO * blendWeights.y + zAO * blendWeights.z;
+
+            // Assign AO to the output struct
+            o.Occlusion = finalAO;
+        }
+        else
+        {
+            o.Occlusion = 1.0;
+        }
+
+        // Metallic blending
+        half yMetallic = tex2D(_MetallicMap, yUV + texOffsetY).r;
+        half xMetallic = tex2D(_MetallicMap, xUV + texOffsetX).r;
+        half zMetallic = tex2D(_MetallicMap, zUV + texOffsetZ).r;
+
+        o.Metallic = _MetallicPower * (xMetallic * blendWeights.x + yMetallic * blendWeights.y + zMetallic * blendWeights.z);
+
+        // Diffuse blending
         half3 yDiff = (1 - topTextureStrength) * tex2D(_MainTex, yUV + texOffsetY) + topTextureStrength * tex2D(_MainTex, yUV + texOffsetY);
         half3 xDiff = (1 - topTextureStrength) * tex2D(_MainTex, xUV + texOffsetX) + topTextureStrength * tex2D(_MainTex, xUV + texOffsetX);
         half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV + texOffsetZ) + topTextureStrength * tex2D(_MainTex, zUV + texOffsetZ);
 
         c.rgb = xDiff * blendWeights.x + yDiff * blendWeights.y + zDiff * blendWeights.z;
 
-        // Normal map (set same triplanar uv's)
+        // Normal map blending
         half3 normalY = UnpackScaleNormal(tex2D(_NormalMap, yUV + texOffsetY), _NormalStrength);
         half3 normalX = UnpackScaleNormal(tex2D(_NormalMap, xUV + texOffsetX), _NormalStrength);
         half3 normalZ = UnpackScaleNormal(tex2D(_NormalMap, zUV + texOffsetZ), _NormalStrength);
 
         o.Normal.rgb = normalX * blendWeights.x + normalY * blendWeights.y + normalZ * blendWeights.z;
 
-        // Roughness map (triplanar blending)
+        // Roughness blending (smoothness = 1 - roughness)
         half yRoughness = tex2D(_RoughnessTex, yUV + texOffsetY).r;
         half xRoughness = tex2D(_RoughnessTex, xUV + texOffsetX).r;
         half zRoughness = tex2D(_RoughnessTex, zUV + texOffsetZ).r;
 
         o.Smoothness = 1.0 - (xRoughness * blendWeights.x + yRoughness * blendWeights.y + zRoughness * blendWeights.z);
+
+
 
         // Tint
         c.rgb *= _TextureTint.rgb;
@@ -319,9 +346,5 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
     // ######################################################################### FINALIZE #########################################################################
 
     o.Albedo = c.rgb;
-
-    // Metallic and smoothness come from slider variables
-    o.Metallic = _Metallic;
-
     o.Alpha = c.a;
 }

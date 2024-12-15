@@ -130,7 +130,6 @@ namespace BlockmapFramework
             else LastHeightChangeWasIncrease = isIncrease;
 
             RecalculateShape();
-            RecalculateCenterWorldPosition();
         }
 
         /// <summary>
@@ -150,7 +149,6 @@ namespace BlockmapFramework
                 if (Altitude[corner] < newHeights[corner]) LastHeightChangeWasIncrease = true;
                 Altitude = newHeights;
                 RecalculateShape();
-                RecalculateCenterWorldPosition();
             }
         }
 
@@ -189,7 +187,6 @@ namespace BlockmapFramework
                     Altitude[dir] = newAltitude[dir];
 
                 RecalculateShape();
-                RecalculateCenterWorldPosition();
             }
         }
 

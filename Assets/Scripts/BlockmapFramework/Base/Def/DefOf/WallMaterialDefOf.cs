@@ -9,5 +9,7 @@ namespace BlockmapFramework
     {
         public static WallMaterialDef Brick;
         public static WallMaterialDef CorrugatedSteel;
+        public static WallMaterialDef MetalDark;
+        public static WallMaterialDef WoodPlanks;
     }
 }

@@ -41,7 +41,21 @@ namespace BlockmapFramework.Defs
                 DefName = "CorrugatedSteel",
                 Label = "corrugated steel",
                 Material = MaterialManager.LoadMaterial("CorrugatedSteel"),
-            }
+            },
+
+            new WallMaterialDef()
+            {
+                DefName = "WoodPlanks",
+                Label = "wood planks",
+                Material = MaterialManager.LoadMaterial("WoodPlanks"),
+            },
+
+            new WallMaterialDef()
+            {
+                DefName = "MetalDark",
+                Label = "dark metal",
+                Material = MaterialManager.LoadMaterial("MetalDark"),
+            },
         };
     }
 }

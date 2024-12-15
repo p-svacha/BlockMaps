@@ -23,7 +23,6 @@ namespace BlockmapFramework
             WaterBody = waterBody;
             GroundNode = surfaceNode;
             GroundNode.SetWaterNode(this);
-            RecalculateCenterWorldPosition();
         }
 
         protected override bool ShouldConnectToNodeDirectly(BlockmapNode adjNode, Direction dir)
