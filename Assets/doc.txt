@@ -1,11 +1,4 @@
 Building Generator:
-(/) doors
-(/) lowest wall piece black metal material
-(/) windows
-¨ladders outside
-green wall type
-chance for different walls on same building
-drainage pipe scenery entity
 path towards building door (with stairs if necessary)
 overhang roof
 basement floor if any ground node is x tiles below floor altitude (x = floor height)

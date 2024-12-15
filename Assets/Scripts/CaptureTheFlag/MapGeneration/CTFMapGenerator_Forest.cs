@@ -135,7 +135,7 @@ namespace CaptureTheFlag
                     Vector2Int nextPosition = position;
                     while (previousPositions.Contains(nextPosition) && numAttempts++ < 10)
                     {
-                        nextPosition = HelperFunctions.GetWorldCoordinatesInDirection(position, HelperFunctions.GetRandomSide());
+                        nextPosition = HelperFunctions.GetCoordinatesInDirection(position, HelperFunctions.GetRandomSide());
                     }
                     position = nextPosition;
                 }

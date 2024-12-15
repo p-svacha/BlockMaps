@@ -39,7 +39,7 @@ namespace BlockmapFramework
                 // Try going east
                 if (x > 0)
                 {
-                    Vector2Int eastCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(yBaseNode.WorldCoordinates, Direction.E);
+                    Vector2Int eastCoordinates = HelperFunctions.GetCoordinatesInDirection(yBaseNode.WorldCoordinates, Direction.E);
                     List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
                     BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yBaseNode, x, Direction.E));
                     if (eastNode == null) return null;
@@ -52,7 +52,7 @@ namespace BlockmapFramework
                 for (int y = 0; y < dimensions.z - 1; y++)
                 {
                     // Try going north
-                    Vector2Int northCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(yNode.WorldCoordinates, Direction.N);
+                    Vector2Int northCoordinates = HelperFunctions.GetCoordinatesInDirection(yNode.WorldCoordinates, Direction.N);
                     List<BlockmapNode> candidateNodesNorth = world.GetNodes(northCoordinates);
                     BlockmapNode northNode = candidateNodesNorth.FirstOrDefault(x => world.DoAdjacentHeightsMatch(yNode, x, Direction.N));
                     if (northNode == null) return null;
@@ -69,7 +69,7 @@ namespace BlockmapFramework
             {
                 for (int i = 0; i < dimensions.x - 1; i++)
                 {
-                    Vector2Int eastCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(cornerNodeNW.WorldCoordinates, Direction.E);
+                    Vector2Int eastCoordinates = HelperFunctions.GetCoordinatesInDirection(cornerNodeNW.WorldCoordinates, Direction.E);
                     List<BlockmapNode> candidateNodesEast = world.GetNodes(eastCoordinates);
                     BlockmapNode eastNode = candidateNodesEast.FirstOrDefault(x => world.DoAdjacentHeightsMatch(cornerNodeNW, x, Direction.E));
 

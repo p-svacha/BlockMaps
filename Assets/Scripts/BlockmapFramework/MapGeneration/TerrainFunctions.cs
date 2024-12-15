@@ -49,7 +49,7 @@ namespace BlockmapFramework.WorldGeneration
                         // East
                         if (isEastEdge && !isSouthEdge && !isNorthEdge)
                         {
-                            GroundNode westGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W));
+                            GroundNode westGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.W));
 
                             // Match west side to western adjacent nodes east side
                             groundNode.Altitude[Direction.NW] = westGroundNode.Altitude[Direction.NE];
@@ -82,7 +82,7 @@ namespace BlockmapFramework.WorldGeneration
                         // West
                         if (isWestEdge && !isSouthEdge && !isNorthEdge)
                         {
-                            GroundNode eastGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E));
+                            GroundNode eastGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.E));
 
                             // Match east side to eastern adjacent nodes west side
                             groundNode.Altitude[Direction.NE] = eastGroundNode.Altitude[Direction.NW];
@@ -115,7 +115,7 @@ namespace BlockmapFramework.WorldGeneration
                         // North
                         if (isNorthEdge && !isEastEdge && !isWestEdge)
                         {
-                            GroundNode southGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.S));
+                            GroundNode southGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.S));
 
                             // Match south side to southern adjacent nodes north side
                             groundNode.Altitude[Direction.SE] = southGroundNode.Altitude[Direction.NE];
@@ -148,7 +148,7 @@ namespace BlockmapFramework.WorldGeneration
                         // South
                         if (isSouthEdge && !isEastEdge && !isWestEdge)
                         {
-                            GroundNode northGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.N));
+                            GroundNode northGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.N));
 
                             // Match north side to northern adjacent nodes south side
                             groundNode.Altitude[Direction.NE] = northGroundNode.Altitude[Direction.SE];
@@ -200,13 +200,13 @@ namespace BlockmapFramework.WorldGeneration
                         // SW
                         if (isWestEdge && isSouthEdge)
                         {
-                            GroundNode neGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.NE));
+                            GroundNode neGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.NE));
                             groundNode.Altitude[Direction.NE] = neGroundNode.Altitude[Direction.SW];
 
-                            GroundNode nGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.N));
+                            GroundNode nGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.N));
                             groundNode.Altitude[Direction.NW] = nGroundNode.Altitude[Direction.SW];
 
-                            GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E));
+                            GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.E));
                             groundNode.Altitude[Direction.SE] = eGroundNode.Altitude[Direction.SW];
 
                             if (groundNode.Altitude[Direction.SW] - groundNode.Altitude[Direction.SE] > smoothStep)
@@ -224,13 +224,13 @@ namespace BlockmapFramework.WorldGeneration
                         // SE
                         if (isEastEdge && isSouthEdge)
                         {
-                            GroundNode nwGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.NW));
+                            GroundNode nwGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.NW));
                             groundNode.Altitude[Direction.NW] = nwGroundNode.Altitude[Direction.SE];
 
-                            GroundNode nGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.N));
+                            GroundNode nGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.N));
                             groundNode.Altitude[Direction.NE] = nGroundNode.Altitude[Direction.SE];
 
-                            GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W));
+                            GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.W));
                             groundNode.Altitude[Direction.SW] = wGroundNode.Altitude[Direction.SE];
 
                             if (groundNode.Altitude[Direction.SE] - groundNode.Altitude[Direction.SW] > smoothStep)
@@ -248,13 +248,13 @@ namespace BlockmapFramework.WorldGeneration
                         // NE
                         if (isEastEdge && isNorthEdge)
                         {
-                            GroundNode swGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.SW));
+                            GroundNode swGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.SW));
                             groundNode.Altitude[Direction.SW] = swGroundNode.Altitude[Direction.NE];
 
-                            GroundNode sGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.S));
+                            GroundNode sGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.S));
                             groundNode.Altitude[Direction.SE] = sGroundNode.Altitude[Direction.NE];
 
-                            GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W));
+                            GroundNode wGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.W));
                             groundNode.Altitude[Direction.NW] = wGroundNode.Altitude[Direction.NE];
 
                             if (groundNode.Altitude[Direction.NE] - groundNode.Altitude[Direction.NW] > smoothStep)
@@ -272,13 +272,13 @@ namespace BlockmapFramework.WorldGeneration
                         // NW
                         if (isWestEdge && isNorthEdge)
                         {
-                            GroundNode seGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.SE));
+                            GroundNode seGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.SE));
                             groundNode.Altitude[Direction.SE] = seGroundNode.Altitude[Direction.NW];
 
-                            GroundNode sGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.S));
+                            GroundNode sGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.S));
                             groundNode.Altitude[Direction.SW] = sGroundNode.Altitude[Direction.NW];
 
-                            GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E));
+                            GroundNode eGroundNode = world.GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.E));
                             groundNode.Altitude[Direction.NE] = eGroundNode.Altitude[Direction.NW];
 
                             if (groundNode.Altitude[Direction.NW] - groundNode.Altitude[Direction.NE] > smoothStep)

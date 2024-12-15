@@ -116,10 +116,10 @@ namespace BlockmapFramework
 
                     if (WorldCoordinates.Contains(worldCoords))
                     {
-                        Vector2Int coords_N = HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.N);
-                        Vector2Int coords_E = HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.E);
-                        Vector2Int coords_S = HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.S);
-                        Vector2Int coords_W = HelperFunctions.GetWorldCoordinatesInDirection(worldCoords, Direction.W);
+                        Vector2Int coords_N = HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.N);
+                        Vector2Int coords_E = HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.E);
+                        Vector2Int coords_S = HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.S);
+                        Vector2Int coords_W = HelperFunctions.GetCoordinatesInDirection(worldCoords, Direction.W);
                         if (World.IsInWorld(coords_N) && !WorldCoordinates.Contains(coords_N)) borders[0] = true;
                         if (World.IsInWorld(coords_E) && !WorldCoordinates.Contains(coords_E)) borders[1] = true;
                         if (World.IsInWorld(coords_S) && !WorldCoordinates.Contains(coords_S)) borders[2] = true;

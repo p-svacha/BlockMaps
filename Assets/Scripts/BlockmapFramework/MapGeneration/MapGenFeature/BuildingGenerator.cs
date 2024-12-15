@@ -45,13 +45,10 @@ namespace BlockmapFramework.WorldGeneration
 
             // Generate noises used when placing the building
             Dictionary<Direction, PerlinNoise> windowNoises = new Dictionary<Direction, PerlinNoise>();
-            foreach (Direction side in HelperFunctions.GetSides())
-            {
-                windowNoises.Add(side, new PerlinNoise() { Scale = 0.2f });
-            }
+            foreach (Direction side in HelperFunctions.GetSides()) windowNoises.Add(side, new PerlinNoise() { Scale = 0.2f });
 
             // Declare dictionaries that are filled when placing the building
-            Dictionary<Vector2Int, BlockmapNode> buildingFloorNodes = new Dictionary<Vector2Int, BlockmapNode>(); // the erdgeschoss node for each coordinate
+            Dictionary<Vector2Int, BlockmapNode> buildingFloorNodes = new Dictionary<Vector2Int, BlockmapNode>(); // the erdgeschoss ground/air node for each coordinate
 
             bool useDarkMetalFoundation = Random.value < 0.5f;
 
@@ -134,13 +131,18 @@ namespace BlockmapFramework.WorldGeneration
                     int ceilingAltidude = floorAltitude + localHeight;
                     GroundNode groundNode = world.GetGroundNode(worldCoord);
 
+                    AirNode ceilingNode = null;
+
+                    // Roof
+                    if (roofAltitude[localCoord] > 0) ceilingNode = world.BuildAirNode(worldCoord, floorAltitude + roofAltitude[localCoord], SurfaceDefOf.CorrugatedSteel, updateWorld: false);
+
                     // Check if wall is needed in any direction
                     if (localHeight > 0) // This node is inside building
                     {
                         foreach (Direction side in HelperFunctions.GetSides())
                         {
                             // Check if it is a wall leading to the outside of the building
-                            bool isWallToOutsideBuilding = (!buildingHeight.TryGetValue(HelperFunctions.GetWorldCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight == 0);
+                            bool isWallToOutsideBuilding = (!buildingHeight.TryGetValue(HelperFunctions.GetCoordinatesInDirection(localCoord, side), out int adjHeight) || adjHeight == 0);
                             
                             // Check if it is a wall due to different ceiling height
                             bool isWallWithinBuilding = (adjHeight > 0 && adjHeight < localHeight);
@@ -148,10 +150,11 @@ namespace BlockmapFramework.WorldGeneration
                             if (isWallToOutsideBuilding)
                             {
                                 // Check if we want a door here
-                                bool placeDoor = Random.value < 0.05f;
+                                bool placeDoor = Random.value < 0.04f;
                                 int doorHeight = 4;
                                 if(placeDoor) world.BuildDoor(buildingFloorNodes[localCoord], side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
 
+                                // Check if we want a window here
                                 bool placeWindow = !placeDoor && windowNoises[side].GetValue(worldCoord.x, worldCoord.y) > 0.65f;
                                 int windowLowerMargin = 2;
                                 int windowHeight = 2;
@@ -170,6 +173,14 @@ namespace BlockmapFramework.WorldGeneration
                                         world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), side, wallShape, wallMat, updateWorld: false);
                                     }
                                 }
+
+                                // Check if we want a ladder outside
+                                bool placeLadder = Random.value < 0.04f;
+                                if (placeLadder)
+                                {
+                                    GroundNode outsideGroundNode = world.GetAdjacentGroundNode(worldCoord, side);
+                                    world.BuildLadder(outsideGroundNode, ceilingNode, HelperFunctions.GetOppositeDirection(side), updateWorld: false);
+                                }
                             }
                             else if (isWallWithinBuilding)
                             {
@@ -182,9 +193,6 @@ namespace BlockmapFramework.WorldGeneration
                             }
                         }
                     }
-
-                    // Roof
-                    if(roofAltitude[localCoord] > 0) world.BuildAirNode(worldCoord, floorAltitude + roofAltitude[localCoord], SurfaceDefOf.CorrugatedSteel, updateWorld: false);
 
                     // Pillar
                     foreach (Direction corner in cornerPillars[localCoord].Keys)

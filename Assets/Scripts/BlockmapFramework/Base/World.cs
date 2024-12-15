@@ -1561,7 +1561,7 @@ namespace BlockmapFramework
             // Get target node (need to be adjacent, higher up and flat on the target direction)
             int sourceAltitude = source.GetMinAltitude(side);
             Direction targetSide = HelperFunctions.GetOppositeDirection(side);
-            Vector2Int targetCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(source.WorldCoordinates, side);
+            Vector2Int targetCoordinates = HelperFunctions.GetCoordinatesInDirection(source.WorldCoordinates, side);
 
             List<BlockmapNode> adjNodes = GetNodes(targetCoordinates).OrderBy(x => x.GetMaxAltitude(targetSide)).ToList();
             foreach (BlockmapNode adjNode in adjNodes)
@@ -2053,12 +2053,12 @@ namespace BlockmapFramework
 
         public List<BlockmapNode> GetAdjacentNodes(Vector2Int worldCoordinates, Direction dir)
         {
-            Vector2Int targetCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir);
+            Vector2Int targetCoordinates = HelperFunctions.GetCoordinatesInDirection(worldCoordinates, dir);
             return GetNodes(targetCoordinates);
         }
         public GroundNode GetAdjacentGroundNode(Vector2Int worldCoordinates, Direction dir)
         {
-            return GetGroundNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir));
+            return GetGroundNode(HelperFunctions.GetCoordinatesInDirection(worldCoordinates, dir));
         }
         public GroundNode GetAdjacentGroundNode(BlockmapNode node, Direction dir)
         {
@@ -2066,7 +2066,7 @@ namespace BlockmapFramework
         }
         public WaterNode GetAdjacentWaterNode(Vector2Int worldCoordinates, Direction dir)
         {
-            return GetWaterNode(HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, dir));
+            return GetWaterNode(HelperFunctions.GetCoordinatesInDirection(worldCoordinates, dir));
         }
 
         public List<Entity> GetEntities(Vector2Int worldCoordinates, int minHeight, int maxHeight)
@@ -2130,7 +2130,7 @@ namespace BlockmapFramework
         {
             Vector2Int worldCoordinates = new Vector2Int(globalCellCoordinates.x, globalCellCoordinates.z);
             int altitude = globalCellCoordinates.y;
-            Vector2Int adjacentCoordinates = HelperFunctions.GetWorldCoordinatesInDirection(worldCoordinates, side);
+            Vector2Int adjacentCoordinates = HelperFunctions.GetCoordinatesInDirection(worldCoordinates, side);
             Vector3Int adjacentCellCoordinates = new Vector3Int(adjacentCoordinates.x, altitude, adjacentCoordinates.y);
             Direction oppositeSide = HelperFunctions.GetOppositeDirection(side);
 

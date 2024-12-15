@@ -308,9 +308,9 @@ public static class HelperFunctions
     public static bool IsCorner(Direction dir) => GetCorners().Contains(dir);
     public static bool IsSide(Direction dir) => GetSides().Contains(dir);
 
-    public static Vector2Int GetWorldCoordinatesInDirection(Vector2Int worldCoordinates, Direction dir)
+    public static Vector2Int GetCoordinatesInDirection(Vector2Int coordinates, Direction dir)
     {
-        return worldCoordinates + GetDirectionVector(dir);
+        return coordinates + GetDirectionVector(dir);
     }
     public static Vector2Int GetDirectionVector(Direction dir, int distance = 1)
     {
