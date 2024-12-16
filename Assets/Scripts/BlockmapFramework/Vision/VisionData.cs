@@ -70,5 +70,10 @@ namespace BlockmapFramework
         public HashSet<BlockmapNode> ExploredNodes => GetExploredObjects(NodeVision);
         public HashSet<Wall> ExploredWalls => GetExploredObjects(WallVision);
         private HashSet<T> GetExploredObjects<T>(Dictionary<T, VisionType> dictionary) => dictionary.Where(x => x.Value == VisionType.FogOfWar).Select(x => x.Key).ToHashSet();
+
+        public override string ToString()
+        {
+            return $"{NodeVision.Where(x => x.Value == VisionType.Visible).Count()} nodes are visible. \n{NodeVision.Where(x => x.Value == VisionType.FogOfWar).Count()} nodes are explored.\n{EntityVision.Where(x => x.Value == VisionType.Visible).Count()} entities are visible. \n{EntityVision.Where(x => x.Value == VisionType.FogOfWar).Count()} entities are explored.\n{WallVision.Where(x => x.Value == VisionType.Visible).Count()} walls are visible. \n{WallVision.Where(x => x.Value == VisionType.FogOfWar).Count()} walls are explored.";
+        }
     }
 }

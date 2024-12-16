@@ -114,7 +114,7 @@ namespace WorldEditor
                 if (height > Comp_Movement.MaxEntityHeight) return;
                 int maxHopUpDistance = int.Parse(MaxHopUpDistanceInput.text);
                 int maxHopDownDistance = int.Parse(MaxHopDownDistanceInput.text);
-                World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill, maxHopUpDistance, maxHopDownDistance));
+                World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, updateWorld: true, height, preInit: e => ((EditorMovingEntity)e).PreInit(speed, vision, canSwim, climbingSkill, maxHopUpDistance, maxHopDownDistance));
             }
             else World.SpawnEntity(SelectedEntity, spawnNode, Direction.N, owner, updateWorld: true);
         }
@@ -123,7 +123,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (World.HoveredEntity.GetComponent<Comp_Movement>() == null) return;
 
-            World.RemoveEntity(World.HoveredEntity);
+            World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

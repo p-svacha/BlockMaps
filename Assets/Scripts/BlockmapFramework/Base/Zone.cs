@@ -20,6 +20,11 @@ namespace BlockmapFramework
         public bool IsBorderVisible;
         public bool ProvidesVision;
 
+        public int MinX { get; private set; }
+        public int MaxX { get; private set; }
+        public int MinY { get; private set; }
+        public int MaxY { get; private set; }
+
         public Zone() { }
         public Zone(World world, int id, Actor actor, HashSet<Vector2Int> coordinates, bool providesVision, bool showBorders)
         {
@@ -80,6 +85,12 @@ namespace BlockmapFramework
             // Add this zone as a reference to all affected chunks
             foreach (Chunk chunk in AffectedChunks)
                 chunk.AddZone(this);
+
+            // Calculate bounds
+            MinX = WorldCoordinates.Min(c => c.x);
+            MaxX = WorldCoordinates.Max(c => c.x);
+            MinY = WorldCoordinates.Min(c => c.y);
+            MaxY = WorldCoordinates.Max(c => c.y);
         }
 
         public void SetBorderStyle(bool visible, bool redraw)

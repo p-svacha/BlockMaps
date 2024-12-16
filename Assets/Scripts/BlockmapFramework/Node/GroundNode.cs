@@ -201,7 +201,7 @@ namespace BlockmapFramework
             return base.IsGenerallyPassable();
         }
 
-        public bool IsCenterUnderWater => (WaterNode != null && CenterWorldPosition.y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
+        public bool IsCenterUnderWater => (WaterNode != null && MeshCenterWorldPosition.y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
 
         #endregion
 

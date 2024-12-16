@@ -14,10 +14,10 @@ namespace BlockmapFramework.Defs
         {
             new MapGenFeatureDef()
             {
-                DefName = "Building",
-                Label = "building",
-                Description = "A randomized building.",
-                GenerateAction = BuildingGenerator.GenerateBuilding
+                DefName = "Shack",
+                Label = "shack",
+                Description = "A one-story shack.",
+                GenerateAction = ShackGenerator.GenerateShack
             },
         };
     }

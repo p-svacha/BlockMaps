@@ -89,7 +89,7 @@ namespace WorldEditor
             // Select entity
             if (World.HoveredEntity != null)
             {
-                if (World.HoveredEntity.GetComponent<Comp_Movement>() != null)
+                if (World.HoveredEntity.HasComponent<Comp_Movement>())
                 {
                     SelectEntity(World.HoveredEntity);
                 }

@@ -33,7 +33,7 @@ namespace WorldEditor
         {
             if (World.HoveredDynamicNode != null && World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true))
             {
-                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
+                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true, updateWorld: true);
             }
         }
 
@@ -41,7 +41,7 @@ namespace WorldEditor
         {
             if (World.HoveredDynamicNode != null && World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false))
             {
-                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
+                World.ChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false, updateWorld: true);
             }
         }
 

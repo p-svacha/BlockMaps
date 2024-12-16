@@ -36,7 +36,7 @@ namespace BlockmapFramework
             Vector2 oldPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
 
             // Get 2d position of next node
-            Vector3 nextNodePosition = To.CenterWorldPosition;
+            Vector3 nextNodePosition = To.MeshCenterWorldPosition;
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
 
             // Calculate new 2d world position and coordinates by moving towards next node in 2d
@@ -62,7 +62,7 @@ namespace BlockmapFramework
 
         public override List<Vector3> GetPreviewPath()
         {
-            return new List<Vector3>() { From.CenterWorldPosition, To.CenterWorldPosition };
+            return new List<Vector3>() { From.MeshCenterWorldPosition, To.MeshCenterWorldPosition };
         }
     }
 }

@@ -88,7 +88,7 @@ namespace WorldEditor
             if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
 
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner, isMirrored: MirrorToggle.isOn);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner, updateWorld: true, isMirrored: MirrorToggle.isOn);
         }
 
         public override void HandleRightClick()
@@ -96,7 +96,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (!World.HoveredEntity.IsStandaloneEntity) return;
                 
-            World.RemoveEntity(World.HoveredEntity);
+            World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }
 
         public void SelectEntity(EntityDef def)

@@ -38,10 +38,10 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public override void RecalculateCenterWorldPosition()
+        public override void RecalculateMeshCenterWorldPosition()
         {
             if (WaterBody == null) return;
-            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
+            MeshCenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 
         protected override bool IsGenerallyPassable()

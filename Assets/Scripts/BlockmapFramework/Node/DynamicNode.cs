@@ -216,9 +216,9 @@ namespace BlockmapFramework
         #endregion
 
 
-        public override void RecalculateCenterWorldPosition()
+        public override void RecalculateMeshCenterWorldPosition()
         {
-            CenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldMeshAltitude(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
+            MeshCenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldMeshAltitude(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
         }
     }
 }

@@ -82,10 +82,10 @@ namespace BlockmapFramework
                     Entity.SetOriginNode(currentOriginNode);
 
                     // Recalculate vision of all nearby entities (including this)
-                    if (Entity.BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.CenterWorldPosition, callback: Entity.UpdateVisibility);
+                    if (Entity.BlocksVision) World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.MeshCenterWorldPosition, callback: Entity.UpdateVisibility);
                     else // If this entity doesn't block vision, only update the vision of itself and of entities from other actors
                     {
-                        World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.CenterWorldPosition, callback: Entity.UpdateVisibility, excludeActor: Entity.Actor);
+                        World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.MeshCenterWorldPosition, callback: Entity.UpdateVisibility, excludeActor: Entity.Actor);
                         Entity.UpdateVision();
                     }
                 }

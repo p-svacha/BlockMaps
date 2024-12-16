@@ -8,7 +8,7 @@ namespace BlockmapFramework.WorldGeneration
     /// <summary>
     /// Class containing logic for procedurally generated buildings that can be placed on the map, consisting of various world objects.
     /// </summary>
-    public static class BuildingGenerator
+    public static class ShackGenerator
     {
         private const int MinSize = 5;
 
@@ -18,7 +18,7 @@ namespace BlockmapFramework.WorldGeneration
             WallMaterialDefOf.WoodPlanks,
         };
 
-        public static void GenerateBuilding(Parcel parcel, BlockmapNode node)
+        public static void GenerateShack(Parcel parcel, BlockmapNode node, bool updateWorld)
         {
             if (parcel.Dimensions.x < MinSize) return;
             if (parcel.Dimensions.y < MinSize) return;
@@ -75,9 +75,11 @@ namespace BlockmapFramework.WorldGeneration
                     int localHeight = buildingHeight[localCoord];
                     if (localHeight == 0) continue;
 
-                    Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
+                    Vector2Int worldCoord = parcel.Position + buildingPosInParcel + localCoord;
 
                     GroundNode ground = world.GetGroundNode(worldCoord);
+                    if (ground == null) continue;
+
                     List<Entity> entitiesToRemove = ground.Entities.ToList();
                     foreach (Entity e in entitiesToRemove) world.RemoveEntity(e, updateWorld: false);
                 }
@@ -89,7 +91,7 @@ namespace BlockmapFramework.WorldGeneration
                 for (int z = 0; z < buildingSizeY; z++)
                 {
                     Vector2Int localCoord = new Vector2Int(x, z);
-                    Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
+                    Vector2Int worldCoord = parcel.Position + buildingPosInParcel + localCoord;
                     GroundNode ground = world.GetGroundNode(worldCoord);
 
                     // Inside floor
@@ -115,7 +117,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         ground.SetAltitude(floorAltitude);
                         ground.SetSurface(groundSurfaces[localCoord]);
-                        TerrainFunctions.SmoothOutside(ground, smoothStep: 1);
+                        TerrainFunctions.SmoothOutside(ground, smoothStep: 1, ignoredSurfaces: new() { floor });
                     }
                 }
             }
@@ -126,7 +128,7 @@ namespace BlockmapFramework.WorldGeneration
                 for (int z = 0; z < buildingSizeY; z++)
                 {
                     Vector2Int localCoord = new Vector2Int(x, z);
-                    Vector2Int worldCoord = node.WorldCoordinates + buildingPosInParcel + localCoord;
+                    Vector2Int worldCoord = parcel.Position + buildingPosInParcel + localCoord;
                     int localHeight = buildingHeight[localCoord];
                     int ceilingAltidude = floorAltitude + localHeight;
                     GroundNode groundNode = world.GetGroundNode(worldCoord);
@@ -149,10 +151,23 @@ namespace BlockmapFramework.WorldGeneration
 
                             if (isWallToOutsideBuilding)
                             {
+                                GroundNode outsideGroundNode = world.GetAdjacentGroundNode(worldCoord, side);
+
                                 // Check if we want a door here
                                 bool placeDoor = Random.value < 0.04f;
                                 int doorHeight = 4;
-                                if(placeDoor) world.BuildDoor(buildingFloorNodes[localCoord], side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
+                                if (placeDoor)
+                                {
+                                    BlockmapNode doorInsideNode = buildingFloorNodes[localCoord];
+                                    world.BuildDoor(doorInsideNode, side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
+
+                                    // Check if we need to lower outside ground of door in case door is lower than it
+                                    if(outsideGroundNode != null && doorInsideNode.BaseAltitude < outsideGroundNode.MaxAltitude)
+                                    {
+                                        outsideGroundNode.SetAltitude(doorInsideNode.BaseAltitude);
+                                        TerrainFunctions.SmoothOutside(outsideGroundNode, smoothStep: 1, ignoredSurfaces: new() { floor });
+                                    }
+                                }
 
                                 // Check if we want a window here
                                 bool placeWindow = !placeDoor && windowNoises[side].GetValue(worldCoord.x, worldCoord.y) > 0.65f;
@@ -176,9 +191,8 @@ namespace BlockmapFramework.WorldGeneration
 
                                 // Check if we want a ladder outside
                                 bool placeLadder = Random.value < 0.04f;
-                                if (placeLadder)
+                                if (placeLadder && outsideGroundNode != null)
                                 {
-                                    GroundNode outsideGroundNode = world.GetAdjacentGroundNode(worldCoord, side);
                                     world.BuildLadder(outsideGroundNode, ceilingNode, HelperFunctions.GetOppositeDirection(side), updateWorld: false);
                                 }
                             }
@@ -199,8 +213,6 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         if (cornerPillars[localCoord][corner])
                         {
-                            Debug.Log($"haspilar: {groundNode.Altitude[corner]} - {roofAltitude[localCoord]}");
-
                             for (int y = groundNode.Altitude[corner]; y < floorAltitude + roofAltitude[localCoord]; y++)
                             {
                                 world.BuildWall(new Vector3Int(worldCoord.x, y, worldCoord.y), corner, WallShapeDefOf.Corner, mainWallMaterial, updateWorld: false);
@@ -210,7 +222,7 @@ namespace BlockmapFramework.WorldGeneration
                 }
             }
 
-            parcel.UpdateWorld();
+            if(updateWorld) parcel.UpdateWorld();
         }
 
         /// <summary>
@@ -265,8 +277,6 @@ namespace BlockmapFramework.WorldGeneration
 
                     PillarType pillar = pillarTypeWeights.GetWeightedRandomElement();
                     
-                    Debug.Log($"Adding pillar in corner {corner}");
-
                     if (pillar == PillarType.Big)
                     {
                         buildingHeight[HelperFunctions.GetCornerCoordinates(buildingSize, corner)] = baseBuildingHeight;

@@ -70,7 +70,7 @@ namespace BlockmapFramework
 
                 foreach (BlockmapNode node in chunk.GetAllNodes())
                 {
-                    Vector3 nodePos = node.CenterWorldPosition - new Vector3(NODE_SIZE / 2f, NODE_SIZE / 2f, NODE_SIZE / 2f);
+                    Vector3 nodePos = node.MeshCenterWorldPosition - new Vector3(NODE_SIZE / 2f, NODE_SIZE / 2f, NODE_SIZE / 2f);
                     int nodeSubmesh = nodeMeshBuilder.GetSubmesh(GetNodeSubmeshMaterial(node));
                     nodeMeshBuilder.BuildCube(nodeSubmesh, nodePos, nodeCubeDimensions);
 

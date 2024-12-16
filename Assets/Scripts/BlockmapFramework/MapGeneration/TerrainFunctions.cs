@@ -7,7 +7,7 @@ namespace BlockmapFramework.WorldGeneration
     public static class TerrainFunctions
     {
 
-        public static void SmoothOutside(BlockmapNode node, int smoothStep) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep);
+        public static void SmoothOutside(BlockmapNode node, int smoothStep, List<SurfaceDef> ignoredSurfaces = null) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep);
 
         /// <summary>
         /// Smooths the ground area outside the given parcel so there are no hard edges around the parcel.
@@ -15,7 +15,7 @@ namespace BlockmapFramework.WorldGeneration
         /// <br/>Smooth step defines the targeted steepness along the smoothed area.
         /// <br/>Returns the modified area as a new parcel.
         /// </summary>
-        public static Parcel SmoothOutside(World world, Parcel parcel, int smoothStep = 1)
+        public static Parcel SmoothOutside(World world, Parcel parcel, int smoothStep = 1, List<SurfaceDef> ignoredSurfaces = null)
         {
             bool anotherLayerRequired;
 
@@ -45,6 +45,7 @@ namespace BlockmapFramework.WorldGeneration
                         Vector2Int worldCoords = new Vector2Int(x, y);
                         GroundNode groundNode = world.GetGroundNode(worldCoords);
                         if (groundNode == null) continue;
+                        if (ignoredSurfaces != null && ignoredSurfaces.Contains(groundNode.SurfaceDef)) continue;
 
                         // East
                         if (isEastEdge && !isSouthEdge && !isNorthEdge)

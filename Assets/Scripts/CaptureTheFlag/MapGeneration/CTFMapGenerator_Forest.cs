@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace CaptureTheFlag
                 AddForests,
                 AddPaths,
                 AddFencesAroundPaths,
+                AddShacks,
                 CreatePlayerBases,
             };
         }
@@ -65,8 +67,6 @@ namespace CaptureTheFlag
                     };
                 n.SetAltitude(nodeHeights);
             }
-
-            World.RedrawFullWorld();
         }
 
         #endregion
@@ -87,15 +87,13 @@ namespace CaptureTheFlag
                 WaterBody b = World.CanAddWater(n, 3);
                 if (b != null)
                 {
-                    World.AddWaterBody(b, updateNavmesh: false);
+                    World.AddWaterBody(b, updateWorld: false);
                     numWaterBodies++;
                 }
             }
 
             // End
-            Debug.Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
-
-            World.RedrawFullWorld();
+            Log("Generated " + numWaterBodies + " water bodies after " + attempts + " attempts.");
         }
 
         #endregion
@@ -127,7 +125,7 @@ namespace CaptureTheFlag
                     GroundNode node = World.GetGroundNode(position);
                     if (World.CanSpawnEntity(EntityDefOf.ProcHedge, node, Direction.N,hedgeHeight, forceHeadspaceRecalc: true))
                     {
-                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, World.Gaia, hedgeHeight, updateWorld: false);
+                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, World.Gaia, updateWorld: false, hedgeHeight);
                     }
 
                     // Next position
@@ -325,6 +323,59 @@ namespace CaptureTheFlag
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region Shacks
+
+        private const int MIN_SHACK_PARCEL_SIZE = 5;
+        private const int MAX_SHACK_PARCEL_SIZE = 15;
+
+        private void AddShacks()
+        {
+            float minShackDensity = 0.25f; // Min amount of shacks per num chunks per side
+            float maxShackDensity = 1f; // Max amount of shacks per num chunks per side
+
+            float shackDensity = Random.Range(minShackDensity, maxShackDensity);
+            int targetShacks = Mathf.RoundToInt(NumChunksPerSide * shackDensity);
+
+            int numShacks = 0;
+            int attempts = 0;
+            int maxAttempts = targetShacks * 20;
+            while(numShacks < targetShacks && attempts < maxAttempts)
+            {
+                attempts++;
+
+                if (TryPlaceRandomShack()) numShacks++;
+            }
+
+            Log($"Generated {numShacks}/{targetShacks} shacks after {attempts} attempts. Target density = {shackDensity}.");
+        }
+
+        private bool TryPlaceRandomShack()
+        {
+            int parcelSizeX = Random.Range(MIN_SHACK_PARCEL_SIZE, MAX_SHACK_PARCEL_SIZE + 1);
+            int parcelSizeY = Random.Range(MIN_SHACK_PARCEL_SIZE, MAX_SHACK_PARCEL_SIZE + 1);
+            Vector2Int parcelCenter = GetRandomWorldCoordinates();
+            Vector2Int parcelPosition = new Vector2Int(parcelCenter.x - parcelSizeX / 2, parcelCenter.y - parcelSizeY / 2);
+
+            Parcel parcel = new Parcel(World, parcelPosition, new Vector2Int(parcelSizeX, parcelSizeY));
+            if(CanPlaceShack(parcel))
+            {
+                ShackGenerator.GenerateShack(parcel, World.GetGroundNode(parcelCenter), updateWorld: false);
+                return true;
+            }
+            return false;
+        }
+
+        private bool CanPlaceShack(Parcel parcel)
+        {
+            if (!parcel.IsInWorld()) return false;
+            if (parcel.HasAnyWater()) return false;
+            if (parcel.HasAnyNodesWithSurface(SurfaceDefOf.CorrugatedSteel)) return false;
+            if (parcel.HasAnyNodesWithSurface(SurfaceDefOf.DirtPath)) return false;
+            return true;
         }
 
         #endregion

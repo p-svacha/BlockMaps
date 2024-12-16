@@ -77,7 +77,7 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (TargetNode == null) return;
 
-            World.BuildLadder(World.HoveredNode, TargetNode, World.NodeHoverModeSides);
+            World.BuildLadder(World.HoveredNode, TargetNode, World.NodeHoverModeSides, updateWorld: true);
         }
 
         public override void HandleRightClick()
@@ -85,7 +85,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (!(World.HoveredEntity is Ladder)) return;
 
-            World.RemoveEntity(World.HoveredEntity);
+            World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }
 
 

@@ -96,12 +96,12 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.CanBuildAirNode(HoveredCoordinates, BuildAltitude))
-                World.BuildAirNode(HoveredCoordinates, BuildAltitude, SelectedSurface);
+                World.BuildAirNode(HoveredCoordinates, BuildAltitude, SelectedSurface, updateWorld: true);
         }
 
         public override void HandleRightClick()
         {
-            if (World.HoveredAirNode != null && World.CanRemoveAirNode(World.HoveredAirNode)) World.RemoveAirNode(World.HoveredAirNode);
+            if (World.HoveredAirNode != null && World.CanRemoveAirNode(World.HoveredAirNode)) World.RemoveAirNode(World.HoveredAirNode, updateWorld: true);
         }
 
         public override void OnSelect()

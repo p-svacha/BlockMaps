@@ -249,7 +249,7 @@ namespace BlockmapFramework
             Debug.Log("WORLD INITIALIZATION STEP 0");
 
             IsInitialized = false;
-            InitializeStep = 1;
+            InitializeStep = 0;
 
             // Gaia
             Gaia = Actors[0];
@@ -286,36 +286,36 @@ namespace BlockmapFramework
         private void UpdateInitialization()
         {
             if (IsInitialized) return;
+            InitializeStep++;
 
-            // Frame 1 after initilaization: General stuff and draw all meshes
+            // Frame 1 after initilaization: Draw meshes
             if (InitializeStep == 1)
             {
                 Debug.Log("WORLD INITIALIZATION STEP 1");
                 // Draw node meshes because we need to shoot rays to generate navmesh
                 RedrawFullWorld();
-
-                InitializeStep++;
                 return;
             }
 
-            // Frame 2 after initialization: Do stuff that requires drawn node meshes.
+            // todo: step for calculating node center positions (also apply this new step in all "updateWorld"s)
+
+            // Frame 2 after initilaization: Generate navmesh (also calculates mesh center world positions so it requires the mesh)
             if (InitializeStep == 2)
             {
                 Debug.Log("WORLD INITIALIZATION STEP 2");
-                foreach (Entity e in Entities.Values) e.UpdateVision();
-
-                InitializeStep++;
+                GenerateFullNavmesh();
                 return;
             }
 
-            // When all post-initialization steps are done, regenerate navmesh and we're good to go
+            // Frame 3 after initialization: Entity vision
             if (InitializeStep == 3)
             {
                 Debug.Log("WORLD INITIALIZATION STEP 3");
-                GenerateFullNavmesh();
-                InitializeStep++;
+                UpdateVisionOfAllEntitiesDelayed();
                 return;
             }
+
+
         }
 
         #endregion
@@ -876,72 +876,15 @@ namespace BlockmapFramework
 
         #endregion
 
-        #region Actions
-
-        public void RegisterNode(BlockmapNode node, bool registerInWorld = true)
-        {
-            if (registerInWorld) Nodes.Add(node.Id, node); // Global registry
-
-            // Chunk registry
-            node.Chunk.RegisterNode(node);
-        }
-        public void DeregisterNode(BlockmapNode node)
-        {
-            // Destroy fences on node
-            while (node.Fences.Count > 0) DeregisterFence(node.Fences.Values.ToList()[0]);
-
-            // Destroy ladders from and to node
-            while (node.SourceLadders.Count > 0) RemoveEntity(node.SourceLadders.Values.ToList()[0]);
-            while (node.TargetLadders.Count > 0) RemoveEntity(node.TargetLadders.Values.ToList()[0]);
-
-            // Node
-            Nodes.Remove(node.Id); // Global registry
-
-            // Chunk registry
-            node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
-            if (node is GroundNode groundNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
-            else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
-            else if (node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
-        }
-        public void RegisterChunk(Chunk chunk)
-        {
-            Chunks.Add(chunk.Coordinates, chunk);
-        }
-
-        public Actor AddActor(string name, Color color)
-        {
-            int id = ActorIdCounter++;
-            Actor newActor = new Actor(this, id, name, color);
-            Actors.Add(id, newActor);
-
-            return newActor;
-        }
-        public void ResetExploration(Actor actor)
-        {
-            foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
-            foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
-            foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
-
-            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
-
-            UpdateVisibility();
-        }
-        public void ExploreEverything(Actor actor)
-        {
-            foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
-            foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
-            foreach (Wall wall in Walls.Values) wall.AddExploredBy(actor);
-
-            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
-
-            UpdateVisibility();
-        }
+        #region Navmesh
 
         private void UpdateNavmeshDelayed(List<BlockmapNode> nodes, bool isInitialization = false)
         {
             updateNavmeshDelay = NumDelayedUpdateFrames;
             navmeshUpdateNodes = nodes;
             isNavmeshUpdatePartOfInitialization = isInitialization;
+
+            Debug.Log($"Requesting navmesh update for {navmeshUpdateNodes.Count} nodes.");
         }
         /// <summary>
         /// Updates the navmesh for the given nodes by recalculating all transitions originating from them.
@@ -959,7 +902,7 @@ namespace BlockmapFramework
             fullNavmeshTimer.Start();
 
             recalcWorldPos.Start();
-            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalculateCenterWorldPosition();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalculateMeshCenterWorldPosition();
             recalcWorldPos.Stop();
             Debug.Log("Recalculating node world positions took " + recalcWorldPos.ElapsedMilliseconds + " ms for " + navmeshUpdateNodes.Count + " nodes.");
 
@@ -1026,44 +969,122 @@ namespace BlockmapFramework
             UpdateNavmeshDelayed(nodesToUpdate);
         }
 
+        #endregion
+
+        #region Actions
+
+        public void RegisterNode(BlockmapNode node, bool registerInWorld = true)
+        {
+            if (registerInWorld) Nodes.Add(node.Id, node); // Global registry
+
+            // Chunk registry
+            node.Chunk.RegisterNode(node);
+        }
+        public void DeregisterNode(BlockmapNode node)
+        {
+            // Destroy fences on node
+            while (node.Fences.Count > 0) DeregisterFence(node.Fences.Values.ToList()[0]);
+
+            // Destroy ladders from and to node
+            while (node.SourceLadders.Count > 0) RemoveEntity(node.SourceLadders.Values.ToList()[0], updateWorld: false);
+            while (node.TargetLadders.Count > 0) RemoveEntity(node.TargetLadders.Values.ToList()[0], updateWorld: false);
+
+            // Node
+            Nodes.Remove(node.Id); // Global registry
+
+            // Chunk registry
+            node.Chunk.Nodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(node);
+            if (node is GroundNode groundNode) node.Chunk.GroundNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
+            else if (node is WaterNode waterNode) node.Chunk.WaterNodes[node.LocalCoordinates.x, node.LocalCoordinates.y] = null;
+            else if (node is AirNode airNode) node.Chunk.AirNodes[node.LocalCoordinates.x, node.LocalCoordinates.y].Remove(airNode);
+        }
+        public void RegisterChunk(Chunk chunk)
+        {
+            Chunks.Add(chunk.Coordinates, chunk);
+        }
+
+        public Actor AddActor(string name, Color color)
+        {
+            int id = ActorIdCounter++;
+            Actor newActor = new Actor(this, id, name, color);
+            Actors.Add(id, newActor);
+
+            return newActor;
+        }
+        public void ResetExploration(Actor actor)
+        {
+            foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
+            foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
+            foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
+
+            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
+
+            UpdateVisibility();
+        }
+        public void ExploreEverything(Actor actor)
+        {
+            foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
+            foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
+            foreach (Wall wall in Walls.Values) wall.AddExploredBy(actor);
+
+            foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
+
+            UpdateVisibility();
+        }
+
+
+
         public bool CanChangeShape(DynamicNode node, Direction mode, bool isIncrease)
         {
             return node.CanChangeShape(mode, isIncrease);
         }
-        public void ChangeShape(DynamicNode node, Direction mode, bool isIncrease)
+        public void ChangeShape(DynamicNode node, Direction mode, bool isIncrease, bool updateWorld)
         {
             node.ChangeShape(mode, isIncrease);
 
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(node.MeshCenterWorldPosition);
+            }
         }
 
-        public void SetSurface(DynamicNode node, SurfaceDef surface, bool updateWorld = true)
+        public void SetSurface(DynamicNode node, SurfaceDef surface, bool updateWorld)
         {
             node.SetSurface(surface);
 
-            if (!updateWorld) return;
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateNavmeshDisplayDelayed();
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateNavmeshDisplayDelayed();
+            }
         }
-        public void SetGroundNodeAsVoid(GroundNode node, bool updateWorld = true)
+        public void SetGroundNodeAsVoid(GroundNode node, bool updateWorld)
         {
             node.SetAsVoid();
 
-            if (!updateWorld) return;
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateNavmeshDisplayDelayed();
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateNavmeshDisplayDelayed();
+            }
         }
-        public void UnsetGroundNodeAsVoid(GroundNode node, int altitude, bool updateWorld = true)
+        public void UnsetGroundNodeAsVoid(GroundNode node, int altitude, bool updateWorld)
         {
             node.UnsetAsVoid(altitude);
 
-            if (!updateWorld) return;
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateNavmeshDisplayDelayed();
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateNavmeshDisplayDelayed();
+            }
         }
 
         public bool CanBuildAirNode(Vector2Int worldCoordinates, int altitude)
@@ -1104,7 +1125,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public AirNode BuildAirNode(Vector2Int worldCoordinates, int altitude, SurfaceDef surfaceDef, bool updateWorld = true)
+        public AirNode BuildAirNode(Vector2Int worldCoordinates, int altitude, SurfaceDef surfaceDef, bool updateWorld)
         {
             if (!CanBuildAirNode(worldCoordinates, altitude)) return null;
 
@@ -1114,11 +1135,12 @@ namespace BlockmapFramework
             AirNode newNode = new AirNode(this, chunk, NodeIdCounter++, localCoordinates, HelperFunctions.GetFlatHeights(altitude), surfaceDef);
             RegisterNode(newNode);
 
+            // Update world around coordinates
             if (updateWorld)
             {
                 UpdateNavmeshAround(newNode.WorldCoordinates);
                 RedrawNodesAround(newNode.WorldCoordinates);
-                UpdateVisionOfNearbyEntitiesDelayed(newNode.CenterWorldPosition);
+                UpdateVisionOfNearbyEntitiesDelayed(newNode.MeshCenterWorldPosition);
             }
 
             return newNode;
@@ -1129,13 +1151,17 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void RemoveAirNode(AirNode node)
+        public void RemoveAirNode(AirNode node, bool updateWorld)
         {
             DeregisterNode(node);
 
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(node.MeshCenterWorldPosition);
+            }
         }
 
         public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
@@ -1175,9 +1201,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
         /// </summary>
-        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, int height = -1, bool isMirrored = false, bool updateWorld = true, System.Action<Entity> preInit = null)
+        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, bool updateWorld, int height = -1, bool isMirrored = false, System.Action<Entity> preInit = null)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
+            if (node == null) throw new System.Exception("The node on which to spawn an entity must not be null.");
 
             // Create entity
             Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
@@ -1197,8 +1224,7 @@ namespace BlockmapFramework
             // Return new instance
             return newEntity;
         }
-
-        public void RemoveEntity(Entity entityToRemove, bool updateWorld = true)
+        public void RemoveEntity(Entity entityToRemove, bool updateWorld)
         {
             // De-register entity
             DeregisterEntity(entityToRemove);
@@ -1245,13 +1271,13 @@ namespace BlockmapFramework
             // Update vision of all other entities near the entity (doesn't work instantly bcuz destroying takes too long)
             if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entityToRemove.GetWorldCenter());
         }
-        public void RemoveEntities(BlockmapNode node, bool updateWorld = true)
+        public void RemoveEntities(BlockmapNode node, bool updateWorld)
         {
             while (node.Entities.Count > 0) RemoveEntity(node.Entities.First(), updateWorld);
         }
         public void RegisterEntity(Entity entity, bool updateWorld, bool registerInWorld = true)
         {
-            // Register in various registires
+            // Register in various registries
             if (registerInWorld) Entities.Add(entity.id, entity);
             entity.Actor.Entities.Add(entity);
             if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
@@ -1260,7 +1286,7 @@ namespace BlockmapFramework
             if (updateWorld && entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) RedrawNodesAround(entity.OriginNode.WorldCoordinates);
 
             // Update vision around new entity (and then update it's visibility when done)
-            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entity.OriginNode.CenterWorldPosition, callback: entity.UpdateVisibility);
+            if (updateWorld) UpdateVisionOfNearbyEntitiesDelayed(entity.OriginNode.MeshCenterWorldPosition, callback: entity.UpdateVisibility);
 
             // Update pathfinding navmesh
             if (updateWorld) UpdateNavmeshAround(entity.OriginNode.WorldCoordinates, entity.GetTranslatedDimensions().x, entity.GetTranslatedDimensions().z);
@@ -1334,7 +1360,7 @@ namespace BlockmapFramework
 
             return waterBody;
         }
-        public void AddWaterBody(WaterBody data, bool updateNavmesh)
+        public void AddWaterBody(WaterBody data, bool updateWorld)
         {
             // Create a new water nodes for each covered surface node
             List<WaterNode> waterNodes = new List<WaterNode>();
@@ -1352,17 +1378,17 @@ namespace BlockmapFramework
             HashSet<Chunk> affectedChunks = new HashSet<Chunk>();
             foreach (BlockmapNode node in newWaterBody.CoveredGroundNodes) affectedChunks.Add(node.Chunk);
 
-            // Redraw affected chunks
-            foreach (Chunk c in affectedChunks) RedrawChunk(c);
-
-            // Update navmesh
-            if (updateNavmesh)
-                UpdateNavmeshAround(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1);
-
             // Register water body
             WaterBodies.Add(newWaterBody.Id, newWaterBody);
+
+            // Update world around water body
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1);
+                foreach (Chunk c in affectedChunks) RedrawChunk(c);
+            }
         }
-        public void RemoveWaterBody(WaterBody water)
+        public void RemoveWaterBody(WaterBody water, bool updateWorld)
         {
             // De-register
             WaterBodies.Remove(water.Id);
@@ -1377,11 +1403,12 @@ namespace BlockmapFramework
             // Deregister deleted water nodes
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
-            // Update navmesh
-            UpdateNavmeshAround(new Vector2Int(water.MinX, water.MinY), water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1);
-
-            // Redraw affected chunks
-            foreach (Chunk c in affectedChunks) RedrawChunk(c);
+            // Update world around water body
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(new Vector2Int(water.MinX, water.MinY), water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1);
+                foreach (Chunk c in affectedChunks) RedrawChunk(c);
+            }
         }
 
         public bool CanBuildFence(FenceDef def, BlockmapNode node, Direction side, int height)
@@ -1396,7 +1423,7 @@ namespace BlockmapFramework
 
             return CanBuildOnNodeSide(node, side, height, allowSlopes: true);
         }
-        public void BuildFence(FenceDef def, BlockmapNode node, Direction side, int height, bool updateWorld = true)
+        public void BuildFence(FenceDef def, BlockmapNode node, Direction side, int height, bool updateWorld)
         {
             // Adjust height if it's higher than fence type allows
             if (height > def.MaxHeight) height = def.MaxHeight;
@@ -1405,11 +1432,12 @@ namespace BlockmapFramework
             Fence fence = new Fence(this, def, FenceIdCounter++, node, side, height);
             RegisterFence(fence);
 
+            // Update world around coordinates
             if (updateWorld)
             {
                 UpdateNavmeshAround(node.WorldCoordinates);
                 RedrawNodesAround(node.WorldCoordinates);
-                UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+                UpdateVisionOfNearbyEntitiesDelayed(node.MeshCenterWorldPosition);
             }
         }
         public void RegisterFence(Fence fence, bool registerInWorld = true)
@@ -1423,16 +1451,19 @@ namespace BlockmapFramework
             // On node
             fence.Node.Fences.Add(fence.Side, fence);
         }
-        public void RemoveFence(Fence fence)
+        public void RemoveFence(Fence fence, bool updateWorld)
         {
             // Deregister
             BlockmapNode node = fence.Node;
             DeregisterFence(fence);
 
-            // Update world
-            UpdateNavmeshAround(node.WorldCoordinates);
-            RedrawNodesAround(node.WorldCoordinates);
-            UpdateVisionOfNearbyEntitiesDelayed(node.CenterWorldPosition);
+            // Update world around coordinates
+            if (updateWorld)
+            {
+                UpdateNavmeshAround(node.WorldCoordinates);
+                RedrawNodesAround(node.WorldCoordinates);
+                UpdateVisionOfNearbyEntitiesDelayed(node.MeshCenterWorldPosition);
+            }
         }
         public void DeregisterFence(Fence fence)
         {
@@ -1495,17 +1526,15 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored = false, bool updateWorld = true)
+        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool updateWorld, bool mirrored = false)
         {
             //if (!CanBuildWall(globalCellCoordinates, side)) return;
-
-            if (shape == WallShapeDefOf.Corner) Debug.Log("we make corner");
 
             // Create and register new wall
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
             RegisterWall(newWall);
 
-            // Update systems around cell
+            // Update world around cell
             if (updateWorld)
             {
                 UpdateNavmeshAround(newWall.WorldCoordinates);
@@ -1525,7 +1554,7 @@ namespace BlockmapFramework
             // In chunk
             wall.Chunk.RegisterWall(wall);
         }
-        public void RemoveWall(Wall wall, bool updateWorld = true)
+        public void RemoveWall(Wall wall, bool updateWorld)
         {
             // Destroy vision collider
             GameObject.Destroy(wall.VisionColliderObject);
@@ -1533,7 +1562,7 @@ namespace BlockmapFramework
             // Deregister
             DeregisterWall(wall);
 
-            // Update systems around cell
+            // Update world around cell
             if (updateWorld)
             {
                 UpdateNavmeshAround(wall.WorldCoordinates);
@@ -1595,7 +1624,7 @@ namespace BlockmapFramework
 
             return possibleTargetNodes;
         }
-        public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side, bool updateWorld = true)
+        public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side, bool updateWorld)
         {
             SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to), isMirrored: false, updateWorld: updateWorld);
         }
@@ -1604,9 +1633,9 @@ namespace BlockmapFramework
         {
             return CanBuildOnNodeSide(node, side, height, allowSlopes: false);
         }
-        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld = true)
+        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld)
         {
-            SpawnEntity(EntityDefOf.Door, node, side, Gaia, height, isMirrored, updateWorld);
+            SpawnEntity(EntityDefOf.Door, node, side, Gaia, updateWorld, height, isMirrored);
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
@@ -1767,6 +1796,8 @@ namespace BlockmapFramework
             visionUpdateEntities = GetNearbyEntities(position, rangeEast, rangeNorth);
             if (excludeActor != null) visionUpdateEntities = visionUpdateEntities.Where(x => x.Actor != excludeActor).ToList();
             entityVisionUpdateCallback = callback;
+
+            Debug.Log($"Request entity vision update for {visionUpdateEntities.Count} entities.");
         }
         /// <summary>
         /// Updates the vision of all given entities over the next few frames and calls callback when done.
@@ -1777,10 +1808,11 @@ namespace BlockmapFramework
 
             visionUpdateEntities = entities;
             entityVisionUpdateCallback = callback;
+
+            Debug.Log($"Request entity vision update for {visionUpdateEntities.Count} entities.");
         }
         private void DoUpdateVisionOfEntities()
         {
-            //Debug.Log("Updating vision of " + entitiesToUpdate.Count + " entities.");
             foreach (Entity e in visionUpdateEntities)
             {
                 e.UpdateVision();

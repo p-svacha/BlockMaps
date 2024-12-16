@@ -108,7 +108,7 @@ namespace WorldEditor
         {
             if (CurrentWaterBody == null) return;
 
-            World.AddWaterBody(CurrentWaterBody, updateNavmesh: true);
+            World.AddWaterBody(CurrentWaterBody, updateWorld: true);
 
             Cache.Clear();
         }
@@ -117,7 +117,7 @@ namespace WorldEditor
         {
             if (World.HoveredWaterBody == null) return;
 
-            World.RemoveWaterBody(World.HoveredWaterBody);
+            World.RemoveWaterBody(World.HoveredWaterBody, updateWorld: true);
 
             Cache.Clear();
         }

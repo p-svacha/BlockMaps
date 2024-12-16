@@ -151,7 +151,7 @@ namespace WorldEditor
         {
             if (World.HoveredWall == null) return;
 
-            World.RemoveWall(World.HoveredWall);
+            World.RemoveWall(World.HoveredWall, updateWorld: true);
         }
 
         public override void HandleMiddleClick()
@@ -159,7 +159,7 @@ namespace WorldEditor
             Wall targetWall = World.HoveredWall;
             if (targetWall == null) return;
 
-            World.RemoveWall(targetWall);
+            World.RemoveWall(targetWall, updateWorld: true);
             World.BuildWall(targetWall.GlobalCellCoordinates, targetWall.Side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn);
         }
 

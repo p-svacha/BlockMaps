@@ -429,19 +429,18 @@ namespace BlockmapFramework
             // Get list of everything that this entity currently sees
             pm_GetCurrentVision.Begin();
             CurrentVision = GetCurrentVision(debugVisionRays);
+            //Debug.Log($"Vision for {Label}:\n{CurrentVision}");
             pm_GetCurrentVision.End();
 
             pm_HandleVisibilityChange.Begin();
             // Add entitiy vision to visible nodes
-            //Debug.Log(CurrentVision.VisibleNodes.Count + " nodes are visible");
+            
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
-            //Debug.Log(CurrentVision.ExploredNodes.Count + " nodes are explored");
             foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Actor);
 
             // Update last known position and rotation of all currently visible entities
-            //Debug.Log(CurrentVision.VisibleEntities.Count + " entities are visible");
             foreach (Entity e in CurrentVision.VisibleEntities) e.AddVisionBy(this);
 
             // Add entity vision to visible walls
@@ -621,7 +620,26 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Retrieve a specific comp of this entity (or null if it doesn't have it).
+        /// Returns if this entity has a specific comp.
+        /// </summary>
+        public bool HasComponent<T>() where T : EntityComp
+        {
+            if (Components != null)
+            {
+                int i = 0;
+                for (int count = Components.Count; i < count; i++)
+                {
+                    if (Components[i] is T result)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Retrieve a specific comp of this entity. Throws an error if it doesn't have it.
         /// </summary>
         public T GetComponent<T>() where T : EntityComp
         {
@@ -705,17 +723,18 @@ namespace BlockmapFramework
                     pm_GetTargetNodes.End();
                     foreach (BlockmapNode targetNode in targetNodes)
                     {
-                        if ((targetNode.CenterWorldPosition - visionRaySource).sqrMagnitude > visionRangeSquared) continue;
+                        Vector3 nodeRayTargetPosition = targetNode.MeshCenterWorldPosition;
+                        if ((nodeRayTargetPosition - visionRaySource).sqrMagnitude > visionRangeSquared) continue;
 
                         pm_Look.Begin();
-                        VisionData nodeRayVision = Look(visionRaySource, targetNode.CenterWorldPosition, debugVisionRays);
+                        VisionData nodeRayVision = Look(visionRaySource, nodeRayTargetPosition, debugVisionRays);
                         pm_Look.End();
 
                         pm_AggregateVisionData.Begin();
                         finalVision.AddVisionData(nodeRayVision);
                         pm_AggregateVisionData.End();
 
-                        // Shoot ray all entities on node
+                        // Shoot ray at all entities on node
                         foreach (Entity e in targetNode.Entities)
                         {
                             if (e.Actor == Actor) continue; // Don't check for entities of the same actor since they see them anyway
@@ -952,7 +971,7 @@ namespace BlockmapFramework
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
-            return OriginNode.CenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
+            return OriginNode.MeshCenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
         }
 
         /// <summary>
@@ -987,8 +1006,8 @@ namespace BlockmapFramework
             ResetWorldPositonAndRotation();
 
             // Update vision from entities around source and target position
-            List<Entity> entitiesNearSourcePosition = World.GetNearbyEntities(sourceNode.CenterWorldPosition);
-            List<Entity> entitiesNearTargetPosition = World.GetNearbyEntities(targetNode.CenterWorldPosition);
+            List<Entity> entitiesNearSourcePosition = World.GetNearbyEntities(sourceNode.MeshCenterWorldPosition);
+            List<Entity> entitiesNearTargetPosition = World.GetNearbyEntities(targetNode.MeshCenterWorldPosition);
             List<Entity> entitiesToUpdate = entitiesNearSourcePosition.Union(entitiesNearTargetPosition).ToList();
 
             if (BlocksVision) World.UpdateEntityVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);

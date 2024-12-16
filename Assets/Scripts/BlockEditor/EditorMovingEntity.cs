@@ -66,7 +66,7 @@ namespace WorldEditor
 
         private void OnNewPath()
         {
-            TargetFlag.transform.position = MovementComp.Target.CenterWorldPosition;
+            TargetFlag.transform.position = MovementComp.Target.MeshCenterWorldPosition;
             TargetFlag.transform.localScale = new Vector3(TargetFlagScale, 1f, TargetFlagScale);
             TargetFlag.GetComponent<MeshRenderer>().material.color = Color.red;
             TargetFlag.gameObject.SetActive(true);

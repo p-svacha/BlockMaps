@@ -179,6 +179,8 @@ namespace BlockmapFramework
             MaxAltitude = Altitude.Values.Max();
             Shape = GetShape(Altitude);
             Steepness = GetSteepness(Altitude);
+
+            RecalculateShapeCenterWorldPosition();
         }
 
         protected string GetShape(Dictionary<Direction, int> altitude)
@@ -867,8 +869,19 @@ namespace BlockmapFramework
         #region Getters
 
         public bool HasFence => Fences.Count > 0;
-        public Vector3 CenterWorldPosition { get; protected set; }
-        public abstract void RecalculateCenterWorldPosition();
+        /// <summary>
+        /// The center world position of this node purely by shape. Can be retrieved without a drawn mesh.
+        /// </summary>
+        public Vector3 ShapeCenterWorldPosition { get; protected set; }
+        /// <summary>
+        /// The real center world position of this mode based on its drawn mesh.
+        /// </summary>
+        public Vector3 MeshCenterWorldPosition { get; protected set; }
+        public abstract void RecalculateMeshCenterWorldPosition();
+        protected void RecalculateShapeCenterWorldPosition()
+        {
+            ShapeCenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldShapeAltitude(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);
+        }
 
         /// <summary>
         /// Returns the minimum altitude on the given side of this node as a y coordinate. 

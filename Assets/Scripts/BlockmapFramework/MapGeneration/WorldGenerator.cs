@@ -11,15 +11,18 @@ namespace BlockmapFramework.WorldGeneration
 
         public abstract string Name { get; }
 
+        /// <summary>
+        /// The amount of chunks on each side of the map. (A world with 2x2 chunks has NumChunksPerSide = 2).
+        /// </summary>
         protected int NumChunksPerSide;
 
         /// <summary>
-        /// The amount of nodes on each size of the map. (A world with 2x2 chunks has WorldSize = 32).
+        /// The amount of nodes on each side of the map. (A world with 2x2 chunks has WorldSize = 32).
         /// </summary>
         protected int WorldSize { get; private set; }
 
         /// <summary>
-        /// Amount of ground nodes on the map. (WorldSize^2)
+        /// Amount of ground nodes on the map. (A world with 2x2 chunks has WorldArea = 32 * 32 = 1024).
         /// </summary>
         protected int WorldArea => WorldSize * WorldSize;
 
@@ -122,6 +125,11 @@ namespace BlockmapFramework.WorldGeneration
 
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
         protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
+
+        protected void Log(string message)
+        {
+            Debug.Log($"[Map Generation] {message}");
+        }
 
         #endregion
     }

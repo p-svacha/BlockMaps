@@ -100,7 +100,7 @@ namespace WorldEditor
             int height = int.Parse(HeightInput.text);
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, owner, height);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, owner, updateWorld: true, height);
         }
 
         public override void HandleRightClick()
@@ -108,7 +108,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (World.HoveredEntity.Def.RenderProperties.RenderType != EntityRenderType.Batch) return;
 
-            World.RemoveEntity(World.HoveredEntity);
+            World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }
 
         public override void OnSelect()

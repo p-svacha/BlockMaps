@@ -92,14 +92,14 @@ namespace WorldEditor
             int height = int.Parse(HeightInput.text);
             if (!World.CanBuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height)) return;
 
-            World.BuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height);
+            World.BuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height, updateWorld: true);
         }
 
         public override void HandleRightClick()
         {
             if (World.HoveredFence == null) return;
 
-            World.RemoveFence(World.HoveredFence);
+            World.RemoveFence(World.HoveredFence, updateWorld: true);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)

@@ -47,7 +47,7 @@ namespace WorldEditor
             {
                 if (World.HoveredDynamicNode.SurfaceDef == SelectedSurface) return;
 
-                World.SetSurface(World.HoveredDynamicNode, SelectedSurface);
+                World.SetSurface(World.HoveredDynamicNode, SelectedSurface, updateWorld: true);
 
                 // Update overlay
                 World.HoveredDynamicNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);

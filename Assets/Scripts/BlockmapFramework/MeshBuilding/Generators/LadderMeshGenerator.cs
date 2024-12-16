@@ -19,8 +19,6 @@ namespace BlockmapFramework
         {
             int ladderSubmesh = meshBuilder.GetSubmesh(GetMaterial(isPreview));
 
-            Debug.Log($"building ladder mesh with height {height}");
-
             // Left pole
             Vector3 lpl_pos = new Vector3(-LADDER_STEP_LENGTH / 2f - LADDER_POLE_SIZE, 0f, -0.5f);
             Vector3 lpl_dim = new Vector3(LADDER_POLE_SIZE, height * World.NodeHeight, LADDER_POLE_SIZE);

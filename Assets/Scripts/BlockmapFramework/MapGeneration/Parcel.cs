@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework.WorldGeneration
@@ -21,6 +23,11 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         public Vector2Int Dimensions { get; private set; }
 
+        public int MinX => Position.x;
+        public int MaxX => Position.x + Dimensions.x - 1;
+        public int MinY => Position.y;
+        public int MaxY => Position.y + Dimensions.y - 1;
+
         public Parcel(World world, Vector2Int position, Vector2Int dimensions)
         {
             World = world;
@@ -33,6 +40,8 @@ namespace BlockmapFramework.WorldGeneration
         public Vector2Int CornerNE => Position + new Vector2Int(Dimensions.x, Dimensions.y);
         public Vector2Int CornerNW => Position + new Vector2Int(0, Dimensions.y);
 
+        #region Actions
+
         /// <summary>
         /// Redraws the world, recalculates the navmesh and updates entity vision for the whole parcel area.
         /// </summary>
@@ -42,5 +51,59 @@ namespace BlockmapFramework.WorldGeneration
             World.UpdateNavmeshAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
             World.UpdateEntityVisionAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
         }
+
+        #endregion
+
+        #region Properties
+
+        public bool IsInWorld()
+        {
+            if (!World.IsInWorld(CornerNW)) return false;
+            if (!World.IsInWorld(CornerNE)) return false;
+            if (!World.IsInWorld(CornerSE)) return false;
+            if (!World.IsInWorld(CornerSW)) return false;
+            return true;
+        }
+
+        public bool IntersectsZone(Zone z)
+        {
+            // Quick bounding box check
+            if (z.MaxX < MinX || z.MinX > MaxX || z.MaxY < MinY || z.MinY > MaxY)
+                 return false; // No overlap in bounding boxes
+
+            // Check each coordinate
+            foreach (var coord in z.WorldCoordinates)
+            {
+                if (coord.x >= MinX && coord.x <= MaxX && coord.y >= MinY && coord.y <= MaxY)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool HasAnyWater()
+        {
+            return HasAny(n => n is WaterNode);
+        }
+        public bool HasAnyNodesWithSurface(SurfaceDef def)
+        {
+            return HasAny(n => n.SurfaceDef == def);
+        }
+
+        private bool HasAny(Func<BlockmapNode, bool> predicate)
+        {
+            for (int x = Position.x; x < Position.x + Dimensions.x; x++)
+            {
+                for (int y = Position.y; y < Position.y + Dimensions.y; y++)
+                {
+                    if (World.GetNodes(new Vector2Int(x, y)).Any(predicate)) return true;
+                }
+            }
+            return false;
+        }
+
+        #endregion
     }
 }

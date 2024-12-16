@@ -86,7 +86,7 @@ namespace WorldEditor
             {
                 if (World.HoveredGroundNode != null && World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease))
                 {
-                    World.ChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease);
+                    World.ChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease, updateWorld: true);
                 }
             }
             else // Height change of full tile(s)
@@ -125,7 +125,7 @@ namespace WorldEditor
                     {
                         World.UpdateNavmeshAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
                         World.RedrawNodesAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                        World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.CenterWorldPosition, AreaSize, AreaSize);
+                        World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.MeshCenterWorldPosition, AreaSize, AreaSize);
                     }
                 }
             }

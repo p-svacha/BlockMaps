@@ -38,7 +38,7 @@ namespace BlockmapFramework
             HopDownDistance = hopDownDistance;
 
             float arcHeight = (Mathf.Max(hopUpDistance, hopDownDistance) * World.NodeHeight);
-            HopArc = HelperFunctions.CreateArc(from.CenterWorldPosition, to.CenterWorldPosition, arcHeight, segments: 12);
+            HopArc = HelperFunctions.CreateArc(from.MeshCenterWorldPosition, to.MeshCenterWorldPosition, arcHeight, segments: 12);
         }
 
         public override bool CanPass(Entity entity)
@@ -86,7 +86,7 @@ namespace BlockmapFramework
                 if (moveComp.TransitionPathIndex == HopArc.Count - 1)
                 {
                     finishedTransition = true;
-                    newPosition = To.CenterWorldPosition;
+                    newPosition = To.MeshCenterWorldPosition;
                 }
             }
             currentNode = moveComp.TransitionPathIndex > HopArc.Count / 2 ? To : From;

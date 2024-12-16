@@ -86,7 +86,7 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (Parcel == null) return;
 
-            Features[FeatureDropdown.value].GenerateAction(Parcel, World.HoveredNode);
+            Features[FeatureDropdown.value].GenerateAction(Parcel, World.HoveredNode, true);
         }
 
         public override void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
@@ -116,7 +116,10 @@ namespace WorldEditor
             if (ParcelInputX.text == "") return;
             if (ParcelInputY.text == "") return;
 
-            Parcel = new Parcel(World, World.HoveredNode.WorldCoordinates, new Vector2Int(int.Parse(ParcelInputX.text), int.Parse(ParcelInputY.text)));
+
+            int worldCoordsX = World.HoveredNode.WorldCoordinates.x - ParcelSizeX / 2;
+            int worldCoordsY = World.HoveredNode.WorldCoordinates.y - ParcelSizeY / 2;
+            Parcel = new Parcel(World, new Vector2Int(worldCoordsX, worldCoordsY), new Vector2Int(ParcelSizeX, ParcelSizeY));
             float worldAltitude = World.HoveredNode.BaseWorldAltitude;
             float previewHeight = 2f;
 

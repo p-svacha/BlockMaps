@@ -83,7 +83,7 @@ namespace BlockmapFramework
 
         public static Vector3 GetLadderWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
         {
-            Vector3 nodeCenter = originNode.CenterWorldPosition;
+            Vector3 nodeCenter = originNode.MeshCenterWorldPosition;
             float worldHeight = originNode.GetMinAltitude(rotation) * World.NodeHeight;
             return new Vector3(nodeCenter.x, worldHeight, nodeCenter.z);
         }

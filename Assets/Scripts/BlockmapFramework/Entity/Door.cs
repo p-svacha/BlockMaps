@@ -91,7 +91,7 @@ namespace BlockmapFramework
                 WorldRotation = targetRotation;
                 UpdateVisibility();
                 UpdateVisionColliderPosition();
-                World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.CenterWorldPosition);
+                World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.MeshCenterWorldPosition);
             }
         }
 

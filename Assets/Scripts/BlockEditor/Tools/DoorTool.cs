@@ -88,7 +88,7 @@ namespace WorldEditor
             if (World.HoveredNode == null) return;
             if (!World.CanBuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height)) return;
 
-            World.BuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height, MirrorToggle.isOn);
+            World.BuildDoor(World.HoveredNode, World.NodeHoverModeSides, Height, MirrorToggle.isOn, updateWorld: true);
         }
 
         public override void HandleRightClick()
@@ -96,7 +96,7 @@ namespace WorldEditor
             if (World.HoveredEntity == null) return;
             if (!(World.HoveredEntity is Door)) return;
 
-            World.RemoveEntity(World.HoveredEntity);
+            World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }
 
         public override void HandleMiddleClick()

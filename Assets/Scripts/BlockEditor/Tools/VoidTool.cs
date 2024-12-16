@@ -88,15 +88,15 @@ namespace WorldEditor
             if (HoveredCoordinatesGroundNode == null) return;
 
             IsDragSetVoid = !HoveredCoordinatesGroundNode.IsVoid;
-            if (HoveredCoordinatesGroundNode.IsVoid) World.UnsetGroundNodeAsVoid(HoveredCoordinatesGroundNode, UnvoidAltitude);
-            else World.SetGroundNodeAsVoid(HoveredCoordinatesGroundNode);
+            if (HoveredCoordinatesGroundNode.IsVoid) World.UnsetGroundNodeAsVoid(HoveredCoordinatesGroundNode, UnvoidAltitude, updateWorld: true);
+            else World.SetGroundNodeAsVoid(HoveredCoordinatesGroundNode, updateWorld: true);
         }
 
         public override void HandleLeftDrag()
         {
             if (HoveredCoordinatesGroundNode == null) return;
-            if (!IsDragSetVoid && HoveredCoordinatesGroundNode.IsVoid) World.UnsetGroundNodeAsVoid(HoveredCoordinatesGroundNode, UnvoidAltitude);
-            else if (IsDragSetVoid && !HoveredCoordinatesGroundNode.IsVoid) World.SetGroundNodeAsVoid(HoveredCoordinatesGroundNode);
+            if (!IsDragSetVoid && HoveredCoordinatesGroundNode.IsVoid) World.UnsetGroundNodeAsVoid(HoveredCoordinatesGroundNode, UnvoidAltitude, updateWorld: true);
+            else if (IsDragSetVoid && !HoveredCoordinatesGroundNode.IsVoid) World.SetGroundNodeAsVoid(HoveredCoordinatesGroundNode, updateWorld: true);
         }
 
         public override void OnSelect()
