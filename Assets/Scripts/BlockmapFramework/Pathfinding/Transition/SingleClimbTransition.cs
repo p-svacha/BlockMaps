@@ -96,7 +96,7 @@ namespace BlockmapFramework
                         {
                             y = World.GetWorldAltitudeAt(newPosition2d, From);
                             if (From.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
-                            if (!IsAscend && y < World.GetWorldHeight(StartHeight)) y = World.GetWorldHeight(StartHeight);
+                            if (!IsAscend && y < World.GetWorldY(StartHeight)) y = World.GetWorldY(StartHeight);
                         }
                         else y = World.NodeHeight * From.GetMinAltitude(Direction);
 

@@ -77,7 +77,7 @@ namespace WorldEditor
             if (World.HoveredGroundNode == null) return;
 
             Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
-            modifiedArea.UpdateWorld();
+            World.UpdateWorldSystems(modifiedArea);
         }
 
         private void ApplyHeightChange(bool isIncrease)
@@ -118,14 +118,12 @@ namespace WorldEditor
                     if (SmoothEdgeToggle.isOn)
                     {
                         Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, coordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
-                        modifiedArea.UpdateWorld();
+                        World.UpdateWorldSystems(modifiedArea);
                     }
 
                     else
                     {
-                        World.UpdateNavmeshAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                        World.RedrawNodesAround(World.HoveredGroundNode.WorldCoordinates, AreaSize, AreaSize);
-                        World.UpdateVisionOfNearbyEntitiesDelayed(World.HoveredGroundNode.MeshCenterWorldPosition, AreaSize, AreaSize);
+                        World.UpdateWorldSystems(new Parcel(World.HoveredGroundNode, AreaSize));
                     }
                 }
             }

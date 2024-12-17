@@ -72,7 +72,7 @@ namespace BlockmapFramework
             isRotating = true;
 
             IsOpen = !IsOpen;
-            World.UpdateNavmeshAround(OriginNode.WorldCoordinates);
+            World.UpdateNavmesh(new Parcel(OriginNode));
         }
 
         protected override void OnTick()

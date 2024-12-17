@@ -1132,9 +1132,9 @@ namespace BlockmapFramework
 
             text += "\nMovement Speed Modifier: " + SurfaceDef.MovementSpeedModifier;
             text += "\nShape: " + World.HoveredNode.Shape;
-            text += "\nLocal Shape Altitude: " + World.HoveredNode.GetLocalShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
-            text += "\nWorld Shape Altitude: " + World.HoveredNode.GetWorldShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
-            text += "\nWorld Mesh Altitude: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nLocal Shape Y: " + World.HoveredNode.GetLocalShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Shape Y: " + World.HoveredNode.GetWorldShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Mesh Y: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             text += "\n" + mph;
             text += "\n" + headspace;
             if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";

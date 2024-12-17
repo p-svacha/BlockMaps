@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace BlockmapFramework.WorldGeneration
+namespace BlockmapFramework
 {
     /// <summary>
     /// Represents a plot of land as a 2d rectangular area in the world.
@@ -24,9 +24,9 @@ namespace BlockmapFramework.WorldGeneration
         public Vector2Int Dimensions { get; private set; }
 
         public int MinX => Position.x;
-        public int MaxX => Position.x + Dimensions.x - 1;
+        public int MaxX => Position.x + Dimensions.x;
         public int MinY => Position.y;
-        public int MaxY => Position.y + Dimensions.y - 1;
+        public int MaxY => Position.y + Dimensions.y;
 
         public Parcel(World world, Vector2Int position, Vector2Int dimensions)
         {
@@ -34,27 +34,20 @@ namespace BlockmapFramework.WorldGeneration
             Position = position;
             Dimensions = dimensions;
         }
+        public Parcel(BlockmapNode swNode, int size = 1)
+        {
+            World = swNode.World;
+            Position = swNode.WorldCoordinates;
+            Dimensions = new Vector2Int(size, size);
+        }
 
         public Vector2Int CornerSW => Position;
         public Vector2Int CornerSE => Position + new Vector2Int(Dimensions.x, 0);
         public Vector2Int CornerNE => Position + new Vector2Int(Dimensions.x, Dimensions.y);
         public Vector2Int CornerNW => Position + new Vector2Int(0, Dimensions.y);
 
-        #region Actions
 
-        /// <summary>
-        /// Redraws the world, recalculates the navmesh and updates entity vision for the whole parcel area.
-        /// </summary>
-        public void UpdateWorld()
-        {
-            World.RedrawNodesAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
-            World.UpdateNavmeshAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
-            World.UpdateEntityVisionAround(CornerSW - new Vector2Int(1, 1), Dimensions.x + 1, Dimensions.y + 1);
-        }
-
-        #endregion
-
-        #region Properties
+        #region Getters
 
         public bool IsInWorld()
         {

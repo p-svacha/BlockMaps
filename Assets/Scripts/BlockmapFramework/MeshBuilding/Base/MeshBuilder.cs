@@ -555,7 +555,7 @@ namespace BlockmapFramework
 
             // Apply offset based on node position on chunk to footprint
             int startHeightCoordinate = node.GetMinAltitude(side);
-            float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
+            float worldHeight = node.World.GetWorldY(startHeightCoordinate);
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
             for (int i = 0; i < 4; i++) footprint[i] += nodeOffsetPos;
@@ -588,7 +588,7 @@ namespace BlockmapFramework
 
             // Apply offset based on node position on chunk to footprint
             int startHeightCoordinate = node.GetMinAltitude(side);
-            float worldHeight = node.World.GetWorldHeight(startHeightCoordinate);
+            float worldHeight = node.World.GetWorldY(startHeightCoordinate);
             Vector3 nodeOffsetPos = new Vector3(node.LocalCoordinates.x, worldHeight, node.LocalCoordinates.y);
 
             for (int i = 0; i < 4; i++) vertices[i] += nodeOffsetPos;

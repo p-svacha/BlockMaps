@@ -94,8 +94,8 @@ namespace BlockmapFramework
             // For y, take the lowest node center out of all occupied nodes
             HashSet<BlockmapNode> occupiedNodes = GetOccupiedNodes(def, world, originNode, rotation);
             float y;
-            if (occupiedNodes == null) y = originNode.GetWorldMeshAltitude(new Vector2(0.5f, 0.5f));
-            else y = occupiedNodes.Min(x => x.GetWorldMeshAltitude(new Vector2(0.5f, 0.5f)));
+            if (occupiedNodes == null) y = originNode.MeshCenterWorldPosition.y;
+            else y = occupiedNodes.Min(x => x.MeshCenterWorldPosition.y);
 
             // Final position
             return new Vector3(basePosition.x, y, basePosition.y);

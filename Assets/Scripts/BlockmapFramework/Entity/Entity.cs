@@ -150,6 +150,9 @@ namespace BlockmapFramework
             Actor = owner;
             IsMirrored = isMirrored;
 
+            // Set position and rotation
+            ResetWorldPositonAndRotation();
+
             OnCreated();
         }
 
@@ -176,9 +179,6 @@ namespace BlockmapFramework
             foreach (Actor p in World.GetAllActors()) LastKnownPosition.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
             foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
-
-            // Set position and rotation
-            ResetWorldPositonAndRotation();
 
             // Initialize components
             InitializeComps();
@@ -420,11 +420,18 @@ namespace BlockmapFramework
             if (!CanSee) return; // This entity cannot see
             pm_UpdateVision.Begin();
 
+            HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
+
             // Remove entity vision from previously visible nodes, entities and walls
             VisionData previousVision = CurrentVision;
             foreach (BlockmapNode n in previousVision.VisibleNodes) n.RemoveVisionBy(this);
             foreach (Entity e in previousVision.VisibleEntities) e.RemoveVisionBy(this);
             foreach (Wall w in previousVision.VisibleWalls) w.RemoveVisionBy(this);
+
+            // Add chunks from old vision to changedVisibilityChunks
+            foreach (BlockmapNode n in previousVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
+            foreach (Entity e in previousVision.VisibleEntities) changedVisibilityChunks.Add(e.Chunk);
+            foreach (Wall w in previousVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
 
             // Get list of everything that this entity currently sees
             pm_GetCurrentVision.Begin();
@@ -449,36 +456,14 @@ namespace BlockmapFramework
             // Set walls as explored
             foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
 
-            // Find nodes and walls where the visibility changed
-            HashSet<BlockmapNode> changedVisibilityNodes = new HashSet<BlockmapNode>(previousVision.VisibleNodes.Concat(previousVision.ExploredNodes));
-            HashSet<Wall> changedVisibilityWalls = new HashSet<Wall>(previousVision.VisibleWalls.Concat(previousVision.ExploredWalls));
-            changedVisibilityNodes.SymmetricExceptWith(CurrentVision.VisibleNodes.Concat(CurrentVision.ExploredNodes));
-            changedVisibilityWalls.SymmetricExceptWith(CurrentVision.VisibleWalls.Concat(CurrentVision.ExploredWalls));
-            //Debug.Log("Visiblity of " + changedVisibilityNodes.Count + " nodes changed."); 
+            // Add chunks from new vision to changedVisibilityChunks
+            foreach (BlockmapNode n in CurrentVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
+            foreach (Entity e in CurrentVision.VisibleEntities) changedVisibilityChunks.Add(e.Chunk);
+            foreach (Wall w in CurrentVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
 
-            // Add all adjacent nodes as well because vision goes over node edge
-            HashSet<BlockmapNode> adjNodes = new HashSet<BlockmapNode>();
-            foreach (BlockmapNode n in changedVisibilityNodes)
-            {
-                foreach (Direction dir in HelperFunctions.GetAllDirections8())
-                {
-                    foreach (BlockmapNode adjNode in World.GetAdjacentNodes(n.WorldCoordinates, dir))
-                        adjNodes.Add(adjNode);
-                }
-            }
-            foreach (BlockmapNode adjNode in adjNodes) changedVisibilityNodes.Add(adjNode);
-
-            // Get chunks where visibility changed
-            HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
-            foreach (BlockmapNode n in changedVisibilityNodes) changedVisibilityChunks.Add(n.Chunk);
-            foreach (Wall w in changedVisibilityWalls) changedVisibilityChunks.Add(w.Chunk);
-
-            // Redraw visibility of affected chunks
-            //Debug.Log("Visibility of " + changedVisibilityChunks.Count + " chunks changed.");
             foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Actor);
 
             pm_HandleVisibilityChange.End();
-
             pm_UpdateVision.End();
         }
 
@@ -607,7 +592,7 @@ namespace BlockmapFramework
         public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
         public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
-        public float WorldHeight => World.GetWorldHeight(Height);
+        public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
         public bool CanSee => VisionRange > 0;
 
@@ -659,9 +644,12 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns the world position of this entity when placed on the given originNode.
-        /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis.
+        /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis. (see EntityManager.GetWorldPosition)
         /// </summary>
-        public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, bool isMirrored) => Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, isMirrored);
+        public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, bool isMirrored)
+        {
+            return Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, isMirrored);
+        }
 
         /// <summary>
         /// Returns the world position of the center of this entity.
@@ -1069,7 +1057,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates the position of all vision colliders according to the current OriginNode and rotation of this entity.
         /// </summary>
-        protected void UpdateVisionColliderPosition()
+        public void UpdateVisionColliderPosition()
         {
             VisionColliderObject.transform.position = GetWorldPosition(OriginNode, Rotation, IsMirrored);
             VisionColliderObject.transform.rotation = WorldRotation;

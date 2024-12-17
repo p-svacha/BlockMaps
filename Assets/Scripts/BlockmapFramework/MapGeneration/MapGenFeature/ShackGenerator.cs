@@ -222,7 +222,7 @@ namespace BlockmapFramework.WorldGeneration
                 }
             }
 
-            if(updateWorld) parcel.UpdateWorld();
+            if (updateWorld) world.UpdateWorldSystems(parcel);
         }
 
         /// <summary>

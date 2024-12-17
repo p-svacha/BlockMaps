@@ -144,7 +144,7 @@ namespace WorldEditor
             if (!World.CanBuildWall(globalCellPosition, side)) return;
 
             // BUILD THE WALL
-            World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial, MirrorToggle.isOn);
+            World.BuildWall(globalCellPosition, side, SelectedWallShape, SelectedWallMaterial, updateWorld: true, MirrorToggle.isOn);
         }
 
         public override void HandleRightClick()

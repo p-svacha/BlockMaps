@@ -36,10 +36,5 @@ namespace BlockmapFramework
         {
             //World?.LateUpdate();
         }
-
-        protected virtual void FixedUpdate()
-        {
-            World?.FixedUpdate();
-        }
     }
 }
