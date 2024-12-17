@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using BlockmapFramework.Profiling;
 using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,7 +43,9 @@ namespace CaptureTheFlag
             }
 
             Debug.Log("Starting World Generation Step: " + GenerationSteps[CurrentGenerationStep].Method.Name);
+            Profiler.Begin(GenerationSteps[CurrentGenerationStep].Method.Name);
             GenerationSteps[CurrentGenerationStep].Invoke();
+            Profiler.End(GenerationSteps[CurrentGenerationStep].Method.Name);
             CurrentGenerationStep++;
         }
 

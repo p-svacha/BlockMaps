@@ -1,12 +1,6 @@
 Building Generator:
-path towards building door (with stairs if necessary)
-overhang roof
-basement floor if any ground node is x tiles below floor altitude (x = floor height)
-bench
-round corner pillars
-metal wall material (use for small round pillars)
-
-add to ctf map gen
+elevated path towards building door (with stairs if necessary)
+bridges when paths go over water
 
 Map Modifiers:
 	- a function that affects the whole map

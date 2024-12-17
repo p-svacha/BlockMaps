@@ -879,20 +879,14 @@ namespace BlockmapFramework
                     }
                 }
                 Profiler.End("Calculate Node Centers");
-            }
 
-            // Step 3: Generate navmesh
-            if (WorldUpdateStep == 3)
-            {
+                // Step 3: Generate navmesh
                 Profiler.Begin("Generate Navmesh");
                 if (WorldUpdateArea == null) GenerateFullNavmesh();
                 else UpdateNavmesh(WorldUpdateArea);
                 Profiler.End("Generate Navmesh");
-            }
 
-            // Step 4: Reposition standalone entities
-            if (WorldUpdateStep == 4)
-            {
+                // Step 4: Reposition standalone entities
                 Profiler.Begin("Reposition Entities");
                 HashSet<Entity> entitiesToUpdate = new HashSet<Entity>();
 
@@ -919,20 +913,14 @@ namespace BlockmapFramework
                     e.UpdateVisibility();
                 }
                 Profiler.End("Reposition Entities");
-            }
 
-            // Step 5: Update entity vision
-            if (WorldUpdateStep == 5)
-            {
+                // Step 5: Update entity vision
                 Profiler.Begin("Update Entity Vision");
                 if (WorldUpdateArea == null) UpdateVisionOfAllEntities();
                 else UpdateVisionOfNearbyEntities(WorldUpdateArea);
                 Profiler.End("Update Entity Vision");
-            }
 
-            // Step 6: Done and callback
-            if (WorldUpdateStep == 6)
-            {
+                // Step 6: Done and callback
                 IsUpdatingWorldSystems = false;
                 WorldUpdateCallback?.Invoke();
             }
@@ -1590,9 +1578,9 @@ namespace BlockmapFramework
         {
             return CanBuildOnNodeSide(node, side, height, allowSlopes: false);
         }
-        public void BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld)
+        public Door BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld)
         {
-            SpawnEntity(EntityDefOf.Door, node, side, Gaia, updateWorld, height, isMirrored);
+            return (Door)(SpawnEntity(EntityDefOf.Door, node, side, Gaia, updateWorld, height, isMirrored));
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)

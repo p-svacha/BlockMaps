@@ -26,8 +26,8 @@ namespace CaptureTheFlag
                 AddHedges,
                 AddForests,
                 AddPaths,
-                AddFencesAroundPaths,
                 AddShacks,
+                AddFencesAroundPaths,
                 CreatePlayerBases,
             };
         }
@@ -219,8 +219,9 @@ namespace CaptureTheFlag
         /// <summary>
         /// Draws a path until reaching another path or the map edge
         /// </summary>
-        private List<GroundNode> DrawPath(Vector2 startPosition, float startAngle, int thickness, List<GroundNode> existingPath = null)
+        private List<GroundNode> DrawPath(Vector2 startPosition, float startAngle, int thickness, List<GroundNode> existingPath = null, List<SurfaceDef> ignoreSurfaces = null)
         {
+            // Log($"Drawing path from {startPosition} with angle {startAngle}");
             Vector2 currentPosition = startPosition;
             float currentAngle = startAngle;
 
@@ -256,13 +257,13 @@ namespace CaptureTheFlag
                             continuePath = false; // reached other path
                             break;
                         }
-                        World.SetSurface(node, SurfaceDefOf.DirtPath, updateWorld: false);
-                        allPathNodes.Add(node);
-
-                        // Remove entity on path
-                        World.RemoveEntities(node, updateWorld: false);
+                        else if (ignoreSurfaces == null || !ignoreSurfaces.Contains(node.SurfaceDef))
+                        {
+                            World.SetSurface(node, SurfaceDefOf.DirtPath, updateWorld: false);
+                            allPathNodes.Add(node);
+                            World.RemoveEntities(node, updateWorld: false);
+                        }
                     }
-
                 }
 
                 currentPosition = segmentEndPosition;
@@ -363,7 +364,30 @@ namespace CaptureTheFlag
             Parcel parcel = new Parcel(World, parcelPosition, new Vector2Int(parcelSizeX, parcelSizeY));
             if(CanPlaceShack(parcel))
             {
+                // Shack
                 ShackGenerator.GenerateShack(parcel, World.GetGroundNode(parcelCenter), updateWorld: false);
+
+                // Path leading to shack
+                foreach(Door door in ShackGenerator.GeneratedShackInfo.Doors)
+                {
+                    int doorAltitude = door.MinAltitude;
+                    GroundNode outsideGroundNode = World.GetAdjacentGroundNode(door.OriginNode, door.Rotation);
+                    if (Mathf.Abs(outsideGroundNode.BaseAltitude - doorAltitude) <= 1) // Path directly on ground to door
+                    {
+                        outsideGroundNode.SetAltitude(doorAltitude);
+                        TerrainFunctions.SmoothOutside(outsideGroundNode, 1, new() { ShackGenerator.GeneratedShackInfo.FloorSurface });
+                        int thickness = Random.Range(MIN_PATH_THICKNESS, MAX_PATH_THICKNESS + 1);
+                        float pathOffsetX = (Random.value * 0.5f) - 0.25f;
+                        float pathOffsetY = (Random.value * 0.5f) - 0.25f;
+                        DrawPath(outsideGroundNode.WorldCenter2D + new Vector2(pathOffsetX, pathOffsetY), HelperFunctions.GetDirectionAngle(door.Rotation) + 180, thickness, ignoreSurfaces: new() { ShackGenerator.GeneratedShackInfo.FloorSurface });
+                    }
+                    else // Elevated patio in front of door
+                    {
+
+                    }
+
+                }
+
                 return true;
             }
             return false;
@@ -377,6 +401,8 @@ namespace CaptureTheFlag
             if (parcel.HasAnyNodesWithSurface(SurfaceDefOf.DirtPath)) return false;
             return true;
         }
+
+
 
         #endregion
     }

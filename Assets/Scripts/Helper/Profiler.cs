@@ -36,19 +36,24 @@ namespace BlockmapFramework.Profiling
 
         public static void LogAndClearResults()
         {
-            Debug.Log($"[Profiler Results] {LogTree(Tree)}");
+            Debug.Log($"[Profiler Results] {LogTree(Tree, logRoot: false)}");
             Reset();
         }
-        private static string LogTree(StopwatchTree tree)
+        private static string LogTree(StopwatchTree tree, bool logRoot)
         {
-            string prefix = "";
-            for (int i = 0; i < tree.Depth; i++) prefix += "\t";
-            string log = $"{prefix}{tree.Name}: {tree.Stopwatch.ElapsedMilliseconds} ms";
-            long selfTime = tree.Stopwatch.ElapsedMilliseconds;
-            foreach (StopwatchTree child in tree.Children) selfTime -= child.Stopwatch.ElapsedMilliseconds;
-            log += $" (self = {selfTime} ms)";
+            string log = "";
 
-            foreach (StopwatchTree child in tree.Children) log += $"\n{LogTree(child)}";
+            if (logRoot)
+            {
+                string prefix = "";
+                for (int i = 0; i < tree.Depth; i++) prefix += "\t";
+                log += $"{prefix}{tree.Name}: {tree.Stopwatch.ElapsedMilliseconds} ms";
+                long selfTime = tree.Stopwatch.ElapsedMilliseconds;
+                foreach (StopwatchTree child in tree.Children) selfTime -= child.Stopwatch.ElapsedMilliseconds;
+                log += $" (self = {selfTime} ms)";
+            }
+
+            foreach (StopwatchTree child in tree.Children) log += $"\n{LogTree(child, logRoot: true)}";
             return log;
         }
     }

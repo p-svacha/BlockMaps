@@ -10,6 +10,8 @@ namespace BlockmapFramework.WorldGeneration
     /// </summary>
     public static class ShackGenerator
     {
+        public static ShackInformation GeneratedShackInfo;
+
         private const int MinSize = 5;
 
         private static List<WallMaterialDef> WallMaterials = new List<WallMaterialDef>()
@@ -49,6 +51,9 @@ namespace BlockmapFramework.WorldGeneration
 
             // Declare dictionaries that are filled when placing the building
             Dictionary<Vector2Int, BlockmapNode> buildingFloorNodes = new Dictionary<Vector2Int, BlockmapNode>(); // the erdgeschoss ground/air node for each coordinate
+
+            // Return values
+            List<Door> doors = new List<Door>();
 
             bool useDarkMetalFoundation = Random.value < 0.5f;
 
@@ -159,7 +164,7 @@ namespace BlockmapFramework.WorldGeneration
                                 if (placeDoor)
                                 {
                                     BlockmapNode doorInsideNode = buildingFloorNodes[localCoord];
-                                    world.BuildDoor(doorInsideNode, side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
+                                    Door door = world.BuildDoor(doorInsideNode, side, doorHeight, isMirrored: Random.value < 0.5f, updateWorld: false);
 
                                     // Check if we need to lower outside ground of door in case door is lower than it
                                     if(outsideGroundNode != null && doorInsideNode.BaseAltitude < outsideGroundNode.MaxAltitude)
@@ -167,6 +172,9 @@ namespace BlockmapFramework.WorldGeneration
                                         outsideGroundNode.SetAltitude(doorInsideNode.BaseAltitude);
                                         TerrainFunctions.SmoothOutside(outsideGroundNode, smoothStep: 1, ignoredSurfaces: new() { floor });
                                     }
+
+                                    // Add door to return value
+                                    doors.Add(door);
                                 }
 
                                 // Check if we want a window here
@@ -190,7 +198,7 @@ namespace BlockmapFramework.WorldGeneration
                                 }
 
                                 // Check if we want a ladder outside
-                                bool placeLadder = Random.value < 0.04f;
+                                bool placeLadder = !placeDoor && Random.value < 0.04f;
                                 if (placeLadder && outsideGroundNode != null)
                                 {
                                     world.BuildLadder(outsideGroundNode, ceilingNode, HelperFunctions.GetOppositeDirection(side), updateWorld: false);
@@ -223,6 +231,12 @@ namespace BlockmapFramework.WorldGeneration
             }
 
             if (updateWorld) world.UpdateWorldSystems(parcel);
+
+            GeneratedShackInfo = new ShackInformation
+            {
+                Doors = doors,
+                FloorSurface = floor,
+            };
         }
 
         /// <summary>
@@ -321,6 +335,12 @@ namespace BlockmapFramework.WorldGeneration
         {
             return WallMaterials.RandomElement();
         }
+    }
+
+    public class ShackInformation
+    {
+        public SurfaceDef FloorSurface;
+        public List<Door> Doors;
     }
 
     #region Enums

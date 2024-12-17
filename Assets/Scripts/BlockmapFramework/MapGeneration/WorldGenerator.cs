@@ -1,3 +1,4 @@
+using BlockmapFramework.Profiling;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Profiling;
@@ -39,6 +40,7 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         public void StartGeneration(int numChunks)
         {
+            Profiler.Begin("World Generation");
             Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks.");
 
             if (World.ChunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
@@ -93,6 +95,7 @@ namespace BlockmapFramework.WorldGeneration
         {
             Debug.Log($"Finalizing world generation.");
             GenerationPhase = GenerationPhase.Done;
+            Profiler.End("World Generation");
         }
 
         #region Helper Functions
