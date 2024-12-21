@@ -501,11 +501,14 @@ public static class HelperFunctions
     }
     public static Sprite GetAssetPreviewSprite(string path)
     {
+        return null;
+        /*
         Object asset = Resources.Load(path);
         if (asset == null) throw new System.Exception($"Could not find asset with path {path}.");
         Texture2D assetPreviewTexture = AssetPreview.GetAssetPreview(asset);
         //if (assetPreviewTexture == null) throw new System.Exception($"Could not create asset preview texture of {asset} ({path}).");
         return TextureToSprite(assetPreviewTexture);
+        */
     }
 
     public static Sprite TextureToSprite(string resourcePath)

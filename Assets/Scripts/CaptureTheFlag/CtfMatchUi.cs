@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 namespace CaptureTheFlag
 {
-    public class CTFUi : MonoBehaviour
+    public class CtfMatchUi : MonoBehaviour
     {
-        private CTFGame Game;
+        private CtfMatch Game;
 
         [Header("Prefabs")]
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
@@ -20,11 +20,6 @@ namespace CaptureTheFlag
 
         public TextMeshProUGUI TileInfoText;
         public Button EndTurnButton;
-        public GameObject LoadingScreenOverlay;
-
-        public GameObject EndGameScreen;
-        public TextMeshProUGUI EndGameText;
-        public Button EndGameMenuButton;
 
         public GameObject CharacterSelectionContainer;
         public UI_CharacterInfo CharacterInfo;
@@ -38,7 +33,7 @@ namespace CaptureTheFlag
         private Dictionary<CTFCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
-        public void Init(CTFGame game)
+        public void Init(CtfMatch game)
         {
             Game = game;
             DevModeButton.onClick.AddListener(() => Game.ToggleDevMode());
@@ -112,12 +107,6 @@ namespace CaptureTheFlag
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
             SpecialActionsContainer.SetActive(false);
-        }
-
-        public void ShowEndGameScreen(string text)
-        {
-            EndGameScreen.SetActive(true);
-            EndGameText.text = text;
         }
 
         public void ShowTurnIndicator(string text, float hideAfter = 0f)

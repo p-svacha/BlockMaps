@@ -7,7 +7,7 @@ namespace CaptureTheFlag
 {
     public class Player
     {
-        public CTFGame Game;
+        public CtfMatch Game;
         public Actor Actor;
         public Entity Flag;
         public List<CTFCharacter> Characters;
@@ -37,7 +37,7 @@ namespace CaptureTheFlag
             FlagZone = flagZone;
         }
 
-        public virtual void OnStartGame(CTFGame game)
+        public virtual void OnStartGame(CtfMatch game)
         {
             Game = game;
             foreach (CTFCharacter c in Characters) c.OnStartGame(Game, this, Opponent);

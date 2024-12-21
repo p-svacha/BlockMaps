@@ -16,8 +16,8 @@ namespace BlockmapFramework
 
         private const float ZOOM_SPEED = 0.8f;
         private const float CAMERA_ANGLE = 1f; // 1f = 45 degrees, the lower the value the higher the camera
-        private const float MIN_HEIGHT = 2f;
-        private const float MAX_HEIGHT = 40f;
+        private const float MIN_ZOOM_HEIGHT = 1.5f;
+        private const float MAX_ZOOM_HEIGHT = 60f;
 
         // Pan animation
         public bool IsPanning { get; private set; }
@@ -141,7 +141,7 @@ namespace BlockmapFramework
 
         private void UpdatePosition()
         {
-            CurrentZoom = Mathf.Clamp(CurrentZoom, MIN_HEIGHT, MAX_HEIGHT);
+            CurrentZoom = Mathf.Clamp(CurrentZoom, MIN_ZOOM_HEIGHT, MAX_ZOOM_HEIGHT);
 
             OffsetRadius = CAMERA_ANGLE * CurrentZoom;
 

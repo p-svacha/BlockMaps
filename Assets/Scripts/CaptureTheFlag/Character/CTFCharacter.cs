@@ -10,7 +10,7 @@ namespace CaptureTheFlag
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
-        public CTFGame Game;
+        public CtfMatch Game;
         public Player Owner { get; private set; }
         public Player Opponent { get; private set; }
 
@@ -42,7 +42,7 @@ namespace CaptureTheFlag
 
         #region Game Loop
 
-        public void OnStartGame(CTFGame game, Player player, Player opponent)
+        public void OnStartGame(CtfMatch game, Player player, Player opponent)
         {
             Game = game;
             ActionPoints = MaxActionPoints;

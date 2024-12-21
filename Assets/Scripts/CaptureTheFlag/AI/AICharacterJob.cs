@@ -15,7 +15,7 @@ namespace CaptureTheFlag
         public CTFCharacter Character { get; private set; }
         public AIPlayer Player => (AIPlayer)Character.Owner;
         public Player Opponent => Player.Opponent;
-        public CTFGame Game => Character.Game;
+        public CtfMatch Game => Character.Game;
 
         public abstract AICharacterJobId Id { get; }
         public abstract string DevmodeDisplayText { get; }
@@ -48,6 +48,12 @@ namespace CaptureTheFlag
             // Get path to target
             NavigationPath path = GetPath(targetNode);
 
+            if (path == null) // No path found
+            {
+                if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+                return null;
+            }
+
             // Check if the path contains an adjacent move
             foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.IsSingleTransitionPath()))
             {
@@ -55,8 +61,6 @@ namespace CaptureTheFlag
                 if (path.Target == movement.Target) return movement;
             }
 
-            // No path found
-            if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
             return null;
         }
 

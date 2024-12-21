@@ -36,7 +36,7 @@ namespace CaptureTheFlag
 
         public AIPlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone) : base(actor, territory, jailZone, flagZone) { }
 
-        public override void OnStartGame(CTFGame game)
+        public override void OnStartGame(CtfMatch game)
         {
             base.OnStartGame(game);
 

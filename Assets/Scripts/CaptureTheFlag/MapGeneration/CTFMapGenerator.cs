@@ -83,20 +83,20 @@ namespace CaptureTheFlag
             numAttempts = 0;
             do
             {
-                flagDistanceX = Random.Range(CTFGame.JAIL_ZONE_MIN_FLAG_DISTANCE, CTFGame.JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
-                flagDistanceY = Random.Range(CTFGame.JAIL_ZONE_MIN_FLAG_DISTANCE, CTFGame.JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
+                flagDistanceX = Random.Range(CtfMatch.JAIL_ZONE_MIN_FLAG_DISTANCE, CtfMatch.JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
+                flagDistanceY = Random.Range(CtfMatch.JAIL_ZONE_MIN_FLAG_DISTANCE, CtfMatch.JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
                 if (Random.value < 0.5f) flagDistanceX *= -1;
                 if (Random.value < 0.5f) flagDistanceY *= -1;
             }
-            while (numAttempts++ < 10 && (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < World.MinX + CTFGame.JAIL_ZONE_RADIUS ||
-                spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX > World.MaxX - CTFGame.JAIL_ZONE_RADIUS - 1 ||
-                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY < World.MinY + CTFGame.JAIL_ZONE_RADIUS ||
-                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > World.MaxY - CTFGame.JAIL_ZONE_RADIUS - 1));
+            while (numAttempts++ < 10 && (spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX < World.MinX + CtfMatch.JAIL_ZONE_RADIUS ||
+                spawnedFlag.OriginNode.WorldCoordinates.x + flagDistanceX > World.MaxX - CtfMatch.JAIL_ZONE_RADIUS - 1 ||
+                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY < World.MinY + CtfMatch.JAIL_ZONE_RADIUS ||
+                spawnedFlag.OriginNode.WorldCoordinates.y + flagDistanceY > World.MaxY - CtfMatch.JAIL_ZONE_RADIUS - 1));
 
             Vector2Int jailZoneCenter = spawnedFlag.OriginNode.WorldCoordinates + new Vector2Int(flagDistanceX, flagDistanceY);
-            for (int x = -(CTFGame.JAIL_ZONE_RADIUS - 1); x < CTFGame.JAIL_ZONE_RADIUS; x++)
+            for (int x = -(CtfMatch.JAIL_ZONE_RADIUS - 1); x < CtfMatch.JAIL_ZONE_RADIUS; x++)
             {
-                for (int y = -(CTFGame.JAIL_ZONE_RADIUS - 1); y < CTFGame.JAIL_ZONE_RADIUS; y++)
+                for (int y = -(CtfMatch.JAIL_ZONE_RADIUS - 1); y < CtfMatch.JAIL_ZONE_RADIUS; y++)
                 {
                     jailZoneCoords.Add(jailZoneCenter + new Vector2Int(x, y));
                 }
@@ -105,13 +105,13 @@ namespace CaptureTheFlag
 
             // Flag zone
             HashSet<Vector2Int> flagZoneCoords = new HashSet<Vector2Int>();
-            for(int x = -(int)(CTFGame.FLAG_ZONE_RADIUS + 1); x <= CTFGame.FLAG_ZONE_RADIUS + 1; x++)
+            for(int x = -(int)(CtfMatch.FLAG_ZONE_RADIUS + 1); x <= CtfMatch.FLAG_ZONE_RADIUS + 1; x++)
             {
-                for (int y = -(int)(CTFGame.FLAG_ZONE_RADIUS + 1); y <= CTFGame.FLAG_ZONE_RADIUS + 1; y++)
+                for (int y = -(int)(CtfMatch.FLAG_ZONE_RADIUS + 1); y <= CtfMatch.FLAG_ZONE_RADIUS + 1; y++)
                 {
                     Vector2Int offsetCoords = new Vector2Int(x, y);
                     float distance = offsetCoords.magnitude;
-                    if(distance <= CTFGame.FLAG_ZONE_RADIUS)
+                    if(distance <= CtfMatch.FLAG_ZONE_RADIUS)
                     {
                         flagZoneCoords.Add(spawnedFlag.OriginNode.WorldCoordinates + offsetCoords);
                     }
@@ -144,7 +144,7 @@ namespace CaptureTheFlag
         /// </summary>
         protected void CreateMapZones()
         {
-            int neutralZoneSize = (int)(WorldSize * CTFGame.NEUTRAL_ZONE_SIZE);
+            int neutralZoneSize = (int)(WorldSize * CtfMatch.NEUTRAL_ZONE_SIZE);
             int playerZoneSize = (WorldSize / 2) - (neutralZoneSize / 2);
             HashSet<Vector2Int> ownZoneNodes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> neutralZoneNodes = new HashSet<Vector2Int>();

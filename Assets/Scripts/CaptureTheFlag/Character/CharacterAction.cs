@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class CharacterAction
     {
-        public CTFGame Game { get; private set; }
+        public CtfMatch Game { get; private set; }
 
         /// <summary>
         /// The actor who will perform this action.
@@ -29,7 +29,7 @@ namespace CaptureTheFlag
         public bool IsDone => State == CharacterActionState.Done;
         public bool IsPaused => State == CharacterActionState.Paused;
 
-        public CharacterAction(CTFGame game, CTFCharacter c, float cost)
+        public CharacterAction(CtfMatch game, CTFCharacter c, float cost)
         {
             Game = game;
             Character = c;
