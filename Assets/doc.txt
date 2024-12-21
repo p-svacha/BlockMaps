@@ -1,8 +1,3 @@
-Selecting entities through invisible air nodes
-
-
-
-
 Building Generator:
 elevated path towards building door (with stairs if necessary)
 bridges when paths go over water
@@ -166,7 +161,8 @@ Animation system for walking / climbing entities
 
 Sounds
 
-
+Add "DrawSlopeAsStairs" to SurfaceDef.Renderproperties
+	If true, all slopes (IsSlope = true) are drawn as stairs in DrawNodeSurface()
 
 - strength & destroy
 	> movingentities get a new strength attribute

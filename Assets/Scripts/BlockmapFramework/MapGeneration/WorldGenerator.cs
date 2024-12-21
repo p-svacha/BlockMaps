@@ -44,10 +44,13 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Starts a new world generation process with this generator that is continued every time UpdateGeneration() is called until the GenerationPhase is Done.
         /// </summary>
-        public void StartGeneration(int numChunks, System.Action onDoneCallback = null)
+        public void StartGeneration(int numChunks, int seed = -1, System.Action onDoneCallback = null)
         {
             Profiler.Begin("World Generation");
-            Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks.");
+
+            if (seed == -1) seed = GetRandomSeed();
+            Random.InitState(seed);
+            Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks. Seed = {seed}");
 
             if (World.ChunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
 
@@ -143,5 +146,10 @@ namespace BlockmapFramework.WorldGeneration
         }
 
         #endregion
+
+        public static int GetRandomSeed()
+        {
+            return Random.Range(int.MinValue, int.MaxValue);
+        }
     }
 }

@@ -782,18 +782,18 @@ namespace BlockmapFramework
             Vector3 direction = targetPosition - sourcePosition;
 
             Ray ray = new Ray(sourcePosition, direction);
-            int layerMask = (1 << World.Layer_GroundNode) | (1 << World.Layer_AirNode) |
-                    (1 << World.Layer_Water) | (1 << World.Layer_EntityVisionCollider) |
-                    (1 << World.Layer_Fence) | (1 << World.Layer_WallVisionCollider);
+            int layerMask = (1 << World.Layer_GroundNodeMesh) | (1 << World.Layer_AirNodeMesh) |
+                    (1 << World.Layer_WaterMesh) | (1 << World.Layer_EntityVisionCollider) |
+                    (1 << World.Layer_FenceMesh) | (1 << World.Layer_WallVisionCollider);
             RaycastHit[] hits = Physics.RaycastAll(ray, VisionRange, layerMask);
-            System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance))); // sort hits by distance
+            HelperFunctions.OrderRaycastHitsByDistance(hits);
 
             foreach (RaycastHit hit in hits)
             {
                 GameObject objectHit = hit.transform.gameObject;
 
                 // Hit ground node
-                if(objectHit.layer == World.Layer_GroundNode)
+                if(objectHit.layer == World.Layer_GroundNodeMesh)
                 {
                     // Get position of where we hit
                     Vector3 hitPosition = hit.point;
@@ -834,7 +834,7 @@ namespace BlockmapFramework
                 }
 
                 // Hit air node
-                if (objectHit.layer == World.Layer_AirNode)
+                if (objectHit.layer == World.Layer_AirNodeMesh)
                 {
                     AirNode hitAirNode = World.GetAirNodeFromRaycastHit(hit);
 
@@ -849,7 +849,7 @@ namespace BlockmapFramework
                 }
 
                 // Hit water node
-                if (objectHit.layer == World.Layer_Water)
+                if (objectHit.layer == World.Layer_WaterMesh)
                 {
                     // Get position of where we hit
                     Vector3 hitPosition = hit.point;
@@ -891,7 +891,7 @@ namespace BlockmapFramework
                 }
 
                 // Hit fence
-                if (objectHit.layer == World.Layer_Fence)
+                if (objectHit.layer == World.Layer_FenceMesh)
                 {
                     Fence hitFence = World.GetFenceFromRaycastHit(hit);
 

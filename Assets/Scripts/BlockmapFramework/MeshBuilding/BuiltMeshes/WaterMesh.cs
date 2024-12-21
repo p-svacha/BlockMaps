@@ -13,7 +13,7 @@ namespace BlockmapFramework
         {
             OnInit(chunk);
 
-            gameObject.layer = chunk.World.Layer_Water;
+            gameObject.layer = chunk.World.Layer_WaterMesh;
         }
 
         public void Draw()

@@ -591,4 +591,16 @@ public static class HelperFunctions
     }
 
     #endregion
+
+    #region Raycast
+
+    /// <summary>
+    /// Sorts the given array of raycast hits by distance, whereas the first hit (closest to source position) is first.
+    /// </summary>
+    public static void OrderRaycastHitsByDistance(RaycastHit[] hits)
+    {
+        System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance)));
+    }
+
+    #endregion
 }

@@ -17,7 +17,7 @@ namespace BlockmapFramework
             OnInit(chunk);
 
             Altitude = level;
-            gameObject.layer = chunk.World.Layer_AirNode;
+            gameObject.layer = chunk.World.Layer_AirNodeMesh;
         }
 
         protected override BlockmapNode GetNode(Vector2Int localCoordinates)

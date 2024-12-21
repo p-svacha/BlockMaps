@@ -69,7 +69,7 @@ namespace BlockmapFramework
 
         // World updates
         private bool IsUpdatingWorldSystems;
-        private int WorldUpdateStep;
+        private int WorldUpdateFrame;
         private Parcel WorldUpdateArea; // if null, the full world is getting updated
         private System.Action WorldUpdateCallback;
 
@@ -113,12 +113,12 @@ namespace BlockmapFramework
         public Actor ActiveVisionActor { get; private set; }
 
         // Layers
-        public int Layer_GroundNode;
+        public int Layer_GroundNodeMesh;
         public int Layer_EntityMesh;
         public int Layer_EntityVisionCollider;
-        public int Layer_AirNode;
-        public int Layer_Water;
-        public int Layer_Fence;
+        public int Layer_AirNodeMesh;
+        public int Layer_WaterMesh;
+        public int Layer_FenceMesh;
         public int Layer_ProceduralEntityMesh;
         public int Layer_WallMesh;
         public int Layer_WallVisionCollider;
@@ -211,12 +211,12 @@ namespace BlockmapFramework
         private void OnCreate()
         {
             // Set layers
-            Layer_GroundNode = LayerMask.NameToLayer("Terrain");
+            Layer_GroundNodeMesh = LayerMask.NameToLayer("Terrain");
             Layer_EntityMesh = LayerMask.NameToLayer("EntityMesh");
             Layer_EntityVisionCollider = LayerMask.NameToLayer("EntityVisionCollider");
-            Layer_AirNode = LayerMask.NameToLayer("Path");
-            Layer_Water = LayerMask.NameToLayer("Water");
-            Layer_Fence = LayerMask.NameToLayer("Fence");
+            Layer_AirNodeMesh = LayerMask.NameToLayer("Path");
+            Layer_WaterMesh = LayerMask.NameToLayer("Water");
+            Layer_FenceMesh = LayerMask.NameToLayer("Fence");
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
             Layer_WallMesh = LayerMask.NameToLayer("WallMesh");
             Layer_WallVisionCollider = LayerMask.NameToLayer("WallVisionCollider");
@@ -319,7 +319,6 @@ namespace BlockmapFramework
         /// </summary>
         private void UpdateHoveredObjects()
         {
-            RaycastHit hit;
             Ray ray = Camera.Camera.ScreenPointToRay(Input.mousePosition);
 
             IsHoveringWorld = false;
@@ -351,8 +350,11 @@ namespace BlockmapFramework
             Wall oldHoveredWall = HoveredWall;
             Wall newHoveredWall = null;
 
-            // Shoot a raycast on ground and air layers to detect hovered nodes
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_Water | 1 << Layer_Fence | 1 << Layer_WallMesh))
+            // Shoot a raycast on all layers that are relevant for detecting hovered objects
+            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, 1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
+            HelperFunctions.OrderRaycastHitsByDistance(hits);
+
+            foreach (RaycastHit hit in hits)
             {
                 Transform objectHit = hit.transform;
 
@@ -366,89 +368,110 @@ namespace BlockmapFramework
                 HoveredWorldCoordinates = GetWorldCoordinates(hitPosition);
 
                 // Hit ground node
-                if (objectHit.gameObject.layer == Layer_GroundNode)
+                if (objectHit.gameObject.layer == Layer_GroundNodeMesh)
                 {
-                    newHoveredGroundNode = GetGroundNode(HoveredWorldCoordinates);
-                    newHoveredNode = newHoveredGroundNode;
-                    newHoveredDynamicNode = newHoveredGroundNode;
+                    GroundNode hitNode = GetGroundNode(HoveredWorldCoordinates);
 
-                    if (newHoveredGroundNode != null)
+                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
                     {
-                        newHoveredChunk = newHoveredGroundNode.Chunk;
+                        newHoveredGroundNode = hitNode;
+                        newHoveredNode = hitNode;
+                        newHoveredDynamicNode = hitNode;
+                        newHoveredChunk = hitNode.Chunk;
+                        break;
                     }
                 }
 
                 // Hit air node
-                else if (objectHit.gameObject.layer == Layer_AirNode)
+                else if (objectHit.gameObject.layer == Layer_AirNodeMesh)
                 {
-                    newHoveredAirNode = GetAirNodeFromRaycastHit(hit);
+                    AirNode hitNode = GetAirNodeFromRaycastHit(hit);
 
-                    newHoveredNode = newHoveredAirNode;
-                    newHoveredDynamicNode = newHoveredAirNode;
-
-                    if (newHoveredAirNode != null)
+                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
                     {
-                        HoveredWorldCoordinates = newHoveredAirNode.WorldCoordinates;
-                        newHoveredChunk = newHoveredAirNode.Chunk;
+                        newHoveredAirNode = hitNode;
+                        newHoveredNode = hitNode;
+                        newHoveredDynamicNode = hitNode;
+                        HoveredWorldCoordinates = hitNode.WorldCoordinates;
+                        newHoveredChunk = hitNode.Chunk;
+                        break;
                     }
                 }
 
                 // Hit water node
-                else if (objectHit.gameObject.layer == Layer_Water)
+                else if (objectHit.gameObject.layer == Layer_WaterMesh)
                 {
-                    WaterNode hitWaterNode = GetWaterNode(HoveredWorldCoordinates);
+                    WaterNode hitNode = GetWaterNode(HoveredWorldCoordinates);
 
-                    if (hitWaterNode != null)
+                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
                     {
-                        if (hitWaterNode.GroundNode.IsCenterUnderWater)
+                        if (hitNode.GroundNode.IsCenterUnderWater)
                         {
-                            newHoveredNode = hitWaterNode;
-                            newHoveredWaterBody = hitWaterNode.WaterBody;
+                            newHoveredNode = hitNode;
+                            newHoveredWaterBody = hitNode.WaterBody;
                         }
-                        else newHoveredNode = hitWaterNode.GroundNode;
+                        else newHoveredNode = hitNode.GroundNode;
 
-                        newHoveredGroundNode = hitWaterNode.GroundNode;
-                        newHoveredDynamicNode = hitWaterNode.GroundNode;
-                        newHoveredChunk = hitWaterNode.Chunk;
+                        newHoveredGroundNode = hitNode.GroundNode;
+                        newHoveredDynamicNode = hitNode.GroundNode;
+                        newHoveredChunk = hitNode.Chunk;
+                        break;
                     }
                 }
 
                 // Hit fence
-                else if (objectHit.gameObject.layer == Layer_Fence)
+                else if (objectHit.gameObject.layer == Layer_FenceMesh)
                 {
-                    newHoveredFence = GetFenceFromRaycastHit(hit);
-                    if (newHoveredFence != null)
+                    Fence hitFence = GetFenceFromRaycastHit(hit);
+                    
+                    if (hitFence != null && hitFence.Node.IsVisibleBy(ActiveVisionActor))
                     {
-                        HoveredWorldCoordinates = newHoveredFence.Node.WorldCoordinates;
-                        newHoveredChunk = newHoveredFence.Chunk;
+                        newHoveredFence = hitFence;
+                        HoveredWorldCoordinates = hitFence.Node.WorldCoordinates;
+                        newHoveredChunk = hitFence.Chunk;
+                        break;
                     }
                 }
 
                 // Hit wall
                 else if (objectHit.gameObject.layer == Layer_WallMesh)
                 {
-                    newHoveredWall = GetWallFromRaycastHit(hit);
-                    if (newHoveredWall != null)
+                    Wall hitWall = GetWallFromRaycastHit(hit);
+                    
+                    if (hitWall != null && hitWall.IsVisibleBy(ActiveVisionActor))
                     {
-                        HoveredWorldCoordinates = newHoveredWall.WorldCoordinates;
-                        newHoveredChunk = GetChunk(newHoveredWall.WorldCoordinates);
+                        newHoveredWall = hitWall;
+                        HoveredWorldCoordinates = hitWall.WorldCoordinates;
+                        newHoveredChunk = hitWall.Chunk;
+                        break;
                     }
                 }
-            }
 
-            // Ray to detect entity
-            if (Physics.Raycast(ray, out hit, 1000f, 1 << Layer_GroundNode | 1 << Layer_AirNode | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh))
-            {
-                if (hit.transform.gameObject.layer == Layer_EntityMesh)
+                // Hit standalone entity
+                else if (hit.transform.gameObject.layer == Layer_EntityMesh)
                 {
-                    Transform objectHit = hit.transform;
-                    newHoveredEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
+                    Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
+
+                    if(hitEntity != null && hitEntity.IsVisibleBy(ActiveVisionActor))
+                    {
+                        newHoveredEntity = hitEntity;
+                        newHoveredChunk = hitEntity.Chunk;
+                        break;
+                    }
                 }
+
+                // Hit batch entity
                 else if (hit.transform.gameObject.layer == Layer_ProceduralEntityMesh)
                 {
-                    newHoveredEntity = GetBatchEntityFromRaycastHit(hit);
+                    Entity hitEntity = GetBatchEntityFromRaycastHit(hit);
+
+                    if (hitEntity != null && hitEntity.IsVisibleBy(ActiveVisionActor))
+                    {
+                        newHoveredEntity = hitEntity;
+                        newHoveredChunk = hitEntity.Chunk;
+                        break;
+                    }
                 }
-                if (newHoveredEntity != null && newHoveredChunk == null) newHoveredChunk = newHoveredEntity.Chunk;
             }
 
             // Update currently hovered objects
@@ -849,7 +872,7 @@ namespace BlockmapFramework
 
             IsUpdatingWorldSystems = true;
             WorldUpdateArea = area;
-            WorldUpdateStep = 0;
+            WorldUpdateFrame = 0;
             WorldUpdateCallback = callback;
         }
 
@@ -859,10 +882,10 @@ namespace BlockmapFramework
         private void WorldSystemUpdateTick()
         {
             if (!IsUpdatingWorldSystems) return;
-            WorldUpdateStep++;
+            WorldUpdateFrame++;
 
             // Step 1: Draw meshes
-            if (WorldUpdateStep == 1)
+            if (WorldUpdateFrame == 1)
             {
                 Profiler.Begin("Draw Meshes");
                 if (WorldUpdateArea == null) RedrawFullWorld();
@@ -871,7 +894,7 @@ namespace BlockmapFramework
             }
 
             // Step 2: Calculate node center world positions
-            if (WorldUpdateStep == 2)
+            if (WorldUpdateFrame == 2)
             {
                 Profiler.Begin("Calculate Node Centers");
                 if (WorldUpdateArea == null)
@@ -924,7 +947,10 @@ namespace BlockmapFramework
                     e.UpdateVisibility();
                 }
                 Profiler.End("Reposition Entities");
+            }
 
+            if (WorldUpdateFrame == 3)
+            {
                 // Step 5: Update entity vision
                 Profiler.Begin("Update Entity Vision");
                 if (WorldUpdateArea == null) UpdateVisionOfAllEntities();
@@ -2171,21 +2197,21 @@ namespace BlockmapFramework
                 Transform objectHit = hit.transform;
 
                 // We hit the ground mesh we are looking for
-                if (node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_GroundNode)
+                if (node.Type == NodeType.Ground && objectHit.gameObject.layer == Layer_GroundNodeMesh)
                 {
                     Vector3 hitPosition = hit.point;
                     return Mathf.Max(hitPosition.y, node.BaseWorldAltitude);
                 }
 
                 // We hit the air node mesh of the level we are looking for
-                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNode && objectHit.GetComponent<AirNodeMesh>().Altitude == node.BaseAltitude)
+                if (node.Type == NodeType.Air && objectHit.gameObject.layer == Layer_AirNodeMesh && objectHit.GetComponent<AirNodeMesh>().Altitude == node.BaseAltitude)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;
                 }
 
                 // We hit the water mesh we are looking for
-                if (node.Type == NodeType.Water && objectHit.gameObject.layer == Layer_Water)
+                if (node.Type == NodeType.Water && objectHit.gameObject.layer == Layer_WaterMesh)
                 {
                     Vector3 hitPosition = hit.point;
                     return hitPosition.y;

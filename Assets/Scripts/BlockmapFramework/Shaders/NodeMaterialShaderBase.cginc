@@ -256,7 +256,7 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
 
 
     // Single overlay texture that stretches across multiple tiles
-    if (_ShowTileOverlay == 1)
+    if (_ShowTileOverlay == 1 && isFacingUpwards == 1)
     {
         // Get adjusted wolld position, clamping it within the chunk coordinates
         float adjustedWorldPosX = IN.worldPos.x;
@@ -287,7 +287,7 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
     }
 
     // Overlay texture that gets repeated over multuple tiles
-    if (_ShowMultiOverlay[tileIndex] == 1)
+    if (_ShowMultiOverlay[tileIndex] == 1 && isFacingUpwards == 1)
     {
         fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
         c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);

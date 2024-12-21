@@ -22,6 +22,9 @@ namespace WorldEditor
         [Header("Elements")]
         public TMP_InputField NumChunksInput;
 
+        public TMP_InputField SeedInput;
+        public Toggle SeedRandomizeToggle;
+
         public TMP_Dropdown GeneratorDropdown;
         public Button GenerateButton;
 
@@ -84,7 +87,11 @@ namespace WorldEditor
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];
 
             ActiveGenerator = selectedGenerator;
-            ActiveGenerator.StartGeneration(numChunks);
+            bool generateRandomSeed = SeedRandomizeToggle.isOn || SeedInput.text == "";
+            int seed = generateRandomSeed ? WorldGenerator.GetRandomSeed() : int.Parse(SeedInput.text);
+            SeedInput.text = seed.ToString(); // Put seed in seed input field
+            ActiveGenerator.StartGeneration(numChunks, seed);
+
         }
 
         private void SaveButton_OnClick()

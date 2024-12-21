@@ -19,7 +19,7 @@ namespace BlockmapFramework
         {
             OnInit(chunk);
 
-            gameObject.layer = chunk.World.Layer_GroundNode;
+            gameObject.layer = chunk.World.Layer_GroundNodeMesh;
         }
 
         public void Draw()
