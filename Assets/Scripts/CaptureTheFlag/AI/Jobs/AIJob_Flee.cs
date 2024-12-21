@@ -12,7 +12,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.Flee;
         public override string DevmodeDisplayText => "Fleeing";
 
-        public AIJob_Flee(Character c) : base(c) { }
+        public AIJob_Flee(CTFCharacter c) : base(c) { }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
@@ -27,7 +27,7 @@ namespace CaptureTheFlag
         public override CharacterAction GetNextAction()
         {
             // Get opponent characters that are relevant
-            List<Character> relevantOpponents = GetRelevantOpponents();
+            List<CTFCharacter> relevantOpponents = GetRelevantOpponents();
             if (relevantOpponents.Count == 0) return null;
 
             // Get node that is the furthest away from all opponent characters
@@ -36,9 +36,9 @@ namespace CaptureTheFlag
             foreach(BlockmapNode movementTarget in Character.PossibleMoves.Keys)
             {
                 float lowestCost = float.MaxValue;
-                foreach(Character opp in relevantOpponents)
+                foreach(CTFCharacter opp in relevantOpponents)
                 {
-                    float cost = Pathfinder.GetPathCost(opp.Entity, opp.Node, movementTarget);
+                    float cost = Pathfinder.GetPathCost(opp, opp.Node, movementTarget);
                     if (cost < lowestCost) lowestCost = cost;
                 }
                 if (lowestCost > highestCost)
@@ -52,12 +52,12 @@ namespace CaptureTheFlag
             return GetSingleNodeMovementTo(targetNode);
         }
 
-        private List<Character> GetRelevantOpponents()
+        private List<CTFCharacter> GetRelevantOpponents()
         {
-            List<Character> relevantOpponents = new List<Character>();
-            foreach (Character opponentCharacter in Opponent.Characters)
+            List<CTFCharacter> relevantOpponents = new List<CTFCharacter>();
+            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
             {
-                if (opponentCharacter.Entity.GetComponent<Comp_Movement>().IsInRange(Character.Node, 40)) relevantOpponents.Add(opponentCharacter);
+                if (opponentCharacter.GetComponent<Comp_Movement>().IsInRange(Character.Node, 40)) relevantOpponents.Add(opponentCharacter);
             }
             return relevantOpponents;
         }

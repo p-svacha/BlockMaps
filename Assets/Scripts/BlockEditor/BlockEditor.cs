@@ -117,9 +117,9 @@ namespace WorldEditor
             isInitialized = true;
         }
 
-        public override void SetWorld(World world)
+        public override void SetAndInitializeWorld(World world, System.Action onInitializationDoneCallback = null)
         {
-            base.SetWorld(world);
+            base.SetAndInitializeWorld(world, onInitializationDoneCallback);
 
             // Init hooks
             World.OnHoveredGroundNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -130,12 +130,6 @@ namespace WorldEditor
             // Feedback
             foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
             DisplayOptions.OnNewWorld();
-        }
-
-        public void DestroyWorld()
-        {
-            Destroy(World.WorldObject);
-            World = null;
         }
 
         #region Controls

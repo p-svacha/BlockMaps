@@ -134,6 +134,8 @@ namespace BlockmapFramework
         /// </summary>
         protected BlockmapNode(World world, Chunk chunk, int id, Vector2Int localCoordinates, Dictionary<Direction, int> height, SurfaceDef surfaceDef)
         {
+            if (surfaceDef == null) throw new System.Exception("SurfaceDef is null");
+
             World = world;
             Chunk = chunk;
             this.id = id;

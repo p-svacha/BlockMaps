@@ -24,8 +24,8 @@ namespace CaptureTheFlag
             { AICharacterRole.Attacker, 6 },
             { AICharacterRole.Defender, 2 },
         };
-        private Dictionary<Character, AICharacterRole> Roles = new Dictionary<Character, AICharacterRole>();
-        private Dictionary<Character, AICharacterJob> Jobs = new Dictionary<Character, AICharacterJob>();
+        private Dictionary<CTFCharacter, AICharacterRole> Roles = new Dictionary<CTFCharacter, AICharacterRole>();
+        private Dictionary<CTFCharacter, AICharacterJob> Jobs = new Dictionary<CTFCharacter, AICharacterJob>();
 
         public List<BlockmapNode> DefendPerimeterNodes;
 
@@ -71,7 +71,7 @@ namespace CaptureTheFlag
             // Get a new action if the current one is null or done.
             if(CurrentAction == null || CurrentAction.IsDone)
             {
-                Character currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
+                CTFCharacter currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
                 CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
 
                 if(nextAction == null) // Character is done for this turn => go to next character
@@ -118,7 +118,7 @@ namespace CaptureTheFlag
             if (CurrentFollowedAction != null)
             {
                 // Wait for camera
-                if (World.Camera.FollowedEntity == CurrentFollowedAction.Character.Entity)
+                if (World.Camera.FollowedEntity == CurrentFollowedAction.Character)
                 {
                     // Unpause action if camera arrived at character
                     if (CurrentFollowedAction.IsPaused)
@@ -148,7 +148,7 @@ namespace CaptureTheFlag
                 }
 
                 // Else Pan to character
-                else World.CameraPanToFocusEntity(CurrentFollowedAction.Character.Entity, duration: 1f, followAfterPan: true, unbreakableFollow: true);
+                else World.CameraPanToFocusEntity(CurrentFollowedAction.Character, duration: 1f, followAfterPan: true, unbreakableFollow: true);
             }
         }
 
@@ -163,7 +163,7 @@ namespace CaptureTheFlag
             }
             else
             {
-                foreach (Character c in Characters) c.UI_Label.Init(c);
+                foreach (CTFCharacter c in Characters) c.UI_Label.Init(c);
             }
         }
 
@@ -175,7 +175,7 @@ namespace CaptureTheFlag
         /// </summary>
         private void SetDevModeLabels()
         {
-            foreach (Character c in Characters)
+            foreach (CTFCharacter c in Characters)
             {
                 string label = Roles[c].ToString() + " | " + Jobs[c].DevmodeDisplayText;
                 c.UI_Label.SetLabelText(label);
@@ -186,7 +186,7 @@ namespace CaptureTheFlag
         /// Returns the action the given character will do next this turn.
         /// <br/>Can return null if no further action should be taken by the character.
         /// </summary>
-        private CharacterAction GetNextCharacterAction(Character c)
+        private CharacterAction GetNextCharacterAction(CTFCharacter c)
         {
             if (c.PossibleMoves.Count == 0) return null;
 
@@ -220,10 +220,10 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns a new job that the given character should do given their role and current game state.
         /// </summary>
-        private AICharacterJob GetNewCharacterJob(Character c)
+        private AICharacterJob GetNewCharacterJob(CTFCharacter c)
         {
             // If we can directly tag an opponent, do that no matter the role
-            if (CanTagCharacterDirectly(c, out Character target0)) return new AIJob_TagOpponent(c, target0);
+            if (CanTagCharacterDirectly(c, out CTFCharacter target0)) return new AIJob_TagOpponent(c, target0);
 
             switch (Roles[c])
             {
@@ -241,7 +241,7 @@ namespace CaptureTheFlag
                 case AICharacterRole.Defender:
 
                     // If there is a visible opponent nearby
-                    if (ShouldChaseCharacterToTag(c, out Character target1)) return new AIJob_TagOpponent(c, target1);
+                    if (ShouldChaseCharacterToTag(c, out CTFCharacter target1)) return new AIJob_TagOpponent(c, target1);
 
                     // Else just patrol own flag
                     return new AIJob_PatrolDefendFlag(c);
@@ -253,11 +253,11 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if the given character can tag an opponent with their possible moves.
         /// </summary>
-        public bool CanTagCharacterDirectly(Character source, out Character target)
+        public bool CanTagCharacterDirectly(CTFCharacter source, out CTFCharacter target)
         {
             target = null;
 
-            foreach (Character opponentCharacter in Opponent.Characters)
+            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
             {
                 if (!opponentCharacter.IsInOpponentTerritory) continue;
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
@@ -275,15 +275,15 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if a character should flee from an opponent.
         /// </summary>
-        public bool ShouldFlee(Character c)
+        public bool ShouldFlee(CTFCharacter c)
         {
             if (!c.IsInOpponentTerritory) return false;
 
-            foreach (Character opponentCharacter in Opponent.Characters)
+            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
             {
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
 
-                if (c.Entity.IsVisibleBy(opponentCharacter.Entity)) return true;
+                if (c.IsVisibleBy(opponentCharacter)) return true;
             }
             return false;
         }
@@ -291,11 +291,11 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if the given character should chase an opponent by going towards them.
         /// </summary>
-        public bool ShouldChaseCharacterToTag(Character source, out Character target)
+        public bool ShouldChaseCharacterToTag(CTFCharacter source, out CTFCharacter target)
         {
             target = null;
 
-            foreach (Character opponentCharacter in Opponent.Characters)
+            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
             {
                 if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.MovementComp.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
                 {

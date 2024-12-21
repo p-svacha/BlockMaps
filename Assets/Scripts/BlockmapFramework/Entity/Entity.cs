@@ -153,6 +153,9 @@ namespace BlockmapFramework
             // Set position and rotation
             ResetWorldPositonAndRotation();
 
+            // Initialize components
+            InitializeComps();
+
             OnCreated();
         }
 
@@ -179,9 +182,6 @@ namespace BlockmapFramework
             foreach (Actor p in World.GetAllActors()) LastKnownPosition.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
             foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
-
-            // Initialize components
-            InitializeComps();
 
             // Initialize game objects
             InitializeGameObject();
@@ -1115,6 +1115,10 @@ namespace BlockmapFramework
             SaveLoadManager.SaveOrLoadPrimitive(ref IsMirrored, "isMirrored");
             SaveLoadManager.SaveOrLoadPrimitive(ref Rotation, "rotation");
             SaveLoadManager.SaveOrLoadReference(ref Actor, "owner");
+
+            // Components
+            if (SaveLoadManager.IsLoading) InitializeComps();
+            foreach(EntityComp comp in Components) comp.ExposeDataForSaveAndLoad();
         }
 
         #endregion

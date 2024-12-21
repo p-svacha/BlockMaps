@@ -824,73 +824,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 352102312}
   m_CullTransparentMesh: 1
---- !u!1 &385050381
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 385050384}
-  - component: {fileID: 385050383}
-  - component: {fileID: 385050385}
-  m_Layer: 0
-  m_Name: ResourceManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &385050383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385050381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4efaa097f155d0e4fbea8fa42e0ab8d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GrassColor: {r: 0.2, g: 0.3, b: 0.1, a: 1}
-  SandColor: {r: 0.7, g: 0.5, b: 0, a: 1}
-  TarmacColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
-  WaterColor: {r: 0, g: 0.3, b: 0.3, a: 1}
-  GrassTexture: {fileID: 2800000, guid: 071868ced1c0fc34896314d99e152985, type: 3}
-  SandTexture: {fileID: 2800000, guid: c8d4084e50031fa48ab4bc19ff8e51dc, type: 3}
-  ConcreteTexture: {fileID: 0}
-  WaterTexture: {fileID: 2800000, guid: 2cf8a180b7dbd934f834ab7f8d588d22, type: 3}
-  SelectionIndicator: {fileID: 1841773600738071307, guid: 20b217845ce3c4e4397dcdcfbf4e6935, type: 3}
---- !u!4 &385050384
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385050381}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12.876337, y: -4.9650483, z: 6.615033}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &385050385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385050381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61f0f9c7892872a4ba243c7e31b92156, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ReachableTileTexture: {fileID: 2800000, guid: 6939c8b398ef6bd4da6c113bdd2de8b3, type: 3}
 --- !u!1 &481135217
 GameObject:
   m_ObjectHideFlags: 0
@@ -4140,7 +4073,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1471701593
 GameObject:

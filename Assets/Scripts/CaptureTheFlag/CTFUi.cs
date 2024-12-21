@@ -35,7 +35,7 @@ namespace CaptureTheFlag
 
         public GameObject CharacterLabelsContainer;
 
-        private Dictionary<Character, UI_CharacterSelectionPanel> CharacterSelection = new();
+        private Dictionary<CTFCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
         public void Init(CTFGame game)
@@ -51,7 +51,7 @@ namespace CaptureTheFlag
             HelperFunctions.DestroyAllChildredImmediately(CharacterSelectionContainer.gameObject);
 
             CharacterSelection.Clear();
-            foreach (Character c in Game.LocalPlayer.Characters)
+            foreach (CTFCharacter c in Game.LocalPlayer.Characters)
             {
                 UI_CharacterSelectionPanel panel = Instantiate(CharacterSelectionPrefab, CharacterSelectionContainer.transform);
                 panel.Init(Game, c);
@@ -80,7 +80,7 @@ namespace CaptureTheFlag
         /// <summary>
         /// Updates the selection panel for a single character.
         /// </summary>
-        public void UpdateSelectionPanel(Character c)
+        public void UpdateSelectionPanel(CTFCharacter c)
         {
             CharacterSelection[c].Refresh();
         }
@@ -92,7 +92,7 @@ namespace CaptureTheFlag
             foreach (UI_CharacterSelectionPanel panel in CharacterSelection.Values) panel.Refresh();
         }
 
-        public void SelectCharacter(Character c)
+        public void SelectCharacter(CTFCharacter c)
         {
             // Character Info
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
@@ -107,7 +107,7 @@ namespace CaptureTheFlag
                 actionBtn.Init(action);
             }
         }
-        public void DeselectCharacter(Character c)
+        public void DeselectCharacter(CTFCharacter c)
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);

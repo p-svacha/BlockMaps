@@ -13,8 +13,6 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class CTFMapGenerator : WorldGenerator
     {
-        public const string FLAG_ID = "CtfFlag";
-
         // Rules
         private const int SPAWN_MAP_EDGE_OFFSET = 10;
         private const int SPAWN_VARIATION = 5;

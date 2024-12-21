@@ -29,6 +29,12 @@ namespace BlockmapFramework.WorldGeneration
 
         protected int TotalNumChunks => NumChunksPerSide * NumChunksPerSide;
 
+        /// <summary>
+        /// The action that gets invoked when the generator is done.
+        /// <br/>Note that the world is then not yet initialized (drawn/navmesh, etc), but merely the generator is finished with its part.
+        /// </summary>
+        public System.Action OnDoneCallback { get; private set; }
+
 
 
         public World World { get; private set; }
@@ -38,7 +44,7 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Starts a new world generation process with this generator that is continued every time UpdateGeneration() is called until the GenerationPhase is Done.
         /// </summary>
-        public void StartGeneration(int numChunks)
+        public void StartGeneration(int numChunks, System.Action onDoneCallback = null)
         {
             Profiler.Begin("World Generation");
             Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks.");
@@ -47,6 +53,7 @@ namespace BlockmapFramework.WorldGeneration
 
             NumChunksPerSide = numChunks;
             WorldSize = World.ChunkSize * numChunks;
+            OnDoneCallback = onDoneCallback;
 
             GenerationPhase = GenerationPhase.InitializingGenerator;
         }
@@ -93,9 +100,10 @@ namespace BlockmapFramework.WorldGeneration
         /// </summary>
         protected void FinalizeGeneration()
         {
-            Debug.Log($"Finalizing world generation.");
             GenerationPhase = GenerationPhase.Done;
             Profiler.End("World Generation");
+            
+            OnDoneCallback?.Invoke();
         }
 
         #region Helper Functions

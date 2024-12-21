@@ -1,3 +1,8 @@
+Selecting entities through invisible air nodes
+
+
+
+
 Building Generator:
 elevated path towards building door (with stairs if necessary)
 bridges when paths go over water

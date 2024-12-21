@@ -9,13 +9,13 @@ namespace BlockmapFramework
     /// </summary>
     public class BlockmapGame : MonoBehaviour
     {
-        public World World { get; protected set; }
+        public World World { get; private set; }
 
         /// <summary>
-        /// Takes a World object as an input and creates all Unity GameObjects for that world.
-        /// <br/>This is now the world of this game.
+        /// Sets a world object as the new world of this game.
+        /// <br/>Also starts the initialization of that world (drawing, navmesh, vision etc.).
         /// </summary>
-        public virtual void SetWorld(World world)
+        public virtual void SetAndInitializeWorld(World world, System.Action callback)
         {
             // Destory GameObject of previous world
             if(World != null) Destroy(World.WorldObject);
@@ -24,17 +24,18 @@ namespace BlockmapFramework
             World = world;
 
             // Start world initialization
-            World.Initialize();
+            World.Initialize(callback);
+        }
+
+        public void DestroyWorld()
+        {
+            Destroy(World.WorldObject);
+            World = null;
         }
 
         protected virtual void Update()
         {
             World?.Tick();
-        }
-
-        protected virtual void LateUpdate()
-        {
-            //World?.LateUpdate();
         }
     }
 }

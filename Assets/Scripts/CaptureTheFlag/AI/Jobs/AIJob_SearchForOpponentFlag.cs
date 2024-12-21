@@ -14,10 +14,10 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.SearchOpponentFlag;
         public override string DevmodeDisplayText => "Searching Flag (going to " + TargetNode.ToStringShort() + ")";
 
-        public AIJob_SearchForOpponentFlag(Character c) : base(c)
+        public AIJob_SearchForOpponentFlag(CTFCharacter c) : base(c)
         {
             // Find a target node
-            List<BlockmapNode> candidates = Game.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character.Entity)).ToList();
+            List<BlockmapNode> candidates = Game.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
             BlockmapNode targetNode = candidates[Random.Range(0, candidates.Count)];
             TargetNode = targetNode;
         }
@@ -27,7 +27,7 @@ namespace CaptureTheFlag
             forcedNewJob = null;
 
             // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out Character target0))
+            if (Player.CanTagCharacterDirectly(Character, out CTFCharacter target0))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target0);
                 return true;
@@ -41,7 +41,7 @@ namespace CaptureTheFlag
             }
 
             // If we are on or close to our target node, look for new job
-            if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
+            if (Character.OriginNode == TargetNode || Character.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
 
             return false;
         }

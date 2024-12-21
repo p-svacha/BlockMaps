@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
         public override string DevmodeDisplayText => "Patrolling Flag --> " + TargetNode.ToStringShort();
 
-        public AIJob_PatrolDefendFlag(Character c) : base(c)
+        public AIJob_PatrolDefendFlag(CTFCharacter c) : base(c)
         {
             // Find a target node near own flag
             int numAttempts = 0;
@@ -23,9 +23,9 @@ namespace CaptureTheFlag
             {
                 TargetNode = Player.DefendPerimeterNodes[Random.Range(0, Player.DefendPerimeterNodes.Count)];
             }
-            while (Pathfinder.GetPath(Character.Entity, Character.Node, TargetNode, forbiddenNodes: Player.FlagZone.Nodes) == null && numAttempts++ < maxAttempts);
+            while (Pathfinder.GetPath(Character, Character.Node, TargetNode, forbiddenNodes: Player.FlagZone.Nodes) == null && numAttempts++ < maxAttempts);
 
-            if (numAttempts >= maxAttempts && Game.DevMode) Debug.LogError("No valid node found within defend perimeter for " + Character.Name + " after " + numAttempts + " attempts.");
+            if (numAttempts >= maxAttempts && Game.DevMode) Debug.LogError("No valid node found within defend perimeter for " + Character.LabelCap + " after " + numAttempts + " attempts.");
         }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
@@ -33,21 +33,21 @@ namespace CaptureTheFlag
             forcedNewJob = null;
 
             // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out Character target0))
+            if (Player.CanTagCharacterDirectly(Character, out CTFCharacter target0))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target0);
                 return true;
             }
 
             // If we see a nearby opponent, chase them
-            if (Player.ShouldChaseCharacterToTag(Character, out Character target))
+            if (Player.ShouldChaseCharacterToTag(Character, out CTFCharacter target))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target);
                 return true;
             }
 
             // If we are on or close to our target node, look for new job
-            if (Character.Entity.OriginNode == TargetNode || Character.Entity.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
+            if (Character.OriginNode == TargetNode || Character.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
 
             return false;
         }

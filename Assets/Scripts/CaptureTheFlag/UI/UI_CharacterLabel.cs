@@ -8,19 +8,19 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterLabel : MonoBehaviour
     {
-        private Character Character;
+        private CTFCharacter Character;
         private Vector3 WorldOffset;
         public float Width;
 
         [Header("Elements")]
         public TextMeshProUGUI NameText;
 
-        public void Init(Character c)
+        public void Init(CTFCharacter c)
         {
             Character = c;
-            NameText.text = c.Name;
+            NameText.text = c.LabelCap;
             NameText.color = c.Owner.Actor.Color;
-            WorldOffset = new Vector3(0f, (c.Entity.Height / 2f) + 0.1f, 0f);
+            WorldOffset = new Vector3(0f, (c.Height / 2f) + 0.1f, 0f);
         }
 
         public void SetLabelText(string text)

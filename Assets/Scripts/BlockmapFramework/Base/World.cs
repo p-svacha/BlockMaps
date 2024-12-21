@@ -59,6 +59,7 @@ namespace BlockmapFramework
         public string Name;
 
         public bool IsInitialized { get; private set; }
+        private System.Action OnInitializationDoneCallback;
 
         /// <summary>
         /// The amount of nodes on each side on a chunk.
@@ -243,12 +244,13 @@ namespace BlockmapFramework
         /// Starts world initialization which redraws the full world, updates the vision of all entities and generates the full navmesh.
         /// <br/>Gets executed once after creating or loading a world.
         /// </summary>
-        public void Initialize()
+        public void Initialize(System.Action callback)
         {
             IsInitialized = false;
+            OnInitializationDoneCallback = callback;
 
             Profiler.Begin("Initialize World");
-            UpdateFullWorld(callback: () => { IsInitialized = true; Profiler.End("Initialize World"); Profiler.LogAndClearResults(); });
+            UpdateFullWorld(callback: OnInitializationDone);
 
             // Gaia
             Gaia = Actors[0];
@@ -277,6 +279,15 @@ namespace BlockmapFramework
             ZoneIdCounter = Zones.Count == 0 ? 0 : Zones.Max(x => x.Key) + 1;
             FenceIdCounter = Fences.Count == 0 ? 0 : Fences.Max(x => x.Key) + 1;
             WallIdCounter = Walls.Count == 0 ? 0 : Walls.Max(x => x.Key) + 1;
+        }
+
+        private void OnInitializationDone()
+        {
+            IsInitialized = true;
+            Profiler.End("Initialize World");
+            Profiler.LogAndClearResults();
+
+            OnInitializationDoneCallback?.Invoke();
         }
 
         #endregion

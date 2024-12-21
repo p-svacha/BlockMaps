@@ -12,7 +12,7 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class AICharacterJob
     {
-        public Character Character { get; private set; }
+        public CTFCharacter Character { get; private set; }
         public AIPlayer Player => (AIPlayer)Character.Owner;
         public Player Opponent => Player.Opponent;
         public CTFGame Game => Character.Game;
@@ -20,7 +20,7 @@ namespace CaptureTheFlag
         public abstract AICharacterJobId Id { get; }
         public abstract string DevmodeDisplayText { get; }
 
-        public AICharacterJob(Character c)
+        public AICharacterJob(CTFCharacter c)
         {
             Character = c;
         }
@@ -56,7 +56,7 @@ namespace CaptureTheFlag
             }
 
             // No path found
-            if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.Entity.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+            if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
             return null;
         }
 
@@ -80,7 +80,7 @@ namespace CaptureTheFlag
             }
 
             // No possible move is part of path
-            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.Entity.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
             return null;
         }
 
@@ -89,7 +89,7 @@ namespace CaptureTheFlag
         /// </summary>
         private NavigationPath GetPath(BlockmapNode targetNode)
         {
-            return Pathfinder.GetPath(Character.Entity, Character.Entity.OriginNode, targetNode, considerUnexploredNodes: false, Player.FlagZone.Nodes);
+            return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, Player.FlagZone.Nodes);
         }
 
         #endregion

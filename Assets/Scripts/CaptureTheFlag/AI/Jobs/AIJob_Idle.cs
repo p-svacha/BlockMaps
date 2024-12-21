@@ -10,7 +10,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.Idle;
         public override string DevmodeDisplayText => "Idle";
 
-        public AIJob_Idle(Character c) : base(c) { }
+        public AIJob_Idle(CTFCharacter c) : base(c) { }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {

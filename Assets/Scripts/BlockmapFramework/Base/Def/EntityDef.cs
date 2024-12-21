@@ -14,7 +14,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The class that will be instantiated when making entity.
         /// </summary>
-        public Type EntityClass { get; init; } = null;
+        public Type EntityClass { get; init; } = typeof(Entity);
 
         /// <summary>
         /// Definitions of how this entity is rendered in the world.

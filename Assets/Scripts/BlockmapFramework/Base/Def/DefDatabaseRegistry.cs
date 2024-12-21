@@ -69,6 +69,7 @@ namespace BlockmapFramework
         {
             foreach (Type defOfClass in GetAllDefOfClasses())
             {
+                Debug.Log($"Binding {defOfClass.Name}");
                 BindDefsFor(defOfClass);
             }
         }

@@ -75,5 +75,23 @@ namespace BlockmapFramework
         // Quick accessors for special materials
         public static Material BlendbaleSurfaceMaterial => LoadMaterial("Special/SurfaceMaterial");
         public static Material BuildPreviewMaterial => LoadMaterial("Special/BuildPreviewMaterial");
+
+        #region Textures
+
+        private static Dictionary<string, Texture2D> CachedTextures = new Dictionary<string, Texture2D>();
+
+        public static Texture2D LoadTexture(string fullPath)
+        {
+            // cached
+            if (CachedTextures.TryGetValue(fullPath, out Texture2D tex)) return tex;
+
+            // not yet cached
+            Texture2D newTex = Resources.Load<Texture2D>(fullPath);
+            if (newTex == null) throw new System.Exception($"Failed to load texture {fullPath}.");
+            CachedTextures.Add(fullPath, newTex);
+            return newTex;
+        }
+
+        #endregion
     }
 }

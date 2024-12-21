@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         /// <summary>
         /// The actor who will perform this action.
         /// </summary>
-        public Character Character { get; private set; }
+        public CTFCharacter Character { get; private set; }
 
         /// <summary>
         /// The amount of action points and stamina that get reduced when performing this action.
@@ -29,7 +29,7 @@ namespace CaptureTheFlag
         public bool IsDone => State == CharacterActionState.Done;
         public bool IsPaused => State == CharacterActionState.Paused;
 
-        public CharacterAction(CTFGame game, Character c, float cost)
+        public CharacterAction(CTFGame game, CTFCharacter c, float cost)
         {
             Game = game;
             Character = c;

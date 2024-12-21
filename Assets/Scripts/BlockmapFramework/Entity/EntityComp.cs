@@ -36,5 +36,11 @@ namespace BlockmapFramework
         /// Checks if this comp is valid on the parent entity and returns an exception if not.
         /// </summary>
         public virtual void Validate() { }
+
+        #region Save / Load
+
+        public virtual void ExposeDataForSaveAndLoad() { }
+
+        #endregion
     }
 }

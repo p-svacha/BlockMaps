@@ -52,7 +52,7 @@ namespace WorldEditor
             {
                 if (ActiveGenerator.IsDone)
                 {
-                    Editor.SetWorld(ActiveGenerator.World);
+                    Editor.SetAndInitializeWorld(ActiveGenerator.World);
                     ActiveGenerator = null;
                 }
                 else ActiveGenerator.UpdateGeneration();
@@ -106,7 +106,7 @@ namespace WorldEditor
             string worldToLoad = SavedWorlds[LoadDropdown.value];
 
             World loadedWorld = SaveLoadManager.Load(worldToLoad);
-            Editor.SetWorld(loadedWorld);
+            Editor.SetAndInitializeWorld(loadedWorld);
 
             SaveNameInput.text = worldToLoad;
             

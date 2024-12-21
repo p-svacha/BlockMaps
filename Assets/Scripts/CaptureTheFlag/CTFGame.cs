@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class CTFGame : MonoBehaviour
+    public class CTFGame : BlockmapGame
     {
         // Rules
         public const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
@@ -21,7 +21,8 @@ namespace CaptureTheFlag
         public LineRenderer PathPreview;
         private CTFMapGenerator MapGenerator;
 
-        public Character SelectedCharacter { get; private set; }
+        private List<CTFCharacter> Characters;
+        public CTFCharacter SelectedCharacter { get; private set; }
         private HashSet<BlockmapNode> HighlightedNodes = new();
 
         // Game attributes
@@ -30,7 +31,6 @@ namespace CaptureTheFlag
         public Zone OpponentZone { get; private set; }
 
         public GameState State { get; private set; }
-        public World World { get; private set; }
 
         public Player LocalPlayer { get; private set; }
         public AIPlayer Opponent { get; private set; }
@@ -38,25 +38,42 @@ namespace CaptureTheFlag
         // Options
         public bool DevMode { get; private set; }
 
+        // Cache
+        private Texture2D ReachableTileOverlay;
+
 
         #region Game Loop
 
         private void Start()
         {
+            // Load defs
+            DefDatabaseRegistry.AddAllGlobalDefs();
+            DefDatabase<EntityDef>.AddDefs(EntityDefs.Defs);
+            DefDatabaseRegistry.ResolveAllReferences();
+            DefDatabaseRegistry.OnLoadingDone();
+            DefDatabaseRegistry.BindAllDefOfs();
+
+            // Init materials
+            MaterialManager.InitializeBlendableSurfaceMaterial();
+
+            // Load textures
+            ReachableTileOverlay = MaterialManager.LoadTexture("CaptureTheFlag/Textures/ReachableTileOverlay");
+
+            // UI
             UI.Init(this);
 
             UI.LoadingScreenOverlay.SetActive(true);
             MapGenerator = new CTFMapGenerator_Forest();
-            MapGenerator.StartGeneration(4);// Random.Range(4, 8 + 1));
-            State = GameState.Loading;
+            MapGenerator.StartGeneration(Random.Range(4, 8 + 1), onDoneCallback: OnWorldGenerationDone);
+            State = GameState.GeneratingWorld;
         }
 
-        private void StartGame()
+        private void OnWorldGenerationDone()
         {
-            // Set world
-            World = MapGenerator.World;
+            // Start world initialization
+            SetAndInitializeWorld(MapGenerator.World, OnWorldInitializationDone);
 
-            // Map zones
+            // Set map zones
             LocalPlayerZone = World.GetZone(id: 0);
             NeutralZone = World.GetZone(id: 1);
             OpponentZone = World.GetZone(id: 2);
@@ -67,9 +84,25 @@ namespace CaptureTheFlag
             LocalPlayer.Opponent = Opponent;
             Opponent.Opponent = LocalPlayer;
 
+            // Register all characters
+            Characters = new List<CTFCharacter>();
+            Characters.AddRange(LocalPlayer.Characters);
+            Characters.AddRange(Opponent.Characters);
+
+            State = GameState.InitializingWorld;
+            
+        }
+
+        private void OnWorldInitializationDone()
+        {
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
 
+            StartGame();
+        }
+
+        private void StartGame()
+        {
             // Vision
             World.ShowTextures(true);
             World.ShowGridOverlay(true);
@@ -83,7 +116,7 @@ namespace CaptureTheFlag
             UI.OnStartGame();
 
             // Camera
-            World.CameraJumpToFocusEntity(LocalPlayer.Characters[0].Entity);
+            World.CameraJumpToFocusEntity(LocalPlayer.Characters[0]);
 
             StartYourTurn();
         }
@@ -97,21 +130,21 @@ namespace CaptureTheFlag
             action.Character.ReduceActionAndStamina(action.Cost);
 
             // Send all colliding characters to jail (depending on map half)
-            BlockmapNode node = action.Character.Entity.OriginNode;
-            List<Character> characters = GetCharacters(node);
+            BlockmapNode node = action.Character.OriginNode;
+            List<CTFCharacter> characters = GetCharacters(node);
             if(LocalPlayerZone.ContainsNode(node) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
             {
-                foreach (Character opponentCharacter in characters.Where(x => x.Owner == Opponent))
+                foreach (CTFCharacter opponentCharacter in characters.Where(x => x.Owner == Opponent))
                     SendToJail(opponentCharacter);
             }
             if (OpponentZone.ContainsNode(node) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
             {
-                foreach (Character ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
+                foreach (CTFCharacter ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
                     SendToJail(ownCharacter);
             }
 
             // Update possible moves for all characters
-            foreach (Character teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
+            foreach (CTFCharacter teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
 
             // Update UI
             if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
@@ -122,7 +155,7 @@ namespace CaptureTheFlag
         {
             State = GameState.YourTurn;
 
-            foreach (Character c in LocalPlayer.Characters) c.OnStartTurn();
+            foreach (CTFCharacter c in LocalPlayer.Characters) c.OnStartTurn();
             UI.UpdateSelectionPanels();
         }
 
@@ -140,7 +173,7 @@ namespace CaptureTheFlag
             State = GameState.OpponentTurn;
 
             UI.ShowTurnIndicator("Opponent Turn");
-            foreach (Character c in Opponent.Characters) c.OnStartTurn();
+            foreach (CTFCharacter c in Opponent.Characters) c.OnStartTurn();
             Opponent.StartTurn();
         }
 
@@ -177,8 +210,10 @@ namespace CaptureTheFlag
 
         #region Update
 
-        private void Update()
+        protected override void Update()
         {
+            base.Update();
+            
             HelperFunctions.UnfocusNonInputUiElements();
 
             // V - Vision (debug)
@@ -191,9 +226,8 @@ namespace CaptureTheFlag
 
             switch (State)
             {
-                case GameState.Loading:
-                    if (MapGenerator.IsDone) StartGame();
-                    else MapGenerator.UpdateGeneration();
+                case GameState.GeneratingWorld:
+                    MapGenerator.UpdateGeneration();
                     break;
 
                 case GameState.YourTurn:
@@ -213,8 +247,8 @@ namespace CaptureTheFlag
         private void UpdateYourTurn()
         {
             // Update hovered character
-            Character hoveredCharacter = null;
-            if (World.HoveredEntity != null && World.HoveredEntity is Character c) hoveredCharacter = c;
+            CTFCharacter hoveredCharacter = null;
+            if (World.HoveredEntity != null && World.HoveredEntity is CTFCharacter c) hoveredCharacter = c;
 
             // Left click - Select character
             if(Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
@@ -279,7 +313,7 @@ namespace CaptureTheFlag
             // Can not move there in this turn
             else
             {
-                NavigationPath path = Pathfinder.GetPath(SelectedCharacter.Entity, SelectedCharacter.Entity.OriginNode, targetNode, considerUnexploredNodes: true);
+                NavigationPath path = Pathfinder.GetPath(SelectedCharacter, SelectedCharacter.OriginNode, targetNode, considerUnexploredNodes: true);
                 if (path == null) return; // no viable path there
 
                 PathPreview.gameObject.SetActive(true);
@@ -291,7 +325,7 @@ namespace CaptureTheFlag
 
         #region Actions
 
-        public void SelectCharacter(Character c)
+        public void SelectCharacter(CTFCharacter c)
         {
             // Deselect previous
             DeselectCharacter();
@@ -301,7 +335,7 @@ namespace CaptureTheFlag
             if (SelectedCharacter != null)
             {
                 UI.SelectCharacter(c);
-                c.Entity.SetSelected(true);
+                c.SetSelected(true);
                
                 HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
             }
@@ -313,7 +347,7 @@ namespace CaptureTheFlag
             if (SelectedCharacter != null)
             {
                 UI.DeselectCharacter(SelectedCharacter);
-                SelectedCharacter.Entity.SetSelected(false);
+                SelectedCharacter.SetSelected(false);
             }
             SelectedCharacter = null;
         }
@@ -324,10 +358,10 @@ namespace CaptureTheFlag
             HashSet<BlockmapNode> addedNodes = new HashSet<BlockmapNode>();
             foreach (BlockmapNode node in HighlightedNodes)
             {
-                node.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
+                node.ShowMultiOverlay(ReachableTileOverlay, Color.green);
                 if (node is GroundNode surfaceNode && surfaceNode.WaterNode != null) // Also highlight waternodes on top of surface nodes
                 {
-                    surfaceNode.WaterNode.ShowMultiOverlay(CTFResourceManager.Singleton.ReachableTileTexture, Color.green);
+                    surfaceNode.WaterNode.ShowMultiOverlay(ReachableTileOverlay, Color.green);
                     addedNodes.Add(surfaceNode.WaterNode);
                 }
             }
@@ -340,14 +374,14 @@ namespace CaptureTheFlag
             HighlightedNodes.Clear();
         }
 
-        public void SendToJail(Character character)
+        public void SendToJail(CTFCharacter character)
         {
             // Get a random free node within the characters jail zone
-            List<BlockmapNode> candidateNodes = character.Owner.JailZone.Nodes.Where(x => x.IsPassable(character.Entity)).ToList();
+            List<BlockmapNode> candidateNodes = character.Owner.JailZone.Nodes.Where(x => x.IsPassable(character)).ToList();
             BlockmapNode targetNode = candidateNodes[Random.Range(0, candidateNodes.Count)];
 
             // Teleport character to target node
-            character.Entity.Teleport(targetNode);
+            character.Teleport(targetNode);
 
             // Instantly remove all action points (needed if it happens during own turn)
             character.SetActionPointsToZero();
@@ -374,9 +408,9 @@ namespace CaptureTheFlag
 
         #region Getters
 
-        public List<Character> GetCharacters(BlockmapNode node)
+        public List<CTFCharacter> GetCharacters(BlockmapNode node)
         {
-            return node.Entities.Where(x => x is Character).Select(x => (Character)x).ToList();
+            return node.Entities.Where(x => x is CTFCharacter).Select(x => (CTFCharacter)x).ToList();
         }
 
         #endregion

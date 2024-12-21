@@ -6,7 +6,8 @@ namespace CaptureTheFlag
 {
     public enum GameState
     {
-        Loading,
+        GeneratingWorld,
+        InitializingWorld,
         YourTurn,
         OpponentTurn,
         GameFinished

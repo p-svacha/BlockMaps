@@ -6,23 +6,17 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class Character : Entity
+    public class CTFCharacter : Entity
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
         public CTFGame Game;
-        public Entity Entity { get; private set; }
-        public Comp_Movement MovementComp { get; private set; }
         public Player Owner { get; private set; }
         public Player Opponent { get; private set; }
 
-        [Header("Attributes")]
-        public Sprite Avatar;
-        public string Name;
-        public float MaxActionPoints;
-        public float MaxStamina;
-        public float StaminaRegeneration;
-        public float MovementSkill;
+        // Components
+        public Comp_Movement MovementComp { get; private set; }
+        public Comp_CTFCharacter CtfComp { get; private set; }
 
         // Current stats
         public float ActionPoints { get; private set; }
@@ -41,6 +35,7 @@ namespace CaptureTheFlag
         protected override void OnInitialized()
         {
             MovementComp = GetComponent<Comp_Movement>();
+            CtfComp = GetComponent<Comp_CTFCharacter>();
         }
 
         #endregion
@@ -109,12 +104,19 @@ namespace CaptureTheFlag
 
         #region Getters
 
-        public Vector2Int WorldCoordinates => Entity.OriginNode.WorldCoordinates;
+        public Vector2Int WorldCoordinates => OriginNode.WorldCoordinates;
         public bool IsInAction => CurrentAction != null;
-        public BlockmapNode Node => Entity.OriginNode;
-        public bool IsVisible => Entity.IsVisibleBy(Game.World.ActiveVisionActor);
-        public bool IsVisibleByOpponent => Entity.IsVisibleBy(Owner.Opponent.Actor);
-        public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(Entity.OriginNode);
+        public BlockmapNode Node => OriginNode;
+        public bool IsVisible => IsVisibleBy(Game.World.ActiveVisionActor);
+        public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
+        public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
+
+        // CtfComp
+        public Sprite Avatar => CtfComp.Avatar;
+        public float MaxActionPoints => CtfComp.MaxActionPoints;
+        public float MaxStamina => CtfComp.MaxStamina;
+        public float StaminaRegeneration => CtfComp.StaminaRegeneration;
+        public float MovementSkill => CtfComp.MovementSkill;
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.
@@ -129,9 +131,9 @@ namespace CaptureTheFlag
             Dictionary<BlockmapNode, NavigationPath> nodePaths = new Dictionary<BlockmapNode, NavigationPath>();
 
             // Start with origin node
-            priorityQueue.Add(Entity.OriginNode, 0f);
-            nodeCosts.Add(Entity.OriginNode, 0f);
-            nodePaths.Add(Entity.OriginNode, new NavigationPath(Entity.OriginNode));
+            priorityQueue.Add(OriginNode, 0f);
+            nodeCosts.Add(OriginNode, 0f);
+            nodePaths.Add(OriginNode, new NavigationPath(OriginNode));
 
             while(priorityQueue.Count > 0)
             {
@@ -144,13 +146,13 @@ namespace CaptureTheFlag
                 foreach(Transition t in currentNode.Transitions)
                 {
                     BlockmapNode targetNode = t.To;
-                    float transitionCost = t.GetMovementCost(Entity) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
+                    float transitionCost = t.GetMovementCost(this) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
                     if (totalCost > Stamina) continue; // not reachable with current stamina
-                    if (!t.CanPass(Entity)) continue; // transition not passable for this character
-                    if (!t.To.IsExploredBy(Entity.Actor)) continue; // node not explored
+                    if (!t.CanPass(this)) continue; // transition not passable for this character
+                    if (!t.To.IsExploredBy(Actor)) continue; // node not explored
 
                     // Node has not yet been visited or cost is lower than previously lowest cost => Update
                     if(!nodeCosts.ContainsKey(targetNode) || totalCost < nodeCosts[targetNode])

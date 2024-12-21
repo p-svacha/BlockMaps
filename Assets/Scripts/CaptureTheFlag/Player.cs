@@ -10,7 +10,7 @@ namespace CaptureTheFlag
         public CTFGame Game;
         public Actor Actor;
         public Entity Flag;
-        public List<Character> Characters;
+        public List<CTFCharacter> Characters;
         public Zone Territory;
         public Zone JailZone;
         public Zone FlagZone;
@@ -19,17 +19,17 @@ namespace CaptureTheFlag
         /// <summary>
         /// Dictionary containing the current/last action for each character.
         /// </summary>
-        public Dictionary<Character, CharacterAction> Actions = new Dictionary<Character, CharacterAction>();
+        public Dictionary<CTFCharacter, CharacterAction> Actions = new Dictionary<CTFCharacter, CharacterAction>();
 
         public Player(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
         {
             Actor = actor;
 
-            Characters = new List<Character>();
+            Characters = new List<CTFCharacter>();
             foreach (Entity e in actor.Entities)
             {
-                if (e.Def.DefName == CTFMapGenerator.FLAG_ID) Flag = e;
-                if (e is Character c) Characters.Add(c);
+                if (e.Def == EntityDefOf.Flag) Flag = e;
+                if (e is CTFCharacter c) Characters.Add(c);
             }
 
             Territory = territory;
@@ -40,7 +40,7 @@ namespace CaptureTheFlag
         public virtual void OnStartGame(CTFGame game)
         {
             Game = game;
-            foreach (Character c in Characters) c.OnStartGame(Game, this, Opponent);
+            foreach (CTFCharacter c in Characters) c.OnStartGame(Game, this, Opponent);
         }
 
         /// <summary>

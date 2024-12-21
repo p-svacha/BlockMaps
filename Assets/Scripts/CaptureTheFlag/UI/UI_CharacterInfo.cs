@@ -8,7 +8,7 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterInfo : MonoBehaviour
     {
-        private Character Character;
+        private CTFCharacter Character;
 
         [Header("Elements")]
         public TextMeshProUGUI TitleText;
@@ -18,15 +18,15 @@ namespace CaptureTheFlag
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
-        public void Init(Character c)
+        public void Init(CTFCharacter c)
         {
             gameObject.SetActive(true);
             Character = c;
 
-            TitleText.text = c.Name;
+            TitleText.text = c.LabelCap;
             MovementText.text = c.MovementSkill.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
-            VisionText.text = c.Entity.Def.VisionRange.ToString();
+            VisionText.text = c.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
         }

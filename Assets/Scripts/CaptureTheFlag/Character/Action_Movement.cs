@@ -17,7 +17,7 @@ namespace CaptureTheFlag
         public NavigationPath Path { get; private set; }
         public BlockmapNode Target => Path.Target;
 
-        public Action_Movement(CTFGame game, Character c, NavigationPath path, float cost) : base(game, c, cost)
+        public Action_Movement(CTFGame game, CTFCharacter c, NavigationPath path, float cost) : base(game, c, cost)
         {
             Path = path;
         }

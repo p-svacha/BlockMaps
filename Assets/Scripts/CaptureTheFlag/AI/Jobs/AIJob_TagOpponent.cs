@@ -11,13 +11,13 @@ namespace CaptureTheFlag
     /// </summary>
     public class AIJob_TagOpponent : AICharacterJob
     {
-        private Character Target;
+        private CTFCharacter Target;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.TagOpponent;
-        public override string DevmodeDisplayText => "Tagging opponent (" + Target.Name + ")";
+        public override string DevmodeDisplayText => "Tagging opponent (" + Target.LabelCap + ")";
 
-        public AIJob_TagOpponent(Character c, Character target) : base(c)
+        public AIJob_TagOpponent(CTFCharacter c, CTFCharacter target) : base(c)
         {
             Target = target;
         }
@@ -35,7 +35,7 @@ namespace CaptureTheFlag
 
         public override CharacterAction GetNextAction()
         {
-            return GetMovementTo(Target.Entity.OriginNode);
+            return GetMovementTo(Target.OriginNode);
         }
     }
 }
