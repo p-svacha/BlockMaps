@@ -12,7 +12,7 @@ namespace CaptureTheFlag
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
-        public override string DevmodeDisplayText => "Patrolling Flag --> " + TargetNode.ToStringShort();
+        public override string DevmodeDisplayText => "Patrolling Flag --> " + TargetNode;
 
         public AIJob_PatrolDefendFlag(CtfCharacter c) : base(c)
         {

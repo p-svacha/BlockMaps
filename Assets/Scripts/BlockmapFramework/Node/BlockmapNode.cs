@@ -607,13 +607,11 @@ namespace BlockmapFramework
 
                 if (ShouldCreateSingleClimbTransition(adjNode, dir, out List<IClimbable> climbList, out int maxHeightSingle))
                 {
-                    // Debug.Log("Creating single climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     SingleClimbTransition t = new SingleClimbTransition(this, adjNode, dir, climbList, maxHeightSingle);
                     AddTransition(t, isWalkTransition: false);
                 }
                 else if(ShouldCreateDoubleClimbTransition(adjNode, dir, out List<IClimbable> climpUp, out List<IClimbable> climbDown, out int maxHeightDouble))
                 {
-                    // Debug.Log("Creating double climb transition from " + ToString() + " to " + adjNode.ToString() + " in direction " + dir.ToString());
                     DoubleClimbTransition t = new DoubleClimbTransition(this, adjNode, dir, climpUp, climbDown, maxHeightDouble);
                     AddTransition(t, isWalkTransition: false);
                 }
@@ -1025,7 +1023,7 @@ namespace BlockmapFramework
                     else return false;
             }
 
-            throw new System.Exception($"Case not yet implemented. Shape {Shape}. GetTriangleMeshShapeVariant() implementation is missing. Node: {DebugInfoShort()}");
+            throw new System.Exception($"Case not yet implemented. Shape {Shape}. GetTriangleMeshShapeVariant() implementation is missing. Node: {this}");
         }
 
         /// <summary>
@@ -1110,22 +1108,10 @@ namespace BlockmapFramework
             return World.IsAbove(Altitude, otherNode.Altitude);
         }
 
-        public override string ToString()
-        {
-            string mph = "MPH:";
-            foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
-            string headspace = "FSH";
-            foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
-            return Type.ToString() + WorldCoordinates.ToString() + " alt:" + BaseAltitude + "-" + MaxAltitude + " prop:" + SurfaceDef.Label + "\n" + headspace + "\n" + mph;
-        }
-        public string DebugInfoShort()
-        {
-            return $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}-{MaxAltitude} ({Type})";
-        }
-
+        public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}-{MaxAltitude} ({Type})";
         public string DebugInfoLong()
         {
-            string text = DebugInfoShort();
+            string text = ToString();
 
             string mph = "Max Passable Height:";
             foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
@@ -1143,8 +1129,6 @@ namespace BlockmapFramework
 
             return text;
         }
-
-        public virtual string ToStringShort() => SurfaceDef.Label + "(" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
 
         /// <summary>
         /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.

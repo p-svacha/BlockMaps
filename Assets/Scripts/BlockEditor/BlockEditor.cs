@@ -171,8 +171,8 @@ namespace WorldEditor
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
             if (World.HoveredNode != null)
             {
-                if(Input.GetKey(KeyCode.LeftAlt)) text += "\n" + World.HoveredNode.DebugInfoLong();
-                else text += "\n" + World.HoveredNode.DebugInfoShort();
+                if (Input.GetKey(KeyCode.LeftAlt)) text += "\n" + World.HoveredNode.DebugInfoLong();
+                else text += "\n" + World.HoveredNode;
             }
             if (World.HoveredEntity != null) text += "\nEntity: " + World.HoveredEntity.ToString();
             if (World.HoveredWaterBody != null) text += "\nWaterbody";

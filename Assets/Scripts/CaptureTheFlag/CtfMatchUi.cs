@@ -64,7 +64,7 @@ namespace CaptureTheFlag
             string text = "";
 
             // Add coordinates
-            if (Match != null && Match.DevMode && Match.World != null && Match.World.HoveredNode != null) text += "\n" + Match.World.HoveredNode.ToStringShort();
+            if (Match != null && Match.DevMode && Match.World != null && Match.World.HoveredNode != null) text += "\n" + Match.World.HoveredNode;
 
             // Add FPS and tick
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;

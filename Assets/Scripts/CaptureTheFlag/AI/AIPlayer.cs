@@ -95,8 +95,6 @@ namespace CaptureTheFlag
                     nextAction.Perform();
                     currentCharacter.MovementComp.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
                 }
-
-
             }
 
             // Check if we should queue-follow an action

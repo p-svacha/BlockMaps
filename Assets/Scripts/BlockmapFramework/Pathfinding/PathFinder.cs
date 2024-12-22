@@ -24,7 +24,7 @@ namespace BlockmapFramework
         public static NavigationPath GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;
-
+            
             List<BlockmapNode> openList = new List<BlockmapNode>() { from }; // tiles that are queued for searching
             List<BlockmapNode> closedList = new List<BlockmapNode>(); // tiles that have already been searched
 
@@ -69,6 +69,7 @@ namespace BlockmapFramework
             }
 
             // Out of tiles -> no path
+            Debug.Log($"[Pathfinder] Couldn't find path {from} -> {to} for {entity?.Label} after checking all transitions.");
             return null;
         }
 

@@ -50,7 +50,7 @@ namespace CaptureTheFlag
 
             if (path == null) // No path found
             {
-                if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+                if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
                 return null;
             }
 
@@ -58,7 +58,7 @@ namespace CaptureTheFlag
             foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.IsSingleTransitionPath()))
             {
                 if (Player.Opponent.Characters.Any(x => x.Node == movement.Target)) continue; // Don't go there if an opponent is on that node
-                if (path.Target == movement.Target) return movement;
+                if (path.Nodes[1] == movement.Target) return movement;
             }
 
             return null;
@@ -84,7 +84,7 @@ namespace CaptureTheFlag
             }
 
             // No possible move is part of path
-            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode.ToStringShort() + " --> " + targetNode.ToStringShort() + ")");
+            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
             return null;
         }
 
@@ -93,7 +93,7 @@ namespace CaptureTheFlag
         /// </summary>
         private NavigationPath GetPath(BlockmapNode targetNode)
         {
-            return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, Player.FlagZone.Nodes);
+            return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, forbiddenNodes: Player.FlagZone.Nodes);
         }
 
         #endregion

@@ -59,8 +59,6 @@ namespace BlockmapFramework
             return base.CanEntityStandHere(entity);
         }
 
-        public override string ToStringShort() => "Water (" + WorldCoordinates.x + ", " + BaseAltitude + "-" + MaxAltitude + ", " + WorldCoordinates.y + ")";
-
         #endregion
     }
 }
