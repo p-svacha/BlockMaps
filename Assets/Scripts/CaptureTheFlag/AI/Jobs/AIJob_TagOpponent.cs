@@ -11,13 +11,13 @@ namespace CaptureTheFlag
     /// </summary>
     public class AIJob_TagOpponent : AICharacterJob
     {
-        private CTFCharacter Target;
+        private CtfCharacter Target;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.TagOpponent;
         public override string DevmodeDisplayText => "Tagging opponent (" + Target.LabelCap + ")";
 
-        public AIJob_TagOpponent(CTFCharacter c, CTFCharacter target) : base(c)
+        public AIJob_TagOpponent(CtfCharacter c, CtfCharacter target) : base(c)
         {
             Target = target;
         }

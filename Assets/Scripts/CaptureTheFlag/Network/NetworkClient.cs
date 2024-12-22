@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 
-namespace CaptureTheFlag.Networking
+namespace CaptureTheFlag.Network
 {
     public class NetworkClient : MonoBehaviour
     {
@@ -158,7 +158,7 @@ namespace CaptureTheFlag.Networking
 
         private void ReceiveNetworkAction(string finalJson)
         {
-            Debug.Log(finalJson);
+            Debug.Log($"[Client] Received data from server: {finalJson}");
 
             // 1) Deserialize the wrapper
             NetworkActionWrapper wrapper = JsonUtility.FromJson<NetworkActionWrapper>(finalJson);
@@ -176,16 +176,15 @@ namespace CaptureTheFlag.Networking
             action.IsSentBySelf = (action.SenderId == ClientId);
 
             // 4) Now 'action' includes all subclass fields
-            Debug.Log($"Received real action type: {action.GetType().Name}");
+            Debug.Log($"[Client] Received real action type: {action.GetType().Name}");
 
             try
             {
                 switch (action.ActionType)
                 {
-                    case "StartMatch":
-                        var startMatchAction = (NetworkAction_StartMatch)action;
-                        Debug.Log($"StartMatch => size={startMatchAction.MapSize}, seed={startMatchAction.MapSeed}");
-                        Game.SetMultiplayerMatchAsReady(startMatchAction.MapSize, startMatchAction.MapSeed, playAsBlue: startMatchAction.IsSentBySelf);
+                    case "InitializeMultiplayerMatch":
+                        var initializeAction = (NetworkAction_InitializeMultiplayerMatch)action;
+                        Game.SetMultiplayerMatchAsReady(initializeAction.MapSize, initializeAction.MapSeed, playAsBlue: initializeAction.IsSentBySelf, initializeAction.Player1ClientId, initializeAction.Player2ClientId);
                         break;
 
                     default:

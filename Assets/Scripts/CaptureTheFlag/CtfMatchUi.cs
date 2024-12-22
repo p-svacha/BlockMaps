@@ -8,7 +8,7 @@ namespace CaptureTheFlag
 {
     public class CtfMatchUi : MonoBehaviour
     {
-        private CtfMatch Game;
+        private CtfMatch Match;
 
         [Header("Prefabs")]
         public UI_CharacterSelectionPanel CharacterSelectionPrefab;
@@ -30,26 +30,26 @@ namespace CaptureTheFlag
 
         public GameObject CharacterLabelsContainer;
 
-        private Dictionary<CTFCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
+        private Dictionary<CtfCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
         public void Init(CtfMatch game)
         {
-            Game = game;
-            DevModeButton.onClick.AddListener(() => Game.ToggleDevMode());
-            EndTurnButton.onClick.AddListener(() => Game.EndYourTurn());
+            Match = game;
+            DevModeButton.onClick.AddListener(() => Match.ToggleDevMode());
+            EndTurnButton.onClick.AddListener(() => Match.EndPlayerTurn());
         }
 
-        public void OnStartGame()
+        public void OnGameInitialized()
         {
             // Character selection
             HelperFunctions.DestroyAllChildredImmediately(CharacterSelectionContainer.gameObject);
 
             CharacterSelection.Clear();
-            foreach (CTFCharacter c in Game.LocalPlayer.Characters)
+            foreach (CtfCharacter c in Match.LocalPlayer.Characters)
             {
                 UI_CharacterSelectionPanel panel = Instantiate(CharacterSelectionPrefab, CharacterSelectionContainer.transform);
-                panel.Init(Game, c);
+                panel.Init(Match, c);
                 CharacterSelection.Add(c, panel);
             }
 
@@ -59,15 +59,19 @@ namespace CaptureTheFlag
 
         private void Update()
         {
+            if (Match == null) return;
+
             string text = "";
 
             // Add coordinates
-            if (Game != null && Game.DevMode && Game.World != null && Game.World.HoveredNode != null) text += "\n" + Game.World.HoveredNode.ToStringShort();
+            if (Match != null && Match.DevMode && Match.World != null && Match.World.HoveredNode != null) text += "\n" + Match.World.HoveredNode.ToStringShort();
 
-            // Add FPS
+            // Add FPS and tick
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;
             text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
+
+            if(Match.DevMode) text += "\nTick " + Match.CurrentTick;
 
             TileInfoText.text = text;
         }
@@ -75,7 +79,7 @@ namespace CaptureTheFlag
         /// <summary>
         /// Updates the selection panel for a single character.
         /// </summary>
-        public void UpdateSelectionPanel(CTFCharacter c)
+        public void UpdateSelectionPanel(CtfCharacter c)
         {
             CharacterSelection[c].Refresh();
         }
@@ -87,7 +91,7 @@ namespace CaptureTheFlag
             foreach (UI_CharacterSelectionPanel panel in CharacterSelection.Values) panel.Refresh();
         }
 
-        public void SelectCharacter(CTFCharacter c)
+        public void SelectCharacter(CtfCharacter c)
         {
             // Character Info
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
@@ -102,19 +106,19 @@ namespace CaptureTheFlag
                 actionBtn.Init(action);
             }
         }
-        public void DeselectCharacter(CTFCharacter c)
+        public void DeselectCharacter(CtfCharacter c)
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
             SpecialActionsContainer.SetActive(false);
         }
 
-        public void ShowTurnIndicator(string text, float hideAfter = 0f)
+        public void ShowRedNotificationText(string text, float hideAfter = 0f)
         {
             TurnIndicator.SetActive(true);
             TurnIndicatorText.text = text;
         }
-        public void HideTurnIndicator()
+        public void HideRedNotificationText()
         {
             TurnIndicator.SetActive(false);
         }

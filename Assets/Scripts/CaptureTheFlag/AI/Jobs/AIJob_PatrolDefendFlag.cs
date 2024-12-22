@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
         public override string DevmodeDisplayText => "Patrolling Flag --> " + TargetNode.ToStringShort();
 
-        public AIJob_PatrolDefendFlag(CTFCharacter c) : base(c)
+        public AIJob_PatrolDefendFlag(CtfCharacter c) : base(c)
         {
             // Find a target node near own flag
             int numAttempts = 0;
@@ -33,14 +33,14 @@ namespace CaptureTheFlag
             forcedNewJob = null;
 
             // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out CTFCharacter target0))
+            if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target0);
                 return true;
             }
 
             // If we see a nearby opponent, chase them
-            if (Player.ShouldChaseCharacterToTag(Character, out CTFCharacter target))
+            if (Player.ShouldChaseCharacterToTag(Character, out CtfCharacter target))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target);
                 return true;

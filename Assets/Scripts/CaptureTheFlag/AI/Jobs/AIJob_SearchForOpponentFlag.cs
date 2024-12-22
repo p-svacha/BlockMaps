@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.SearchOpponentFlag;
         public override string DevmodeDisplayText => "Searching Flag (going to " + TargetNode.ToStringShort() + ")";
 
-        public AIJob_SearchForOpponentFlag(CTFCharacter c) : base(c)
+        public AIJob_SearchForOpponentFlag(CtfCharacter c) : base(c)
         {
             // Find a target node
             List<BlockmapNode> candidates = Game.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
@@ -27,7 +27,7 @@ namespace CaptureTheFlag
             forcedNewJob = null;
 
             // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out CTFCharacter target0))
+            if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target0);
                 return true;

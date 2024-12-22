@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public enum GameState
+    public enum MatchState
     {
         GeneratingWorld,
         InitializingWorld,
-        YourTurn,
-        OpponentTurn,
+        MatchReadyToStart, // only used in multiplayer
+        PlayerTurn,
+        WaitingForOtherPlayerTurn, // only used in multiplayer
+        NpcTurn,
         GameFinished
     }
 }

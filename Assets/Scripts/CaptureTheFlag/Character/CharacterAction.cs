@@ -1,3 +1,4 @@
+using CaptureTheFlag.Network;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,12 +10,12 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class CharacterAction
     {
-        public CtfMatch Game { get; private set; }
+        public CtfMatch Match { get; private set; }
 
         /// <summary>
         /// The actor who will perform this action.
         /// </summary>
-        public CTFCharacter Character { get; private set; }
+        public CtfCharacter Character { get; private set; }
 
         /// <summary>
         /// The amount of action points and stamina that get reduced when performing this action.
@@ -29,9 +30,9 @@ namespace CaptureTheFlag
         public bool IsDone => State == CharacterActionState.Done;
         public bool IsPaused => State == CharacterActionState.Paused;
 
-        public CharacterAction(CtfMatch game, CTFCharacter c, float cost)
+        public CharacterAction(CtfMatch game, CtfCharacter c, float cost)
         {
-            Game = game;
+            Match = game;
             Character = c;
             Cost = cost;
             State = CharacterActionState.Pending;
@@ -68,10 +69,14 @@ namespace CaptureTheFlag
             Character.SetCurrentAction(null);
             State = CharacterActionState.Done;
 
-            Game.OnActionDone(this);
-            if(Game.State != GameState.GameFinished) Character.Owner.OnActionDone(this);
+            Match.OnActionDone(this);
+            if(Match.State != MatchState.GameFinished) Character.Owner.OnActionDone(this);
         }
 
+        #region Multiplayer
 
+        public abstract NetworkAction GetNetworkAction();
+
+        #endregion
     }
 }

@@ -25,7 +25,6 @@ namespace CaptureTheFlag
 
         private void OnClick()
         {
-            Action.Character.Owner.Actions[Action.Character] = Action;
             Action.Perform();
         }
     }

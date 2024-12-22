@@ -14,6 +14,7 @@ namespace CaptureTheFlag.UI
         public Button SingleplayerButton;
         public Button MultiplayerHostButton;
         public Button MultiplayerConnectButton;
+        public Button QuitButton;
         public TMP_InputField MultiplayerIpInput;
 
         public void Init(CtfGame game)
@@ -22,6 +23,7 @@ namespace CaptureTheFlag.UI
             SingleplayerButton.onClick.AddListener(SingleplayerBtn_OnClick);
             MultiplayerHostButton.onClick.AddListener(MpHostBtn_OnClick);
             MultiplayerConnectButton.onClick.AddListener(MpConnectBtn_OnClick);
+            QuitButton.onClick.AddListener(QuitBtn_OnClick);
         }
 
         private void SingleplayerBtn_OnClick()
@@ -37,6 +39,11 @@ namespace CaptureTheFlag.UI
         private void MpConnectBtn_OnClick()
         {
             Game.ConnectToServer();
+        }
+
+        private void QuitBtn_OnClick()
+        {
+            Application.Quit();
         }
     }
 }

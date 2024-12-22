@@ -8,14 +8,14 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterLabel : MonoBehaviour
     {
-        private CTFCharacter Character;
+        private CtfCharacter Character;
         private Vector3 WorldOffset;
         public float Width;
 
         [Header("Elements")]
         public TextMeshProUGUI NameText;
 
-        public void Init(CTFCharacter c)
+        public void Init(CtfCharacter c)
         {
             Character = c;
             NameText.text = c.LabelCap;

@@ -12,7 +12,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.Flee;
         public override string DevmodeDisplayText => "Fleeing";
 
-        public AIJob_Flee(CTFCharacter c) : base(c) { }
+        public AIJob_Flee(CtfCharacter c) : base(c) { }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
@@ -27,7 +27,7 @@ namespace CaptureTheFlag
         public override CharacterAction GetNextAction()
         {
             // Get opponent characters that are relevant
-            List<CTFCharacter> relevantOpponents = GetRelevantOpponents();
+            List<CtfCharacter> relevantOpponents = GetRelevantOpponents();
             if (relevantOpponents.Count == 0) return null;
 
             // Get node that is the furthest away from all opponent characters
@@ -36,7 +36,7 @@ namespace CaptureTheFlag
             foreach(BlockmapNode movementTarget in Character.PossibleMoves.Keys)
             {
                 float lowestCost = float.MaxValue;
-                foreach(CTFCharacter opp in relevantOpponents)
+                foreach(CtfCharacter opp in relevantOpponents)
                 {
                     float cost = Pathfinder.GetPathCost(opp, opp.Node, movementTarget);
                     if (cost < lowestCost) lowestCost = cost;
@@ -52,10 +52,10 @@ namespace CaptureTheFlag
             return GetSingleNodeMovementTo(targetNode);
         }
 
-        private List<CTFCharacter> GetRelevantOpponents()
+        private List<CtfCharacter> GetRelevantOpponents()
         {
-            List<CTFCharacter> relevantOpponents = new List<CTFCharacter>();
-            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
+            List<CtfCharacter> relevantOpponents = new List<CtfCharacter>();
+            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
             {
                 if (opponentCharacter.GetComponent<Comp_Movement>().IsInRange(Character.Node, 40)) relevantOpponents.Add(opponentCharacter);
             }

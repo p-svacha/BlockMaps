@@ -24,8 +24,8 @@ namespace CaptureTheFlag
             { AICharacterRole.Attacker, 6 },
             { AICharacterRole.Defender, 2 },
         };
-        private Dictionary<CTFCharacter, AICharacterRole> Roles = new Dictionary<CTFCharacter, AICharacterRole>();
-        private Dictionary<CTFCharacter, AICharacterJob> Jobs = new Dictionary<CTFCharacter, AICharacterJob>();
+        private Dictionary<CtfCharacter, AICharacterRole> Roles = new Dictionary<CtfCharacter, AICharacterRole>();
+        private Dictionary<CtfCharacter, AICharacterJob> Jobs = new Dictionary<CtfCharacter, AICharacterJob>();
 
         public List<BlockmapNode> DefendPerimeterNodes;
 
@@ -36,9 +36,9 @@ namespace CaptureTheFlag
 
         public AIPlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone) : base(actor, territory, jailZone, flagZone) { }
 
-        public override void OnStartGame(CtfMatch game)
+        public override void OnGameInitialized(CtfMatch game)
         {
-            base.OnStartGame(game);
+            base.OnGameInitialized(game);
 
             // Assign a weighted-random role to all characters
             for (int i = 0; i < Characters.Count; i++)
@@ -58,7 +58,6 @@ namespace CaptureTheFlag
             TurnFinished = false;
             CurrentCharacterIndex = -1;
             CurrentAction = null;
-            Actions.Clear();
             ActionsToFollow.Clear();
             CurrentFollowedAction = null;
         }
@@ -71,7 +70,7 @@ namespace CaptureTheFlag
             // Get a new action if the current one is null or done.
             if(CurrentAction == null || CurrentAction.IsDone)
             {
-                CTFCharacter currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
+                CtfCharacter currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
                 CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
 
                 if(nextAction == null) // Character is done for this turn => go to next character
@@ -92,7 +91,6 @@ namespace CaptureTheFlag
                 // Start performing next action immediately
                 if (nextAction != null) 
                 {
-                    Actions[currentCharacter] = nextAction;
                     CurrentAction = nextAction;
                     nextAction.Perform();
                     currentCharacter.MovementComp.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
@@ -102,8 +100,9 @@ namespace CaptureTheFlag
             }
 
             // Check if we should queue-follow an action
-            foreach (CharacterAction action in Actions.Values.Where(x => x.State == CharacterActionState.Performing))
+            foreach (CtfCharacter character in Characters.Where(c => c.IsInAction))
             {
+                CharacterAction action = character.CurrentAction;
                 if (action == CurrentFollowedAction) continue;
 
                 // Character is newly visible
@@ -152,30 +151,11 @@ namespace CaptureTheFlag
             }
         }
 
-        /// <summary>
-        /// Gets called when dev mode gets activated or deactivated.
-        /// </summary>
-        public void OnSetDevMode(bool active)
-        {
-            if(active)
-            {
-                SetDevModeLabels();
-            }
-            else
-            {
-                foreach (CTFCharacter c in Characters) c.UI_Label.Init(c);
-            }
-        }
-
-
         #region Private
 
-        /// <summary>
-        /// Sets the visible label of all characters according to their role and job to easily debug what they are doing.
-        /// </summary>
-        private void SetDevModeLabels()
+        protected override void SetDevModeLabels()
         {
-            foreach (CTFCharacter c in Characters)
+            foreach (CtfCharacter c in Characters)
             {
                 string label = Roles[c].ToString() + " | " + Jobs[c].DevmodeDisplayText;
                 c.UI_Label.SetLabelText(label);
@@ -186,7 +166,7 @@ namespace CaptureTheFlag
         /// Returns the action the given character will do next this turn.
         /// <br/>Can return null if no further action should be taken by the character.
         /// </summary>
-        private CharacterAction GetNextCharacterAction(CTFCharacter c)
+        private CharacterAction GetNextCharacterAction(CtfCharacter c)
         {
             if (c.PossibleMoves.Count == 0) return null;
 
@@ -220,10 +200,10 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns a new job that the given character should do given their role and current game state.
         /// </summary>
-        private AICharacterJob GetNewCharacterJob(CTFCharacter c)
+        private AICharacterJob GetNewCharacterJob(CtfCharacter c)
         {
             // If we can directly tag an opponent, do that no matter the role
-            if (CanTagCharacterDirectly(c, out CTFCharacter target0)) return new AIJob_TagOpponent(c, target0);
+            if (CanTagCharacterDirectly(c, out CtfCharacter target0)) return new AIJob_TagOpponent(c, target0);
 
             switch (Roles[c])
             {
@@ -241,7 +221,7 @@ namespace CaptureTheFlag
                 case AICharacterRole.Defender:
 
                     // If there is a visible opponent nearby
-                    if (ShouldChaseCharacterToTag(c, out CTFCharacter target1)) return new AIJob_TagOpponent(c, target1);
+                    if (ShouldChaseCharacterToTag(c, out CtfCharacter target1)) return new AIJob_TagOpponent(c, target1);
 
                     // Else just patrol own flag
                     return new AIJob_PatrolDefendFlag(c);
@@ -253,11 +233,11 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if the given character can tag an opponent with their possible moves.
         /// </summary>
-        public bool CanTagCharacterDirectly(CTFCharacter source, out CTFCharacter target)
+        public bool CanTagCharacterDirectly(CtfCharacter source, out CtfCharacter target)
         {
             target = null;
 
-            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
+            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
             {
                 if (!opponentCharacter.IsInOpponentTerritory) continue;
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
@@ -275,11 +255,11 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if a character should flee from an opponent.
         /// </summary>
-        public bool ShouldFlee(CTFCharacter c)
+        public bool ShouldFlee(CtfCharacter c)
         {
             if (!c.IsInOpponentTerritory) return false;
 
-            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
+            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
             {
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
 
@@ -291,11 +271,11 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if the given character should chase an opponent by going towards them.
         /// </summary>
-        public bool ShouldChaseCharacterToTag(CTFCharacter source, out CTFCharacter target)
+        public bool ShouldChaseCharacterToTag(CtfCharacter source, out CtfCharacter target)
         {
             target = null;
 
-            foreach (CTFCharacter opponentCharacter in Opponent.Characters)
+            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
             {
                 if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.MovementComp.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
                 {

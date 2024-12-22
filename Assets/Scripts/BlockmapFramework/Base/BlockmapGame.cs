@@ -35,7 +35,7 @@ namespace BlockmapFramework
 
         protected virtual void Update()
         {
-            World?.Tick();
+            World?.Update();
         }
     }
 }

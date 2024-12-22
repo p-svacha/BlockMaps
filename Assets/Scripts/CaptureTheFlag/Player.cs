@@ -10,26 +10,27 @@ namespace CaptureTheFlag
         public CtfMatch Game;
         public Actor Actor;
         public Entity Flag;
-        public List<CTFCharacter> Characters;
+        public List<CtfCharacter> Characters;
         public Zone Territory;
         public Zone JailZone;
         public Zone FlagZone;
         public Player Opponent;
 
-        /// <summary>
-        /// Dictionary containing the current/last action for each character.
-        /// </summary>
-        public Dictionary<CTFCharacter, CharacterAction> Actions = new Dictionary<CTFCharacter, CharacterAction>();
+        // Multiplayer
+        public string ClientId;
+        public bool ReadyToStartMultiplayerMatch;
+        public bool TurnEnded;
 
-        public Player(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
+        public Player(Actor actor, Zone territory, Zone jailZone, Zone flagZone, string clientId = "")
         {
             Actor = actor;
+            ClientId = clientId;
 
-            Characters = new List<CTFCharacter>();
+            Characters = new List<CtfCharacter>();
             foreach (Entity e in actor.Entities)
             {
                 if (e.Def == EntityDefOf.Flag) Flag = e;
-                if (e is CTFCharacter c) Characters.Add(c);
+                if (e is CtfCharacter c) Characters.Add(c);
             }
 
             Territory = territory;
@@ -37,16 +38,22 @@ namespace CaptureTheFlag
             FlagZone = flagZone;
         }
 
-        public virtual void OnStartGame(CtfMatch game)
+        public virtual void OnGameInitialized(CtfMatch game)
         {
             Game = game;
-            foreach (CTFCharacter c in Characters) c.OnStartGame(Game, this, Opponent);
+            foreach (CtfCharacter c in Characters) c.OnGameInitialized(Game, this, Opponent);
         }
 
         /// <summary>
         /// Gets called when a character of this player has completed their action.
         /// </summary>
         public virtual void OnActionDone(CharacterAction action) { }
+
+        public virtual void OnStartTurn()
+        {
+            TurnEnded = false;
+            foreach (CtfCharacter c in Characters) c.OnStartTurn();
+        }
 
         #region Getters
 
@@ -63,12 +70,38 @@ namespace CaptureTheFlag
             if (move.Character.IsInAction) return false;
 
             // Check if another character is currently heading to the target node
-            foreach(CharacterAction action in Actions.Values)
+            foreach(CtfCharacter character in Game.Characters)
             {
-                if (!action.IsDone && action is Action_Movement otherMove && otherMove.Target == move.Target) return false;
+                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == move.Target) return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets called when dev mode gets activated or deactivated.
+        /// </summary>
+        public void OnSetDevMode(bool active)
+        {
+            if (active)
+            {
+                SetDevModeLabels();
+            }
+            else
+            {
+                foreach (CtfCharacter c in Characters) c.UI_Label.Init(c);
+            }
+        }
+
+        /// <summary>
+        /// Sets the visible label of all characters according to their role and job to easily debug what they are doing.
+        /// </summary>
+        protected virtual void SetDevModeLabels()
+        {
+            foreach (CtfCharacter c in Characters)
+            {
+                c.UI_Label.SetLabelText($"{c.LabelCap} ({c.Id})");
+            }
         }
 
         #endregion

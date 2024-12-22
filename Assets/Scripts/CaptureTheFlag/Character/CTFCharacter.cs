@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class CTFCharacter : Entity
+    public class CtfCharacter : Entity
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
@@ -25,7 +25,7 @@ namespace CaptureTheFlag
         public bool IsInJail => JailTime > 0;
         public Dictionary<BlockmapNode, Action_Movement> PossibleMoves { get; private set; }
         public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
-        private CharacterAction CurrentAction;
+        public CharacterAction CurrentAction { get; private set; }
 
         // UI
         public UI_CharacterLabel UI_Label;
@@ -42,7 +42,7 @@ namespace CaptureTheFlag
 
         #region Game Loop
 
-        public void OnStartGame(CtfMatch game, Player player, Player opponent)
+        public void OnGameInitialized(CtfMatch game, Player player, Player opponent)
         {
             Game = game;
             ActionPoints = MaxActionPoints;

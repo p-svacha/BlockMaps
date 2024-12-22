@@ -1,5 +1,5 @@
 using BlockmapFramework;
-using CaptureTheFlag.Networking;
+using CaptureTheFlag.Network;
 using CaptureTheFlag.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +34,13 @@ namespace CaptureTheFlag
         private int MultiplayerMapSize;
         private int MultiplayerMapSeed;
         private bool MultiplayerPlayAsBlue;
+        private string MultiplayerP1ClientId;
+        private string MultiplayerP2ClientId;
+
+        // Ticks
+        private float TickAccumulator = 0f;
+        private const float TICKS_PER_SECOND = 60f;
+        private const float TICK_INTERVAL = 1f / TICKS_PER_SECOND;
 
         private void Start()
         {
@@ -53,22 +60,32 @@ namespace CaptureTheFlag
 
         private void Update()
         {
-            ActiveMatch?.Tick();
+            ActiveMatch?.Update();
 
-            if(IsWaitingForOtherPlayerAsHost)
+            // Ticks
+            float dt = Time.deltaTime;
+            TickAccumulator += dt;
+
+            // Process as many ticks as fit into this frame
+            while (TickAccumulator >= TICK_INTERVAL)
             {
-                if(NetworkManager.Instance.ConnectedClients.Count == 2)
+                TickAccumulator -= TICK_INTERVAL;
+                ActiveMatch?.Tick();
+            }
+
+            if (IsWaitingForOtherPlayerAsHost)
+            {
+                if(NetworkServer.Instance.ConnectedClients.Count == 2)
                 {
                     IsWaitingForOtherPlayerAsHost = false;
                     int mapSeed = CTFMapGenerator.GetRandomSeed();
                     int mapSize = GetRandomMapSize();
-                    NetworkClient.Instance.SendAction(new NetworkAction_StartMatch(mapSize, mapSeed));
+                    NetworkClient.Instance.SendAction(new NetworkAction_InitializeMultiplayerMatch(mapSize, mapSeed, NetworkServer.Instance.ConnectedClients[0].Client.RemoteEndPoint.ToString(), NetworkServer.Instance.ConnectedClients[1].Client.RemoteEndPoint.ToString()));
                 }
             }
 
             if(IsMultiplayerMatchReady)
             {
-                Debug.Log("MP match START");
                 IsMultiplayerMatchReady = false;
                 StartMultiplayerMatch();
             }
@@ -96,7 +113,7 @@ namespace CaptureTheFlag
         {
             ActiveMatch = new CtfMatch(this);
             NetworkClient.Instance.Match = ActiveMatch;
-            ActiveMatch.InitializeGame(CtfMatchType.Multiplayer, MultiplayerMapSize, MultiplayerMapSeed, MultiplayerPlayAsBlue);
+            ActiveMatch.InitializeGame(CtfMatchType.Multiplayer, MultiplayerMapSize, MultiplayerMapSeed, MultiplayerPlayAsBlue, MultiplayerP1ClientId, MultiplayerP2ClientId);
             MatchUI.Init(ActiveMatch);
             MainMenuUI.gameObject.SetActive(false);
         }
@@ -104,7 +121,7 @@ namespace CaptureTheFlag
         public void HostServer()
         {
             NetworkClient.Instance.Game = this;
-            NetworkManager.Instance.StartServerAndConnectAsHost();
+            NetworkServer.Instance.StartServerAndConnectAsHost();
             IsWaitingForOtherPlayerAsHost = true;
         }
 
@@ -115,14 +132,15 @@ namespace CaptureTheFlag
             NetworkClient.Instance.ConnectToServer();
         }
 
-        public void SetMultiplayerMatchAsReady(int mapSize, int mapSeed, bool playAsBlue)
+        public void SetMultiplayerMatchAsReady(int mapSize, int mapSeed, bool playAsBlue, string player1ClientId, string player2ClientId)
         {
             IsWaitingForOtherPlayerAsHost = false;
             MultiplayerMapSize = mapSize;
             MultiplayerMapSeed = mapSeed;
             MultiplayerPlayAsBlue = playAsBlue;
             IsMultiplayerMatchReady = true;
-            Debug.Log("MP match is ready");
+            MultiplayerP1ClientId = player1ClientId;
+            MultiplayerP2ClientId = player2ClientId;
         }
 
         #endregion

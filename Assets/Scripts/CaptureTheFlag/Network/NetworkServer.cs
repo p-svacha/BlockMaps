@@ -5,11 +5,11 @@ using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 
-namespace CaptureTheFlag.Networking
+namespace CaptureTheFlag.Network
 {
-    public class NetworkManager : MonoBehaviour
+    public class NetworkServer : MonoBehaviour
     {
-        public static NetworkManager Instance { get; private set; }
+        public static NetworkServer Instance { get; private set; }
 
         public int Port = 7777;
         private TcpListener ServerListener;
@@ -121,7 +121,7 @@ namespace CaptureTheFlag.Networking
 
                         // (1) Convert bytes to string
                         string finalJson = System.Text.Encoding.UTF8.GetString(dataBuffer);
-                        Debug.Log($"[Server] Received data from client: {finalJson}");
+                        Debug.Log($"[Server] Received data from client with id {client.Client.RemoteEndPoint}: {finalJson}");
 
                         // (2) Deserialize the "wrapper"
                         NetworkActionWrapper incomingWrapper = JsonUtility.FromJson<NetworkActionWrapper>(finalJson);

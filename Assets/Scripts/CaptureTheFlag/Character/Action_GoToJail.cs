@@ -1,3 +1,4 @@
+using CaptureTheFlag.Network;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,17 +12,20 @@ namespace CaptureTheFlag
         public override string Name => "Go to Jail";
         public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/Icons/Jail");
 
-        public Action_GoToJail(CtfMatch game, CTFCharacter c) : base(game, c, ACTION_COST) { }
+        public Action_GoToJail(CtfMatch game, CtfCharacter c) : base(game, c, ACTION_COST) { }
 
         protected override void OnStartPerform()
         {
-            Game.SendToJail(Character);
+            Match.SendToJail(Character);
             EndAction();
         }
 
         public override void DoPause() { } // unused because action is instant
         public override void DoUnpause() { } // unused because action is instant
 
-
+        public override NetworkAction GetNetworkAction()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

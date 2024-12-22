@@ -13,7 +13,7 @@ namespace BlockmapFramework
     /// </summary>
     public class Entity : WorldDatabaseObject, IVisionTarget, ISaveAndLoadable
     {
-        public int id;
+        private int id;
         public override int Id => id;
 
         /// <summary>
@@ -855,6 +855,8 @@ namespace BlockmapFramework
                     Vector3 hitPosition = hit.point;
                     Vector2Int hitWorldCoordinates = World.GetWorldCoordinates(hitPosition);
                     WaterNode hitWaterNode = World.GetWaterNode(hitWorldCoordinates);
+
+                    if(hitWaterNode == null) return vision; // Somehow we couldn't detect what water node we hit => just stop search
 
                     // Mark the water node as visible
                     vision.AddVisibleNode(hitWaterNode);

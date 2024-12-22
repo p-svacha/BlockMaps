@@ -294,7 +294,7 @@ namespace BlockmapFramework
 
         #region Update
 
-        public void Tick()
+        public void Update()
         {
             // Update world systems
             if (IsUpdatingWorldSystems) WorldSystemUpdateTick();
@@ -372,7 +372,7 @@ namespace BlockmapFramework
                 {
                     GroundNode hitNode = GetGroundNode(HoveredWorldCoordinates);
 
-                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
+                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredGroundNode = hitNode;
                         newHoveredNode = hitNode;
@@ -387,7 +387,7 @@ namespace BlockmapFramework
                 {
                     AirNode hitNode = GetAirNodeFromRaycastHit(hit);
 
-                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
+                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredAirNode = hitNode;
                         newHoveredNode = hitNode;
@@ -403,7 +403,7 @@ namespace BlockmapFramework
                 {
                     WaterNode hitNode = GetWaterNode(HoveredWorldCoordinates);
 
-                    if (hitNode != null && hitNode.IsVisibleBy(ActiveVisionActor))
+                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor))
                     {
                         if (hitNode.GroundNode.IsCenterUnderWater)
                         {
@@ -424,7 +424,7 @@ namespace BlockmapFramework
                 {
                     Fence hitFence = GetFenceFromRaycastHit(hit);
                     
-                    if (hitFence != null && hitFence.Node.IsVisibleBy(ActiveVisionActor))
+                    if (hitFence != null && hitFence.Node.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredFence = hitFence;
                         HoveredWorldCoordinates = hitFence.Node.WorldCoordinates;
@@ -438,7 +438,7 @@ namespace BlockmapFramework
                 {
                     Wall hitWall = GetWallFromRaycastHit(hit);
                     
-                    if (hitWall != null && hitWall.IsVisibleBy(ActiveVisionActor))
+                    if (hitWall != null && hitWall.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredWall = hitWall;
                         HoveredWorldCoordinates = hitWall.WorldCoordinates;
@@ -452,7 +452,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
-                    if(hitEntity != null && hitEntity.IsVisibleBy(ActiveVisionActor))
+                    if(hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredChunk = hitEntity.Chunk;
@@ -465,7 +465,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = GetBatchEntityFromRaycastHit(hit);
 
-                    if (hitEntity != null && hitEntity.IsVisibleBy(ActiveVisionActor))
+                    if (hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor))
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredChunk = hitEntity.Chunk;
@@ -1302,7 +1302,7 @@ namespace BlockmapFramework
         public void RegisterEntity(Entity entity, bool updateWorld, bool registerInWorld = true)
         {
             // Register in various registries
-            if (registerInWorld) Entities.Add(entity.id, entity);
+            if (registerInWorld) Entities.Add(entity.Id, entity);
             entity.Actor.Entities.Add(entity);
             if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
 
@@ -1313,7 +1313,7 @@ namespace BlockmapFramework
         }
         public void DeregisterEntity(Entity entity)
         {
-            Entities.Remove(entity.id);
+            Entities.Remove(entity.Id);
             entity.Actor.Entities.Remove(entity);
             if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.DeregisterBatchEntity(entity);
 

@@ -8,7 +8,7 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterInfo : MonoBehaviour
     {
-        private CTFCharacter Character;
+        private CtfCharacter Character;
 
         [Header("Elements")]
         public TextMeshProUGUI TitleText;
@@ -18,7 +18,7 @@ namespace CaptureTheFlag
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
-        public void Init(CTFCharacter c)
+        public void Init(CtfCharacter c)
         {
             gameObject.SetActive(true);
             Character = c;

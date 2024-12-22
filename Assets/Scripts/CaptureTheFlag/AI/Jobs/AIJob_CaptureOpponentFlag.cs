@@ -11,14 +11,14 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.CaptureOpponentFlag;
         public override string DevmodeDisplayText => "Capturing Flag";
 
-        public AIJob_CaptureOpponentFlag(CTFCharacter c) : base(c) { }
+        public AIJob_CaptureOpponentFlag(CtfCharacter c) : base(c) { }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
             forcedNewJob = null;
 
             // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out CTFCharacter target0))
+            if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
             {
                 forcedNewJob = new AIJob_TagOpponent(Character, target0);
                 return true;

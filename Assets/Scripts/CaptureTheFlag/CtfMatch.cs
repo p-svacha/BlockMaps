@@ -1,5 +1,5 @@
 using BlockmapFramework;
-using CaptureTheFlag.Networking;
+using CaptureTheFlag.Network;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +26,8 @@ namespace CaptureTheFlag
         public LineRenderer PathPreview => Game.PathPreviewRenderer;
         private CTFMapGenerator MapGenerator;
 
-        private List<CTFCharacter> Characters;
-        public CTFCharacter SelectedCharacter { get; private set; }
+        public List<CtfCharacter> Characters;
+        public CtfCharacter SelectedCharacter { get; private set; }
         private HashSet<BlockmapNode> HighlightedNodes = new();
 
         // Game attributes
@@ -35,12 +35,15 @@ namespace CaptureTheFlag
         public Zone NeutralZone { get; private set; }
         public Zone OpponentZone => Opponent.Territory;
 
-        public GameState State { get; private set; }
-
         public List<Player> Players;
         private bool IsPlayingAsBlue;
         public Player LocalPlayer { get; private set; }
         public Player Opponent { get; private set; }
+
+        // Match state
+        public MatchState State { get; private set; }
+        public bool IsMatchRunning => (State != MatchState.GeneratingWorld && State != MatchState.InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
+        public int CurrentTick { get; private set; }
 
         // Options
         public bool DevMode { get; private set; }
@@ -48,15 +51,18 @@ namespace CaptureTheFlag
         // Cache
         private Texture2D ReachableTileOverlay;
 
+        // Multiplayer
+        List<System.Tuple<CharacterAction, int>> QueuedCharacterActions = new List<System.Tuple<CharacterAction, int>>(); // Stores which actions should be performed at what tick
 
-        #region Game Loop
+
+        #region Initialize
 
         public CtfMatch(CtfGame game)
         {
             Game = game;
         }
 
-        public void InitializeGame(CtfMatchType matchType, int mapSize, int seed = -1, bool playAsBlue = true)
+        public void InitializeGame(CtfMatchType matchType, int mapSize, int seed = -1, bool playAsBlue = true, string p1ClientId = "", string p2ClientId = "")
         {
             MatchType = matchType;
             IsPlayingAsBlue = playAsBlue;
@@ -67,11 +73,11 @@ namespace CaptureTheFlag
             // Start world generation
             Game.LoadingScreenOverlay.SetActive(true);
             MapGenerator = new CTFMapGenerator_Forest();
-            MapGenerator.StartGeneration(mapSize, seed, onDoneCallback: OnWorldGenerationDone);
-            State = GameState.GeneratingWorld;
+            MapGenerator.StartGeneration(mapSize, seed, onDoneCallback: () => OnWorldGenerationDone(p1ClientId, p2ClientId));
+            State = MatchState.GeneratingWorld;
         }
 
-        private void OnWorldGenerationDone()
+        private void OnWorldGenerationDone(string p1ClientId = "", string p2ClientId = "")
         {
             // Start world initialization
             if (World != null) GameObject.Destroy(World.WorldObject);
@@ -105,8 +111,9 @@ namespace CaptureTheFlag
             }
             else if(MatchType == CtfMatchType.Multiplayer)
             {
-                Players.Add(new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4)));
-                Players.Add(new Player(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6)));
+                Debug.Log($"Player clientIds are {p1ClientId} and {p2ClientId}");
+                Players.Add(new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4), p1ClientId));
+                Players.Add(new Player(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6), p2ClientId));
 
                 if (IsPlayingAsBlue)
                 {
@@ -124,11 +131,11 @@ namespace CaptureTheFlag
             Opponent.Opponent = LocalPlayer;
 
             // Register all characters
-            Characters = new List<CTFCharacter>();
+            Characters = new List<CtfCharacter>();
             Characters.AddRange(LocalPlayer.Characters);
             Characters.AddRange(Opponent.Characters);
 
-            State = GameState.InitializingWorld;
+            State = MatchState.InitializingWorld;
         }
 
         private void OnWorldInitializationDone()
@@ -136,11 +143,6 @@ namespace CaptureTheFlag
             // Hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
 
-            StartGame();
-        }
-
-        private void StartGame()
-        {
             // Vision
             World.ShowTextures(true);
             World.ShowGridOverlay(true);
@@ -148,16 +150,34 @@ namespace CaptureTheFlag
             World.SetActiveVisionActor(LocalPlayer.Actor);
             Game.LoadingScreenOverlay.SetActive(false);
 
-            // Start Game
-            LocalPlayer.OnStartGame(this);
-            Opponent.OnStartGame(this);
-            UI.OnStartGame();
+            // Hooks
+            LocalPlayer.OnGameInitialized(this);
+            Opponent.OnGameInitialized(this);
+            UI.OnGameInitialized();
 
             // Camera
             World.CameraJumpToFocusEntity(LocalPlayer.Characters[0]);
 
-            StartYourTurn();
+            if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
+            if (MatchType == CtfMatchType.Multiplayer)
+            {
+                UI.ShowRedNotificationText("Waiting for other player");
+                NetworkClient.Instance.SendAction(new NetworkAction("PlayerReadyToStartMatch")); // Inform the server that we are ready
+                State = MatchState.MatchReadyToStart;
+            }
         }
+
+        private void StartGame()
+        {
+            UI.HideRedNotificationText();
+            CurrentTick = 0;
+            if (MatchType == CtfMatchType.Multiplayer && IsPlayingAsBlue) CurrentTick = -30; // Offset for server host to counteract ping
+            StartPlayerTurn();
+        }
+
+        #endregion
+
+        #region Game Loop
 
         public void OnActionDone(CharacterAction action)
         {
@@ -169,62 +189,72 @@ namespace CaptureTheFlag
 
             // Send all colliding characters to jail (depending on map half)
             BlockmapNode node = action.Character.OriginNode;
-            List<CTFCharacter> characters = GetCharacters(node);
+            List<CtfCharacter> characters = GetCharacters(node);
             if(LocalPlayerZone.ContainsNode(node) && characters.Any(x => x.Owner == LocalPlayer)) // send opponent characters to their jail
             {
-                foreach (CTFCharacter opponentCharacter in characters.Where(x => x.Owner == Opponent))
+                foreach (CtfCharacter opponentCharacter in characters.Where(x => x.Owner == Opponent))
                     SendToJail(opponentCharacter);
             }
             if (OpponentZone.ContainsNode(node) && characters.Any(x => x.Owner == Opponent)) // send own characters to own jail
             {
-                foreach (CTFCharacter ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
+                foreach (CtfCharacter ownCharacter in characters.Where(x => x.Owner == LocalPlayer))
                     SendToJail(ownCharacter);
             }
 
             // Update possible moves for all characters
-            foreach (CTFCharacter teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
+            foreach (CtfCharacter teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
 
             // Update UI
             if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
             if (SelectedCharacter == action.Character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
         }
 
-        private void StartYourTurn()
+        private void StartPlayerTurn()
         {
-            State = GameState.YourTurn;
-
-            foreach (CTFCharacter c in LocalPlayer.Characters) c.OnStartTurn();
+            State = MatchState.PlayerTurn;
+            foreach (Player p in Players) p.OnStartTurn();
             UI.UpdateSelectionPanels();
         }
 
-        public void EndYourTurn()
+        public void EndPlayerTurn()
         {
-            if (State != GameState.YourTurn) return;
+            if (State != MatchState.PlayerTurn) return;
             if (LocalPlayer.Characters.Any(x => x.IsInAction)) return;
             DeselectCharacter();
 
-            StartOpponentTurn();
+            if (MatchType == CtfMatchType.Singleplayer) StartNpcTurn();
+            if (MatchType == CtfMatchType.Multiplayer)
+            {
+                NetworkClient.Instance.SendAction(new NetworkAction("TurnEnded"));
+                UI.ShowRedNotificationText("Waiting for other player");
+                State = MatchState.WaitingForOtherPlayerTurn;
+            }
         }
 
-        public void StartOpponentTurn()
+        /// <summary>
+        /// Starts the turn where all bots and neutral characters make their move.
+        /// </summary>
+        public void StartNpcTurn()
         {
-            State = GameState.OpponentTurn;
+            State = MatchState.NpcTurn;
 
-            UI.ShowTurnIndicator("Opponent Turn");
-            foreach (CTFCharacter c in Opponent.Characters) c.OnStartTurn();
+            UI.ShowRedNotificationText("NPC Turn");
 
             if (MatchType == CtfMatchType.Singleplayer) ((AIPlayer)Opponent).StartTurn();
         }
+        /// <summary>
+        /// Ends the turn where all bots and neutral characters make their move.
+        /// </summary>
 
-        public void EndOpponentTurn()
+        public void EndNpcTurn()
         {
-            UI.HideTurnIndicator();
-            StartYourTurn();
+            UI.HideRedNotificationText();
+            StartPlayerTurn();
         }
 
         public void EndGame(bool won)
         {
-            State = GameState.GameFinished;
+            State = MatchState.GameFinished;
             Game.ShowEndGameScreen(won ? "You won!" : "You lost.");
         }
 
@@ -247,12 +277,13 @@ namespace CaptureTheFlag
 
         #endregion
 
-        #region Update
+        #region Update / Tick
 
-        public void Tick()
+        // Called every frame: Use this for detecting and handling client-side stuff like inputs etc.
+        public void Update()
         {
-            World?.Tick();
-            
+            World?.Update();
+
             HelperFunctions.UnfocusNonInputUiElements();
 
             // V - Vision (debug)
@@ -265,33 +296,65 @@ namespace CaptureTheFlag
 
             switch (State)
             {
-                case GameState.GeneratingWorld:
+                case MatchState.GeneratingWorld:
                     MapGenerator.UpdateGeneration();
                     break;
 
-                case GameState.YourTurn:
-                    UpdateYourTurn();
+                case MatchState.InitializingWorld:
+                    // Handled in World.Update()
                     break;
 
-                case GameState.OpponentTurn:
+                case MatchState.MatchReadyToStart: // Multiplayer only
+                    if (Players.All(p => p.ReadyToStartMultiplayerMatch)) StartGame();
+                    break;
+
+                case MatchState.PlayerTurn:
+                    UpdatePlayerTurn();
+                    break;
+
+                case MatchState.WaitingForOtherPlayerTurn:
+                    if (Players.All(p => p.TurnEnded)) StartNpcTurn();
+                    break;
+
+                case MatchState.NpcTurn:
                     if (MatchType == CtfMatchType.Singleplayer)
                     {
                         AIPlayer opp = (AIPlayer)Opponent;
                         opp.UpdateTurn();
-                        if (opp.TurnFinished) EndOpponentTurn();
+                        if (opp.TurnFinished) EndNpcTurn();
                     }
+                    else EndNpcTurn(); // no NPCs in multiplayer (yet)
                     break;
+            }
+        }
+
+        // Called every tick (exactly 60 TPS): Use this for game simulation logic so it's deterministic across all players
+        public void Tick()
+        {
+            if(!IsMatchRunning) return;
+            CurrentTick++;
+
+            if(MatchType == CtfMatchType.Multiplayer)
+            {
+                foreach(System.Tuple<CharacterAction, int> queuedAction in QueuedCharacterActions)
+                {
+                    if (queuedAction.Item2 == CurrentTick)
+                    {
+                        queuedAction.Item1.Perform();
+                    }
+                }
+                QueuedCharacterActions = QueuedCharacterActions.Where(x => x.Item2 > CurrentTick).ToList(); // Remove actions that were performed this tick
             }
         }
 
         /// <summary>
         /// Gets called every frame during your turn.
         /// </summary>
-        private void UpdateYourTurn()
+        private void UpdatePlayerTurn()
         {
             // Update hovered character
-            CTFCharacter hoveredCharacter = null;
-            if (World.HoveredEntity != null && World.HoveredEntity is CTFCharacter c) hoveredCharacter = c;
+            CtfCharacter hoveredCharacter = null;
+            if (World.HoveredEntity != null && World.HoveredEntity is CtfCharacter c) hoveredCharacter = c;
 
             // Left click - Select character
             if(Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
@@ -314,12 +377,16 @@ namespace CaptureTheFlag
                 {
                     if (LocalPlayer.CanPerformMovement(move))
                     {
-                        LocalPlayer.Actions[SelectedCharacter] = move;
-                        move.Perform(); // Start movement action
+                        if (MatchType == CtfMatchType.Singleplayer) move.Perform();
+                        if (MatchType == CtfMatchType.Multiplayer) PerformMultiplayerAction(move);
+
                         UnhighlightNodes(); // Unhighlight nodes
                     }
                 }
             }
+
+            // Notifications
+            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowRedNotificationText("Opponent has ended their turn");
         }
 
         private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
@@ -368,8 +435,10 @@ namespace CaptureTheFlag
 
         #region Actions
 
-        public void SelectCharacter(CTFCharacter c)
+        public void SelectCharacter(CtfCharacter c)
         {
+            if (State != MatchState.PlayerTurn) return;
+
             // Deselect previous
             DeselectCharacter();
 
@@ -417,7 +486,7 @@ namespace CaptureTheFlag
             HighlightedNodes.Clear();
         }
 
-        public void SendToJail(CTFCharacter character)
+        public void SendToJail(CtfCharacter character)
         {
             // Get a random free node within the characters jail zone
             List<BlockmapNode> candidateNodes = character.Owner.JailZone.Nodes.Where(x => x.IsPassable(character)).ToList();
@@ -442,7 +511,7 @@ namespace CaptureTheFlag
             DevMode = active;
 
             UI.OnSetDevMode(DevMode);
-            if (MatchType == CtfMatchType.Singleplayer) ((AIPlayer)Opponent).OnSetDevMode(DevMode);
+            foreach (Player p in Players) p.OnSetDevMode(DevMode);
 
             if (!DevMode) World.SetActiveVisionActor(LocalPlayer.Actor);
         }
@@ -451,18 +520,69 @@ namespace CaptureTheFlag
 
         #region Getters
 
-        public List<CTFCharacter> GetCharacters(BlockmapNode node)
+        public List<CtfCharacter> GetCharacters(BlockmapNode node)
         {
-            return node.Entities.Where(x => x is CTFCharacter).Select(x => (CTFCharacter)x).ToList();
+            return node.Entities.Where(x => x is CtfCharacter).Select(x => (CtfCharacter)x).ToList();
         }
+
+        public CtfCharacter GetCharacterById(int id) => Characters.First(c => c.Id == id);
+
+        public Player GetPlayerByClientId(string clientId) => Players.First(p => p.ClientId == clientId);
 
         #endregion
 
         #region Network
 
-        public void OnNetworkActionReceived(NetworkAction action)
+        /// <summary>
+        /// All actions that players take in a multiplayer game need to be sent to this function.
+        /// </summary>
+        public void PerformMultiplayerAction(CharacterAction action)
         {
+            NetworkClient.Instance.SendAction(action.GetNetworkAction());
+        }
 
+        /// <summary>
+        /// Gets called by the NetworkClient when actions come in through the network.
+        /// <br/>THIS RUNS IN ANOTHER THREAD, do not directly call game simulation logic from here, but set flags so that the main thread can then handle it.
+        /// </summary>
+        /// <param name="baseAction"></param>
+        public void OnNetworkActionReceived(NetworkAction baseAction)
+        {
+            try
+            {
+                switch (baseAction.ActionType)
+                {
+                    case "MoveCharacter":
+                        var action = (NetworkAction_MoveCharacter)baseAction;
+                        Action_Movement move = GetCharacterById(action.CharacterId).PossibleMoves.First(m => m.Key.Id == action.TargetNodeId).Value;
+                        QueueActionToPerform(move, action.Tick);
+                        break;
+
+                    case "PlayerReadyToStartMatch":
+                        GetPlayerByClientId(baseAction.SenderId).ReadyToStartMultiplayerMatch = true;
+                        Debug.Log($"Player with clientId {baseAction.SenderId} is ready. {Players.Count(x => x.ReadyToStartMultiplayerMatch)}/{Players.Count} players are ready now.");
+                        break;
+
+                    case "TurnEnded":
+                        GetPlayerByClientId(baseAction.SenderId).TurnEnded = true;
+                        Debug.Log($"Player with clientId {baseAction.SenderId} has ended their turn. {Players.Count(x => x.TurnEnded)}/{Players.Count} players have ended their now.");
+                        break;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log($"[Client] Error in OnNetworkActionReceived(): {e.Message}");
+            }
+        }
+
+        private void QueueActionToPerform(CharacterAction action, int tick)
+        {
+            if (tick <= CurrentTick)
+            {
+                Debug.Log($"Delaying action from tick {tick} to {CurrentTick + 1} because else it would be in the past.");
+                tick = CurrentTick + 1; // Ensure that action comes through
+            }
+            QueuedCharacterActions.Add(new System.Tuple<CharacterAction, int>(action, tick));
         }
 
         #endregion

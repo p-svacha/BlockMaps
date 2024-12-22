@@ -12,7 +12,7 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class AICharacterJob
     {
-        public CTFCharacter Character { get; private set; }
+        public CtfCharacter Character { get; private set; }
         public AIPlayer Player => (AIPlayer)Character.Owner;
         public Player Opponent => Player.Opponent;
         public CtfMatch Game => Character.Game;
@@ -20,7 +20,7 @@ namespace CaptureTheFlag
         public abstract AICharacterJobId Id { get; }
         public abstract string DevmodeDisplayText { get; }
 
-        public AICharacterJob(CTFCharacter c)
+        public AICharacterJob(CtfCharacter c)
         {
             Character = c;
         }

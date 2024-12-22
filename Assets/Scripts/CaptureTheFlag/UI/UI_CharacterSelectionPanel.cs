@@ -8,7 +8,7 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterSelectionPanel : MonoBehaviour
     {
-        private CTFCharacter Character;
+        private CtfCharacter Character;
         private CtfMatch Game;
 
         [Header("Elements")]
@@ -24,7 +24,7 @@ namespace CaptureTheFlag
         private float DoubleClickTimeThreshold = 0.5f;
         private float LastClickTime = 0f;
 
-        public void Init(CtfMatch game, CTFCharacter character)
+        public void Init(CtfMatch game, CtfCharacter character)
         {
             Game = game;
             Character = character;

@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using CaptureTheFlag.Network;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace CaptureTheFlag
         public NavigationPath Path { get; private set; }
         public BlockmapNode Target => Path.Target;
 
-        public Action_Movement(CtfMatch game, CTFCharacter c, NavigationPath path, float cost) : base(game, c, cost)
+        public Action_Movement(CtfMatch game, CtfCharacter c, NavigationPath path, float cost) : base(game, c, cost)
         {
             Path = path;
         }
@@ -44,6 +45,11 @@ namespace CaptureTheFlag
         {
             Character.MovementComp.OnTargetReached -= OnCharacterReachedTarget;
             EndAction();
+        }
+
+        public override NetworkAction GetNetworkAction()
+        {
+            return new NetworkAction_MoveCharacter(Character.Id, Target.Id, Match.CurrentTick + 10);
         }
     }
 }
