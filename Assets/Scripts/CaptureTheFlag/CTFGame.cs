@@ -14,16 +14,15 @@ namespace CaptureTheFlag
     /// </summary>
     public class CtfGame : MonoBehaviour
     {
+        public static string VERSION = "0.0.1";
+
         private CtfMatch ActiveMatch;
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;
         public CtfMatchUi MatchUI;
         public GameObject LoadingScreenOverlay;
-
-        public GameObject EndGameScreen;
-        public TextMeshProUGUI EndGameText;
-        public Button EndGameMenuButton;
+        public UI_EndGameScreen EndGameScreen;
 
         [Header("Misc")]
         public LineRenderer PathPreviewRenderer;
@@ -60,17 +59,20 @@ namespace CaptureTheFlag
 
         private void Update()
         {
-            ActiveMatch?.Update();
-
-            // Ticks
-            float dt = Time.deltaTime;
-            TickAccumulator += dt;
-
-            // Process as many ticks as fit into this frame
-            while (TickAccumulator >= TICK_INTERVAL)
+            if (ActiveMatch != null)
             {
-                TickAccumulator -= TICK_INTERVAL;
-                ActiveMatch?.Tick();
+                ActiveMatch.Update();
+
+                // Ticks
+                float dt = Time.deltaTime;
+                TickAccumulator += dt;
+
+                // Process as many ticks as fit into this frame
+                while (TickAccumulator >= TICK_INTERVAL)
+                {
+                    TickAccumulator -= TICK_INTERVAL;
+                    ActiveMatch.Tick();
+                }
             }
 
             if (IsWaitingForOtherPlayerAsHost)
@@ -80,7 +82,7 @@ namespace CaptureTheFlag
                     IsWaitingForOtherPlayerAsHost = false;
                     int mapSeed = CTFMapGenerator.GetRandomSeed();
                     int mapSize = GetRandomMapSize();
-                    NetworkClient.Instance.SendAction(new NetworkAction_InitializeMultiplayerMatch(mapSize, mapSeed, NetworkServer.Instance.ConnectedClients[0].Client.RemoteEndPoint.ToString(), NetworkServer.Instance.ConnectedClients[1].Client.RemoteEndPoint.ToString()));
+                    NetworkClient.Instance.SendMessage(new NetworkMessage_InitializeMultiplayerMatch(mapSize, mapSeed, NetworkServer.Instance.ConnectedClients[0].Client.RemoteEndPoint.ToString(), NetworkServer.Instance.ConnectedClients[1].Client.RemoteEndPoint.ToString()));
                 }
             }
 
@@ -101,8 +103,14 @@ namespace CaptureTheFlag
 
         public void ShowEndGameScreen(string text)
         {
-            EndGameScreen.SetActive(true);
-            EndGameText.text = text;
+            EndGameScreen.gameObject.SetActive(true);
+            EndGameScreen.Text.text = text;
+        }
+
+        public void GoToMainMenu()
+        {
+            ActiveMatch = null;
+            MainMenuUI.gameObject.SetActive(true);
         }
 
         private int GetRandomMapSize() => Random.Range(4, 8 + 1);

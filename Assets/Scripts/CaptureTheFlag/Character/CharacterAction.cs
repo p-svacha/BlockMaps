@@ -75,7 +75,7 @@ namespace CaptureTheFlag
 
         #region Multiplayer
 
-        public abstract NetworkAction GetNetworkAction();
+        public abstract NetworkMessage_CharacterAction GetNetworkAction();
 
         #endregion
     }

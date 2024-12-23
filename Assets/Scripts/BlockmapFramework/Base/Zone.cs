@@ -17,7 +17,7 @@ namespace BlockmapFramework
         public HashSet<Vector2Int> WorldCoordinates;
         public List<BlockmapNode> Nodes { get; private set; }
         public HashSet<Chunk> AffectedChunks { get; private set; }
-        public bool IsBorderVisible;
+        public ZoneVisibility Visibility;
         public bool ProvidesVision;
 
         public int MinX { get; private set; }
@@ -25,15 +25,17 @@ namespace BlockmapFramework
         public int MinY { get; private set; }
         public int MaxY { get; private set; }
 
+        #region Initialize
+
         public Zone() { }
-        public Zone(World world, int id, Actor actor, HashSet<Vector2Int> coordinates, bool providesVision, bool showBorders)
+        public Zone(World world, int id, Actor actor, HashSet<Vector2Int> coordinates, bool providesVision, ZoneVisibility visibility)
         {
             this.id = id;
             World = world;
             Actor = actor;
             WorldCoordinates = coordinates;
             ProvidesVision = providesVision;
-            IsBorderVisible = showBorders;
+            Visibility = visibility;
 
             Init();
         }
@@ -53,6 +55,10 @@ namespace BlockmapFramework
 
             UpdateAffectedNodes();
         }
+
+        #endregion
+
+        #region Actions
 
         /// <summary>
         /// Updates the zone references in all nodes and chunks this zone is on.
@@ -93,17 +99,20 @@ namespace BlockmapFramework
             MaxY = WorldCoordinates.Max(c => c.y);
         }
 
-        public void SetBorderStyle(bool visible, bool redraw)
-        {
-            IsBorderVisible = visible;
-
-            if (redraw)
-            {
-                foreach (Chunk chunk in AffectedChunks) chunk.DrawZoneBorders();
-            }
-        }
+        #endregion
 
         #region Getters
+
+        /// <summary>
+        /// Returns if the borders of this zone can be seen by the given actor. (In general, not right now).
+        /// </summary>
+        public bool CanBeSeenBy(Actor actor)
+        {
+            if (Visibility == ZoneVisibility.VisibleForEveryone) return true;
+            if (Visibility == ZoneVisibility.VisibleForOwner) return (actor == null || actor == Actor);
+            if (Visibility == ZoneVisibility.Invisible) return false;
+            return false;
+        }
 
         public bool ContainsNode(BlockmapNode node)
         {
@@ -154,11 +163,18 @@ namespace BlockmapFramework
 
             SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
             SaveLoadManager.SaveOrLoadReference(ref Actor, "actor");
-            SaveLoadManager.SaveOrLoadPrimitive(ref IsBorderVisible, "isBorderVisible");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Visibility, "visibility");
             SaveLoadManager.SaveOrLoadPrimitive(ref ProvidesVision, "providesVision");
             SaveLoadManager.SaveOrLoadVector2IntSet(ref WorldCoordinates, "coordinates");
         }
 
         #endregion
+    }
+
+    public enum ZoneVisibility
+    {
+        VisibleForEveryone,
+        VisibleForOwner,
+        Invisible
     }
 }

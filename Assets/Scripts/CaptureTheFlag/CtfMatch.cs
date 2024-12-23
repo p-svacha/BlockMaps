@@ -52,6 +52,7 @@ namespace CaptureTheFlag
         private Texture2D ReachableTileOverlay;
 
         // Multiplayer
+        protected const int MultiplayerActionTickOffset = 10;
         List<System.Tuple<CharacterAction, int>> QueuedCharacterActions = new List<System.Tuple<CharacterAction, int>>(); // Stores which actions should be performed at what tick
 
 
@@ -132,15 +133,29 @@ namespace CaptureTheFlag
 
             // Register all characters
             Characters = new List<CtfCharacter>();
-            Characters.AddRange(LocalPlayer.Characters);
-            Characters.AddRange(Opponent.Characters);
+            foreach (Player p in Players) Characters.AddRange(p.Characters);
 
             State = MatchState.InitializingWorld;
         }
 
         private void OnWorldInitializationDone()
         {
-            // Hooks
+            FinalizeMatchInitialization();
+
+            if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
+            if (MatchType == CtfMatchType.Multiplayer)
+            {
+                UI.ShowRedNotificationText("Waiting for other player");
+                NetworkClient.Instance.SendMessage(new NetworkMessage("PlayerReadyToStartMatch")); // Inform the server that we are ready
+            }
+        }
+
+        /// <summary>
+        /// Gets called when the world is fully generated and initialized. After this function the match should be immediately ready to start.
+        /// </summary>
+        private void FinalizeMatchInitialization()
+        {
+            // Register hooks
             World.OnHoveredNodeChanged += OnHoveredNodeChanged;
 
             // Vision
@@ -150,21 +165,14 @@ namespace CaptureTheFlag
             World.SetActiveVisionActor(LocalPlayer.Actor);
             Game.LoadingScreenOverlay.SetActive(false);
 
-            // Hooks
-            LocalPlayer.OnGameInitialized(this);
-            Opponent.OnGameInitialized(this);
-            UI.OnGameInitialized();
-
             // Camera
             World.CameraJumpToFocusEntity(LocalPlayer.Characters[0]);
 
-            if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
-            if (MatchType == CtfMatchType.Multiplayer)
-            {
-                UI.ShowRedNotificationText("Waiting for other player");
-                NetworkClient.Instance.SendAction(new NetworkAction("PlayerReadyToStartMatch")); // Inform the server that we are ready
-                State = MatchState.MatchReadyToStart;
-            }
+            // Notify match readiness
+            foreach (Player p in Players) p.OnMatchReady(this);
+            UI.OnMatchReady();
+
+            State = MatchState.MatchReadyToStart;
         }
 
         private void StartGame()
@@ -225,7 +233,7 @@ namespace CaptureTheFlag
             if (MatchType == CtfMatchType.Singleplayer) StartNpcTurn();
             if (MatchType == CtfMatchType.Multiplayer)
             {
-                NetworkClient.Instance.SendAction(new NetworkAction("TurnEnded"));
+                NetworkClient.Instance.SendMessage(new NetworkMessage("TurnEnded"));
                 UI.ShowRedNotificationText("Waiting for other player");
                 State = MatchState.WaitingForOtherPlayerTurn;
             }
@@ -448,8 +456,11 @@ namespace CaptureTheFlag
             {
                 UI.SelectCharacter(c);
                 c.SetSelected(true);
-               
-                HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
+
+                if (!SelectedCharacter.IsInAction)
+                {
+                    HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
+                }
             }
         }
         private void DeselectCharacter()
@@ -488,9 +499,9 @@ namespace CaptureTheFlag
 
         public void SendToJail(CtfCharacter character)
         {
-            // Get a random free node within the characters jail zone
-            List<BlockmapNode> candidateNodes = character.Owner.JailZone.Nodes.Where(x => x.IsPassable(character)).ToList();
-            BlockmapNode targetNode = candidateNodes[Random.Range(0, candidateNodes.Count)];
+            // Get a node within the characters jail zone
+            BlockmapNode targetNode = character.Owner.GetNextJailPosition();
+            while (!targetNode.IsPassable(character)) targetNode = character.Owner.GetNextJailPosition();
 
             // Teleport character to target node
             character.Teleport(targetNode);
@@ -538,40 +549,51 @@ namespace CaptureTheFlag
         /// </summary>
         public void PerformMultiplayerAction(CharacterAction action)
         {
-            NetworkClient.Instance.SendAction(action.GetNetworkAction());
+            NetworkMessage_CharacterAction characterActionMessage = action.GetNetworkAction();
+            characterActionMessage.Tick = CurrentTick + MultiplayerActionTickOffset;
+
+            NetworkClient.Instance.SendMessage(action.GetNetworkAction());
         }
 
         /// <summary>
         /// Gets called by the NetworkClient when actions come in through the network.
         /// <br/>THIS RUNS IN ANOTHER THREAD, do not directly call game simulation logic from here, but set flags so that the main thread can then handle it.
         /// </summary>
-        /// <param name="baseAction"></param>
-        public void OnNetworkActionReceived(NetworkAction baseAction)
+        /// <param name="baseMessage"></param>
+        public void OnNetworkMessageReceived(NetworkMessage baseMessage)
         {
             try
             {
-                switch (baseAction.ActionType)
+                switch (baseMessage.MessageType)
                 {
-                    case "MoveCharacter":
-                        var action = (NetworkAction_MoveCharacter)baseAction;
-                        Action_Movement move = GetCharacterById(action.CharacterId).PossibleMoves.First(m => m.Key.Id == action.TargetNodeId).Value;
-                        QueueActionToPerform(move, action.Tick);
-                        break;
-
+                    // Game loop
                     case "PlayerReadyToStartMatch":
-                        GetPlayerByClientId(baseAction.SenderId).ReadyToStartMultiplayerMatch = true;
-                        Debug.Log($"Player with clientId {baseAction.SenderId} is ready. {Players.Count(x => x.ReadyToStartMultiplayerMatch)}/{Players.Count} players are ready now.");
+                        GetPlayerByClientId(baseMessage.SenderId).ReadyToStartMultiplayerMatch = true;
+                        Debug.Log($"Player with clientId {baseMessage.SenderId} is ready. {Players.Count(x => x.ReadyToStartMultiplayerMatch)}/{Players.Count} players are ready now.");
                         break;
 
                     case "TurnEnded":
-                        GetPlayerByClientId(baseAction.SenderId).TurnEnded = true;
-                        Debug.Log($"Player with clientId {baseAction.SenderId} has ended their turn. {Players.Count(x => x.TurnEnded)}/{Players.Count} players have ended their now.");
+                        GetPlayerByClientId(baseMessage.SenderId).TurnEnded = true;
+                        Debug.Log($"Player with clientId {baseMessage.SenderId} has ended their turn. {Players.Count(x => x.TurnEnded)}/{Players.Count} players have ended their now.");
+                        break;
+
+                    // Character actions
+                    case "CharacterAction_MoveCharacter":
+                        var moveMessage = (NetworkMessage_MoveCharacter)baseMessage;
+                        Action_Movement move = GetCharacterById(moveMessage.CharacterId).PossibleMoves.First(m => m.Key.Id == moveMessage.TargetNodeId).Value;
+                        QueueActionToPerform(move, moveMessage.Tick);
+                        break;
+
+                    case "CharacterAction_GoToJail":
+                        var jailMessage = (NetworkMessage_CharacterAction)baseMessage;
+                        Action_GoToJail jailAction = (Action_GoToJail)(GetCharacterById(jailMessage.CharacterId).PossibleSpecialActions.First(x => x is Action_GoToJail));
+                        QueueActionToPerform(jailAction, jailMessage.Tick);
                         break;
                 }
             }
             catch (System.Exception e)
             {
-                Debug.Log($"[Client] Error in OnNetworkActionReceived(): {e.Message}");
+                Debug.Log($"[Client] Error in OnNetworkMessageReceived(): {e.Message}");
             }
         }
 

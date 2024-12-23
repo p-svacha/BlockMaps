@@ -11,6 +11,7 @@ namespace CaptureTheFlag.UI
         public CtfGame Game;
 
         [Header("Elements")]
+        public TextMeshProUGUI VersionText;
         public Button SingleplayerButton;
         public Button MultiplayerHostButton;
         public Button MultiplayerConnectButton;
@@ -20,6 +21,7 @@ namespace CaptureTheFlag.UI
         public void Init(CtfGame game)
         {
             Game = game;
+            VersionText.text = $"version {CtfGame.VERSION}";
             SingleplayerButton.onClick.AddListener(SingleplayerBtn_OnClick);
             MultiplayerHostButton.onClick.AddListener(MpHostBtn_OnClick);
             MultiplayerConnectButton.onClick.AddListener(MpConnectBtn_OnClick);

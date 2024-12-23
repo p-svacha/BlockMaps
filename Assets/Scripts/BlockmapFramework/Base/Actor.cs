@@ -12,7 +12,7 @@ namespace BlockmapFramework
         private int id;
         public override int Id => id;
 
-        public string Name;
+        public string Label;
         public World World { get; private set; }
         public Color Color;
 
@@ -23,7 +23,7 @@ namespace BlockmapFramework
         {
             World = world;
             this.id = id;
-            Name = name;
+            Label = name;
             Color = color;
 
             Init();
@@ -46,7 +46,7 @@ namespace BlockmapFramework
             if (SaveLoadManager.IsLoading) World = SaveLoadManager.LoadingWorld;
 
             SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
-            SaveLoadManager.SaveOrLoadPrimitive(ref Name, "name");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Label, "name");
             SaveLoadManager.SaveOrLoadColor(ref Color, "color");
         }
 

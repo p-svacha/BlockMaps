@@ -23,9 +23,9 @@ namespace CaptureTheFlag
         public override void DoPause() { } // unused because action is instant
         public override void DoUnpause() { } // unused because action is instant
 
-        public override NetworkAction GetNetworkAction()
+        public override NetworkMessage_CharacterAction GetNetworkAction()
         {
-            throw new System.NotImplementedException();
+            return new NetworkMessage_CharacterAction("CharacterAction_GoToJail", Character.Id);
         }
     }
 }

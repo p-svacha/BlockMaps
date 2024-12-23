@@ -924,7 +924,7 @@ namespace BlockmapFramework
                 Profiler.Begin("Reposition Entities");
                 HashSet<Entity> entitiesToUpdate = new HashSet<Entity>();
 
-                if (WorldUpdateArea == null) entitiesToUpdate = Entities.Values.Where(e => e.IsStandaloneEntity).ToHashSet();
+                if (WorldUpdateArea == null) entitiesToUpdate = Entities.Values.ToHashSet();
                 else
                 {
                     for (int x = WorldUpdateArea.Position.x - 1; x < WorldUpdateArea.Position.x + WorldUpdateArea.Dimensions.x + 1; x++)
@@ -934,7 +934,7 @@ namespace BlockmapFramework
                             if (!IsInWorld(new Vector2Int(x, y))) continue;
                             foreach (BlockmapNode n in GetNodes(new Vector2Int(x, y)))
                             {
-                                foreach (Entity e in n.Entities.Where(e => e.IsStandaloneEntity)) entitiesToUpdate.Add(e);
+                                foreach (Entity e in n.Entities) entitiesToUpdate.Add(e);
                             }
                         }
                     }
@@ -1620,10 +1620,10 @@ namespace BlockmapFramework
             return (Door)(SpawnEntity(EntityDefOf.Door, node, side, Gaia, updateWorld, height, isMirrored));
         }
 
-        public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, bool showBorders)
+        public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, ZoneVisibility visibility)
         {
             int id = ZoneIdCounter++;
-            Zone newZone = new Zone(this, id, actor, coordinates, providesVision, showBorders);
+            Zone newZone = new Zone(this, id, actor, coordinates, providesVision, visibility);
             Zones.Add(id, newZone);
             return newZone;
         }
@@ -1714,7 +1714,7 @@ namespace BlockmapFramework
             chunk.ShowGrid(IsShowingGrid);
             chunk.ShowTextures(IsShowingTextures);
             chunk.ShowTileBlending(IsShowingTileBlending);
-            chunk.DrawZoneBorders();
+            chunk.DrawZoneBorders(ActiveVisionActor);
             pm_RedrawChunk.End();
         }
 
@@ -1731,6 +1731,7 @@ namespace BlockmapFramework
         public void UpdateVisibility(Chunk c)
         {
             c.SetVisibility(ActiveVisionActor);
+            c.DrawZoneBorders(ActiveVisionActor);
         }
 
         /// <summary>
@@ -1781,7 +1782,7 @@ namespace BlockmapFramework
         }
         private void UpdateZoneBorders()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.DrawZoneBorders();
+            foreach (Chunk chunk in Chunks.Values) chunk.DrawZoneBorders(ActiveVisionActor);
         }
 
         public void ToggleNavmesh()
@@ -1891,7 +1892,7 @@ namespace BlockmapFramework
         public List<Zone> GetAllZones() => Zones.Values.ToList();
         public List<Wall> GetAllWalls() => Walls.Values.ToList();
 
-        public BlockmapNode GetNode(int id) => Nodes[id];
+        public BlockmapNode GetNode(int id) => Nodes.ContainsKey(id) ? Nodes[id] : null;
         public Actor GetActor(int id) => Actors[id];
         public Entity GetEntity(int id) => Entities[id];
         public WaterBody GetWaterBody(int id) => WaterBodies[id];
@@ -1934,7 +1935,7 @@ namespace BlockmapFramework
             return chunks;
         }
 
-        public Actor GetActor(string name) => Actors.Values.First(x => x.Name == name);
+        public Actor GetActor(string name) => Actors.Values.First(x => x.Label == name);
 
         public List<BlockmapNode> GetNodes(Vector2Int worldCoordinates, int altitude)
         {

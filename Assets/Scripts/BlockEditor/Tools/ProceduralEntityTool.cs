@@ -40,7 +40,7 @@ namespace WorldEditor
         {
             // Player Dropdown
             PlayerDropdown.ClearOptions();
-            List<string> playerOptions = World.GetAllActors().Select(x => x.Name).ToList();
+            List<string> playerOptions = World.GetAllActors().Select(x => x.Label).ToList();
             PlayerDropdown.AddOptions(playerOptions);
         }
 

@@ -9,6 +9,7 @@ namespace CaptureTheFlag
     public class AIJob_PatrolDefendFlag : AICharacterJob
     {
         private BlockmapNode TargetNode;
+        private NavigationPath TargetPath;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
@@ -16,21 +17,30 @@ namespace CaptureTheFlag
 
         public AIJob_PatrolDefendFlag(CtfCharacter c) : base(c)
         {
-            // Find a target node near own flag
-            int numAttempts = 0;
-            int maxAttempts = 50;
-            do
-            {
-                TargetNode = Player.DefendPerimeterNodes[Random.Range(0, Player.DefendPerimeterNodes.Count)];
-            }
-            while (Pathfinder.GetPath(Character, Character.Node, TargetNode, forbiddenNodes: Player.FlagZone.Nodes) == null && numAttempts++ < maxAttempts);
+            if (Player.DefendPerimeterNodes.Count == 0) return;
 
-            if (numAttempts >= maxAttempts && Game.DevMode) Debug.LogError("No valid node found within defend perimeter for " + Character.LabelCap + " after " + numAttempts + " attempts.");
+            // Find a target node near own flag
+            int attempts = 0;
+            int maxAttempts = 10;
+            while (TargetNode == null && attempts < maxAttempts)
+            {
+                BlockmapNode targetNode = Player.DefendPerimeterNodes[Random.Range(0, Player.DefendPerimeterNodes.Count)];
+                NavigationPath targetPath = GetPath(targetNode);
+                if (targetPath != null) // valid target that we can reach
+                {
+                    TargetNode = targetNode;
+                    TargetPath = targetPath;
+                }
+            }
         }
 
         public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
         {
             forcedNewJob = null;
+
+            // Check if our path is still valid
+            if (TargetPath == null) return true;
+            if (!TargetPath.CanPass(Character)) return true;
 
             // If we can tag an opponent this turn, do that
             if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
@@ -54,7 +64,7 @@ namespace CaptureTheFlag
 
         public override CharacterAction GetNextAction()
         {
-            return GetSingleNodeMovementTo(TargetNode);
+            return GetSingleNodeMovementTo(TargetNode, TargetPath);
         }
     }
 }

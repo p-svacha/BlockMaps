@@ -36,9 +36,9 @@ namespace CaptureTheFlag
 
         public AIPlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone) : base(actor, territory, jailZone, flagZone) { }
 
-        public override void OnGameInitialized(CtfMatch game)
+        public override void OnMatchReady(CtfMatch game)
         {
-            base.OnGameInitialized(game);
+            base.OnMatchReady(game);
 
             // Assign a weighted-random role to all characters
             for (int i = 0; i < Characters.Count; i++)
@@ -171,8 +171,13 @@ namespace CaptureTheFlag
             AICharacterJob currentJob = Jobs[c];
 
             // Ask the current job if (any or a forced) new job should be assigned to the character
-            if(currentJob.ShouldStopJob(out AICharacterJob forcedNewJob))
+            int attempts = 0;
+            int maxAttempts = 10;
+            AICharacterJob forcedNewJob;
+            while (currentJob.ShouldStopJob(out forcedNewJob) && attempts < maxAttempts)
             {
+                attempts++;
+                
                 // Assign the job that is getting forced by the current job as the new job
                 if(forcedNewJob != null)
                 {
@@ -187,9 +192,11 @@ namespace CaptureTheFlag
                     currentJob = newJob;
                 }
             }
+            if (currentJob.ShouldStopJob(out _) && attempts < maxAttempts) throw new System.Exception($"After {attempts} we still didn't get a job that shouldn't immediately be stopped. Current job = {currentJob.DevmodeDisplayText}");
+
 
             // Update dev mode labels
-            if (Game.DevMode) SetDevModeLabels();
+            if (Match.DevMode) SetDevModeLabels();
 
             // Get action based on job
             return currentJob.GetNextAction();

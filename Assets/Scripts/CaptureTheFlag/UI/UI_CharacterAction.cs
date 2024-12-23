@@ -25,7 +25,9 @@ namespace CaptureTheFlag
 
         private void OnClick()
         {
-            Action.Perform();
+            if (Action.Match.MatchType == CtfMatchType.Singleplayer) Action.Perform();
+            if (Action.Match.MatchType == CtfMatchType.Multiplayer) Action.Match.PerformMultiplayerAction(Action);
+
         }
     }
 }

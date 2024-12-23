@@ -71,9 +71,9 @@ namespace CaptureTheFlag.Network
         }
 
         /// <summary>
-        /// Send a NetworkAction to the server, preserving subclass fields.
+        /// Send a NetworkMessage to the server, which will the be broadcast to all clients.
         /// </summary>
-        public void SendAction(NetworkAction action)
+        public void SendMessage(NetworkMessage message)
         {
             if (Client == null || !Client.Connected)
             {
@@ -84,10 +84,10 @@ namespace CaptureTheFlag.Network
             try
             {
                 // 1) Create the wrapper and store type info + subclass JSON
-                var wrapper = new NetworkActionWrapper
+                var wrapper = new NetworkMessageWrapper
                 {
-                    TypeName = action.GetType().AssemblyQualifiedName, // e.g. "NetworkAction_StartMatch"
-                    Json = JsonUtility.ToJson(action)                  // includes all subclass fields
+                    TypeName = message.GetType().AssemblyQualifiedName,
+                    Json = JsonUtility.ToJson(message)
                 };
 
                 // 2) Serialize the wrapper into JSON
@@ -101,11 +101,11 @@ namespace CaptureTheFlag.Network
                 Stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 Stream.Write(data, 0, data.Length);
 
-                Debug.Log($"Sent NetworkAction of type {action.ActionType} via wrapper {wrapper.TypeName}.");
+                Debug.Log($"Sent NetworkMessage of type {message.MessageType} via wrapper {wrapper.TypeName}.");
             }
             catch (Exception e)
             {
-                Debug.LogWarning("SendAction failed: " + e.Message);
+                Debug.LogWarning("SendMessage failed: " + e.Message);
             }
         }
 
@@ -143,7 +143,7 @@ namespace CaptureTheFlag.Network
                         }
 
                         string receivedJson = Encoding.UTF8.GetString(dataBuffer);
-                        ReceiveNetworkAction(receivedJson);
+                        ReceiveNetworkMessage(receivedJson);
 
                         // Keep reading
                         ReceiveData();
@@ -156,12 +156,12 @@ namespace CaptureTheFlag.Network
             }, null);
         }
 
-        private void ReceiveNetworkAction(string finalJson)
+        private void ReceiveNetworkMessage(string finalJson)
         {
             Debug.Log($"[Client] Received data from server: {finalJson}");
 
             // 1) Deserialize the wrapper
-            NetworkActionWrapper wrapper = JsonUtility.FromJson<NetworkActionWrapper>(finalJson);
+            NetworkMessageWrapper wrapper = JsonUtility.FromJson<NetworkMessageWrapper>(finalJson);
 
             // 2) Look up the actual System.Type from the stored typeName
             Type actualType = Type.GetType(wrapper.TypeName);
@@ -172,23 +172,22 @@ namespace CaptureTheFlag.Network
             }
 
             // 3) Deserialize *again*, this time into the actual subclass
-            NetworkAction action = (NetworkAction)JsonUtility.FromJson(wrapper.Json, actualType);
-            action.IsSentBySelf = (action.SenderId == ClientId);
+            NetworkMessage message = (NetworkMessage)JsonUtility.FromJson(wrapper.Json, actualType);
+            message.IsSentBySelf = (message.SenderId == ClientId);
 
-            // 4) Now 'action' includes all subclass fields
-            Debug.Log($"[Client] Received real action type: {action.GetType().Name}");
-
+            // 4) Now 'message' includes all subclass fields
+            Debug.Log($"[Client] Received real action type: {message.GetType().Name}");
             try
             {
-                switch (action.ActionType)
+                switch (message.MessageType)
                 {
                     case "InitializeMultiplayerMatch":
-                        var initializeAction = (NetworkAction_InitializeMultiplayerMatch)action;
-                        Game.SetMultiplayerMatchAsReady(initializeAction.MapSize, initializeAction.MapSeed, playAsBlue: initializeAction.IsSentBySelf, initializeAction.Player1ClientId, initializeAction.Player2ClientId);
+                        var initializeMessage = (NetworkMessage_InitializeMultiplayerMatch)message;
+                        Game.SetMultiplayerMatchAsReady(initializeMessage.MapSize, initializeMessage.MapSeed, playAsBlue: initializeMessage.IsSentBySelf, initializeMessage.Player1ClientId, initializeMessage.Player2ClientId);
                         break;
 
                     default:
-                        Match.OnNetworkActionReceived(action);
+                        Match.OnNetworkMessageReceived(message);
                         break;
                 }
             }

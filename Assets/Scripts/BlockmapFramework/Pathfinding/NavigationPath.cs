@@ -88,7 +88,21 @@ namespace BlockmapFramework
             if (Transitions.Count != Nodes.Count) throw new System.Exception("Can't remove first transition if the current starting point of this path is already a node.");
 
             Transitions.RemoveAt(0);
-        }   
+        }
+
+        /// <summary>
+        /// Changes the path so that the new starting point is the given node.
+        /// <br/>Only works if the node is part of the path.
+        /// </summary>
+        public void CutEverythingBefore(BlockmapNode node)
+        {
+            if (!Nodes.Contains(node)) throw new System.Exception($"Can't cut path because {node} is not part of it.");
+            while(Nodes[0] != node)
+            {
+                RemoveFirstNode();
+                RemoveFirstTransition();
+            }
+        }
 
         #endregion
 
@@ -110,6 +124,30 @@ namespace BlockmapFramework
         public bool IsSingleTransitionPath()
         {
             return Nodes.Count == 2 && Transitions.Count == 1;
+        }
+
+        /// <summary>
+        /// Checks for all transitions and nodes in this path if they still exist.
+        /// </summary>
+        public bool IsValid()
+        {
+            if (Nodes.Any(n => Pathfinder.World.GetNode(n.Id) == null)) return false;
+            foreach(Transition t in Transitions)
+            {
+                if (!t.From.TransitionsByTarget.ContainsKey(t.To)) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Checks and returns if this path can be fully used by the given entity.
+        /// </summary>
+        public bool CanPass(Entity e)
+        {
+            if (!IsValid()) return false;
+            if (Nodes.Any(n => !n.IsPassable(e))) return false;
+            if (Transitions.Any(t => !t.CanPass(e))) return false;
+            return true;
         }
 
         #endregion

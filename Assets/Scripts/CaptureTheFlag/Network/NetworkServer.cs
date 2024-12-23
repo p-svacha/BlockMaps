@@ -124,10 +124,10 @@ namespace CaptureTheFlag.Network
                         Debug.Log($"[Server] Received data from client with id {client.Client.RemoteEndPoint}: {finalJson}");
 
                         // (2) Deserialize the "wrapper"
-                        NetworkActionWrapper incomingWrapper = JsonUtility.FromJson<NetworkActionWrapper>(finalJson);
+                        NetworkMessageWrapper incomingWrapper = JsonUtility.FromJson<NetworkMessageWrapper>(finalJson);
                         if (incomingWrapper == null)
                         {
-                            Debug.LogWarning("Failed to parse NetworkActionWrapper!");
+                            Debug.LogWarning("Failed to parse NetworkMessageWrapper!");
                             return;
                         }
 
@@ -140,10 +140,10 @@ namespace CaptureTheFlag.Network
                         }
 
                         // (4) Deserialize the *actual subclass* from wrapper.Json
-                        NetworkAction realAction = (NetworkAction)JsonUtility.FromJson(incomingWrapper.Json, realType);
-                        if (realAction == null)
+                        NetworkMessage realMessage = (NetworkMessage)JsonUtility.FromJson(incomingWrapper.Json, realType);
+                        if (realMessage == null)
                         {
-                            Debug.LogWarning("Failed to deserialize realAction from wrapper.Json");
+                            Debug.LogWarning("Failed to deserialize realMessage from wrapper.Json");
                             return;
                         }
 
@@ -151,10 +151,10 @@ namespace CaptureTheFlag.Network
                         string senderId = (client.Client.RemoteEndPoint != null)
                             ? client.Client.RemoteEndPoint.ToString()
                             : "UnknownSender";
-                        realAction.SenderId = senderId;
+                        realMessage.SenderId = senderId;
 
                         // (5) Broadcast to all clients (including the sender)
-                        BroadcastAction(realAction);
+                        BroadcastMessage(realMessage);
 
                         // (6) Keep listening
                         ReceiveDataFromClient(client);
@@ -170,18 +170,15 @@ namespace CaptureTheFlag.Network
         }
 
         /// <summary>
-        /// Broadcast the given action to all connected clients.
+        /// Broadcast the given message to all connected clients.
         /// </summary>
-        private void BroadcastAction(NetworkAction action)
+        private void BroadcastMessage(NetworkMessage message)
         {
             // 1) Build a new wrapper for the actual subclass
-            var wrapper = new NetworkActionWrapper
+            var wrapper = new NetworkMessageWrapper
             {
-                // The real runtime type => e.g. "CaptureTheFlag.Networking.NetworkAction_StartMatch"
-                TypeName = action.GetType().AssemblyQualifiedName,
-
-                // Subclass JSON => includes all fields (MapSeed, MapSize, etc.)
-                Json = JsonUtility.ToJson(action)
+                TypeName = message.GetType().AssemblyQualifiedName,
+                Json = JsonUtility.ToJson(message)
             };
 
             // 2) Serialize the wrapper itself
@@ -201,7 +198,7 @@ namespace CaptureTheFlag.Network
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("BroadcastAction failed for client: " + e.Message);
+                    Debug.LogWarning("BroadcastMessage failed for client: " + e.Message);
                 }
             }
         }

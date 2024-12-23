@@ -46,7 +46,7 @@ namespace WorldEditor
             // Vision Dropdown
             VisionDropdown.ClearOptions();
             List<string> visionOptions = new List<string>() { "Everything" };
-            foreach (Actor p in World.GetAllActors()) visionOptions.Add(p.Name);
+            foreach (Actor p in World.GetAllActors()) visionOptions.Add(p.Label);
             VisionDropdown.AddOptions(visionOptions);
 
             SetVisionCutoffAlitude(10);
@@ -131,7 +131,7 @@ namespace WorldEditor
             if (World == null) return;
 
             if (World.ActiveVisionActor == null) VisionDropdown.value = 0;
-            else VisionDropdown.value = VisionDropdown.options.Where(x => x.text == World.ActiveVisionActor.Name).Select(x => VisionDropdown.options.IndexOf(x)).First();
+            else VisionDropdown.value = VisionDropdown.options.Where(x => x.text == World.ActiveVisionActor.Label).Select(x => VisionDropdown.options.IndexOf(x)).First();
 
             GridToggle.isOn = World.IsShowingGrid;
             TextureToggle.isOn = World.IsShowingTextures;

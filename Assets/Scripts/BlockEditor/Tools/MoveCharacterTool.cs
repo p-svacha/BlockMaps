@@ -2,6 +2,7 @@ using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 namespace WorldEditor
 {
@@ -17,6 +18,9 @@ namespace WorldEditor
         private Color PATH_PREVIEW_COLOR = new Color(1f, 1f, 1f, 0.5f);
         private NavigationPath TargetPath;
         private LineRenderer PathPreview;
+
+        [Header("Elements")]
+        public TMP_InputField HoveredPathCostInput;
 
         // Cache
         private BlockmapNode CacheOriginNode;
@@ -57,10 +61,10 @@ namespace WorldEditor
         {
             TargetPath = null;
             PathPreview.gameObject.SetActive(false);
+            HoveredPathCostInput.text = "";
 
             if (SelectedEntity == null) return;
             if (World.HoveredNode == null) return;
-            if (!World.HoveredNode.IsExploredBy(SelectedEntity.Actor)) return;
 
             if (SelectedEntity.OriginNode != CacheOriginNode) PathCache.Clear(); // Clear cache when changing node
             CacheOriginNode = SelectedEntity.OriginNode;
@@ -79,6 +83,7 @@ namespace WorldEditor
 
             PathPreview.gameObject.SetActive(true);
             Pathfinder.ShowPathPreview(PathPreview, TargetPath, PATH_PREVIEW_WIDTH, PATH_PREVIEW_COLOR);
+            HoveredPathCostInput.text = TargetPath.GetCost(SelectedEntity).ToString("0.##");
         }
 
         public override void HandleLeftClick()

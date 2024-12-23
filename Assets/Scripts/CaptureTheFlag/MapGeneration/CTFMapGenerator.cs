@@ -101,7 +101,7 @@ namespace CaptureTheFlag
                     jailZoneCoords.Add(jailZoneCenter + new Vector2Int(x, y));
                 }
             }
-            World.AddZone(jailZoneCoords, player, providesVision: false, showBorders: true);
+            World.AddZone(jailZoneCoords, player, providesVision: false, ZoneVisibility.VisibleForOwner);
 
             // Flag zone
             HashSet<Vector2Int> flagZoneCoords = new HashSet<Vector2Int>();
@@ -117,7 +117,7 @@ namespace CaptureTheFlag
                     }
                 }
             }
-            Zone flagZone = World.AddZone(flagZoneCoords, player, providesVision: true, showBorders: true);
+            Zone flagZone = World.AddZone(flagZoneCoords, player, providesVision: true, ZoneVisibility.VisibleForOwner);
 
             // Humans
             int humansSpawned = 0;
@@ -155,9 +155,9 @@ namespace CaptureTheFlag
                 else if (node.WorldCoordinates.x < playerZoneSize + neutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
                 else opponentZoneNodes.Add(node.WorldCoordinates);
             }
-            Zone localPlayerZone = World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, showBorders: true);
-            Zone neutralZone = World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, showBorders: true);
-            Zone opponentZone = World.AddZone(opponentZoneNodes, Opponent, providesVision: false, showBorders: true);
+            World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, ZoneVisibility.VisibleForOwner); // id = 0: Blue player territory
+            World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, ZoneVisibility.VisibleForEveryone); // id = 1: Neutral territory
+            World.AddZone(opponentZoneNodes, Opponent, providesVision: false, ZoneVisibility.VisibleForOwner);// id = 2: Red player territory
         }
     }
 }

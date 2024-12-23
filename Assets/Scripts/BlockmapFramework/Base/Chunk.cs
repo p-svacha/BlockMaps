@@ -254,7 +254,7 @@ namespace BlockmapFramework
             foreach (Entity e in Entities.Where(e => e.MeshObject != null)) e.MeshObject.SetActive(value == -1 || e.MinAltitude < value);
         }
 
-        public void DrawZoneBorders()
+        public void DrawZoneBorders(Actor actor)
         {
             // Combine all visible zones on this chunk into 1 combines zone border list that contains a bool[4] (1 for each direction) for each node that state if a border should be drawn there.
             bool[][] combinedBorders = new bool[256][];
@@ -265,7 +265,7 @@ namespace BlockmapFramework
                 combinedBorders[i] = new bool[4];
             }
 
-            List<Zone> visibleZones = Zones.Where(x => x.IsBorderVisible).ToList();
+            List<Zone> visibleZones = Zones.Where(x => x.CanBeSeenBy(actor)).ToList();
             foreach (Zone z in visibleZones)
             {
                 List<bool[]> nodeBorders = z.GetChunkZoneBorders(this);

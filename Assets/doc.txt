@@ -1,13 +1,7 @@
-Building Generator:
-elevated path towards building door (with stairs if necessary)
-bridges when paths go over water
-
+make ctf map generator system the default one with the steps
 Map Modifiers:
 	- a function that affects the whole map
 	- basically a step of map gen process
-
-
-
 
 Increase performance of detecting climb transitions on empty perlin map
 maybe also other steps
@@ -39,32 +33,10 @@ same with invisible EntityWalls for climbability
 ---
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-CTF AI:
- - Attacker: new job: Flee if seeing opponent character that sees you too
- - New role: Flag cheater (go directly towards flag even if not visible)
- - Attacker roles can change when in own territory
- - Defender role can change during patrol
-
 make label half transparent for enemy characters that are explored but not visible (in last known position)
 give everyone names
 turn counter and display
 
-Main menu
 Game creation lobby
 
 Release build on github
@@ -72,7 +44,6 @@ Release build on github
 
 
 mapgen forest: wide road with cars
-mapgen forest: house
 mapgen forest: river
 mapgen forest: hedges should be straighter
 
@@ -216,9 +187,6 @@ Add "DrawSlopeAsStairs" to SurfaceDef.Renderproperties
 
 - dig/tunnel?
 
-- add some new static entities
-	> for new static entity ideas watch project zomboid streams
-
 - Add additional movement methods (jump/fly)
 - Stealth/Invisibility
 - Teleportation
@@ -226,28 +194,68 @@ Add "DrawSlopeAsStairs" to SurfaceDef.Renderproperties
 
 - Weather / Temperature (Snow/Mud)
 
+More static entities (see following for inspiration):
+	> project zomboid streams
+	> fallout tactics streams
+
+
+CTF: Player Names
+CTF: Game Lobby
+
+CTF: Open/Close door action
+	> + sync
+
+CTF: Use ladder action
+	> + sync
+
+CTF: Different humans and dogs
+CTF: Neutral items that refresh stamina or give modifiers
+CTF: Neutral items that can be picked up (requires inventory system)
+
+CTF: Pick up Flag (requires inventory system)
+	> characters can now enter flag zone
+	> characters in flag zone are "disabled" for the whole turn they were in
+	> "disabled characters" cannot tag enemies
+	> flag can be picked up when moving on that node for a cost
+	> character can move with impairment with flag
+	> flag zone moves with character holding flag
+	> character holding flag can be tagged by enemy to win the game
+	> flag can be dropped whenever by character for a cost
+
+CTF Forest Generator:
+	- elevated path towards building door (with stairs if necessary)
+	- bridges when paths go over water
+
+
 CTF: Neutral moving entities
  - Wolves
  - 1 sneaky wolf
 
- CTF: more logic for dogs
+CTF: more logic for dogs
+  - dogs have a chance to not listen to commands and something else instead (random needs to be applied before sending to server so its synced)
   - can get distracted
 
-- CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
-- CTF: Multiplayer
+CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
+CTF: Multiplayer test
 
-- CTF: Slopes use more action points
+CTF: Slopes use more action points
 	> downwards * 1.25
 	> upwards * 1.5
 
-- CTF: Upon end game show full visible map
+CTF: Upon end game show full visible map
 
-- CTF: more general modifier system
+CTF: more general modifier system
 	> modifiers have a duration and effect, name, description, icon
 	> move jail time to modifier
 	> add ui for modifiers
 
-- CTF: Rework hover pathfinding
+CTF AI:
+ - Attacker: new job: Flee if seeing opponent character that sees you too
+ - New role: Flag cheater (go directly towards flag even if not visible)
+ - Attacker roles can change when in own territory
+ - Defender role can change during patrol
+
+CTF: Rework hover pathfinding
 	> Hover on unreachable node = no path preview
 	> Hover on node with !canStandOn = red path preview
 	> Hover on node within possible moves = green path preview
@@ -256,13 +264,13 @@ CTF: Neutral moving entities
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
 
-- CTF: Rework jail system
+CTF: Rework jail system
 	> 1 Jail that is in neutral area
 	> gives full vision for both players
 	> Fully fenced off
 	> Characters get teleported out of jail when jail time ends
 
-- CTF: Make menu for creating game
+CTF: Make menu for creating game
 	> Allow different map sizes
 	> Miniscule: 7 chunks
 	> Tiny: 9 chunks

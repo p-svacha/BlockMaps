@@ -47,9 +47,9 @@ namespace CaptureTheFlag
             EndAction();
         }
 
-        public override NetworkAction GetNetworkAction()
+        public override NetworkMessage_CharacterAction GetNetworkAction()
         {
-            return new NetworkAction_MoveCharacter(Character.Id, Target.Id, Match.CurrentTick + 10);
+            return new NetworkMessage_MoveCharacter(Character.Id, Target.Id);
         }
     }
 }

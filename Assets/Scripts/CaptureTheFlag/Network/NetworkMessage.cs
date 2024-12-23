@@ -5,14 +5,14 @@ using UnityEngine;
 namespace CaptureTheFlag.Network
 {
     [System.Serializable]
-    public class NetworkAction
+    public class NetworkMessage
     {
         public string SenderId;
-        public string ActionType;
+        public string MessageType;
 
-        public NetworkAction(string actionType)
+        public NetworkMessage(string messageType)
         {
-            ActionType = actionType;
+            MessageType = messageType;
         }
 
         // This will NOT be serialized into JSON. It's purely local state.

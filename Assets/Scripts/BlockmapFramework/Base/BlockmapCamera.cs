@@ -171,7 +171,11 @@ namespace BlockmapFramework
             EnableUnbreakableFollowAfterPan = unbreakableFollow;
 
             // Immediately end pan if we are already very close to target position
-            if (Vector3.Distance(CurrentPosition, targetPos) <= 0.01f) PanDelay = PanDuration;
+            if (Vector3.Distance(CurrentPosition, targetPos) <= 0.1f)
+            {
+                Debug.Log("Panning camera skipped because it already is at target position");
+                PanDelay = PanDuration;
+            }
         }
         public void Unfollow()
         {

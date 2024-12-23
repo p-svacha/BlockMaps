@@ -7,7 +7,7 @@ namespace BlockmapFramework
 {
     public static class Pathfinder
     {
-        private static World World;
+        public static World World;
 
         public static void Init(World world)
         {
@@ -21,6 +21,7 @@ namespace BlockmapFramework
         /// Returns the shortest path from a source node to a target node for the given entity.
         /// <br/>Returned path includes both source and target.
         /// </summary>
+        /// <param name="considerUnexploredNodes">If true, only nodes that are explored by the entity's actor are considered for a path.</param>
         public static NavigationPath GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == to || !to.IsPassable(entity)) return null;

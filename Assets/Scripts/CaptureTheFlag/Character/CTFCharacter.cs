@@ -42,7 +42,7 @@ namespace CaptureTheFlag
 
         #region Game Loop
 
-        public void OnGameInitialized(CtfMatch game, Player player, Player opponent)
+        public void OnMatchReady(CtfMatch game, Player player, Player opponent)
         {
             Game = game;
             ActionPoints = MaxActionPoints;

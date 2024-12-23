@@ -40,7 +40,7 @@ namespace CaptureTheFlag
             EndTurnButton.onClick.AddListener(() => Match.EndPlayerTurn());
         }
 
-        public void OnGameInitialized()
+        public void OnMatchReady()
         {
             // Character selection
             HelperFunctions.DestroyAllChildredImmediately(CharacterSelectionContainer.gameObject);

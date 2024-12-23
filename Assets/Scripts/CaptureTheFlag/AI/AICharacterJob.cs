@@ -40,17 +40,18 @@ namespace CaptureTheFlag
         #region Helper
 
         /// <summary>
-        /// Returns the possible adjacent movement (only moving 1 node) directly towards the given node.
+        /// Returns the possible adjacent movement (only moving 1 node) directly towards the given node, optionally by using the provided targetPath.
         /// <br/>This method is cheating a little since it will look for the perfect path even through unexplored territory.
         /// </summary>
-        protected Action_Movement GetSingleNodeMovementTo(BlockmapNode targetNode)
+        protected Action_Movement GetSingleNodeMovementTo(BlockmapNode targetNode, NavigationPath targetPath = null)
         {
             // Get path to target
-            NavigationPath path = GetPath(targetNode);
+            if (targetPath == null) targetPath = GetPath(targetNode);
+            else targetPath.CutEverythingBefore(Character.OriginNode); // Adapt the given path so the start point is where the character is currently at
 
-            if (path == null) // No path found
+            if (targetPath == null) // No path found
             {
-                if (Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
+                if (Game.DevMode) Debug.Log("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
                 return null;
             }
 
@@ -58,7 +59,7 @@ namespace CaptureTheFlag
             foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.IsSingleTransitionPath()))
             {
                 if (Player.Opponent.Characters.Any(x => x.Node == movement.Target)) continue; // Don't go there if an opponent is on that node
-                if (path.Nodes[1] == movement.Target) return movement;
+                if (targetPath.Nodes[1] == movement.Target) return movement;
             }
 
             return null;
@@ -89,9 +90,9 @@ namespace CaptureTheFlag
         }
 
         /// <summary>
-        /// Returns the fastest possible path to the given node without going the own flag zone.
+        /// Returns the fastest possible path to the given node without going through the own flag zone.
         /// </summary>
-        private NavigationPath GetPath(BlockmapNode targetNode)
+        protected NavigationPath GetPath(BlockmapNode targetNode)
         {
             return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, forbiddenNodes: Player.FlagZone.Nodes);
         }

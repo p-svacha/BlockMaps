@@ -1,13 +1,15 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CaptureTheFlag
 {
     public class Player
     {
-        public CtfMatch Game;
+        public string Label => Actor.Label;
+        public CtfMatch Match;
         public Actor Actor;
         public Entity Flag;
         public List<CtfCharacter> Characters;
@@ -15,6 +17,12 @@ namespace CaptureTheFlag
         public Zone JailZone;
         public Zone FlagZone;
         public Player Opponent;
+
+        /// <summary>
+        /// The order of nodes that characters will be placed on when going to jail.
+        /// </summary>
+        public List<BlockmapNode> JailPositions;
+        private int CurrentJailPositionIndex;
 
         // Multiplayer
         public string ClientId;
@@ -38,10 +46,21 @@ namespace CaptureTheFlag
             FlagZone = flagZone;
         }
 
-        public virtual void OnGameInitialized(CtfMatch game)
+        public virtual void OnMatchReady(CtfMatch match)
         {
-            Game = game;
-            foreach (CtfCharacter c in Characters) c.OnGameInitialized(Game, this, Opponent);
+            Match = match;
+
+            // Set determinstic jail positions
+            JailPositions = JailZone.Nodes.Where(x => x.IsPassable()).ToList().GetShuffledList();
+            CurrentJailPositionIndex = 0;
+
+            // Debug
+            string log = "";
+            foreach(BlockmapNode n in JailPositions) log += n.Id + "/";
+            Debug.Log($"Jail Positions for {Label}: {log}");
+
+            // Inform characters about match ready
+            foreach (CtfCharacter c in Characters) c.OnMatchReady(Match, this, Opponent);
         }
 
         /// <summary>
@@ -53,6 +72,14 @@ namespace CaptureTheFlag
         {
             TurnEnded = false;
             foreach (CtfCharacter c in Characters) c.OnStartTurn();
+        }
+
+        public BlockmapNode GetNextJailPosition()
+        {
+            BlockmapNode node = JailPositions[CurrentJailPositionIndex];
+            CurrentJailPositionIndex++;
+            if (CurrentJailPositionIndex == JailPositions.Count) CurrentJailPositionIndex = 0;
+            return node;
         }
 
         #region Getters
@@ -70,7 +97,7 @@ namespace CaptureTheFlag
             if (move.Character.IsInAction) return false;
 
             // Check if another character is currently heading to the target node
-            foreach(CtfCharacter character in Game.Characters)
+            foreach(CtfCharacter character in Match.Characters)
             {
                 if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == move.Target) return false;
             }

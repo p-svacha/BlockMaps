@@ -40,8 +40,8 @@ namespace BlockmapFramework
 
         // IClimbable
         public ClimbingCategory ClimbSkillRequirement => ClimbingCategory.Basic;
-        public float ClimbCostUp => 1.6f;
-        public float ClimbCostDown => 1.3f;
+        public float ClimbCostUp => 0.8f;
+        public float ClimbCostDown => 0.6f;
         public float ClimbTransformOffset => LadderMeshGenerator.LADDER_POLE_SIZE;
         public Direction ClimbSide => Side;
         public bool IsClimbable => true;

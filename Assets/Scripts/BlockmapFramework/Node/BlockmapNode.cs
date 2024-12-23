@@ -1028,6 +1028,7 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns if it is theoretically possible for some entity to stand on this node.
+        /// <br/>Use IsPassable for public use, since that checks this plus additional criteria.
         /// </summary>
         protected virtual bool IsGenerallyPassable()
         {
