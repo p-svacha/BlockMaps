@@ -1,3 +1,11 @@
+Lobby: Color
+Lobby: NetworkMessage color change
+Lobby: NetworkMessage settingschange
+Lobby: Network Message Initialize Match (use exsitng)
+	> use GameSettings
+
+
+
 make ctf map generator system the default one with the steps
 Map Modifiers:
 	- a function that affects the whole map

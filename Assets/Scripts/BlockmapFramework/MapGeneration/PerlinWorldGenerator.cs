@@ -6,7 +6,7 @@ namespace BlockmapFramework.WorldGeneration
 {
     public class PerlinWorldGenerator : WorldGenerator
     {
-        public override string Name => "Simple Perlin";
+        public override string Label => "Simple Perlin";
 
         private int[,] HeightMap;
         private int GenerationStep;

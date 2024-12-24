@@ -9,7 +9,7 @@ namespace BlockmapFramework.WorldGeneration
     /// </summary>
     public class RegionMapGenerator : WorldGenerator
     {
-        public override string Name => "Parcels";
+        public override string Label => "Parcels";
 
         private ParcelGeneratorStep GenerationStep;
 

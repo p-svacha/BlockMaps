@@ -43,7 +43,7 @@ namespace WorldEditor
             SaveButton.onClick.AddListener(SaveButton_OnClick);
 
             // Generator dropdown
-            List<string> generators = editor.Generators.Select(x => x.Name).ToList();
+            List<string> generators = editor.Generators.Select(x => x.Label).ToList();
             GeneratorDropdown.AddOptions(generators);
 
             UpdateLoadWorldDropdown();

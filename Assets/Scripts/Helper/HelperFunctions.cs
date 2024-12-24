@@ -490,7 +490,7 @@ public static class HelperFunctions
     public static void DestroyAllChildredImmediately(GameObject obj, int skipElements = 0)
     {
         int numChildren = obj.transform.childCount;
-        for (int i = skipElements; i < numChildren; i++) GameObject.DestroyImmediate(obj.transform.GetChild(0).gameObject);
+        for (int i = skipElements; i < numChildren; i++) GameObject.DestroyImmediate(obj.transform.GetChild(skipElements).gameObject);
     }
     
     public static Sprite TextureToSprite(Texture tex) => TextureToSprite((Texture2D)tex);

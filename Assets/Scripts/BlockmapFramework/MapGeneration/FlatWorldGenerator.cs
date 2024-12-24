@@ -6,7 +6,7 @@ namespace BlockmapFramework.WorldGeneration
 {
     public class FlatWorldGenerator : WorldGenerator
     {
-        public override string Name => "Flat";
+        public override string Label => "Flat";
 
         protected override void OnGenerationStart() { }
         protected override void OnUpdate()

@@ -1,16 +1,17 @@
 using BlockmapFramework.Profiling;
+using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
 
-namespace BlockmapFramework.WorldGeneration
+namespace BlockmapFramework
 {
     public abstract class WorldGenerator
     {
         public const int MAX_WORLD_SIZE = 512;
 
-        public abstract string Name { get; }
+        public abstract string Label { get; }
 
         /// <summary>
         /// The amount of chunks on each side of the map. (A world with 2x2 chunks has NumChunksPerSide = 2).
@@ -50,7 +51,7 @@ namespace BlockmapFramework.WorldGeneration
 
             if (seed == -1) seed = GetRandomSeed();
             Random.InitState(seed);
-            Debug.Log($"Starting world generation '{Name}' with {numChunks}x{numChunks} chunks. Seed = {seed}");
+            Debug.Log($"Starting world generation '{Label}' with {numChunks}x{numChunks} chunks. Seed = {seed}");
 
             if (World.ChunkSize * numChunks > MAX_WORLD_SIZE) throw new System.Exception("World size can't be bigger than " + MAX_WORLD_SIZE +  ".");
 

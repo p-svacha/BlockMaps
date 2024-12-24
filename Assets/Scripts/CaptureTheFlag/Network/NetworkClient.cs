@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace CaptureTheFlag.Network
 {
+    /// <summary>
+    /// NetworkClients send and receive NetworkMessages from the server. One NetworkClient acts as the host.
+    /// </summary>
     public class NetworkClient : MonoBehaviour
     {
         public static NetworkClient Instance { get; private set; }
@@ -16,11 +19,15 @@ namespace CaptureTheFlag.Network
 
         public string ClientId { get; private set; }
 
+        public bool IsHost { get; private set; }
         private TcpClient Client;
         private NetworkStream Stream;
 
+        public bool IsInGameOrLobby;
+
         public CtfGame Game;
         public CtfMatch Match;
+        private System.Action OnConnectionCallback;
 
         private void Awake()
         {
@@ -28,13 +35,19 @@ namespace CaptureTheFlag.Network
             else Destroy(gameObject);
         }
 
+        public void SetAsHost()
+        {
+            IsHost = true;
+        }
+
         /// <summary>
         /// Connect to the specified server IP and port.
         /// </summary>
-        public void ConnectToServer()
+        public void ConnectToServer(System.Action callback)
         {
             try
             {
+                OnConnectionCallback = callback;
                 Client = new TcpClient();
                 Client.BeginConnect(ServerIP, ServerPort, OnConnect, null);
             }
@@ -50,7 +63,7 @@ namespace CaptureTheFlag.Network
             {
                 Client.EndConnect(ar);
                 Stream = Client.GetStream();
-                Debug.Log("Connected to server.");
+                Debug.Log("[Client] Connected to server.");
 
                 // Get local endpoint as our "client ID"
                 if (Client.Client.LocalEndPoint != null)
@@ -62,11 +75,13 @@ namespace CaptureTheFlag.Network
                     ClientId = Guid.NewGuid().ToString();
                 }
 
+                OnConnectionCallback?.Invoke();
+
                 ReceiveData();
             }
             catch (Exception e)
             {
-                Debug.LogError("Connection error: " + e.Message);
+                Debug.LogError("[Client] Connection error: " + e.Message);
             }
         }
 
@@ -77,7 +92,7 @@ namespace CaptureTheFlag.Network
         {
             if (Client == null || !Client.Connected)
             {
-                Debug.LogWarning("Not connected to a server!");
+                Debug.LogWarning("[Client] Not connected to a server!");
                 return;
             }
 
@@ -101,11 +116,11 @@ namespace CaptureTheFlag.Network
                 Stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 Stream.Write(data, 0, data.Length);
 
-                Debug.Log($"Sent NetworkMessage of type {message.MessageType} via wrapper {wrapper.TypeName}.");
+                Debug.Log($"[Client] Sent NetworkMessage of type {message.MessageType} via wrapper {wrapper.TypeName}.");
             }
             catch (Exception e)
             {
-                Debug.LogWarning("SendMessage failed: " + e.Message);
+                Debug.LogWarning("[Client] SendMessage failed: " + e.Message);
             }
         }
 
@@ -181,6 +196,14 @@ namespace CaptureTheFlag.Network
             {
                 switch (message.MessageType)
                 {
+                    case "ConnectedClientsInfo":
+                        var clientInfosMessage = (NetworkMessage_ConnectedClientsInfo)message;
+                        List<ClientInfo> clientInfos = new List<ClientInfo>();
+                        for(int i = 0; i < clientInfosMessage.ClientIds.Length; i++)
+                            clientInfos.Add(new ClientInfo(clientInfosMessage.ClientIds[i], clientInfosMessage.ClientDisplayNames[i]));
+                        Game.OnNewClientConnected(clientInfos, isSelf: clientInfosMessage.NewlyConnectedClientId == ClientId);
+                        break;
+
                     case "InitializeMultiplayerMatch":
                         var initializeMessage = (NetworkMessage_InitializeMultiplayerMatch)message;
                         Game.SetMultiplayerMatchAsReady(initializeMessage.MapSize, initializeMessage.MapSeed, playAsBlue: initializeMessage.IsSentBySelf, initializeMessage.Player1ClientId, initializeMessage.Player2ClientId);

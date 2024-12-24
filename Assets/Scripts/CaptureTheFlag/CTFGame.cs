@@ -20,6 +20,7 @@ namespace CaptureTheFlag
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;
+        public UI_Lobby LobbyUI;
         public CtfMatchUi MatchUI;
         public GameObject LoadingScreenOverlay;
         public UI_EndGameScreen EndGameScreen;
@@ -28,7 +29,9 @@ namespace CaptureTheFlag
         public LineRenderer PathPreviewRenderer;
 
         // Multiplayer
-        private bool IsWaitingForOtherPlayerAsHost;
+        private List<ClientInfo> ClientInfos = new List<ClientInfo>();
+        private bool ClientUpdateReceived;
+        private bool WeJustJoinedTheServer;
         private bool IsMultiplayerMatchReady;
         private int MultiplayerMapSize;
         private int MultiplayerMapSeed;
@@ -55,6 +58,11 @@ namespace CaptureTheFlag
 
             // Menu UIs
             MainMenuUI.Init(this);
+            LobbyUI.Init(this);
+
+            MatchUI.gameObject.SetActive(false);
+            MainMenuUI.gameObject.SetActive(true);
+            LobbyUI.gameObject.SetActive(false);
         }
 
         private void Update()
@@ -75,8 +83,31 @@ namespace CaptureTheFlag
                 }
             }
 
-            if (IsWaitingForOtherPlayerAsHost)
+            // The list of connected clients (ClientInfos) changed since last update
+            if(ClientUpdateReceived)
             {
+                Debug.Log("Client update received");
+                ClientUpdateReceived = false;
+
+                // We ourselves joined a server
+                if (WeJustJoinedTheServer)
+                {
+                    WeJustJoinedTheServer = false;
+                    GoToLobby();
+                }
+
+                // Another client joined the server we are in
+                else
+                {
+                    LobbyUI.SetPlayerList(ClientInfos);
+                }
+            }
+
+            /*
+            else if (NetworkClient.Instance.ClientId != null && !NetworkClient.Instance.IsInGameOrLobby) // We just connected to server => go to lobby
+            {
+                CreateMultiplayerLobby();
+
                 if(NetworkServer.Instance.ConnectedClients.Count == 2)
                 {
                     IsWaitingForOtherPlayerAsHost = false;
@@ -84,13 +115,16 @@ namespace CaptureTheFlag
                     int mapSize = GetRandomMapSize();
                     NetworkClient.Instance.SendMessage(new NetworkMessage_InitializeMultiplayerMatch(mapSize, mapSeed, NetworkServer.Instance.ConnectedClients[0].Client.RemoteEndPoint.ToString(), NetworkServer.Instance.ConnectedClients[1].Client.RemoteEndPoint.ToString()));
                 }
+
             }
+            */
 
             if(IsMultiplayerMatchReady)
             {
                 IsMultiplayerMatchReady = false;
                 StartMultiplayerMatch();
             }
+            
         }
 
         public void StartSingleplayerMatch()
@@ -117,6 +151,39 @@ namespace CaptureTheFlag
 
         #region Multiplayer
 
+        public void HostAndConnectToServer()
+        {
+            NetworkServer.Instance.StartServer();
+            ConnectToServer(isHost: true);
+        }
+
+        public void ConnectToServer(bool isHost)
+        {
+            NetworkClient.Instance.Game = this;
+            NetworkClient.Instance.ServerIP = MainMenuUI.MultiplayerIpInput.text;
+            NetworkClient.Instance.ConnectToServer(callback: OnConnectionToServerEstablished);
+            if (isHost) NetworkClient.Instance.SetAsHost();
+        }
+
+
+        /// <summary>
+        /// Gets called on seperate thread when a new client has connected to the server.
+        /// <br/>Contains information about all currently connected clients and if the newly connected client was ourselves.
+        /// </summary>
+        public void OnNewClientConnected(List<ClientInfo> infos, bool isSelf)
+        {
+            ClientInfos = infos;
+            ClientUpdateReceived = true;
+            if (isSelf) WeJustJoinedTheServer = true;
+        }
+
+        private void GoToLobby()
+        {
+            MainMenuUI.gameObject.SetActive(false);
+            LobbyUI.gameObject.SetActive(true);
+            LobbyUI.SetPlayerList(ClientInfos);
+        }
+
         private void StartMultiplayerMatch()
         {
             ActiveMatch = new CtfMatch(this);
@@ -126,23 +193,15 @@ namespace CaptureTheFlag
             MainMenuUI.gameObject.SetActive(false);
         }
 
-        public void HostServer()
-        {
-            NetworkClient.Instance.Game = this;
-            NetworkServer.Instance.StartServerAndConnectAsHost();
-            IsWaitingForOtherPlayerAsHost = true;
-        }
 
-        public void ConnectToServer()
+        private void OnConnectionToServerEstablished()
         {
-            NetworkClient.Instance.Game = this;
-            NetworkClient.Instance.ServerIP = MainMenuUI.MultiplayerIpInput.text;
-            NetworkClient.Instance.ConnectToServer();
+            // When connection to server has been established, inform all clients that a new client connected
+            NetworkClient.Instance.SendMessage(new NetworkMessage_ClientConnected(MainMenuUI.MultiplayerNameInput.text));
         }
 
         public void SetMultiplayerMatchAsReady(int mapSize, int mapSeed, bool playAsBlue, string player1ClientId, string player2ClientId)
         {
-            IsWaitingForOtherPlayerAsHost = false;
             MultiplayerMapSize = mapSize;
             MultiplayerMapSeed = mapSeed;
             MultiplayerPlayAsBlue = playAsBlue;

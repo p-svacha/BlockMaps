@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
@@ -13,7 +14,11 @@ namespace CaptureTheFlag.Network
 
         public int Port = 7777;
         private TcpListener ServerListener;
-        public List<TcpClient> ConnectedClients = new List<TcpClient>();
+
+        /// <summary>
+        /// Dictionary holding all information of connected clients that have confirmed their connection by sending a NetworkMessage_ClientConnected.
+        /// </summary>
+        public Dictionary<TcpClient, ClientInfo> ConnectedClients = new Dictionary<TcpClient, ClientInfo>();
 
         private void Awake()
         {
@@ -23,44 +28,22 @@ namespace CaptureTheFlag.Network
         }
 
         /// <summary>
-        /// Start hosting a server on the given port,
-        /// and also connect a local client so the host is in the connectedClients list.
-        /// </summary>
-        public void StartServerAndConnectAsHost()
-        {
-            StartServer();
-
-            // After starting the server, connect as localhost
-            // This ensures the host is treated just like any other client.
-            if (NetworkClient.Instance != null)
-            {
-                NetworkClient.Instance.ServerIP = "127.0.0.1";
-                NetworkClient.Instance.ServerPort = Port;
-                NetworkClient.Instance.ConnectToServer();
-            }
-            else
-            {
-                Debug.LogWarning("No NetworkClient found in scene. Host won't be treated as client!");
-            }
-        }
-
-        /// <summary>
         /// Starts the server listening for incoming clients.
         /// </summary>
-        private void StartServer()
+        public void StartServer()
         {
             try
             {
                 ServerListener = new TcpListener(IPAddress.Any, Port);
                 ServerListener.Start();
-                Debug.Log("Server started. Listening on port " + Port);
+                Debug.Log("[Server] Server started. Listening on port " + Port);
 
                 // Begin listening asynchronously
                 ServerListener.BeginAcceptTcpClient(OnClientConnect, null);
             }
             catch (Exception e)
             {
-                Debug.LogError("Failed to start server: " + e.Message);
+                Debug.LogError("[Server] Failed to start server: " + e.Message);
             }
         }
 
@@ -72,8 +55,7 @@ namespace CaptureTheFlag.Network
             try
             {
                 TcpClient newClient = ServerListener.EndAcceptTcpClient(ar);
-                ConnectedClients.Add(newClient);
-                Debug.Log("Client connected: " + newClient.Client.RemoteEndPoint);
+                Debug.Log("[Server] Client connected: " + newClient.Client.RemoteEndPoint);
 
                 // Start receiving data from this client
                 ReceiveDataFromClient(newClient);
@@ -127,7 +109,7 @@ namespace CaptureTheFlag.Network
                         NetworkMessageWrapper incomingWrapper = JsonUtility.FromJson<NetworkMessageWrapper>(finalJson);
                         if (incomingWrapper == null)
                         {
-                            Debug.LogWarning("Failed to parse NetworkMessageWrapper!");
+                            Debug.LogWarning("[Server] Failed to parse NetworkMessageWrapper!");
                             return;
                         }
 
@@ -135,7 +117,7 @@ namespace CaptureTheFlag.Network
                         System.Type realType = System.Type.GetType(incomingWrapper.TypeName);
                         if (realType == null)
                         {
-                            Debug.LogWarning($"Unknown type: {incomingWrapper.TypeName}");
+                            Debug.LogWarning($"[Server] Unknown type: {incomingWrapper.TypeName}");
                             return;
                         }
 
@@ -143,20 +125,28 @@ namespace CaptureTheFlag.Network
                         NetworkMessage realMessage = (NetworkMessage)JsonUtility.FromJson(incomingWrapper.Json, realType);
                         if (realMessage == null)
                         {
-                            Debug.LogWarning("Failed to deserialize realMessage from wrapper.Json");
+                            Debug.LogWarning("[Server] Failed to deserialize realMessage from wrapper.Json");
                             return;
                         }
 
-                        // Append the sender ID
-                        string senderId = (client.Client.RemoteEndPoint != null)
-                            ? client.Client.RemoteEndPoint.ToString()
-                            : "UnknownSender";
-                        realMessage.SenderId = senderId;
+                        // Append sender id
+                        realMessage.SenderId = client.Client.RemoteEndPoint.ToString();
 
-                        // (5) Broadcast to all clients (including the sender)
-                        BroadcastMessage(realMessage);
+                        // If it's a client connect message:
+                        //  - Register it as a connected client
+                        //  - Boradcast the info of all currently connected clients to all clients
+                        if(realMessage.MessageType == "ClientConnected")
+                        {
+                            NetworkMessage_ClientConnected connectMessage = (NetworkMessage_ClientConnected)realMessage;
+                            Debug.Log($"[Server] Client with id {connectMessage.SenderId} has confirmed connection with display name {connectMessage.DisplayName}");
+                            ConnectedClients.Add(client, new ClientInfo(client, connectMessage.DisplayName));
+                            BroadcastMessageToAllClients(new NetworkMessage_ConnectedClientsInfo(ConnectedClients.Values.Select(c => c.ClientId).ToArray(), ConnectedClients.Values.Select(c => c.DisplayName).ToArray(), connectMessage.SenderId));
+                        }
 
-                        // (6) Keep listening
+                        // Else broadcast/forwards the received message to all clients (including the sender)
+                        else BroadcastMessageToAllClients(realMessage);
+
+                        // Keep listening
                         ReceiveDataFromClient(client);
 
                     }, null);
@@ -172,23 +162,11 @@ namespace CaptureTheFlag.Network
         /// <summary>
         /// Broadcast the given message to all connected clients.
         /// </summary>
-        private void BroadcastMessage(NetworkMessage message)
+        private void BroadcastMessageToAllClients(NetworkMessage message)
         {
-            // 1) Build a new wrapper for the actual subclass
-            var wrapper = new NetworkMessageWrapper
-            {
-                TypeName = message.GetType().AssemblyQualifiedName,
-                Json = JsonUtility.ToJson(message)
-            };
+            ConvertNetworkMessageToBytes(message, out byte[] data, out byte[] lengthPrefix);
 
-            // 2) Serialize the wrapper itself
-            string finalJson = JsonUtility.ToJson(wrapper);
-
-            // 3) Convert to bytes and broadcast
-            byte[] data = System.Text.Encoding.UTF8.GetBytes(finalJson);
-            byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
-
-            foreach (var client in ConnectedClients)
+            foreach (var client in ConnectedClients.Keys)
             {
                 try
                 {
@@ -203,6 +181,38 @@ namespace CaptureTheFlag.Network
             }
         }
 
+        private void SendMessageToClient(TcpClient client, NetworkMessage message)
+        {
+            ConvertNetworkMessageToBytes(message, out byte[] data, out byte[] lengthPrefix);
+            try
+            {
+                NetworkStream stream = client.GetStream();
+                stream.Write(lengthPrefix, 0, lengthPrefix.Length);
+                stream.Write(data, 0, data.Length);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("BroadcastMessage failed for client: " + e.Message);
+            }
+        }
+
+        private void ConvertNetworkMessageToBytes(NetworkMessage message, out byte[] data, out byte[] lengthPrefix)
+        {
+            // 1) Build a new wrapper for the actual subclass
+            var wrapper = new NetworkMessageWrapper
+            {
+                TypeName = message.GetType().AssemblyQualifiedName,
+                Json = JsonUtility.ToJson(message)
+            };
+
+            // 2) Serialize the wrapper itself
+            string finalJson = JsonUtility.ToJson(wrapper);
+
+            // 3) Convert to bytes and broadcast
+            data = System.Text.Encoding.UTF8.GetBytes(finalJson);
+            lengthPrefix = BitConverter.GetBytes(data.Length);
+        }
+
         private void OnDestroy()
         {
             // Clean up
@@ -210,7 +220,7 @@ namespace CaptureTheFlag.Network
             {
                 ServerListener.Stop();
             }
-            foreach (var client in ConnectedClients)
+            foreach (var client in ConnectedClients.Keys)
             {
                 client.Close();
             }
