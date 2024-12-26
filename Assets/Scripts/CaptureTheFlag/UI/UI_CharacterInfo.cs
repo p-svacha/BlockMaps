@@ -18,7 +18,7 @@ namespace CaptureTheFlag
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
-        public void Init(CtfCharacter c)
+        public void ShowCharacter(CtfCharacter c, CharacterAction hoveredAction = null)
         {
             gameObject.SetActive(true);
             Character = c;
@@ -29,9 +29,11 @@ namespace CaptureTheFlag
             VisionText.text = c.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+
+            if (hoveredAction != null) ShowActionPreview(hoveredAction.Cost);
         }
 
-        public void ShowActionPreview(float cost)
+        private void ShowActionPreview(float cost)
         {
             ActionBar.SetPendingValue(Character.ActionPoints, Character.ActionPoints - cost, Character.MaxActionPoints, valueFormat: "0.#", ActionBar.ProgressBar.GetComponent<Image>().color, Color.black);
             StaminaBar.SetPendingValue(Character.Stamina, Character.Stamina - cost, Character.MaxStamina, valueFormat: "0.#", StaminaBar.ProgressBar.GetComponent<Image>().color, Color.black);

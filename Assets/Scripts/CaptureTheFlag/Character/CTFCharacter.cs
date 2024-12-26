@@ -10,7 +10,7 @@ namespace CaptureTheFlag
     {
         private const float BASE_MOVEMENT_COST_MODIFIER = 10;
 
-        public CtfMatch Game;
+        public CtfMatch Match;
         public Player Owner { get; private set; }
         public Player Opponent { get; private set; }
 
@@ -44,7 +44,7 @@ namespace CaptureTheFlag
 
         public void OnMatchReady(CtfMatch game, Player player, Player opponent)
         {
-            Game = game;
+            Match = game;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
             Owner = player;
@@ -107,7 +107,7 @@ namespace CaptureTheFlag
         public Vector2Int WorldCoordinates => OriginNode.WorldCoordinates;
         public bool IsInAction => CurrentAction != null;
         public BlockmapNode Node => OriginNode;
-        public bool IsVisible => IsVisibleBy(Game.World.ActiveVisionActor);
+        public bool IsVisible => IsVisibleBy(Match.World.ActiveVisionActor);
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
         public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
 
@@ -117,6 +117,7 @@ namespace CaptureTheFlag
         public float MaxStamina => CtfComp.MaxStamina;
         public float StaminaRegeneration => CtfComp.StaminaRegeneration;
         public float MovementSkill => CtfComp.MovementSkill;
+        public bool CanInteractWithDoors => CtfComp.CanInteractWithDoors;
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.
@@ -173,7 +174,7 @@ namespace CaptureTheFlag
                         if (!CanStandOn(targetNode)) continue;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Action_Movement(Game, this, nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Action_Movement(Match, this, nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
@@ -189,14 +190,16 @@ namespace CaptureTheFlag
             List<SpecialCharacterAction> actions = new List<SpecialCharacterAction>();
 
             // Go to jail
-            if(!IsInJail) actions.Add(new Action_GoToJail(Game, this));
+            if(!IsInJail) actions.Add(new Action_GoToJail(Match, this));
 
             // Door interaction
-            foreach(Door door in World.GetNearbyEntities(WorldPosition, maxDistance: 2f).Where(e => e is Door))
+            if (CanInteractWithDoors)
             {
-                actions.Add(new Action_InteractWithDoor(Game, this, door));
+                foreach (Door door in World.GetNearbyEntities(WorldPosition, maxDistance: 2f).Where(e => e is Door && e.IsExploredBy(Actor)))
+                {
+                    actions.Add(new Action_InteractWithDoor(Match, this, door));
+                }
             }
-
 
             return actions;
         }
@@ -206,8 +209,8 @@ namespace CaptureTheFlag
         /// </summary>
         private bool CanStandOn(BlockmapNode targetNode)
         {
-            if (Game.GetCharacters(targetNode).Any(x => x.Owner == Owner)) return false; // can't stand on ally characters
-            if (Game.NeutralZone.ContainsNode(targetNode) && Game.GetCharacters(targetNode).Count > 0) return false; // can't stand on any characters in neutral zone
+            if (Match.GetCharacters(targetNode).Any(x => x.Owner == Owner)) return false; // can't stand on ally characters
+            if (Match.NeutralZone.ContainsNode(targetNode) && Match.GetCharacters(targetNode).Count > 0) return false; // can't stand on any characters in neutral zone
             if (targetNode.Entities.Any(x => x == Owner.Flag)) return false; // can't stand on own flag
             if (Owner.FlagZone.ContainsNode(targetNode)) return false; // Can't stand in own flag zone
 

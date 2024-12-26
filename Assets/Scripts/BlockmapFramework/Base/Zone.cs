@@ -16,6 +16,7 @@ namespace BlockmapFramework
         public Actor Actor;
         public HashSet<Vector2Int> WorldCoordinates;
         public List<BlockmapNode> Nodes { get; private set; }
+        public List<Wall> Walls { get; private set; }
         public HashSet<Chunk> AffectedChunks { get; private set; }
         public ZoneVisibility Visibility;
         public bool ProvidesVision;
@@ -51,9 +52,10 @@ namespace BlockmapFramework
         public void Init()
         {
             Nodes = new List<BlockmapNode>();
+            Walls = new List<Wall>();
             AffectedChunks = new HashSet<Chunk>();
 
-            UpdateAffectedNodes();
+            UpdateAffectedWorldObjects();
         }
 
         #endregion
@@ -61,9 +63,9 @@ namespace BlockmapFramework
         #region Actions
 
         /// <summary>
-        /// Updates the zone references in all nodes and chunks this zone is on.
+        /// Updates the zone references in all nodes, walls and chunks this zone is on.
         /// </summary>
-        private void UpdateAffectedNodes()
+        private void UpdateAffectedWorldObjects()
         {
             // Remove this zone from all previously affected nodes
             foreach (BlockmapNode node in Nodes)
@@ -77,6 +79,20 @@ namespace BlockmapFramework
             // Add this zone as a reference to all affected nodes
             foreach (BlockmapNode node in Nodes)
                 node.AddZone(this);
+
+
+            // Remove this zone from all previously affected walls
+            foreach (Wall wall in Walls)
+                wall.RemoveZone(this);
+
+            // Recalculate affected walls
+            Walls.Clear();
+            foreach (Vector2Int coords in WorldCoordinates)
+                Walls.AddRange(World.GetWalls(coords));
+
+            // Add this zone as a reference to all affected wall
+            foreach (Wall wall in Walls)
+                wall.AddZone(this);
 
 
             // Remove this zone from all previously affected chunks

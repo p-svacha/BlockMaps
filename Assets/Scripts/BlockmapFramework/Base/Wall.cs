@@ -48,6 +48,11 @@ namespace BlockmapFramework
         /// </summary>
         public bool IsMirrored;
 
+        /// <summary>
+        /// Zones that this wall is inside of
+        /// </summary>
+        public List<Zone> Zones = new List<Zone>();
+
         public float Width => Shape.Width;
 
         // GameObject
@@ -138,6 +143,22 @@ namespace BlockmapFramework
 
         #endregion
 
+        #region Actions
+
+        public void AddZone(Zone z)
+        {
+            Zones.Add(z);
+
+            // Explore walls for zone owner if zone provides vision
+            if (z.ProvidesVision) AddExploredBy(z.Actor);
+        }
+        public void RemoveZone(Zone z)
+        {
+            Zones.Remove(z);
+        }
+
+        #endregion
+
         #region Vision Target
 
         private HashSet<Actor> ExploredBy = new HashSet<Actor>();
@@ -164,6 +185,7 @@ namespace BlockmapFramework
         public bool IsVisibleBy(Actor actor)
         {
             if (actor == null) return true; // Everything is visible
+            if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
             if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Wall is seen by an entity of given actor
 
             return false;

@@ -11,7 +11,7 @@ namespace CaptureTheFlag
         private const float ACTION_COST = 0.5f;
 
         public override string Name => "Interact with Door";
-        public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/Icons/Jail");
+        public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/ActionIcons/Door");
 
         public Door TargetDoor { get; private set; }
 
@@ -20,9 +20,20 @@ namespace CaptureTheFlag
             TargetDoor = target;
         }
 
+        public override bool CanPerformNow()
+        {
+            if (!Character.CanInteractWithDoors) return false;
+
+            return base.CanPerformNow();
+        }
+
         protected override void OnStartPerform()
         {
-            TargetDoor.Toggle();
+            TargetDoor.Toggle(callback: DoorToggleDone);
+        }
+
+        private void DoorToggleDone()
+        {
             EndAction();
         }
 

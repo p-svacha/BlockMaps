@@ -16,6 +16,7 @@ namespace CaptureTheFlag
         public float MaxStamina => Props.MaxStamina;
         public float StaminaRegeneration => Props.StaminaRegeneration;
         public float MovementSkill => Props.MovementSkill;
+        public bool CanInteractWithDoors => Props.CanInteractWithDoors;
 
         #endregion
     }

@@ -18,5 +18,6 @@ namespace CaptureTheFlag
         public float MaxStamina { get; init; } = 0;
         public float StaminaRegeneration { get; init; } = 0;
         public float MovementSkill { get; init; } = 0;
+        public bool CanInteractWithDoors { get; init; } = false;
     }
 }

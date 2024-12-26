@@ -516,7 +516,8 @@ namespace BlockmapFramework
 
         public bool IsExploredBy(Actor actor)
         {
-            if (actor == null) return true; // Everything is visible
+            if (IsVisibleBy(actor)) return true; // Is currently visible by the given actor
+
             return LastKnownPosition[actor] != null; // There is a last known position for the given actor meaning they have discovered this entity
         }
 
@@ -791,6 +792,7 @@ namespace BlockmapFramework
                     (1 << World.Layer_WaterMesh) | (1 << World.Layer_EntityVisionCollider) |
                     (1 << World.Layer_FenceMesh) | (1 << World.Layer_WallVisionCollider);
             RaycastHit[] hits = Physics.RaycastAll(ray, VisionRange, layerMask);
+
             HelperFunctions.OrderRaycastHitsByDistance(hits);
 
             foreach (RaycastHit hit in hits)

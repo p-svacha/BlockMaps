@@ -24,6 +24,7 @@ namespace CaptureTheFlag
             int maxAttempts = 10;
             while (TargetNode == null && attempts < maxAttempts)
             {
+                attempts++;
                 BlockmapNode targetNode = Player.DefendPerimeterNodes[Random.Range(0, Player.DefendPerimeterNodes.Count)];
                 NavigationPath targetPath = GetPath(targetNode);
                 if (targetPath != null) // valid target that we can reach

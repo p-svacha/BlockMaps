@@ -2062,7 +2062,8 @@ namespace BlockmapFramework
 
             // Determine the chunk radius to search
             int chunkRadius = Mathf.CeilToInt(maxDistance / ChunkSize);
-            Vector2Int targetChunkCoords = GetChunk(new Vector2Int(Mathf.RoundToInt(worldPosition.x), Mathf.RoundToInt(worldPosition.z))).Coordinates;
+
+            Vector2Int targetChunkCoords = GetChunk(new Vector2Int((int)worldPosition.x, (int)worldPosition.z)).Coordinates;
 
             // Only check entities in chunks where there's a chance that they're close enough
             for (int x = -chunkRadius; x <= chunkRadius; x++)

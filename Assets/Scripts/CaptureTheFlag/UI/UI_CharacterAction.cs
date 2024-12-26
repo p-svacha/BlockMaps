@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 namespace CaptureTheFlag
 {
-    public class UI_CharacterAction : MonoBehaviour
+    public class UI_CharacterAction : MonoBehaviour, IPointerEnterHandler
     {
         private SpecialCharacterAction Action;
 
@@ -21,6 +22,8 @@ namespace CaptureTheFlag
             Button.onClick.AddListener(OnClick);
             TitleText.text = action.Name;
             Icon.sprite = action.Icon;
+
+            GetComponent<TooltipTarget>().Text = action.Name;
         }
 
         private void OnClick()
@@ -29,7 +32,11 @@ namespace CaptureTheFlag
 
             if (Action.Match.MatchType == CtfMatchType.Singleplayer) Action.Perform();
             if (Action.Match.MatchType == CtfMatchType.Multiplayer) Action.Match.PerformMultiplayerAction(Action);
+        }
 
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if(Action.CanPerformNow()) Action.Match.HoveredAction = Action;
         }
     }
 }

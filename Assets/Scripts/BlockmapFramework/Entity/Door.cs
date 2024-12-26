@@ -43,6 +43,7 @@ namespace BlockmapFramework
         private float elapsedTime;
         private float rotationDuration = 1f; // Duration for the full rotation in seconds
         private bool isRotating = false;
+        private System.Action ToggleCallback;
 
         #region Init
 
@@ -97,9 +98,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Opens or closes the door based on its current state.
         /// </summary>
-        public void Toggle()
+        public void Toggle(System.Action callback  = null)
         {
             if (isRotating) return; // Prevent toggling during rotation
+
+            ToggleCallback = callback;
 
             startingRotation = WorldRotation;
             targetRotation = IsOpen ? ClosedRotation : OpenRotation;
@@ -126,6 +129,7 @@ namespace BlockmapFramework
                 WorldRotation = targetRotation;
                 UpdateVisibility();
                 World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.MeshCenterWorldPosition);
+                ToggleCallback?.Invoke();
             }
         }
 

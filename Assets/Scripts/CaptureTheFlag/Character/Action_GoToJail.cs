@@ -10,9 +10,16 @@ namespace CaptureTheFlag
         private const float ACTION_COST = 0f;
 
         public override string Name => "Go to Jail";
-        public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/Icons/Jail");
+        public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/ActionIcons/Jail");
 
         public Action_GoToJail(CtfMatch game, CtfCharacter c) : base(game, c, ACTION_COST) { }
+
+        public override bool CanPerformNow()
+        {
+            if (Character.IsInJail) return false;
+
+            return base.CanPerformNow();
+        }
 
         protected override void OnStartPerform()
         {

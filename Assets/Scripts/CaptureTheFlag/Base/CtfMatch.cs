@@ -47,6 +47,7 @@ namespace CaptureTheFlag
 
         public List<CtfCharacter> Characters;
         public CtfCharacter SelectedCharacter { get; private set; }
+        public CharacterAction HoveredAction { get; set; }
         private HashSet<BlockmapNode> HighlightedNodes = new();
 
         // Game attributes
@@ -174,9 +175,6 @@ namespace CaptureTheFlag
         /// </summary>
         private void FinalizeMatchInitialization()
         {
-            // Register hooks
-            World.OnHoveredNodeChanged += OnHoveredNodeChanged;
-
             // Vision
             World.ShowTextures(true);
             World.ShowGridOverlay(true);
@@ -383,8 +381,11 @@ namespace CaptureTheFlag
             CtfCharacter hoveredCharacter = null;
             if (World.HoveredEntity != null && World.HoveredEntity is CtfCharacter c) hoveredCharacter = c;
 
+            // Hovered move
+            UpdateHoveredMove();
+
             // Left click - Select character
-            if(Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
+            if (Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
             {
                 // Deselect character
                 if (hoveredCharacter == null) DeselectCharacter();
@@ -394,7 +395,7 @@ namespace CaptureTheFlag
             }
 
             // Right click - Move
-            if(Input.GetMouseButtonDown(1))
+            if(Input.GetMouseButtonDown(1) && !HelperFunctions.IsMouseOverUi())
             {
                 // Move
                 if(SelectedCharacter != null && 
@@ -410,13 +411,11 @@ namespace CaptureTheFlag
                 }
             }
 
-            // Notifications
-            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowRedNotificationText("Opponent has ended their turn");
-        }
+            // Update character info UI
+            if (SelectedCharacter != null) UI.CharacterInfo.ShowCharacter(SelectedCharacter, HoveredAction);
 
-        private void OnHoveredNodeChanged(BlockmapNode oldNode, BlockmapNode newNode)
-        {
-            UpdateHoveredMove();
+            // Notifications UI
+            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowRedNotificationText("Opponent has ended their turn");
         }
 
         /// <summary>
@@ -428,13 +427,14 @@ namespace CaptureTheFlag
             if (SelectedCharacter.IsInAction) return;
 
             PathPreview.gameObject.SetActive(false);
-            UI.CharacterInfo.Init(SelectedCharacter);
+
+            if (HelperFunctions.IsMouseOverUi()) return;
+            HoveredAction = null;
 
             // Check if we hover a possible move
             BlockmapNode targetNode = World.HoveredNode;
             if (targetNode == null) return;
             if (!targetNode.IsExploredBy(LocalPlayer.Actor)) return;
-
 
             // Can move there in this turn
             if (SelectedCharacter.PossibleMoves.ContainsKey(targetNode))
@@ -442,7 +442,7 @@ namespace CaptureTheFlag
                 PathPreview.gameObject.SetActive(true);
 
                 Action_Movement move = SelectedCharacter.PossibleMoves[targetNode];
-                UI.CharacterInfo.ShowActionPreview(move.Cost);
+                HoveredAction = move;
                 Pathfinder.ShowPathPreview(PathPreview, move.Path, 0.1f, new Color(1f, 1f, 1f, 0.5f));
             }
             // Can not move there in this turn
@@ -450,7 +450,7 @@ namespace CaptureTheFlag
             {
                 NavigationPath path = Pathfinder.GetPath(SelectedCharacter, SelectedCharacter.OriginNode, targetNode, considerUnexploredNodes: true);
                 if (path == null) return; // no viable path there
-
+                
                 PathPreview.gameObject.SetActive(true);
                 Pathfinder.ShowPathPreview(PathPreview, path, 0.1f, new Color(1f, 0f, 0f, 0.5f));
             }

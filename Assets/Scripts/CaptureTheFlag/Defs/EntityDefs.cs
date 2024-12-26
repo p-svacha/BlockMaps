@@ -70,6 +70,7 @@ namespace CaptureTheFlag
                         MaxStamina = 60,
                         StaminaRegeneration = 6,
                         MovementSkill = 10,
+                        CanInteractWithDoors = true,
                     }
                 },
             },
@@ -111,6 +112,7 @@ namespace CaptureTheFlag
                         MaxStamina = 40,
                         StaminaRegeneration = 5,
                         MovementSkill = 15,
+                        CanInteractWithDoors = false,
                     }
                 },
             },

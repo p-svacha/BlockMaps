@@ -81,7 +81,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.26666668, g: 0.27058825, b: 0.27058825, a: 1}
+  m_Color: {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -352,8 +352,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4294621107
+  m_fontColor: {r: 0.7019608, g: 0.7176471, b: 0.9803922, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -735,15 +735,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.b
-      value: 0
+      value: 0.055602543
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.g
-      value: 0
+      value: 0.05660379
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.r
-      value: 0
+      value: 0.052598804
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409163, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_SizeDelta.x
@@ -892,15 +892,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.b
-      value: 0
+      value: 0.055602543
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.g
-      value: 0
+      value: 0.05660379
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409162, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_Color.r
-      value: 0
+      value: 0.052598804
       objectReference: {fileID: 0}
     - target: {fileID: 6868416948953409163, guid: 63f699ebaba5eb44999b5ec49422dcd1, type: 3}
       propertyPath: m_SizeDelta.x

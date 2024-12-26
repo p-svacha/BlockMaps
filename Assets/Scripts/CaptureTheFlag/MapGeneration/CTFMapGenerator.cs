@@ -134,9 +134,9 @@ namespace CaptureTheFlag
                 else if (node.WorldCoordinates.x < playerZoneSize + neutralZoneSize) neutralZoneNodes.Add(node.WorldCoordinates);
                 else opponentZoneNodes.Add(node.WorldCoordinates);
             }
-            World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, ZoneVisibility.VisibleForOwner); // id = 0: Blue player territory
+            World.AddZone(ownZoneNodes, LocalPlayer, providesVision: false, ZoneVisibility.VisibleForEveryone); // id = 0: Blue player territory
             World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, ZoneVisibility.VisibleForEveryone); // id = 1: Neutral territory
-            World.AddZone(opponentZoneNodes, Opponent, providesVision: false, ZoneVisibility.VisibleForOwner);// id = 2: Red player territory
+            World.AddZone(opponentZoneNodes, Opponent, providesVision: false, ZoneVisibility.VisibleForEveryone);// id = 2: Red player territory
         }
     }
 }

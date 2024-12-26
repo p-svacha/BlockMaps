@@ -53,6 +53,7 @@ namespace CaptureTheFlag
                 CharacterSelection.Add(c, panel);
             }
 
+            HelperFunctions.DestroyAllChildredImmediately(SpecialActionsContainer);
             CharacterInfo.gameObject.SetActive(false);
             TurnIndicator.SetActive(false);
         }
@@ -93,9 +94,8 @@ namespace CaptureTheFlag
 
         public void SelectCharacter(CtfCharacter c)
         {
-            // Character Info
+            // Character Selection
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
-            CharacterInfo.Init(c);
 
             // Actions
             SpecialActionsContainer.SetActive(true);

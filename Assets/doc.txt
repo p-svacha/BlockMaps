@@ -1,4 +1,13 @@
-make valley map gen 
+CTF: Singleplayer lobby
+Lobby: Back to Menu Button
+
+CTF: humans and dogs with names and attributes
+(one longer human)
+
+
+make valley map gen
+	high sides with player spawns
+	river in the middle
 
 
 Map Modifiers:

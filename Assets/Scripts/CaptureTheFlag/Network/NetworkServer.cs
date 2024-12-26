@@ -242,6 +242,11 @@ namespace CaptureTheFlag.Network
 
         private void OnDestroy()
         {
+            StopServer();
+        }
+
+        public void StopServer()
+        {
             // Clean up
             if (ServerListener != null)
             {
