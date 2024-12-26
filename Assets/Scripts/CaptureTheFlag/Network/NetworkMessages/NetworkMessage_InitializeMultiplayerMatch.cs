@@ -7,15 +7,17 @@ namespace CaptureTheFlag.Network
     [System.Serializable]
     public class NetworkMessage_InitializeMultiplayerMatch : NetworkMessage
     {
-        public int MapSize;
-        public int MapSeed;
+        public int WorldGeneratorIndex;
+        public int WorldSize;
+        public int Seed;
         public string Player1ClientId;
         public string Player2ClientId;
 
-        public NetworkMessage_InitializeMultiplayerMatch(int size, int seed, string p1Id, string p2Id) : base("InitializeMultiplayerMatch")
+        public NetworkMessage_InitializeMultiplayerMatch(int worldGeneratorIndex, int worldSize, int seed, string p1Id, string p2Id) : base("InitializeMultiplayerMatch")
         {
-            MapSize = size;
-            MapSeed = seed;
+            WorldGeneratorIndex = worldGeneratorIndex;
+            WorldSize = worldSize;
+            Seed = seed;
             Player1ClientId = p1Id;
             Player2ClientId = p2Id;
         }

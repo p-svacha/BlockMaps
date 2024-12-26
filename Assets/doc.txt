@@ -1,5 +1,7 @@
+Change ClientConnected to ClientJoinedLobby and also send LobbyState in the answer from the server
+LobbyState has ClientInfos and MatchSettings
+
 Lobby: Color
-Lobby: NetworkMessage color change
 Lobby: NetworkMessage settingschange
 Lobby: Network Message Initialize Match (use exsitng)
 	> use GameSettings

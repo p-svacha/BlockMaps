@@ -204,9 +204,14 @@ namespace CaptureTheFlag.Network
                         Game.OnNewClientConnected(clientInfos, isSelf: clientInfosMessage.NewlyConnectedClientId == ClientId);
                         break;
 
+                    case "LobbyState":
+                        var lobbyStateMessage = (NetworkMessage_LobbyState)message;
+                        Game.SetUpdatedLobbyInfo(new CtfMatchLobby(Game.ServerClientInfos, lobbyStateMessage));
+                        break;
+
                     case "InitializeMultiplayerMatch":
                         var initializeMessage = (NetworkMessage_InitializeMultiplayerMatch)message;
-                        Game.SetMultiplayerMatchAsReady(initializeMessage.MapSize, initializeMessage.MapSeed, playAsBlue: initializeMessage.IsSentBySelf, initializeMessage.Player1ClientId, initializeMessage.Player2ClientId);
+                        Game.SetMultiplayerMatchAsReady(initializeMessage.WorldGeneratorIndex, initializeMessage.WorldSize, initializeMessage.Seed, initializeMessage.Player1ClientId, initializeMessage.Player2ClientId);
                         break;
 
                     default:

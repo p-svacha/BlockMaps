@@ -12,9 +12,10 @@ namespace CaptureTheFlag.UI
         public TextMeshProUGUI LabelText;
         public Image ColorIcon;
 
-        public void Init(ClientInfo playerInfo)
+        public void Init(ClientInfo playerInfo, Color c)
         {
             LabelText.text = $"{playerInfo.DisplayName} ({playerInfo.ClientId})";
+            ColorIcon.color = c;
         }
     }
 }

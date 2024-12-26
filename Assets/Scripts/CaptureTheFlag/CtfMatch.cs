@@ -20,6 +20,17 @@ namespace CaptureTheFlag
         public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
         public const int JAIL_TIME = 5; // Amount of turns a character spends in jail after being tagged
         public const float FLAG_ZONE_RADIUS = 7.5f;  // Amount of tiles around flag that can't be entered by own team
+        public static List<Color> PlayerColors = new List<Color>()
+        {
+            Color.blue,
+            Color.red
+        };
+
+        // World generators
+        public static List<CTFMapGenerator> WorldGenerators = new List<CTFMapGenerator>()
+        {
+            new CTFMapGenerator_Forest(),
+        };
 
         // Elements
         public CtfMatchUi UI => Game.MatchUI;
@@ -36,7 +47,7 @@ namespace CaptureTheFlag
         public Zone OpponentZone => Opponent.Territory;
 
         public List<Player> Players;
-        private bool IsPlayingAsBlue;
+        private bool LocalPlayerIsPlayer1;
         public Player LocalPlayer { get; private set; }
         public Player Opponent { get; private set; }
 
@@ -63,17 +74,17 @@ namespace CaptureTheFlag
             Game = game;
         }
 
-        public void InitializeGame(CtfMatchType matchType, int mapSize, int seed = -1, bool playAsBlue = true, string p1ClientId = "", string p2ClientId = "")
+        public void InitializeGame(CtfMatchType matchType, int mapGeneratorIndex, int mapSize, int seed = -1, bool playAsP1 = true, string p1ClientId = "", string p2ClientId = "")
         {
             MatchType = matchType;
-            IsPlayingAsBlue = playAsBlue;
+            LocalPlayerIsPlayer1 = playAsP1;
 
             // Load textures
             ReachableTileOverlay = MaterialManager.LoadTexture("CaptureTheFlag/Textures/ReachableTileOverlay");
 
             // Start world generation
             Game.LoadingScreenOverlay.SetActive(true);
-            MapGenerator = new CTFMapGenerator_Forest();
+            MapGenerator = WorldGenerators[mapGeneratorIndex];
             MapGenerator.StartGeneration(mapSize, seed, onDoneCallback: () => OnWorldGenerationDone(p1ClientId, p2ClientId));
             State = MatchState.GeneratingWorld;
         }
@@ -93,7 +104,7 @@ namespace CaptureTheFlag
 
             if(MatchType == CtfMatchType.Singleplayer)
             {
-                if (IsPlayingAsBlue)
+                if (LocalPlayerIsPlayer1)
                 {
                     LocalPlayer = new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
                     Players.Add(LocalPlayer);
@@ -116,7 +127,7 @@ namespace CaptureTheFlag
                 Players.Add(new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4), p1ClientId));
                 Players.Add(new Player(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6), p2ClientId));
 
-                if (IsPlayingAsBlue)
+                if (LocalPlayerIsPlayer1)
                 {
                     LocalPlayer = Players[0];
                     Opponent = Players[1];
@@ -179,7 +190,7 @@ namespace CaptureTheFlag
         {
             UI.HideRedNotificationText();
             CurrentTick = 0;
-            if (MatchType == CtfMatchType.Multiplayer && IsPlayingAsBlue) CurrentTick = -30; // Offset for server host to counteract ping
+            if (MatchType == CtfMatchType.Multiplayer && LocalPlayerIsPlayer1) CurrentTick = -30; // Offset for server host to counteract ping
             StartPlayerTurn();
         }
 

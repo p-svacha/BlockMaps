@@ -7,18 +7,26 @@ namespace CaptureTheFlag
 {
     public class MatchSettings
     {
+        public int ChosenWorldGeneratorIndex;
         public string ChosenWorldGeneratorOption;
-        public WorldGenerator WorldGenerator;
 
+        public int ChosenMapSizeIndex;
         public string ChosenMapSizeOption;
-        public int MapSize;
 
-        public MatchSettings(string chosenWorldGeneratorOption, WorldGenerator worldGenerator, string chosenMapSizeOption, int mapSize)
+        public MatchSettings() { }
+        public MatchSettings(int[] settings)
         {
-            ChosenWorldGeneratorOption = chosenWorldGeneratorOption;
-            WorldGenerator = worldGenerator;
-            ChosenMapSizeOption = chosenMapSizeOption;
-            MapSize = mapSize;
+            ChosenWorldGeneratorIndex = settings[0];
+            ChosenMapSizeIndex = settings[1];
+        }
+
+        public int[] ToIntArray()
+        {
+            return new int[]
+            {
+                ChosenWorldGeneratorIndex,
+                ChosenMapSizeIndex
+            };
         }
     }
 }
