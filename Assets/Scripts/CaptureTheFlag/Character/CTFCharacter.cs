@@ -24,7 +24,7 @@ namespace CaptureTheFlag
         public int JailTime { get; private set; }
         public bool IsInJail => JailTime > 0;
         public Dictionary<BlockmapNode, Action_Movement> PossibleMoves { get; private set; }
-        public List<SpecialAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
+        public List<SpecialCharacterAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         public CharacterAction CurrentAction { get; private set; }
 
         // UI
@@ -184,13 +184,19 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns a list of all actions that can be performed via button.
         /// </summary>
-        /// <returns></returns>
-        private List<SpecialAction> GetSpecialActions()
+        private List<SpecialCharacterAction> GetSpecialActions()
         {
-            List<SpecialAction> actions = new List<SpecialAction>();
+            List<SpecialCharacterAction> actions = new List<SpecialCharacterAction>();
 
             // Go to jail
             if(!IsInJail) actions.Add(new Action_GoToJail(Game, this));
+
+            // Door interaction
+            foreach(Door door in World.GetNearbyEntities(WorldPosition, maxDistance: 2f).Where(e => e is Door))
+            {
+                actions.Add(new Action_InteractWithDoor(Game, this, door));
+            }
+
 
             return actions;
         }
@@ -208,7 +214,8 @@ namespace CaptureTheFlag
             return true;
         }
 
-
         #endregion
+
+
     }
 }

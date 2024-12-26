@@ -38,6 +38,17 @@ namespace CaptureTheFlag
             State = CharacterActionState.Pending;
         }
 
+        public virtual bool CanPerformNow()
+        {
+            // Check if character is currently performing another action
+            if (Character.IsInAction) return false;
+
+            // Check if character has enough action points remaining
+            if (Character.ActionPoints < Cost) return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Start performing this action.
         /// </summary>

@@ -1,14 +1,6 @@
-Change ClientConnected to ClientJoinedLobby and also send LobbyState in the answer from the server
-LobbyState has ClientInfos and MatchSettings
-
-Lobby: Color
-Lobby: NetworkMessage settingschange
-Lobby: Network Message Initialize Match (use exsitng)
-	> use GameSettings
+make valley map gen 
 
 
-
-make ctf map generator system the default one with the steps
 Map Modifiers:
 	- a function that affects the whole map
 	- basically a step of map gen process
@@ -17,7 +9,7 @@ Increase performance of detecting climb transitions on empty perlin map
 maybe also other steps
 Goal: 512 x 512 map (32 chunks) in 10 seconds preferred, 20 max. Now it takes like 50
 
-fix are for hop transitions - arc always has a height of 1 and going further down/up is just straight
+fix arc for hop transitions - arc always has a height of 1 and going further down/up is just straight
 
 
 
@@ -209,8 +201,8 @@ More static entities (see following for inspiration):
 	> fallout tactics streams
 
 
-CTF: Player Names
-CTF: Game Lobby
+CTF: Single player lobby
+CTF: Vision altitude cutoff
 
 CTF: Open/Close door action
 	> + sync

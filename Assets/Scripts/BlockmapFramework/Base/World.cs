@@ -2055,6 +2055,37 @@ namespace BlockmapFramework
         {
             return Entities.Values.Where(x => x.CanSee && Vector3.Distance(x.GetWorldCenter(), position) <= x.VisionRange + (rangeEast) + (rangeNorth)).ToList();
         }
+        public HashSet<Entity> GetNearbyEntities(Vector3 worldPosition, float maxDistance)
+        {
+            HashSet<Entity> nearbyEntities = new HashSet<Entity>();
+            float maxDistanceSquared = maxDistance * maxDistance;
+
+            // Determine the chunk radius to search
+            int chunkRadius = Mathf.CeilToInt(maxDistance / ChunkSize);
+            Vector2Int targetChunkCoords = GetChunk(new Vector2Int(Mathf.RoundToInt(worldPosition.x), Mathf.RoundToInt(worldPosition.z))).Coordinates;
+
+            // Only check entities in chunks where there's a chance that they're close enough
+            for (int x = -chunkRadius; x <= chunkRadius; x++)
+            {
+                for (int y = -chunkRadius; y <= chunkRadius; y++)
+                {
+                    Vector2Int neighborChunkCoords = targetChunkCoords + new Vector2Int(x, y);
+                    Chunks.TryGetValue(neighborChunkCoords, out Chunk neighbourChunk);
+                    if (neighbourChunk != null)
+                    {
+                        foreach (var entity in neighbourChunk.GetAllEntities())
+                        {
+                            if ((entity.WorldPosition - worldPosition).sqrMagnitude <= maxDistanceSquared)
+                            {
+                                nearbyEntities.Add(entity);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return nearbyEntities;
+        }
         public List<Entity> GetEntitiesThatCanSeeParcel(Parcel parcel)
         {
             return Entities.Values

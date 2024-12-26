@@ -26,10 +26,18 @@ namespace CaptureTheFlag
             Color.red
         };
 
-        // World generators
+        // Match setting option
         public static List<CTFMapGenerator> WorldGenerators = new List<CTFMapGenerator>()
         {
             new CTFMapGenerator_Forest(),
+        };
+        public static Dictionary<string, int> MapSizes = new Dictionary<string, int>()
+        {
+            { "Tiny", 4 },
+            { "Small", 6 },
+            { "Medium", 8 },
+            { "Big", 10 },
+            { "Large", 12 },
         };
 
         // Elements
@@ -391,16 +399,14 @@ namespace CaptureTheFlag
                 // Move
                 if(SelectedCharacter != null && 
                     World.HoveredNode != null &&
-                    !SelectedCharacter.IsInAction
-                    && SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Action_Movement move))
+                    !SelectedCharacter.IsInAction &&
+                    SelectedCharacter.PossibleMoves.TryGetValue(World.HoveredNode, out Action_Movement move) &&
+                    move.CanPerformNow())
                 {
-                    if (LocalPlayer.CanPerformMovement(move))
-                    {
-                        if (MatchType == CtfMatchType.Singleplayer) move.Perform();
-                        if (MatchType == CtfMatchType.Multiplayer) PerformMultiplayerAction(move);
+                    if (MatchType == CtfMatchType.Singleplayer) move.Perform();
+                    if (MatchType == CtfMatchType.Multiplayer) PerformMultiplayerAction(move);
 
-                        UnhighlightNodes(); // Unhighlight nodes
-                    }
+                    UnhighlightNodes(); // Unhighlight nodes
                 }
             }
 
@@ -590,8 +596,8 @@ namespace CaptureTheFlag
 
                     // Character actions
                     case "CharacterAction_MoveCharacter":
-                        var moveMessage = (NetworkMessage_MoveCharacter)baseMessage;
-                        Action_Movement move = GetCharacterById(moveMessage.CharacterId).PossibleMoves.First(m => m.Key.Id == moveMessage.TargetNodeId).Value;
+                        var moveMessage = (NetworkMessage_CharacterAction)baseMessage;
+                        Action_Movement move = GetCharacterById(moveMessage.CharacterId).PossibleMoves.First(m => m.Key.Id == moveMessage.TargetId).Value;
                         QueueActionToPerform(move, moveMessage.Tick);
                         break;
 
@@ -599,6 +605,12 @@ namespace CaptureTheFlag
                         var jailMessage = (NetworkMessage_CharacterAction)baseMessage;
                         Action_GoToJail jailAction = (Action_GoToJail)(GetCharacterById(jailMessage.CharacterId).PossibleSpecialActions.First(x => x is Action_GoToJail));
                         QueueActionToPerform(jailAction, jailMessage.Tick);
+                        break;
+
+                    case "CharacterAction_InteractWithDoor":
+                        var doorMessage = (NetworkMessage_CharacterAction)baseMessage;
+                        Action_InteractWithDoor doorAction = (Action_InteractWithDoor)(GetCharacterById(doorMessage.CharacterId).PossibleSpecialActions.First(x => x is Action_InteractWithDoor a && a.TargetDoor.Id == doorMessage.TargetId));
+                        QueueActionToPerform(doorAction, doorMessage.Tick);
                         break;
                 }
             }

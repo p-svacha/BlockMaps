@@ -42,6 +42,10 @@ namespace BlockmapFramework
         protected GenerationPhase GenerationPhase { get; set; }
         public bool IsDone => GenerationPhase == GenerationPhase.Done;
 
+        // Generation
+        private int CurrentGenerationStep;
+        private List<System.Action> GenerationSteps;
+
         /// <summary>
         /// Starts a new world generation process with this generator that is continued every time UpdateGeneration() is called until the GenerationPhase is Done.
         /// </summary>
@@ -71,10 +75,14 @@ namespace BlockmapFramework
             World = new World(NumChunksPerSide);
 
             GenerationPhase = GenerationPhase.Generating;
+            CurrentGenerationStep = 0;
+            GenerationSteps = GetGenerationSteps();
             OnGenerationStart();
         }
 
-        protected abstract void OnGenerationStart();
+        protected abstract List<System.Action> GetGenerationSteps();
+
+        protected virtual void OnGenerationStart() { }
 
         /// <summary>
         /// Call this in FixedUpdate.
@@ -87,22 +95,31 @@ namespace BlockmapFramework
                     CreateEmptyWorld();
                     break;
 
-                case GenerationPhase.Generating: // Generator-specific steps
-                    OnUpdate();
+                case GenerationPhase.Generating:
+                    ExecuteGenerationStep();
                     break;
             }
         }
 
-        /// <summary>
-        /// Gets called each frame. Should be used to go through the different generation steps while not blocking the program completely.
-        /// <br/>When done, call FinalizeGeneration().
-        /// </summary>
-        protected abstract void OnUpdate();
+        private void ExecuteGenerationStep()
+        {
+            if (CurrentGenerationStep == GenerationSteps.Count)
+            {
+                FinalizeGeneration();
+                return;
+            }
+
+            Debug.Log("Starting World Generation Step: " + GenerationSteps[CurrentGenerationStep].Method.Name);
+            Profiler.Begin(GenerationSteps[CurrentGenerationStep].Method.Name);
+            GenerationSteps[CurrentGenerationStep].Invoke();
+            Profiler.End(GenerationSteps[CurrentGenerationStep].Method.Name);
+            CurrentGenerationStep++;
+        }
 
         /// <summary>
         /// Last step of world generation. Initiates the world initialization which redraws the finished world, updates the vision of all entities and generates the full navmesh.
         /// </summary>
-        protected void FinalizeGeneration()
+        private void FinalizeGeneration()
         {
             GenerationPhase = GenerationPhase.Done;
             Profiler.End("World Generation");

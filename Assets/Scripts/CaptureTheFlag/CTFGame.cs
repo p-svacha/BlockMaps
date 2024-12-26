@@ -123,10 +123,13 @@ namespace CaptureTheFlag
 
         public void StartSingleplayerMatch()
         {
+            MainMenuUI.gameObject.SetActive(false);
+            LobbyUI.gameObject.SetActive(false);
+            MatchUI.gameObject.SetActive(true);
+
             ActiveMatch = new CtfMatch(this);
             ActiveMatch.InitializeGame(CtfMatchType.Singleplayer, mapGeneratorIndex: 0, GetRandomMapSize(), playAsP1: true);
             MatchUI.Init(ActiveMatch);
-            MainMenuUI.gameObject.SetActive(false);
         }
 
         public void ShowEndGameScreen(string text)

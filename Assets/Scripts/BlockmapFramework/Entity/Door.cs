@@ -55,6 +55,41 @@ namespace BlockmapFramework
             OriginNode.Doors.Remove(Rotation);
         }
 
+        protected override void CreateVisionCollider()
+        {
+            // A door has 2 non-moving vision colliders in place for open and closed state. Because if you see one of those, you know the state for sure.
+
+            // Parent objects of both colliders
+            VisionColliderObject = new GameObject("visionCollider");
+            VisionColliderObject.transform.SetParent(Wrapper.transform);
+
+            // Vision collider for closed state
+            GameObject closedVisionColliderObj = new GameObject("visionCollider_closed");
+            closedVisionColliderObj.layer = World.Layer_EntityVisionCollider;
+            closedVisionColliderObj.transform.SetParent(VisionColliderObject.transform);
+
+            MeshCollider closedCollider = closedVisionColliderObj.AddComponent<MeshCollider>();
+            closedCollider.sharedMesh = MeshCollider.sharedMesh;
+            closedCollider.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+            WorldObjectCollider closedEvc = closedVisionColliderObj.AddComponent<WorldObjectCollider>();
+            closedEvc.Object = this;
+            closedEvc.State = 0;
+
+            // Vision collider for open state
+            GameObject openVisionColliderObj = new GameObject("visionCollider_closed");
+            openVisionColliderObj.layer = World.Layer_EntityVisionCollider;
+            openVisionColliderObj.transform.SetParent(VisionColliderObject.transform);
+
+            MeshCollider openCollider = openVisionColliderObj.AddComponent<MeshCollider>();
+            openCollider.sharedMesh = MeshCollider.sharedMesh;
+            openCollider.transform.rotation = IsMirrored ? Quaternion.Euler(0, 90, 0) : Quaternion.Euler(0, -90, 0);
+
+            WorldObjectCollider openEvc = openVisionColliderObj.AddComponent<WorldObjectCollider>();
+            openEvc.Object = this;
+            openEvc.State = 1;
+        }
+
         #endregion
 
         #region Actions
@@ -90,7 +125,6 @@ namespace BlockmapFramework
                 isRotating = false; // Rotation is complete
                 WorldRotation = targetRotation;
                 UpdateVisibility();
-                UpdateVisionColliderPosition();
                 World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.MeshCenterWorldPosition);
             }
         }
@@ -105,6 +139,13 @@ namespace BlockmapFramework
         }
 
         #region Getters
+
+        public override bool BlocksVision(WorldObjectCollider collider)
+        {
+            if (collider.State == 0 && !IsOpen) return true;
+            if (collider.State == 1 && IsOpen) return true;
+            return false;
+        }
 
         public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
         {
@@ -172,10 +213,11 @@ namespace BlockmapFramework
             int handleSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Special/LadderMaterial"));
 
             // Anchor point (needed for correct door rotation)
-            float anchorPointOffset = DOOR_WIDTH / 2f;
+            float anchorPointOffsetX = DOOR_WIDTH / 2f;
+            float anchorPointOffsetY = DOOR_WIDTH / 2f;
             Vector2 anchorPoint;
-            if (isMirrored) anchorPoint = new Vector2(-(1f - anchorPointOffset), -anchorPointOffset);
-            else anchorPoint = new Vector2(-anchorPointOffset, -anchorPointOffset);
+            if (isMirrored) anchorPoint = new Vector2(-(1f - anchorPointOffsetX), -anchorPointOffsetY);
+            else anchorPoint = new Vector2(-anchorPointOffsetX, -anchorPointOffsetY);
 
             // Door
             float doorHeight = height * World.NodeHeight;

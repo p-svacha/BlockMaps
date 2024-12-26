@@ -21,5 +21,10 @@ namespace BlockmapFramework
         /// <br/>Only works on standalone rendered entities and should be avoided for entities with complicated meshes.
         /// </summary>
         MeshCollider,
+
+        /// <summary>
+        /// VisionCollider is created with custom logic in the entity subclass.
+        /// </summary>
+        CustomImplementation
     }
 }

@@ -13,11 +13,9 @@ namespace CaptureTheFlag
 
         private int[,] HeightMap;
 
-        protected override void OnGenerationStart()
+        protected override List<System.Action> GetGenerationSteps()
         {
-            base.OnGenerationStart();
-
-            GenerationSteps = new List<System.Action>()
+            return new List<System.Action>()
             {
                 GenerateNoise,
                 ApplyHeightmap,

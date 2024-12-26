@@ -11,10 +11,12 @@ namespace CaptureTheFlag.Network
     {
         public int Tick;
         public int CharacterId;
+        public int TargetId;
 
-        public NetworkMessage_CharacterAction(string messageType, int characterId) : base(messageType)
+        public NetworkMessage_CharacterAction(string messageType, int characterId, int targetId = 0) : base(messageType)
         {
             CharacterId = characterId;
+            TargetId = targetId;
         }
     }
 }

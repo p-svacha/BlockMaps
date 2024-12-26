@@ -87,25 +87,6 @@ namespace CaptureTheFlag
         public World World => Actor.World;
 
         /// <summary>
-        /// Returns if a movement action can currently be performed.
-        /// </summary>
-        public bool CanPerformMovement(Action_Movement move)
-        {
-            if (move.Character.Owner != this) throw new System.Exception("Can only check actions from characters of this player");
-
-            // Check if character is currently performing another action
-            if (move.Character.IsInAction) return false;
-
-            // Check if another character is currently heading to the target node
-            foreach(CtfCharacter character in Match.Characters)
-            {
-                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == move.Target) return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Gets called when dev mode gets activated or deactivated.
         /// </summary>
         public void OnSetDevMode(bool active)

@@ -426,6 +426,7 @@ namespace BlockmapFramework
         {
             return Fences.Select(x => x.Value).SelectMany(x => x).Where(x => x.Node.BaseAltitude == altitude).ToList();
         }
+        public HashSet<Entity> GetAllEntities() => Entities;
         public List<Entity> GetBatchEntities(int altitude)
         {
             return BatchEntities.Select(x => x.Value).SelectMany(x => x).Where(x => x.OriginNode.BaseAltitude == altitude).ToList();

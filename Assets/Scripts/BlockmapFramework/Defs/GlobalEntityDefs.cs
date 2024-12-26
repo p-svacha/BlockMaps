@@ -43,7 +43,7 @@ namespace BlockmapFramework.Defs
                 },
                 VisionImpact = new EntityVisionImpactProperties()
                 {
-                    VisionColliderType = VisionColliderType.MeshCollider,
+                    VisionColliderType = VisionColliderType.CustomImplementation,
                 }
             },
 

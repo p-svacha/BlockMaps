@@ -10,5 +10,7 @@ namespace BlockmapFramework
     public class WorldObjectCollider : MonoBehaviour
     {
         public WorldDatabaseObject Object;
+
+        public int State; // Flag is used for entities with vision colliders for individual states (i.e. door)
     }
 }

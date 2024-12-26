@@ -23,6 +23,17 @@ namespace CaptureTheFlag
             Path = path;
         }
 
+        public override bool CanPerformNow()
+        {
+            // Check if another character is currently heading to the target node
+            foreach (CtfCharacter character in Match.Characters)
+            {
+                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == Target) return false;
+            }
+
+            return base.CanPerformNow();
+        }
+
         protected override void OnStartPerform()
         {
             // Subsribe to OnTargetReached so we know when character is done moving
@@ -49,7 +60,7 @@ namespace CaptureTheFlag
 
         public override NetworkMessage_CharacterAction GetNetworkAction()
         {
-            return new NetworkMessage_MoveCharacter(Character.Id, Target.Id);
+            return new NetworkMessage_CharacterAction("CharacterAction_MoveCharacter", Character.Id, Target.Id);
         }
     }
 }

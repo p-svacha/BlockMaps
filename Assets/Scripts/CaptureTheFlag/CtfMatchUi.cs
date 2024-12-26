@@ -100,7 +100,7 @@ namespace CaptureTheFlag
             // Actions
             SpecialActionsContainer.SetActive(true);
             HelperFunctions.DestroyAllChildredImmediately(SpecialActionsContainer);
-            foreach(SpecialAction action in c.PossibleSpecialActions)
+            foreach(SpecialCharacterAction action in c.PossibleSpecialActions)
             {
                 UI_CharacterAction actionBtn = Instantiate(CharacterActionButtonPrefab, SpecialActionsContainer.transform);
                 actionBtn.Init(action);

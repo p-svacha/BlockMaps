@@ -8,14 +8,14 @@ namespace CaptureTheFlag
 {
     public class UI_CharacterAction : MonoBehaviour
     {
-        private SpecialAction Action;
+        private SpecialCharacterAction Action;
 
         [Header("Elements")]
         public Button Button;
         public TextMeshProUGUI TitleText;
         public Image Icon;
 
-        public void Init(SpecialAction action)
+        public void Init(SpecialCharacterAction action)
         {
             Action = action;
             Button.onClick.AddListener(OnClick);
@@ -25,6 +25,8 @@ namespace CaptureTheFlag
 
         private void OnClick()
         {
+            if (!Action.CanPerformNow()) return;
+
             if (Action.Match.MatchType == CtfMatchType.Singleplayer) Action.Perform();
             if (Action.Match.MatchType == CtfMatchType.Multiplayer) Action.Match.PerformMultiplayerAction(Action);
 

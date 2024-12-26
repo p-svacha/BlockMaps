@@ -81,7 +81,7 @@ namespace CaptureTheFlag
             for (int i = 0; i < path.Nodes.Count; i++)
             {
                 BlockmapNode backtrackNode = path.Nodes[path.Nodes.Count - i - 1];
-                if (Character.PossibleMoves.TryGetValue(backtrackNode, out Action_Movement closestMove) && Character.Owner.CanPerformMovement(closestMove)) return closestMove;
+                if (Character.PossibleMoves.TryGetValue(backtrackNode, out Action_Movement closestMove) && closestMove.CanPerformNow()) return closestMove;
             }
 
             // No possible move is part of path

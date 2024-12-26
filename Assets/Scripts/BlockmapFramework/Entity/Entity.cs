@@ -284,7 +284,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Creates the box collider(s) for this entity that are used to calculate the vision of other entities around it and adds them to the wrapper.
         /// </summary>
-        protected void CreateVisionCollider()
+        protected virtual void CreateVisionCollider()
         {
             VisionColliderObject = new GameObject("visionCollider");
             VisionColliderObject.layer = World.Layer_EntityVisionCollider;
@@ -333,6 +333,10 @@ namespace BlockmapFramework
                         evc.Object = this;
                     }
                 }
+            }
+            else if(Def.VisionImpact.VisionColliderType == VisionColliderType.CustomImplementation)
+            {
+                throw new System.NotImplementedException($"No custom implementation found. CreateVisionCollider() seems to not be overriden for entity with DefName={Def.DefName}.");
             }
         }
 
@@ -585,7 +589,8 @@ namespace BlockmapFramework
         public virtual string Description => Def.Description;
 
         public virtual float VisionRange => Def.VisionRange;
-        public virtual bool BlocksVision => Def.VisionImpact.BlocksVision;
+        public virtual bool BlocksVision() => Def.VisionImpact.BlocksVision;
+        public virtual bool BlocksVision(WorldObjectCollider collider) => BlocksVision();
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
 
@@ -873,7 +878,8 @@ namespace BlockmapFramework
                 if (objectHit.layer == World.Layer_EntityVisionCollider)
                 {
                     // Get the entity we hit from the collider
-                    Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
+                    WorldObjectCollider worldObjectColliderHit = objectHit.GetComponent<WorldObjectCollider>();
+                    Entity hitEntity = (Entity)worldObjectColliderHit.Object;
 
                     // If the thing we hit is ourselves, go to the next thing
                     if (hitEntity == this) continue;
@@ -884,7 +890,7 @@ namespace BlockmapFramework
                     // Mark all nodes that the entity stands on as explored
                     foreach (BlockmapNode n in hitEntity.OccupiedNodes) vision.AddExploredNode(n);
 
-                    if (!hitEntity.BlocksVision) continue; // Continue search if entity doesn't block vision
+                    if (!hitEntity.BlocksVision(worldObjectColliderHit)) continue; // Continue search if entity doesn't block vision
                     else
                     {
                         if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
@@ -1000,7 +1006,7 @@ namespace BlockmapFramework
             List<Entity> entitiesNearTargetPosition = World.GetNearbyEntities(targetNode.MeshCenterWorldPosition);
             List<Entity> entitiesToUpdate = entitiesNearSourcePosition.Union(entitiesNearTargetPosition).ToList();
 
-            if (BlocksVision) World.UpdateEntityVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
+            if (BlocksVision()) World.UpdateEntityVisionDelayed(entitiesToUpdate, callback: OnPostTeleportVisionCalcDone);
             else
             {
                 // Only update the vision of itself and of entities from other actors

@@ -90,6 +90,10 @@ namespace CaptureTheFlag
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "dog/dog_2_fbx"),
                     PlayerColorMaterialIndex = 1,
                 },
+                VisionImpact = new EntityVisionImpactProperties()
+                {
+                    BlocksVision = false,
+                },
                 Components = new List<CompProperties>()
                 {
                     new CompProperties_Movement()

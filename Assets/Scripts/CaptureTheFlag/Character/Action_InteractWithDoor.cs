@@ -1,3 +1,4 @@
+using BlockmapFramework;
 using CaptureTheFlag.Network;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,18 +6,23 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class Action_GoToJail : SpecialCharacterAction
+    public class Action_InteractWithDoor : SpecialCharacterAction
     {
-        private const float ACTION_COST = 0f;
+        private const float ACTION_COST = 0.5f;
 
-        public override string Name => "Go to Jail";
+        public override string Name => "Interact with Door";
         public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/Icons/Jail");
 
-        public Action_GoToJail(CtfMatch game, CtfCharacter c) : base(game, c, ACTION_COST) { }
+        public Door TargetDoor { get; private set; }
+
+        public Action_InteractWithDoor(CtfMatch game, CtfCharacter c, Door target) : base(game, c, ACTION_COST)
+        {
+            TargetDoor = target;
+        }
 
         protected override void OnStartPerform()
         {
-            Match.SendToJail(Character);
+            TargetDoor.Toggle();
             EndAction();
         }
 
@@ -25,7 +31,7 @@ namespace CaptureTheFlag
 
         public override NetworkMessage_CharacterAction GetNetworkAction()
         {
-            return new NetworkMessage_CharacterAction("CharacterAction_GoToJail", Character.Id);
+            return new NetworkMessage_CharacterAction("CharacterAction_InteractWithDoor", Character.Id, TargetDoor.Id);
         }
     }
 }

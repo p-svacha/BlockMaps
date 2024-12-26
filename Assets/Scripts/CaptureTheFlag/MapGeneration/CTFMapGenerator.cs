@@ -15,36 +15,17 @@ namespace CaptureTheFlag
     {
         // Rules
         private const int SPAWN_MAP_EDGE_OFFSET = 10;
-        private const int SPAWN_VARIATION = 5;
+        private const int CHARACTER_SPAWN_VARIATION = 10;
         private const int NUM_HUMANS_PER_PLAYER = 6;
         private const int NUM_DOGS_PER_PLAYER = 2;
-
-        // Generation
-        private int CurrentGenerationStep;
-        protected List<System.Action> GenerationSteps;
         
         private Actor LocalPlayer;
         private Actor Opponent;
 
         protected override void OnGenerationStart()
         {
-            CurrentGenerationStep = 0;
             LocalPlayer = World.GetActor(1);
             Opponent = World.GetActor(2);
-        }
-        protected override void OnUpdate()
-        {
-            if (CurrentGenerationStep == GenerationSteps.Count)
-            {
-                FinalizeGeneration();
-                return;
-            }
-
-            Debug.Log("Starting World Generation Step: " + GenerationSteps[CurrentGenerationStep].Method.Name);
-            Profiler.Begin(GenerationSteps[CurrentGenerationStep].Method.Name);
-            GenerationSteps[CurrentGenerationStep].Invoke();
-            Profiler.End(GenerationSteps[CurrentGenerationStep].Method.Name);
-            CurrentGenerationStep++;
         }
 
         /// <summary>
@@ -124,7 +105,7 @@ namespace CaptureTheFlag
             numAttempts = 0;
             while(humansSpawned < NUM_HUMANS_PER_PLAYER && numAttempts++ < 10)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if(spawnedCharacter != null) humansSpawned++;
             }
 
@@ -133,12 +114,10 @@ namespace CaptureTheFlag
             numAttempts = 0;
             while (dogsSpawned < NUM_DOGS_PER_PLAYER && numAttempts++ < 10)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
                 if (spawnedCharacter != null) dogsSpawned++;
             }
         }
-
-
         /// <summary>
         /// Creates both player zones and the neutral zone in between.
         /// </summary>

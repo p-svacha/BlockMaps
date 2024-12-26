@@ -11,9 +11,6 @@ namespace BlockmapFramework.WorldGeneration
     {
         public override string Label => "Parcels";
 
-        private ParcelGeneratorStep GenerationStep;
-
-        private int CurrentParcelIndex = 0;
         private List<Region> Parcels;
 
         // Parcel probabilities
@@ -25,36 +22,28 @@ namespace BlockmapFramework.WorldGeneration
             { ParcelType.Forest, 1f },
         };
 
+        protected override List<System.Action> GetGenerationSteps()
+        {
+            return new List<System.Action>()
+            {
+                SplitMapIntoParcels,
+                FillParcels,
+            };
+        }
+
         protected override void OnGenerationStart()
         {
             Parcels = new List<Region>();
-            CurrentParcelIndex = 0;
-
-            GenerationStep = ParcelGeneratorStep.SplitMapIntoParcels;
         }
 
-        protected override void OnUpdate()
+        private void SplitMapIntoParcels()
         {
-            switch (GenerationStep)
-            {
-                case ParcelGeneratorStep.SplitMapIntoParcels:
-                    SplitMapIntoParcels(WorldSize, WorldSize);
-                    GenerationStep = ParcelGeneratorStep.FillParcels;
-                    break;
+            SplitMapIntoParcels(WorldSize, WorldSize);
+        }
 
-                case ParcelGeneratorStep.FillParcels:
-                    if (CurrentParcelIndex == Parcels.Count) GenerationStep = ParcelGeneratorStep.Done;
-                    else
-                    {
-                        Parcels[CurrentParcelIndex].Generate();
-                        CurrentParcelIndex++;
-                    }
-                    break;
-
-                case ParcelGeneratorStep.Done:
-                    FinalizeGeneration();
-                    break;
-            }
+        private void FillParcels()
+        {
+            for(int i = 0; i < Parcels.Count; i++) Parcels[i].Generate();
         }
 
         /// <summary>
@@ -120,12 +109,5 @@ namespace BlockmapFramework.WorldGeneration
             };
         }
 
-
-        private enum ParcelGeneratorStep
-        {
-            SplitMapIntoParcels,
-            FillParcels,
-            Done
-        }
     }
 }

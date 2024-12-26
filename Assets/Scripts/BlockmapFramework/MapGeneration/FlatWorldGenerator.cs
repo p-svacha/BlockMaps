@@ -8,10 +8,9 @@ namespace BlockmapFramework.WorldGeneration
     {
         public override string Label => "Flat";
 
-        protected override void OnGenerationStart() { }
-        protected override void OnUpdate()
+        protected override List<System.Action> GetGenerationSteps()
         {
-            FinalizeGeneration();
+            return new List<System.Action>();
         }
     }
 }

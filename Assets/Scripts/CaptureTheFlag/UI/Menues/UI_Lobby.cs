@@ -24,17 +24,6 @@ namespace CaptureTheFlag.UI
         [Header("Prefabs")]
         public UI_PlayerRow PlayerRowPrefab;
 
-        // Game settings
-        public static Dictionary<string, int> MapSizes = new Dictionary<string, int>()
-        {
-            { "Tiny", 3 },
-            { "Small", 4 },
-            { "Medium", 5 },
-            { "Big", 6 },
-            { "Large", 7 },
-        };
-
-
         public void Init(CtfGame game)
         {
             Game = game;
@@ -51,7 +40,7 @@ namespace CaptureTheFlag.UI
             // Map size
             MapSizeDropdown.ClearOptions();
             List<string> mapSizes = new List<string>() { "Random" };
-            foreach (var size in MapSizes)
+            foreach (var size in CtfMatch.MapSizes)
             {
                 int numNodes = size.Value * World.ChunkSize;
                 string label = $"{size.Key} ({numNodes}x{numNodes})";
@@ -111,7 +100,7 @@ namespace CaptureTheFlag.UI
 
             int mapSeed = CTFMapGenerator.GetRandomSeed();
             int worldGeneratorIndex = LobbyData.Settings.ChosenWorldGeneratorIndex == 0 ? Random.Range(0, CtfMatch.WorldGenerators.Count) : LobbyData.Settings.ChosenWorldGeneratorIndex - 1;
-            int worldSize = LobbyData.Settings.ChosenMapSizeIndex == 0 ? Random.Range(0, MapSizes.Count) : MapSizes.Values.ToList()[LobbyData.Settings.ChosenMapSizeIndex - 1];
+            int worldSize = LobbyData.Settings.ChosenMapSizeIndex == 0 ? Random.Range(0, CtfMatch.MapSizes.Count) : CtfMatch.MapSizes.Values.ToList()[LobbyData.Settings.ChosenMapSizeIndex - 1];
 
             NetworkClient.Instance.SendMessage(new NetworkMessage_InitializeMultiplayerMatch(worldGeneratorIndex, worldSize, mapSeed, LobbyData.Clients[0].ClientId, LobbyData.Clients[1].ClientId));
         }
