@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     public class UI_CharacterSelectionPanel : MonoBehaviour
     {
         private CtfCharacter Character;
-        private CtfMatch Game;
+        private CtfMatch Match;
 
         [Header("Elements")]
         public GameObject SelectionFrame;
@@ -24,9 +24,9 @@ namespace CaptureTheFlag
         private float DoubleClickTimeThreshold = 0.5f;
         private float LastClickTime = 0f;
 
-        public void Init(CtfMatch game, CtfCharacter character)
+        public void Init(CtfMatch match, CtfCharacter character)
         {
-            Game = game;
+            Match = match;
             Character = character;
 
             TitleText.text = character.LabelCap;
@@ -49,14 +49,13 @@ namespace CaptureTheFlag
         {
             if (Time.time - LastClickTime < DoubleClickTimeThreshold) // Double click detected
             {
-                Game.World.CameraPanToFocusEntity(Character, duration: 0.5f, false);
+                Match.World.CameraPanToFocusEntity(Character, duration: 0.5f, false);
             }
             else // Single click
             {
-                Game.SelectCharacter(Character);
+                Match.SelectCharacter(Character);
             }
             
-
             LastClickTime = Time.time;
         }
 

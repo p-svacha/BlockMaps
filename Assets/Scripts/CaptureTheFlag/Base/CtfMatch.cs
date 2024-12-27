@@ -477,6 +477,8 @@ namespace CaptureTheFlag
         public void SelectCharacter(CtfCharacter c)
         {
             if (State != MatchState.PlayerTurn) return;
+            if (SelectedCharacter == c) return;
+            if (c.Owner != LocalPlayer) return;
 
             // Deselect previous
             DeselectCharacter();

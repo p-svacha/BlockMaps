@@ -103,7 +103,7 @@ namespace CaptureTheFlag
             }
             else
             {
-                foreach (CtfCharacter c in Characters) c.UI_Label.Init(c);
+                foreach (CtfCharacter c in Characters) c.UI_Label.SetLabelText(c.LabelCap);
             }
         }
 

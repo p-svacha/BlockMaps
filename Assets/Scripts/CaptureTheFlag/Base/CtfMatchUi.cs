@@ -117,6 +117,9 @@ namespace CaptureTheFlag.UI
             // Character Selection
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(true);
 
+            // Character Label
+            c.UI_Label.SetSelected(true);
+
             // Actions
             SpecialActionsContainer.SetActive(true);
             HelperFunctions.DestroyAllChildredImmediately(SpecialActionsContainer);
@@ -131,6 +134,7 @@ namespace CaptureTheFlag.UI
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
             SpecialActionsContainer.SetActive(false);
+            c.UI_Label.SetSelected(false);
         }
 
         public void ShowRedNotificationText(string text, float hideAfter = 0f)
