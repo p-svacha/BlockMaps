@@ -8,6 +8,7 @@ namespace CaptureTheFlag.Network
     /// Message that server sends to a client once it receives a "RequestJoinLobby" NetworkMessage from that client.
     /// <br/>Contains information about the lobby the client connects to.
     /// </summary>
+    [System.Serializable]
     public class NetworkMessage_LobbyState : NetworkMessage
     {
         public string[] ClientIds;

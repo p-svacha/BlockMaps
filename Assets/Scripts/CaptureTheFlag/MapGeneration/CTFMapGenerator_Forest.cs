@@ -9,7 +9,7 @@ namespace CaptureTheFlag
 {
     public class CTFMapGenerator_Forest : CTFMapGenerator
     {
-        public override string Label => "CTF - Forest";
+        public override string Label => "Forest";
 
         private int[,] HeightMap;
 

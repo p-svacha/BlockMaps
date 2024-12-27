@@ -42,7 +42,7 @@ public class TooltipTarget : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         Tooltip.Instance.Init(Type, Title, Text);
     }
 
-    private void HideTooltip()
+    public void HideTooltip()
     {
         IsFocussed = false;
         CurrentDelay = 0;

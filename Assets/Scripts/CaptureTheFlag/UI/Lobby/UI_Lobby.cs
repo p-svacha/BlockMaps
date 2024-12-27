@@ -24,11 +24,11 @@ namespace CaptureTheFlag.UI
         [Header("Prefabs")]
         public UI_PlayerRow PlayerRowPrefab;
 
+        private Dictionary<int, Sprite> MapPreviewSprites;
+
         public void Init(CtfGame game)
         {
             Game = game;
-
-            // Game settings dropdowns
 
             // Map
             MapDropdown.ClearOptions();
@@ -36,6 +36,11 @@ namespace CaptureTheFlag.UI
             foreach (WorldGenerator gen in CtfMatch.WorldGenerators) mapOptions.Add(gen.Label);
             MapDropdown.AddOptions(mapOptions);
             MapDropdown.value = 0;
+
+            // Preview sprites
+            string mapPreviewBasePath = "CaptureTheFlag/MapPreviewImages/";
+            MapPreviewSprites = new Dictionary<int, Sprite>();
+            for(int i = 0; i < MapDropdown.options.Count; i++) MapPreviewSprites.Add(i, Resources.Load<Sprite>(mapPreviewBasePath + MapDropdown.options[i].text));
 
             // Map size
             MapSizeDropdown.ClearOptions();
@@ -49,7 +54,7 @@ namespace CaptureTheFlag.UI
             MapSizeDropdown.AddOptions(mapSizes);
             MapSizeDropdown.value = 0;
 
-            // Hooks
+            // Listeners
             StartGameButton.onClick.AddListener(StartBtn_OnClick);
             MapDropdown.onValueChanged.AddListener(MapDropdown_OnValueChanged);
             MapSizeDropdown.onValueChanged.AddListener(MapSizeDropdown_OnValueChanged);
@@ -66,43 +71,41 @@ namespace CaptureTheFlag.UI
             foreach(ClientInfo playerInfo in data.Clients)
             {
                 UI_PlayerRow row = Instantiate(PlayerRowPrefab, PlayerListContainer.transform);
-                row.Init(playerInfo, CtfMatch.PlayerColors[index]);
+                row.Init(data.MatchType, playerInfo, CtfMatch.PlayerColors[index]);
                 index++;
             }
 
             // Game settings
-            MapDropdown.value = data.Settings.ChosenWorldGeneratorIndex;
-            data.Settings.ChosenWorldGeneratorOption = MapDropdown.options[MapDropdown.value].text;
-
-            MapSizeDropdown.value = data.Settings.ChosenMapSizeIndex;
-            data.Settings.ChosenMapSizeOption = MapSizeDropdown.options[MapSizeDropdown.value].text;
+            MapDropdown.value = data.Settings.WorldGeneratorDropdownIndex;
+            MapSizeDropdown.value = data.Settings.WorldSizeDropdownIndex;
 
             // Map preview
-            string mapPreviewBasePath = "CaptureTheFlag/MapPreviewImages/";
-            if (data.Settings.ChosenWorldGeneratorIndex == 0) MapPreviewImage.sprite = Resources.Load<Sprite>(mapPreviewBasePath + "Random");
-            if (data.Settings.ChosenWorldGeneratorIndex == 1) MapPreviewImage.sprite = Resources.Load<Sprite>(mapPreviewBasePath + "Forest");
+            MapPreviewImage.sprite = MapPreviewSprites[data.Settings.WorldGeneratorDropdownIndex];
         }
 
         private void MapDropdown_OnValueChanged(int value)
         {
-            LobbyData.Settings.ChosenWorldGeneratorIndex = value;
-            NetworkClient.Instance.SendMessage(LobbyData.ToNetworkMessage());
+            LobbyData.Settings.SetWorldGeneratorDropdownIndex(value);
+            OnMatchSettingChanged();
         }
         private void MapSizeDropdown_OnValueChanged(int value)
         {
-            LobbyData.Settings.ChosenMapSizeIndex = value;
-            NetworkClient.Instance.SendMessage(LobbyData.ToNetworkMessage());
+            LobbyData.Settings.SetMapSizeDropdownIndex(value);
+            OnMatchSettingChanged();
+        }
+
+        private void OnMatchSettingChanged()
+        {
+            if (LobbyData.MatchType == CtfMatchType.Singleplayer) SetData(LobbyData);
+            if (LobbyData.MatchType == CtfMatchType.Multiplayer) NetworkClient.Instance.SendMessage(LobbyData.ToNetworkMessage());
         }
 
         private void StartBtn_OnClick()
         {
             if (LobbyData.Clients.Count != 2) return;
 
-            int mapSeed = CTFMapGenerator.GetRandomSeed();
-            int worldGeneratorIndex = LobbyData.Settings.ChosenWorldGeneratorIndex == 0 ? Random.Range(0, CtfMatch.WorldGenerators.Count) : LobbyData.Settings.ChosenWorldGeneratorIndex - 1;
-            int worldSize = LobbyData.Settings.ChosenMapSizeIndex == 0 ? Random.Range(0, CtfMatch.MapSizes.Count) : CtfMatch.MapSizes.Values.ToList()[LobbyData.Settings.ChosenMapSizeIndex - 1];
-
-            NetworkClient.Instance.SendMessage(new NetworkMessage_InitializeMultiplayerMatch(worldGeneratorIndex, worldSize, mapSeed, LobbyData.Clients[0].ClientId, LobbyData.Clients[1].ClientId));
+            if (LobbyData.MatchType == CtfMatchType.Singleplayer) Game.StartMatch();
+            if (LobbyData.MatchType == CtfMatchType.Multiplayer) NetworkClient.Instance.SendMessage(new NetworkMessage("InitializeMultiplayerMatch"));
         }
     }
 }

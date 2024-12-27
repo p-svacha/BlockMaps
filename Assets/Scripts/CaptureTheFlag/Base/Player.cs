@@ -8,7 +8,9 @@ namespace CaptureTheFlag
 {
     public class Player
     {
-        public string Label => Actor.Label;
+        private ClientInfo ClientInfo;
+
+        public string Name => ClientInfo.DisplayName;
         public CtfMatch Match;
         public Actor Actor;
         public Entity Flag;
@@ -25,14 +27,18 @@ namespace CaptureTheFlag
         private int CurrentJailPositionIndex;
 
         // Multiplayer
-        public string ClientId;
+        public string ClientId => ClientInfo.ClientId;
         public bool ReadyToStartMultiplayerMatch;
         public bool TurnEnded;
 
-        public Player(Actor actor, Zone territory, Zone jailZone, Zone flagZone, string clientId = "")
+        public Player(ClientInfo info)
+        {
+            ClientInfo = info;
+            Debug.Log($"Adding player with Name {Name} and ClientId {ClientId}.");
+        }
+        public void OnWorldGenerationDone(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
         {
             Actor = actor;
-            ClientId = clientId;
 
             Characters = new List<CtfCharacter>();
             foreach (Entity e in actor.Entities)
@@ -57,7 +63,7 @@ namespace CaptureTheFlag
             // Debug
             string log = "";
             foreach(BlockmapNode n in JailPositions) log += n.Id + "/";
-            Debug.Log($"Jail Positions for {Label}: {log}");
+            Debug.Log($"Jail Positions for {Name}: {log}");
 
             // Inform characters about match ready
             foreach (CtfCharacter c in Characters) c.OnMatchReady(Match, this, Opponent);

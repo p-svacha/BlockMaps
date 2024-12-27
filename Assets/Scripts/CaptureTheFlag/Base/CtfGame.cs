@@ -37,13 +37,6 @@ namespace CaptureTheFlag
         private CtfMatchLobby UpdatedLobbyInfo;
         private bool IsMultiplayerMatchReady;
 
-        private int MultiplayerWorldGenIndex;
-        private int MultiplayerMapSize;
-        private int MultiplayerMapSeed;
-        private bool MultiplayerPlayAsP1;
-        private string MultiplayerP1ClientId;
-        private string MultiplayerP2ClientId;
-
         // Ticks
         private float TickAccumulator = 0f;
         private const float TICKS_PER_SECOND = 60f;
@@ -91,7 +84,6 @@ namespace CaptureTheFlag
             // The list of connected clients (ClientInfos) changed since last update
             if(ClientUpdateReceived)
             {
-                Debug.Log("Client update received");
                 ClientUpdateReceived = false;
 
                 // We ourselves joined a server
@@ -116,35 +108,54 @@ namespace CaptureTheFlag
             if(IsMultiplayerMatchReady)
             {
                 IsMultiplayerMatchReady = false;
-                StartMultiplayerMatch();
+                StartMatch();
             }
-            
         }
 
-        public void StartSingleplayerMatch()
+        public void StartSingleplayerLobby()
         {
-            MainMenuUI.gameObject.SetActive(false);
-            LobbyUI.gameObject.SetActive(false);
-            MatchUI.gameObject.SetActive(true);
+            ActiveLobby = new CtfMatchLobby(MainMenuUI.DisplayNameInput.text);
+            LobbyUI.SetData(ActiveLobby);
 
+            GoToLobby();
+        }
+        public void StartMatch()
+        {
             ActiveMatch = new CtfMatch(this);
-            ActiveMatch.InitializeGame(CtfMatchType.Singleplayer, mapGeneratorIndex: 0, GetRandomMapSize(), playAsP1: true);
+            ActiveMatch.InitializeGame(ActiveLobby);
             MatchUI.Init(ActiveMatch);
+
+            SwitchWindow(MatchUI.gameObject);
         }
 
-        public void ShowEndGameScreen(string text)
+        #region Window switch
+
+        private void GoToLobby()
         {
-            EndGameScreen.gameObject.SetActive(true);
-            EndGameScreen.Text.text = text;
+            SwitchWindow(LobbyUI.gameObject);
         }
 
         public void GoToMainMenu()
         {
             ActiveMatch = null;
-            MainMenuUI.gameObject.SetActive(true);
+            SwitchWindow(MainMenuUI.gameObject);
         }
 
-        private int GetRandomMapSize() => Random.Range(4, 8 + 1);
+        public void ShowEndGameScreen(string text)
+        {
+            EndGameScreen.Text.text = text;
+            SwitchWindow(EndGameScreen.gameObject);
+        }
+
+        private void SwitchWindow(GameObject window)
+        {
+            MainMenuUI.gameObject.SetActive(window == MainMenuUI.gameObject);
+            LobbyUI.gameObject.SetActive(window == LobbyUI.gameObject);
+            MatchUI.gameObject.SetActive(window == MatchUI.gameObject);
+            EndGameScreen.gameObject.SetActive(window == EndGameScreen.gameObject);
+        }
+
+        #endregion
 
         #region Multiplayer
 
@@ -173,7 +184,7 @@ namespace CaptureTheFlag
         private void OnConnectionToServerEstablished()
         {
             // When connection to server has been established, inform all clients that a new client connected
-            NetworkClient.Instance.SendMessage(new NetworkMessage_ClientConnected(MainMenuUI.MultiplayerNameInput.text));
+            NetworkClient.Instance.SendMessage(new NetworkMessage_ClientConnected(MainMenuUI.DisplayNameInput.text));
         }
 
 
@@ -196,41 +207,15 @@ namespace CaptureTheFlag
             UpdatedLobbyInfo = lobbyInfo;
         }
 
-        private void GoToLobby()
-        {
-            MainMenuUI.gameObject.SetActive(false);
-            LobbyUI.gameObject.SetActive(true);
-        }
-
         private void SetLobbyData(CtfMatchLobby lobby)
         {
             ActiveLobby = lobby;
             LobbyUI.SetData(ActiveLobby);
         }
 
-        public void SetMultiplayerMatchAsReady(int generatorIndex, int worldSize, int seed, string p1ClientId, string p2ClientId)
+        public void SetMultiplayerMatchAsReady()
         {
-            MultiplayerWorldGenIndex = generatorIndex;
-            MultiplayerMapSize = worldSize;
-            MultiplayerMapSeed = seed;
-            MultiplayerP1ClientId = p1ClientId;
-            MultiplayerP2ClientId = p2ClientId;
-
-            MultiplayerPlayAsP1 = p1ClientId == NetworkClient.Instance.ClientId;
-
             IsMultiplayerMatchReady = true;
-        }
-
-        private void StartMultiplayerMatch()
-        {
-            MainMenuUI.gameObject.SetActive(false);
-            LobbyUI.gameObject.SetActive(false);
-            MatchUI.gameObject.SetActive(true);
-
-            ActiveMatch = new CtfMatch(this);
-            NetworkClient.Instance.Match = ActiveMatch;
-            ActiveMatch.InitializeGame(CtfMatchType.Multiplayer, MultiplayerWorldGenIndex, MultiplayerMapSize, MultiplayerMapSeed, MultiplayerPlayAsP1, MultiplayerP1ClientId, MultiplayerP2ClientId);
-            MatchUI.Init(ActiveMatch);
         }
 
         #endregion

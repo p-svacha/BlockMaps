@@ -34,7 +34,7 @@ namespace CaptureTheFlag
         private Queue<CharacterAction> ActionsToFollow = new Queue<CharacterAction>(); // queue containing all character actions that are visible to local player and awaiting to be followed by camera, one after the other
 
 
-        public AIPlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone) : base(actor, territory, jailZone, flagZone) { }
+        public AIPlayer(ClientInfo info) : base(info) { }
 
         public override void OnMatchReady(CtfMatch game)
         {

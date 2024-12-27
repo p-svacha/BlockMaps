@@ -67,7 +67,7 @@ namespace CaptureTheFlag.Network
             }
             catch (Exception e)
             {
-                Debug.LogError("Error accepting client: " + e.Message);
+                Debug.LogError("[Server] Error accepting client: " + e.Message);
             }
         }
 
@@ -84,7 +84,7 @@ namespace CaptureTheFlag.Network
                     int bytesRead = stream.EndRead(ar);
                     if (bytesRead <= 0)
                     {
-                        Debug.Log("Client disconnected.");
+                        Debug.Log("[Server] Client disconnected.");
                         ConnectedClients.Remove(tcpClient);
                         return;
                     }
@@ -98,14 +98,13 @@ namespace CaptureTheFlag.Network
                         int bytesReadData = stream.EndRead(ar2);
                         if (bytesReadData <= 0)
                         {
-                            Debug.Log("Client disconnected while reading data.");
+                            Debug.Log("[Server] Client disconnected while reading data.");
                             ConnectedClients.Remove(tcpClient);
                             return;
                         }
 
                         // (1) Convert bytes to string
                         string finalJson = System.Text.Encoding.UTF8.GetString(dataBuffer);
-                        Debug.Log($"[Server] Received data from client with id {tcpClient.Client.RemoteEndPoint}: {finalJson}");
 
                         // (2) Deserialize the "wrapper"
                         NetworkMessageWrapper incomingWrapper = JsonUtility.FromJson<NetworkMessageWrapper>(finalJson);
@@ -134,10 +133,13 @@ namespace CaptureTheFlag.Network
                         // Append sender id
                         realMessage.SenderId = tcpClient.Client.RemoteEndPoint.ToString();
 
+                        // Log
+                        Debug.Log($"[Server] Received message '{realMessage.MessageType}' from client with id {tcpClient.Client.RemoteEndPoint}:\n{finalJson}");
+
                         // If it's a client connect message:
                         //  - Register it as a connected client
                         //  - Boradcast the info of all currently connected clients to all clients
-                        if(realMessage.MessageType == "ClientConnected")
+                        if (realMessage.MessageType == "ClientConnected")
                         {
                             NetworkMessage_ClientConnected connectMessage = (NetworkMessage_ClientConnected)realMessage;
                             Debug.Log($"[Server] Client with id {connectMessage.SenderId} has confirmed connection with display name {connectMessage.DisplayName}");
@@ -148,7 +150,7 @@ namespace CaptureTheFlag.Network
                         // If it's a request join lobby message, send the current lobby state to the sender
                         else if(realMessage.MessageType == "RequestJoinLobby")
                         {
-                            Debug.Log($"[Server] Client{ConnectedClients[tcpClient].DisplayName} requests to join lobby, sending lobby state.");
+                            Debug.Log($"[Server] Client {ConnectedClients[tcpClient].DisplayName} requests to join lobby, sending lobby state.");
                             if (Lobby == null) Lobby = new CtfMatchLobby(ConnectedClients[tcpClient]);
                             else Lobby.Clients.Add(ConnectedClients[tcpClient]);
                             BroadcastMessageToLobby(Lobby, Lobby.ToNetworkMessage());
@@ -172,7 +174,7 @@ namespace CaptureTheFlag.Network
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("ReceiveDataFromClient failed: " + e.Message);
+                    Debug.LogWarning("[Server] ReceiveDataFromClient failed: " + e.Message);
                     ConnectedClients.Remove(tcpClient);
                 }
             }, null);
@@ -196,11 +198,21 @@ namespace CaptureTheFlag.Network
         /// </summary>
         private void BroadcastMessageToLobby(CtfMatchLobby lobby, NetworkMessage message)
         {
-            ConvertNetworkMessageToBytes(message, out byte[] data, out byte[] lengthPrefix);
-
-            foreach (var client in lobby.Clients.Select(c => c.TcpClient))
+            try
             {
-                SendDataToClient(client, data, lengthPrefix);
+                ConvertNetworkMessageToBytes(message, out byte[] data, out byte[] lengthPrefix);
+                List<TcpClient> targetClients = lobby.Clients.Select(c => c.TcpClient).ToList();
+
+                Debug.Log($"[Server] Sending '{message.MessageType}' message to {targetClients.Count} clients in the lobby.");
+
+                foreach (var client in targetClients)
+                {
+                    SendDataToClient(client, data, lengthPrefix);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("[Server] BroadcastMessageToLobby failed: " + e.Message);
             }
         }
 
@@ -219,7 +231,7 @@ namespace CaptureTheFlag.Network
             }
             catch (Exception e)
             {
-                Debug.LogWarning("[Server] BroadcastMessage failed for client: " + e.Message);
+                Debug.LogWarning("[Server] SendDataToClient failed: " + e.Message);
             }
         }
 

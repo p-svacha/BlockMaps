@@ -11,7 +11,8 @@ namespace CaptureTheFlag
     {
         private CtfGame Game;
         public World World { get; private set; }
-        public CtfMatchType MatchType { get; private set; }
+        public CtfMatchLobby MatchInfo { get; private set; }
+        public CtfMatchType MatchType => MatchInfo.MatchType;
 
         // Rules
         public const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
@@ -81,24 +82,33 @@ namespace CaptureTheFlag
         public CtfMatch(CtfGame game)
         {
             Game = game;
-        }
-
-        public void InitializeGame(CtfMatchType matchType, int mapGeneratorIndex, int mapSize, int seed = -1, bool playAsP1 = true, string p1ClientId = "", string p2ClientId = "")
-        {
-            MatchType = matchType;
-            LocalPlayerIsPlayer1 = playAsP1;
 
             // Load textures
             ReachableTileOverlay = MaterialManager.LoadTexture("CaptureTheFlag/Textures/ReachableTileOverlay");
+        }
+
+        public void InitializeGame(CtfMatchLobby matchInfo)
+        {
+            MatchInfo = matchInfo;
+            LocalPlayerIsPlayer1 = (MatchType == CtfMatchType.Singleplayer) || (matchInfo.Clients[0].ClientId == NetworkClient.Instance.ClientId);
+
+            // Network
+            if (MatchType == CtfMatchType.Multiplayer) NetworkClient.Instance.Match = this;
+
+            // Create players
+            Players = new List<Player>();
+            Players.Add(new Player(matchInfo.Clients[0]));
+            if (MatchType == CtfMatchType.Singleplayer) Players.Add(new AIPlayer(matchInfo.Clients[1]));
+            if (MatchType == CtfMatchType.Multiplayer) Players.Add(new Player(matchInfo.Clients[1]));
 
             // Start world generation
             Game.LoadingScreenOverlay.SetActive(true);
-            MapGenerator = WorldGenerators[mapGeneratorIndex];
-            MapGenerator.StartGeneration(mapSize, seed, onDoneCallback: () => OnWorldGenerationDone(p1ClientId, p2ClientId));
+            MapGenerator = WorldGenerators[matchInfo.Settings.WorldGeneratorIndex];
+            MapGenerator.StartGeneration(matchInfo.Settings.WorldSize, matchInfo.Settings.Seed, onDoneCallback: OnWorldGenerationDone);
             State = MatchState.GeneratingWorld;
         }
 
-        private void OnWorldGenerationDone(string p1ClientId = "", string p2ClientId = "")
+        private void OnWorldGenerationDone()
         {
             // Start world initialization
             if (World != null) GameObject.Destroy(World.WorldObject);
@@ -108,44 +118,19 @@ namespace CaptureTheFlag
             // Set map zones
             NeutralZone = World.GetZone(id: 1);
 
-            // Create players
-            Players = new List<Player>();
+            // Initialize players
+            Players[0].OnWorldGenerationDone(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
+            Players[1].OnWorldGenerationDone(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
 
-            if(MatchType == CtfMatchType.Singleplayer)
+            if (LocalPlayerIsPlayer1)
             {
-                if (LocalPlayerIsPlayer1)
-                {
-                    LocalPlayer = new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
-                    Players.Add(LocalPlayer);
-
-                    Opponent = new AIPlayer(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
-                    Players.Add(Opponent);
-                }
-                else
-                {
-                    Opponent = new AIPlayer(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
-                    Players.Add(Opponent);
-
-                    LocalPlayer = new Player(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
-                    Players.Add(LocalPlayer);
-                }
+                LocalPlayer = Players[0];
+                Opponent = Players[1];
             }
-            else if(MatchType == CtfMatchType.Multiplayer)
+            else
             {
-                Debug.Log($"Player clientIds are {p1ClientId} and {p2ClientId}");
-                Players.Add(new Player(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4), p1ClientId));
-                Players.Add(new Player(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6), p2ClientId));
-
-                if (LocalPlayerIsPlayer1)
-                {
-                    LocalPlayer = Players[0];
-                    Opponent = Players[1];
-                }
-                else
-                {
-                    LocalPlayer = Players[1];
-                    Opponent = Players[0];
-                }
+                LocalPlayer = Players[1];
+                Opponent = Players[0];
             }
 
             LocalPlayer.Opponent = Opponent;

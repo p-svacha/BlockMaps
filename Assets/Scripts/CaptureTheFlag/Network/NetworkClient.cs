@@ -26,7 +26,7 @@ namespace CaptureTheFlag.Network
         public bool IsInGameOrLobby;
 
         public CtfGame Game;
-        public CtfMatch Match;
+        public CtfMatch Match { get; set; }
         private System.Action OnConnectionCallback;
 
         private void Awake()
@@ -116,7 +116,7 @@ namespace CaptureTheFlag.Network
                 Stream.Write(lengthPrefix, 0, lengthPrefix.Length);
                 Stream.Write(data, 0, data.Length);
 
-                Debug.Log($"[Client] Sent NetworkMessage of type {message.MessageType} via wrapper {wrapper.TypeName}.");
+                Debug.Log($"[Client] Sent NetworkMessage of type '{message.MessageType}' via wrapper {wrapper.TypeName}.");
             }
             catch (Exception e)
             {
@@ -173,8 +173,6 @@ namespace CaptureTheFlag.Network
 
         private void ReceiveNetworkMessage(string finalJson)
         {
-            Debug.Log($"[Client] Received data from server: {finalJson}");
-
             // 1) Deserialize the wrapper
             NetworkMessageWrapper wrapper = JsonUtility.FromJson<NetworkMessageWrapper>(finalJson);
 
@@ -191,7 +189,7 @@ namespace CaptureTheFlag.Network
             message.IsSentBySelf = (message.SenderId == ClientId);
 
             // 4) Now 'message' includes all subclass fields
-            Debug.Log($"[Client] Received real action type: {message.GetType().Name}");
+            Debug.Log($"[Client] Received message '{message.MessageType}' from server.\nFull data:{finalJson}");
             try
             {
                 switch (message.MessageType)
@@ -210,8 +208,7 @@ namespace CaptureTheFlag.Network
                         break;
 
                     case "InitializeMultiplayerMatch":
-                        var initializeMessage = (NetworkMessage_InitializeMultiplayerMatch)message;
-                        Game.SetMultiplayerMatchAsReady(initializeMessage.WorldGeneratorIndex, initializeMessage.WorldSize, initializeMessage.Seed, initializeMessage.Player1ClientId, initializeMessage.Player2ClientId);
+                        Game.SetMultiplayerMatchAsReady();
                         break;
 
                     default:
@@ -221,7 +218,7 @@ namespace CaptureTheFlag.Network
             }
             catch (Exception e)
             {
-                Debug.Log(e.Message);
+                Debug.Log($"[Client] Error in handling message '{message.MessageType}': {e.Message}");
             }
         }
     }

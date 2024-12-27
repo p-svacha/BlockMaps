@@ -30,6 +30,7 @@ namespace CaptureTheFlag
         {
             if (!Action.CanPerformNow()) return;
 
+            GetComponent<TooltipTarget>().HideTooltip();
             if (Action.Match.MatchType == CtfMatchType.Singleplayer) Action.Perform();
             if (Action.Match.MatchType == CtfMatchType.Multiplayer) Action.Match.PerformMultiplayerAction(Action);
         }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -603,6 +605,28 @@ public static class HelperFunctions
     public static void OrderRaycastHitsByDistance(RaycastHit[] hits)
     {
         System.Array.Sort(hits, (a, b) => (a.distance.CompareTo(b.distance)));
+    }
+
+    #endregion
+
+    #region Network
+
+    public static string GetLocalIPv4()
+    {
+        string localIP = string.Empty;
+        string hostName = Dns.GetHostName();       // Get the name of the host running the application
+        IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+
+        foreach (var ip in hostEntry.AddressList)
+        {
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                localIP = ip.ToString();
+                break; // If you only want the first IPv4
+            }
+        }
+
+        return localIP;
     }
 
     #endregion
