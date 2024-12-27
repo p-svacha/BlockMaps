@@ -37,7 +37,7 @@ namespace WorldEditor
             TextureToggle.onValueChanged.AddListener((b) => World.ShowTextures(b));
             BlendToggle.onValueChanged.AddListener((b) => World.ShowTileBlending(b));
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
-            VisionCutoffToggle.onValueChanged.AddListener((b) => World.EnableVisionCutoff(b));
+            VisionCutoffToggle.onValueChanged.AddListener((b) => World.ShowVisionCutoff(b));
         }
         public void OnNewWorld()
         {

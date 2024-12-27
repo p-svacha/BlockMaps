@@ -19,12 +19,13 @@ namespace CaptureTheFlag
             {
                 GenerateNoise,
                 ApplyHeightmap,
-                CreateMapZones,
                 AddWaterBodies,
                 AddHedges,
                 AddForests,
                 AddPaths,
                 AddShacks,
+
+                CreateMapZones,
                 AddFencesAroundPaths,
                 CreatePlayerBases,
             };

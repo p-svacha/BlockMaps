@@ -4,10 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.UI
 {
     public class UI_CharacterInfo : MonoBehaviour
     {
+        private CtfMatch Match;
         private CtfCharacter Character;
 
         [Header("Elements")]
@@ -17,6 +18,14 @@ namespace CaptureTheFlag
         public TextMeshProUGUI VisionText;
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
+
+        public UI_ToggleButton VisionCutoffButton;
+
+        public void Init(CtfMatch match)
+        {
+            Match = match;
+            VisionCutoffButton.Button.onClick.AddListener(() => { Match.ToggleVisionCutoff(); VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled); });
+        }
 
         public void ShowCharacter(CtfCharacter c, CharacterAction hoveredAction = null)
         {
@@ -29,6 +38,8 @@ namespace CaptureTheFlag
             VisionText.text = c.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+
+            VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
 
             if (hoveredAction != null) ShowActionPreview(hoveredAction.Cost);
         }

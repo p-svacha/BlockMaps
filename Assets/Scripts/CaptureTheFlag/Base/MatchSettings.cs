@@ -22,6 +22,9 @@ namespace CaptureTheFlag
         public MatchSettings()
         {
             Seed = new System.Random().Next();
+
+            SetWorldGeneratorDropdownIndex(0);
+            SetMapSizeDropdownIndex(0);
         }
 
         public MatchSettings(int[] settings)
@@ -43,7 +46,6 @@ namespace CaptureTheFlag
 
             if (index == 0) WorldGeneratorIndex = Random.Range(0, CtfMatch.WorldGenerators.Count);
             else WorldGeneratorIndex = index - 1;
-
         }
 
         public void SetMapSizeDropdownIndex(int index)

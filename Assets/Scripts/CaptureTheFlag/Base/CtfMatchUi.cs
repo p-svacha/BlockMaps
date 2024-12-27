@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.UI
 {
     public class CtfMatchUi : MonoBehaviour
     {
@@ -19,6 +19,7 @@ namespace CaptureTheFlag
         public Button DevModeButton;
 
         public TextMeshProUGUI TileInfoText;
+        public UI_ToggleButton ToggleGridButton;
         public Button EndTurnButton;
 
         public GameObject CharacterSelectionContainer;
@@ -33,10 +34,14 @@ namespace CaptureTheFlag
         private Dictionary<CtfCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
 
-        public void Init(CtfMatch game)
+        public void Init(CtfMatch match)
         {
-            Match = game;
+            Match = match;
+
+            CharacterInfo.Init(Match);
+
             DevModeButton.onClick.AddListener(() => Match.ToggleDevMode());
+            ToggleGridButton.Button.onClick.AddListener(() => { Match.World.ToggleGridOverlay(); ToggleGridButton.SetToggle(Match.World.IsShowingGrid); });
             EndTurnButton.onClick.AddListener(() => Match.EndPlayerTurn());
         }
 
@@ -62,17 +67,32 @@ namespace CaptureTheFlag
         {
             if (Match == null) return;
 
+            UpdateHoverInfoText();
+        }
+
+        private void UpdateHoverInfoText()
+        {
             string text = "";
 
-            // Add coordinates
-            if (Match != null && Match.DevMode && Match.World != null && Match.World.HoveredNode != null) text += "\n" + Match.World.HoveredNode;
+            if(Match.DevMode)
+            {
+                // Add coordinates
+                if (Match.World != null && Match.World.HoveredNode != null) text += "\n" + Match.World.HoveredNode;
 
-            // Add FPS and tick
-            deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
-            float fps = 1.0f / deltaTime;
-            text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
+                // Add FPS and tick
+                deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+                float fps = 1.0f / deltaTime;
+                text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
 
-            if(Match.DevMode) text += "\nTick " + Match.CurrentTick;
+                text += "\nTick " + Match.CurrentTick;
+            }
+            else
+            {
+                if (Match.World != null && Match.World.HoveredNode != null)
+                {
+                    text = $"{Match.World.HoveredNode.SurfaceDef.LabelCap} ({Match.World.HoveredNode.SurfaceDef.MovementSpeedModifier.ToString("P0")} speed)";
+                }
+            }
 
             TileInfoText.text = text;
         }

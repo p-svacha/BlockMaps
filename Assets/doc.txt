@@ -1,6 +1,31 @@
+make selected character labels other color
+select characters by clicking label
+
+ladder interaction action
+individual names and attributes
+lag when hovering node without path
+
+Bot: flee job
+Bot: enemy moves from netural into player area even though he sees player is there
+
+End-Game-Screen: instead of gray background show full-visible map
+End-Game-Screen: Menu button not working
+
+Charcacter shouldn't spawn in places where they can move on less than 30 nodes
+
+Drawing AirNodes should also always draw a plane on the bottom side of the node
+
+Node should be visible if any entity on it is visible
+
+
+
+
+
 CTF: humans and dogs with names and attributes
 	(one longer human)
 
+ladder interaction action
+	+ network sync
 
 make valley map gen
 	high sides with player spawns
@@ -45,12 +70,6 @@ make label half transparent for enemy characters that are explored but not visib
 give everyone names
 turn counter and display
 
-Game creation lobby
-
-Release build on github
-
-
-
 mapgen forest: wide road with cars
 mapgen forest: river
 mapgen forest: hedges should be straighter
@@ -81,7 +100,7 @@ mapgen forest: hedges should be straighter
 
 ---
 
---- New cover layer for Nodes
+--- New cover layer for Nodes (for EcosystemSimulation)
 
 New CoverLayerDef
 nodes can have different layers stacked on top of each other

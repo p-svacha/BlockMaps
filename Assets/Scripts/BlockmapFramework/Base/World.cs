@@ -123,6 +123,8 @@ namespace BlockmapFramework
         public int Layer_WallMesh;
         public int Layer_WallVisionCollider;
 
+        public int Layer_AllMeshLayers;
+
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
         public Vector3 HoveredWorldPosition { get; private set; }
@@ -220,6 +222,8 @@ namespace BlockmapFramework
             Layer_ProceduralEntityMesh = LayerMask.NameToLayer("ProceduralEntityMesh");
             Layer_WallMesh = LayerMask.NameToLayer("WallMesh");
             Layer_WallVisionCollider = LayerMask.NameToLayer("WallVisionCollider");
+
+            Layer_AllMeshLayers = (1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
         }
 
         private void CreateChunksAndGameObjects()
@@ -297,7 +301,7 @@ namespace BlockmapFramework
         public void Update()
         {
             // Update world systems
-            if (IsUpdatingWorldSystems) WorldSystemUpdateTick();
+            if (IsUpdatingWorldSystems) WorldSystemUpdate();
             if (UpdateEntityVisionIn > 0)
             {
                 UpdateEntityVisionIn--;
@@ -351,7 +355,7 @@ namespace BlockmapFramework
             Wall newHoveredWall = null;
 
             // Shoot a raycast on all layers that are relevant for detecting hovered objects
-            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, 1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, Layer_AllMeshLayers);
             HelperFunctions.OrderRaycastHitsByDistance(hits);
 
             foreach (RaycastHit hit in hits)
@@ -879,7 +883,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Gets executed each frame while the world is being updated
         /// </summary>
-        private void WorldSystemUpdateTick()
+        private void WorldSystemUpdate()
         {
             if (!IsUpdatingWorldSystems) return;
             WorldUpdateFrame++;
@@ -1846,18 +1850,24 @@ namespace BlockmapFramework
             IsVisionCutoffEnabled = !IsVisionCutoffEnabled;
             UpdateVisionCutoff();
         }
-        public void EnableVisionCutoff(bool value)
+        public void ShowVisionCutoff(bool value)
         {
             IsVisionCutoffEnabled = value;
             UpdateVisionCutoff();
         }
-        public void SetVisionCutoffAltitude(int value)
+        public void SetVisionCutoffAltitude(int altitude)
         {
-            VisionCutoffAltitude = value;
+            VisionCutoffAltitude = altitude;
             if (VisionCutoffAltitude < 0) VisionCutoffAltitude = 0;
             if (VisionCutoffAltitude > MAX_ALTITUDE) VisionCutoffAltitude = MAX_ALTITUDE;
 
             if (IsVisionCutoffEnabled) UpdateVisionCutoff();
+        }
+        public void ShowVisionCutoffAt(int altitude)
+        {
+            IsVisionCutoffEnabled = true;
+            VisionCutoffAltitude = altitude;
+            UpdateVisionCutoff();
         }
         private void UpdateVisionCutoff()
         {

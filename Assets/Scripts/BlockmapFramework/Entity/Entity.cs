@@ -277,7 +277,7 @@ namespace BlockmapFramework
                 SelectionIndicator.transform.SetParent(MeshObject != null ? MeshObject.transform : Wrapper.transform);
                 SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
                 SelectionIndicator.orthographicSize = 0.5f;
-                SetSelected(false);
+                ShowSelectionIndicator(false);
             }
         }
 
@@ -989,7 +989,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Shows/hides the selection indicator of this entity.
         /// </summary>
-        public void SetSelected(bool value)
+        public void ShowSelectionIndicator(bool value)
         {
             SelectionIndicator.gameObject.SetActive(value);
         }

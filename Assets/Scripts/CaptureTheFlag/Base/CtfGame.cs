@@ -14,7 +14,7 @@ namespace CaptureTheFlag
     /// </summary>
     public class CtfGame : MonoBehaviour
     {
-        public static string VERSION = "0.0.1";
+        public static string VERSION = "0.0.2-dev";
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;

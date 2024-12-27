@@ -37,9 +37,9 @@ namespace WorldEditor
 
         public void SelectEntity(Entity e)
         {
-            if (SelectedEntity != null) SelectedEntity.SetSelected(false);
+            if (SelectedEntity != null) SelectedEntity.ShowSelectionIndicator(false);
             SelectedEntity = e;
-            if(SelectedEntity != null) SelectedEntity.SetSelected(true);
+            if(SelectedEntity != null) SelectedEntity.ShowSelectionIndicator(true);
 
             World.SetNavmeshEntity(SelectedEntity);
         }

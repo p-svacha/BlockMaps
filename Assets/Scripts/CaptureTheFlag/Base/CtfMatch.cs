@@ -1,5 +1,6 @@
 using BlockmapFramework;
 using CaptureTheFlag.Network;
+using CaptureTheFlag.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,9 @@ namespace CaptureTheFlag
         public MatchState State { get; private set; }
         public bool IsMatchRunning => (State != MatchState.GeneratingWorld && State != MatchState.InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
         public int CurrentTick { get; private set; }
+
+        // Display options
+        public bool IsVisionCutoffEnabled { get; private set; }
 
         // Options
         public bool DevMode { get; private set; }
@@ -162,7 +166,7 @@ namespace CaptureTheFlag
         {
             // Vision
             World.ShowTextures(true);
-            World.ShowGridOverlay(true);
+            World.ShowGridOverlay(false);
             World.ShowTileBlending(true);
             World.SetActiveVisionActor(LocalPlayer.Actor);
             Game.LoadingScreenOverlay.SetActive(false);
@@ -369,6 +373,9 @@ namespace CaptureTheFlag
             // Hovered move
             UpdateHoveredMove();
 
+            // Vision cutoff
+            UpdateVisionCutoff();
+
             // Left click - Select character
             if (Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
             {
@@ -441,6 +448,28 @@ namespace CaptureTheFlag
             }
         }
 
+        private void UpdateVisionCutoff()
+        {
+            if(SelectedCharacter == null)
+            {
+                if (World.IsVisionCutoffEnabled) World.ShowVisionCutoff(false);
+            }
+
+            else
+            {
+                if (!IsVisionCutoffEnabled && World.IsVisionCutoffEnabled) World.ShowVisionCutoff(false);
+                else if (IsVisionCutoffEnabled)
+                {
+                    int currentCutoffAltitude = World.VisionCutoffAltitude;
+                    int targetCutoffAltitude = SelectedCharacter.OriginNode.MaxAltitude + 2;
+                    if (currentCutoffAltitude != targetCutoffAltitude || !World.IsVisionCutoffEnabled)
+                    {
+                        World.ShowVisionCutoffAt(targetCutoffAltitude);
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region Actions
@@ -457,7 +486,7 @@ namespace CaptureTheFlag
             if (SelectedCharacter != null)
             {
                 UI.SelectCharacter(c);
-                c.SetSelected(true);
+                c.ShowSelectionIndicator(true);
 
                 if (!SelectedCharacter.IsInAction)
                 {
@@ -469,10 +498,11 @@ namespace CaptureTheFlag
         {
             UnhighlightNodes();
             PathPreview.gameObject.SetActive(false);
+            IsVisionCutoffEnabled = false;
             if (SelectedCharacter != null)
             {
                 UI.DeselectCharacter(SelectedCharacter);
-                SelectedCharacter.SetSelected(false);
+                SelectedCharacter.ShowSelectionIndicator(false);
             }
             SelectedCharacter = null;
         }
@@ -527,6 +557,11 @@ namespace CaptureTheFlag
             foreach (Player p in Players) p.OnSetDevMode(DevMode);
 
             if (!DevMode) World.SetActiveVisionActor(LocalPlayer.Actor);
+        }
+
+        public void ToggleVisionCutoff()
+        {
+            IsVisionCutoffEnabled = !IsVisionCutoffEnabled;
         }
 
         #endregion
