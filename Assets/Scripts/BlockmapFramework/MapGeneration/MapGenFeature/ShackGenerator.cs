@@ -201,7 +201,10 @@ namespace BlockmapFramework.WorldGeneration
                                 bool placeLadder = !placeDoor && Random.value < 0.04f;
                                 if (placeLadder && outsideGroundNode != null)
                                 {
-                                    world.BuildLadder(outsideGroundNode, ceilingNode, HelperFunctions.GetOppositeDirection(side), updateWorld: false);
+                                    if (world.CanBuildLadder(outsideGroundNode, HelperFunctions.GetOppositeDirection(side), ceilingNode))
+                                    {
+                                        world.BuildLadder(outsideGroundNode, ceilingNode, HelperFunctions.GetOppositeDirection(side), updateWorld: false);
+                                    }
                                 }
                             }
                             else if (isWallWithinBuilding)

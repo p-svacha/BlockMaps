@@ -42,5 +42,18 @@ namespace BlockmapFramework
 
             return base.Validate(parent);
         }
+
+        public override CompProperties Clone()
+        {
+            return new CompProperties_Movement()
+            {
+                CompClass = this.CompClass,
+                MovementSpeed = this.MovementSpeed,
+                CanSwim = this.CanSwim,
+                ClimbingSkill = this.ClimbingSkill,
+                MaxHopUpDistance = this.MaxHopUpDistance,
+                MaxHopDownDistance = this.MaxHopDownDistance
+            };
+        }
     }
 }

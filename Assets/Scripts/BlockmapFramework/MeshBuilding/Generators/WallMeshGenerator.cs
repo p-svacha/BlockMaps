@@ -31,6 +31,7 @@ namespace BlockmapFramework
                 foreach(Wall wall in wallsToDraw)
                 {
                     wall.Shape.RenderFunction(chunk.World, meshBuilder, wall.GlobalCellCoordinates, wall.LocalCellCoordinates, wall.Side, wall.Material.Material, wall.IsMirrored);
+                    wall.SetMesh(mesh);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();

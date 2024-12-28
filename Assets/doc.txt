@@ -1,33 +1,57 @@
-(/) ladder interaction action
-(kinda/) lag when hovering node without path
-(maybe/) End-Game-Screen: instead of gray background show full-visible map
-(maybe/) End-Game-Screen: Menu button not working
-(/)Drawing AirNodes should also always draw a plane on the bottom side of the node
-(/)Node should be visible if any entity on it is visible
-(/)when character is selected while arriving at target, hovered nodes hsould refresh AND ACTIONS
-(/)special actions dont reset after moving
-(/)add cost to special actions button
-(/)pending action doesn't reset when going from move hover to ui
-(/)double clicking a character should pan camera there
+(/)can't move on opponent character in own zone (canPerformNow = false)
+(/)vision cutoff resets when arriving at destination (because character is reselected which sets it to off in deselect)
+(/)nodes don't seem to get explored when moving while vision cutoff is on (test by moving character inside building with vision cutoff and look at ceiling nides)
+(/)should be able to hover node through character label
+(/)Game Over Screen: Set visibility to Everything
+(/)ladders should work even when starting on slope
 
-individual names and attributes
+------------------------- END CTF v0.0.2 -------------------------
+
+make CtfCharacterStatDef and CtfCharacterStat
+Comp_CtfCharacter handles Dictionary<StatDef, Stat>
+
+CtfCharactorComp defines base stats
+
+individual attributes
+humans:
+Alberto (good climber)
+Usain (fast, no stamina, height 4)
+Eluid (good movement, extreme stamina reg)
+Veronica (extremely good vision)
+Katie (good swimmer, bad vision)
+Adrienne  (very good with dogs)
+
+dogs:
+blotto (big, height = 2, little faster but bad stamina, better hop)
+pierette (little, little slower but good stamina, better hop)
+
+show short description of character below name in charactor info, noting biggest strength/weakness
+
+rework how attributes are displayed in character info, so it also puts the values into perspective to how good they are relatively (bar length or stars)
+
+------------------------- END CTF v0.0.3 -------------------------
 
 AI: flee job
 AI: enemy moves from netural into player area even though he sees player is there
+AI: enemies get stuck when next node (adjacent) they want to move to is occupied
+AI: Stop searching flag when it becomes explored
 
-
-
-CTF: humans and dogs with names and attributes
-	(one longer human)
-
-ladder interaction action
-	+ network sync
+------------------------- END CTF v0.0.4 -------------------------
 
 make valley map gen
 	high sides with player spawns
 	river in the middle
+	some bridge crossings
 
-------------------------- END CTF v0.0.2 -------------------------
+desert map gen
+	sand, cactus, mostly flat
+	very few country roads through it
+	wild scorpions that can put you into jail
+
+farm map
+	different crop fields with movement modifiers
+
+------------------------- END CTF v0.0.5 -------------------------
 
 
 New EditorTool: Map Modifiers
@@ -222,12 +246,6 @@ More static entities (see following for inspiration):
 	> fallout tactics streams
 
 
-CTF: Single player lobby
-CTF: Vision altitude cutoff
-
-CTF: Use ladder action
-	> + sync
-
 CTF: Different humans and dogs
 CTF: Neutral items that refresh stamina or give modifiers
 CTF: Neutral items that can be picked up (requires inventory system)
@@ -261,7 +279,6 @@ CTF: more logic for dogs
   - can get distracted
 
 CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
-CTF: Multiplayer test
 
 CTF: Slopes use more action points
 	> downwards * 1.25
@@ -294,18 +311,6 @@ CTF: Rework jail system
 	> gives full vision for both players
 	> Fully fenced off
 	> Characters get teleported out of jail when jail time ends
-
-CTF: Make menu for creating game
-	> Allow different map sizes
-	> Miniscule: 7 chunks
-	> Tiny: 9 chunks
-	> Small: 11 chunks
-	> Medium: 13 chunks
-	> Big: 15 chunks
-	> Huge: 17 chunks
-	> Enormous: 20 chunks
-	> Random
-
 
 -------- POSSIBLE PROJECT IDEAS WITH FRAMEWORK --------
 

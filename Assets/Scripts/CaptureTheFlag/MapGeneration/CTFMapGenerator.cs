@@ -16,8 +16,21 @@ namespace CaptureTheFlag
         // Rules
         private const int SPAWN_MAP_EDGE_OFFSET = 10;
         private const int CHARACTER_SPAWN_VARIATION = 10;
-        private const int NUM_HUMANS_PER_PLAYER = 6;
-        private const int NUM_DOGS_PER_PLAYER = 2;
+
+        /// <summary>
+        /// List containing all EntityDefs of the characters that each player gets.
+        /// </summary>
+        private List<EntityDef> CharacterRoster = new List<EntityDef>()
+        {
+            EntityDefOf.Alberto,
+            EntityDefOf.Usain,
+            EntityDefOf.Eluid,
+            EntityDefOf.Veronica,
+            EntityDefOf.Katie,
+            EntityDefOf.Adrienne,
+            EntityDefOf.Blotto,
+            EntityDefOf.Pierette,
+        };
 
         private const int REQUIRED_SPAWN_ROAMING_AREA = 50; // Spawned characters need this many nodes to move around near them to be a valid spawn
         
@@ -102,22 +115,16 @@ namespace CaptureTheFlag
             }
             Zone flagZone = World.AddZone(flagZoneCoords, player, providesVision: true, ZoneVisibility.VisibleForOwner);
 
-            // Humans
-            int humansSpawned = 0;
-            numAttempts = 0;
-            while(humansSpawned < NUM_HUMANS_PER_PLAYER && numAttempts++ < 10)
+            // Character roster
+            foreach(EntityDef characterDef in CharacterRoster)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes);
-                if(spawnedCharacter != null) humansSpawned++;
-            }
-
-            // Dogs
-            int dogsSpawned = 0;
-            numAttempts = 0;
-            while (dogsSpawned < NUM_DOGS_PER_PLAYER && numAttempts++ < 10)
-            {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes);
-                if (spawnedCharacter != null) dogsSpawned++;
+                bool spawnSuccessful = false;
+                numAttempts = 0;
+                while (!spawnSuccessful && numAttempts++ < 10)
+                {
+                    Entity spawnedCharacter = SpawnEntityOnGroundAround(characterDef, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes);
+                    if (spawnedCharacter != null) spawnSuccessful = true;
+                }
             }
         }
         /// <summary>

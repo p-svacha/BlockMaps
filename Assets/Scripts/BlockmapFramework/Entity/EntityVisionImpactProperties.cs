@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -25,5 +26,20 @@ namespace BlockmapFramework
         /// <br/>The default value is the height of the entity (Dimensions.y).
         /// </summary>
         public Dictionary<Vector2Int, int> VisionBlockHeights { get; init; } = new Dictionary<Vector2Int, int>();
+
+        /// <summary>
+        /// Creates new EntityVisionImpactProperties
+        /// </summary>
+        public EntityVisionImpactProperties() { }
+
+        /// <summary>
+        /// Creates a deep copy of existing EntityVisionImpactProperties.
+        /// </summary>
+        public EntityVisionImpactProperties(EntityVisionImpactProperties orig)
+        {
+            BlocksVision = orig.BlocksVision;
+            VisionColliderType = orig.VisionColliderType;
+            VisionBlockHeights = orig.VisionBlockHeights.ToDictionary(x => new Vector2Int(x.Key.x, x.Key.y), x => x.Value);
+        }
     }
 }

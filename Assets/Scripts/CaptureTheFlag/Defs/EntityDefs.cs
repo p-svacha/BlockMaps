@@ -10,50 +10,27 @@ namespace CaptureTheFlag
         private static string BlenderImportBasePath = "Entities/Models/BlenderImport/";
         public static string ThumbnailBasePath = "Editor/Thumbnails/";
 
-        public static List<EntityDef> Defs = new List<EntityDef>()
+        private static EntityDef HumanBase = new EntityDef()
         {
-            new EntityDef()
+            DefName = "Human",
+            Label = "human",
+            Description = "Regular human",
+            EntityClass = typeof(CtfCharacter),
+            UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "human/human_fbx"),
+            Dimensions = new Vector3Int(1, 3, 1),
+            VisionRange = 10,
+            Impassable = false,
+            RenderProperties = new EntityRenderProperties()
             {
-                DefName = "Flag",
-                Label = "flag",
-                Description = "The flag to protect or capture.",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "flag/flag_fbx"),
-                EntityClass = typeof(Entity),
-                Dimensions = new Vector3Int(1, 2, 1),
-                Impassable = false,
-                RenderProperties = new EntityRenderProperties()
-                {
-                    RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "flag/flag_fbx"),
-                    PlayerColorMaterialIndex = 1,
-                },
-                VisionImpact = new EntityVisionImpactProperties()
-                {
-                    BlocksVision = false,
-                }
+                RenderType = EntityRenderType.StandaloneModel,
+                Model = Resources.Load<GameObject>(BlenderImportBasePath + "human/human_fbx"),
+                PlayerColorMaterialIndex = 0,
             },
-
-            new EntityDef()
+            VisionImpactProperties = new EntityVisionImpactProperties()
             {
-                DefName = "Human",
-                Label = "human",
-                Description = "Regular human",
-                EntityClass = typeof(CtfCharacter),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "human/human_fbx"),
-                Dimensions = new Vector3Int(1, 3, 1),
-                VisionRange = 10,
-                Impassable = false,
-                RenderProperties = new EntityRenderProperties()
-                {
-                    RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "human/human_fbx"),
-                    PlayerColorMaterialIndex = 0,
-                },
-                VisionImpact = new EntityVisionImpactProperties()
-                {
-                    BlocksVision = false,
-                },
-                Components = new List<CompProperties>()
+                BlocksVision = false,
+            },
+            Components = new List<CompProperties>()
                 {
                     new CompProperties_Movement()
                     {
@@ -73,29 +50,28 @@ namespace CaptureTheFlag
                         CanInteractWithDoors = true,
                     }
                 },
-            },
-
-            new EntityDef()
+        };
+        private static EntityDef DogBase = new EntityDef()
+        {
+            DefName = "Dog",
+            Label = "dog",
+            Description = "good boi",
+            EntityClass = typeof(CtfCharacter),
+            UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "dog/dog_2_fbx"),
+            Dimensions = new Vector3Int(1, 1, 1),
+            VisionRange = 3,
+            Impassable = false,
+            RenderProperties = new EntityRenderProperties()
             {
-                DefName = "Dog",
-                Label = "dog",
-                Description = "good boi",
-                EntityClass = typeof(CtfCharacter),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "dog/dog_2_fbx"),
-                Dimensions = new Vector3Int(1, 1, 1),
-                VisionRange = 3,
-                Impassable = false,
-                RenderProperties = new EntityRenderProperties()
-                {
-                    RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "dog/dog_2_fbx"),
-                    PlayerColorMaterialIndex = 1,
-                },
-                VisionImpact = new EntityVisionImpactProperties()
-                {
-                    BlocksVision = false,
-                },
-                Components = new List<CompProperties>()
+                RenderType = EntityRenderType.StandaloneModel,
+                Model = Resources.Load<GameObject>(BlenderImportBasePath + "dog/dog_2_fbx"),
+                PlayerColorMaterialIndex = 1,
+            },
+            VisionImpactProperties = new EntityVisionImpactProperties()
+            {
+                BlocksVision = false,
+            },
+            Components = new List<CompProperties>()
                 {
                     new CompProperties_Movement()
                     {
@@ -115,6 +91,80 @@ namespace CaptureTheFlag
                         CanInteractWithDoors = false,
                     }
                 },
+        };
+
+
+
+        public static List<EntityDef> Defs = new List<EntityDef>()
+        {
+            new EntityDef()
+            {
+                DefName = "Flag",
+                Label = "flag",
+                Description = "The flag to protect or capture.",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "flag/flag_fbx"),
+                EntityClass = typeof(Entity),
+                Dimensions = new Vector3Int(1, 2, 1),
+                Impassable = false,
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "flag/flag_fbx"),
+                    PlayerColorMaterialIndex = 1,
+                },
+                VisionImpactProperties = new EntityVisionImpactProperties()
+                {
+                    BlocksVision = false,
+                }
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Alberto",
+                Label = "alberto",
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Usain",
+                Label = "usain",
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Eluid",
+                Label = "eluid",
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Veronica",
+                Label = "veronica",
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Katie",
+                Label = "katie",
+            },
+
+            new EntityDef(HumanBase)
+            {
+                DefName = "Adrienne",
+                Label = "adrienne",
+            },
+
+
+            new EntityDef(DogBase)
+            {
+                DefName = "Blotto",
+                Label = "blotto",
+            },
+
+            new EntityDef(DogBase)
+            {
+                DefName = "Pierette",
+                Label = "pierette",
             },
         };
     }

@@ -227,8 +227,6 @@ namespace CaptureTheFlag
         /// </summary>
         private bool CanStandOn(BlockmapNode targetNode)
         {
-            if (Match.GetCharacters(targetNode).Any(x => x.Owner == Owner)) return false; // can't stand on ally characters
-            if (Match.NeutralZone.ContainsNode(targetNode) && Match.GetCharacters(targetNode).Count > 0) return false; // can't stand on any characters in neutral zone
             if (targetNode.Entities.Any(x => x == Owner.Flag)) return false; // can't stand on own flag
             if (Owner.FlagZone.ContainsNode(targetNode)) return false; // Can't stand in own flag zone
 

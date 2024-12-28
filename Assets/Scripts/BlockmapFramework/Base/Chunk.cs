@@ -199,7 +199,7 @@ namespace BlockmapFramework
 
             pm_GenerateProcEntityMeshes.Begin();
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) GameObject.Destroy(mesh.gameObject);
-            ProceduralEntityMeshes = ProceduralEntityMeshGenerator.GenerateMeshes(this);
+            ProceduralEntityMeshes = BatchEntityMeshGenerator.GenerateMeshes(this);
             pm_GenerateProcEntityMeshes.End();
 
             // Chunk position
@@ -247,11 +247,11 @@ namespace BlockmapFramework
         }
         public void SetVisionCutoffAltitude(int value)
         {
-            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.gameObject.SetActive(value == -1 || mesh.Altitude < value);
-            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.gameObject.SetActive(value == -1 || mesh.Altitude < value);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.gameObject.SetActive(value == -1 || mesh.Altitude < value);
-            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.gameObject.SetActive(value == -1 || mesh.Altitude < value);
-            foreach (Entity e in Entities.Where(e => e.MeshObject != null && e.OriginNode.Type != NodeType.Ground)) e.MeshObject.SetActive(value == -1 || e.MinAltitude < value);
+            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
+            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
+            foreach (WallMesh mesh in WallMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
+            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
+            foreach (Entity e in Entities.Where(e => e.IsStandaloneEntity && e.OriginNode.Type != NodeType.Ground)) e.MeshRenderer.enabled = (value == -1 || e.MinAltitude < value);
         }
 
         public void DrawZoneBorders(Actor actor)

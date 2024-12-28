@@ -41,7 +41,13 @@ namespace CaptureTheFlag.UI
 
             VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
 
-            if (hoveredAction != null && hoveredAction.CanPerformNow()) ShowActionPreview(hoveredAction.Cost);
+            if (hoveredAction != null)
+            {
+                if (hoveredAction.CanPerformNow() || Character.CurrentAction == hoveredAction)
+                {
+                    ShowActionPreview(hoveredAction.Cost);
+                }
+            }
         }
 
         private void ShowActionPreview(float cost)

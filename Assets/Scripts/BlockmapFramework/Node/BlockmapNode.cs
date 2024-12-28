@@ -118,7 +118,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The mesh in the world that this node is drawn on.
         /// </summary>
-        protected ChunkMesh Mesh { get; private set; }
+        public ChunkMesh Mesh { get; private set; }
 
         // Cache
         private Dictionary<Direction, List<IClimbable>> ClimbUpCache = new Dictionary<Direction, List<IClimbable>>();

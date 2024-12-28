@@ -100,7 +100,13 @@ namespace BlockmapFramework
         /// The MeshRenderer that renders standalone entities.
         /// <br/>Null for entities that are not standalone.
         /// </summary>
-        private MeshRenderer MeshRenderer;
+        public MeshRenderer MeshRenderer { get; private set; }
+
+        /// <summary>
+        /// The BatchEntityMesh that this entity belongs to.
+        /// <br/>Null for entities that are not batch entities.
+        /// </summary>
+        public BatchEntityMesh BatchEntityMesh { get; private set; }
 
         /// <summary>
         /// The collider that is used for hovering and selecting the entity with the cursor.
@@ -291,7 +297,7 @@ namespace BlockmapFramework
             VisionColliderObject.transform.SetParent(Wrapper.transform);
             if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
 
-            if (Def.VisionImpact.VisionColliderType == VisionColliderType.FullBox) // Create a single box collider with the bounds of the whole entity
+            if (Def.VisionImpactProperties.VisionColliderType == VisionColliderType.FullBox) // Create a single box collider with the bounds of the whole entity
             {
                 BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
                 if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
@@ -301,7 +307,7 @@ namespace BlockmapFramework
                 WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
                 evc.Object = this;
             }
-            else if (Def.VisionImpact.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
+            else if (Def.VisionImpactProperties.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
             {
                 MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
                 collider.sharedMesh = MeshCollider.sharedMesh;
@@ -309,7 +315,7 @@ namespace BlockmapFramework
                 WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
                 evc.Object = this;
             }
-            else if(Def.VisionImpact.VisionColliderType == VisionColliderType.BlockPerNode) // Create a box collider per node, each one with its own height
+            else if(Def.VisionImpactProperties.VisionColliderType == VisionColliderType.BlockPerNode) // Create a box collider per node, each one with its own height
             {
                 for (int x = 0; x < Dimensions.x; x++)
                 {
@@ -323,7 +329,7 @@ namespace BlockmapFramework
                         BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
 
                         float height = Dimensions.y; // default height
-                        if (Def.VisionImpact.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
+                        if (Def.VisionImpactProperties.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
 
                         if (MeshObject != null) collider.size = new Vector3(1f / MeshObject.transform.localScale.x, (height * World.NodeHeight) / MeshObject.transform.localScale.y, 1f / MeshObject.transform.localScale.z);
                         collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
@@ -334,7 +340,7 @@ namespace BlockmapFramework
                     }
                 }
             }
-            else if(Def.VisionImpact.VisionColliderType == VisionColliderType.CustomImplementation)
+            else if(Def.VisionImpactProperties.VisionColliderType == VisionColliderType.CustomImplementation)
             {
                 throw new System.NotImplementedException($"No custom implementation found. CreateVisionCollider() seems to not be overriden for entity with DefName={Def.DefName}.");
             }
@@ -581,6 +587,11 @@ namespace BlockmapFramework
                 MeshRenderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
         }
 
+        public void SetBatchEntityMesh(BatchEntityMesh mesh)
+        {
+            BatchEntityMesh = mesh;
+        }
+
         #endregion
 
         #region Getters
@@ -590,7 +601,7 @@ namespace BlockmapFramework
         public virtual string Description => Def.Description;
 
         public virtual float VisionRange => Def.VisionRange;
-        public virtual bool BlocksVision() => Def.VisionImpact.BlocksVision;
+        public virtual bool BlocksVision() => Def.VisionImpactProperties.BlocksVision;
         public virtual bool BlocksVision(WorldObjectCollider collider) => BlocksVision();
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;

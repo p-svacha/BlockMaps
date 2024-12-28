@@ -574,9 +574,79 @@ public static class HelperFunctions
     /// <summary>
     /// Returns is the mouse is currently hovering over a UI element.
     /// </summary>
-    public static bool IsMouseOverUi()
+    public static bool IsMouseOverUi(params GameObject[] excludedButtons)
     {
         return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    /// <summary>
+    /// Checks if the mouse is currently over a UI element, excluding certain UI objects
+    /// and all their children.
+    /// </summary>
+    /// <param name="excludedUiElements">
+    /// Optional list of UI GameObjects to ignore in the check (including any of their children).
+    /// </param>
+    /// <returns>
+    /// True if mouse is over a UI element that is not excluded; false otherwise.
+    /// </returns>
+    public static bool IsMouseOverUiExcept(params GameObject[] excludedUiElements)
+    {
+        // Quick check: if pointer isn't over *any* UI elements, we can stop.
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            return false;
+        }
+
+        // Perform a UI raycast from the mouse pointer
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        // If no UI elements are hit, we can stop
+        if (results.Count == 0)
+        {
+            return false;
+        }
+
+        // Check each UI element that was hit by the raycast
+        foreach (RaycastResult result in results)
+        {
+            GameObject hitObject = result.gameObject;
+
+            // If the hit object is not in the excluded list and not a child of an excluded object,
+            // then we consider the mouse to be over a "meaningful" UI element.
+            if (!IsExcluded(hitObject, excludedUiElements))
+            {
+                return true;
+            }
+        }
+
+        // If we only hit excluded objects, return false
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if the given object is the same as one of the excluded objects
+    /// or is a child of one of them.
+    /// </summary>
+    private static bool IsExcluded(GameObject candidate, GameObject[] excludedUiElements)
+    {
+        foreach (GameObject excluded in excludedUiElements)
+        {
+            if (excluded == null) continue;
+
+            // If candidate is the excluded object itself or is a descendant
+            if (candidate.transform == excluded.transform ||
+                candidate.transform.IsChildOf(excluded.transform))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     #endregion

@@ -25,7 +25,7 @@ namespace CaptureTheFlag
 
         public override bool CanPerformNow()
         {
-            if (Match.IsAnyCharacterOnOrHeadingTo(Target)) return false;
+            if (!Match.CanCharacterMoveOn(Character, Target)) return false;
 
             return base.CanPerformNow();
         }

@@ -24,7 +24,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Definitions of how this entity affects the vision of other entities.
         /// </summary>
-        public EntityVisionImpactProperties VisionImpact { get; init; } = new EntityVisionImpactProperties();
+        public EntityVisionImpactProperties VisionImpactProperties { get; init; } = new EntityVisionImpactProperties();
 
         /// <summary>
         /// Components that add custom behaviour to this entity.
@@ -56,11 +56,39 @@ namespace BlockmapFramework
         /// </summary>
         public bool VariableHeight { get; init; } = false;
 
+        /// <summary>
+        /// Creates a new EntityDef.
+        /// </summary>
+        public EntityDef() { }
+
+        /// <summary>
+        /// Creates a deep copy of another EntityDef.
+        /// </summary>
+        public EntityDef(EntityDef orig)
+        {
+            // Base Def
+            DefName = orig.DefName;
+            Label = orig.Label;
+            Description = orig.Description;
+            UiPreviewSprite = orig.UiPreviewSprite;
+
+            // EntityDef
+            EntityClass = orig.EntityClass;
+            RenderProperties = new EntityRenderProperties(orig.RenderProperties);
+            VisionImpactProperties = new EntityVisionImpactProperties(orig.VisionImpactProperties);
+            Components = orig.Components.Select(c => c.Clone()).ToList();
+            VisionRange = orig.VisionRange;
+            Dimensions = new Vector3Int(orig.Dimensions.x, orig.Dimensions.y, orig.Dimensions.z);
+            Impassable = orig.Impassable;
+            RequiresFlatTerrain = orig.RequiresFlatTerrain;
+            VariableHeight = orig.VariableHeight;
+        }
+
         public override bool Validate()
         {
             if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) ThrowValidationError("Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
             if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) ThrowValidationError("x and z dimensions must be 1 for batch-rendered entities.");
-            if (VisionImpact.VisionColliderType == VisionColliderType.BlockPerNode && VisionImpact.VisionBlockHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
+            if (VisionImpactProperties.VisionColliderType == VisionColliderType.BlockPerNode && VisionImpactProperties.VisionBlockHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
 
             foreach (CompProperties props in Components)
                 if(!props.Validate(this))

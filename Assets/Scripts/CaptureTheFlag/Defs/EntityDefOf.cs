@@ -9,8 +9,15 @@ namespace CaptureTheFlag
     public static class EntityDefOf
     {
         public static EntityDef Flag;
-        public static EntityDef Human;
-        public static EntityDef Dog;
         public static EntityDef ProcHedge;
+
+        public static EntityDef Alberto;
+        public static EntityDef Usain;
+        public static EntityDef Eluid;
+        public static EntityDef Veronica;
+        public static EntityDef Katie;
+        public static EntityDef Adrienne;
+        public static EntityDef Blotto;
+        public static EntityDef Pierette;
     }
 }

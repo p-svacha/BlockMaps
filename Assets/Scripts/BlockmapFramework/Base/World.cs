@@ -376,7 +376,7 @@ namespace BlockmapFramework
                 {
                     GroundNode hitNode = GetGroundNode(HoveredWorldCoordinates);
 
-                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor))
+                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor) && hitNode.Mesh.Renderer.enabled)
                     {
                         newHoveredGroundNode = hitNode;
                         newHoveredNode = hitNode;
@@ -391,7 +391,7 @@ namespace BlockmapFramework
                 {
                     AirNode hitNode = GetAirNodeFromRaycastHit(hit);
 
-                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor))
+                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor) && hitNode.Mesh.Renderer.enabled)
                     {
                         newHoveredAirNode = hitNode;
                         newHoveredNode = hitNode;
@@ -428,7 +428,7 @@ namespace BlockmapFramework
                 {
                     Fence hitFence = GetFenceFromRaycastHit(hit);
                     
-                    if (hitFence != null && hitFence.Node.IsExploredBy(ActiveVisionActor))
+                    if (hitFence != null && hitFence.Node.IsExploredBy(ActiveVisionActor) && objectHit.GetComponent<MeshRenderer>().enabled)
                     {
                         newHoveredFence = hitFence;
                         HoveredWorldCoordinates = hitFence.Node.WorldCoordinates;
@@ -442,7 +442,7 @@ namespace BlockmapFramework
                 {
                     Wall hitWall = GetWallFromRaycastHit(hit);
                     
-                    if (hitWall != null && hitWall.IsExploredBy(ActiveVisionActor))
+                    if (hitWall != null && hitWall.IsExploredBy(ActiveVisionActor) && hitWall.Mesh.Renderer.enabled)
                     {
                         newHoveredWall = hitWall;
                         HoveredWorldCoordinates = hitWall.WorldCoordinates;
@@ -456,7 +456,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
-                    if(hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor))
+                    if(hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.MeshRenderer.enabled)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredChunk = hitEntity.Chunk;
@@ -469,7 +469,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = GetBatchEntityFromRaycastHit(hit);
 
-                    if (hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor))
+                    if (hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.BatchEntityMesh.Renderer.enabled)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredChunk = hitEntity.Chunk;
@@ -1200,6 +1200,8 @@ namespace BlockmapFramework
 
         public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
         {
+            if (def == null) throw new System.Exception($"Cannot check if entity is spawnable because EntityDef is null");
+
             HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, height); // get nodes that would be occupied when placing the entity on the given node
 
             // Terrain below entity is not fully connected and therefore occupiedNodes is null
@@ -1610,6 +1612,7 @@ namespace BlockmapFramework
 
             return possibleTargetNodes;
         }
+        public bool CanBuildLadder(BlockmapNode from, Direction side, BlockmapNode to) => GetPossibleLadderTargetNodes(from, side).Contains(to);
         public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side, bool updateWorld)
         {
             SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to), isMirrored: false, updateWorld: updateWorld);

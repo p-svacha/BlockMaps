@@ -12,6 +12,11 @@ namespace BlockmapFramework
     {
         public Type CompClass { get; init; } = null;
 
+        /// <summary>
+        /// Creates a deep copy of an existing CompProperties
+        /// </summary>
+        public abstract CompProperties Clone();
+
         public virtual bool Validate(EntityDef parent)
         {
             return true;

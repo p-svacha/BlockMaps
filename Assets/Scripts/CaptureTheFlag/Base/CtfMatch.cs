@@ -224,7 +224,7 @@ namespace CaptureTheFlag
 
             // Update UI
             if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
-            if (SelectedCharacter == action.Character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and actions
+            if (SelectedCharacter == action.Character) RefreshSelectedCharacter(); // Reselect character to update highlighted nodes and actions
         }
 
         private void StartPlayerTurn()
@@ -273,6 +273,7 @@ namespace CaptureTheFlag
         public void EndGame(bool won)
         {
             State = MatchState.GameFinished;
+            World.SetActiveVisionActor(null);
             UI.ShowEndGameScreen(won ? "You won!" : "You lost.");
         }
 
@@ -398,7 +399,7 @@ namespace CaptureTheFlag
             }
 
             // Right click - Move
-            if(Input.GetMouseButtonDown(1) && !HelperFunctions.IsMouseOverUi())
+            if(Input.GetMouseButtonDown(1) && !HelperFunctions.IsMouseOverUiExcept(UI.CharacterLabelsContainer))
             {
                 // Move
                 if(SelectedCharacter != null && 
@@ -431,7 +432,7 @@ namespace CaptureTheFlag
 
             PathPreview.gameObject.SetActive(false);
 
-            if (HelperFunctions.IsMouseOverUi()) return;
+            if (HelperFunctions.IsMouseOverUiExcept(UI.CharacterLabelsContainer)) return;
             HoveredAction = null;
 
             // Check if we hover a possible move
@@ -488,6 +489,7 @@ namespace CaptureTheFlag
         public void SelectCharacter(CtfCharacter c)
         {
             if (State != MatchState.PlayerTurn) return;
+            if (SelectedCharacter == c) return;
             if (c.Owner != LocalPlayer) return;
 
             // Deselect previous
@@ -495,16 +497,8 @@ namespace CaptureTheFlag
 
             // Select new
             SelectedCharacter = c;
-            if (SelectedCharacter != null)
-            {
-                UI.SelectCharacter(c);
-                c.ShowSelectionIndicator(true);
 
-                if (!SelectedCharacter.IsInAction)
-                {
-                    HighlightNodes(c.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
-                }
-            }
+            RefreshSelectedCharacter();
         }
         private void DeselectCharacter()
         {
@@ -517,6 +511,19 @@ namespace CaptureTheFlag
                 SelectedCharacter.ShowSelectionIndicator(false);
             }
             SelectedCharacter = null;
+        }
+
+        public void RefreshSelectedCharacter()
+        {
+            if (SelectedCharacter == null) return;
+
+            UI.SelectCharacter(SelectedCharacter);
+            SelectedCharacter.ShowSelectionIndicator(true);
+
+            if (!SelectedCharacter.IsInAction)
+            {
+                HighlightNodes(SelectedCharacter.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
+            }
         }
 
         private void HighlightNodes(HashSet<BlockmapNode> nodes)
@@ -589,15 +596,33 @@ namespace CaptureTheFlag
 
         public Player GetPlayerByClientId(string clientId) => Players.First(p => p.ClientId == clientId);
 
-        public bool IsAnyCharacterOnOrHeadingTo(BlockmapNode target)
+        /// <summary>
+        /// Checks and returns a character can move on a given node.
+        public bool CanCharacterMoveOn(CtfCharacter sourceCharacter, BlockmapNode target)
         {
-            // Check if any character is currently on or heading to the target node
-            foreach (CtfCharacter character in Characters)
+            // Can't be on same node as any other friendly character
+            foreach (CtfCharacter otherCharacter in sourceCharacter.Owner.Characters)
             {
-                if (character.OriginNode == target) return true;
-                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == target) return true;
-                if (character.IsInAction && character.CurrentAction is Action_UseLadder ladderMove && ladderMove.Transition.To == target) return true;
+                if (IsCharacterOnOrMovingTowards(otherCharacter, target)) return false;
             }
+
+            // Additionally, can't be on same node as opponent character in neutral zone
+            if (NeutralZone.ContainsNode(target))
+            {
+                foreach (CtfCharacter otherCharacter in sourceCharacter.Opponent.Characters)
+                {
+                    if (IsCharacterOnOrMovingTowards(otherCharacter, target)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsCharacterOnOrMovingTowards(CtfCharacter character, BlockmapNode node)
+        {
+            if (character.OriginNode == node) return true;
+            if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == node) return true;
+            if (character.IsInAction && character.CurrentAction is Action_UseLadder ladderMove && ladderMove.Transition.To == node) return true;
             return false;
         }
 

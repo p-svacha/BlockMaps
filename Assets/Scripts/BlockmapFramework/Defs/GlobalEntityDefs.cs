@@ -41,7 +41,7 @@ namespace BlockmapFramework.Defs
                     StandaloneRenderFunction = Door.GenerateDoorMesh,
                     GetWorldPositionFunction = Door.GetWorldPosition,
                 },
-                VisionImpact = new EntityVisionImpactProperties()
+                VisionImpactProperties = new EntityVisionImpactProperties()
                 {
                     VisionColliderType = VisionColliderType.CustomImplementation,
                 }
@@ -61,7 +61,7 @@ namespace BlockmapFramework.Defs
                     StandaloneRenderFunction = LadderMeshGenerator.GenerateLadderMesh,
                     GetWorldPositionFunction = Ladder.GetLadderWorldPosition,
                 },
-                VisionImpact = new EntityVisionImpactProperties()
+                VisionImpactProperties = new EntityVisionImpactProperties()
                 {
                     BlocksVision = false,
                 },
@@ -125,7 +125,7 @@ namespace BlockmapFramework.Defs
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car1_fbx"),
                 },
-                VisionImpact = new EntityVisionImpactProperties()
+                VisionImpactProperties = new EntityVisionImpactProperties()
                 {
                     VisionColliderType = VisionColliderType.BlockPerNode,
                     VisionBlockHeights = new Dictionary<Vector2Int, int>()
@@ -149,7 +149,7 @@ namespace BlockmapFramework.Defs
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car2_fbx"),
                 },
-                VisionImpact = new EntityVisionImpactProperties()
+                VisionImpactProperties = new EntityVisionImpactProperties()
                 {
                     VisionColliderType = VisionColliderType.BlockPerNode,
                     VisionBlockHeights = new Dictionary<Vector2Int, int>()
@@ -173,7 +173,7 @@ namespace BlockmapFramework.Defs
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car3_fbx"),
                 },
-                VisionImpact = new EntityVisionImpactProperties()
+                VisionImpactProperties = new EntityVisionImpactProperties()
                 {
                     VisionColliderType = VisionColliderType.BlockPerNode,
                     VisionBlockHeights = new Dictionary<Vector2Int, int>()

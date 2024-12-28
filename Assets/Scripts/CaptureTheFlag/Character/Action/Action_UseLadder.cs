@@ -20,7 +20,7 @@ namespace CaptureTheFlag
 
         public override bool CanPerformNow()
         {
-            if (Match.IsAnyCharacterOnOrHeadingTo(Transition.To)) return false;
+            if (!Match.CanCharacterMoveOn(Character, Transition.To)) return false;
 
             // Check if character can use the transition
             if (!Transition.CanPass(Character)) return false;

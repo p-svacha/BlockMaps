@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public static class ProceduralEntityMeshGenerator
+    public static class BatchEntityMeshGenerator
     {
         public static Dictionary<int, BatchEntityMesh> GenerateMeshes(Chunk chunk)
         {
@@ -26,6 +26,7 @@ namespace BlockmapFramework
                 foreach (Entity e in entitiesToDraw)
                 {
                     e.Def.RenderProperties.BatchRenderFunction(meshBuilder, e.OriginNode, e.Height, false);
+                    e.SetBatchEntityMesh(mesh);
                 }
                 meshBuilder.ApplyMesh();
                 mesh.OnMeshApplied();

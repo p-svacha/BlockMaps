@@ -45,5 +45,24 @@ namespace BlockmapFramework
         /// <br/>Parameters are: EntityDef, World, TargetNode, TargetRotation, IsMirrored.
         /// </summary>
         public System.Func<EntityDef, World, BlockmapNode, Direction, bool, Vector3> GetWorldPositionFunction { get; init; } = EntityManager.GetWorldPosition;
+
+        /// <summary>
+        /// Creates new EntityRenderPropertes
+        /// </summary>
+        public EntityRenderProperties() { }
+
+        /// <summary>
+        /// Creates a deep copy of existing EntityRenderPropertes.
+        /// </summary>
+        public EntityRenderProperties(EntityRenderProperties orig)
+        {
+            RenderType = orig.RenderType;
+            Model = orig.Model;
+            ModelScale = orig.ModelScale;
+            PlayerColorMaterialIndex = orig.PlayerColorMaterialIndex;
+            BatchRenderFunction = orig.BatchRenderFunction;
+            StandaloneRenderFunction = orig.StandaloneRenderFunction;
+            GetWorldPositionFunction = orig.GetWorldPositionFunction;
+        }
     }
 }

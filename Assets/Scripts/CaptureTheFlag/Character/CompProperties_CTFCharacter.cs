@@ -19,5 +19,19 @@ namespace CaptureTheFlag
         public float StaminaRegeneration { get; init; } = 0;
         public float MovementSkill { get; init; } = 0;
         public bool CanInteractWithDoors { get; init; } = false;
+
+        public override CompProperties Clone()
+        {
+            return new CompProperties_CTFCharacter()
+            {
+                CompClass = this.CompClass,
+                Avatar = this.Avatar,
+                MaxActionPoints = this.MaxActionPoints,
+                MaxStamina = this.MaxStamina,
+                StaminaRegeneration = this.StaminaRegeneration,
+                MovementSkill = this.MovementSkill,
+                CanInteractWithDoors = this.CanInteractWithDoors,
+            };
+        }
     }
 }

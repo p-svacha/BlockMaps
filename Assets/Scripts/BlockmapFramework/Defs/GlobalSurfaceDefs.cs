@@ -127,7 +127,7 @@ namespace BlockmapFramework.Defs
                 DefName = "DirtPath",
                 Label = "dith path",
                 Description = "A foresty dirt path",
-                MovementSpeedModifier = 0.8f,
+                MovementSpeedModifier = 0.85f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,

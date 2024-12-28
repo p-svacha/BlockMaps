@@ -56,6 +56,7 @@ namespace BlockmapFramework
         public float Width => Shape.Width;
 
         // GameObject
+        public WallMesh Mesh { get; private set; }
         public GameObject VisionColliderObject;
 
 
@@ -144,6 +145,11 @@ namespace BlockmapFramework
         #endregion
 
         #region Actions
+
+        public void SetMesh(WallMesh mesh)
+        {
+            Mesh = mesh;
+        }
 
         public void AddZone(Zone z)
         {
