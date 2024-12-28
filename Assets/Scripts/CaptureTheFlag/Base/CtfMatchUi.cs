@@ -30,6 +30,7 @@ namespace CaptureTheFlag.UI
         public TextMeshProUGUI TurnIndicatorText;
 
         public GameObject CharacterLabelsContainer;
+        public UI_GameOverPanel GameOverPanel;
 
         private Dictionary<CtfCharacter, UI_CharacterSelectionPanel> CharacterSelection = new();
         float deltaTime; // for fps
@@ -43,6 +44,8 @@ namespace CaptureTheFlag.UI
             DevModeButton.onClick.AddListener(() => Match.ToggleDevMode());
             ToggleGridButton.Button.onClick.AddListener(() => { Match.World.ToggleGridOverlay(); ToggleGridButton.SetToggle(Match.World.IsShowingGrid); });
             EndTurnButton.onClick.AddListener(() => Match.EndPlayerTurn());
+
+            GameOverPanel.Init(match);
         }
 
         public void OnMatchReady()
@@ -145,6 +148,12 @@ namespace CaptureTheFlag.UI
         public void HideRedNotificationText()
         {
             TurnIndicator.SetActive(false);
+        }
+
+        public void ShowEndGameScreen(string text)
+        {
+            GameOverPanel.gameObject.SetActive(true);
+            GameOverPanel.Text.text = text;
         }
 
         public void OnSetDevMode(bool active)

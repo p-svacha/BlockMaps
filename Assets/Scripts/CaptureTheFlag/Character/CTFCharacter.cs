@@ -111,6 +111,8 @@ namespace CaptureTheFlag
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
         public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
 
+        public ClimbingCategory ClimbingSkill => MovementComp.ClimbingSkill;
+
         // CtfComp
         public Sprite Avatar => CtfComp.Avatar;
         public float MaxActionPoints => CtfComp.MaxActionPoints;
@@ -174,7 +176,7 @@ namespace CaptureTheFlag
                         if (!CanStandOn(targetNode)) continue;
 
                         // Add target node to possible moves
-                        movements[targetNode] = new Action_Movement(Match, this, nodePaths[targetNode], nodeCosts[targetNode]);
+                        movements[targetNode] = new Action_Movement(this, nodePaths[targetNode], nodeCosts[targetNode]);
                     }
                 }
             }
@@ -190,14 +192,30 @@ namespace CaptureTheFlag
             List<SpecialCharacterAction> actions = new List<SpecialCharacterAction>();
 
             // Go to jail
-            if(!IsInJail) actions.Add(new Action_GoToJail(Match, this));
+            if(!IsInJail) actions.Add(new Action_GoToJail(this));
 
             // Door interaction
             if (CanInteractWithDoors)
             {
                 foreach (Door door in World.GetNearbyEntities(WorldPosition, maxDistance: 2f).Where(e => e is Door && e.IsExploredBy(Actor)))
                 {
-                    actions.Add(new Action_InteractWithDoor(Match, this, door));
+                    actions.Add(new Action_InteractWithDoor(this, door));
+                }
+            }
+            
+            // Ladder transition
+            if(ClimbingSkill != ClimbingCategory.None)
+            {
+                foreach (Ladder ladder in OriginNode.SourceLadders.Values)
+                {
+                    Transition targetTransition = ladder.GetTransition(from: OriginNode);
+                    if (targetTransition != null) actions.Add(new Action_UseLadder(this, targetTransition));
+                }
+
+                foreach (Ladder ladder in OriginNode.TargetLadders.Values)
+                {
+                    Transition targetTransition = ladder.GetTransition(from: OriginNode);
+                    if(targetTransition != null) actions.Add(new Action_UseLadder(this, targetTransition));
                 }
             }
 

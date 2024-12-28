@@ -17,7 +17,7 @@ namespace BlockmapFramework
         /// </summary>
         public static void DrawDefaultNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, Material material, float height)
         {
-            if (node is AirNode airNode && airNode.IsStairs)
+            if (node is AirNode airNode && airNode.SurfaceDef.RenderProperties.DrawSlopeAsStairs && airNode.IsStairs)
             {
                 BuildStairs(meshBuilder, node, 0f, material);
                 return;
@@ -45,11 +45,27 @@ namespace BlockmapFramework
                 {
                     meshBuilder.AddTriangle(surfaceSubmesh, v1a, v3a, v2a);
                     meshBuilder.AddTriangle(surfaceSubmesh, v1b, v4b, v3b);
+
+                    // Also draw bottom side for air nodes
+                    if (node is AirNode)
+                    {
+                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Cliff");
+                        meshBuilder.BuildTriangle(bottomSideSubmesh, v1a.Position, v3a.Position, v2a.Position);
+                        meshBuilder.BuildTriangle(bottomSideSubmesh, v1b.Position, v4b.Position, v3b.Position);
+                    }
                 }
                 else
                 {
                     meshBuilder.AddTriangle(surfaceSubmesh, v1a, v4a, v2a);
                     meshBuilder.AddTriangle(surfaceSubmesh, v2b, v4b, v3b);
+
+                    // Also draw bottom side for air nodes
+                    if (node is AirNode)
+                    {
+                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Cliff");
+                        meshBuilder.BuildTriangle(bottomSideSubmesh, v1a.Position, v4a.Position, v2a.Position);
+                        meshBuilder.BuildTriangle(bottomSideSubmesh, v2b.Position, v4b.Position, v3b.Position);
+                    }
                 }
             }
             else meshBuilder.BuildCube(node, surfaceSubmesh, Vector3.zero, new Vector3(1f, height, 1f), adjustToNodeShape: true);

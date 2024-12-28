@@ -12,6 +12,6 @@ namespace CaptureTheFlag
         public abstract string Name { get; }
         public abstract Sprite Icon { get; }
 
-        public SpecialCharacterAction(CtfMatch game, CtfCharacter c, float cost) : base(game, c, cost) { }
+        public SpecialCharacterAction(CtfCharacter c, float cost) : base(c, cost) { }
     }
 }

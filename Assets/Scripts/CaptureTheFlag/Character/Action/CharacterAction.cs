@@ -10,7 +10,7 @@ namespace CaptureTheFlag
     /// </summary>
     public abstract class CharacterAction
     {
-        public CtfMatch Match { get; private set; }
+        public CtfMatch Match => Character.Match;
 
         /// <summary>
         /// The actor who will perform this action.
@@ -30,9 +30,8 @@ namespace CaptureTheFlag
         public bool IsDone => State == CharacterActionState.Done;
         public bool IsPaused => State == CharacterActionState.Paused;
 
-        public CharacterAction(CtfMatch game, CtfCharacter c, float cost)
+        public CharacterAction(CtfCharacter c, float cost)
         {
-            Match = game;
             Character = c;
             Cost = cost;
             State = CharacterActionState.Pending;

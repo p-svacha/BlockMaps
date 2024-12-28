@@ -44,7 +44,7 @@ namespace CaptureTheFlag
             WorldGeneratorDropdownIndex = index;
             WorldGeneratorDropdownOption = index == 0 ? "Random" : CtfMatch.WorldGenerators[index - 1].Label;
 
-            if (index == 0) WorldGeneratorIndex = Random.Range(0, CtfMatch.WorldGenerators.Count);
+            if (index == 0) WorldGeneratorIndex = new System.Random().Next(CtfMatch.WorldGenerators.Count);
             else WorldGeneratorIndex = index - 1;
         }
 
@@ -55,7 +55,7 @@ namespace CaptureTheFlag
 
             if (index == 0)
             {
-                int worldSizeIndex = Random.Range(0, CtfMatch.MapSizes.Count);
+                int worldSizeIndex = new System.Random().Next(CtfMatch.MapSizes.Count);
                 WorldSize = CtfMatch.MapSizes.Values.ToList()[worldSizeIndex];
             }
             else

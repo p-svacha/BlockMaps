@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Utendo-Regular SDF Outline
   m_EditorClassIdentifier: 
-  hashCode: 1672509095
+  hashCode: 1666078951
   material: {fileID: 4030179771045053883}
-  materialHashCode: 1482855207
+  materialHashCode: 1931139815
   m_Version: 1.1.0
   m_SourceFontFileGUID: f8a8c2c484a93994bae9f6484efafafc
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: f8a8c2c484a93994bae9f6484efafafc, type: 3}
@@ -2615,7 +2615,7 @@ Material:
     - _OutlineSoftness: 0
     - _OutlineUVSpeedX: 0
     - _OutlineUVSpeedY: 0
-    - _OutlineWidth: 0
+    - _OutlineWidth: 0.2
     - _PerspectiveFilter: 0.875
     - _Reflectivity: 10
     - _ScaleRatioA: 0.8333333

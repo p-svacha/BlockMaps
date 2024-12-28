@@ -50,7 +50,8 @@ namespace BlockmapFramework.Defs
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_NoBlend,
-                    MaterialName = "ConcreteLight"
+                    MaterialName = "ConcreteLight",
+                    DrawSlopeAsStairs = true,
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },

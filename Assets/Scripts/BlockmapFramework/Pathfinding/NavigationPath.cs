@@ -37,6 +37,15 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Creates a path that represents a single transition, going from its source to its target.
+        /// </summary>
+        public NavigationPath(Transition transition)
+        {
+            Nodes = new List<BlockmapNode>() { transition.From, transition.To };
+            Transitions = new List<Transition>() { transition };
+        }
+
+        /// <summary>
         /// Creates a copy of an existing NavigationPath.
         /// </summary>
         public NavigationPath(NavigationPath source)

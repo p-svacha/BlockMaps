@@ -147,7 +147,7 @@ namespace CaptureTheFlag.Network
                             BroadcastMessageToAllClients(new NetworkMessage_ConnectedClientsInfo(ConnectedClients.Values.Select(c => c.ClientId).ToArray(), ConnectedClients.Values.Select(c => c.DisplayName).ToArray(), connectMessage.SenderId));
                         }
 
-                        // If it's a request join lobby message, send the current lobby state to the sender
+                        // If it's a request join lobby message, add the requester to the lobby and send lobby state with the new player list to all players in the lobby
                         else if(realMessage.MessageType == "RequestJoinLobby")
                         {
                             Debug.Log($"[Server] Client {ConnectedClients[tcpClient].DisplayName} requests to join lobby, sending lobby state.");

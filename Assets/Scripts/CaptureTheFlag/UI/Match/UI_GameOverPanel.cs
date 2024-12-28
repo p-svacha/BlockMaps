@@ -6,18 +6,18 @@ using TMPro;
 
 namespace CaptureTheFlag.UI
 {
-    public class UI_EndGameScreen : MonoBehaviour
+    public class UI_GameOverPanel : MonoBehaviour
     {
-        public CtfGame Game;
+        public CtfMatch Match;
 
         [Header("Elements")]
         public TextMeshProUGUI Text;
         public Button MainMenuButton;
 
-        public void Init(CtfGame game)
+        public void Init(CtfMatch match)
         {
-            Game = game;
-            MainMenuButton.onClick.AddListener(() => Game.GoToMainMenu());
+            Match = match;
+            MainMenuButton.onClick.AddListener(() => Match.Game.GoToMainMenu());
         }
     }
 }

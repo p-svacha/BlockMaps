@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -80,6 +81,14 @@ namespace BlockmapFramework
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns the clmb up or down transition using this ladder based on the given source node.
+        /// </summary>
+        public Transition GetTransition(BlockmapNode from)
+        {
+            return from.Transitions.FirstOrDefault(t => (t is SingleClimbTransition || t is DoubleClimbTransition) && (t.To.TargetLadders.Values.Contains(this) || t.To.SourceLadders.Values.Contains(this)));
+        }
 
         public static Vector3 GetLadderWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
         {

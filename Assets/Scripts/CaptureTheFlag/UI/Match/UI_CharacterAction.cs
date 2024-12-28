@@ -15,6 +15,7 @@ namespace CaptureTheFlag
         public Button Button;
         public TextMeshProUGUI TitleText;
         public Image Icon;
+        public TextMeshProUGUI CostText;
 
         public void Init(SpecialCharacterAction action)
         {
@@ -22,6 +23,7 @@ namespace CaptureTheFlag
             Button.onClick.AddListener(OnClick);
             TitleText.text = action.Name;
             Icon.sprite = action.Icon;
+            CostText.text = $"Cost: {action.Cost.ToString("0.#")}";
 
             GetComponent<TooltipTarget>().Text = action.Name;
         }
@@ -37,7 +39,7 @@ namespace CaptureTheFlag
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if(Action.CanPerformNow()) Action.Match.HoveredAction = Action;
+            Action.Match.HoveredAction = Action;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace CaptureTheFlag
         public override string Name => "Go to Jail";
         public override Sprite Icon => Resources.Load<Sprite>("CaptureTheFlag/ActionIcons/Jail");
 
-        public Action_GoToJail(CtfMatch game, CtfCharacter c) : base(game, c, ACTION_COST) { }
+        public Action_GoToJail(CtfCharacter c) : base(c, ACTION_COST) { }
 
         public override bool CanPerformNow()
         {

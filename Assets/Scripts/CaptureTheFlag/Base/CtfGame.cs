@@ -21,7 +21,6 @@ namespace CaptureTheFlag
         public UI_Lobby LobbyUI;
         public CtfMatchUi MatchUI;
         public GameObject LoadingScreenOverlay;
-        public UI_EndGameScreen EndGameScreen;
 
         [Header("Misc")]
         public LineRenderer PathPreviewRenderer;
@@ -141,18 +140,11 @@ namespace CaptureTheFlag
             SwitchWindow(MainMenuUI.gameObject);
         }
 
-        public void ShowEndGameScreen(string text)
-        {
-            EndGameScreen.Text.text = text;
-            SwitchWindow(EndGameScreen.gameObject);
-        }
-
         private void SwitchWindow(GameObject window)
         {
             MainMenuUI.gameObject.SetActive(window == MainMenuUI.gameObject);
             LobbyUI.gameObject.SetActive(window == LobbyUI.gameObject);
             MatchUI.gameObject.SetActive(window == MatchUI.gameObject);
-            EndGameScreen.gameObject.SetActive(window == EndGameScreen.gameObject);
         }
 
         #endregion

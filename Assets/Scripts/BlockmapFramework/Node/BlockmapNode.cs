@@ -70,7 +70,9 @@ namespace BlockmapFramework
         /// </summary>
         public abstract bool SupportsEntities { get; }
 
-        // Connections
+        /// <summary>
+        /// List containing all transitions starting on this node
+        /// </summary>
         public List<Transition> Transitions { get; private set; }
         /// <summary>
         /// All transition going out from this node to other nodes grouped by target node.
@@ -759,6 +761,7 @@ namespace BlockmapFramework
             if (actor == null) return true; // Everything is visible
             if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
             if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Node is seen by an entity of given actor
+            if (Entities.Any(e => e.IsVisibleBy(actor))) return true; // An entity on this node is visible
 
             return false;
         }

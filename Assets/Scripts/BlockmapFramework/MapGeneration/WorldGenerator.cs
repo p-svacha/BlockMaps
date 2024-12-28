@@ -132,7 +132,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns an entity on the ground near the given point and returns the entity instance.
         /// </summary>
-        protected Entity SpawnEntityOnGroundAround(EntityDef def, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, List<BlockmapNode> forbiddenNodes = null)
+        protected Entity SpawnEntityOnGroundAround(EntityDef def, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
         {
             int maxAttempts = 50;
             if (standard_deviation == 0f) maxAttempts = 1;
@@ -144,7 +144,7 @@ namespace BlockmapFramework
 
                 if (!World.IsInWorld(targetPos)) continue;
 
-                BlockmapNode targetNode = World.GetGroundNode(targetPos);
+                BlockmapNode targetNode = World.GetNodes(targetPos).RandomElement();
                 if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) continue;
                 if (!World.CanSpawnEntity(def, targetNode, rotation, forceHeadspaceRecalc: true)) continue;
 

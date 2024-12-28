@@ -18,18 +18,14 @@ namespace CaptureTheFlag
         public NavigationPath Path { get; private set; }
         public BlockmapNode Target => Path.Target;
 
-        public Action_Movement(CtfMatch game, CtfCharacter c, NavigationPath path, float cost) : base(game, c, cost)
+        public Action_Movement(CtfCharacter c, NavigationPath path, float cost) : base(c, cost)
         {
             Path = path;
         }
 
         public override bool CanPerformNow()
         {
-            // Check if another character is currently heading to the target node
-            foreach (CtfCharacter character in Match.Characters)
-            {
-                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == Target) return false;
-            }
+            if (Match.IsAnyCharacterOnOrHeadingTo(Target)) return false;
 
             return base.CanPerformNow();
         }

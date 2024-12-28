@@ -17,7 +17,7 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public bool IsStairs => IsSlope() && Steepness > 1;
+        public bool IsStairs => IsSlope();
 
         #endregion
     }

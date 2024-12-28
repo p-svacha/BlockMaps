@@ -61,5 +61,10 @@ namespace BlockmapFramework
         /// <br/>Useful for roofs for example.
         /// </summary>
         public bool UseLongEdges { get; init; } = false;
+
+        /// <summary>
+        /// If true, all sloped air nodes (IsSlope = true) with this surface are drawn as stairs.
+        /// </summary>
+        public bool DrawSlopeAsStairs { get; init; } = false;
     }
 }

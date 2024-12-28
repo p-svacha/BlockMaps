@@ -24,47 +24,66 @@ namespace BlockmapFramework
         /// <param name="considerUnexploredNodes">If true, only nodes that are explored by the entity's actor are considered for a path.</param>
         public static NavigationPath GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
+            if (from == null || to == null) return null;
             if (from == to || !to.IsPassable(entity)) return null;
-            
-            List<BlockmapNode> openList = new List<BlockmapNode>() { from }; // tiles that are queued for searching
-            List<BlockmapNode> closedList = new List<BlockmapNode>(); // tiles that have already been searched
+
+            PriorityQueue<BlockmapNode> openSet = new PriorityQueue<BlockmapNode>(); // Nodes that are queued for searching
+            HashSet<BlockmapNode> closedSet = new HashSet<BlockmapNode>(); // Nodes that have already been searched
 
             Dictionary<BlockmapNode, float> gCosts = new Dictionary<BlockmapNode, float>(); // G-Costs are the accumulated real costs from the source node to any other node
             Dictionary<BlockmapNode, float> fCosts = new Dictionary<BlockmapNode, float>(); // F-Costs are the combined cost (assumed(h) + real(g)) from the source node to any other node
             Dictionary<BlockmapNode, Transition> transitionToNodes = new Dictionary<BlockmapNode, Transition>(); // Stores for each node which transition comes before it to get there the shortest way
             Dictionary<Transition, Transition> transitionToTransitions = new Dictionary<Transition, Transition>(); // Stores for each transition which transition comes before it to get there the shortest way
 
-            gCosts.Add(from, 0);
-            fCosts.Add(from, gCosts[from] + GetHCost(from, to));
+            // Initialize start node
+            gCosts[from] = 0;
+            fCosts[from] = GetHCost(from, to);
+            openSet.Enqueue(from, fCosts[from]);  // priority = F cost
 
-            while (openList.Count > 0)
+            while (openSet.Count > 0)
             {
-                BlockmapNode currentNode = GetLowestFCostNode(openList, fCosts);
-                if (currentNode == to) // Reached goal
+                // Grab the node with the smallest F cost
+                BlockmapNode currentNode = openSet.Dequeue();
+
+                // If it's already in closedSet, it might be a stale entry
+                if (closedSet.Contains(currentNode)) continue;
+
+                // If we've reached the goal
+                if (currentNode == to)
                 {
                     return GetFinalPath(to, transitionToNodes, transitionToTransitions);
                 }
 
-                openList.Remove(currentNode);
-                closedList.Add(currentNode);
+                closedSet.Add(currentNode);
 
+                // Explore neighbours
                 foreach (Transition transition in currentNode.Transitions)
                 {
-                    if (closedList.Contains(transition.To)) continue;
+                    BlockmapNode neighbour = transition.To;
+
+                    // Skip any invalid or closed neighbours
+                    if (closedSet.Contains(neighbour)) continue;
                     if (!transition.CanPass(entity)) continue;
-                    if (considerUnexploredNodes && !transition.To.IsExploredBy(entity.Actor)) continue;
-                    if (forbiddenNodes != null && forbiddenNodes.Contains(transition.To)) continue;
+                    if (considerUnexploredNodes && !neighbour.IsExploredBy(entity.Actor)) continue;
+                    if (forbiddenNodes != null && forbiddenNodes.Contains(neighbour)) continue;
 
                     float tentativeGCost = gCosts[currentNode] + GetCCost(transition, entity);
-                    if (!gCosts.ContainsKey(transition.To) || tentativeGCost < gCosts[transition.To])
+
+                    // If this neighbor has never been visited or we found a cheaper path
+                    if (!gCosts.ContainsKey(neighbour) || tentativeGCost < gCosts[neighbour])
                     {
-                        transitionToNodes[transition.To] = transition;
-                        if(currentNode != from) transitionToTransitions[transition] = transitionToNodes[transition.From];
+                        gCosts[neighbour] = tentativeGCost;
+                        float newF = tentativeGCost + GetHCost(neighbour, to);
+                        fCosts[neighbour] = newF;
 
-                        gCosts[transition.To] = tentativeGCost;
-                        fCosts[transition.To] = tentativeGCost + GetHCost(transition.To, to);
+                        transitionToNodes[neighbour] = transition;
+                        if (currentNode != from)
+                        {
+                            transitionToTransitions[transition] = transitionToNodes[transition.From];
+                        }
 
-                        if (!openList.Contains(transition.To)) openList.Add(transition.To);
+                        // Enqueue or update priority
+                        openSet.Enqueue(neighbour, newF);
                     }
                 }
             }
@@ -100,21 +119,6 @@ namespace BlockmapFramework
             return t.GetMovementCost(e);
         }
 
-        private static BlockmapNode GetLowestFCostNode(List<BlockmapNode> list, Dictionary<BlockmapNode, float> fCosts)
-        {
-            float lowestCost = float.MaxValue;
-            BlockmapNode lowestCostTile = list[0];
-            foreach (BlockmapNode tile in list)
-            {
-                if (fCosts[tile] < lowestCost)
-                {
-                    lowestCostTile = tile;
-                    lowestCost = fCosts[tile];
-                }
-            }
-            return lowestCostTile;
-        }
-
         /// <summary>
         /// Returns the final path to the given target node with all the intermediary steps that have been cached.
         /// </summary>
@@ -139,6 +143,59 @@ namespace BlockmapFramework
             transitions.Reverse();
 
             return new NavigationPath(nodes, transitions);
+        }
+
+        #endregion
+
+        #region Other useful functions
+
+        /// <summary>
+        /// Checks and returns if the given start node has at least the given amount of nodes
+        /// available to move around (for the given entity if != null).
+        /// <br/>Useful to check if entities are stuck in enclosed or blocked spaces.
+        /// </summary>
+        public static bool HasRoamingArea(BlockmapNode startNode, int numNodes, Entity e = null, List<BlockmapNode> forbiddenNodes = null)
+        {
+            // 1) Get the node where the entity currently stands.
+            if (startNode == null) return false;
+
+            // 2) BFS (breadth-first search) initialization
+            Queue<BlockmapNode> queue = new Queue<BlockmapNode>();
+            HashSet<BlockmapNode> visited = new HashSet<BlockmapNode>();
+
+            queue.Enqueue(startNode);
+            visited.Add(startNode);
+
+            // 3) BFS loop
+            while (queue.Count > 0)
+            {
+                BlockmapNode current = queue.Dequeue();
+
+                // Early exit if we've visited enough nodes
+                if (visited.Count >= numNodes)
+                    return true;
+
+                // Explore neighbors
+                foreach (Transition transition in current.Transitions)
+                {
+                    // The transition must be passable by this entity
+                    if (e != null && !transition.CanPass(e)) continue;
+
+                    BlockmapNode neighbour = transition.To;
+
+                    // The neighbor must be passable, and not yet visited
+                    if (forbiddenNodes != null && forbiddenNodes.Contains(neighbour)) continue;
+                    if (visited.Contains(neighbour)) continue;
+                    if (e != null && !neighbour.IsPassable(e)) continue;
+
+                    // Valid
+                    visited.Add(neighbour);
+                    queue.Enqueue(neighbour);
+                }
+            }
+
+            // If BFS ends without reaching numNodes, it's not big enough
+            return (visited.Count >= numNodes);
         }
 
         #endregion

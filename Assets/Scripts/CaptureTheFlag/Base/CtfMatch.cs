@@ -10,7 +10,7 @@ namespace CaptureTheFlag
 {
     public class CtfMatch
     {
-        private CtfGame Game;
+        public CtfGame Game { get; private set; }
         public World World { get; private set; }
         public CtfMatchLobby MatchInfo { get; private set; }
         public CtfMatchType MatchType => MatchInfo.MatchType;
@@ -80,6 +80,9 @@ namespace CaptureTheFlag
         protected const int MultiplayerActionTickOffset = 10;
         List<System.Tuple<CharacterAction, int>> QueuedCharacterActions = new List<System.Tuple<CharacterAction, int>>(); // Stores which actions should be performed at what tick
 
+        // Double click
+        private float DoubleClickTimeThreshold = 0.5f;
+        private float LastSelectClickTime = 0f;
 
         #region Initialize
 
@@ -215,12 +218,13 @@ namespace CaptureTheFlag
                     SendToJail(ownCharacter);
             }
 
-            // Update possible moves for all characters
-            foreach (CtfCharacter teamCharacter in action.Character.Owner.Characters) teamCharacter.UpdatePossibleActions();
+            // Update possible actions for all characters
+            foreach (CtfCharacter character in Characters) character.UpdatePossibleActions();
+
 
             // Update UI
             if (action.Character.Owner == LocalPlayer) UI.UpdateSelectionPanel(action.Character);
-            if (SelectedCharacter == action.Character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and character info
+            if (SelectedCharacter == action.Character) SelectCharacter(SelectedCharacter); // Reselect character to update highlighted nodes and actions
         }
 
         private void StartPlayerTurn()
@@ -269,9 +273,8 @@ namespace CaptureTheFlag
         public void EndGame(bool won)
         {
             State = MatchState.GameFinished;
-            Game.ShowEndGameScreen(won ? "You won!" : "You lost.");
+            UI.ShowEndGameScreen(won ? "You won!" : "You lost.");
         }
-
 
         private bool IsGameOver(out Player winner)
         {
@@ -382,8 +385,16 @@ namespace CaptureTheFlag
                 // Deselect character
                 if (hoveredCharacter == null) DeselectCharacter();
 
-                // Select character
-                else if(hoveredCharacter.Owner == LocalPlayer) SelectCharacter(hoveredCharacter);
+                // Select character (or pan to when double clicking)
+                else if (hoveredCharacter.Owner == LocalPlayer)
+                {
+                    if (Time.time - LastSelectClickTime < DoubleClickTimeThreshold) // Double click detected
+                        World.CameraPanToFocusEntity(hoveredCharacter, duration: 0.5f, false);
+
+                    else SelectCharacter(hoveredCharacter);
+
+                    LastSelectClickTime = Time.time;
+                }
             }
 
             // Right click - Move
@@ -477,7 +488,6 @@ namespace CaptureTheFlag
         public void SelectCharacter(CtfCharacter c)
         {
             if (State != MatchState.PlayerTurn) return;
-            if (SelectedCharacter == c) return;
             if (c.Owner != LocalPlayer) return;
 
             // Deselect previous
@@ -579,6 +589,18 @@ namespace CaptureTheFlag
 
         public Player GetPlayerByClientId(string clientId) => Players.First(p => p.ClientId == clientId);
 
+        public bool IsAnyCharacterOnOrHeadingTo(BlockmapNode target)
+        {
+            // Check if any character is currently on or heading to the target node
+            foreach (CtfCharacter character in Characters)
+            {
+                if (character.OriginNode == target) return true;
+                if (character.IsInAction && character.CurrentAction is Action_Movement otherMove && otherMove.Target == target) return true;
+                if (character.IsInAction && character.CurrentAction is Action_UseLadder ladderMove && ladderMove.Transition.To == target) return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region Network
@@ -634,6 +656,15 @@ namespace CaptureTheFlag
                         Action_InteractWithDoor doorAction = (Action_InteractWithDoor)(GetCharacterById(doorMessage.CharacterId).PossibleSpecialActions.First(x => x is Action_InteractWithDoor a && a.TargetDoor.Id == doorMessage.TargetId));
                         QueueActionToPerform(doorAction, doorMessage.Tick);
                         break;
+
+                    case "CharacterAction_UseLadder":
+                        var ladderMessage = (NetworkMessage_CharacterAction)baseMessage;
+                        Action_UseLadder ladderAction = (Action_UseLadder)(GetCharacterById(ladderMessage.CharacterId).PossibleSpecialActions.First(x => x is Action_UseLadder a && a.Transition.To.Id == ladderMessage.TargetId));
+                        QueueActionToPerform(ladderAction, ladderMessage.Tick);
+                        break;
+
+                    default:
+                        throw new System.Exception($"NetworkMessage type '{baseMessage.MessageType}' not handled.");
                 }
             }
             catch (System.Exception e)

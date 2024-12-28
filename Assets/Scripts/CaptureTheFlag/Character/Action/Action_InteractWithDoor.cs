@@ -15,7 +15,7 @@ namespace CaptureTheFlag
 
         public Door TargetDoor { get; private set; }
 
-        public Action_InteractWithDoor(CtfMatch game, CtfCharacter c, Door target) : base(game, c, ACTION_COST)
+        public Action_InteractWithDoor(CtfCharacter c, Door target) : base(c, ACTION_COST)
         {
             TargetDoor = target;
         }

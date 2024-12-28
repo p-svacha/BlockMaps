@@ -18,6 +18,8 @@ namespace CaptureTheFlag
         private const int CHARACTER_SPAWN_VARIATION = 10;
         private const int NUM_HUMANS_PER_PLAYER = 6;
         private const int NUM_DOGS_PER_PLAYER = 2;
+
+        private const int REQUIRED_SPAWN_ROAMING_AREA = 50; // Spawned characters need this many nodes to move around near them to be a valid spawn
         
         private Actor LocalPlayer;
         private Actor Opponent;
@@ -105,7 +107,7 @@ namespace CaptureTheFlag
             numAttempts = 0;
             while(humansSpawned < NUM_HUMANS_PER_PLAYER && numAttempts++ < 10)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Human, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes);
                 if(spawnedCharacter != null) humansSpawned++;
             }
 
@@ -114,7 +116,7 @@ namespace CaptureTheFlag
             numAttempts = 0;
             while (dogsSpawned < NUM_DOGS_PER_PLAYER && numAttempts++ < 10)
             {
-                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, forbiddenNodes: flagZone.Nodes);
+                Entity spawnedCharacter = SpawnEntityOnGroundAround(EntityDefOf.Dog, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION, faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes);
                 if (spawnedCharacter != null) dogsSpawned++;
             }
         }

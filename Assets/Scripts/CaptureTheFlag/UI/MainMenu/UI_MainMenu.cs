@@ -28,6 +28,8 @@ namespace CaptureTheFlag.UI
             MultiplayerHostButton.onClick.AddListener(MpHostBtn_OnClick);
             MultiplayerConnectButton.onClick.AddListener(MpConnectBtn_OnClick);
             QuitButton.onClick.AddListener(QuitBtn_OnClick);
+
+            MultiplayerIpInput.text = HelperFunctions.GetLocalIPv4();
         }
 
         private void SingleplayerBtn_OnClick()
