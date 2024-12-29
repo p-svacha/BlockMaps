@@ -27,7 +27,7 @@ namespace CaptureTheFlag
             EntityDefOf.Eluid,
             EntityDefOf.Veronica,
             EntityDefOf.Katie,
-            EntityDefOf.Adrienne,
+            EntityDefOf.Yaroslava,
             EntityDefOf.Blotto,
             EntityDefOf.Pierette,
         };

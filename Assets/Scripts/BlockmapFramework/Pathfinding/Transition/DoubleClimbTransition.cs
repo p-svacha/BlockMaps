@@ -35,11 +35,11 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(Entity entity)
         {
-            float value = (0.5f * (1f / From.SurfaceDef.MovementSpeedModifier)) + (0.5f * (1f / To.SurfaceDef.MovementSpeedModifier)); // Cost of moving between start and end tile
+            float value = (0.5f * From.GetMovementCost(entity)) + (0.5f * To.GetMovementCost(entity)); // Cost of moving between start and end tile
 
             // Add cost of climbing
-            foreach (IClimbable climb in ClimbUp) value += climb.ClimbCostUp;
-            foreach (IClimbable climb in ClimbDown) value += climb.ClimbCostDown;
+            foreach (IClimbable climb in ClimbUp) value += climb.GetClimbCostUp(entity);
+            foreach (IClimbable climb in ClimbDown) value += climb.GetClimbCostDown(entity);
 
             return value;
         }
@@ -47,7 +47,7 @@ namespace BlockmapFramework
         public override bool CanPass(Entity entity)
         {
             // Climb skill
-            if ((int)entity.GetComponent<Comp_Movement>().ClimbingSkill < (int)ClimbSkillRequirement) return false;
+            if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
 
             return base.CanPass(entity);
         }
@@ -74,7 +74,7 @@ namespace BlockmapFramework
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, moveComp.MovementSpeed * Time.deltaTime * From.SurfaceDef.MovementSpeedModifier);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.GetCurrentWalkingSpeed() * Time.deltaTime);
 
                         // Calculate altitude
                         float y = World.GetWorldAltitudeAt(newPosition2d, From);
@@ -105,7 +105,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbUpEndPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedUp);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.GetClimbSpeedUp(entity));
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -136,7 +136,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbDownStartPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedUp);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.GetClimbSpeedUp(entity));
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -162,7 +162,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetClimbDownEndPoint(entity, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.ClimbSpeedDown);
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * climb.GetClimbSpeedDown(entity));
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -195,7 +195,7 @@ namespace BlockmapFramework
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, moveComp.MovementSpeed * Time.deltaTime * To.SurfaceDef.MovementSpeedModifier);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.GetCurrentWalkingSpeed() * Time.deltaTime);
 
                         // Calculate altitude
                         float y = World.GetWorldAltitudeAt(newPosition2d, To);

@@ -84,6 +84,26 @@ namespace BlockmapFramework
             VariableHeight = orig.VariableHeight;
         }
 
+
+        /// <summary>
+        /// Retrieve specific CompProperties of this def. Throws an error if it doesn't have it.
+        /// </summary>
+        public T GetCompProperties<T>() where T : CompProperties
+        {
+            if (Components != null)
+            {
+                int i = 0;
+                for (int count = Components.Count; i < count; i++)
+                {
+                    if (Components[i] is T result)
+                    {
+                        return result;
+                    }
+                }
+            }
+            throw new System.Exception($"CompProperties {typeof(T)} not found on EntityDef {Label}. EntityDef has {Components.Count} CompProperties.");
+        }
+
         public override bool Validate()
         {
             if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) ThrowValidationError("Model cannot be null in an EntityDef with RenderType = StandaloneModel.");

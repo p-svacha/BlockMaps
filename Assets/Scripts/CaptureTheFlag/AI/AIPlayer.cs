@@ -155,7 +155,7 @@ namespace CaptureTheFlag
         {
             foreach (CtfCharacter c in Characters)
             {
-                string label = Roles[c].ToString() + " | " + Jobs[c].DevmodeDisplayText;
+                string label = $"{ c.LabelCap } ({ c.Id}): {Roles[c]} | {Jobs[c].DevmodeDisplayText}";
                 c.UI_Label.SetLabelText(label);
             }
         }

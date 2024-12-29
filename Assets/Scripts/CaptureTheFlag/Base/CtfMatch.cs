@@ -273,6 +273,7 @@ namespace CaptureTheFlag
         public void EndGame(bool won)
         {
             State = MatchState.GameFinished;
+            World.Camera.Unfollow();
             World.SetActiveVisionActor(null);
             UI.ShowEndGameScreen(won ? "You won!" : "You lost.");
         }
@@ -520,9 +521,10 @@ namespace CaptureTheFlag
             UI.SelectCharacter(SelectedCharacter);
             SelectedCharacter.ShowSelectionIndicator(true);
 
+            UnhighlightNodes();
             if (!SelectedCharacter.IsInAction)
             {
-                HighlightNodes(SelectedCharacter.PossibleMoves.Select(x => x.Key).ToHashSet()); // Highlight reachable nodes
+                HighlightNodes(SelectedCharacter.PossibleMoves.Select(x => x.Key).ToHashSet());
             }
         }
 

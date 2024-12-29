@@ -1182,6 +1182,16 @@ namespace BlockmapFramework
             return nodeCosts.Keys.ToList();
         }
 
+        /// <summary>
+        /// Returns the movement cost for walking one unit (1 meter) on this node.
+        /// </summary>
+        public float GetMovementCost(Entity e)
+        {
+            float value = 1f / SurfaceDef.MovementSpeedModifier;
+            if (e != null) value *= 1f / e.GetSurfaceAptitude(SurfaceDef);
+            return value;
+        }
+
         #endregion
 
         #region Save / Load

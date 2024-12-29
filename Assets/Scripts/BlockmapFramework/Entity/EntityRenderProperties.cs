@@ -22,7 +22,7 @@ namespace BlockmapFramework
         /// <summary>
         /// If RenderType is set to StandaloneModel, this scaling value will be used for the model.
         /// </summary>
-        public float ModelScale { get; init; } = 1f;
+        public Vector3 ModelScale { get; set; } = Vector3.one;
 
         /// <summary>
         /// The index of the material in the MeshRenderer that is colored based on the owner's player color.
@@ -58,7 +58,7 @@ namespace BlockmapFramework
         {
             RenderType = orig.RenderType;
             Model = orig.Model;
-            ModelScale = orig.ModelScale;
+            ModelScale = new Vector3(orig.ModelScale.x, orig.ModelScale.y, orig.ModelScale.z);
             PlayerColorMaterialIndex = orig.PlayerColorMaterialIndex;
             BatchRenderFunction = orig.BatchRenderFunction;
             StandaloneRenderFunction = orig.StandaloneRenderFunction;

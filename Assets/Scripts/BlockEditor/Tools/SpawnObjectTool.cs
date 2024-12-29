@@ -58,7 +58,7 @@ namespace WorldEditor
                 BuildPreview.gameObject.SetActive(true);
                 BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
-                BuildPreview.transform.localScale = new Vector3(SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale, SelectedEntity.RenderProperties.ModelScale);
+                BuildPreview.transform.localScale = SelectedEntity.RenderProperties.ModelScale;
                 if (MirrorToggle.isOn) HelperFunctions.SetAsMirrored(BuildPreview);
 
                 foreach (Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)

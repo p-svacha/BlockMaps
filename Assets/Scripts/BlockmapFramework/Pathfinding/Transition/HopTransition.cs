@@ -43,9 +43,8 @@ namespace BlockmapFramework
 
         public override bool CanPass(Entity entity)
         {
-            Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
-            if (moveComp.MaxHopUpDistance < HopUpDistance) return false;
-            if (moveComp.MaxHopDownDistance < HopDownDistance) return false;
+            if (entity.MaxHopUpDistance < HopUpDistance) return false;
+            if (entity.MaxHopDownDistance < HopDownDistance) return false;
 
             return base.CanPass(entity);
         }

@@ -78,7 +78,7 @@ namespace BlockmapFramework.Defs
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(EntityModelBasePath + "Trees/Fir_Tree"),
-                    ModelScale = 0.25f,
+                    ModelScale = new Vector3(0.25f, 0.25f, 0.25f),
                 }
             },
 
@@ -93,7 +93,7 @@ namespace BlockmapFramework.Defs
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(EntityModelBasePath + "Trees/Fir_Tree"),
-                    ModelScale = 0.6f,
+                    ModelScale = new Vector3(0.6f, 0.6f, 0.6f),
                 }
             },
 
@@ -108,7 +108,7 @@ namespace BlockmapFramework.Defs
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(EntityModelBasePath + "Trees/Fir_Tree"),
-                    ModelScale = 0.9f,
+                    ModelScale = new Vector3(0.9f, 0.9f, 0.9f),
                 }
             },
 

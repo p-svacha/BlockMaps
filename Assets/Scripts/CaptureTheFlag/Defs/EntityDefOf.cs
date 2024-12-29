@@ -16,7 +16,7 @@ namespace CaptureTheFlag
         public static EntityDef Eluid;
         public static EntityDef Veronica;
         public static EntityDef Katie;
-        public static EntityDef Adrienne;
+        public static EntityDef Yaroslava;
         public static EntityDef Blotto;
         public static EntityDef Pierette;
     }

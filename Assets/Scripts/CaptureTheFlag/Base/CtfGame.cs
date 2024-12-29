@@ -14,7 +14,7 @@ namespace CaptureTheFlag
     /// </summary>
     public class CtfGame : MonoBehaviour
     {
-        public static string VERSION = "0.0.2";
+        public static string VERSION = "0.0.3-dev";
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;
@@ -44,8 +44,10 @@ namespace CaptureTheFlag
         private void Start()
         {
             // Load defs
+            DefDatabase<StatDef>.AddDefs(StatDefs.Defs);
             DefDatabaseRegistry.AddAllGlobalDefs();
-            DefDatabase<EntityDef>.AddDefs(EntityDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(EntityDefs.ObjectDefs);
+            DefDatabase<EntityDef>.AddDefs(EntityDefs.CharacterDefs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

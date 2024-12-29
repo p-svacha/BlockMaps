@@ -181,6 +181,9 @@ namespace BlockmapFramework
             // Validate
             if (Height <= 0) throw new System.Exception($"Cannot create an entity with height = {Height}. Must be positive.");
 
+            // Comp cache
+            if (HasComponent<Comp_Movement>()) MovementComp = GetComponent<Comp_Movement>();
+
             // Initialize some objects
             OccupiedNodes = new HashSet<BlockmapNode>();
             CurrentVision = new VisionData();
@@ -223,8 +226,12 @@ namespace BlockmapFramework
                 {
                     throw new System.Exception($"The EntityComp {newComp.GetType()} is not valid on the entity {Label} (DefName={Def.DefName}).\nReason: {e.Message}");
                 }
+
+                OnCompInitialized(newComp);
             }
         }
+
+        protected virtual void OnCompInitialized(EntityComp comp) { }
 
         /// <summary>
         /// Creates the Unity GameObjects related to this entity.
@@ -252,7 +259,7 @@ namespace BlockmapFramework
                     MeshCollider = MeshObject.AddComponent<MeshCollider>();
 
                     // Scale
-                    MeshObject.transform.localScale = new Vector3(Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale, Def.RenderProperties.ModelScale);
+                    MeshObject.transform.localScale = Def.RenderProperties.ModelScale;
                     if (IsMirrored) HelperFunctions.SetAsMirrored(MeshObject);
                 }
                 if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
@@ -600,11 +607,22 @@ namespace BlockmapFramework
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
 
+        private Comp_Movement MovementComp;
+        public virtual float MovementSpeed => MovementComp.MovementSpeed;
+        public virtual bool CanSwim => MovementComp.CanSwim;
+        public virtual ClimbingCategory ClimbingSkill => MovementComp.ClimbingSkill;
+        public virtual int MaxHopUpDistance => MovementComp.MaxHopUpDistance;
+        public virtual int MaxHopDownDistance => MovementComp.MaxHopDownDistance;
+
         public virtual float VisionRange => Def.VisionRange;
         public virtual bool BlocksVision() => Def.VisionImpactProperties.BlocksVision;
         public virtual bool BlocksVision(WorldObjectCollider collider) => BlocksVision();
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
+
+        // Aptitudes (affect the cost of using of transitions in the navmesh)
+        public virtual float ClimbingAptitude => MovementComp.ClimbingAptitude;
+        public virtual float GetSurfaceAptitude(SurfaceDef def) => MovementComp.GetSurfaceAptitude(def);
 
         public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
         public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
@@ -612,6 +630,20 @@ namespace BlockmapFramework
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
         public bool CanSee => VisionRange > 0;
+
+        /// <summary>
+        /// Returns the movement speed this entity has right now taking into account the surface its on.
+        /// </summary>
+        public float GetCurrentWalkingSpeed()
+        {
+            float value = MovementSpeed;
+
+            SurfaceDef surface = OriginNode.SurfaceDef;
+            value *= surface.MovementSpeedModifier;
+            value *= GetSurfaceAptitude(surface);
+
+            return value;
+        }
 
         /// <summary>
         /// Returns the dimensions of this object taking into account its current rotation.

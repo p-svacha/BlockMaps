@@ -16,7 +16,7 @@ namespace CaptureTheFlag
 
         // Components
         public Comp_Movement MovementComp { get; private set; }
-        public Comp_CTFCharacter CtfComp { get; private set; }
+        public Comp_CtfCharacter CtfComp { get; private set; }
 
         // Current stats
         public float ActionPoints { get; private set; }
@@ -32,10 +32,10 @@ namespace CaptureTheFlag
 
         #region Init
 
-        protected override void OnInitialized()
+        protected override void OnCompInitialized(EntityComp comp)
         {
-            MovementComp = GetComponent<Comp_Movement>();
-            CtfComp = GetComponent<Comp_CTFCharacter>();
+            if (comp is Comp_Movement move) MovementComp = move;
+            if (comp is Comp_CtfCharacter ctf) CtfComp = ctf;
         }
 
         #endregion
@@ -111,15 +111,31 @@ namespace CaptureTheFlag
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
         public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
 
-        public ClimbingCategory ClimbingSkill => MovementComp.ClimbingSkill;
-
-        // CtfComp
+        // Stats
         public Sprite Avatar => CtfComp.Avatar;
         public float MaxActionPoints => CtfComp.MaxActionPoints;
-        public float MaxStamina => CtfComp.MaxStamina;
-        public float StaminaRegeneration => CtfComp.StaminaRegeneration;
-        public float MovementSkill => CtfComp.MovementSkill;
-        public bool CanInteractWithDoors => CtfComp.CanInteractWithDoors;
+
+        public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : CtfComp.GetStat(StatDefOf.Speed) * 0.2f;
+
+        public float MovementSkill => CtfComp.GetStat(StatDefOf.Speed);
+        public override float VisionRange => CtfComp.GetStat(StatDefOf.Vision);
+        public float MaxStamina => CtfComp.GetStat(StatDefOf.MaxStamina);
+        public float StaminaRegeneration => CtfComp.GetStat(StatDefOf.StaminaRegeneration);
+
+        public override ClimbingCategory ClimbingSkill => CtfComp.GetStat(StatDefOf.Climbing) == 0 ? ClimbingCategory.None : ClimbingCategory.Intermediate;
+        public override float ClimbingAptitude => CtfComp.GetStat(StatDefOf.Climbing);
+        public override bool CanSwim => CtfComp.GetStat(StatDefOf.Swimming) > 0;
+        public override int MaxHopUpDistance => (int)CtfComp.GetStat(StatDefOf.Jumping);
+        public override int MaxHopDownDistance => (int)CtfComp.GetStat(StatDefOf.Dropping);
+        public bool CanInteractWithDoors => CtfComp.GetStat(StatDefOf.CanUseDoors) == 1;
+
+        public override Vector3Int Dimensions => new Vector3Int(Def.Dimensions.x, (int)CtfComp.GetStat(StatDefOf.Height), Def.Dimensions.z);
+
+        public override float GetSurfaceAptitude(SurfaceDef def)
+        {
+            if (def == SurfaceDefOf.Water) return CtfComp.GetStat(StatDefOf.Swimming);
+            return base.GetSurfaceAptitude(def);
+        }
 
         /// <summary>
         /// Returns a list of possible moves that this character can undertake with default movement within this turn with their remaining action points.
@@ -149,7 +165,7 @@ namespace CaptureTheFlag
                 foreach(Transition t in currentNode.Transitions)
                 {
                     BlockmapNode targetNode = t.To;
-                    float transitionCost = t.GetMovementCost(this) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
+                    float transitionCost = GetActionPointCost(t);
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
@@ -182,6 +198,11 @@ namespace CaptureTheFlag
             }
 
             return movements;
+        }
+
+        private float GetActionPointCost(Transition t)
+        {
+            return t.GetMovementCost(this) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace CaptureTheFlag.UI
             Character = c;
 
             TitleText.text = c.LabelCap;
-            MovementText.text = c.MovementSkill.ToString();
+            MovementText.text = c.MovementSpeed.ToString();
             StaminaRegenText.text = c.StaminaRegeneration.ToString();
             VisionText.text = c.VisionRange.ToString();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");

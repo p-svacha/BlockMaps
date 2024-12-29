@@ -44,7 +44,7 @@ namespace BlockmapFramework
         public Transition CurrentTransition { get; private set; }
 
         // Overrides
-        private bool isOverrideMovementSpeedActive;
+        public bool IsOverrideMovementSpeedActive { get; private set; }
         private float overrideMovementSpeed;
 
         private bool isOverrideCanSwimActive;
@@ -237,12 +237,12 @@ namespace BlockmapFramework
 
         public void EnableOverrideMovementSpeed(float value)
         {
-            isOverrideMovementSpeedActive = true;
+            IsOverrideMovementSpeedActive = true;
             overrideMovementSpeed = value;
         }
         public void DisableOverrideMovementSpeed()
         {
-            isOverrideMovementSpeedActive = false;
+            IsOverrideMovementSpeedActive = false;
         }
 
         public void EnableOverrideCanSwim(bool value)
@@ -292,7 +292,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The speed at which this entity moves around in the world.
         /// </summary>
-        public float MovementSpeed => isOverrideMovementSpeedActive ? overrideMovementSpeed : Props.MovementSpeed;
+        public float MovementSpeed => IsOverrideMovementSpeedActive ? overrideMovementSpeed : Props.MovementSpeed;
 
         /// <summary>
         /// Flag if this entity can pass water nodes.
@@ -305,6 +305,11 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbingSkill => isOverrideClimbSkillActive ? overrideClimbSkill : Props.ClimbingSkill;
 
         /// <summary>
+        /// Modifies the cost of using climbing transitions.
+        /// </summary>
+        public float ClimbingAptitude => Props.ClimbingAptitude;
+
+        /// <summary>
         /// The maximum height the entity can hop upwards to an adjacent node.
         /// </summary>
         public int MaxHopUpDistance => isOverrideMaxHopUpDistanceActive ? overrideMaxHopUpDistance : Props.MaxHopUpDistance;
@@ -313,6 +318,11 @@ namespace BlockmapFramework
         /// The maximum height the entity can hop downwards to an adjacent node.
         /// </summary>
         public int MaxHopDownDistance => isOverrideMaxHopDownDistanceActive ? overrideMaxHopDownDistance : Props.MaxHopDownDistance;
+
+        /// <summary>
+        /// Returns the modifier of the cost that this entity has to pay to move on the given SurfaceDef.
+        /// </summary>
+        public float GetSurfaceAptitude(SurfaceDef def) => Props.SurfaceAptitudes.ContainsKey(def) ? Props.SurfaceAptitudes[def] : 1f;
 
         /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -27,6 +28,11 @@ namespace BlockmapFramework
         public ClimbingCategory ClimbingSkill { get; init; } = ClimbingCategory.None;
 
         /// <summary>
+        /// Modifies the cost of using climbing transitions.
+        /// </summary>
+        public float ClimbingAptitude { get; init; } = 1f;
+
+        /// <summary>
         /// The maximum height the entity can hop upwards to an adjacent node.
         /// </summary>
         public int MaxHopUpDistance { get; init; } = 0;
@@ -35,6 +41,11 @@ namespace BlockmapFramework
         /// The maximum height the entity can drop downwards to an adjacent node.
         /// </summary>
         public int MaxHopDownDistance { get; init; } = 0;
+
+        /// <summary>
+        /// Modifier of the cost the entity has to pay to move on the given SurfaceDef.
+        /// </summary>
+        public Dictionary<SurfaceDef, float> SurfaceAptitudes { get; init; } = new Dictionary<SurfaceDef, float>();
 
         public override bool Validate(EntityDef parent)
         {
@@ -52,7 +63,8 @@ namespace BlockmapFramework
                 CanSwim = this.CanSwim,
                 ClimbingSkill = this.ClimbingSkill,
                 MaxHopUpDistance = this.MaxHopUpDistance,
-                MaxHopDownDistance = this.MaxHopDownDistance
+                MaxHopDownDistance = this.MaxHopDownDistance,
+                SurfaceAptitudes = this.SurfaceAptitudes.ToDictionary(x => x.Key, x => x.Value)
             };
         }
     }
