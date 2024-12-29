@@ -8,8 +8,6 @@ namespace CaptureTheFlag
 {
     public class CtfCharacter : Entity
     {
-        private const float BASE_MOVEMENT_COST_MODIFIER = 10;
-
         public CtfMatch Match;
         public Player Owner { get; private set; }
         public Player Opponent { get; private set; }
@@ -115,10 +113,10 @@ namespace CaptureTheFlag
         public Sprite Avatar => CtfComp.Avatar;
         public float MaxActionPoints => CtfComp.MaxActionPoints;
 
-        public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : CtfComp.GetStat(StatDefOf.Speed) * 0.2f;
+        public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : CtfComp.GetStat(StatDefOf.RunningSpeed) * 0.2f;
 
         public List<Stat> GetAllStats() => CtfComp.GetAllStats();
-        public float MovementSkill => CtfComp.GetStat(StatDefOf.Speed);
+        public float Running => CtfComp.GetStat(StatDefOf.RunningSpeed);
         public override float VisionRange => CtfComp.GetStat(StatDefOf.Vision);
         public float MaxStamina => CtfComp.GetStat(StatDefOf.MaxStamina);
         public float StaminaRegeneration => CtfComp.GetStat(StatDefOf.StaminaRegeneration);
@@ -135,7 +133,7 @@ namespace CaptureTheFlag
         public override float GetSurfaceAptitude(SurfaceDef def)
         {
             if (def == SurfaceDefOf.Water) return CtfComp.GetStat(StatDefOf.Swimming);
-            return base.GetSurfaceAptitude(def);
+            else return 0.1f * CtfComp.GetStat(StatDefOf.RunningSpeed);
         }
 
         /// <summary>
@@ -166,7 +164,7 @@ namespace CaptureTheFlag
                 foreach(Transition t in currentNode.Transitions)
                 {
                     BlockmapNode targetNode = t.To;
-                    float transitionCost = GetActionPointCost(t);
+                    float transitionCost = t.GetMovementCost(this);
                     float totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > ActionPoints) continue; // not reachable with current action points
@@ -199,11 +197,6 @@ namespace CaptureTheFlag
             }
 
             return movements;
-        }
-
-        private float GetActionPointCost(Transition t)
-        {
-            return t.GetMovementCost(this) * (1f / MovementSkill) * BASE_MOVEMENT_COST_MODIFIER;
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace CaptureTheFlag
     /// </summary>
     public class CtfGame : MonoBehaviour
     {
-        public static string VERSION = "0.0.3-dev";
+        public static string VERSION = "0.0.3";
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;
@@ -111,6 +111,11 @@ namespace CaptureTheFlag
                 IsMultiplayerMatchReady = false;
                 StartMatch();
             }
+        }
+
+        private void FixedUpdate()
+        {
+            ActiveMatch?.World?.FixedUpdate();
         }
 
         public void StartSingleplayerLobby()

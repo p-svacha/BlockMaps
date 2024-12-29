@@ -14,7 +14,7 @@ namespace CaptureTheFlag
         public static StatDef Height;
         public static StatDef Jumping;
         public static StatDef MaxStamina;
-        public static StatDef Speed;
+        public static StatDef RunningSpeed;
         public static StatDef StaminaRegeneration;
         public static StatDef Swimming;
         public static StatDef Vision;

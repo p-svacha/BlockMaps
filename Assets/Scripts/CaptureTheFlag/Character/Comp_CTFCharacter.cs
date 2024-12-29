@@ -21,7 +21,7 @@ namespace CaptureTheFlag
 
             Stats = new Dictionary<StatDef, Stat>();
 
-            CreateStat(StatDefOf.Speed, Props.Speed);
+            CreateStat(StatDefOf.RunningSpeed, Props.RunningSpeed);
             CreateStat(StatDefOf.Vision, Props.Vision);
             CreateStat(StatDefOf.MaxStamina, Props.MaxStamina);
             CreateStat(StatDefOf.StaminaRegeneration, Props.StaminaRegeneration);

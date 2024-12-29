@@ -15,7 +15,7 @@ namespace CaptureTheFlag
         public Sprite Avatar { get; init; } = null;
         public float MaxActionPoints { get; init; } = 10;
 
-        public float Speed { get; set; } = 0;
+        public float RunningSpeed { get; set; } = 0;
         public float Vision { get; set; } = 0;
         public float MaxStamina { get; set; } = 0;
         public float StaminaRegeneration { get; set; } = 0;
@@ -36,7 +36,7 @@ namespace CaptureTheFlag
                 Avatar = this.Avatar,
                 MaxActionPoints = this.MaxActionPoints,
 
-                Speed = this.Speed,
+                RunningSpeed = this.RunningSpeed,
                 Vision = this.Vision,
                 MaxStamina = this.MaxStamina,
                 StaminaRegeneration = this.StaminaRegeneration,

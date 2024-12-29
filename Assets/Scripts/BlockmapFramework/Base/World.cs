@@ -300,6 +300,15 @@ namespace BlockmapFramework
 
         public void Update()
         {
+            if (!IsInitialized) return;
+
+            // Regular updates
+            UpdateHoveredObjects();
+            foreach (Entity e in Entities.Values) e.Tick();
+        }
+
+        public void FixedUpdate()
+        {
             // Update world systems
             if (IsUpdatingWorldSystems) WorldSystemUpdate();
             if (UpdateEntityVisionIn > 0)
@@ -311,11 +320,6 @@ namespace BlockmapFramework
                     EntityVisionUpdateCallback?.Invoke();
                 }
             }
-            if (!IsInitialized) return;
-
-            // Regular updates
-            UpdateHoveredObjects();
-            foreach (Entity e in Entities.Values) e.Tick();
         }
 
         /// <summary>
@@ -898,7 +902,7 @@ namespace BlockmapFramework
             }
 
             // Step 2: Calculate node center world positions
-            if (WorldUpdateFrame == 2)
+            if (WorldUpdateFrame == 3)
             {
                 Profiler.Begin("Calculate Node Centers");
                 if (WorldUpdateArea == null)
@@ -953,7 +957,7 @@ namespace BlockmapFramework
                 Profiler.End("Reposition Entities");
             }
 
-            if (WorldUpdateFrame == 3)
+            if (WorldUpdateFrame == 4)
             {
                 // Step 5: Update entity vision
                 Profiler.Begin("Update Entity Vision");

@@ -1,19 +1,8 @@
-
-
-show short description of character below name in charactor info, noting biggest strength/weakness
-
-rework how attributes are displayed in character info, so it also puts the values into perspective to how good they are relatively (bar length or stars)
-	> make new additional panel to the right of info that can be toggled on and off
-	> it shows all stats in a rimworld style manner
-	> hovering label of stat shows description in a tooltip
-	> rework tooltip so it looks nicer
-		> arial font
-		> very slight shadow behind window
-		> 1 px hard frame
-		> title in other color than text
-		> no separator
-
-edge scroll
+(/)tooltip position near bottom edge
+(/)tooltip frame flicker
+(/)characters spawn inside terrain (at base altitude instead of exact)
+(/)edge scroll
+(/)movement speed shouldn't affect swimming & climbing & jumping - CtfCharacter.GetActionPointCost
 
 ------------------------- END CTF v0.0.3 -------------------------
 
@@ -42,6 +31,8 @@ farm map
 
 ------------------------- END CTF v0.0.5 -------------------------
 
+World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
+	test by quickly changing surface of many nodes in editor
 
 New EditorTool: Map Modifiers
 	- a function that affects the whole map

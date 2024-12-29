@@ -32,7 +32,7 @@ namespace CaptureTheFlag
                     {
                         Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
 
-                        Speed = 10,
+                        RunningSpeed = 10,
                         Vision = 8,
                         MaxStamina = 60,
                         StaminaRegeneration = 5,
@@ -70,7 +70,7 @@ namespace CaptureTheFlag
                     {
                         Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
 
-                        Speed = 15,
+                        RunningSpeed = 15,
                         Vision = 4,
                         MaxStamina = 60,
                         StaminaRegeneration = 4,
@@ -105,7 +105,7 @@ namespace CaptureTheFlag
                     Description = "Tall guy who is extremely fast but low stamina, meaning he needs to rest often."
                 };
                 usain.RenderProperties.ModelScale = new Vector3(1f, 1.3f, 1f);
-                usain.GetCompProperties<CompProperties_CtfCharacter>().Speed = 16;
+                usain.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 16;
                 usain.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 40;
                 usain.GetCompProperties<CompProperties_CtfCharacter>().Height = 4;
 
@@ -115,7 +115,7 @@ namespace CaptureTheFlag
                     Label = "eluid",
                     Description = "Quite fast and very high stamina and regeneration, meaning he will almost never need rest."
                 };
-                eluid.GetCompProperties<CompProperties_CtfCharacter>().Speed = 12;
+                eluid.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
                 eluid.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 100;
                 eluid.GetCompProperties<CompProperties_CtfCharacter>().StaminaRegeneration = 10;
 
@@ -163,7 +163,7 @@ namespace CaptureTheFlag
                     Description = "Smaller dog with high stamina, but once that's gone she will need to rest long."
                 };
                 blotto.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 80;
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().Speed = 12;
+                blotto.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
 
                 return new List<EntityDef>()
                 {

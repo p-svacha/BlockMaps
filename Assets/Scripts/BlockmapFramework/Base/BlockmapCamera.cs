@@ -19,6 +19,9 @@ namespace BlockmapFramework
         private const float MIN_ZOOM_HEIGHT = 1.5f;
         private const float MAX_ZOOM_HEIGHT = 60f;
 
+        // EDGE SCROLL
+        private const float EDGE_SCROLL_MARGIN = 10f; // in pixels from screen edge
+
         // Pan animation
         public bool IsPanning { get; private set; }
         private float PanDuration;
@@ -81,12 +84,14 @@ namespace BlockmapFramework
         {
             bool isUiElementFocussed = EventSystem.current.currentSelectedGameObject != null;
             if (isUiElementFocussed) return;
+
             bool canMoveCamera = !InUnbreakableFollow && !IsPanning;
             bool isMouseOverUi = HelperFunctions.IsMouseOverUi();
 
             float moveSpeed = MOVE_SPEED;
             if (Input.GetKey(KeyCode.LeftShift)) moveSpeed = SHIFT_MOVE_SPEED;
 
+            // === ROTATION (Q/E) ===
             if (Input.GetKey(KeyCode.Q)) // Q - Rotate camera anti-clockwise
             {
                 CurrentAngle = CurrentAngle += TURN_SPEED * Time.deltaTime;
@@ -98,6 +103,7 @@ namespace BlockmapFramework
                 UpdatePosition();
             }
 
+            // === MOVEMENT (WASD) ===
             if (Input.GetKey(KeyCode.W) && canMoveCamera) // W - Move camera up
             {
                 CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
@@ -127,6 +133,35 @@ namespace BlockmapFramework
                 FollowedEntity = null;
             }
 
+            // === EDGE SCROLL ===
+            if (canMoveCamera && !isMouseOverUi)
+            {
+                Vector3 mousePos = Input.mousePosition;
+
+                // Left edge
+                if (mousePos.x <= EDGE_SCROLL_MARGIN)
+                {
+                    MoveLeft(moveSpeed);
+                }
+                // Right edge
+                else if (mousePos.x >= Screen.width - EDGE_SCROLL_MARGIN)
+                {
+                    MoveRight(moveSpeed);
+                }
+
+                // Bottom edge
+                if (mousePos.y <= EDGE_SCROLL_MARGIN)
+                {
+                    MoveBackward(moveSpeed);
+                }
+                // Top edge
+                else if (mousePos.y >= Screen.height - EDGE_SCROLL_MARGIN)
+                {
+                    MoveForward(moveSpeed);
+                }
+            }
+
+            // === ZOOM (Mouse Scroll) ===
             if (!isMouseOverUi && Input.mouseScrollDelta.y < 0 && !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftShift)) // Scroll down - Zoom out
             {
                 CurrentZoom += ZOOM_SPEED;
@@ -137,6 +172,35 @@ namespace BlockmapFramework
                 CurrentZoom -= ZOOM_SPEED;
                 UpdatePosition();
             }
+        }
+
+        private void MoveForward(float speed)
+        {
+            CurrentPosition.x -= speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            CurrentPosition.z -= speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            UpdatePosition();
+            FollowedEntity = null;
+        }
+        private void MoveBackward(float speed)
+        {
+            CurrentPosition.x += speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            CurrentPosition.z += speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            UpdatePosition();
+            FollowedEntity = null;
+        }
+        private void MoveLeft(float speed)
+        {
+            CurrentPosition.x += speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            CurrentPosition.z += speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            UpdatePosition();
+            FollowedEntity = null;
+        }
+        private void MoveRight(float speed)
+        {
+            CurrentPosition.x -= speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            CurrentPosition.z -= speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            UpdatePosition();
+            FollowedEntity = null;
         }
 
         private void UpdatePosition()

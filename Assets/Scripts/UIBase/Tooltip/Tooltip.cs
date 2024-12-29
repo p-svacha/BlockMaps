@@ -50,6 +50,7 @@ public class Tooltip : MonoBehaviour
         rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, finalWidth);
 
         // Initial placement
+        rect.ForceUpdateRectTransforms();
         RepositionTooltip();
 
         // Show it
@@ -74,22 +75,18 @@ public class Tooltip : MonoBehaviour
         Vector3 position = Input.mousePosition + new Vector3(MOUSE_OFFSET, MOUSE_OFFSET, 0);
 
         // Fit on screen
-        float w = rect.rect.width;
-        float h = rect.rect.height;
+        Width = rect.rect.width;
+        Height = rect.rect.height;
 
         // If tooltip would go off the right edge, nudge left
-        if (position.x + w > Screen.width - SCREEN_EDGE_OFFSET)
-            position.x = Screen.width - w - SCREEN_EDGE_OFFSET;
+        if (position.x + Width > Screen.width - SCREEN_EDGE_OFFSET)
+            position.x = Screen.width - Width - SCREEN_EDGE_OFFSET;
 
-        // If it would go off the top/bottom
-        if (position.y - h < SCREEN_EDGE_OFFSET)
-            position.y = h + SCREEN_EDGE_OFFSET;
-        if (position.y + h > Screen.height - SCREEN_EDGE_OFFSET)
-            position.y = Screen.height - h - SCREEN_EDGE_OFFSET;
+        // If it would go off the top
+        if (position.y + Height > Screen.height - SCREEN_EDGE_OFFSET)
+            position.y = Screen.height - Height - SCREEN_EDGE_OFFSET;
 
         transform.position = position;
-        Width = w;
-        Height = h;
     }
 
 

@@ -11,8 +11,8 @@ namespace CaptureTheFlag
             // Most important ones
             new StatDef()
             {
-                DefName = "Speed",
-                Label = "speed",
+                DefName = "RunningSpeed",
+                Label = "running",
                 Description = "How far this character can move within a turn. Higher speed stat means moving needs less action points.",
                 MaxValue = 16,
             },
