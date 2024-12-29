@@ -10,32 +10,45 @@ namespace CaptureTheFlag.UI
     {
         private CtfMatch Match;
         private CtfCharacter Character;
+        private CharacterAction HoveredAction;
 
         [Header("Elements")]
         public TextMeshProUGUI TitleText;
-        public TextMeshProUGUI MovementText;
-        public TextMeshProUGUI StaminaRegenText;
-        public TextMeshProUGUI VisionText;
+        public UI_ToggleButton VisionCutoffButton;
+
+        public TextMeshProUGUI DescriptionText;
+        public UI_ToggleButton StatButton;
+        public GameObject StatPanel;
+        public GameObject StatListContainer;
+
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
-        public UI_ToggleButton VisionCutoffButton;
+        [Header("Prefabs")]
+        public UI_StatRow StatRowPrefab;
+
+        // internal
+        private bool IsStatWindowActive;
 
         public void Init(CtfMatch match)
         {
             Match = match;
             VisionCutoffButton.Button.onClick.AddListener(() => { Match.ToggleVisionCutoff(); VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled); });
+            StatButton.Button.onClick.AddListener(StatButton_OnClick);
+            StatPanel.SetActive(false);
         }
 
         public void ShowCharacter(CtfCharacter c, CharacterAction hoveredAction = null)
         {
+            if (Character == c && HoveredAction == hoveredAction) return;
+
             gameObject.SetActive(true);
             Character = c;
+            HoveredAction = hoveredAction;
 
             TitleText.text = c.LabelCap;
-            MovementText.text = c.MovementSpeed.ToString();
-            StaminaRegenText.text = c.StaminaRegeneration.ToString();
-            VisionText.text = c.VisionRange.ToString();
+            DescriptionText.text = c.Description.ToString();
+            RefreshStatPanel();
             ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
             StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
 
@@ -47,6 +60,32 @@ namespace CaptureTheFlag.UI
                 {
                     ShowActionPreview(hoveredAction.Cost);
                 }
+            }
+        }
+
+        private void StatButton_OnClick()
+        {
+            IsStatWindowActive = !IsStatWindowActive;
+            StatButton.SetToggle(IsStatWindowActive);
+
+            if(IsStatWindowActive)
+            {
+                RefreshStatPanel();
+                StatPanel.SetActive(true);
+            }
+            else
+            {
+                StatPanel.SetActive(false);
+            }
+        }
+
+        private void RefreshStatPanel()
+        {
+            HelperFunctions.DestroyAllChildredImmediately(StatListContainer);
+            foreach (Stat stat in Character.GetAllStats())
+            {
+                UI_StatRow statRow = Instantiate(StatRowPrefab, StatListContainer.transform);
+                statRow.Init(stat);
             }
         }
 

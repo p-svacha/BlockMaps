@@ -20,6 +20,8 @@ namespace CaptureTheFlag
         /// <br/>If -1, there is no upper bound.
         /// </summary>
         public float MaxValue { get; init; } = -1;
+
+        public bool HigherIsBetter { get; init; } = true;
     }
 
     public enum StatType

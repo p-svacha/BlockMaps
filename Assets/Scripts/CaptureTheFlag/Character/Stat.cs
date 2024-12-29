@@ -14,6 +14,8 @@ namespace CaptureTheFlag
 
         public Stat(StatDef def, float baseValue)
         {
+            if (def.Type != StatType.Binary && baseValue > def.MaxValue) throw new System.Exception($"Can't create stat with def {def.DefName} and base value {baseValue} because it is greater than the max value of that stat ({def.MaxValue}).");
+
             Def = def;
             BaseValue = baseValue;
         }

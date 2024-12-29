@@ -117,6 +117,7 @@ namespace CaptureTheFlag
 
         public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : CtfComp.GetStat(StatDefOf.Speed) * 0.2f;
 
+        public List<Stat> GetAllStats() => CtfComp.GetAllStats();
         public float MovementSkill => CtfComp.GetStat(StatDefOf.Speed);
         public override float VisionRange => CtfComp.GetStat(StatDefOf.Vision);
         public float MaxStamina => CtfComp.GetStat(StatDefOf.MaxStamina);

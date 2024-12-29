@@ -1,26 +1,4 @@
-(/)can't move camera after losing
-(/)NPC turns take forever - speed override broken?
-(/)node highlight doesn't update after using door
 
-(/)make CtfCharacterStatDef and CtfCharacterStat
-(/)Comp_CtfCharacter handles Dictionary<StatDef, Stat>
-(/)CtfCharactorComp defines base stats
-
-(/)add surface aptitudes
-(/)add climbing aptitude
-
-individual attributes
-(/)humans:
-	Alberto (good climber)
-	Usain (fast, no stamina, height 4)
-	Eluid (good movement, extreme stamina reg)
-	Veronica (extremely good vision)
-	Katie (good swimmer, bad vision)
-	Adrienne  (very good with dogs)
-
-(/)dogs:
-blotto (big, height = 2, little faster but bad stamina, better hop)
-pierette (little, little slower but good stamina, better hop)
 
 show short description of character below name in charactor info, noting biggest strength/weakness
 

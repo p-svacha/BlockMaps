@@ -74,8 +74,8 @@ namespace CaptureTheFlag
                         Vision = 4,
                         MaxStamina = 60,
                         StaminaRegeneration = 4,
-                        ClimbingSpeedModifier = 0,
-                        SwimmingSpeedModifier = 1.2f,
+                        ClimbingSpeedModifier = 0f,
+                        SwimmingSpeedModifier = 2f,
                         Jumping = 1,
                         Dropping = 1,
                         Height = 1,
@@ -96,7 +96,7 @@ namespace CaptureTheFlag
                     Label = "alberto",
                     Description = "Very good and fast climber."
                 };
-                alberto.GetCompProperties<CompProperties_CtfCharacter>().ClimbingSpeedModifier = 2f;
+                alberto.GetCompProperties<CompProperties_CtfCharacter>().ClimbingSpeedModifier = 3f;
 
                 EntityDef usain = new EntityDef(HumanBase)
                 {
@@ -117,7 +117,7 @@ namespace CaptureTheFlag
                 };
                 eluid.GetCompProperties<CompProperties_CtfCharacter>().Speed = 12;
                 eluid.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 100;
-                eluid.GetCompProperties<CompProperties_CtfCharacter>().StaminaRegeneration = 9;
+                eluid.GetCompProperties<CompProperties_CtfCharacter>().StaminaRegeneration = 10;
 
                 EntityDef veronica = new EntityDef(HumanBase)
                 {
@@ -134,7 +134,7 @@ namespace CaptureTheFlag
                     Description = "Very fast swimmer with above-average stamina."
                 };
                 katie.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 70;
-                katie.GetCompProperties<CompProperties_CtfCharacter>().SwimmingSpeedModifier = 2.5f;
+                katie.GetCompProperties<CompProperties_CtfCharacter>().SwimmingSpeedModifier = 3f;
 
                 EntityDef yaroslava = new EntityDef(HumanBase)
                 {

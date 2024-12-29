@@ -1,6 +1,7 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CaptureTheFlag
@@ -43,6 +44,7 @@ namespace CaptureTheFlag
         public float MaxActionPoints => Props.MaxActionPoints;
 
         public float GetStat(StatDef def) => Stats[def].GetValue();
+        public List<Stat> GetAllStats() => Stats.Values.ToList();
 
         #endregion
     }
