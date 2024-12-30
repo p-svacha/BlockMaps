@@ -16,6 +16,7 @@ namespace CaptureTheFlag
             EntityClass = typeof(CtfCharacter),
             UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
             Impassable = false,
+            WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
@@ -54,6 +55,7 @@ namespace CaptureTheFlag
             EntityClass = typeof(CtfCharacter),
             UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
             Impassable = false,
+            WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
@@ -84,8 +86,6 @@ namespace CaptureTheFlag
                     new CompProperties_Movement() { }
                 },
         };
-
-
         public static List<EntityDef> CharacterDefs
         {
             get
@@ -190,6 +190,7 @@ namespace CaptureTheFlag
                 EntityClass = typeof(Entity),
                 Dimensions = new Vector3Int(1, 2, 1),
                 Impassable = false,
+                WaterBehaviour = WaterBehaviour.AboveWater,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,

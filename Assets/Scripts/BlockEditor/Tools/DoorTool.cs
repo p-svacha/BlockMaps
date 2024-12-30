@@ -70,7 +70,7 @@ namespace WorldEditor
 
                 // Preview
                 MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                BuildPreview.transform.position = SelectedDoor.RenderProperties.GetWorldPositionFunction(SelectedDoor, World, node, side, MirrorToggle.isOn);
+                BuildPreview.transform.position = SelectedDoor.RenderProperties.GetWorldPositionFunction(SelectedDoor, World, node, side, Height, MirrorToggle.isOn);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                 Door.GenerateDoorMesh(previewMeshBuilder, Height, MirrorToggle.isOn, isPreview: true);
                 previewMeshBuilder.ApplyMesh();

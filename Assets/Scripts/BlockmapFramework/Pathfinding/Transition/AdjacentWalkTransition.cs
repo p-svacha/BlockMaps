@@ -49,7 +49,7 @@ namespace BlockmapFramework
 
             // Calculate altitude (y-coordinate) on new position
             float y = World.GetWorldAltitudeAt(newPosition2d, originNode);
-            if (originNode.Type == NodeType.Water) y -= entity.WorldHeight / 2f;
+            if (originNode.Type == NodeType.Water && entity.Def.WaterBehaviour == WaterBehaviour.HalfBelowWaterSurface) y -= entity.WorldHeight / 2f;
 
             // Set new position
             Vector3 newPosition = new Vector3(newPosition2d.x, y, newPosition2d.y);

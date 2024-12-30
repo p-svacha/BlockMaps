@@ -522,7 +522,7 @@ namespace CaptureTheFlag
             SelectedCharacter.ShowSelectionIndicator(true);
 
             // Enable vision cutoff if below air node, else disable it
-            bool isBelowRoof = (World.GetNodes(SelectedCharacter.OriginNode.WorldCoordinates).Any(n => n.BaseAltitude > SelectedCharacter.OriginNode.BaseAltitude));
+            bool isBelowRoof = (World.GetNodes(SelectedCharacter.OriginNode.WorldCoordinates).Any(n => n.BaseAltitude > SelectedCharacter.OriginNode.MaxAltitude));
             IsVisionCutoffEnabled = isBelowRoof;
 
             // Highlight nodes

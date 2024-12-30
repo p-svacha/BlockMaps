@@ -42,9 +42,9 @@ namespace BlockmapFramework
 
         /// <summary>
         /// The function to retrieve the exact world position of the entity if placed on the given node with the given properties.
-        /// <br/>Parameters are: EntityDef, World, TargetNode, TargetRotation, IsMirrored.
+        /// <br/>Parameters are: EntityDef, World, TargetNode, TargetRotation, EntityHeight, IsMirrored.
         /// </summary>
-        public System.Func<EntityDef, World, BlockmapNode, Direction, bool, Vector3> GetWorldPositionFunction { get; init; } = EntityManager.GetWorldPosition;
+        public System.Func<EntityDef, World, BlockmapNode, Direction, int, bool, Vector3> GetWorldPositionFunction { get; init; } = EntityManager.GetWorldPosition;
 
         /// <summary>
         /// Creates new EntityRenderPropertes

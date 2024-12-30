@@ -1215,19 +1215,22 @@ namespace BlockmapFramework
 
             int actualHeight = def.VariableHeight ? height : def.Dimensions.y;
 
-            Vector3 placePos = def.RenderProperties.GetWorldPositionFunction(def, this, node, rotation, false);
+            Vector3 placePos = def.RenderProperties.GetWorldPositionFunction(def, this, node, rotation, height, false);
             int minAltitude = Mathf.FloorToInt(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
             int maxAltitude = minAltitude + actualHeight - 1; // max y coordinate that this entity will occupy on all occupied tiles
 
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
             {
+                if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
+
+                // Check if node is generally passable
+                if (!occupiedNode.IsGenerallyPassable()) return false;
+
                 // Check if the place position is on water
-                if (occupiedNode is WaterNode waterNode && placePos.y <= waterNode.WaterBody.WaterSurfaceWorldHeight) return false;
-                if (occupiedNode is GroundNode groundNode && groundNode.WaterNode != null && placePos.y <= groundNode.WaterNode.WaterBody.WaterSurfaceWorldHeight) return false;
+                if (occupiedNode is WaterNode && def.WaterBehaviour == WaterBehaviour.Forbidden) return false;
 
                 // Check if entity can stand here
-                if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
                 int headSpace = occupiedNode.MaxPassableHeight[Direction.None];
                 if (minAltitude + headSpace <= maxAltitude) return false;
 

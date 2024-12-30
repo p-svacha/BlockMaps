@@ -56,7 +56,7 @@ namespace WorldEditor
                 bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
 
                 BuildPreview.gameObject.SetActive(true);
-                BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, false);
+                BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, SelectedEntity.Dimensions.y, false);
                 BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(CurrentRotation);
                 BuildPreview.transform.localScale = SelectedEntity.RenderProperties.ModelScale;
                 if (MirrorToggle.isOn) HelperFunctions.SetAsMirrored(BuildPreview);

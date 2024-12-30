@@ -1,18 +1,15 @@
-(/)dogs wrong attributes
-(/)hovering an entity should also hover the node underneath (if dimensions are 1/1)
-(/)vision cutoff should be +1 above current altitude
-(/)auto enable cutoff when selecting a character with an airnode above
-(/)camera doesn't show enemy moves anymore - override doesn't stop?
-	enemies are already extremely far into tile when moving stops to pan camera
-	porbably just way too fast
-(/)jail +1 turn
-(/)show a symbol in label when a character is in jail
-(/)sometimes selecting the character doesn't show info if it has been selected right before (probably the c and action check)
-(/)hold rightclikc to rotate camera
+(/)can place entities on water node that is below ground
+
+(/)red player sees blue characters after selecting a character (??)
+	also happens in refreshcharacter
+	probably vision cutoff related
+	vision cutoff gets activated when on ground node with water
+	resets renderer other entities
+
+(/)dog can't move further than half map in water
+	probably only sees ground nodes below water
 
 ------------------------- END CTF v0.0.3 -------------------------
-
-
 
 AI: flee job completely is broken
 AI: enemy moves from netural into player area even though he sees player is there
@@ -49,15 +46,6 @@ World.UpdateWorldSystems should enqueue changes so they don't get overwritten if
 Walls that are not actually explored are visible when a wall on the same cell is explored
 	> maybe one mesh per direction per height level?
 	> maybe pass direction to shader?
-
-Fix how moving entities behave in water:
-	Atm the walk transition handled the world position below water surface
-	this means when placing entity and vision collider and eye position is wrong
-	it should be handled in getworldposition instead and logic removed from walk transition
-	then:
-	make characters can spawn in water if they can swim in ctf
-	jail in water not below surface
-	check vision in water
 
 New EditorTool: Map Modifiers
 	- a function that affects the whole map
@@ -260,6 +248,8 @@ CTF: Lobby: Back to Menu Button
 	and server disconnect as client
 	send message to others in lobby that player left
 
+
+
 CTF: Pick up Flag (requires inventory system)
 	> characters can now enter flag zone
 	> characters in flag zone are "disabled" for the whole turn they were in
@@ -310,12 +300,6 @@ CTF: Rework hover pathfinding
 	> Cache paths (forever since they can never change atm)
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
-
-CTF: Rework jail system
-	> 1 Jail that is in neutral area
-	> gives full vision for both players
-	> Fully fenced off
-	> Characters get teleported out of jail when jail time ends
 
 -------- POSSIBLE PROJECT IDEAS WITH FRAMEWORK --------
 

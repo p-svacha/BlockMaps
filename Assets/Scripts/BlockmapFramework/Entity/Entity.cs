@@ -156,11 +156,11 @@ namespace BlockmapFramework
             Actor = owner;
             IsMirrored = isMirrored;
 
-            // Set position and rotation
-            ResetWorldPositonAndRotation();
-
             // Initialize components
             InitializeComps();
+
+            // Set position and rotation
+            ResetWorldPositonAndRotation();
 
             OnCreated();
         }
@@ -564,6 +564,9 @@ namespace BlockmapFramework
                     MeshObject.transform.rotation = WorldRotation;
 
                     foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
+
+                    // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
+                    if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;
                 }
 
                 // Entity was explored before but not currently visible => render transparent at last known position
@@ -576,6 +579,9 @@ namespace BlockmapFramework
                     MeshObject.transform.rotation = LastKnownRotation[player].Value;
 
                     foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.5f);
+
+                    // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
+                    if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;
                 }
 
                 // Entity was not yet explored => don't render it
@@ -624,8 +630,8 @@ namespace BlockmapFramework
         public virtual float ClimbingAptitude => MovementComp.ClimbingAptitude;
         public virtual float GetSurfaceAptitude(SurfaceDef def) => MovementComp.GetSurfaceAptitude(def);
 
-        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
-        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
+        public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
+        public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
@@ -695,15 +701,15 @@ namespace BlockmapFramework
         /// Returns the world position of this entity when placed on the given originNode.
         /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis. (see EntityManager.GetWorldPosition)
         /// </summary>
-        public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, bool isMirrored)
+        public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, int height, bool isMirrored)
         {
-            return Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, isMirrored);
+            return Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, height, isMirrored);
         }
 
         /// <summary>
         /// Returns the world position of the center of this entity.
         /// </summary>
-        public virtual Vector3 GetWorldCenter() => GetWorldPosition(OriginNode, Rotation, IsMirrored) + new Vector3(0f, WorldHeight / 2f, 0f);
+        public virtual Vector3 GetWorldCenter() => GetWorldPosition(OriginNode, Rotation, Height, IsMirrored) + new Vector3(0f, WorldHeight / 2f, 0f);
 
         /// <summary>
         /// Returns the translated local coordinate in x/y direction depending the rotation of the entity.
@@ -1012,7 +1018,7 @@ namespace BlockmapFramework
         {
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
-            return OriginNode.MeshCenterWorldPosition + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.5f), 0f);
+            return GetWorldPosition(OriginNode, Rotation, Height, IsMirrored) + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.4f), 0f);
         }
 
         /// <summary>
@@ -1112,7 +1118,7 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateVisionColliderPosition()
         {
-            VisionColliderObject.transform.position = GetWorldPosition(OriginNode, Rotation, IsMirrored);
+            VisionColliderObject.transform.position = GetWorldPosition(OriginNode, Rotation, Height, IsMirrored);
             VisionColliderObject.transform.rotation = WorldRotation;
         }
 
@@ -1138,7 +1144,7 @@ namespace BlockmapFramework
         /// </summary>
         public virtual void ResetWorldPositonAndRotation()
         {
-            WorldPosition = GetWorldPosition(OriginNode, Rotation, IsMirrored);
+            WorldPosition = GetWorldPosition(OriginNode, Rotation, Height, IsMirrored);
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 

@@ -53,7 +53,7 @@ namespace WorldEditor
                     // Preview
                     BuildPreview.SetActive(true);
                     MeshBuilder previewMeshBuilder = new MeshBuilder(BuildPreview);
-                    BuildPreview.transform.position = SelectedLadder.RenderProperties.GetWorldPositionFunction(SelectedLadder, World, bottom, side, false);
+                    BuildPreview.transform.position = SelectedLadder.RenderProperties.GetWorldPositionFunction(SelectedLadder, World, bottom, side, height, false);
                     BuildPreview.transform.rotation = HelperFunctions.Get2dRotationByDirection(side);
                     LadderMeshGenerator.GenerateLadderMesh(previewMeshBuilder, height, isPreview: true);
                     previewMeshBuilder.ApplyMesh();

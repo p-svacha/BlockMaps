@@ -44,7 +44,7 @@ namespace BlockmapFramework
             MeshCenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, WaterBody.WaterSurfaceWorldHeight, WorldCoordinates.y + 0.5f);
         }
 
-        protected override bool IsGenerallyPassable()
+        public override bool IsGenerallyPassable()
         {
             if (!GroundNode.IsCenterUnderWater) return false; // Surface node on same spot is passable
             return base.IsGenerallyPassable();

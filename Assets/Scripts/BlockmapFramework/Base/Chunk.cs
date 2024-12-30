@@ -251,7 +251,7 @@ namespace BlockmapFramework
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
             foreach (WallMesh mesh in WallMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
-            foreach (Entity e in Entities.Where(e => e.IsStandaloneEntity && e.OriginNode.Type != NodeType.Ground)) e.MeshRenderer.enabled = (value == -1 || e.MinAltitude < value);
+            foreach (Entity e in Entities) e.UpdateVisibility();
         }
 
         public void DrawZoneBorders(Actor actor)

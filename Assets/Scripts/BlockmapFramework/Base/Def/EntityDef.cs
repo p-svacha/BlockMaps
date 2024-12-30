@@ -57,6 +57,11 @@ namespace BlockmapFramework
         public bool VariableHeight { get; init; } = false;
 
         /// <summary>
+        /// How the entity behaves around water - if and how it can exist on water.
+        /// </summary>
+        public WaterBehaviour WaterBehaviour { get; init; } = WaterBehaviour.Forbidden;
+
+        /// <summary>
         /// Creates a new EntityDef.
         /// </summary>
         public EntityDef() { }
@@ -82,6 +87,7 @@ namespace BlockmapFramework
             Impassable = orig.Impassable;
             RequiresFlatTerrain = orig.RequiresFlatTerrain;
             VariableHeight = orig.VariableHeight;
+            WaterBehaviour = orig.WaterBehaviour;
         }
 
 
@@ -116,5 +122,24 @@ namespace BlockmapFramework
 
             return base.Validate();
         }
+    }
+
+    public enum WaterBehaviour
+    {
+        /// <summary>
+        /// The entity can be placed on water and will be fully above the water surface.
+        /// </summary>
+        AboveWater,
+
+        /// <summary>
+        /// The entity can be placed on water and will be sink halway below the water surface.
+        /// <br/>Useful to simulate swimming characters.
+        /// </summary>
+        HalfBelowWaterSurface,
+
+        /// <summary>
+        /// The entity cannot be placed on water.
+        /// </summary>
+        Forbidden
     }
 }

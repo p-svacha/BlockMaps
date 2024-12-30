@@ -276,7 +276,7 @@ namespace BlockmapFramework
 
             // Set max possible to 0 for all sides if not generally passable
             if (!IsGenerallyPassable())
-            {
+            {   
                 foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight[dir] = 0;
                 return;
             }
@@ -1030,10 +1030,10 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns if it is theoretically possible for some entity to stand on this node.
+        /// Returns if it is even theoretically possible for any entity to stand on this node.
         /// <br/>Use IsPassable for public use, since that checks this plus additional criteria.
         /// </summary>
-        protected virtual bool IsGenerallyPassable()
+        public virtual bool IsGenerallyPassable()
         {
             if (Entities.Any(x => x.Def.Impassable)) return false; // An entity is blocking this node
             return true;

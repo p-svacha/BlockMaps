@@ -90,7 +90,7 @@ namespace BlockmapFramework
             return from.Transitions.FirstOrDefault(t => (t is SingleClimbTransition || t is DoubleClimbTransition) && (t.To.TargetLadders.Values.Contains(this) || t.To.SourceLadders.Values.Contains(this)));
         }
 
-        public static Vector3 GetLadderWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, bool isMirrored)
+        public static Vector3 GetLadderWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, int height, bool isMirrored)
         {
             Vector3 nodeCenter = originNode.MeshCenterWorldPosition;
             float worldHeight = originNode.GetMinAltitude(rotation) * World.NodeHeight;
