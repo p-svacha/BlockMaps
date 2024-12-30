@@ -97,25 +97,7 @@ namespace CaptureTheFlag
         /// </summary>
         public void OnSetDevMode(bool active)
         {
-            if (active)
-            {
-                SetDevModeLabels();
-            }
-            else
-            {
-                foreach (CtfCharacter c in Characters) c.UI_Label.SetLabelText(c.LabelCap);
-            }
-        }
-
-        /// <summary>
-        /// Sets the visible label of all characters according to their role and job to easily debug what they are doing.
-        /// </summary>
-        protected virtual void SetDevModeLabels()
-        {
-            foreach (CtfCharacter c in Characters)
-            {
-                c.UI_Label.SetLabelText($"{c.LabelCap} ({c.Id})");
-            }
+            foreach (CtfCharacter c in Characters) c.RefreshLabelText();
         }
 
         #endregion

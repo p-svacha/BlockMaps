@@ -10,7 +10,6 @@ namespace CaptureTheFlag
     {
         private CtfCharacter Character;
         private Vector3 WorldOffset;
-        public float Width;
 
         // Double click
         private float DoubleClickTimeThreshold = 0.5f;
@@ -67,12 +66,8 @@ namespace CaptureTheFlag
             {
                 NameText.gameObject.SetActive(true);
 
-                // Update position
-                if (Width == 0) Width = GetComponent<RectTransform>().sizeDelta.x;
                 Vector3 targetWorldPosition = Character.IsVisible ? Character.MeshObject.transform.position + WorldOffset : (Vector3)Character.LastKnownPosition[Character.Match.LocalPlayer.Actor] + WorldOffset;
-
                 Vector3 screenPosition = Character.Match.World.Camera.Camera.WorldToScreenPoint(targetWorldPosition);
-                screenPosition = screenPosition + new Vector3(-Width / 2, 0f, 0f);
                 transform.position = screenPosition;
 
                 // Transparent when not currently visible

@@ -105,7 +105,7 @@ namespace BlockmapFramework
         /// </summary>
         public void CutEverythingBefore(BlockmapNode node)
         {
-            if (!Nodes.Contains(node)) throw new System.Exception($"Can't cut path because {node} is not part of it.");
+            if (!Nodes.Contains(node)) throw new System.Exception($"Can't cut path because {node} is not part of it. Path has {Nodes.Count} nodes and {Transitions.Count} transitions.");
             while(Nodes[0] != node)
             {
                 RemoveFirstNode();

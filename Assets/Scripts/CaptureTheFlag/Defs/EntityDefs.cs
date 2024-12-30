@@ -162,8 +162,8 @@ namespace CaptureTheFlag
                     Label = "pierette",
                     Description = "Smaller dog with high stamina, but once that's gone she will need to rest long."
                 };
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 80;
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
+                pierette.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 80;
+                pierette.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
 
                 return new List<EntityDef>()
                 {

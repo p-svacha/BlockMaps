@@ -62,7 +62,7 @@ namespace CaptureTheFlag
             {
                 DefName = "Jumping",
                 Label = "jumping",
-                Description = "How many cells upwards this character can jump onto adjacent tiles.",
+                Description = "How many cells upwards this character can jump over obstacles or onto adjacent tiles.",
                 Type = StatType.Int,
                 MaxValue = 6,
             },

@@ -136,6 +136,7 @@ namespace CaptureTheFlag.UI
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
+            CharacterInfo.OnCharacterDeselected();
             SpecialActionsContainer.SetActive(false);
             c.UI_Label.SetSelected(false);
         }

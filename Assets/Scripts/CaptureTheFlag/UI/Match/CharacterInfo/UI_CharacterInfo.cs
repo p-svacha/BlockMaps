@@ -63,6 +63,12 @@ namespace CaptureTheFlag.UI
             }
         }
 
+        public void OnCharacterDeselected()
+        {
+            Character = null;
+            HoveredAction = null;
+        }
+
         private void StatButton_OnClick()
         {
             IsStatWindowActive = !IsStatWindowActive;

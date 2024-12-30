@@ -98,6 +98,11 @@ namespace CaptureTheFlag
             ActionPoints = 0;
         }
 
+        public void RefreshLabelText()
+        {
+            UI_Label.SetLabelText(GetLabelText());
+        }
+
         #endregion
 
         #region Getters
@@ -246,6 +251,22 @@ namespace CaptureTheFlag
             if (Owner.FlagZone.ContainsNode(targetNode)) return false; // Can't stand in own flag zone
 
             return true;
+        }
+
+        public string GetLabelText()
+        {
+            string text = LabelCap;
+
+            if(Match.DevMode && Owner is AIPlayer aiPlayer)
+            {
+                text = aiPlayer.GetDevModeLabel(this);
+            }
+            else
+            {
+                if (IsInJail) text += $" (Jailed for {JailTime} turns)";
+            }
+            
+            return text;
         }
 
         #endregion

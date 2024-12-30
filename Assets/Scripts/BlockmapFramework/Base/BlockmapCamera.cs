@@ -11,7 +11,7 @@ namespace BlockmapFramework
 
         private const float TURN_SPEED = 80f;
 
-        private const float MOVE_SPEED = 10f;
+        private const float MOVE_SPEED = 15f;
         private const float SHIFT_MOVE_SPEED = 50f;
 
         private const float ZOOM_SPEED = 0.8f;
@@ -21,6 +21,10 @@ namespace BlockmapFramework
 
         // EDGE SCROLL
         private const float EDGE_SCROLL_MARGIN = 10f; // in pixels from screen edge
+
+        // RIGHT MOUSE ROTATE DRAG
+        private const float RMB_ROTATE_SPEED = 0.15f;
+        private Vector3 lastMousePos;
 
         // Pan animation
         public bool IsPanning { get; private set; }
@@ -104,33 +108,21 @@ namespace BlockmapFramework
             }
 
             // === MOVEMENT (WASD) ===
-            if (Input.GetKey(KeyCode.W) && canMoveCamera) // W - Move camera up
+            if (Input.GetKey(KeyCode.W) && canMoveCamera) // W - Move camera forward
             {
-                CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                UpdatePosition();
-                FollowedEntity = null;
+                MoveForward(moveSpeed);
             }
             if (Input.GetKey(KeyCode.A) && canMoveCamera) // A - Move camera left
             {
-                CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                UpdatePosition();
-                FollowedEntity = null;
+                MoveLeft(moveSpeed);
             }
-            if (Input.GetKey(KeyCode.S) && canMoveCamera) // S - Move camera down
+            if (Input.GetKey(KeyCode.S) && canMoveCamera) // S - Move camera backward
             {
-                CurrentPosition.x += moveSpeed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                CurrentPosition.z += moveSpeed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-                UpdatePosition();
-                FollowedEntity = null;
+                MoveBackward(moveSpeed);
             }
             if (Input.GetKey(KeyCode.D) && canMoveCamera) // D - Move camera right
             {
-                CurrentPosition.x -= moveSpeed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                CurrentPosition.z -= moveSpeed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-                UpdatePosition();
-                FollowedEntity = null;
+                MoveRight(moveSpeed);
             }
 
             // === EDGE SCROLL ===
@@ -138,26 +130,33 @@ namespace BlockmapFramework
             {
                 Vector3 mousePos = Input.mousePosition;
 
-                // Left edge
-                if (mousePos.x <= EDGE_SCROLL_MARGIN)
-                {
-                    MoveLeft(moveSpeed);
-                }
-                // Right edge
-                else if (mousePos.x >= Screen.width - EDGE_SCROLL_MARGIN)
-                {
-                    MoveRight(moveSpeed);
-                }
+                // Mouse is off-screen
+                if (mousePos.x < 0 || mousePos.x > Screen.width ||
+                    mousePos.y < 0 || mousePos.y > Screen.height) { }
 
-                // Bottom edge
-                if (mousePos.y <= EDGE_SCROLL_MARGIN)
+                else
                 {
-                    MoveBackward(moveSpeed);
-                }
-                // Top edge
-                else if (mousePos.y >= Screen.height - EDGE_SCROLL_MARGIN)
-                {
-                    MoveForward(moveSpeed);
+                    // Left edge
+                    if (mousePos.x <= EDGE_SCROLL_MARGIN)
+                    {
+                        MoveLeft(moveSpeed);
+                    }
+                    // Right edge
+                    else if (mousePos.x >= Screen.width - EDGE_SCROLL_MARGIN)
+                    {
+                        MoveRight(moveSpeed);
+                    }
+
+                    // Bottom edge
+                    if (mousePos.y <= EDGE_SCROLL_MARGIN)
+                    {
+                        MoveBackward(moveSpeed);
+                    }
+                    // Top edge
+                    else if (mousePos.y >= Screen.height - EDGE_SCROLL_MARGIN)
+                    {
+                        MoveForward(moveSpeed);
+                    }
                 }
             }
 
@@ -172,6 +171,20 @@ namespace BlockmapFramework
                 CurrentZoom -= ZOOM_SPEED;
                 UpdatePosition();
             }
+
+            // === RMB DRAG ROTATION ===
+            if (canMoveCamera && Input.GetMouseButton(1))
+            {
+                // Calculate how much the mouse moved horizontally
+                float deltaX = Input.mousePosition.x - lastMousePos.x;
+
+                // Adjust the camera angle based on that horizontal movement
+                CurrentAngle -= deltaX * RMB_ROTATE_SPEED;
+                UpdatePosition();
+            }
+
+            // [ADDED] Always track the last mouse position (end of frame)
+            lastMousePos = Input.mousePosition;
         }
 
         private void MoveForward(float speed)

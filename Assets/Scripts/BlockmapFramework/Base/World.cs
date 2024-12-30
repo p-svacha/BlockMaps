@@ -463,7 +463,8 @@ namespace BlockmapFramework
                     if(hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.MeshRenderer.enabled)
                     {
                         newHoveredEntity = hitEntity;
-                        newHoveredChunk = hitEntity.Chunk;
+                        newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
+                        newHoveredChunk = newHoveredNode != null ? newHoveredNode.Chunk : hitEntity.Chunk;
                         break;
                     }
                 }
@@ -476,7 +477,8 @@ namespace BlockmapFramework
                     if (hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.BatchEntityMesh.Renderer.enabled)
                     {
                         newHoveredEntity = hitEntity;
-                        newHoveredChunk = hitEntity.Chunk;
+                        newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
+                        newHoveredChunk = newHoveredNode != null ? newHoveredNode.Chunk : hitEntity.Chunk;
                         break;
                     }
                 }

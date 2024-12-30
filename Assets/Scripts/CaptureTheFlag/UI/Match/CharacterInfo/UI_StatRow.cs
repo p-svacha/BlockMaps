@@ -51,7 +51,7 @@ namespace CaptureTheFlag.UI
             tooltip.Title = stat.Def.LabelCap;
             tooltip.Text = $"{stat.Def.Description}";
             if(stat.Def.Type != StatType.Binary && stat.Def.HigherIsBetter)
-                tooltip.Text += $"\n\nMaximun: {stat.Def.MaxValue}";
+                tooltip.Text += $"\n\nMaximum: {stat.Def.MaxValue}";
         }
 
         private void HideValueBar()

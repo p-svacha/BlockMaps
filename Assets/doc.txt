@@ -1,16 +1,28 @@
-(/)tooltip position near bottom edge
-(/)tooltip frame flicker
-(/)characters spawn inside terrain (at base altitude instead of exact)
-(/)edge scroll
-(/)movement speed shouldn't affect swimming & climbing & jumping - CtfCharacter.GetActionPointCost
+(/)dogs wrong attributes
+(/)hovering an entity should also hover the node underneath (if dimensions are 1/1)
+(/)vision cutoff should be +1 above current altitude
+(/)auto enable cutoff when selecting a character with an airnode above
+(/)camera doesn't show enemy moves anymore - override doesn't stop?
+	enemies are already extremely far into tile when moving stops to pan camera
+	porbably just way too fast
+(/)jail +1 turn
+(/)show a symbol in label when a character is in jail
+(/)sometimes selecting the character doesn't show info if it has been selected right before (probably the c and action check)
+(/)hold rightclikc to rotate camera
 
 ------------------------- END CTF v0.0.3 -------------------------
 
-AI: flee job
+
+
+AI: flee job completely is broken
 AI: enemy moves from netural into player area even though he sees player is there
 AI: enemies get stuck when next node (adjacent) they want to move to is occupied
 AI: Stop searching flag when it becomes explored
 AI: two characters that are searching flag went on same node in own territory (missing CanPerform check probably)
+AI: random amount of attacker / defender
+AI: characters can change between attacker / defender in rare cases
+AI: Increase defense perimeter
+AI: get stuck between searching flag an fleeing on opponent terriotry neutral border
 
 ------------------------- END CTF v0.0.4 -------------------------
 
@@ -33,6 +45,19 @@ farm map
 
 World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
 	test by quickly changing surface of many nodes in editor
+
+Walls that are not actually explored are visible when a wall on the same cell is explored
+	> maybe one mesh per direction per height level?
+	> maybe pass direction to shader?
+
+Fix how moving entities behave in water:
+	Atm the walk transition handled the world position below water surface
+	this means when placing entity and vision collider and eye position is wrong
+	it should be handled in getworldposition instead and logic removed from walk transition
+	then:
+	make characters can spawn in water if they can swim in ctf
+	jail in water not below surface
+	check vision in water
 
 New EditorTool: Map Modifiers
 	- a function that affects the whole map

@@ -11,7 +11,7 @@ namespace CaptureTheFlag
         public bool TurnFinished { get; private set; }
 
         // AI Behaviour
-        private const float INVISIBLE_CHARACTER_SPEED = 50;
+        private const float INVISIBLE_CHARACTER_SPEED = 25;
 
         private const float MAX_CHASE_DISTANCE = 40; // Transition cost
         private const float DEFEND_PERIMETER_RADIUS = 40; // Transition cost
@@ -149,16 +149,14 @@ namespace CaptureTheFlag
             }
         }
 
+        public string GetDevModeLabel(CtfCharacter c)
+        {
+            return $"{c.LabelCap}: {Roles[c]} | {Jobs[c].DevmodeDisplayText}";
+        }
+
         #region Private
 
-        protected override void SetDevModeLabels()
-        {
-            foreach (CtfCharacter c in Characters)
-            {
-                string label = $"{ c.LabelCap } ({ c.Id}): {Roles[c]} | {Jobs[c].DevmodeDisplayText}";
-                c.UI_Label.SetLabelText(label);
-            }
-        }
+
 
         /// <summary>
         /// Returns the action the given character will do next this turn.
@@ -193,10 +191,6 @@ namespace CaptureTheFlag
                 }
             }
             if (currentJob.ShouldStopJob(out _) && attempts < maxAttempts) throw new System.Exception($"After {attempts} we still didn't get a job that shouldn't immediately be stopped. Current job = {currentJob.DevmodeDisplayText}");
-
-
-            // Update dev mode labels
-            if (Match.DevMode) SetDevModeLabels();
 
             // Get action based on job
             return currentJob.GetNextAction();

@@ -20,7 +20,7 @@ namespace CaptureTheFlag
         public const int JAIL_ZONE_RADIUS = 3;
         public const int JAIL_ZONE_MIN_FLAG_DISTANCE = 9; // minimum distance from jail zone center to flag
         public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
-        public const int JAIL_TIME = 5; // Amount of turns a character spends in jail after being tagged
+        public const int JAIL_TIME = 6; // Amount of turns a character spends in jail after being tagged
         public const float FLAG_ZONE_RADIUS = 7.5f;  // Amount of tiles around flag that can't be entered by own team
         public static List<Color> PlayerColors = new List<Color>()
         {
@@ -474,7 +474,7 @@ namespace CaptureTheFlag
                 else if (IsVisionCutoffEnabled)
                 {
                     int currentCutoffAltitude = World.VisionCutoffAltitude;
-                    int targetCutoffAltitude = SelectedCharacter.OriginNode.MaxAltitude + 2;
+                    int targetCutoffAltitude = SelectedCharacter.OriginNode.MaxAltitude + 3;
                     if (currentCutoffAltitude != targetCutoffAltitude || !World.IsVisionCutoffEnabled)
                     {
                         World.ShowVisionCutoffAt(targetCutoffAltitude);
@@ -521,6 +521,11 @@ namespace CaptureTheFlag
             UI.SelectCharacter(SelectedCharacter);
             SelectedCharacter.ShowSelectionIndicator(true);
 
+            // Enable vision cutoff if below air node, else disable it
+            bool isBelowRoof = (World.GetNodes(SelectedCharacter.OriginNode.WorldCoordinates).Any(n => n.BaseAltitude > SelectedCharacter.OriginNode.BaseAltitude));
+            IsVisionCutoffEnabled = isBelowRoof;
+
+            // Highlight nodes
             UnhighlightNodes();
             if (!SelectedCharacter.IsInAction)
             {
@@ -567,6 +572,9 @@ namespace CaptureTheFlag
 
             // Update selection panel UI
             if (character.Owner == LocalPlayer) UI.UpdateSelectionPanel(character);
+
+            // Update label
+            character.RefreshLabelText();
         }
 
         public void ToggleDevMode() => SetDevMode(!DevMode);
