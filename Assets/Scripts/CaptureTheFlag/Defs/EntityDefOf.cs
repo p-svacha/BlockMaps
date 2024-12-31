@@ -11,13 +11,13 @@ namespace CaptureTheFlag
         public static EntityDef Flag;
         public static EntityDef ProcHedge;
 
-        public static EntityDef Alberto;
-        public static EntityDef Usain;
-        public static EntityDef Eluid;
-        public static EntityDef Veronica;
-        public static EntityDef Katie;
-        public static EntityDef Yaroslava;
-        public static EntityDef Blotto;
-        public static EntityDef Pierette;
+        public static EntityDef Human1;
+        public static EntityDef Human2;
+        public static EntityDef Human3;
+        public static EntityDef Human4;
+        public static EntityDef Human5;
+        public static EntityDef Human6;
+        public static EntityDef Dog1;
+        public static EntityDef Dog2;
     }
 }

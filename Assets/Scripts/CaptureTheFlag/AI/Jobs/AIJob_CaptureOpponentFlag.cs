@@ -20,7 +20,7 @@ namespace CaptureTheFlag
             // If we can tag an opponent this turn, do that
             if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
             {
-                forcedNewJob = new AIJob_TagOpponent(Character, target0);
+                forcedNewJob = new AIJob_ChaseToTagOpponent(Character, target0);
                 return true;
             }
 

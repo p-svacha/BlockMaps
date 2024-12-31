@@ -92,7 +92,7 @@ namespace CaptureTheFlag
             {
                 EntityDef alberto = new EntityDef(HumanBase)
                 {
-                    DefName = "Alberto",
+                    DefName = "Human1",
                     Label = "alberto",
                     Description = "Very good and fast climber."
                 };
@@ -100,7 +100,7 @@ namespace CaptureTheFlag
 
                 EntityDef usain = new EntityDef(HumanBase)
                 {
-                    DefName = "Usain",
+                    DefName = "Human2",
                     Label = "usain",
                     Description = "Tall guy who is extremely fast but low stamina, meaning he needs to rest often."
                 };
@@ -111,7 +111,7 @@ namespace CaptureTheFlag
 
                 EntityDef eluid = new EntityDef(HumanBase)
                 {
-                    DefName = "Eluid",
+                    DefName = "Human3",
                     Label = "eluid",
                     Description = "Quite fast and very high stamina and regeneration, meaning he will almost never need rest."
                 };
@@ -121,7 +121,7 @@ namespace CaptureTheFlag
 
                 EntityDef veronica = new EntityDef(HumanBase)
                 {
-                    DefName = "Veronica",
+                    DefName = "Human4",
                     Label = "veronica",
                     Description = "Extremely good vision, making her a great scout."
                 };
@@ -129,7 +129,7 @@ namespace CaptureTheFlag
 
                 EntityDef katie = new EntityDef(HumanBase)
                 {
-                    DefName = "Katie",
+                    DefName = "Human5",
                     Label = "katie",
                     Description = "Very fast swimmer with above-average stamina."
                 };
@@ -138,7 +138,7 @@ namespace CaptureTheFlag
 
                 EntityDef yaroslava = new EntityDef(HumanBase)
                 {
-                    DefName = "Yaroslava",
+                    DefName = "Human6",
                     Label = "yaroslava",
                     Description = "Very skilled at jumping over high obstacles and onto high platforms. She can also absorb higher drops."
                 };
@@ -147,8 +147,8 @@ namespace CaptureTheFlag
 
                 EntityDef blotto = new EntityDef(DogBase)
                 {
-                    DefName = "Blotto",
-                    Label = "blotto",
+                    DefName = "Dog1",
+                    Label = "chevap",
                     Description = "Bigger dog that can run fast, but low vision and needs to rest for longer periods of time."
                 };
                 blotto.RenderProperties.ModelScale = new Vector3(1f, 1.8f, 1f);
@@ -158,8 +158,8 @@ namespace CaptureTheFlag
 
                 EntityDef pierette = new EntityDef(DogBase)
                 {
-                    DefName = "Pierette",
-                    Label = "pierette",
+                    DefName = "Dog2",
+                    Label = "cici",
                     Description = "Smaller dog with high stamina, but once that's gone she will need to rest long."
                 };
                 pierette.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 80;

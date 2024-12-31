@@ -9,7 +9,7 @@ namespace CaptureTheFlag
     /// <summary>
     /// Job to chases an opponent character in order to tag them.
     /// </summary>
-    public class AIJob_TagOpponent : AICharacterJob
+    public class AIJob_ChaseToTagOpponent : AICharacterJob
     {
         private CtfCharacter Target;
 
@@ -17,7 +17,7 @@ namespace CaptureTheFlag
         public override AICharacterJobId Id => AICharacterJobId.TagOpponent;
         public override string DevmodeDisplayText => "Tagging opponent (" + Target.LabelCap + ")";
 
-        public AIJob_TagOpponent(CtfCharacter c, CtfCharacter target) : base(c)
+        public AIJob_ChaseToTagOpponent(CtfCharacter c, CtfCharacter target) : base(c)
         {
             Target = target;
         }

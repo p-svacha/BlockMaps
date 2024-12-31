@@ -1,29 +1,41 @@
-(/)can place entities on water node that is below ground
+(/)Jumping/dropping aptitudes affecting cost of those transitions
+(/)Expand AICharacterJob.GetSingleNodeMovementTo so it can also return movement over 2 or 3 nodes if the next one is blocked (canperform = false)
+(/)start camera at own flag
+(/?)characters can still spawn on water nodes that should be impassable because of ground node is higher
 
-(/)red player sees blue characters after selecting a character (??)
-	also happens in refreshcharacter
-	probably vision cutoff related
-	vision cutoff gets activated when on ground node with water
-	resets renderer other entities
+(/)AI: enemy moves from netural into player area even though he sees player is there
+(/)AI: enemies get stuck when next node (adjacent) they want to move to is occupied
+(/)AI: Increase defense perimeter
+(/)AI: get stuck between searching flag an fleeing on opponent terriotry neutral border
+(/)AI: two characters that are searching flag went on same node in own territory (missing CanPerform check probably)
+(/)AI: random amount of attacker / defender
+(/)AI: Go to jail if no valid job
+(/)AI: randomize the order every turn in which the characters make their actions
 
-(/)dog can't move further than half map in water
-	probably only sees ground nodes below water
+(/)AI: flee job completely is broken
+(/)AI: Always ignore opponents with jailtime > 1
 
-------------------------- END CTF v0.0.3 -------------------------
-
-AI: flee job completely is broken
-AI: enemy moves from netural into player area even though he sees player is there
-AI: enemies get stuck when next node (adjacent) they want to move to is occupied
-AI: Stop searching flag when it becomes explored
-AI: two characters that are searching flag went on same node in own territory (missing CanPerform check probably)
-AI: random amount of attacker / defender
+AI: replace vianode in SearchForOpponentFlag with AIJob_LingerInNeutral
+AI: Stop searching flag and actually go to it when it becomes explored
 AI: characters can change between attacker / defender in rare cases
-AI: Increase defense perimeter
-AI: get stuck between searching flag an fleeing on opponent terriotry neutral border
+	defender to attacker randomly while patrolling without enemy nearby
+	attacker to defender randomly after jail time ends
+AI: Create LingerInNeutral job that just moves around in neutral.
+	If we see an enemy going in our territory => chase it, Job = TagOpponent (?)
+	If we don't see opponents and have nodes in enemy territory => go there, new Job = ExploreEnemyTerritory
+AI: For defenders, also chase LastKnownPositions (only opponents that aren't visible).
+	To check, go to a random node near the alst known position
+	store if last known positions have been checked and only check it once
+	if last known position changes, reset CheckedLastKnownPosition
+AI: Rare new defender job AIJob_ExploreOwnTerritory
+
 
 ------------------------- END CTF v0.0.4 -------------------------
 
 show map description in lobby
+
+add character spawns so they are fully random along the y axis (sideways), and can't exceed a certain value on the x axis (forward)
+	add spawning type to map generator
 
 make valley map gen
 	high sides with player spawns
@@ -36,7 +48,17 @@ desert map gen
 	wild scorpions that can put you into jail
 
 farm map
-	different crop fields with movement modifiers
+	different crop fields with movement and vision modifiers
+	one big farm building around neutral axis
+
+inside dungeon like map
+
+New EditorTool: Map Modifiers
+	- a function that affects the whole map
+	- basically a single step of map gen process
+
+New map: MegaRandom
+	just repeats random map modifiers
 
 ------------------------- END CTF v0.0.5 -------------------------
 
@@ -47,9 +69,9 @@ Walls that are not actually explored are visible when a wall on the same cell is
 	> maybe one mesh per direction per height level?
 	> maybe pass direction to shader?
 
-New EditorTool: Map Modifiers
-	- a function that affects the whole map
-	- basically a single step of map gen process
+Bug: redrawing entities resets their rotation because ResetWorldPositonAndRotation() is called in system update in reposition
+
+
 
 Increase performance of detecting climb transitions on empty perlin map
 maybe also other steps
@@ -239,7 +261,8 @@ More static entities (see following for inspiration):
 	> fallout tactics streams
 
 
-CTF: Different humans and dogs
+CTF: Rest ability (costs 10 AP, restores 10 stamina)
+
 CTF: Neutral items that refresh stamina or give modifiers
 CTF: Neutral items that can be picked up (requires inventory system)
 

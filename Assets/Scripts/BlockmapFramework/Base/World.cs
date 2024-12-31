@@ -1207,6 +1207,7 @@ namespace BlockmapFramework
         public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
         {
             if (def == null) throw new System.Exception($"Cannot check if entity is spawnable because EntityDef is null");
+            if (!node.IsGenerallyPassable()) return false;
 
             HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, height); // get nodes that would be occupied when placing the entity on the given node
 

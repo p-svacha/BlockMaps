@@ -112,6 +112,7 @@ namespace CaptureTheFlag
         public BlockmapNode Node => OriginNode;
         public bool IsVisible => IsVisibleBy(Match.World.ActiveVisionActor);
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
+        public bool IsInOwnTerritory => Owner.Territory.ContainsNode(OriginNode);
         public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
 
         // Stats
@@ -131,6 +132,7 @@ namespace CaptureTheFlag
         public override bool CanSwim => CtfComp.GetStat(StatDefOf.Swimming) > 0;
         public override int MaxHopUpDistance => (int)CtfComp.GetStat(StatDefOf.Jumping);
         public override int MaxHopDownDistance => (int)CtfComp.GetStat(StatDefOf.Dropping);
+        public override float HoppingAptitude => Mathf.Max(1f, 1f + ((CtfComp.GetStat(StatDefOf.Jumping) - 2) * 0.2f));
         public bool CanInteractWithDoors => CtfComp.GetStat(StatDefOf.CanUseDoors) == 1;
 
         public override Vector3Int Dimensions => new Vector3Int(Def.Dimensions.x, (int)CtfComp.GetStat(StatDefOf.Height), Def.Dimensions.z);

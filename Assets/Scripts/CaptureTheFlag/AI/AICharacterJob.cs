@@ -15,7 +15,7 @@ namespace CaptureTheFlag
         public CtfCharacter Character { get; private set; }
         public AIPlayer Player => (AIPlayer)Character.Owner;
         public Player Opponent => Player.Opponent;
-        public CtfMatch Game => Character.Match;
+        public CtfMatch Match => Character.Match;
 
         public abstract AICharacterJobId Id { get; }
         public abstract string DevmodeDisplayText { get; }
@@ -24,6 +24,16 @@ namespace CaptureTheFlag
         {
             Character = c;
         }
+
+        /// <summary>
+        /// Gets called before the character with this job is requested to provide their actions for this turn.
+        /// </summary>
+        public virtual void OnCharacterStartsTurn() { }
+
+        /// <summary>
+        /// Gets called once when the AI Player wants to get the next action from this job BEFORE ShouldStopJob() and GetNextAction() are called.
+        /// </summary>
+        public virtual void OnNextActionRequested() { }
 
         /// <summary>
         /// Returns if a new job should be assigned to the character instead of continuing to pursue this one.
@@ -39,6 +49,8 @@ namespace CaptureTheFlag
 
         #region Helper
 
+        protected List<CtfCharacter> VisibleOpponentCharactersNotInJail => Player.VisibleOpponentCharactersNotInJail;
+
         /// <summary>
         /// Returns the possible adjacent movement (only moving 1 node) directly towards the given node, optionally by using the provided targetPath.
         /// <br/>This method is cheating a little since it will look for the perfect path even through unexplored territory.
@@ -51,15 +63,22 @@ namespace CaptureTheFlag
 
             if (targetPath == null) // No path found
             {
-                if (Game.DevMode) Debug.Log("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
+                if (Match.DevMode) Debug.Log("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
                 return null;
             }
 
-            // Check if the path contains an adjacent move
-            foreach(Action_Movement movement in Character.PossibleMoves.Values.Where(x => x.Path.IsSingleTransitionPath()))
+            // Look for a possible move that corresponds to a single step in the target path.
+            // If the move exists but is blocked, try moves going over multiple nodes (up to 5) along the path.
+            List<Action_Movement> candidateMoves = Character.PossibleMoves.Values.Where(m => m.CanPerformNow()).ToList();
+            for (int i = 1; i < 5; i++)
             {
-                if (Player.Opponent.Characters.Any(x => x.Node == movement.Target)) continue; // Don't go there if an opponent is on that node
-                if (targetPath.Nodes[1] == movement.Target) return movement;
+                if (targetPath.Nodes.Count < (i + 1)) break;
+
+                BlockmapNode singleMoveTarget = targetPath.Nodes[i];
+                foreach (Action_Movement movement in candidateMoves)
+                {
+                    if (singleMoveTarget == movement.Target) return movement;
+                }
             }
 
             return null;
@@ -85,7 +104,7 @@ namespace CaptureTheFlag
             }
 
             // No possible move is part of path
-            if(Game.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
+            if(Match.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
             return null;
         }
 
@@ -95,6 +114,16 @@ namespace CaptureTheFlag
         protected NavigationPath GetPath(BlockmapNode targetNode)
         {
             return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, forbiddenNodes: Player.FlagZone.Nodes);
+        }
+
+        protected bool IsOnOrNear(BlockmapNode node)
+        {
+            return (Character.OriginNode == node || Character.OriginNode.TransitionsByTarget.ContainsKey(node));
+        }
+
+        protected void Log(string msg)
+        {
+            if (Match.DevMode) Player.Log(Character, msg);
         }
 
         #endregion

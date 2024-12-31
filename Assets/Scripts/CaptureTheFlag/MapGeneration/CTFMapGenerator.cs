@@ -22,14 +22,14 @@ namespace CaptureTheFlag
         /// </summary>
         private List<EntityDef> CharacterRoster = new List<EntityDef>()
         {
-            EntityDefOf.Alberto,
-            EntityDefOf.Usain,
-            EntityDefOf.Eluid,
-            EntityDefOf.Veronica,
-            EntityDefOf.Katie,
-            EntityDefOf.Yaroslava,
-            EntityDefOf.Blotto,
-            EntityDefOf.Pierette,
+            EntityDefOf.Human1,
+            EntityDefOf.Human2,
+            EntityDefOf.Human3,
+            EntityDefOf.Human4,
+            EntityDefOf.Human5,
+            EntityDefOf.Human6,
+            EntityDefOf.Dog1,
+            EntityDefOf.Dog2,
         };
 
         private const int REQUIRED_SPAWN_ROAMING_AREA = 50; // Spawned characters need this many nodes to move around near them to be a valid spawn

@@ -1112,7 +1112,7 @@ namespace BlockmapFramework
             return World.IsAbove(Altitude, otherNode.Altitude);
         }
 
-        public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}-{MaxAltitude} ({Type})";
+        public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}{Type.ToString()[0]}";
         public string DebugInfoLong()
         {
             string text = ToString();

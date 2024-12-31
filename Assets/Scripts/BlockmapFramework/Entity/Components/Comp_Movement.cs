@@ -327,8 +327,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.
         /// </summary>
-        public bool IsInRange(BlockmapNode targetNode, float maxCost)
+        public bool IsInRange(BlockmapNode targetNode, float maxCost, out float totalCost)
         {
+            totalCost = 0;
+
             // First check if the target node is even close. If not: skip detailed check
             if (Vector2.Distance(Entity.OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
 
@@ -354,7 +356,7 @@ namespace BlockmapFramework
                 {
                     BlockmapNode toNode = t.To;
                     float transitionCost = t.GetMovementCost(Entity);
-                    float totalCost = nodeCosts[currentNode] + transitionCost;
+                    totalCost = nodeCosts[currentNode] + transitionCost;
 
                     if (totalCost > maxCost) continue; // not in range
                     if (!t.CanPass(Entity)) continue; // transition not passable for this character

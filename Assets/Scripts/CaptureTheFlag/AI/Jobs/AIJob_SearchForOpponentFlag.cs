@@ -9,13 +9,22 @@ namespace CaptureTheFlag
     public class AIJob_SearchForOpponentFlag : AICharacterJob
     {
         private BlockmapNode TargetNode;
+        private BlockmapNode ViaNode;
         private NavigationPath TargetPath;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.SearchOpponentFlag;
-        public override string DevmodeDisplayText => "Searching Flag (going to " + TargetNode + ")";
+        public override string DevmodeDisplayText => "Searching Flag (going to " + TargetNode + ")" + (ViaNode != null ? (" via " + ViaNode) : "");
 
         public AIJob_SearchForOpponentFlag(CtfCharacter c) : base(c)
+        {
+            SetNewTargetNode();
+        }
+
+        /// <summary>
+        /// Sets the target node and target path to random reachable unexplored node in opponet territory
+        /// </summary>
+        private void SetNewTargetNode()
         {
             // Find a target node
             int attempts = 0;
@@ -23,14 +32,30 @@ namespace CaptureTheFlag
             while (TargetNode == null && attempts < maxAttempts)
             {
                 attempts++;
-                List<BlockmapNode> candidates = Game.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
+                List<BlockmapNode> candidates = Match.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
                 BlockmapNode targetNode = candidates[Random.Range(0, candidates.Count)];
                 NavigationPath targetPath = GetPath(targetNode);
-                if(targetPath != null) // valid target that we can reach
+                if (targetPath != null) // valid target that we can reach
                 {
                     TargetNode = targetNode;
                     TargetPath = targetPath;
                 }
+            }
+        }
+
+        public override void OnNextActionRequested()
+        {
+            // Check if we are at the via node
+            if (ViaNode != null && IsOnOrNear(ViaNode))
+            {
+                ViaNode = null;
+                SetNewTargetNode();
+            }
+
+            // If we are in neutral territory and see an opponent, make a detour in the neutral territory
+            if (ViaNode == null && Player.ShouldMakeNeutralDetour(Character))
+            {
+                ViaNode = Match.NeutralZone.Nodes.RandomElement();
             }
         }
 
@@ -45,7 +70,7 @@ namespace CaptureTheFlag
             // If we can tag an opponent this turn, do that
             if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
             {
-                forcedNewJob = new AIJob_TagOpponent(Character, target0);
+                forcedNewJob = new AIJob_ChaseToTagOpponent(Character, target0);
                 return true;
             }
 
@@ -57,14 +82,17 @@ namespace CaptureTheFlag
             }
 
             // If we are on or close to our target node, look for new job
-            if (Character.OriginNode == TargetNode || Character.OriginNode.TransitionsByTarget.ContainsKey(TargetNode)) return true;
+            if (IsOnOrNear(TargetNode)) return true;
 
             return false;
         }
 
+
+
         public override CharacterAction GetNextAction()
         {
-            return GetSingleNodeMovementTo(TargetNode, TargetPath);
+            if (ViaNode != null) return GetSingleNodeMovementTo(ViaNode);
+            else return GetSingleNodeMovementTo(TargetNode);
         }
     }
 }

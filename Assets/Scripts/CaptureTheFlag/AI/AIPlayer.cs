@@ -13,19 +13,21 @@ namespace CaptureTheFlag
         // AI Behaviour
         private const float INVISIBLE_CHARACTER_SPEED = 25;
 
-        private const float MAX_CHASE_DISTANCE = 40; // Transition cost
-        private const float DEFEND_PERIMETER_RADIUS = 40; // Transition cost
+        private const float MAX_CHASE_DISTANCE = 30; // Transition cost
+        private const float DEFEND_PERIMETER_RADIUS = 60; // Transition cost
 
+        private List<CtfCharacter> ShuffledCharacters;
         private int CurrentCharacterIndex; // Resets each turn - each character performs all actions before the next one starts
         private CharacterAction CurrentAction; // Actions are performed one after the other
 
-        private Dictionary<AICharacterRole, int> RoleTable = new Dictionary<AICharacterRole, int>()
+        private Dictionary<AICharacterRole, int> RoleProbabilities = new Dictionary<AICharacterRole, int>()
         {
             { AICharacterRole.Attacker, 6 },
             { AICharacterRole.Defender, 2 },
         };
         private Dictionary<CtfCharacter, AICharacterRole> Roles = new Dictionary<CtfCharacter, AICharacterRole>();
         private Dictionary<CtfCharacter, AICharacterJob> Jobs = new Dictionary<CtfCharacter, AICharacterJob>();
+        private Dictionary<CtfCharacter, bool> HasStartedTurn = new Dictionary<CtfCharacter, bool>();
 
         public List<BlockmapNode> DefendPerimeterNodes;
 
@@ -43,9 +45,10 @@ namespace CaptureTheFlag
             // Assign a weighted-random role to all characters
             for (int i = 0; i < Characters.Count; i++)
             {
-                AICharacterRole randomRole = HelperFunctions.GetWeightedRandomElement(RoleTable);
+                AICharacterRole randomRole = HelperFunctions.GetWeightedRandomElement(RoleProbabilities);
                 Roles.Add(Characters[i], randomRole);
                 Jobs.Add(Characters[i], new AIJob_Idle(Characters[i]));
+                HasStartedTurn.Add(Characters[i], false);
             }
 
             // Calculate some important things once that will be used for the whole game
@@ -60,6 +63,9 @@ namespace CaptureTheFlag
             CurrentAction = null;
             ActionsToFollow.Clear();
             CurrentFollowedAction = null;
+            ShuffledCharacters = Characters.GetShuffledList();
+
+            foreach (CtfCharacter c in Characters) HasStartedTurn[c] = false;
         }
 
         /// <summary>
@@ -68,29 +74,33 @@ namespace CaptureTheFlag
         public void UpdateTurn()
         {
             // Get a new action if the current one is null or done.
+            // Characters are iterated through one by one
             if(CurrentAction == null || CurrentAction.IsDone)
             {
-                CtfCharacter currentCharacter = CurrentCharacterIndex > -1 ? Characters[CurrentCharacterIndex] : null;
+                CtfCharacter currentCharacter = CurrentCharacterIndex > -1 ? ShuffledCharacters[CurrentCharacterIndex] : null;
                 CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
 
                 if(nextAction == null) // Character is done for this turn => go to next character
                 {
                     CurrentCharacterIndex++;
 
-                    if (CurrentCharacterIndex == Characters.Count) // If it was last character turn is done
+                    if (CurrentCharacterIndex == ShuffledCharacters.Count) // If it was last character turn is done
                     {
                         TurnFinished = true;
                     }
                     else
                     {
-                        currentCharacter = Characters[CurrentCharacterIndex];
+                        currentCharacter = ShuffledCharacters[CurrentCharacterIndex];
                         nextAction = GetNextCharacterAction(currentCharacter);
                     }
                 }
 
+                currentCharacter.RefreshLabelText();
+
                 // Start performing next action immediately
                 if (nextAction != null) 
                 {
+                    if (!nextAction.CanPerformNow()) throw new System.Exception($"GetNextCharacterAction returned an action that can't be performed. Character = {currentCharacter.LabelCap}, Job = {Jobs[currentCharacter].DevmodeDisplayText}");
                     CurrentAction = nextAction;
                     nextAction.Perform();
                     currentCharacter.MovementComp.EnableOverrideMovementSpeed(INVISIBLE_CHARACTER_SPEED); // Speed up enemy characters so player doesn't have to wait for long
@@ -156,8 +166,6 @@ namespace CaptureTheFlag
 
         #region Private
 
-
-
         /// <summary>
         /// Returns the action the given character will do next this turn.
         /// <br/>Can return null if no further action should be taken by the character.
@@ -167,6 +175,9 @@ namespace CaptureTheFlag
             if (c.PossibleMoves.Count == 0) return null;
 
             AICharacterJob currentJob = Jobs[c];
+
+            if (!HasStartedTurn[c]) currentJob.OnCharacterStartsTurn();
+            currentJob.OnNextActionRequested();
 
             // Ask the current job if (any or a forced) new job should be assigned to the character
             int attempts = 0;
@@ -182,6 +193,7 @@ namespace CaptureTheFlag
                     Jobs[c] = forcedNewJob;
                     currentJob = forcedNewJob;
                 }
+
                 // Find a new job based on general rules
                 else
                 {
@@ -189,10 +201,21 @@ namespace CaptureTheFlag
                     Jobs[c] = newJob;
                     currentJob = newJob;
                 }
+
+                if (!HasStartedTurn[c]) currentJob.OnCharacterStartsTurn();
+                currentJob.OnNextActionRequested();
             }
-            if (currentJob.ShouldStopJob(out _) && attempts < maxAttempts) throw new System.Exception($"After {attempts} we still didn't get a job that shouldn't immediately be stopped. Current job = {currentJob.DevmodeDisplayText}");
+
+            // Log if we couldn't get a valid job after many attempts
+            // TODO: GO TO JAIL
+            if (currentJob.ShouldStopJob(out _) && attempts >= maxAttempts)
+            {
+                Log(c, $"After {attempts} attempts we still didn't get a job that shouldn't immediately be stopped. Therefore we go to jail");
+                return c.PossibleSpecialActions.First(a => a is Action_GoToJail);
+            }
 
             // Get action based on job
+            HasStartedTurn[c] = true;
             return currentJob.GetNextAction();
         }
 
@@ -202,7 +225,7 @@ namespace CaptureTheFlag
         private AICharacterJob GetNewCharacterJob(CtfCharacter c)
         {
             // If we can directly tag an opponent, do that no matter the role
-            if (CanTagCharacterDirectly(c, out CtfCharacter target0)) return new AIJob_TagOpponent(c, target0);
+            if (CanTagCharacterDirectly(c, out CtfCharacter target0)) return new AIJob_ChaseToTagOpponent(c, target0);
 
             switch (Roles[c])
             {
@@ -220,7 +243,7 @@ namespace CaptureTheFlag
                 case AICharacterRole.Defender:
 
                     // If there is a visible opponent nearby
-                    if (ShouldChaseCharacterToTag(c, out CtfCharacter target1)) return new AIJob_TagOpponent(c, target1);
+                    if (ShouldChaseCharacterToTag(c, out CtfCharacter target1)) return new AIJob_ChaseToTagOpponent(c, target1);
 
                     // Else just patrol own flag
                     return new AIJob_PatrolDefendFlag(c);
@@ -241,8 +264,10 @@ namespace CaptureTheFlag
                 if (!opponentCharacter.IsInOpponentTerritory) continue;
                 if (!opponentCharacter.IsVisibleByOpponent) continue;
 
-                if (source.PossibleMoves.ContainsKey(opponentCharacter.Node))
+                if (source.PossibleMoves.TryGetValue(opponentCharacter.Node, out Action_Movement move))
                 {
+                    if (!move.CanPerformNow()) continue;
+
                     target = opponentCharacter;
                     return true;
                 }
@@ -258,11 +283,28 @@ namespace CaptureTheFlag
         {
             if (!c.IsInOpponentTerritory) return false;
 
-            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
+            foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
             {
-                if (!opponentCharacter.IsVisibleByOpponent) continue;
-
                 if (c.IsVisibleBy(opponentCharacter)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns if a character should make a via-stop somewhere in the neutral territory due to seeing an opponent narby defending before going to the target.
+        /// </summary>
+        /// <returns></returns>
+        public bool ShouldMakeNeutralDetour(CtfCharacter c)
+        {
+            if (c.IsInOpponentTerritory) return false; // We are already in enemy territory
+
+            foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
+            {
+                if (opponentCharacter.IsInOwnTerritory && Pathfinder.GetPathCost(opponentCharacter, opponentCharacter.Node, c.Node) < 12)
+                {
+                    Log(c, $"Should take a detour because {opponentCharacter.LabelCap} is nearby (distance = {Pathfinder.GetPathCost(opponentCharacter, opponentCharacter.Node, c.Node)})");
+                    return true;
+                }
             }
             return false;
         }
@@ -276,14 +318,22 @@ namespace CaptureTheFlag
 
             foreach (CtfCharacter opponentCharacter in Opponent.Characters)
             {
-                if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.MovementComp.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE))
+                if (opponentCharacter.IsInOpponentTerritory && opponentCharacter.IsVisibleByOpponent && source.MovementComp.IsInRange(opponentCharacter.Node, MAX_CHASE_DISTANCE, out float cost))
                 {
+                    Log(source, $"Chasing {opponentCharacter.LabelCap} because cost towards them is only {cost}.");
                     target = opponentCharacter;
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public List<CtfCharacter> VisibleOpponentCharactersNotInJail => Opponent.Characters.Where(c => c.IsVisibleByOpponent && c.JailTime <= 1).ToList();
+
+        public void Log(CtfCharacter c, string msg)
+        {
+            if (Match.DevMode) Debug.Log($"[AI - {c.LabelCap}] {msg}");
         }
 
         /// <summary>

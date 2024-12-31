@@ -175,7 +175,7 @@ namespace CaptureTheFlag
             Game.LoadingScreenOverlay.SetActive(false);
 
             // Camera
-            World.CameraJumpToFocusEntity(LocalPlayer.Characters[0]);
+            World.CameraJumpToFocusEntity(LocalPlayer.Flag);
 
             // Notify match readiness
             foreach (Player p in Players) p.OnMatchReady(this);

@@ -51,7 +51,11 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(Entity entity)
         {
-            return BaseCost + (HopUpDistance * CostPerHopUpAltitude) + (HopDownDistance * CostPerHopDownAltitude);
+            float value = BaseCost;
+            float costFromDistance = (HopUpDistance * CostPerHopUpAltitude) + (HopDownDistance * CostPerHopDownAltitude);
+            if (entity != null) costFromDistance *= (1f / entity.HoppingAptitude);
+            value += costFromDistance;
+            return value;
         }
 
         public override List<Vector3> GetPreviewPath()

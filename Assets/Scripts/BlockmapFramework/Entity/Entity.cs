@@ -629,6 +629,7 @@ namespace BlockmapFramework
         // Aptitudes (affect the cost of using of transitions in the navmesh)
         public virtual float ClimbingAptitude => MovementComp.ClimbingAptitude;
         public virtual float GetSurfaceAptitude(SurfaceDef def) => MovementComp.GetSurfaceAptitude(def);
+        public virtual float HoppingAptitude => 1f;
 
         public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
         public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
