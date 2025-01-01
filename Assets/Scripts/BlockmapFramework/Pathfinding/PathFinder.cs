@@ -89,7 +89,7 @@ namespace BlockmapFramework
             }
 
             // Out of tiles -> no path
-            Debug.Log($"[Pathfinder] Couldn't find path {from} -> {to} for {entity?.Label} after checking all transitions.");
+            Debug.Log($"[Pathfinder] Couldn't find path {from} -> {to} for {entity?.LabelCap} after checking all transitions.");
             return null;
         }
 

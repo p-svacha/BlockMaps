@@ -4,53 +4,83 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.AI
 {
     public class AIJob_Flee : AICharacterJob
     {
         private const int FLEE_DISTANCE = 15; // If cost from opponent towards this character is less than this, flee
+        private bool StopFleeing;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.Flee;
-        public override string DevmodeDisplayText => $"Fleeing from {FleeingFrom.Count} to {FleeingTo.ToString()}";
+        public override string DevmodeDisplayText => $"Fleeing from {FleeingFrom.Count} to {FleeingTo}";
 
         private List<CtfCharacter> FleeingFrom;
         private BlockmapNode FleeingTo;
 
         public AIJob_Flee(CtfCharacter c) : base(c)
         {
-            RefreshJob();
-        }
-
-        public override void OnCharacterStartsTurn()
-        {
-            RefreshJob();
-        }
-
-        private void RefreshJob()
-        {
             FleeingFrom = GetOpponentsToFleeFrom();
             FleeingTo = GetNodeToFleeTo();
         }
 
-        public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
+        public override void OnCharacterStartsTurn()
         {
-            forcedNewJob = null;
+            FleeingFrom = GetOpponentsToFleeFrom();
+            FleeingTo = GetNodeToFleeTo();
 
-            // Check if we should still be fleeing
-            if (FleeingFrom.Count == 0) return true;
-
-            return false;
+            // We decide only at the start if we should stop fleeing. Never stop fleeing during a turn
+            if (ShouldStopFleeing()) StopFleeing = true;
         }
+
+        public override void OnNextActionRequested()
+        {
+            // Update where we flee to
+            FleeingFrom = GetOpponentsToFleeFrom();
+            if (FleeingFrom.Count > 0) FleeingTo = GetNodeToFleeTo();
+        }
+
+        public override AICharacterJob GetJobForNextAction()
+        {
+            // If we can tag an opponent directly this turn, do that
+            if (CanTagCharacterDirectly(out CtfCharacter target0))
+            {
+                Log($"Switching from {Id} to ChaseToTagOpponent because we can reach {target0.LabelCap} directly this turn.");
+                return new AIJob_ChaseToTagOpponent(Character, target0);
+            }
+
+            // If we should stop fleeing, find a new job based on game state
+            if (StopFleeing)
+            {
+                if (IsEnemyFlagExplored)
+                {
+                    Log($"Switching from {Id} to CaptureOpponentFlag because we no longer need to flee and we know where enemy flag is.");
+                    return new AIJob_CaptureOpponentFlag(Character);
+                }
+
+                // Else chose a random unexplored node in enemy territory to go to
+                else
+                {
+                    Log($"Switching from {Id} to SearchForOpponentFlag because we no longer need to flee and we don't know where enemy flag is.");
+                    return new AIJob_SearchOpponentFlag(Character);
+                }
+            }
+
+            return this;
+        }
+
+
 
         public override CharacterAction GetNextAction()
         {
-            // todo: check if we still need to flee from same opponents as identified at start of turn
-            // If not, refresh where we should flee to
-
             return GetSingleNodeMovementTo(FleeingTo);
         }
 
+        // Helpers
+        private bool ShouldStopFleeing()
+        {
+            return FleeingFrom.Count == 0;
+        }
         private List<CtfCharacter> GetOpponentsToFleeFrom()
         {
             List<CtfCharacter> relevantOpponents = new List<CtfCharacter>();
@@ -64,7 +94,6 @@ namespace CaptureTheFlag
             }
             return relevantOpponents;
         }
-
         private BlockmapNode GetNodeToFleeTo()
         {
             BlockmapNode targetNode = null;
@@ -73,12 +102,12 @@ namespace CaptureTheFlag
             // Get node we can move to this turn that is the furthest away from all opponent characters we are fleeing from
             foreach (BlockmapNode movementTarget in Character.PossibleMoves.Keys)
             {
+                if (VisibleOpponentCharactersNotInJail.Any(c => c.Node == movementTarget)) continue; // We will never want to flee onto an opponent
+
                 // Get the fastest way ANY relevant opponent could move there
                 float opponentCostToGetThere = float.MaxValue;
                 foreach (CtfCharacter opp in FleeingFrom)
                 {
-                    if (opp.Node == movementTarget) continue; // We will never want to flee onto an opponent
-
                     float costForOpponent = Pathfinder.GetPathCost(opp, opp.Node, movementTarget);
                     if (costForOpponent < opponentCostToGetThere) opponentCostToGetThere = costForOpponent;
                 }

@@ -3,40 +3,56 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.AI
 {
     public class AIJob_CaptureOpponentFlag : AICharacterJob
     {
+        private NavigationPath TargetPath;
+
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.CaptureOpponentFlag;
         public override string DevmodeDisplayText => "Capturing Flag";
 
-        public AIJob_CaptureOpponentFlag(CtfCharacter c) : base(c) { }
-
-        public override bool ShouldStopJob(out AICharacterJob forcedNewJob)
+        public AIJob_CaptureOpponentFlag(CtfCharacter c) : base(c)
         {
-            forcedNewJob = null;
+            RecalculateTargetPath();
+        }
 
-            // If we can tag an opponent this turn, do that
-            if (Player.CanTagCharacterDirectly(Character, out CtfCharacter target0))
+        public override void OnNextActionRequested()
+        {
+            // Recalculate target path if no longer valid
+            bool isTargetPathStillValid = (TargetPath != null && TargetPath.CanPass(Character));
+            if (!isTargetPathStillValid) RecalculateTargetPath();
+        }
+
+        private void RecalculateTargetPath()
+        {
+            TargetPath = GetPath(Opponent.Flag.OriginNode);
+        }
+
+        public override AICharacterJob GetJobForNextAction()
+        {
+            // If we can tag an opponent directly this turn, do that
+            if (CanTagCharacterDirectly(out CtfCharacter target0))
             {
-                forcedNewJob = new AIJob_ChaseToTagOpponent(Character, target0);
-                return true;
+                Log($"Switching from {Id} to ChaseToTagOpponent because we can reach {target0.LabelCap} directly this turn.");
+                return new AIJob_ChaseToTagOpponent(Character, target0);
             }
 
-            // If we should flee, do that
-            if (Player.ShouldFlee(Character))
+            // Check if we should flee
+            if (ShouldFlee())
             {
-                forcedNewJob = new AIJob_Flee(Character);
-                return true;
+                Log($"Switching from {Id} to Flee because we need to flee.");
+                return new AIJob_Flee(Character);
             }
 
-            return false;
+            // Keep capturing
+            return this;
         }
 
         public override CharacterAction GetNextAction()
         {
-            return GetMovementTo(Character.Opponent.Flag.OriginNode);
+            return GetSingleNodeMovementTo(Opponent.Flag.OriginNode, TargetPath);
         }
     }
 }

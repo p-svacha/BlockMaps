@@ -189,6 +189,8 @@ namespace BlockmapFramework
             CurrentVision = new VisionData();
             LastKnownPosition = new Dictionary<Actor, Vector3?>();
             foreach (Actor p in World.GetAllActors()) LastKnownPosition.Add(p, null);
+            LastKnownNode = new Dictionary<Actor, BlockmapNode>();
+            foreach (Actor p in World.GetAllActors()) LastKnownNode.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
             foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
 
@@ -495,11 +497,15 @@ namespace BlockmapFramework
         public HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
-        /// Stores the exact world position at which each player has seen this entity the last time.
+        /// Stores the exact world position at which each actor has seen this entity the last time.
         /// </summary>
         public Dictionary<Actor, Vector3?> LastKnownPosition { get; private set; }
         /// <summary>
-        /// Stores the direction that each player has seen this entity facing at the last time.
+        /// Stores the origin node at which each actor has seen this entity the last time.
+        /// </summary>
+        public Dictionary<Actor, BlockmapNode> LastKnownNode { get; private set; }
+        /// <summary>
+        /// Stores the exact world rotation at which each actor has seen this entity the last time.
         /// </summary>
         public Dictionary<Actor, Quaternion?> LastKnownRotation { get; private set; }
 
@@ -637,6 +643,11 @@ namespace BlockmapFramework
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
         public bool CanSee => VisionRange > 0;
+
+        /// <summary>
+        /// Returns if the target node is reachable with a path that costs less than the given limit.
+        /// </summary>
+        public bool IsInRange(BlockmapNode targetNode, float maxCost, out float totalCost) => MovementComp.IsInRange(targetNode, maxCost, out totalCost);
 
         /// <summary>
         /// Returns the movement speed this entity has right now taking into account the surface its on.
@@ -1077,7 +1088,11 @@ namespace BlockmapFramework
             foreach(Actor actor in World.GetAllActors())
             {
                 if (actor == Actor) continue;
-                if (!IsVisibleBy(actor)) LastKnownPosition[actor] = null;
+                if (!IsVisibleBy(actor))
+                {
+                    LastKnownPosition[actor] = null;
+                    LastKnownNode[actor] = null;
+                }
             }
 
             // Update visibility
@@ -1149,15 +1164,17 @@ namespace BlockmapFramework
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 
-        public void UpdateLastKnownPositionFor(Actor p)
+        public void UpdateLastKnownPositionFor(Actor actor)
         {
-            LastKnownPosition[p] = WorldPosition;
-            LastKnownRotation[p] = WorldRotation;
+            LastKnownPosition[actor] = WorldPosition;
+            LastKnownNode[actor] = OriginNode;
+            LastKnownRotation[actor] = WorldRotation;
         }
-        public void ResetLastKnownPositionFor(Actor p)
+        public void ResetLastKnownPositionFor(Actor actor)
         {
-            LastKnownPosition[p] = null;
-            LastKnownRotation[p] = null;
+            LastKnownPosition[actor] = null;
+            LastKnownNode[actor] = null;
+            LastKnownRotation[actor] = null;
         }
 
         #endregion

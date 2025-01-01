@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using CaptureTheFlag.AI;
 using CaptureTheFlag.Network;
 using CaptureTheFlag.UI;
 using System.Collections;

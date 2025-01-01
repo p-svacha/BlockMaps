@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.AI
 {
     public enum AICharacterJobId
     {
-        Idle,
+        Error,
+        Initial,
         SearchOpponentFlag,
         CaptureOpponentFlag,
-        TagOpponent,
+        ChaseAndTagOpponent,
         PatrolDefendFlag,
         Flee,
+        LingerInNeutral,
+        SearchOpponentInOwnTerritory
     }
 }

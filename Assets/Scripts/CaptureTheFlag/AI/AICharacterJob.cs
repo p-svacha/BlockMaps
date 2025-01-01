@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace CaptureTheFlag.AI
 {
     /// <summary>
     /// A short-term, specific task an AI character will pursue or try to achieve.
@@ -36,10 +36,10 @@ namespace CaptureTheFlag
         public virtual void OnNextActionRequested() { }
 
         /// <summary>
-        /// Returns if a new job should be assigned to the character instead of continuing to pursue this one.
-        /// <br/>If yes, a specific job can be forced. If nothing is forced, a new job will be looked for generally.
+        /// Returns if/what new job should be assigned to the character instead of continuing to pursue this one.
+        /// <br/>Returns self if this should be continued.
         /// </summary>
-        public abstract bool ShouldStopJob(out AICharacterJob forcedNewJob);
+        public abstract AICharacterJob GetJobForNextAction();
 
         /// <summary>
         /// Returns the next action the character with this job will do next this turn.
@@ -58,7 +58,7 @@ namespace CaptureTheFlag
         protected Action_Movement GetSingleNodeMovementTo(BlockmapNode targetNode, NavigationPath targetPath = null)
         {
             // Get path to target
-            if (targetPath == null) targetPath = GetPath(targetNode);
+            if (targetPath == null || !targetPath.Nodes.Contains(targetNode)) targetPath = GetPath(targetNode);
             else targetPath.CutEverythingBefore(Character.OriginNode); // Adapt the given path so the start point is where the character is currently at
 
             if (targetPath == null) // No path found
@@ -69,7 +69,7 @@ namespace CaptureTheFlag
 
             // Look for a possible move that corresponds to a single step in the target path.
             // If the move exists but is blocked, try moves going over multiple nodes (up to 5) along the path.
-            List<Action_Movement> candidateMoves = Character.PossibleMoves.Values.Where(m => m.CanPerformNow()).ToList();
+            List<Action_Movement> candidateMoves = Character.PossibleMoves.Values.Where(m => m.CanPerformNow() && !Opponent.Characters.Any(c => c.Node == m.Target)).ToList();
             for (int i = 1; i < 5; i++)
             {
                 if (targetPath.Nodes.Count < (i + 1)) break;
@@ -85,30 +85,6 @@ namespace CaptureTheFlag
         }
 
         /// <summary>
-        /// Returns the possible movement that is as far as possible directly towards the given node.
-        /// <br/>Moves onto the node if within range.
-        /// <br/>This method is cheating a little since it will look for the perfect path even through unexplored territory.
-        /// </summary>
-        protected Action_Movement GetMovementTo(BlockmapNode targetNode)
-        {
-            // Check if we can reach the node
-            if (Character.PossibleMoves.TryGetValue(targetNode, out Action_Movement directMove)) return directMove;
-
-            // Move as close as possible by finding the first node we can reach while backtracking from flag
-            NavigationPath path = GetPath(targetNode);
-            if (path == null) return null; // no path to target
-            for (int i = 0; i < path.Nodes.Count; i++)
-            {
-                BlockmapNode backtrackNode = path.Nodes[path.Nodes.Count - i - 1];
-                if (Character.PossibleMoves.TryGetValue(backtrackNode, out Action_Movement closestMove) && closestMove.CanPerformNow()) return closestMove;
-            }
-
-            // No possible move is part of path
-            if(Match.DevMode) Debug.LogWarning("Couldn't find a direct path towards target node. (" + Character.OriginNode + " --> " + targetNode + ")");
-            return null;
-        }
-
-        /// <summary>
         /// Returns the fastest possible path to the given node without going through the own flag zone.
         /// </summary>
         protected NavigationPath GetPath(BlockmapNode targetNode)
@@ -119,6 +95,105 @@ namespace CaptureTheFlag
         protected bool IsOnOrNear(BlockmapNode node)
         {
             return (Character.OriginNode == node || Character.OriginNode.TransitionsByTarget.ContainsKey(node));
+        }
+
+        protected bool IsAnyOpponentNearby(float maxCost)
+        {
+            foreach(CtfCharacter opp in VisibleOpponentCharactersNotInJail)
+            {
+                if (Character.IsInRange(opp.Node, maxCost, out _)) return true;
+            }
+            return false;
+        }
+
+        protected bool IsEnemyFlagExplored => Opponent.Flag.IsExploredBy(Player.Actor);
+
+        /// <summary>
+        /// Returns if the given character can tag an opponent with their possible moves.
+        /// </summary>
+        protected bool CanTagCharacterDirectly(out CtfCharacter target)
+        {
+            target = null;
+
+            foreach (CtfCharacter opponentCharacter in Opponent.Characters)
+            {
+                if (!opponentCharacter.IsInOpponentTerritory) continue;
+                if (!opponentCharacter.IsVisibleByOpponent) continue;
+
+                if (Character.PossibleMoves.TryGetValue(opponentCharacter.Node, out Action_Movement move))
+                {
+                    if (!move.CanPerformNow()) continue;
+
+                    target = opponentCharacter;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// If there is a visible opponent character or a position that is marked to be checked for search within the given search, returns true and the corresponding AIJob_ChaseToTagOpponent or AIJob_SearchOpponentInOwnTerritory job.
+        /// <br/>Else returns false.
+        /// </summary>
+        protected bool ShouldChaseOrSearchOpponent(float maxDistanceCost, out CtfCharacter target, out AICharacterJobId jobId)
+        {
+            target = null;
+            jobId = AICharacterJobId.Error;
+
+            float lowestCost = float.MaxValue;
+
+            // Look for visibile opponents nearby
+            foreach (CtfCharacter opp in VisibleOpponentCharactersNotInJail)
+            {
+                if (!opp.IsInOpponentTerritory) continue;
+                if (Character.IsInRange(opp.Node, maxDistanceCost, out float cost))
+                {
+                    Log($"Detected possibility to switch from {Id} to ChaseToTagOpponent because {opp.LabelCap} is nearby (distance = {cost}).");
+
+                    if(cost < lowestCost)
+                    {
+                        lowestCost = cost;
+                        target = opp;
+                        jobId = AICharacterJobId.ChaseAndTagOpponent;
+                    }
+                }
+            }
+
+            // Look for positions nearby that are flagged to check
+            foreach (CtfCharacter opp in Opponent.Characters)
+            {
+                BlockmapNode positionToSearch = Player.OpponentPositionsToCheckForDefense[opp];
+                if (positionToSearch == null) continue;
+
+                if (Character.IsInRange(positionToSearch, maxDistanceCost, out float cost))
+                {
+                    Log($"Detected possibility to switch from {Id} to SearchOpponentInOwnTerritory because {opp.LabelCap} was seen nearby (distance = {cost}).");
+
+                    if (cost < lowestCost)
+                    {
+                        target = opp;
+                        jobId = AICharacterJobId.SearchOpponentInOwnTerritory;
+                    }
+                }
+            }
+
+            // Return job with lowest cost to target
+            return target != null;
+        }
+
+        /// <summary>
+        /// Returns if a character should flee from an opponent.
+        /// </summary>
+        public bool ShouldFlee()
+        {
+            if (!Character.IsInOpponentTerritory) return false;
+
+            foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
+            {
+                if (Character.IsVisibleBy(opponentCharacter)) return true;
+            }
+            return false;
         }
 
         protected void Log(string msg)

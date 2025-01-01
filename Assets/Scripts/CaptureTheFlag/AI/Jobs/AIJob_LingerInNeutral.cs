@@ -7,33 +7,39 @@ using UnityEngine;
 namespace CaptureTheFlag.AI
 {
     /// <summary>
-    /// Job to patrol randomly around own flag until we see an opponent nearby to go chase it.
+    /// A job where characters move around in the neutral area until it's either safe to cross into opponent territory, or see an opponent in the own territory.
     /// </summary>
-    public class AIJob_PatrolDefendFlag : AICharacterJob
+    public class AIJob_LingerInNeutral : AICharacterJob
     {
-        private float MAX_CHASE_DISTANCE = 25;
+        private float MAX_DEFEND_CHASE_DISTANCE = 25;
 
         private BlockmapNode TargetNode;
         private NavigationPath TargetPath;
 
-        // AICharacterJob Base
-        public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
-        public override string DevmodeDisplayText => "Patrolling Flag --> " + TargetNode;
+        private AICharacterJob NextJob;
 
-        public AIJob_PatrolDefendFlag(CtfCharacter c) : base(c)
+        // AICharacterJob Base
+        public override AICharacterJobId Id => AICharacterJobId.LingerInNeutral;
+        public override string DevmodeDisplayText => $"LingerInNeutral";
+
+        public AIJob_LingerInNeutral(CtfCharacter c) : base(c)
         {
             SetNewTargetNode();
         }
 
+        /// <summary>
+        /// Sets the target node as a random reachable node in the neutral zone
+        /// </summary>
         private void SetNewTargetNode()
         {
-            // Find a target node near own flag
+            // Find a target node
             int attempts = 0;
             int maxAttempts = 10;
             while (TargetNode == null && attempts < maxAttempts)
             {
                 attempts++;
-                BlockmapNode targetNode = Player.DefendPerimeterNodes[Random.Range(0, Player.DefendPerimeterNodes.Count)];
+                List<BlockmapNode> candidates = Match.NeutralZone.Nodes.ToList();
+                BlockmapNode targetNode = candidates[Random.Range(0, candidates.Count)];
                 NavigationPath targetPath = GetPath(targetNode);
                 if (targetPath != null) // valid target that we can reach
                 {
@@ -63,7 +69,7 @@ namespace CaptureTheFlag.AI
             }
 
             // If there is an opponent or position to check nearby in our own territory, go to that
-            if (ShouldChaseOrSearchOpponent(MAX_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId))
+            if (ShouldChaseOrSearchOpponent(MAX_DEFEND_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId))
             {
                 if (jobId == AICharacterJobId.CaptureOpponentFlag)
                 {
@@ -78,7 +84,26 @@ namespace CaptureTheFlag.AI
                 else throw new System.Exception($"id {jobId} not handled.");
             }
 
-            // If no of the above criteria apply, continue this job
+            // If there is no opponent anywhere close, switch to attack mode
+            if (!IsAnyOpponentNearby(maxCost: 25))
+            {
+                // If we know where enemy flag is => move directly
+                if (IsEnemyFlagExplored)
+                {
+                    Log($"Switching from {Id} to CaptureOpponentFlag because no opponent is nearby and we know where enemy flag is.");
+                    return new AIJob_CaptureOpponentFlag(Character);
+                }
+
+                // Else chose a random unexplored node in enemy territory to go to
+                else
+                {
+                    Log($"Switching from {Id} to SearchForOpponentFlag because no opponent is nearby and we don't know where enemy flag is.");
+                    return new AIJob_SearchOpponentFlag(Character);
+                }
+
+            }
+
+            // If none of the above criteria apply, keep lingering in neutral
             return this;
         }
 
