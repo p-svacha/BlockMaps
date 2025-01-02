@@ -15,6 +15,7 @@ namespace CaptureTheFlag.AI
         private BlockmapNode ViaNode;
         private BlockmapNode TargetNode => ViaNode != null ? ViaNode : Opponent.Flag.OriginNode;
         private NavigationPath TargetPath;
+        private bool WeAreStuck;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.CaptureOpponentFlag;
@@ -51,7 +52,7 @@ namespace CaptureTheFlag.AI
             {
                 // Set any node as the via node
                 int attempts = 0;
-                int maxAttempts = 10;
+                int maxAttempts = 15;
                 while (ViaNode == null && attempts < maxAttempts)
                 {
                     attempts++;
@@ -69,6 +70,12 @@ namespace CaptureTheFlag.AI
             else
             {
                 TargetPath = GetPath(TargetNode);
+            }
+
+            if(TargetPath == null)
+            {
+                Log($"Couldn't find valid path to target. We are stuck!", isWarning: true);
+                WeAreStuck = true;
             }
         }
 
@@ -120,6 +127,13 @@ namespace CaptureTheFlag.AI
             {
                 Log("We can move directly onto flag, so we do that no matter what.");
                 return moveToFlag;
+            }
+
+            // If we are stuck, go to jail
+            if (WeAreStuck)
+            {
+                Log($"Going to jail because we are stuck on {Character.OriginNode}.");
+                return Character.PossibleSpecialActions.First(a => a is Action_GoToJail);
             }
 
             // Small chance to stop moving to rest

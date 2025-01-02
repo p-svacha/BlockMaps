@@ -26,8 +26,8 @@ namespace CaptureTheFlag.UI
         public UI_CharacterInfo CharacterInfo;
         public GameObject SpecialActionsContainer;
 
-        public GameObject TurnIndicator;
-        public TextMeshProUGUI TurnIndicatorText;
+        public GameObject CenterNotificationContainer;
+        public TextMeshProUGUI CenterNotificationText;
 
         public GameObject CharacterLabelsContainer;
         public UI_GameOverPanel GameOverPanel;
@@ -63,13 +63,14 @@ namespace CaptureTheFlag.UI
 
             HelperFunctions.DestroyAllChildredImmediately(SpecialActionsContainer);
             CharacterInfo.gameObject.SetActive(false);
-            TurnIndicator.SetActive(false);
+            CenterNotificationContainer.SetActive(false);
         }
 
         private void Update()
         {
             if (Match == null) return;
 
+            CharacterInfo.UpdateCharacterInfo();
             UpdateHoverInfoText();
         }
 
@@ -136,19 +137,19 @@ namespace CaptureTheFlag.UI
         {
             if (CharacterSelection.TryGetValue(c, out UI_CharacterSelectionPanel panel)) panel.SetSelected(false);
             CharacterInfo.gameObject.SetActive(false);
-            CharacterInfo.OnCharacterDeselected();
             SpecialActionsContainer.SetActive(false);
             c.UI_Label.SetSelected(false);
         }
 
-        public void ShowRedNotificationText(string text, float hideAfter = 0f)
+        public void ShowCenterNotification(string text, Color color)
         {
-            TurnIndicator.SetActive(true);
-            TurnIndicatorText.text = text;
+            CenterNotificationContainer.SetActive(true);
+            CenterNotificationText.text = text;
+            CenterNotificationText.color = color;
         }
-        public void HideRedNotificationText()
+        public void HideCenterNotification()
         {
-            TurnIndicator.SetActive(false);
+            CenterNotificationContainer.SetActive(false);
         }
 
         public void ShowEndGameScreen(string text)

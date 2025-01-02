@@ -569,7 +569,10 @@ namespace BlockmapFramework
                     MeshObject.transform.position = WorldPosition;
                     MeshObject.transform.rotation = WorldRotation;
 
-                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
+                    if (HasComponent<Comp_Movement>())
+                    {
+                        foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
+                    }
 
                     // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
                     if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;
@@ -584,7 +587,11 @@ namespace BlockmapFramework
                     MeshObject.transform.position = LastKnownPosition[player].Value;
                     MeshObject.transform.rotation = LastKnownRotation[player].Value;
 
-                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.5f);
+                    // Render entity transparent if it can move (because it gets rendered at last known position)
+                    if (HasComponent<Comp_Movement>())
+                    {
+                        foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
+                    }
 
                     // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
                     if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;

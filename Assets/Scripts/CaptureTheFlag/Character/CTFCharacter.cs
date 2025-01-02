@@ -157,6 +157,9 @@ namespace CaptureTheFlag
         /// </summary>
         private Dictionary<BlockmapNode, Action_Movement> GetPossibleMoves()
         {
+            bool isOurTurn = (Match.State == MatchState.PlayerTurn || (Owner is AIPlayer && Match.State == MatchState.NpcTurn));
+            if (!isOurTurn) return new Dictionary<BlockmapNode, Action_Movement>();
+
             Dictionary<BlockmapNode, Action_Movement> movements = new Dictionary<BlockmapNode, Action_Movement>();
 
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
@@ -220,6 +223,9 @@ namespace CaptureTheFlag
         /// </summary>
         private List<SpecialCharacterAction> GetSpecialActions()
         {
+            bool isOurTurn = (Match.State == MatchState.PlayerTurn || (Owner is AIPlayer && Match.State == MatchState.NpcTurn));
+            if (!isOurTurn) return new List<SpecialCharacterAction>();
+
             List<SpecialCharacterAction> actions = new List<SpecialCharacterAction>();
 
             // Go to jail
@@ -256,9 +262,8 @@ namespace CaptureTheFlag
         /// <summary>
         /// Returns if this character can stand on / stop on the given node. This is independent from IsPassable, a node can be passable but not able to stand on.
         /// </summary>
-        private bool CanStandOn(BlockmapNode targetNode)
+        public bool CanStandOn(BlockmapNode targetNode)
         {
-            if (targetNode.Entities.Any(x => x == Owner.Flag)) return false; // can't stand on own flag
             if (Owner.FlagZone.ContainsNode(targetNode)) return false; // Can't stand in own flag zone
 
             return true;

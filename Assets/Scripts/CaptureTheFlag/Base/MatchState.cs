@@ -9,6 +9,7 @@ namespace CaptureTheFlag
         GeneratingWorld,
         InitializingWorld,
         MatchReadyToStart, // only used in multiplayer
+        CountdownBeforePlayerTurn, // only used in multiplayer
         PlayerTurn,
         WaitingForOtherPlayerTurn, // only used in multiplayer
         NpcTurn,

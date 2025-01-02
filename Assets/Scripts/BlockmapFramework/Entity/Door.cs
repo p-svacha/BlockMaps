@@ -128,8 +128,7 @@ namespace BlockmapFramework
                 isRotating = false; // Rotation is complete
                 WorldRotation = targetRotation;
                 UpdateVisibility();
-                World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.MeshCenterWorldPosition);
-                ToggleCallback?.Invoke();
+                World.UpdateVisionOfNearbyEntitiesDelayed(OriginNode.MeshCenterWorldPosition, callback: ToggleCallback);
             }
         }
 

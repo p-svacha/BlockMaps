@@ -196,6 +196,8 @@ namespace CaptureTheFlag.AI
             foreach (CtfCharacter opp in VisibleOpponentCharactersNotInJail)
             {
                 if (!opp.IsInOpponentTerritory) continue;
+                if (!Character.CanStandOn(opp.Node)) continue; // don't chase if we can't go where opponent is (i.e. in own flag zone)
+
                 if (Character.IsInRange(opp.Node, maxDistanceCost, out float cost))
                 {
                     Log($"Detected possibility to switch from {Id} to ChaseToTagOpponent because {opp.LabelCap} is nearby (distance = {cost}).");

@@ -1768,8 +1768,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 64.259995, y: 0}
+  m_SizeDelta: {x: 59.26, y: 0}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &481135219
 MonoBehaviour:
@@ -6665,8 +6665,8 @@ MonoBehaviour:
   CharacterSelectionContainer: {fileID: 1085779443}
   CharacterInfo: {fileID: 953654614}
   SpecialActionsContainer: {fileID: 544977126}
-  TurnIndicator: {fileID: 1555068087}
-  TurnIndicatorText: {fileID: 1717861100}
+  CenterNotificationContainer: {fileID: 1555068087}
+  CenterNotificationText: {fileID: 1717861100}
   CharacterLabelsContainer: {fileID: 1959045312}
   GameOverPanel: {fileID: 154307799}
 --- !u!1 &1518942853
@@ -6810,7 +6810,7 @@ GameObject:
   - component: {fileID: 1555068090}
   - component: {fileID: 1555068089}
   m_Layer: 5
-  m_Name: RedNotificationText
+  m_Name: CenterNotification
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6890,7 +6890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.39215687}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8412,7 +8412,7 @@ GameObject:
   - component: {fileID: 1717861101}
   - component: {fileID: 1717861100}
   m_Layer: 5
-  m_Name: TurnIndicatorText
+  m_Name: CenterNotificationText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

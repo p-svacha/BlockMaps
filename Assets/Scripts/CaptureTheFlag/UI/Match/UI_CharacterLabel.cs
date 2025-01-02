@@ -72,7 +72,7 @@ namespace CaptureTheFlag
 
                 // Transparent when not currently visible
                 if (Character.IsVisible && NameText.color.a != 1f) NameText.color = new Color(NameText.color.r, NameText.color.g, NameText.color.b, 1f);
-                else if (!Character.IsVisible && NameText.color.a != 0.5f) NameText.color = new Color(NameText.color.r, NameText.color.g, NameText.color.b, 0.5f);
+                else if (!Character.IsVisible && NameText.color.a != 0.5f) NameText.color = new Color(NameText.color.r, NameText.color.g, NameText.color.b, 0.3f);
             }
 
             else

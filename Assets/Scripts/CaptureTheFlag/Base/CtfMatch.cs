@@ -29,6 +29,8 @@ namespace CaptureTheFlag
             Color.red
         };
 
+        private const float COUNTDOWN_LENGTH_BEFORE_PLAYER_TURN = 3f;
+
         // Match setting option
         public static List<CTFMapGenerator> WorldGenerators = new List<CTFMapGenerator>()
         {
@@ -67,6 +69,7 @@ namespace CaptureTheFlag
         public MatchState State { get; private set; }
         public bool IsMatchRunning => (State != MatchState.GeneratingWorld && State != MatchState.InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
         public int CurrentTick { get; private set; }
+        private float CountdownBeforePlayerTurn;
 
         // Display options
         public bool IsVisionCutoffEnabled { get; private set; }
@@ -158,7 +161,7 @@ namespace CaptureTheFlag
             if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
             if (MatchType == CtfMatchType.Multiplayer)
             {
-                UI.ShowRedNotificationText("Waiting for other player");
+                UI.ShowCenterNotification("Waiting for other player", Color.cyan);
                 NetworkClient.Instance.SendMessage(new NetworkMessage("PlayerReadyToStartMatch")); // Inform the server that we are ready
             }
         }
@@ -187,7 +190,7 @@ namespace CaptureTheFlag
 
         private void StartGame()
         {
-            UI.HideRedNotificationText();
+            UI.HideCenterNotification();
             CurrentTick = 0;
             if (MatchType == CtfMatchType.Multiplayer && LocalPlayerIsPlayer1) CurrentTick = -30; // Offset for server host to counteract ping
             StartPlayerTurn();
@@ -228,11 +231,18 @@ namespace CaptureTheFlag
             if (SelectedCharacter == action.Character) RefreshSelectedCharacter(); // Reselect character to update highlighted nodes and actions
         }
 
+        private void StartCountdownToStartPlayerTurn()
+        {
+            State = MatchState.CountdownBeforePlayerTurn;
+            CountdownBeforePlayerTurn = COUNTDOWN_LENGTH_BEFORE_PLAYER_TURN;
+        }
+
         private void StartPlayerTurn()
         {
             State = MatchState.PlayerTurn;
             foreach (Player p in Players) p.OnStartTurn();
             UI.UpdateSelectionPanels();
+            if (SelectedCharacter != null) RefreshSelectedCharacter();
         }
 
         public void EndPlayerTurn()
@@ -245,9 +255,12 @@ namespace CaptureTheFlag
             if (MatchType == CtfMatchType.Multiplayer)
             {
                 NetworkClient.Instance.SendMessage(new NetworkMessage("TurnEnded"));
-                UI.ShowRedNotificationText("Waiting for other player");
+                UI.ShowCenterNotification("Waiting for other player", Color.cyan);
                 State = MatchState.WaitingForOtherPlayerTurn;
             }
+
+            // Update possible actions for all own characters to make sure player can no longer do actions when selecting characters
+            foreach (CtfCharacter c in LocalPlayer.Characters) c.UpdatePossibleActions();
         }
 
         /// <summary>
@@ -257,7 +270,7 @@ namespace CaptureTheFlag
         {
             State = MatchState.NpcTurn;
 
-            UI.ShowRedNotificationText("NPC Turn");
+            UI.ShowCenterNotification("NPC Turn", Color.cyan);
 
             if (MatchType == CtfMatchType.Singleplayer) ((AIPlayer)Opponent).StartTurn();
         }
@@ -267,8 +280,10 @@ namespace CaptureTheFlag
 
         public void EndNpcTurn()
         {
-            UI.HideRedNotificationText();
-            StartPlayerTurn();
+            UI.HideCenterNotification();
+
+            if (MatchType == CtfMatchType.Singleplayer) StartPlayerTurn();
+            if (MatchType == CtfMatchType.Multiplayer) StartCountdownToStartPlayerTurn();
         }
 
         public void EndGame(bool won)
@@ -328,11 +343,15 @@ namespace CaptureTheFlag
                     if (Players.All(p => p.ReadyToStartMultiplayerMatch)) StartGame();
                     break;
 
+                case MatchState.CountdownBeforePlayerTurn: // Multiplayer only
+                    UpdateCountdownBeforePlayerTurn();
+                    break;
+
                 case MatchState.PlayerTurn:
                     UpdatePlayerTurn();
                     break;
 
-                case MatchState.WaitingForOtherPlayerTurn:
+                case MatchState.WaitingForOtherPlayerTurn: // Multiplayer only
                     if (Players.All(p => p.TurnEnded)) StartNpcTurn();
                     break;
 
@@ -345,6 +364,12 @@ namespace CaptureTheFlag
                     }
                     else EndNpcTurn(); // no NPCs in multiplayer (yet)
                     break;
+            }
+
+            if (IsMatchRunning)
+            {
+                UpdateHoveredMove();
+                UpdateCharacterSelection();
             }
         }
 
@@ -367,38 +392,27 @@ namespace CaptureTheFlag
             }
         }
 
+        private void UpdateCountdownBeforePlayerTurn()
+        {
+            CountdownBeforePlayerTurn -= Time.deltaTime;
+            if (CountdownBeforePlayerTurn <= 0)
+            {
+                UI.HideCenterNotification();
+                StartPlayerTurn();
+            }
+            else
+            {
+                UI.ShowCenterNotification($"Next turn starts in {Mathf.CeilToInt(CountdownBeforePlayerTurn)}", Color.red);
+            }
+        }
+
         /// <summary>
         /// Gets called every frame during your turn.
         /// </summary>
         private void UpdatePlayerTurn()
         {
-            // Update hovered character
-            CtfCharacter hoveredCharacter = null;
-            if (World.HoveredEntity != null && World.HoveredEntity is CtfCharacter c) hoveredCharacter = c;
-
-            // Hovered move
-            UpdateHoveredMove();
-
             // Vision cutoff
             UpdateVisionCutoff();
-
-            // Left click - Select character
-            if (Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
-            {
-                // Deselect character
-                if (hoveredCharacter == null) DeselectCharacter();
-
-                // Select character (or pan to when double clicking)
-                else if (hoveredCharacter.Owner == LocalPlayer)
-                {
-                    if (Time.time - LastSelectClickTime < DoubleClickTimeThreshold) // Double click detected
-                        World.CameraPanToFocusEntity(hoveredCharacter, duration: 0.5f, false);
-
-                    else SelectCharacter(hoveredCharacter);
-
-                    LastSelectClickTime = Time.time;
-                }
-            }
 
             // Right click - Move
             if(Input.GetMouseButtonDown(1) && !HelperFunctions.IsMouseOverUiExcept(UI.CharacterLabelsContainer))
@@ -417,11 +431,8 @@ namespace CaptureTheFlag
                 }
             }
 
-            // Update character info UI
-            if (SelectedCharacter != null) UI.CharacterInfo.ShowCharacter(SelectedCharacter, HoveredAction);
-
             // Notifications UI
-            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowRedNotificationText("Opponent has ended their turn");
+            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowCenterNotification("Opponent has ended their turn", Color.cyan);
         }
 
         /// <summary>
@@ -462,6 +473,29 @@ namespace CaptureTheFlag
             }
         }
 
+        private void UpdateCharacterSelection()
+        {
+            CtfCharacter hoveredCharacter = null;
+            if (World.HoveredEntity != null && World.HoveredEntity is CtfCharacter c) hoveredCharacter = c;
+
+            if (Input.GetMouseButtonDown(0) && !HelperFunctions.IsMouseOverUi())
+            {
+                // Deselect character
+                if (hoveredCharacter == null) DeselectCharacter();
+
+                // Select character (or pan to when double clicking)
+                else if (hoveredCharacter.Owner == LocalPlayer)
+                {
+                    if (Time.time - LastSelectClickTime < DoubleClickTimeThreshold) // Double click detected
+                        World.CameraPanToFocusEntity(hoveredCharacter, duration: 0.5f, false);
+
+                    else SelectCharacter(hoveredCharacter);
+
+                    LastSelectClickTime = Time.time;
+                }
+            }
+        }
+
         private void UpdateVisionCutoff()
         {
             if(SelectedCharacter == null)
@@ -490,7 +524,7 @@ namespace CaptureTheFlag
 
         public void SelectCharacter(CtfCharacter c)
         {
-            if (State != MatchState.PlayerTurn) return;
+            if (!IsMatchRunning) return;
             if (SelectedCharacter == c) return;
             if (c.Owner != LocalPlayer) return;
 

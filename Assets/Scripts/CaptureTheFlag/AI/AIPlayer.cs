@@ -130,6 +130,7 @@ namespace CaptureTheFlag.AI
             // Characters are iterated through one by one
             if (CurrentAction == null || CurrentAction.IsDone)
             {
+                Debug.Log(CurrentCharacterIndex);
                 CtfCharacter currentCharacter = CurrentCharacterIndex > -1 ? ShuffledCharacters[CurrentCharacterIndex] : null;
                 CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
 

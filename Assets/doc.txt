@@ -1,69 +1,14 @@
-(/)Jumping/dropping aptitudes affecting cost of those transitions
-(/)Expand AICharacterJob.GetSingleNodeMovementTo so it can also return movement over 2 or 3 nodes if the next one is blocked (canperform = false)
-(/)start camera at own flag
+------------------------- CTF v0.0.5 -------------------------
 
-
-(/)AI: enemy moves from netural into player area even though he sees player is there
-(/)AI: enemies get stuck when next node (adjacent) they want to move to is occupied
-(/)AI: Increase defense perimeter
-(/)AI: get stuck between searching flag an fleeing on opponent terriotry neutral border
-(/)AI: two characters that are searching flag went on same node in own territory (missing CanPerform check probably)
-(/)AI: random amount of attacker / defender
-(/)AI: Go to jail if no valid job
-(/)AI: randomize the order every turn in which the characters make their actions
-
-(/)AI: flee job completely is broken
-(/)AI: Always ignore opponents with jailtime > 1
-
---------------- ^ commited ^ ----------------
-
-(/)AI: ShouldStopJob should return the new Job and not a bool
-	so it ALWAYS forces a new job
-	like this it's a clear state machine with clear transitions
-(/)AI: draw state graph with jobs
-(/)AI: replace vianode in SearchForOpponentFlag with AIJob_LingerInNeutral
-(/)AI: Stop searching flag and actually go to it when it becomes explored, add logic to AIJob_SearchForOpponentFlag
-(/)AI: Create LingerInNeutral job that just moves around in neutral.
-	If we see an enemy going in our territory => chase it, Job = TagOpponent (?)
-	If we don't see opponents and have nodes in enemy territory => attack
-(/)AI: DefendPatrol Nodes should never have nodes in enemy territory
-(/)AI: For defenders, also chase LastKnownPositions (only opponents that aren't visible).
-	To check, go to a random node near the alst known position
-	store if last known positions have been checked and only check it once
-	if last known position changes, reset CheckedLastKnownPosition
-(/)AI: Add AIJob_SearchOpponentInOwnTerritory
-(/)AI: Add logic to AIJob_PatrolDefendFlag so it can switch to AIJob_SearchOpponentInOwnTerritory
-
---------------- ^ commited ^ ----------------
-
-(/) jailed for text doesn't get refreshed in label when jail time changes
-
-(/) AI-SearchOpponent: Reduce chase distance because search is important too
-(/) defender switch to attacker randomly while patrolling/exploring without enemy nearby (5%)
-(/) AI: New non-urgent new defender job AIJob_ExploreOwnTerritory (25% prob)
-(/) AI-Flee: If any node outside enemy territory is in range, go there
-(/) AI: LingerInNeutral doesn't detect nearby opponents that are also in neutral and then still switches to attacking
-(/) AI: stop fleeing when no longer in enemy territory
-(/) AI: make general GetNewDefenderJob() and GetNewAttackerJob() that can be used when there's no urgent job to do
-(/) AI-SearchOpponentFlag: Gets stuck at target when target is reached
-(/) AI-ChaseToTag: Check if anyone visible is even closer to chase and tag and switch to that target
-(/) AI: non-urgent jobs have a small chance to rest instead instead of moving, if no opponent is nearby and stamina is below 40%
-(/) AI: Gets stuck in loop switching from SearchOpponentFlag <-> Flee
-(/) AI: LingerInNeutral should not move into enemy territory
-(/) SearchFlag switches to CaptureFlag when flag becomes visible
-(/) AI-ChaseToTag: Don't stop chasing WITHIN the turn if target becomes invisible
-(/) AI: CaptureFlag can linger in neutral
-(/) AI-CaptureOpponentFlag: Add a chance that it doesn't go direct but via another node
-(/) attacker switch to defender randomly after jail time ends (50%)
-(/) AI-Capture: if can capture, just do it
-(/) AI-Capture: Never take detour when close to flag
-(/) Flee: Stop moving as soon as in neutral again
-(/) Characters get idle job in jail
-
-------------------------- END CTF v0.0.4 -------------------------
-
-After opening door that explored new nodes that could instantly be reached, they don't get added to possible moves
+(/) AI: Game crash: Don't go after opponents that are in own flag zone because they are unreachable
+(/) AI: Game crashes when opponents want search for flag but are stuck
+	> they go to jail now
+(/)After opening door that explored new nodes that could instantly be reached, they don't get added to possible moves
 	probably because they aren't explored the moment the moves get calculated?
+(/) make explored more invisible
+(/) make countdown after both players pressed end turn
+(/) make it so you can still select your characters after ending turn
+
 
 spawn ctf entities (characters and flag) AFTER navmesh has been initialized
 	> remove forceHeadspaceRecalc from CanSpawnEntity
@@ -71,6 +16,7 @@ spawn ctf entities (characters and flag) AFTER navmesh has been initialized
 	> make check that characters have at least 100 nodes to move around, else change their spawn position
 
 characters can still spawn on water nodes that should be impassable because of ground node is higher
+	> should be fixed with change above
 
 
 
@@ -102,7 +48,21 @@ New EditorTool: Map Modifiers
 New map: MegaRandom
 	just repeats random map modifiers
 
+
+
 ------------------------- END CTF v0.0.5 -------------------------
+
+
+neutral items (both consumable and with active effect)
+	jail-trap (2x2)
+	catapult-trap (2x2)
+	food that gives stamina
+	tag-gun
+	item that restores action points
+	fernrohr that increases vision for one turn by a lot
+items can be dropped too
+
+
 
 World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
 	test by quickly changing surface of many nodes in editor
@@ -302,6 +262,7 @@ More static entities (see following for inspiration):
 	> fallout tactics streams
 
 
+CTF: Add (last seen x turns ago) to entities not visible but explored
 CTF: Rest ability (costs 10 AP, restores 10 stamina)
 
 CTF: Neutral items that refresh stamina or give modifiers

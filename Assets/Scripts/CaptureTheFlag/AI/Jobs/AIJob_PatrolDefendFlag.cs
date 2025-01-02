@@ -15,6 +15,7 @@ namespace CaptureTheFlag.AI
 
         private BlockmapNode TargetNode;
         private NavigationPath TargetPath;
+        private bool WeAreStuck;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.PatrolDefendFlag;
@@ -30,7 +31,7 @@ namespace CaptureTheFlag.AI
             // Find a target node near own flag
             TargetNode = null;
             int attempts = 0;
-            int maxAttempts = 10;
+            int maxAttempts = 15;
             while (TargetNode == null && attempts < maxAttempts)
             {
                 attempts++;
@@ -43,11 +44,18 @@ namespace CaptureTheFlag.AI
                 }
             }
 
-            if (attempts >= maxAttempts) Log($"Couldn't find valid target node after {attempts} attempts.", isWarning: true);
+            if (attempts >= maxAttempts)
+            {
+                Log($"Couldn't find valid target node after {attempts} attempts. We are stuck!", isWarning: true);
+                WeAreStuck = true;
+            }
         }
 
         public override void OnNextActionRequested()
         {
+            // No need for target node checks if we are stuck
+            if (WeAreStuck) return;
+
             // Set new target if we reached previous target
             if (IsOnOrNear(TargetNode)) SetNewTargetNode();
 
@@ -95,8 +103,15 @@ namespace CaptureTheFlag.AI
 
         public override CharacterAction GetNextAction()
         {
+            // If we are stuck, go to jail
+            if (WeAreStuck)
+            {
+                Log($"Going to jail because we are stuck on {Character.OriginNode}.");
+                return Character.PossibleSpecialActions.First(a => a is Action_GoToJail);
+            }
+
             // Small chance to stop moving to rest
-            if(Character.StaminaRatio < AIPlayer.MAX_STAMINA_FOR_REST_CHANCE && Random.value < AIPlayer.NON_URGENT_REST_CHANCE_PER_ACTION)
+            if (Character.StaminaRatio < AIPlayer.MAX_STAMINA_FOR_REST_CHANCE && Random.value < AIPlayer.NON_URGENT_REST_CHANCE_PER_ACTION)
             {
                 Log("Stop moving to rest this turn because stamina is low.");
                 return null;

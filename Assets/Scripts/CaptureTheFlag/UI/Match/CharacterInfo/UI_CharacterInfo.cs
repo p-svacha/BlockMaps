@@ -9,8 +9,6 @@ namespace CaptureTheFlag.UI
     public class UI_CharacterInfo : MonoBehaviour
     {
         private CtfMatch Match;
-        private CtfCharacter Character;
-        private CharacterAction HoveredAction;
 
         [Header("Elements")]
         public TextMeshProUGUI TitleText;
@@ -38,35 +36,35 @@ namespace CaptureTheFlag.UI
             StatPanel.SetActive(false);
         }
 
-        public void ShowCharacter(CtfCharacter c, CharacterAction hoveredAction = null)
+        public void UpdateCharacterInfo()
         {
-            if (Character == c && HoveredAction == hoveredAction) return;
-
-            gameObject.SetActive(true);
-            Character = c;
-            HoveredAction = hoveredAction;
-
-            TitleText.text = c.LabelCap;
-            DescriptionText.text = c.Description.ToString();
-            RefreshStatPanel();
-            ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
-            StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
-
-            VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
-
-            if (hoveredAction != null)
+            if(Match.SelectedCharacter == null)
             {
-                if (hoveredAction.CanPerformNow() || Character.CurrentAction == hoveredAction)
+                if (gameObject.activeSelf) gameObject.SetActive(false);
+                return;
+            }
+
+            if(Match.SelectedCharacter != null)
+            {
+                CtfCharacter c = Match.SelectedCharacter;
+                if (!gameObject.activeSelf) gameObject.SetActive(true);
+
+                TitleText.text = c.LabelCap;
+                DescriptionText.text = c.Description.ToString();
+                RefreshStatPanel(c);
+                ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
+                StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+
+                VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
+
+                if (Match.HoveredAction != null)
                 {
-                    ShowActionPreview(hoveredAction.Cost);
+                    if (Match.HoveredAction.CanPerformNow() || c.CurrentAction == Match.HoveredAction)
+                    {
+                        ShowActionPreview(c, Match.HoveredAction.Cost);
+                    }
                 }
             }
-        }
-
-        public void OnCharacterDeselected()
-        {
-            Character = null;
-            HoveredAction = null;
         }
 
         private void StatButton_OnClick()
@@ -74,9 +72,9 @@ namespace CaptureTheFlag.UI
             IsStatWindowActive = !IsStatWindowActive;
             StatButton.SetToggle(IsStatWindowActive);
 
-            if(IsStatWindowActive)
+            if (IsStatWindowActive)
             {
-                RefreshStatPanel();
+                RefreshStatPanel(Match.SelectedCharacter);
                 StatPanel.SetActive(true);
             }
             else
@@ -85,20 +83,20 @@ namespace CaptureTheFlag.UI
             }
         }
 
-        private void RefreshStatPanel()
+        private void RefreshStatPanel(CtfCharacter c)
         {
             HelperFunctions.DestroyAllChildredImmediately(StatListContainer);
-            foreach (Stat stat in Character.GetAllStats())
+            foreach (Stat stat in c.GetAllStats())
             {
                 UI_StatRow statRow = Instantiate(StatRowPrefab, StatListContainer.transform);
                 statRow.Init(stat);
             }
         }
 
-        private void ShowActionPreview(float cost)
+        private void ShowActionPreview(CtfCharacter c, float cost)
         {
-            ActionBar.SetPendingValue(Character.ActionPoints, Character.ActionPoints - cost, Character.MaxActionPoints, valueFormat: "0.#", ActionBar.ProgressBar.GetComponent<Image>().color, Color.black);
-            StaminaBar.SetPendingValue(Character.Stamina, Character.Stamina - cost, Character.MaxStamina, valueFormat: "0.#", StaminaBar.ProgressBar.GetComponent<Image>().color, Color.black);
+            ActionBar.SetPendingValue(c.ActionPoints, c.ActionPoints - cost, c.MaxActionPoints, valueFormat: "0.#", ActionBar.ProgressBar.GetComponent<Image>().color, Color.black);
+            StaminaBar.SetPendingValue(c.Stamina, c.Stamina - cost, c.MaxStamina, valueFormat: "0.#", StaminaBar.ProgressBar.GetComponent<Image>().color, Color.black);
         }
     }
 }
