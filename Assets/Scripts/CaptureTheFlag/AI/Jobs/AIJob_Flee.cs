@@ -8,7 +8,6 @@ namespace CaptureTheFlag.AI
 {
     public class AIJob_Flee : AICharacterJob
     {
-        private const int FLEE_DISTANCE = 15; // If cost from opponent towards this character is less than this, flee
         private bool StopFleeing;
 
         // AICharacterJob Base
@@ -27,10 +26,10 @@ namespace CaptureTheFlag.AI
         public override void OnCharacterStartsTurn()
         {
             FleeingFrom = GetOpponentsToFleeFrom();
-            FleeingTo = GetNodeToFleeTo();
+            if (FleeingFrom.Count > 0) FleeingTo = GetNodeToFleeTo();
 
             // We decide only at the start if we should stop fleeing. Never stop fleeing during a turn
-            if (ShouldStopFleeing()) StopFleeing = true;
+            if (!ShouldFlee()) StopFleeing = true;
         }
 
         public override void OnNextActionRequested()
@@ -52,52 +51,35 @@ namespace CaptureTheFlag.AI
             // If we should stop fleeing, find a new job based on game state
             if (StopFleeing)
             {
-                if (IsEnemyFlagExplored)
-                {
-                    Log($"Switching from {Id} to CaptureOpponentFlag because we no longer need to flee and we know where enemy flag is.");
-                    return new AIJob_CaptureOpponentFlag(Character);
-                }
-
-                // Else chose a random unexplored node in enemy territory to go to
-                else
-                {
-                    Log($"Switching from {Id} to SearchForOpponentFlag because we no longer need to flee and we don't know where enemy flag is.");
-                    return new AIJob_SearchOpponentFlag(Character);
-                }
+                Log($"Switching from {Id} to a general non-urgent job because we no longer need to flee.");
+                return GetNewNonUrgentJob();
             }
 
             return this;
         }
 
-
-
         public override CharacterAction GetNextAction()
         {
+            // Stop moving further if no longer in opponent territory
+            if (!Character.IsInOpponentTerritory) return null;
+
+            // Else keep fleeing to target
             return GetSingleNodeMovementTo(FleeingTo);
         }
 
-        // Helpers
-        private bool ShouldStopFleeing()
-        {
-            return FleeingFrom.Count == 0;
-        }
-        private List<CtfCharacter> GetOpponentsToFleeFrom()
-        {
-            List<CtfCharacter> relevantOpponents = new List<CtfCharacter>();
-            foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
-            {
-                if (opponentCharacter.GetComponent<Comp_Movement>().IsInRange(Character.Node, FLEE_DISTANCE, out float cost))
-                {
-                    Log($"Fleeing from {opponentCharacter.LabelCap} because distance is {cost}.");
-                    relevantOpponents.Add(opponentCharacter);
-                }
-            }
-            return relevantOpponents;
-        }
         private BlockmapNode GetNodeToFleeTo()
         {
             BlockmapNode targetNode = null;
             float highestCost = float.MinValue;
+
+            // If there are nodes that are outside of the opponent territory, go to random one of those
+            List<BlockmapNode> candidateSafeNodes = Character.PossibleMoves.Keys.Where(n => !Opponent.Territory.ContainsNode(n)).ToList();
+            if (candidateSafeNodes.Count > 0)
+            {
+                BlockmapNode fleeTarget = candidateSafeNodes.RandomElement();
+                Log($"Fleeing towards {fleeTarget} because it is outside the opponent territory.");
+                return fleeTarget;
+            }
 
             // Get node we can move to this turn that is the furthest away from all opponent characters we are fleeing from
             foreach (BlockmapNode movementTarget in Character.PossibleMoves.Keys)

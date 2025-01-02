@@ -20,6 +20,7 @@ namespace CaptureTheFlag
         // Current stats
         public float ActionPoints { get; private set; }
         public float Stamina { get; private set; }
+        public float StaminaRatio => Stamina / MaxStamina;
         public int JailTime { get; private set; }
         public bool IsInJail => JailTime > 0;
         public Dictionary<BlockmapNode, Action_Movement> PossibleMoves { get; private set; }
@@ -62,9 +63,14 @@ namespace CaptureTheFlag
             if (Stamina > MaxStamina) Stamina = MaxStamina;
 
             // No movement if in jail
-            if (IsInJail) JailTime--;
+            if(IsInJail)
+            {
+                JailTime--;
+                if (JailTime == 0) Owner.OnCharacterGotReleasedFromJail(this);
+            }
             if (IsInJail) ActionPoints = 0;
 
+            RefreshLabelText();
             UpdatePossibleActions();
         }
 
@@ -80,6 +86,7 @@ namespace CaptureTheFlag
         public void SetJailTime(int turns)
         {
             JailTime = turns;
+            RefreshLabelText();
         }
 
         public void UpdatePossibleActions()
@@ -114,6 +121,7 @@ namespace CaptureTheFlag
         public bool IsVisible => IsVisibleBy(Match.World.ActiveVisionActor);
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
         public bool IsInOwnTerritory => Owner.Territory.ContainsNode(OriginNode);
+        public bool IsInNeutralTerritory => Match.NeutralZone.ContainsNode(OriginNode);
         public bool IsInOpponentTerritory => Owner.Opponent.Territory.ContainsNode(OriginNode);
 
         // Stats

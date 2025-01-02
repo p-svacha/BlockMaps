@@ -62,7 +62,7 @@ namespace CaptureTheFlag
 
             // Debug
             string log = "";
-            foreach(BlockmapNode n in JailPositions) log += n.Id + "/";
+            foreach (BlockmapNode n in JailPositions) log += n.Id + "/";
             Debug.Log($"Jail Positions for {Name}: {log}");
 
             // Inform characters about match ready
@@ -79,6 +79,10 @@ namespace CaptureTheFlag
             TurnEnded = false;
             foreach (CtfCharacter c in Characters) c.OnStartTurn();
         }
+
+        public virtual void OnCharacterGotSentToJail(CtfCharacter c) { }
+
+        public virtual void OnCharacterGotReleasedFromJail(CtfCharacter c) { }
 
         public BlockmapNode GetNextJailPosition()
         {

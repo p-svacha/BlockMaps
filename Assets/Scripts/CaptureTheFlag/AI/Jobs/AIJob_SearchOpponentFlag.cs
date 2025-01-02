@@ -23,25 +23,29 @@ namespace CaptureTheFlag.AI
         }
 
         /// <summary>
-        /// Sets the target node and target path to random reachable unexplored node in opponet territory
+        /// Sets the target node and target path to random reachable unexplored node in opponent territory
         /// </summary>
         private void SetNewTargetNode()
         {
             // Find a target node
+            TargetNode = null;
             int attempts = 0;
             int maxAttempts = 10;
             while (TargetNode == null && attempts < maxAttempts)
             {
                 attempts++;
-                List<BlockmapNode> candidates = Match.LocalPlayerZone.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
-                BlockmapNode targetNode = candidates[Random.Range(0, candidates.Count)];
+                List<BlockmapNode> candidates = Opponent.Territory.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
+                BlockmapNode targetNode = candidates.RandomElement();
                 NavigationPath targetPath = GetPath(targetNode);
+
                 if (targetPath != null) // valid target that we can reach
                 {
                     TargetNode = targetNode;
                     TargetPath = targetPath;
                 }
             }
+
+            if (attempts >= maxAttempts) Log($"Couldn't find valid target node after {attempts} attempts.", isWarning: true);
         }
 
         public override void OnNextActionRequested()
@@ -68,7 +72,7 @@ namespace CaptureTheFlag.AI
             {
                 foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
                 {
-                    if (opponentCharacter.IsInOwnTerritory && opponentCharacter.IsInRange(Character.Node, OPPONENT_RANGE_TO_LINGER_IN_NEUTRAL, out float cost))
+                    if (opponentCharacter.IsInRange(Character.Node, OPPONENT_RANGE_TO_LINGER_IN_NEUTRAL, out float cost))
                     {
                         Log($"Switching from {Id} to LingerInNeutral  because {opponentCharacter.LabelCap} is nearby (distance = {cost})");
                         return new AIJob_LingerInNeutral(Character);
@@ -97,6 +101,14 @@ namespace CaptureTheFlag.AI
 
         public override CharacterAction GetNextAction()
         {
+            // Small chance to stop moving to rest
+            if (Character.StaminaRatio < AIPlayer.MAX_STAMINA_FOR_REST_CHANCE && Random.value < AIPlayer.NON_URGENT_REST_CHANCE_PER_ACTION)
+            {
+                Log("Stop moving to rest this turn because stamina is low.");
+                return null;
+            }
+
+            // Move closer to target node
             return GetSingleNodeMovementTo(TargetNode, TargetPath);
         }
     }

@@ -12,6 +12,14 @@ namespace CaptureTheFlag.AI
 
         // AI Behaviour
         private const float INVISIBLE_CHARACTER_SPEED = 25;
+        private const float CHANCE_THAT_ATTACKERS_TURN_INTO_DEFENDERS_AFTER_JAIL = 0.5f;
+        public const float CHANCE_THAT_RANDOM_DEFENDER_JOB_IS_EXPLORE = 0.25f;
+        public const float CHANCE_THAT_DEFENDER_SWITCHES_TO_ATTACKER_EACH_ACTION = 0.01f;
+
+        public const float MAX_STAMINA_FOR_REST_CHANCE = 0.4f; // If stamina is below is value (in %), there is a chance that characters with non-urgent jobs chose to rest
+        public const float NON_URGENT_REST_CHANCE_PER_ACTION = 0.06f;
+
+        public const float FLEE_DISTANCE = 16; // Path cost at which characters start fleeing from opponents
 
         private const float DEFEND_PERIMETER_RADIUS = 60; // Transition cost
 
@@ -47,6 +55,8 @@ namespace CaptureTheFlag.AI
 
 
         public AIPlayer(ClientInfo info) : base(info) { }
+
+        #region Game Loop
 
         public override void OnMatchReady(CtfMatch game)
         {
@@ -105,12 +115,6 @@ namespace CaptureTheFlag.AI
             }
         }
 
-        public void UnmarkOpponentCharactersLastPositionToBeChecked(CtfCharacter c)
-        {
-            Debug.Log($"[AI] Marking {c.LabelCap}'s last position to be no longer checked for search.");
-            OpponentPositionsToCheckForDefense[c] = null;
-        }
-
         /// <summary>
         /// Gets called every frame during the AI's turn.
         /// </summary>
@@ -156,7 +160,6 @@ namespace CaptureTheFlag.AI
                 }
             }
         }
-
         private void UpdateCameraFollow()
         {
             // Check if we should queue-follow an action
@@ -211,12 +214,37 @@ namespace CaptureTheFlag.AI
             }
         }
 
-        public string GetDevModeLabel(CtfCharacter c)
+        public override void OnCharacterGotSentToJail(CtfCharacter c)
         {
-            return $"{c.LabelCap}: {Roles[c]} | {Jobs[c].DevmodeDisplayText}";
+            Jobs[c] = new AIJob_InitialJob(c);
         }
 
-        #region Private
+        public override void OnCharacterGotReleasedFromJail(CtfCharacter c)
+        {
+            // Chance that attackers that get released from jail turn into defenders
+            if(Roles[c] == AICharacterRole.Attacker)
+            {
+                if(Random.value < CHANCE_THAT_ATTACKERS_TURN_INTO_DEFENDERS_AFTER_JAIL)
+                {
+                    Log(c, $"Changing role to Defender after being released from jail");
+                    Roles[c] = AICharacterRole.Defender;
+                }
+            }
+        }
+
+        #endregion
+
+
+
+        #region Logic
+
+
+
+        public void UnmarkOpponentCharactersLastPositionToBeChecked(CtfCharacter c)
+        {
+            Debug.Log($"[AI] Marking {c.LabelCap}'s last position to be no longer checked for search.");
+            OpponentPositionsToCheckForDefense[c] = null;
+        }
 
         /// <summary>
         /// Returns the action the given character will do next this turn.
@@ -264,9 +292,19 @@ namespace CaptureTheFlag.AI
         public List<CtfCharacter> OpponentCharacters => Opponent.Characters;
         public List<CtfCharacter> VisibleOpponentCharactersNotInJail => Opponent.Characters.Where(c => c.IsVisibleByOpponent && c.JailTime <= 1).ToList();
 
-        public void Log(CtfCharacter c, string msg)
+
+        public string GetDevModeLabel(CtfCharacter c)
         {
-            if (Match.DevMode) Debug.Log($"[AI - {c.LabelCap}] {msg}");
+            return $"{c.LabelCap}: {Roles[c]} | {Jobs[c].DevmodeDisplayText}";
+        }
+        public void Log(CtfCharacter c, string msg, bool isWarning = false)
+        {
+            if (Match.DevMode)
+            {
+                string logMessage = $"[AI - {c.LabelCap}] {msg}";
+                if (isWarning) Debug.LogWarning(logMessage);
+                else Debug.Log(logMessage);
+            }
         }
 
         /// <summary>

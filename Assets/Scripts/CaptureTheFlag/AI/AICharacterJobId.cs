@@ -14,6 +14,7 @@ namespace CaptureTheFlag.AI
         PatrolDefendFlag,
         Flee,
         LingerInNeutral,
-        SearchOpponentInOwnTerritory
+        SearchOpponentInOwnTerritory,
+        ExploreOwnTerritory
     }
 }

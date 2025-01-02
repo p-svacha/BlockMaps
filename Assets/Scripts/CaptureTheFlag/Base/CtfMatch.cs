@@ -571,11 +571,11 @@ namespace CaptureTheFlag
             // Set jail time so character can't move
             character.SetJailTime(JAIL_TIME);
 
+            // Inform player
+            character.Owner.OnCharacterGotSentToJail(character);
+
             // Update selection panel UI
             if (character.Owner == LocalPlayer) UI.UpdateSelectionPanel(character);
-
-            // Update label
-            character.RefreshLabelText();
         }
 
         public void ToggleDevMode() => SetDevMode(!DevMode);

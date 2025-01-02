@@ -17,19 +17,8 @@ namespace CaptureTheFlag.AI
 
         public override AICharacterJob GetJobForNextAction()
         {
-            switch (Player.Roles[Character])
-            {
-                case AIPlayer.AICharacterRole.Defender:
-                    Log($"Switching from InitialJob to PatrolDefendFlag because we are a defender.");
-                    return new AIJob_PatrolDefendFlag(Character);
-
-                case AIPlayer.AICharacterRole.Attacker:
-                    Log($"Switching from InitialJob to SearchForOpponentFlag because we are an attacker.");
-                    return new AIJob_SearchOpponentFlag(Character);
-
-                default:
-                    throw new System.Exception($"Role {Player.Roles[Character]} not handled.");
-            }
+            Log($"Switching from {Id} to a general non-urgent job.");
+            return GetNewNonUrgentJob();
         }
 
         public override CharacterAction GetNextAction()

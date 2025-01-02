@@ -28,6 +28,7 @@ namespace CaptureTheFlag.AI
         private void SetNewTargetNode()
         {
             // Find a target node near own flag
+            TargetNode = null;
             int attempts = 0;
             int maxAttempts = 10;
             while (TargetNode == null && attempts < maxAttempts)
@@ -41,6 +42,8 @@ namespace CaptureTheFlag.AI
                     TargetPath = targetPath;
                 }
             }
+
+            if (attempts >= maxAttempts) Log($"Couldn't find valid target node after {attempts} attempts.", isWarning: true);
         }
 
         public override void OnNextActionRequested()
@@ -63,9 +66,9 @@ namespace CaptureTheFlag.AI
             }
 
             // If there is an opponent or position to check nearby in our own territory, go to that
-            if (ShouldChaseOrSearchOpponent(MAX_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId))
+            if (ShouldChaseOrSearchOpponent(MAX_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId, out float costToTarget))
             {
-                if (jobId == AICharacterJobId.CaptureOpponentFlag)
+                if (jobId == AICharacterJobId.ChaseAndTagOpponent)
                 {
                     Log($"Switching from {Id} to ChaseToTagOpponent because {target.LabelCap} is nearby.");
                     return new AIJob_ChaseToTagOpponent(Character, target);
@@ -78,12 +81,28 @@ namespace CaptureTheFlag.AI
                 else throw new System.Exception($"id {jobId} not handled.");
             }
 
+            // Small chance that we switch to an attacker
+            if(Random.value < AIPlayer.CHANCE_THAT_DEFENDER_SWITCHES_TO_ATTACKER_EACH_ACTION)
+            {
+                Log($"Switching from {Id} to a new general non-urgent job because we are switching role to attacker.");
+                Player.Roles[Character] = AIPlayer.AICharacterRole.Attacker;
+                return GetNewNonUrgentJob();
+            }
+
             // If no of the above criteria apply, continue this job
             return this;
         }
 
         public override CharacterAction GetNextAction()
         {
+            // Small chance to stop moving to rest
+            if(Character.StaminaRatio < AIPlayer.MAX_STAMINA_FOR_REST_CHANCE && Random.value < AIPlayer.NON_URGENT_REST_CHANCE_PER_ACTION)
+            {
+                Log("Stop moving to rest this turn because stamina is low.");
+                return null;
+            }
+
+            // Move closer to target node
             return GetSingleNodeMovementTo(TargetNode, TargetPath);
         }
     }

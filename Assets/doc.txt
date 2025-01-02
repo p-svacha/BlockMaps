@@ -1,7 +1,7 @@
 (/)Jumping/dropping aptitudes affecting cost of those transitions
 (/)Expand AICharacterJob.GetSingleNodeMovementTo so it can also return movement over 2 or 3 nodes if the next one is blocked (canperform = false)
 (/)start camera at own flag
-(/)characters can still spawn on water nodes that should be impassable because of ground node is higher
+
 
 (/)AI: enemy moves from netural into player area even though he sees player is there
 (/)AI: enemies get stuck when next node (adjacent) they want to move to is occupied
@@ -34,18 +34,45 @@
 (/)AI: Add AIJob_SearchOpponentInOwnTerritory
 (/)AI: Add logic to AIJob_PatrolDefendFlag so it can switch to AIJob_SearchOpponentInOwnTerritory
 
-AI: characters can change between attacker / defender in rare cases
-	defender to attacker randomly while patrolling without enemy nearby
-	attacker to defender randomly after jail time ends
-AI: make general GetNewDefenderJob() and GetNewAttackerJob() that can be used when there's no urgent job to do
-	> AI: Rare new defender job AIJob_ExploreOwnTerritory
-AI: non-urgent jobs have a small chance to rest instead instead of moving, if no opponent is nearby and stamina is below 40%
+--------------- ^ commited ^ ----------------
 
-After opening door that explores new nodes that could instantly be reached, they don't get added to possible moves
-	probably because they aren't explored the moment the moves get calculated?
-jailed for text doesn't get refreshed in label when jail time changes
+(/) jailed for text doesn't get refreshed in label when jail time changes
+
+(/) AI-SearchOpponent: Reduce chase distance because search is important too
+(/) defender switch to attacker randomly while patrolling/exploring without enemy nearby (5%)
+(/) AI: New non-urgent new defender job AIJob_ExploreOwnTerritory (25% prob)
+(/) AI-Flee: If any node outside enemy territory is in range, go there
+(/) AI: LingerInNeutral doesn't detect nearby opponents that are also in neutral and then still switches to attacking
+(/) AI: stop fleeing when no longer in enemy territory
+(/) AI: make general GetNewDefenderJob() and GetNewAttackerJob() that can be used when there's no urgent job to do
+(/) AI-SearchOpponentFlag: Gets stuck at target when target is reached
+(/) AI-ChaseToTag: Check if anyone visible is even closer to chase and tag and switch to that target
+(/) AI: non-urgent jobs have a small chance to rest instead instead of moving, if no opponent is nearby and stamina is below 40%
+(/) AI: Gets stuck in loop switching from SearchOpponentFlag <-> Flee
+(/) AI: LingerInNeutral should not move into enemy territory
+(/) SearchFlag switches to CaptureFlag when flag becomes visible
+(/) AI-ChaseToTag: Don't stop chasing WITHIN the turn if target becomes invisible
+(/) AI: CaptureFlag can linger in neutral
+(/) AI-CaptureOpponentFlag: Add a chance that it doesn't go direct but via another node
+(/) attacker switch to defender randomly after jail time ends (50%)
+(/) AI-Capture: if can capture, just do it
+(/) AI-Capture: Never take detour when close to flag
+(/) Flee: Stop moving as soon as in neutral again
+(/) Characters get idle job in jail
 
 ------------------------- END CTF v0.0.4 -------------------------
+
+After opening door that explored new nodes that could instantly be reached, they don't get added to possible moves
+	probably because they aren't explored the moment the moves get calculated?
+
+spawn ctf entities (characters and flag) AFTER navmesh has been initialized
+	> remove forceHeadspaceRecalc from CanSpawnEntity
+	> make IsGenerallyPassable private again
+	> make check that characters have at least 100 nodes to move around, else change their spawn position
+
+characters can still spawn on water nodes that should be impassable because of ground node is higher
+
+
 
 show map description in lobby
 
@@ -118,6 +145,7 @@ same with invisible EntityWalls for climbability
 give everyone names
 turn counter and display
 
+mapgen forest: don't replace concrete with dirt path
 mapgen forest: wide road with cars
 mapgen forest: river
 mapgen forest: hedges should be straighter

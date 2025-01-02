@@ -58,7 +58,7 @@ namespace CaptureTheFlag.AI
         protected Action_Movement GetSingleNodeMovementTo(BlockmapNode targetNode, NavigationPath targetPath = null)
         {
             // Get path to target
-            if (targetPath == null || !targetPath.Nodes.Contains(targetNode)) targetPath = GetPath(targetNode);
+            if (targetPath == null || !targetPath.Nodes.Contains(Character.OriginNode)) targetPath = GetPath(targetNode);
             else targetPath.CutEverythingBefore(Character.OriginNode); // Adapt the given path so the start point is where the character is currently at
 
             if (targetPath == null) // No path found
@@ -69,7 +69,7 @@ namespace CaptureTheFlag.AI
 
             // Look for a possible move that corresponds to a single step in the target path.
             // If the move exists but is blocked, try moves going over multiple nodes (up to 5) along the path.
-            List<Action_Movement> candidateMoves = Character.PossibleMoves.Values.Where(m => m.CanPerformNow() && !Opponent.Characters.Any(c => c.Node == m.Target)).ToList();
+            List<Action_Movement> candidateMoves = Character.PossibleMoves.Values.Where(m => m.CanPerformNow() && (Player.Territory.ContainsNode(m.Target) || !Opponent.Characters.Any(c => c.Node == m.Target))).ToList();
             for (int i = 1; i < 5; i++)
             {
                 if (targetPath.Nodes.Count < (i + 1)) break;
@@ -85,12 +85,59 @@ namespace CaptureTheFlag.AI
         }
 
         /// <summary>
+        /// Returns a new non-urgent job for this character that fits their role.
+        /// </summary>
+        /// <returns></returns>
+        protected AICharacterJob GetNewNonUrgentJob()
+        {
+            switch (Player.Roles[Character])
+            {
+                case AIPlayer.AICharacterRole.Defender:
+                    return GetNewDefenderJob();
+
+                case AIPlayer.AICharacterRole.Attacker:
+                    return GetNewAttackerJob();
+
+                default:
+                    throw new System.Exception($"Role {Player.Roles[Character]} not handled.");
+            }
+        }
+
+        /// <summary>
+        /// Returns a job that a defender should no if there is no urgent thing to do.
+        /// </summary>
+        private AICharacterJob GetNewDefenderJob()
+        {
+            if (Random.value < AIPlayer.CHANCE_THAT_RANDOM_DEFENDER_JOB_IS_EXPLORE) return new AIJob_ExploreOwnTerritory(Character);
+            else return new AIJob_PatrolDefendFlag(Character);
+        }
+
+        /// <summary>
+        /// Returns a job that an attacker should no if there is no urgent thing to do.
+        /// </summary>
+        private AICharacterJob GetNewAttackerJob()
+        {
+            // If we know where enemy flag is => capture it
+            if (IsEnemyFlagExplored)
+            {
+                return new AIJob_CaptureOpponentFlag(Character);
+            }
+
+            // If we don't know where enemy flag is => search it
+            else
+            {
+                return new AIJob_SearchOpponentFlag(Character);
+            }
+        }
+
+        /// <summary>
         /// Returns the fastest possible path to the given node without going through the own flag zone.
         /// </summary>
         protected NavigationPath GetPath(BlockmapNode targetNode)
         {
             return Pathfinder.GetPath(Character, Character.OriginNode, targetNode, considerUnexploredNodes: false, forbiddenNodes: Player.FlagZone.Nodes);
         }
+        protected float GetPathCost(BlockmapNode targetNode) => GetPath(targetNode).GetCost(Character);
 
         protected bool IsOnOrNear(BlockmapNode node)
         {
@@ -101,7 +148,9 @@ namespace CaptureTheFlag.AI
         {
             foreach(CtfCharacter opp in VisibleOpponentCharactersNotInJail)
             {
-                if (Character.IsInRange(opp.Node, maxCost, out _)) return true;
+                bool isInRange = (Character.IsInRange(opp.Node, maxCost, out float cost));
+                // Log($"IsAnyOpponentNearby: Is {opp.LabelCap} in Range? {isInRange} with cost = {cost}");
+                if (isInRange) return true;
             }
             return false;
         }
@@ -136,12 +185,12 @@ namespace CaptureTheFlag.AI
         /// If there is a visible opponent character or a position that is marked to be checked for search within the given search, returns true and the corresponding AIJob_ChaseToTagOpponent or AIJob_SearchOpponentInOwnTerritory job.
         /// <br/>Else returns false.
         /// </summary>
-        protected bool ShouldChaseOrSearchOpponent(float maxDistanceCost, out CtfCharacter target, out AICharacterJobId jobId)
+        protected bool ShouldChaseOrSearchOpponent(float maxDistanceCost, out CtfCharacter target, out AICharacterJobId jobId, out float costToTarget)
         {
             target = null;
             jobId = AICharacterJobId.Error;
 
-            float lowestCost = float.MaxValue;
+            costToTarget = float.MaxValue;
 
             // Look for visibile opponents nearby
             foreach (CtfCharacter opp in VisibleOpponentCharactersNotInJail)
@@ -151,9 +200,9 @@ namespace CaptureTheFlag.AI
                 {
                     Log($"Detected possibility to switch from {Id} to ChaseToTagOpponent because {opp.LabelCap} is nearby (distance = {cost}).");
 
-                    if(cost < lowestCost)
+                    if(cost < costToTarget)
                     {
-                        lowestCost = cost;
+                        costToTarget = cost;
                         target = opp;
                         jobId = AICharacterJobId.ChaseAndTagOpponent;
                     }
@@ -170,7 +219,7 @@ namespace CaptureTheFlag.AI
                 {
                     Log($"Detected possibility to switch from {Id} to SearchOpponentInOwnTerritory because {opp.LabelCap} was seen nearby (distance = {cost}).");
 
-                    if (cost < lowestCost)
+                    if (cost < costToTarget)
                     {
                         target = opp;
                         jobId = AICharacterJobId.SearchOpponentInOwnTerritory;
@@ -188,17 +237,27 @@ namespace CaptureTheFlag.AI
         public bool ShouldFlee()
         {
             if (!Character.IsInOpponentTerritory) return false;
+            if (GetOpponentsToFleeFrom().Count == 0) return false;
 
+            return true;
+        }
+        protected List<CtfCharacter> GetOpponentsToFleeFrom()
+        {
+            List<CtfCharacter> relevantOpponents = new List<CtfCharacter>();
             foreach (CtfCharacter opponentCharacter in VisibleOpponentCharactersNotInJail)
             {
-                if (Character.IsVisibleBy(opponentCharacter)) return true;
+                if (opponentCharacter.IsInRange(Character.Node, AIPlayer.FLEE_DISTANCE, out float cost))
+                {
+                    Log($"Should flee from {opponentCharacter.LabelCap} because distance is {cost}.");
+                    relevantOpponents.Add(opponentCharacter);
+                }
             }
-            return false;
+            return relevantOpponents;
         }
 
-        protected void Log(string msg)
+        protected void Log(string msg, bool isWarning = false)
         {
-            if (Match.DevMode) Player.Log(Character, msg);
+            if (Match.DevMode) Player.Log(Character, msg, isWarning);
         }
 
         #endregion

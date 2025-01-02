@@ -7,7 +7,7 @@ namespace CaptureTheFlag.AI
 {
     public class AIJob_SearchOpponentInOwnTerritory : AICharacterJob
     {
-        private float CHASE_DISTANCE = 25;
+        private float CHASE_DISTANCE = 15;
         
         private CtfCharacter TargetCharacter;
         private BlockmapNode TargetNode;
@@ -16,7 +16,7 @@ namespace CaptureTheFlag.AI
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.SearchOpponentInOwnTerritory;
-        public override string DevmodeDisplayText => $"Searching Opponent";
+        public override string DevmodeDisplayText => $"Searching {TargetCharacter.LabelCap}'s last known position: {TargetNode}";
 
         public AIJob_SearchOpponentInOwnTerritory(CtfCharacter c, CtfCharacter targetCharacter) : base(c)
         {
@@ -59,31 +59,8 @@ namespace CaptureTheFlag.AI
             // Find a new job if we should stop search
             if (ShouldStopSearch())
             {
-                switch (Player.Roles[Character])
-                {
-                    // If we are defender, patrol flag
-                    case AIPlayer.AICharacterRole.Defender:
-                        Log($"Switchting from {Id} to PatrolDefendFlag because we no longer need to search for {TargetCharacter.LabelCap} and we are a defender.");
-                        return new AIJob_PatrolDefendFlag(Character);
-
-                    // If we are attacker, attack
-                    case AIPlayer.AICharacterRole.Attacker:
-                        if (IsEnemyFlagExplored)
-                        {
-                            Log($"Switching from {Id} to CaptureOpponentFlag because we no longer need to search for {TargetCharacter.LabelCap} and we know where enemy flag is.");
-                            return new AIJob_CaptureOpponentFlag(Character);
-                        }
-
-                        // Else chose a random unexplored node in enemy territory to go to
-                        else
-                        {
-                            Log($"Switching from {Id} to SearchForOpponentFlag because we no longer need to search for {TargetCharacter.LabelCap} and we don't know where enemy flag is.");
-                            return new AIJob_SearchOpponentFlag(Character);
-                        }
-
-                    default:
-                        throw new System.Exception($"Role {Player.Roles[Character]} not handled.");
-                }
+                Log($"Switching from {Id} to a general non-urgent job because we no longer need to search for {TargetCharacter.LabelCap}.");
+                return GetNewNonUrgentJob();
             }
 
             return this;

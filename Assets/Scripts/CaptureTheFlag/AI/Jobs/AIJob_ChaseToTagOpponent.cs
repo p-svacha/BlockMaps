@@ -12,6 +12,7 @@ namespace CaptureTheFlag.AI
     public class AIJob_ChaseToTagOpponent : AICharacterJob
     {
         private CtfCharacter Target;
+        private bool StopChasing;
 
         // AICharacterJob Base
         public override AICharacterJobId Id => AICharacterJobId.ChaseAndTagOpponent;
@@ -22,36 +23,40 @@ namespace CaptureTheFlag.AI
             Target = target;
         }
 
+        public override void OnCharacterStartsTurn()
+        {
+            // Only at the beginning of the turn, stop chasing if opponent is no longer visible
+            Log($"Stop chasing {Target.LabelCap} because they moved out of vision.");
+            if (!Target.IsVisibleByOpponent) StopChasing = true;
+        }
+
         public override AICharacterJob GetJobForNextAction()
         {
-            // If we should stop chasing, find a new job depending on game state
-            if (ShouldStopChase())
+            // If the closest target to chase/search is someone else, go chase/search that character
+            float currentCostToTarget = GetPathCost(Target.Node);
+            if (ShouldChaseOrSearchOpponent(currentCostToTarget, out CtfCharacter target, out AICharacterJobId jobId, out float costToTarget))
             {
-                switch(Player.Roles[Character])
+                if (target != Target)
                 {
-                    // If we are defender, patrol flag
-                    case AIPlayer.AICharacterRole.Defender:
-                        Log($"Switching from {Id} to PatrolDefendFlag because we no longer need to chase {Target.LabelCap} and we are a defender.");
-                        return new AIJob_PatrolDefendFlag(Character);
-
-                    // If we are attacker, attack
-                    case AIPlayer.AICharacterRole.Attacker:
-                        if (IsEnemyFlagExplored)
-                        {
-                            Log($"Switching from {Id} to CaptureOpponentFlag because we no longer need to chase {Target.LabelCap} and we know where enemy flag is.");
-                            return new AIJob_CaptureOpponentFlag(Character);
-                        }
-
-                        // Else chose a random unexplored node in enemy territory to go to
-                        else
-                        {
-                            Log($"Switching from {Id} to SearchForOpponentFlag because we no longer need to chase {Target.LabelCap} and we don't know where enemy flag is.");
-                            return new AIJob_SearchOpponentFlag(Character);
-                        }
-
-                    default:
-                        throw new System.Exception($"Role {Player.Roles[Character]} not handled.");
+                    if (jobId == AICharacterJobId.ChaseAndTagOpponent)
+                    {
+                        Log($"Switching from {Id} to ChaseToTagOpponent with another target because {target.LabelCap} is closer than current target (current = {currentCostToTarget}, new = {costToTarget}).");
+                        return new AIJob_ChaseToTagOpponent(Character, target);
+                    }
+                    else if (jobId == AICharacterJobId.SearchOpponentInOwnTerritory)
+                    {
+                        Log($"Switching from {Id} to SearchOpponentInOwnTerritory because {target.LabelCap} was seen closer than current target (current = {currentCostToTarget}, new = {costToTarget}).");
+                        return new AIJob_SearchOpponentInOwnTerritory(Character, target);
+                    }
+                    else throw new System.Exception($"id {jobId} not handled.");
                 }
+            }
+
+            // If we should stop chasing, find a new job depending on game state
+            if (StopChasing || ShouldStopChase())
+            {
+                Log($"Switching from {Id} to a general non-urgent job because we no longer need to chase {Target.LabelCap}.");
+                return GetNewNonUrgentJob();
             }
 
             // Continue chase
@@ -62,7 +67,6 @@ namespace CaptureTheFlag.AI
         {
             if (Target.IsInJail) return true;
             if (!Target.IsInOpponentTerritory) return true;
-            if (!Target.IsVisibleByOpponent) return true;
 
             return false;
         }

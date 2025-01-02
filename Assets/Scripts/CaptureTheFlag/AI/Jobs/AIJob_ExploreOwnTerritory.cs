@@ -7,44 +7,39 @@ using UnityEngine;
 namespace CaptureTheFlag.AI
 {
     /// <summary>
-    /// A job where characters move around in the neutral area until it's either safe to cross into opponent territory, or see an opponent in the own territory.
+    /// Non-urgent defender job that explores the own territory
     /// </summary>
-    public class AIJob_LingerInNeutral : AICharacterJob
+    public class AIJob_ExploreOwnTerritory : AICharacterJob
     {
-        private float MAX_DEFEND_CHASE_DISTANCE = 25;
+        private float MAX_CHASE_DISTANCE = 25;
 
         private BlockmapNode TargetNode;
         private NavigationPath TargetPath;
 
-        private AICharacterJob NextJob;
-
         // AICharacterJob Base
-        public override AICharacterJobId Id => AICharacterJobId.LingerInNeutral;
-        public override string DevmodeDisplayText => $"Lingering in Neutral (going to {TargetNode})";
+        public override AICharacterJobId Id => AICharacterJobId.ExploreOwnTerritory;
+        public override string DevmodeDisplayText => $"Exploring own territory (going to {TargetNode})";
 
-        public AIJob_LingerInNeutral(CtfCharacter c) : base(c)
+        public AIJob_ExploreOwnTerritory(CtfCharacter c) : base(c)
         {
             SetNewTargetNode();
         }
 
         /// <summary>
-        /// Sets the target node as a random reachable node in the neutral zone
+        /// Sets the target node and target path to random reachable unexplored node in own territory
         /// </summary>
         private void SetNewTargetNode()
         {
-            // Find a target node
+            // Find a target node in own territoty
             TargetNode = null;
             int attempts = 0;
-            int maxAttempts = 20;
+            int maxAttempts = 10;
             while (TargetNode == null && attempts < maxAttempts)
             {
                 attempts++;
-                List<BlockmapNode> candidates = Match.NeutralZone.Nodes.ToList();
-                BlockmapNode targetNode = candidates[Random.Range(0, candidates.Count)];
+                List<BlockmapNode> candidates = Player.Territory.Nodes.Where(x => !x.IsExploredBy(Player.Actor) && x.IsPassable(Character)).ToList();
+                BlockmapNode targetNode = candidates.RandomElement();
                 NavigationPath targetPath = GetPath(targetNode);
-
-                // Path is only valid if it doesn't go through opponent territory
-                bool isPathValid = (targetPath != null) && targetPath.Nodes.Any(n => !Opponent.Territory.ContainsNode(n));
 
                 if (targetPath != null) // valid target that we can reach
                 {
@@ -76,7 +71,7 @@ namespace CaptureTheFlag.AI
             }
 
             // If there is an opponent or position to check nearby in our own territory, go to that
-            if (ShouldChaseOrSearchOpponent(MAX_DEFEND_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId, out float costToTarget))
+            if (ShouldChaseOrSearchOpponent(MAX_CHASE_DISTANCE, out CtfCharacter target, out AICharacterJobId jobId, out float costToTarget))
             {
                 if (jobId == AICharacterJobId.ChaseAndTagOpponent)
                 {
@@ -91,14 +86,15 @@ namespace CaptureTheFlag.AI
                 else throw new System.Exception($"id {jobId} not handled.");
             }
 
-            // If there is no opponent anywhere close, switch to attack mode
-            if (!IsAnyOpponentNearby(maxCost: 25))
+            // Small chance that we switch to an attacker
+            if (Random.value < AIPlayer.CHANCE_THAT_DEFENDER_SWITCHES_TO_ATTACKER_EACH_ACTION)
             {
-                Log($"Switching from {Id} to a general non-urgent job because no opponent is nearby.");
+                Log($"Switching from {Id} to a new general non-urgent job because we are switching role to attacker.");
+                Player.Roles[Character] = AIPlayer.AICharacterRole.Attacker;
                 return GetNewNonUrgentJob();
             }
 
-            // If none of the above criteria apply, keep lingering in neutral
+            // If no of the above criteria apply, continue this job
             return this;
         }
 
