@@ -1033,7 +1033,7 @@ namespace BlockmapFramework
         /// Returns if it is even theoretically possible for any entity to stand on this node.
         /// <br/>Use IsPassable for public use, since that checks this plus additional criteria.
         /// </summary>
-        public virtual bool IsGenerallyPassable()
+        protected virtual bool IsGenerallyPassable()
         {
             if (Entities.Any(x => x.Def.Impassable)) return false; // An entity is blocking this node
             return true;

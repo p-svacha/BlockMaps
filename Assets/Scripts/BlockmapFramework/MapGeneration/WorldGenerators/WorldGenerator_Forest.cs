@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace CaptureTheFlag
+namespace BlockmapFramework.WorldGeneration
 {
-    public class CTFMapGenerator_Forest : CTFMapGenerator
+    public class WorldGenerator_Forest : WorldGenerator
     {
         public override string Label => "Forest";
+        public override string Description => "A forest with varying density across different regions. Dirt paths make moving throught the forest easier. Some shacks and ponds may be scattered throughout the forest.";
 
         private int[,] HeightMap;
 
@@ -24,10 +25,7 @@ namespace CaptureTheFlag
                 AddForests,
                 AddPaths,
                 AddShacks,
-
-                CreateMapZones,
                 AddFencesAroundPaths,
-                CreatePlayerBases,
             };
         }
 

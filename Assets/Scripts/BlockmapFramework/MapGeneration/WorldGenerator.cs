@@ -12,6 +12,7 @@ namespace BlockmapFramework
         public const int MAX_WORLD_SIZE = 512;
 
         public abstract string Label { get; }
+        public abstract string Description { get; }
 
         /// <summary>
         /// The amount of chunks on each side of the map. (A world with 2x2 chunks has NumChunksPerSide = 2).
@@ -128,32 +129,6 @@ namespace BlockmapFramework
         }
 
         #region Helper Functions
-
-        /// <summary>
-        /// Spawns an entity on the ground near the given point and returns the entity instance.
-        /// </summary>
-        protected Entity SpawnEntityOnGroundAround(EntityDef def, Actor player, Vector2Int pos, float standard_deviation, Direction rotation, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
-        {
-            int maxAttempts = 50;
-            if (standard_deviation == 0f) maxAttempts = 1;
-            int numAttempts = 0;
-
-            while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
-            {
-                Vector2Int targetPos = HelperFunctions.GetRandomNearPosition(pos, standard_deviation);
-
-                if (!World.IsInWorld(targetPos)) continue;
-
-                BlockmapNode targetNode = World.GetNodes(targetPos).RandomElement();
-                if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) continue;
-                if (!World.CanSpawnEntity(def, targetNode, rotation, forceHeadspaceRecalc: true)) continue;
-
-                return World.SpawnEntity(def, targetNode, rotation, player, updateWorld: false);
-            }
-
-            Debug.LogWarning("Could not spawn " + def.Label + " around " + pos.ToString() + " after " + maxAttempts + " attempts.");
-            return null;
-        }
 
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
         protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));

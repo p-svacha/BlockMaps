@@ -18,13 +18,17 @@ namespace CaptureTheFlag.UI
         public GameObject PlayerListContainer;
         public TMP_Dropdown MapDropdown;
         public TMP_Dropdown MapSizeDropdown;
+        public TMP_Dropdown SpawnTypeDropdown;
         public Image MapPreviewImage;
+        public TextMeshProUGUI MapPreviewMapName;
+        public TextMeshProUGUI MapPreviewMapDescription;
         public Button StartGameButton;
 
         [Header("Prefabs")]
         public UI_PlayerRow PlayerRowPrefab;
 
         private Dictionary<int, Sprite> MapPreviewSprites;
+        private string RandomMapDescription = "One of the available map generators will be picked at random.";
 
         public void Init(CtfGame game)
         {
@@ -54,10 +58,21 @@ namespace CaptureTheFlag.UI
             MapSizeDropdown.AddOptions(mapSizes);
             MapSizeDropdown.value = 0;
 
+            // Character spawn type
+            SpawnTypeDropdown.ClearOptions();
+            List<string> spawnTypeOptions = new List<string>() { "Random" };
+            foreach(var value in System.Enum.GetValues(typeof(CharacterSpawnType)))
+            {
+                spawnTypeOptions.Add(HelperFunctions.GetEnumDescription((CharacterSpawnType)value));
+            }
+            SpawnTypeDropdown.AddOptions(spawnTypeOptions);
+            SpawnTypeDropdown.value = 0;
+
             // Listeners
             StartGameButton.onClick.AddListener(StartBtn_OnClick);
             MapDropdown.onValueChanged.AddListener(MapDropdown_OnValueChanged);
             MapSizeDropdown.onValueChanged.AddListener(MapSizeDropdown_OnValueChanged);
+            SpawnTypeDropdown.onValueChanged.AddListener(SpawnTypeDropdown_OnValueChanged);
         }
 
 
@@ -78,9 +93,12 @@ namespace CaptureTheFlag.UI
             // Game settings
             MapDropdown.value = data.Settings.WorldGeneratorDropdownIndex;
             MapSizeDropdown.value = data.Settings.WorldSizeDropdownIndex;
+            SpawnTypeDropdown.value = data.Settings.SpawnTypeDropdownIndex;
 
             // Map preview
             MapPreviewImage.sprite = MapPreviewSprites[data.Settings.WorldGeneratorDropdownIndex];
+            MapPreviewMapName.text = data.Settings.WorldGeneratorDropdownOption;
+            MapPreviewMapDescription.text = data.Settings.WorldGeneratorDropdownIndex == 0 ? RandomMapDescription : CtfMatch.WorldGenerators[data.Settings.WorldGeneratorIndex].Description;
         }
 
         private void MapDropdown_OnValueChanged(int value)
@@ -91,6 +109,11 @@ namespace CaptureTheFlag.UI
         private void MapSizeDropdown_OnValueChanged(int value)
         {
             LobbyData.Settings.SetMapSizeDropdownIndex(value);
+            OnMatchSettingChanged();
+        }
+        private void SpawnTypeDropdown_OnValueChanged(int value)
+        {
+            LobbyData.Settings.SetSpawnTypeDropdownIndex(value);
             OnMatchSettingChanged();
         }
 

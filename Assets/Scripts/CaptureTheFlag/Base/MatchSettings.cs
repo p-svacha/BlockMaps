@@ -11,13 +11,18 @@ namespace CaptureTheFlag
         // Lobby dropdown inputs
         public int WorldGeneratorDropdownIndex { get; private set; }
         public string WorldGeneratorDropdownOption { get; private set; }
+
         public int WorldSizeDropdownIndex { get; private set; }
         public string WorldSizeDropdownOption { get; private set; }
+
+        public int SpawnTypeDropdownIndex { get; private set; }
+        public string SpawnTypeDropdownOption { get; private set; }
 
         // Real values used for match initialization
         public int Seed { get; private set; }
         public int WorldGeneratorIndex { get; private set; }
         public int WorldSize { get; private set; }
+        public CharacterSpawnType SpawnType { get; private set; }
 
         public MatchSettings()
         {
@@ -25,6 +30,7 @@ namespace CaptureTheFlag
 
             SetWorldGeneratorDropdownIndex(0);
             SetMapSizeDropdownIndex(0);
+            SetSpawnTypeDropdownIndex(0);
         }
 
         public MatchSettings(int[] settings)
@@ -34,9 +40,12 @@ namespace CaptureTheFlag
             WorldGeneratorIndex = settings[2];
             WorldSizeDropdownIndex = settings[3];
             WorldSize = settings[4];
+            SpawnTypeDropdownIndex = settings[5];
+            SpawnType = (CharacterSpawnType)settings[6];
 
             WorldGeneratorDropdownOption = WorldGeneratorDropdownIndex == 0 ? "Random" : CtfMatch.WorldGenerators[WorldGeneratorDropdownIndex - 1].Label;
             WorldSizeDropdownOption = WorldSizeDropdownIndex == 0 ? "Random" : CtfMatch.MapSizes.Keys.ToList()[WorldSizeDropdownIndex - 1];
+            SpawnTypeDropdownOption = SpawnTypeDropdownIndex == 0 ? "Random" : HelperFunctions.GetEnumDescription((CharacterSpawnType)(SpawnTypeDropdownIndex - 1));
         }
 
         public void SetWorldGeneratorDropdownIndex(int index)
@@ -64,6 +73,21 @@ namespace CaptureTheFlag
             }
         }
 
+        public void SetSpawnTypeDropdownIndex(int index)
+        {
+            SpawnTypeDropdownIndex = index;
+            SpawnTypeDropdownOption = index == 0 ? "Random" : HelperFunctions.GetEnumDescription((CharacterSpawnType)(index - 1));
+
+            if (index == 0)
+            {
+                SpawnType = HelperFunctions.GetRandomEnumValue<CharacterSpawnType>();
+            }
+            else
+            {
+                SpawnType = (CharacterSpawnType)(index - 1);
+            }
+        }
+
         public int[] ToIntArray()
         {
             return new int[]
@@ -72,7 +96,9 @@ namespace CaptureTheFlag
                 WorldGeneratorDropdownIndex,
                 WorldGeneratorIndex,
                 WorldSizeDropdownIndex,
-                WorldSize
+                WorldSize,
+                SpawnTypeDropdownIndex,
+                (int)SpawnType,
             };
         }
     }

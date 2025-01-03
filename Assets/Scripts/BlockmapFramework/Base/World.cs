@@ -1207,7 +1207,6 @@ namespace BlockmapFramework
         public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
         {
             if (def == null) throw new System.Exception($"Cannot check if entity is spawnable because EntityDef is null");
-            if (!node.IsGenerallyPassable()) return false;
 
             HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, height); // get nodes that would be occupied when placing the entity on the given node
 
@@ -1223,10 +1222,8 @@ namespace BlockmapFramework
             // Make some checks for all nodes that would be occupied when placing the entity on the given node
             foreach (BlockmapNode occupiedNode in occupiedNodes)
             {
+                // Recalculate passability (useful if spawned during world generation before navmesh is calculated)
                 if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
-
-                // Check if node is generally passable
-                if (!occupiedNode.IsGenerallyPassable()) return false;
 
                 // Check if the place position is on water
                 if (occupiedNode is WaterNode && def.WaterBehaviour == WaterBehaviour.Forbidden) return false;

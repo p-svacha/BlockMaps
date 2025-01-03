@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -11,6 +12,29 @@ using UnityEngine.UI;
 
 public static class HelperFunctions
 {
+    #region Enum
+
+    public static string GetEnumDescription(System.Enum value)
+    {
+        var fieldInfo = value.GetType().GetField(value.ToString());
+        if (fieldInfo == null)
+            return value.ToString();
+
+        var attribute = fieldInfo
+            .GetCustomAttributes(typeof(DescriptionAttribute), false)
+            .FirstOrDefault() as DescriptionAttribute;
+
+        return attribute?.Description ?? value.ToString();
+    }
+
+    public static T GetRandomEnumValue<T>() where T : System.Enum
+    {
+        var values = System.Enum.GetValues(typeof(T));
+        return (T)values.GetValue(new System.Random().Next(values.Length));
+    }
+
+    #endregion
+
     #region Math
 
     /// <summary>

@@ -70,10 +70,10 @@ namespace WorldEditor
             // Init generators
             Generators = new List<WorldGenerator>()
             {
-                new FlatWorldGenerator(),
-                new PerlinWorldGenerator(),
-                new CaptureTheFlag.CTFMapGenerator_Forest(),
-                new RegionMapGenerator(),
+                new WorldGenerator_Empty(),
+                new WorldGenerator_SimplePerlin(),
+                new WorldGenerator_Forest(),
+                new WorldGenerator_Parcels(),
             };
 
             // Init tools

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +10,12 @@ namespace BlockmapFramework
 	/// </summary>
 	public static class EntityManager
 	{
-		/// <summary>
-		/// Creates a new entity from a Def.
-		/// </summary>
-		public static Entity MakeEntity(EntityDef def)
+        /// <summary>
+        /// Creates a new entity from a Def.
+        /// </summary>
+        public static Entity MakeEntity(EntityDef def)
 		{
-			Entity obj = (Entity)Activator.CreateInstance(def.EntityClass);
+			Entity obj = (Entity)System.Activator.CreateInstance(def.EntityClass);
 			return obj;
 		}
 
@@ -125,5 +124,71 @@ namespace BlockmapFramework
             if (rotation == Direction.E || rotation == Direction.W) return new Vector3Int(sourceDimensions.z, sourceDimensions.y, sourceDimensions.x);
             throw new System.Exception(rotation.ToString() + " is not a valid rotation");
         }
+
+        #region Spawning entities
+
+        /// <summary>
+        /// Spawns an entity on a random node near the given point and returns the entity instance.
+        /// </summary>
+        public static Entity SpawnEntityAround(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, float standard_deviation, Direction rotation, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        {
+            int maxAttempts = 50;
+            if (standard_deviation == 0f) maxAttempts = 1;
+            int numAttempts = 0;
+
+            while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
+            {
+                Vector2Int targetCoordinates = HelperFunctions.GetRandomNearPosition(worldCoordinates, standard_deviation);
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, requiredRoamingArea, forbiddenNodes);
+                if (spawnedEntity != null) return spawnedEntity;
+            }
+
+            Debug.LogWarning($"Could not spawn {def.Label} around {worldCoordinates} after {maxAttempts} attempts.");
+            return null;
+        }
+
+        /// <summary>
+        /// Spawns an entity within a given area in the world and returns the entity instance.
+        /// </summary>
+        public static Entity SpawnEntityWithin(World world, EntityDef def, Actor player, Direction rotation, int minX, int maxX, int minY, int maxY, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        {
+            int maxAttempts = 50;
+            int numAttempts = 0;
+
+            while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
+            {
+                Vector2Int targetCoordinates = new Vector2Int(Random.Range(minX, maxX + 1), Random.Range(minY, maxY + 1));
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, requiredRoamingArea, forbiddenNodes);
+                if (spawnedEntity != null) return spawnedEntity;
+            }
+
+            Debug.LogWarning($"Could not spawn {def.Label} within x:{minX}-{maxX}, y:{minY}-{maxY} after {maxAttempts} attempts.");
+            return null;
+        }
+
+        /// <summary>
+        /// Tries spawning an entity on a random node on the given coordinates with all the given restrictions.
+        /// <br/>Returns the entity instance if successful or null of not successful.
+        private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        {
+            if (!world.IsInWorld(worldCoordinates)) return null;
+
+            BlockmapNode targetNode = world.GetNodes(worldCoordinates).RandomElement();
+            if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) return null;
+            if (!world.CanSpawnEntity(def, targetNode, rotation)) return null;
+
+            Entity spawnedEntity = world.SpawnEntity(def, targetNode, rotation, player, updateWorld: false);
+
+            if (requiredRoamingArea > 0 && !Pathfinder.HasRoamingArea(targetNode, requiredRoamingArea, spawnedEntity, forbiddenNodes))
+            {
+                Debug.Log($"[EntityManager - SpawnEntityAround] Removing {spawnedEntity.LabelCap} from {targetNode} because it didn't have enough roaming space there.");
+                world.RemoveEntity(spawnedEntity, updateWorld: false);
+                return null;
+            }
+
+            return spawnedEntity;
+        }
+
+        #endregion
     }
 }

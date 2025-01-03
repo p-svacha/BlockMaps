@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace BlockmapFramework.WorldGeneration
 {
-    public class PerlinWorldGenerator : WorldGenerator
+    public class WorldGenerator_SimplePerlin : WorldGenerator
     {
         public override string Label => "Simple Perlin";
+        public override string Description => "Empty hilly grass map.";
 
         private int[,] HeightMap;
 

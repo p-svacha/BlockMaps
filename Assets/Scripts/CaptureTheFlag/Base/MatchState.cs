@@ -6,8 +6,9 @@ namespace CaptureTheFlag
 {
     public enum MatchState
     {
-        GeneratingWorld,
-        InitializingWorld,
+        Loading_GeneratingWorld,
+        Loading_InitializingWorld,
+        Loading_CreatingCtfObjects,
         MatchReadyToStart, // only used in multiplayer
         CountdownBeforePlayerTurn, // only used in multiplayer
         PlayerTurn,

@@ -1,29 +1,18 @@
 ------------------------- CTF v0.0.5 -------------------------
 
-(/) AI: Game crash: Don't go after opponents that are in own flag zone because they are unreachable
-(/) AI: Game crashes when opponents want search for flag but are stuck
-	> they go to jail now
-(/)After opening door that explored new nodes that could instantly be reached, they don't get added to possible moves
-	probably because they aren't explored the moment the moves get calculated?
-(/) make explored more invisible
-(/) make countdown after both players pressed end turn
-(/) make it so you can still select your characters after ending turn
-
-
-spawn ctf entities (characters and flag) AFTER navmesh has been initialized
+(/) spawn ctf entities (characters and flag) AFTER navmesh has been initialized
 	> remove forceHeadspaceRecalc from CanSpawnEntity
 	> make IsGenerallyPassable private again
 	> make check that characters have at least 100 nodes to move around, else change their spawn position
 
-characters can still spawn on water nodes that should be impassable because of ground node is higher
+(/) characters can still spawn on water nodes that should be impassable because of ground node is higher
 	> should be fixed with change above
 
+(/) show map description in lobby
+(/) add some randomness to how far away flag spawns from map edge
 
-
-show map description in lobby
-
-add character spawns so they are fully random along the y axis (sideways), and can't exceed a certain value on the x axis (forward)
-	add spawning type to map generator
+(/) add character spawns so they are fully random along the y axis (sideways), and can't exceed a certain value on the x axis (forward)
+	add spawning type settings to lobby
 
 make valley map gen
 	high sides with player spawns
@@ -52,8 +41,21 @@ New map: MegaRandom
 
 ------------------------- END CTF v0.0.5 -------------------------
 
+------------------------- CTF v0.0.6 -------------------------
 
-neutral items (both consumable and with active effect)
+try hosting a dedicated server that handles connections
+
+if that works, create lobby browser
+
+if that works, try hosting the game on a website
+
+
+
+
+------------------------- END CTF v0.0.6 -------------------------
+
+
+CTF neutral items (both consumable and with active effect)
 	jail-trap (2x2)
 	catapult-trap (2x2)
 	food that gives stamina

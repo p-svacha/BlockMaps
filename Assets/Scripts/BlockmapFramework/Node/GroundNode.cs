@@ -194,7 +194,7 @@ namespace BlockmapFramework
             return base.CanChangeShape(mode, isIncrease);
         }
 
-        public override bool IsGenerallyPassable()
+        protected override bool IsGenerallyPassable()
         {
             if (IsCenterUnderWater) return false;
             if (IsVoid) return false;

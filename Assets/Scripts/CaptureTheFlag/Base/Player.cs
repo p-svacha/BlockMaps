@@ -36,7 +36,7 @@ namespace CaptureTheFlag
             ClientInfo = info;
             Debug.Log($"Adding player with Name {Name} and ClientId {ClientId}.");
         }
-        public void OnWorldGenerationDone(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
+        public void InitializePlayer(Actor actor, Zone territory, Zone jailZone, Zone flagZone)
         {
             Actor = actor;
 
@@ -63,7 +63,7 @@ namespace CaptureTheFlag
             // Debug
             string log = "";
             foreach (BlockmapNode n in JailPositions) log += n.Id + "/";
-            Debug.Log($"Jail Positions for {Name}: {log}");
+            // Debug.Log($"Jail Positions for {Name}: {log}");
 
             // Inform characters about match ready
             foreach (CtfCharacter c in Characters) c.OnMatchReady(Match, this, Opponent);

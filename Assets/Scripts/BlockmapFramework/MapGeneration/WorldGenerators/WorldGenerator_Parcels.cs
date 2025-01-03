@@ -7,9 +7,10 @@ namespace BlockmapFramework.WorldGeneration
     /// <summary>
     /// An XCOM inspired map generator that first splits the world into different 2d parcels of certain types. Parcels then get filled by their own parcel generators based on the type.
     /// </summary>
-    public class RegionMapGenerator : WorldGenerator
+    public class WorldGenerator_Parcels : WorldGenerator
     {
         public override string Label => "Parcels";
+        public override string Description => "An XCOM inspired map that first splits the world into different 2d parcels of certain types. Parcels then get filled by their own parcel generators based on the type";
 
         private List<Region> Parcels;
 

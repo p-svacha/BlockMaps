@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using BlockmapFramework.WorldGeneration;
 using CaptureTheFlag.AI;
 using CaptureTheFlag.Network;
 using CaptureTheFlag.UI;
@@ -17,12 +18,7 @@ namespace CaptureTheFlag
         public CtfMatchType MatchType => MatchInfo.MatchType;
 
         // Rules
-        public const float NEUTRAL_ZONE_SIZE = 0.1f; // size of neutral zone strip in %
-        public const int JAIL_ZONE_RADIUS = 3;
-        public const int JAIL_ZONE_MIN_FLAG_DISTANCE = 9; // minimum distance from jail zone center to flag
-        public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
-        public const int JAIL_TIME = 6; // Amount of turns a character spends in jail after being tagged
-        public const float FLAG_ZONE_RADIUS = 7.5f;  // Amount of tiles around flag that can't be entered by own team
+        private const int JAIL_TIME = 6; // Amount of turns a character spends in jail after being tagged
         public static List<Color> PlayerColors = new List<Color>()
         {
             Color.blue,
@@ -32,9 +28,9 @@ namespace CaptureTheFlag
         private const float COUNTDOWN_LENGTH_BEFORE_PLAYER_TURN = 3f;
 
         // Match setting option
-        public static List<CTFMapGenerator> WorldGenerators = new List<CTFMapGenerator>()
+        public static List<WorldGenerator> WorldGenerators = new List<WorldGenerator>()
         {
-            new CTFMapGenerator_Forest(),
+            new WorldGenerator_Forest(),
         };
         public static Dictionary<string, int> MapSizes = new Dictionary<string, int>()
         {
@@ -48,7 +44,7 @@ namespace CaptureTheFlag
         // Elements
         public CtfMatchUi UI => Game.MatchUI;
         public LineRenderer PathPreview => Game.PathPreviewRenderer;
-        private CTFMapGenerator MapGenerator;
+        private WorldGenerator WorldGenerator;
 
         public List<CtfCharacter> Characters;
         public CtfCharacter SelectedCharacter { get; private set; }
@@ -67,7 +63,7 @@ namespace CaptureTheFlag
 
         // Match state
         public MatchState State { get; private set; }
-        public bool IsMatchRunning => (State != MatchState.GeneratingWorld && State != MatchState.InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
+        public bool IsMatchRunning => (State != MatchState.Loading_GeneratingWorld && State != MatchState.Loading_InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
         public int CurrentTick { get; private set; }
         private float CountdownBeforePlayerTurn;
 
@@ -114,24 +110,56 @@ namespace CaptureTheFlag
 
             // Start world generation
             Game.LoadingScreenOverlay.SetActive(true);
-            MapGenerator = WorldGenerators[matchInfo.Settings.WorldGeneratorIndex];
-            MapGenerator.StartGeneration(matchInfo.Settings.WorldSize, matchInfo.Settings.Seed, onDoneCallback: OnWorldGenerationDone);
-            State = MatchState.GeneratingWorld;
+            WorldGenerator = WorldGenerators[matchInfo.Settings.WorldGeneratorIndex];
+            WorldGenerator.StartGeneration(matchInfo.Settings.WorldSize, matchInfo.Settings.Seed, onDoneCallback: OnWorldGenerationDone);
+            State = MatchState.Loading_GeneratingWorld;
         }
 
         private void OnWorldGenerationDone()
         {
             // Start world initialization
             if (World != null) GameObject.Destroy(World.WorldObject);
-            World = MapGenerator.World;
+            World = WorldGenerator.World;
             World.Initialize(OnWorldInitializationDone);
+
+            State = MatchState.Loading_InitializingWorld;
+        }
+
+
+        private void OnWorldInitializationDone()
+        {
+            State = MatchState.Loading_CreatingCtfObjects;
+            CreateCtfObjects(onDoneCallback: OnCreatingCtfObjectsDone);
+        }
+
+        private void OnCreatingCtfObjectsDone()
+        {
+            FinalizeMatchInitialization();
+
+            if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
+            if (MatchType == CtfMatchType.Multiplayer)
+            {
+                UI.ShowCenterNotification("Waiting for other player", Color.cyan);
+                NetworkClient.Instance.SendMessage(new NetworkMessage("PlayerReadyToStartMatch")); // Inform the server that we are ready
+            }
+        }
+
+        /// <summary>
+        /// Gets called when the world is fully generated and initialized.
+        /// <br/>Creates all CTF-specific entities, object, zones, etc. on the world.
+        /// <br/>Calls a callback function once the vision of all newly placed objects is recalculated.
+        /// </summary>
+        private void CreateCtfObjects(System.Action onDoneCallback)
+        {
+            // Turn world into a CTF map
+            CtfMapGenerator.CreateCtfMap(World, MatchInfo.Settings.SpawnType, onDoneCallback);
 
             // Set map zones
             NeutralZone = World.GetZone(id: 1);
 
             // Initialize players
-            Players[0].OnWorldGenerationDone(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
-            Players[1].OnWorldGenerationDone(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
+            Players[0].InitializePlayer(World.GetActor(id: 1), World.GetZone(id: 0), World.GetZone(id: 3), World.GetZone(id: 4));
+            Players[1].InitializePlayer(World.GetActor(id: 2), World.GetZone(id: 2), World.GetZone(id: 5), World.GetZone(id: 6));
 
             if (LocalPlayerIsPlayer1)
             {
@@ -150,24 +178,11 @@ namespace CaptureTheFlag
             // Register all characters
             Characters = new List<CtfCharacter>();
             foreach (Player p in Players) Characters.AddRange(p.Characters);
-
-            State = MatchState.InitializingWorld;
-        }
-
-        private void OnWorldInitializationDone()
-        {
-            FinalizeMatchInitialization();
-
-            if (MatchType == CtfMatchType.Singleplayer) StartGame(); // Instantly start the match in singleplayer
-            if (MatchType == CtfMatchType.Multiplayer)
-            {
-                UI.ShowCenterNotification("Waiting for other player", Color.cyan);
-                NetworkClient.Instance.SendMessage(new NetworkMessage("PlayerReadyToStartMatch")); // Inform the server that we are ready
-            }
         }
 
         /// <summary>
-        /// Gets called when the world is fully generated and initialized. After this function the match should be immediately ready to start.
+        /// Gets called when everything is generated, created and initialized.
+        /// <br/>After this function completes, the match should be immediately ready to start.
         /// </summary>
         private void FinalizeMatchInitialization()
         {
@@ -331,11 +346,11 @@ namespace CaptureTheFlag
 
             switch (State)
             {
-                case MatchState.GeneratingWorld:
-                    MapGenerator.UpdateGeneration();
+                case MatchState.Loading_GeneratingWorld:
+                    WorldGenerator.UpdateGeneration();
                     break;
 
-                case MatchState.InitializingWorld:
+                case MatchState.Loading_InitializingWorld:
                     // Handled in World.Update()
                     break;
 
