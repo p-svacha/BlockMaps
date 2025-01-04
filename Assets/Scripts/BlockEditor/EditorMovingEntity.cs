@@ -21,8 +21,6 @@ namespace WorldEditor
         private int customMaxHopUpDistance;
         private int customMaxHopDownDistance;
 
-        private Comp_Movement MovementComp;
-
         public override float VisionRange => customVisionRange;
 
         protected override void OnInitialized()
@@ -33,7 +31,6 @@ namespace WorldEditor
             TargetFlag.transform.SetParent(MeshObject.transform.parent);
             TargetFlag.gameObject.SetActive(false);
 
-            MovementComp = GetComponent<Comp_Movement>();
             MovementComp.OnNewPath += OnNewPath;
             MovementComp.OnStopMoving += OnStopMoving;
 

@@ -14,19 +14,7 @@ namespace CaptureTheFlag
 
         public Sprite Avatar { get; init; } = null;
         public float MaxActionPoints { get; init; } = 10;
-
-        public float RunningSpeed { get; set; } = 0;
-        public float Vision { get; set; } = 0;
-        public float MaxStamina { get; set; } = 0;
-        public float StaminaRegeneration { get; set; } = 0;
-
-        public float ClimbingSpeedModifier { get; set; } = 0;
-        public float SwimmingSpeedModifier { get; set; } = 0;
-        public int Jumping { get; set; } = 0;
-        public int Dropping { get; set; } = 0;
-
-        public int Height { get; set; } = 0;
-        public bool CanInteractWithDoors { get; set; } = false;
+        public bool CanUseDoors { get; init; } = true;
 
         public override CompProperties Clone()
         {
@@ -35,17 +23,7 @@ namespace CaptureTheFlag
                 CompClass = this.CompClass,
                 Avatar = this.Avatar,
                 MaxActionPoints = this.MaxActionPoints,
-
-                RunningSpeed = this.RunningSpeed,
-                Vision = this.Vision,
-                MaxStamina = this.MaxStamina,
-                StaminaRegeneration = this.StaminaRegeneration,
-                ClimbingSpeedModifier = this.ClimbingSpeedModifier,
-                SwimmingSpeedModifier = this.SwimmingSpeedModifier,
-                Jumping = this.Jumping,
-                Dropping = this.Dropping,
-                Height = this.Height,
-                CanInteractWithDoors = this.CanInteractWithDoors,
+                CanUseDoors = this.CanUseDoors,
             };
         }
     }

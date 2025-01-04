@@ -124,6 +124,11 @@ namespace BlockmapFramework
         /// </summary>
         private Projector SelectionIndicator;
 
+        // Component cache
+        public Comp_Movement MovementComp { get; private set; }
+        public Comp_Skills SkillsComp { get; private set; }
+        public Comp_Stats StatsComp { get; private set; }
+
         // Performance Profilers
         static readonly ProfilerMarker pm_SetOriginNode = new ProfilerMarker("SetOriginNode");
         static readonly ProfilerMarker pm_UpdateVision = new ProfilerMarker("UpdateVision");
@@ -181,8 +186,10 @@ namespace BlockmapFramework
             // Validate
             if (Height <= 0) throw new System.Exception($"Cannot create an entity with height = {Height}. Must be positive.");
 
-            // Comp cache
+            // Component cache
             if (HasComponent<Comp_Movement>()) MovementComp = GetComponent<Comp_Movement>();
+            if (HasComponent<Comp_Skills>()) SkillsComp = GetComponent<Comp_Skills>();
+            if (HasComponent<Comp_Stats>()) StatsComp = GetComponent<Comp_Stats>();
 
             // Initialize some objects
             OccupiedNodes = new HashSet<BlockmapNode>();
@@ -626,7 +633,6 @@ namespace BlockmapFramework
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
 
-        private Comp_Movement MovementComp;
         public virtual float MovementSpeed => MovementComp.MovementSpeed;
         public virtual bool CanSwim => MovementComp.CanSwim;
         public virtual ClimbingCategory ClimbingSkill => MovementComp.ClimbingSkill;
@@ -650,6 +656,12 @@ namespace BlockmapFramework
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
         public bool CanSee => VisionRange > 0;
+
+        // Skills and Stats
+        public List<Skill> GetAllSkills() => SkillsComp.GetAllSkills();
+        public int GetSkillLevel(SkillDef def) => SkillsComp.GetSkillLevel(def);
+        public List<Stat> GetAllStats() => StatsComp.GetAllStats();
+        public float GetStat(StatDef def) => StatsComp.GetStat(def);
 
         /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.
@@ -754,6 +766,19 @@ namespace BlockmapFramework
             return EntityManager.GetOccupiedNodes(Def, World, OriginNode, Rotation, overrideHeight);
         }
 
+        /// <summary>
+        /// Returns if this entity is drawn as its own object with its own MeshObject.
+        /// </summary>
+        public bool IsStandaloneEntity => Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated;
+
+        public override string ToString()
+        {
+            return $"{Label} ({Def.DefName}) alt: {MinAltitude} - {MaxAltitude} {Rotation}";
+        }
+
+        #endregion
+
+        #region Vision
 
         /// <summary>
         /// Shoots rays from the entity's current position towards all nodes, entities and walls within vision range.
@@ -1038,16 +1063,6 @@ namespace BlockmapFramework
             if (Dimensions.x != 1 || Dimensions.z != 1) throw new System.Exception("Eye position not yet implemented for entities bigger than 1x1");
 
             return GetWorldPosition(OriginNode, Rotation, Height, IsMirrored) + new Vector3(0f, (Dimensions.y * World.NodeHeight) - (World.NodeHeight * 0.4f), 0f);
-        }
-
-        /// <summary>
-        /// Returns if this entity is drawn as its own object with its own MeshObject.
-        /// </summary>
-        public bool IsStandaloneEntity => Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel || Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated;
-
-        public override string ToString()
-        {
-            return $"{Label} ({Def.DefName}) alt: {MinAltitude} - {MaxAltitude} {Rotation}";
         }
 
         #endregion

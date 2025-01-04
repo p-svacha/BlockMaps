@@ -1,28 +1,26 @@
 ------------------------- CTF v0.0.5 -------------------------
 
-(/) spawn ctf entities (characters and flag) AFTER navmesh has been initialized
-	> remove forceHeadspaceRecalc from CanSpawnEntity
-	> make IsGenerallyPassable private again
-	> make check that characters have at least 100 nodes to move around, else change their spawn position
+(/) make character stats use the same skala
+	> call them SKILLS with values 0-20
+	> the exact values they are used for (that we display now) are STATS
+		> maybe display them seperately without bars
 
-(/) characters can still spawn on water nodes that should be impassable because of ground node is higher
-	> should be fixed with change above
+new button in character selection for stats
+	> maybe à la rimworld/ecosim2d
 
-(/) show map description in lobby
-(/) add some randomness to how far away flag spawns from map edge
+desert map gen
+	sand, cactus, mostly flat
+	very few country roads through it
 
-(/) add character spawns so they are fully random along the y axis (sideways), and can't exceed a certain value on the x axis (forward)
-	add spawning type settings to lobby
+brutalist structure map
+
+neutral items
+
 
 make valley map gen
 	high sides with player spawns
 	river in the middle
 	some bridge crossings
-
-desert map gen
-	sand, cactus, mostly flat
-	very few country roads through it
-	wild scorpions that can put you into jail
 
 farm map
 	different crop fields with movement and vision modifiers
@@ -62,6 +60,8 @@ CTF neutral items (both consumable and with active effect)
 	tag-gun
 	item that restores action points
 	fernrohr that increases vision for one turn by a lot
+	item that gives another character that disappears when tagged
+		or small robot that will run out of battery
 items can be dropped too
 
 

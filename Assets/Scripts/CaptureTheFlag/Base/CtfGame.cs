@@ -44,6 +44,7 @@ namespace CaptureTheFlag
         private void Start()
         {
             // Load defs
+            DefDatabase<SkillDef>.AddDefs(SkillDefs.Defs);
             DefDatabase<StatDef>.AddDefs(StatDefs.Defs);
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<EntityDef>.AddDefs(EntityDefs.ObjectDefs);

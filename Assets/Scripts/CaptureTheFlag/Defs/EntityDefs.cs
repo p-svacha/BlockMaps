@@ -15,6 +15,7 @@ namespace CaptureTheFlag
         {
             EntityClass = typeof(CtfCharacter),
             UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
+            Dimensions = new Vector3Int(1, 3, 1),
             Impassable = false,
             WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
             RenderProperties = new EntityRenderProperties()
@@ -29,25 +30,29 @@ namespace CaptureTheFlag
             },
             Components = new List<CompProperties>()
                 {
-                    new CompProperties_CtfCharacter()
+                    new CompProperties_Skills()
                     {
-                        Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
-
-                        RunningSpeed = 10,
-                        Vision = 8,
-                        MaxStamina = 60,
-                        StaminaRegeneration = 5,
-                        ClimbingSpeedModifier = 1,
-                        SwimmingSpeedModifier = 1,
-                        Jumping = 2,
-                        Dropping = 4,
-                        Height = 3,
-                        CanInteractWithDoors = true,
+                        InitialSkillLevels = new Dictionary<string, int>()
+                        {
+                            { "Running", 10 },
+                            { "Vision", 8 },
+                            { "Stamina", 14 },
+                            { "Regeneration", 10 },
+                            { "Climbing", 6 },
+                            { "Swimming", 6 },
+                            { "Vaulting", 8 },
+                        },
                     },
                     new CompProperties_Movement()
                     {
                         ClimbingSkill = ClimbingCategory.Intermediate,
-                    }
+                    },
+                    new CompProperties_Stats() { },
+                    new CompProperties_CtfCharacter()
+                    {
+                        Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
+                        CanUseDoors = true,
+                    },
                 },
         };
         private static EntityDef DogBase = new EntityDef()
@@ -68,22 +73,26 @@ namespace CaptureTheFlag
             },
             Components = new List<CompProperties>()
                 {
+                    new CompProperties_Skills()
+                    {
+                        InitialSkillLevels = new Dictionary<string, int>()
+                        {
+                            { "Running", 15 },
+                            { "Vision", 5 },
+                            { "Stamina", 14 },
+                            { "Regeneration", 8 },
+                            { "Climbing", 0 },
+                            { "Swimming", 12 },
+                            { "Vaulting", 5 },
+                        },
+                    },
+                    new CompProperties_Movement() { },
+                    new CompProperties_Stats() { },
                     new CompProperties_CtfCharacter()
                     {
                         Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
-
-                        RunningSpeed = 15,
-                        Vision = 4,
-                        MaxStamina = 60,
-                        StaminaRegeneration = 4,
-                        ClimbingSpeedModifier = 0f,
-                        SwimmingSpeedModifier = 2f,
-                        Jumping = 1,
-                        Dropping = 1,
-                        Height = 1,
-                        CanInteractWithDoors = false,
+                        CanUseDoors = false,
                     },
-                    new CompProperties_Movement() { }
                 },
         };
         public static List<EntityDef> CharacterDefs
@@ -96,18 +105,18 @@ namespace CaptureTheFlag
                     Label = "alberto",
                     Description = "Very good and fast climber."
                 };
-                alberto.GetCompProperties<CompProperties_CtfCharacter>().ClimbingSpeedModifier = 3f;
+                alberto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Climbing"] = 20;
 
                 EntityDef usain = new EntityDef(HumanBase)
                 {
                     DefName = "Human2",
                     Label = "usain",
-                    Description = "Tall guy who is extremely fast but low stamina, meaning he needs to rest often."
+                    Description = "Tall guy who is extremely fast but low stamina, meaning he needs to rest often.",
+                    Dimensions = new Vector3Int(1, 4, 1),
                 };
                 usain.RenderProperties.ModelScale = new Vector3(1f, 1.3f, 1f);
-                usain.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 16;
-                usain.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 40;
-                usain.GetCompProperties<CompProperties_CtfCharacter>().Height = 4;
+                usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Running"] = 20;
+                usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Stamina"] = 10;
 
                 EntityDef eluid = new EntityDef(HumanBase)
                 {
@@ -115,9 +124,9 @@ namespace CaptureTheFlag
                     Label = "eluid",
                     Description = "Quite fast and very high stamina and regeneration, meaning he will almost never need rest."
                 };
-                eluid.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
-                eluid.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 100;
-                eluid.GetCompProperties<CompProperties_CtfCharacter>().StaminaRegeneration = 10;
+                eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Running"] = 12;
+                eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Stamina"] = 20;
+                eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Regeneration"] = 20;
 
                 EntityDef veronica = new EntityDef(HumanBase)
                 {
@@ -125,7 +134,7 @@ namespace CaptureTheFlag
                     Label = "veronica",
                     Description = "Extremely good vision, making her a great scout."
                 };
-                veronica.GetCompProperties<CompProperties_CtfCharacter>().Vision = 13;
+                veronica.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vision"] = 14;
 
                 EntityDef katie = new EntityDef(HumanBase)
                 {
@@ -133,8 +142,8 @@ namespace CaptureTheFlag
                     Label = "katie",
                     Description = "Very fast swimmer with above-average stamina."
                 };
-                katie.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 70;
-                katie.GetCompProperties<CompProperties_CtfCharacter>().SwimmingSpeedModifier = 3f;
+                katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vision"] = 16;
+                katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Swimming"] = 20;
 
                 EntityDef yaroslava = new EntityDef(HumanBase)
                 {
@@ -142,19 +151,18 @@ namespace CaptureTheFlag
                     Label = "yaroslava",
                     Description = "Very skilled at jumping over high obstacles and onto high platforms. She can also absorb higher drops."
                 };
-                yaroslava.GetCompProperties<CompProperties_CtfCharacter>().Jumping = 6;
-                yaroslava.GetCompProperties<CompProperties_CtfCharacter>().Dropping = 6;
+                yaroslava.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vaulting"] = 20;
 
                 EntityDef blotto = new EntityDef(DogBase)
                 {
                     DefName = "Dog1",
                     Label = "chevap",
-                    Description = "Bigger dog that can run fast, but low vision and needs to rest for longer periods of time."
+                    Description = "Bigger dog that can run fast, but low vision and needs to rest for longer periods of time.",
+                    Dimensions = new Vector3Int(1, 4, 1),
                 };
                 blotto.RenderProperties.ModelScale = new Vector3(1f, 1.8f, 1f);
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().Height = 2;
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().Jumping = 2;
-                blotto.GetCompProperties<CompProperties_CtfCharacter>().Dropping = 2;
+                blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vaulting"] = 10;
+                blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Regeneration"] = 6;
 
                 EntityDef pierette = new EntityDef(DogBase)
                 {
@@ -162,8 +170,8 @@ namespace CaptureTheFlag
                     Label = "cici",
                     Description = "Smaller dog with high stamina, but once that's gone she will need to rest long."
                 };
-                pierette.GetCompProperties<CompProperties_CtfCharacter>().MaxStamina = 80;
-                pierette.GetCompProperties<CompProperties_CtfCharacter>().RunningSpeed = 12;
+                pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Stamina"] = 18;
+                pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Running"] = 12;
 
                 return new List<EntityDef>()
                 {

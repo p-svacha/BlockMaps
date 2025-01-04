@@ -319,8 +319,9 @@ GameObject:
   - component: {fileID: 3600956094793267932}
   - component: {fileID: 3600956094793267933}
   - component: {fileID: 8301958419257438534}
+  - component: {fileID: 462062310025597412}
   m_Layer: 5
-  m_Name: StatRow
+  m_Name: SkillRow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -381,6 +382,14 @@ MonoBehaviour:
   Text: 
   IsFocussed: 0
   CurrentDelay: 0
+--- !u!222 &462062310025597412
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3600956094793267935}
+  m_CullTransparentMesh: 1
 --- !u!1 &3600956095104874416
 GameObject:
   m_ObjectHideFlags: 0

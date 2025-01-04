@@ -14,8 +14,9 @@ namespace CaptureTheFlag
         public Player Opponent { get; private set; }
 
         // Components
-        public Comp_Movement MovementComp { get; private set; }
         public Comp_CtfCharacter CtfComp { get; private set; }
+        public Comp_Stats Stats { get; private set; }
+        public Comp_Skills Skills { get; private set; }
 
         // Current stats
         public float ActionPoints { get; private set; }
@@ -34,7 +35,6 @@ namespace CaptureTheFlag
 
         protected override void OnCompInitialized(EntityComp comp)
         {
-            if (comp is Comp_Movement move) MovementComp = move;
             if (comp is Comp_CtfCharacter ctf) CtfComp = ctf;
         }
 
@@ -128,28 +128,24 @@ namespace CaptureTheFlag
         public Sprite Avatar => CtfComp.Avatar;
         public float MaxActionPoints => CtfComp.MaxActionPoints;
 
-        public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : CtfComp.GetStat(StatDefOf.RunningSpeed) * 0.2f;
+        public override float MovementSpeed => MovementComp.IsOverrideMovementSpeedActive ? MovementComp.MovementSpeed : GetStat(StatDefOf.MovementSpeed);
 
-        public List<Stat> GetAllStats() => CtfComp.GetAllStats();
-        public float Running => CtfComp.GetStat(StatDefOf.RunningSpeed);
-        public override float VisionRange => CtfComp.GetStat(StatDefOf.Vision);
-        public float MaxStamina => CtfComp.GetStat(StatDefOf.MaxStamina);
-        public float StaminaRegeneration => CtfComp.GetStat(StatDefOf.StaminaRegeneration);
+        public override float VisionRange => GetStat(StatDefOf.VisionRange);
+        public float MaxStamina => GetStat(StatDefOf.MaxStamina);
+        public float StaminaRegeneration => GetStat(StatDefOf.StaminaRegeneration);
 
-        public override ClimbingCategory ClimbingSkill => CtfComp.GetStat(StatDefOf.Climbing) == 0 ? ClimbingCategory.None : ClimbingCategory.Intermediate;
-        public override float ClimbingAptitude => CtfComp.GetStat(StatDefOf.Climbing);
-        public override bool CanSwim => CtfComp.GetStat(StatDefOf.Swimming) > 0;
-        public override int MaxHopUpDistance => (int)CtfComp.GetStat(StatDefOf.Jumping);
-        public override int MaxHopDownDistance => (int)CtfComp.GetStat(StatDefOf.Dropping);
-        public override float HoppingAptitude => Mathf.Max(1f, 1f + ((CtfComp.GetStat(StatDefOf.Jumping) - 2) * 0.2f));
-        public bool CanInteractWithDoors => CtfComp.GetStat(StatDefOf.CanUseDoors) == 1;
-
-        public override Vector3Int Dimensions => new Vector3Int(Def.Dimensions.x, (int)CtfComp.GetStat(StatDefOf.Height), Def.Dimensions.z);
+        public override ClimbingCategory ClimbingSkill => (ClimbingCategory)GetStat(StatDefOf.ClimbingSkill);
+        public override float ClimbingAptitude => GetStat(StatDefOf.ClimbingAptitude);
+        public override bool CanSwim => GetStat(StatDefOf.CanSwim) > 0;
+        public override int MaxHopUpDistance => (int)GetStat(StatDefOf.HopUpDistance);
+        public override int MaxHopDownDistance => (int)GetStat(StatDefOf.HopDownDistance);
+        public override float HoppingAptitude => GetStat(StatDefOf.HopAptitude);
+        public bool CanInteractWithDoors => CtfComp.CanUseDoors;
 
         public override float GetSurfaceAptitude(SurfaceDef def)
         {
-            if (def == SurfaceDefOf.Water) return CtfComp.GetStat(StatDefOf.Swimming);
-            else return 0.1f * CtfComp.GetStat(StatDefOf.RunningSpeed);
+            if (def == SurfaceDefOf.Water) return GetStat(StatDefOf.SwimmingAptitude);
+            else return GetStat(StatDefOf.RunningAptitude);
         }
 
         /// <summary>

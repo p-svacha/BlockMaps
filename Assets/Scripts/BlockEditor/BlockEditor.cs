@@ -57,7 +57,8 @@ namespace WorldEditor
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<EntityDef>.AddDefs(EditorDefs.EntityDefs);
-            DefDatabase<CaptureTheFlag.StatDef>.AddDefs(CaptureTheFlag.StatDefs.Defs);
+            DefDatabase<SkillDef>.AddDefs(CaptureTheFlag.SkillDefs.Defs);
+            DefDatabase<StatDef>.AddDefs(CaptureTheFlag.StatDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.ObjectDefs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.CharacterDefs);
             DefDatabaseRegistry.ResolveAllReferences();

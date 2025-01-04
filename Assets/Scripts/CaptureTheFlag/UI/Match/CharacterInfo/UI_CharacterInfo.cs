@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using BlockmapFramework;
 
 namespace CaptureTheFlag.UI
 {
@@ -16,24 +17,25 @@ namespace CaptureTheFlag.UI
 
         public TextMeshProUGUI DescriptionText;
         public UI_ToggleButton StatButton;
-        public GameObject StatPanel;
-        public GameObject StatListContainer;
+        public GameObject SkillPanel;
+        public GameObject SkillListContainer;
 
         public UI_ProgressBar ActionBar;
         public UI_ProgressBar StaminaBar;
 
         [Header("Prefabs")]
-        public UI_StatRow StatRowPrefab;
+        public UI_SkillRow SkillRowPrefab;
 
         // internal
         private bool IsStatWindowActive;
+        private CtfCharacter displayedCharacter;
 
         public void Init(CtfMatch match)
         {
             Match = match;
             VisionCutoffButton.Button.onClick.AddListener(() => { Match.ToggleVisionCutoff(); VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled); });
             StatButton.Button.onClick.AddListener(StatButton_OnClick);
-            StatPanel.SetActive(false);
+            SkillPanel.SetActive(false);
         }
 
         public void UpdateCharacterInfo()
@@ -49,11 +51,15 @@ namespace CaptureTheFlag.UI
                 CtfCharacter c = Match.SelectedCharacter;
                 if (!gameObject.activeSelf) gameObject.SetActive(true);
 
-                TitleText.text = c.LabelCap;
-                DescriptionText.text = c.Description.ToString();
-                RefreshStatPanel(c);
-                ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
-                StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+                if (c != displayedCharacter)
+                {
+                    TitleText.text = c.LabelCap;
+                    DescriptionText.text = c.Description.ToString();
+                    RefreshSkillPanel(c);
+                    ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
+                    StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+                    displayedCharacter = c;
+                }
 
                 VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
 
@@ -74,23 +80,29 @@ namespace CaptureTheFlag.UI
 
             if (IsStatWindowActive)
             {
-                RefreshStatPanel(Match.SelectedCharacter);
-                StatPanel.SetActive(true);
+                RefreshSkillPanel(Match.SelectedCharacter);
+                SkillPanel.SetActive(true);
             }
             else
             {
-                StatPanel.SetActive(false);
+                SkillPanel.SetActive(false);
             }
         }
 
-        private void RefreshStatPanel(CtfCharacter c)
+        private void RefreshSkillPanel(CtfCharacter c)
         {
-            HelperFunctions.DestroyAllChildredImmediately(StatListContainer);
-            foreach (Stat stat in c.GetAllStats())
+            HelperFunctions.DestroyAllChildredImmediately(SkillListContainer);
+
+            // Skills
+            foreach (Skill skill in c.GetAllSkills())
             {
-                UI_StatRow statRow = Instantiate(StatRowPrefab, StatListContainer.transform);
-                statRow.Init(stat);
+                UI_SkillRow skillRow = Instantiate(SkillRowPrefab, SkillListContainer.transform);
+                skillRow.Init(skill);
             }
+
+            // Additional info
+            UI_SkillRow canUseDoorsRow = Instantiate(SkillRowPrefab, SkillListContainer.transform);
+            canUseDoorsRow.Init("Can use doors", c.CanInteractWithDoors ? "Yes" : "No");
         }
 
         private void ShowActionPreview(CtfCharacter c, float cost)

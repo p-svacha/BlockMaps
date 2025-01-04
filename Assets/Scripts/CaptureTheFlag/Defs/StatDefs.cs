@@ -1,3 +1,4 @@
+using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,90 +9,209 @@ namespace CaptureTheFlag
     {
         public static List<StatDef> Defs = new List<StatDef>()
         {
-            // Most important ones
             new StatDef()
             {
-                DefName = "RunningSpeed",
-                Label = "running",
-                Description = "How far this character can move within a turn. Higher speed stat means moving needs less action points.",
-                MaxValue = 16,
+                DefName = "MovementSpeed",
+                Label = "movement speed",
+                Description = "How many tiles per second this character moves when running.",
+                BaseValue = 0f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Running",
+                        LinearPerLevelValue = 0.2f,
+                    }
+                },
             },
 
             new StatDef()
             {
-                DefName = "Vision",
-                Label = "vision",
-                Description = "How many cells in every direction this character can see things.",
-                MaxValue = 16,
+                DefName = "RunningAptitude",
+                Label = "running aptitude",
+                Description = "Modifier of how many action points running costs.",
+                Type = StatType.Percent,
+                BaseValue = 0f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Running",
+                        LinearPerLevelValue = 0.1f,
+                    }
+                },
+            },
+
+            new StatDef()
+            {
+                DefName = "VisionRange",
+                Label = "vision range",
+                Description = "How many tiles around themselves this character can see things.",
+                Type = StatType.Int,
+                BaseValue = 0f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Vision",
+                        LinearPerLevelValue = 1f,
+                    }
+                }
             },
 
             new StatDef()
             {
                 DefName = "MaxStamina",
-                Label = "stamina",
+                Label = "max stamina",
                 Description = "How much stamina this character has when fully rested.",
-                MaxValue = 100,
+                Type = StatType.Int,
+                BaseValue = 18,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Stamina",
+                        LinearPerLevelValue = 3,
+                    }
+                },
             },
 
             new StatDef()
             {
                 DefName = "StaminaRegeneration",
-                Label = "regeneration",
+                Label = "stamina regeneration",
                 Description = "How much stamina this character regenerates at the start of each turn.",
-                MaxValue = 10,
+                BaseValue = 1f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Regeneration",
+                        LinearPerLevelValue = 0.5f,
+                    }
+                }
             },
 
-            // Less important ones
             new StatDef()
             {
-                DefName = "Climbing",
+                DefName = "ClimbingSkill",
                 Label = "climbing",
-                Description = "If this character can climb and how fast they are at it.",
-                MaxValue = 3,
-            },
-
-            new StatDef()
-            {
-                DefName = "Swimming",
-                Label = "swimming",
-                Description = "If this character can swim and how many action points it costs to swim.",
-                MaxValue = 3,
-            },
-
-            new StatDef()
-            {
-                DefName = "Jumping",
-                Label = "jumping",
-                Description = "How many cells upwards this character can jump over obstacles or onto adjacent tiles.",
+                Description = "Defines what kind of things this character can climb\n0 = nothing\n1 = ladders\n2 = ladders, fences\n3 = ladders, fences, walls.",
                 Type = StatType.Int,
-                MaxValue = 6,
+                BaseValue = 0,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Climbing",
+                        Type = SkillImpactType.ValuePerLevel,
+                        PerLevelValues = new Dictionary<int, float>()
+                        {
+                            { 0, 0 },
+                            { 1, 1 },
+                            { 10, 2 },
+                            { 20, 3 },
+                        }
+                    }
+                }
             },
 
             new StatDef()
             {
-                DefName = "Dropping",
+                DefName = "ClimbingAptitude",
+                Label = "climbing aptitude",
+                Description = "Modifier of how many action points climbing costs.",
+                Type = StatType.Percent,
+                BaseValue = 0.25f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Climbing",
+                        LinearPerLevelValue = 0.1375f,
+                    }
+                }
+            },
+
+            new StatDef()
+            {
+                DefName = "CanSwim",
+                Label = "can swim",
+                Description = "If this character enter water.",
+                Type = StatType.Binary,
+                BaseValue = 1,
+                SkillRequirements = new List<string>()
+                {
+                    "Swimming",
+                },
+            },
+
+            new StatDef()
+            {
+                DefName = "SwimmingAptitude",
+                Label = "swimming aptitude",
+                Description = "Modifier of how many action points swimming costs.",
+                Type = StatType.Percent,
+                BaseValue = 0.25f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Swimming",
+                        LinearPerLevelValue = 0.1375f,
+                    }
+                }
+            },
+
+            new StatDef()
+            {
+                DefName = "HopUpDistance",
+                Label = "hopping",
+                Description = "How many cells upwards this character can vault over obstacles or onto adjacent tiles.",
+                Type = StatType.Int,
+                BaseValue = 1,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Vaulting",
+                        LinearPerLevelValue = 0.2f,
+                    }
+                }
+            },
+
+            new StatDef()
+            {
+                DefName = "HopDownDistance",
                 Label = "dropping",
                 Description = "How many cells downwards this character can drop onto adjacent tiles.",
                 Type = StatType.Int,
-                MaxValue = 6,
+                BaseValue = 2,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Vaulting",
+                        LinearPerLevelValue = 0.4f,
+                    }
+                }
             },
 
             new StatDef()
             {
-                DefName = "Height",
-                Label = "height",
-                Description = "How many cells tall this character is. Taller characters can see better over things, but can't fit through tight spaces.",
-                Type = StatType.Int,
-                MaxValue = 4,
-                HigherIsBetter = false,
-            },
-
-            new StatDef()
-            {
-                DefName = "CanUseDoors",
-                Label = "can use doors",
-                Description = "If this character can interact with doors.",
-                Type = StatType.Binary
+                DefName = "HopAptitude",
+                Label = "jumping aptitude",
+                Description = "Modifier of how many action points hopping and dropping costs.",
+                Type = StatType.Percent,
+                BaseValue = 0.25f,
+                SkillOffsets = new List<SkillImpact>()
+                {
+                    new SkillImpact()
+                    {
+                        SkillDefName = "Vaulting",
+                        LinearPerLevelValue = 0.1375f,
+                    }
+                }
             },
         };
     }
