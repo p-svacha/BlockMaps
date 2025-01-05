@@ -2,17 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScaleOperation : NoiseOperation
+namespace UltimateNoiseLibrary
 {
-    private float Scale;
-
-    public ScaleOperation(float scale)
+    public class ScaleOperation : NoiseOperation
     {
-        Scale = scale;
-    }
+        public float Scale;
 
-    public override float DoOperation(GradientNoise[] inputs, float x, float y)
-    {
-        return inputs[0].GetValue(x * Scale, y * Scale);
+        public ScaleOperation(float scale)
+        {
+            Scale = scale;
+        }
+
+        public override int NumInputs => 1;
+        public override float DoOperation(GradientNoise[] inputs, float x, float y)
+        {
+            return inputs[0].GetValue(x * Scale, y * Scale);
+        }
     }
 }

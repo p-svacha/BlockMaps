@@ -1,21 +1,5 @@
-------------------------- CTF v0.0.5 -------------------------
-
-(/) make character stats use the same skala
-	> call them SKILLS with values 0-20
-	> the exact values they are used for (that we display now) are STATS
-		> maybe display them seperately without bars
-
-(/) new button in character selection for stats
-	> maybe à la rimworld/ecosim2d
-
-(/) Detailed information window (as part of base framework):
-	shows name and description in header
-	lists all stats in left column and selected stat in right column
-		selected stat shows stat label, description and calculation
-	fixed size, scrollable
-	search bar in header that highlights stats matching
-
-(/) show stamina regen in character info (as "(+4.1)")
+------------------------- CTF v0.0.6 -------------------------
+More maps update
 
 New map(s): ideas listed below
 
@@ -45,9 +29,9 @@ New map: MegaRandom
 
 
 
-------------------------- END CTF v0.0.5 -------------------------
+------------------------- END CTF v0.0.6 -------------------------
 
-------------------------- CTF v0.0.6 -------------------------
+------------------------- CTF v0.0.7 -------------------------
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
@@ -77,9 +61,9 @@ Walking on an item adds it to the characters inventory if they don't hold anothe
 	item that gives another character that disappears when tagged
 		or small robot that will run out of battery
 
-------------------------- END CTF v0.0.6 -------------------------
+------------------------- END CTF v0.0.7 -------------------------
 
-------------------------- CTF v0.0.7 -------------------------
+------------------------- CTF v0.0.8 -------------------------
 
 try hosting a dedicated server that handles connections
 
@@ -87,7 +71,7 @@ if that works, create lobby browser
 
 if that works, try hosting the game on a website
 
-------------------------- END CTF v0.0.7 -------------------------
+------------------------- END CTF v0.0.8 -------------------------
 
 
 Framework Updates:

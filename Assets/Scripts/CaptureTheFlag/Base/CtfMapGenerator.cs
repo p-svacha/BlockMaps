@@ -167,7 +167,7 @@ namespace CaptureTheFlag
                     if (spawnedCharacter == null) throw new System.Exception($"Failed to spawn character");
                     CreatedEntities.Add(spawnedCharacter);
                 }
-                else if (SpawnType == CharacterSpawnType.SpreadAlongFullMapWidth)
+                else if (SpawnType == CharacterSpawnType.OwnTerritory)
                 {
                     int minXOffset = (int)(World.NumNodesPerSide * MIN_CHARACTER_SPAWN_X_RELATIVE);
                     int maxXOffset = (int)(World.NumNodesPerSide * MAX_CHARACTER_SPAWN_X_RELATIVE);
@@ -213,9 +213,9 @@ namespace CaptureTheFlag
         AroundFlag,
 
         /// <summary>
-        /// All the characters of a player spawn completely spread out along the full y axis of the world.
+        /// All the characters of a player spawn at random positions in their territory.
         /// </summary>
-        [Description("Along full map width")]
-        SpreadAlongFullMapWidth
+        [Description("Own territory")]
+        OwnTerritory
     }
 }

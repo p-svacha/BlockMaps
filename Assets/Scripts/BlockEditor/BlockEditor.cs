@@ -75,6 +75,7 @@ namespace WorldEditor
                 new WorldGenerator_SimplePerlin(),
                 new WorldGenerator_Forest(),
                 new WorldGenerator_Parcels(),
+                new WorldGenerator_Desert(),
             };
 
             // Init tools

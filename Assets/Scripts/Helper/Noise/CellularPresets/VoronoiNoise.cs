@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class VoronoiNoise : SegmentationNoise
+namespace UltimateNoiseLibrary
 {
-    public override string Name => throw new System.NotImplementedException();
-
-    public override int GetValue(float x, float y)
+    public class VoronoiNoise : SegmentationNoise
     {
-        throw new System.NotImplementedException();
-    }
+        public override string Name => throw new System.NotImplementedException();
 
+        public override int GetValue(float x, float y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+    }
 }
