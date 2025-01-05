@@ -56,5 +56,24 @@ namespace BlockmapFramework
 
             return value;
         }
+
+        public string GetValueText(float value)
+        {
+            switch (Def.Type)
+            {
+                case StatType.Float:
+                    return value.ToString("0.##");
+
+                case StatType.Int:
+                    return value.ToString();
+
+                case StatType.Binary:
+                    return value == 1 ? "Yes" : "No";
+
+                case StatType.Percent:
+                    return value.ToString("P0");
+            }
+            throw new System.Exception($"Type {Def.Type} not handled.");
+        }
     }
 }

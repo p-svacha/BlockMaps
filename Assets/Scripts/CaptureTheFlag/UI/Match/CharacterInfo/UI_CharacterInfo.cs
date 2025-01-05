@@ -14,13 +14,16 @@ namespace CaptureTheFlag.UI
         [Header("Elements")]
         public TextMeshProUGUI TitleText;
         public UI_ToggleButton VisionCutoffButton;
+        public Button InfoButton;
 
         public TextMeshProUGUI DescriptionText;
         public UI_ToggleButton StatButton;
         public GameObject SkillPanel;
         public GameObject SkillListContainer;
 
+        public TextMeshProUGUI ActionPointsPerTurnText;
         public UI_ProgressBar ActionBar;
+        public TextMeshProUGUI StaminaPerTurnText;
         public UI_ProgressBar StaminaBar;
 
         [Header("Prefabs")]
@@ -35,6 +38,7 @@ namespace CaptureTheFlag.UI
             Match = match;
             VisionCutoffButton.Button.onClick.AddListener(() => { Match.ToggleVisionCutoff(); VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled); });
             StatButton.Button.onClick.AddListener(StatButton_OnClick);
+            InfoButton.onClick.AddListener(() => UI_EntityInfoWindow.Instance.Show(Match.SelectedCharacter));
             SkillPanel.SetActive(false);
         }
 
@@ -58,6 +62,9 @@ namespace CaptureTheFlag.UI
                     RefreshSkillPanel(c);
                     ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
                     StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
+                    ActionPointsPerTurnText.text = $"+{c.CtfComp.MaxActionPoints} / turn";
+                    StaminaPerTurnText.text = $"+{c.StaminaRegeneration.ToString("0.#")} / turn";
+
                     displayedCharacter = c;
                 }
 

@@ -81,7 +81,7 @@ namespace CaptureTheFlag
                 DefName = "StaminaRegeneration",
                 Label = "stamina regeneration",
                 Description = "How much stamina this character regenerates at the start of each turn.",
-                BaseValue = 1f,
+                BaseValue = 0f,
                 SkillOffsets = new List<SkillImpact>()
                 {
                     new SkillImpact()
@@ -186,7 +186,7 @@ namespace CaptureTheFlag
                 Label = "dropping",
                 Description = "How many cells downwards this character can drop onto adjacent tiles.",
                 Type = StatType.Int,
-                BaseValue = 2,
+                BaseValue = 1,
                 SkillOffsets = new List<SkillImpact>()
                 {
                     new SkillImpact()

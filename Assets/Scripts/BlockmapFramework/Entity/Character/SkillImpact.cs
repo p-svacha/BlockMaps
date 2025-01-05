@@ -11,6 +11,7 @@ namespace BlockmapFramework
     public class SkillImpact
     {
         public string SkillDefName { get; init; } = "";
+        public SkillDef SkillDef => DefDatabase<SkillDef>.GetNamed(SkillDefName);
 
         public SkillImpactType Type { get; init; } = SkillImpactType.Linear;
         public float LinearPerLevelValue { get; init; } = 0f;
@@ -23,7 +24,7 @@ namespace BlockmapFramework
 
         public float GetValueFor(Entity e)
         {
-            int skillLevel = e.GetSkillLevel(DefDatabase<SkillDef>.GetNamed(SkillDefName));
+            int skillLevel = e.GetSkillLevel(SkillDef);
 
             if (Type == SkillImpactType.Linear)
             {

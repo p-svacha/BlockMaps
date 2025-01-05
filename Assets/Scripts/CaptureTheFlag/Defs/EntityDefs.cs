@@ -142,7 +142,7 @@ namespace CaptureTheFlag
                     Label = "katie",
                     Description = "Very fast swimmer with above-average stamina."
                 };
-                katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vision"] = 16;
+                katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Stamina"] = 16;
                 katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Swimming"] = 20;
 
                 EntityDef yaroslava = new EntityDef(HumanBase)

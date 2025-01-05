@@ -5,17 +5,25 @@
 	> the exact values they are used for (that we display now) are STATS
 		> maybe display them seperately without bars
 
-new button in character selection for stats
+(/) new button in character selection for stats
 	> maybe à la rimworld/ecosim2d
+
+(/) Detailed information window (as part of base framework):
+	shows name and description in header
+	lists all stats in left column and selected stat in right column
+		selected stat shows stat label, description and calculation
+	fixed size, scrollable
+	search bar in header that highlights stats matching
+
+(/) show stamina regen in character info (as "(+4.1)")
+
+New map(s): ideas listed below
 
 desert map gen
 	sand, cactus, mostly flat
 	very few country roads through it
 
 brutalist structure map
-
-neutral items
-
 
 make valley map gen
 	high sides with player spawns
@@ -41,19 +49,25 @@ New map: MegaRandom
 
 ------------------------- CTF v0.0.6 -------------------------
 
-try hosting a dedicated server that handles connections
+Add Items to CTF:
+	new Comp_CtfItem & CompProperties_CtfItem
+	Active or Passive
+	Characters can hold 1 item at a time
+	Item is shown in CharacterInfo next to bars in a little square
+	new action: use item
+	new action: drop item
+	new actions are added to special actions
+	new actions can also be done by clicking on item in character info
 
-if that works, create lobby browser
+Add "tag" system to map generator:
+	Generators can apply tags (strings) to certain nodes
+	Use these tags for spawning items
+		Forest tags inside building nodes as spawnable for items
+	CtfMapCreator will read these tags and have a chance to spawn an item on tagged nodes
 
-if that works, try hosting the game on a website
+Walking on an item adds it to the characters inventory if they don't hold another item yet
 
-
-
-
-------------------------- END CTF v0.0.6 -------------------------
-
-
-CTF neutral items (both consumable and with active effect)
+>>> List of items <<<
 	jail-trap (2x2)
 	catapult-trap (2x2)
 	food that gives stamina
@@ -62,9 +76,21 @@ CTF neutral items (both consumable and with active effect)
 	fernrohr that increases vision for one turn by a lot
 	item that gives another character that disappears when tagged
 		or small robot that will run out of battery
-items can be dropped too
+
+------------------------- END CTF v0.0.6 -------------------------
+
+------------------------- CTF v0.0.7 -------------------------
+
+try hosting a dedicated server that handles connections
+
+if that works, create lobby browser
+
+if that works, try hosting the game on a website
+
+------------------------- END CTF v0.0.7 -------------------------
 
 
+Framework Updates:
 
 World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
 	test by quickly changing surface of many nodes in editor
@@ -175,7 +201,6 @@ examples are AutumnLeaves, Snow, Moss
 
 
 Rework shader for entities
- - Only use transparency shader on moving objects
  - Allow option to use uv space instead of world space
 	> Apply this to doors
 
@@ -206,35 +231,35 @@ Add "DrawSlopeAsStairs" to SurfaceDef.Renderproperties
 	> walls get it too
 	> entities can destroy for big stamina cost
 
-- Minimap
+CTF: Minimap
 	> shows tiles
 	> shows current camera position
 	> shows character positions
 	> interactable to move camera
 
-- Make flags carriable
+CTF: Make flags carriable
 	> make a framework for carryable entties/items
 	> certain characters can carry it
 	> impassable zones moves with carried flag
 	> if character holding flag gets tagged = game over, no matter where
 	> win game when flag is back home
 
-- Dogs need a nearby master to work
+CTF: Dogs need a nearby master to work
 
-- Jumping ability
+CTF: Jumping ability
 	> to hop over fences
 	> to hop over gaps
 	> jumping ability 1 = hop over 1 tile gap, hop over 1 tile fence
 
-- Horses
+CTF: Horses
 	- Rideable by humans
 	
-- Flying
+CTF: Flying
 	- Hawk
 	- Can't tag or be tagged, fly at fixed height
 	- Only give vision
 
-- fix: water fill algorithm should stop after a while (like 1000 tiles?)
+Framework: fix: water fill algorithm should stop after a while (like 1000 tiles?)
 
 - add new item framework
 	- items behave like static entities on map, but way more limited
@@ -306,18 +331,10 @@ CTF: Slopes use more action points
 	> downwards * 1.25
 	> upwards * 1.5
 
-CTF: Upon end game show full visible map
-
 CTF: more general modifier system
 	> modifiers have a duration and effect, name, description, icon
 	> move jail time to modifier
 	> add ui for modifiers
-
-CTF AI:
- - Attacker: new job: Flee if seeing opponent character that sees you too
- - New role: Flag cheater (go directly towards flag even if not visible)
- - Attacker roles can change when in own territory
- - Defender role can change during patrol
 
 CTF: Rework hover pathfinding
 	> Hover on unreachable node = no path preview
