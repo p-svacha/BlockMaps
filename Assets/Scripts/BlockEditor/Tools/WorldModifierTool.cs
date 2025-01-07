@@ -31,7 +31,7 @@ namespace WorldEditor
             // Modifier dropdown
             ModifierDropdown.onValueChanged.AddListener(ModifierDropdown_OnValueChanged);
             Modifiers = DefDatabase<WorldModifierDef>.AllDefs.ToList();
-            List<string> dropdownOptions = Modifiers.Select(x => x.Label).ToList();
+            List<string> dropdownOptions = Modifiers.Select(x => x.LabelCap).ToList();
             ModifierDropdown.AddOptions(dropdownOptions);
             ModifierDropdown_OnValueChanged(ModifierDropdown.value);
 

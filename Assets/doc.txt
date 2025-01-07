@@ -4,10 +4,10 @@ make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 New map(s): ideas listed below
 
 desert map gen
-	soft sand areas
-	hard sand areas
-	mostly flat
-	dunes
+	(/)soft sand areas
+	(/)hard sand areas
+	(/)mostly flat
+	(/)dunes
 	cactus +  shrub clusters
 	shrubs
 	palm clusters

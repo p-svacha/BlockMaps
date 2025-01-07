@@ -32,14 +32,28 @@ namespace BlockmapFramework.Defs
             {
                 DefName = "Sand",
                 Label = "sand",
-                Description = "Soft sand",
-                MovementSpeedModifier = 0.35f,
+                Description = "Sand",
+                MovementSpeedModifier = 0.4f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Sand",
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "SandSoft",
+                Label = "soft sand",
+                Description = "Soft sand",
+                MovementSpeedModifier = 0.3f,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_Blend,
+                    MaterialName = "SandSoft",
+                },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "SoftSand"),
             },
 
             new SurfaceDef()

@@ -38,7 +38,7 @@ namespace WorldEditor
             // Generator dropdown
             FeatureDropdown.onValueChanged.AddListener(FeatureDropdown_OnValueChanged);
             Features = DefDatabase<MapGenFeatureDef>.AllDefs.ToList();
-            List<string> dropdownOptions = Features.Select(x => x.Label).ToList();
+            List<string> dropdownOptions = Features.Select(x => x.LabelCap).ToList();
             FeatureDropdown.AddOptions(dropdownOptions);
             FeatureDropdown_OnValueChanged(FeatureDropdown.value);
         }

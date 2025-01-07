@@ -36,10 +36,26 @@ namespace WorldEditor
             new WorldModifierDef()
             {
                 DefName = "Desert_BaseHeightMap",
-                Label = "desert base heightmap",
+                Label = "set desert base heightmap",
                 Description = "Applies the base height map of the desert world generator to the whole map.",
                 ModifierAction = WorldGenerator_Desert.ApplyBaseHeightmap,
-            }
+            },
+
+            new WorldModifierDef()
+            {
+                DefName = "Desert_SetSurface",
+                Label = "set desert base surface",
+                Description = "Applies the base surfaces of the desert world generator to the whole map.",
+                ModifierAction = WorldGenerator_Desert.SetBaseSurfaces,
+            },
+
+            new WorldModifierDef()
+            {
+                DefName = "Desert_AddDunes",
+                Label = "add dunes",
+                Description = "Adds sandy dunes to some parts of the map.",
+                ModifierAction = WorldGenerator_Desert.AddDunes,
+            },
         };
     }
 }

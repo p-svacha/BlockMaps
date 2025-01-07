@@ -191,6 +191,21 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Adds the given altitude to all corners
+        /// </summary>
+        public void AddAltitude(Dictionary<Direction, int> toAddAltitudes)
+        {
+            Dictionary<Direction, int> newAltitude = new Dictionary<Direction, int>()
+            {
+                { Direction.SW, Altitude[Direction.SW] + toAddAltitudes[Direction.SW] },
+                { Direction.SE, Altitude[Direction.SE] + toAddAltitudes[Direction.SE] },
+                { Direction.NE, Altitude[Direction.NE] + toAddAltitudes[Direction.NE] },
+                { Direction.NW, Altitude[Direction.NW] + toAddAltitudes[Direction.NW] },
+            };
+            SetAltitude(newAltitude);
+        }
+
+        /// <summary>
         /// Sets the node to be flat on the given altitude.
         /// </summary>
         public void SetAltitude(int altitude)

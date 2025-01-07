@@ -47,7 +47,7 @@ namespace BlockmapFramework
 
             // Set up caching
             CachedSurfaceArrayIndices.Clear();
-            for (int i = 0; i < 3; i++) CachedSurfaceArrayIndices.Add(blendableSurfaces[i], i);
+            for (int i = 0; i < blendableSurfaces.Count; i++) CachedSurfaceArrayIndices.Add(blendableSurfaces[i], i);
 
             // Load materials
             List<Material> blendableMaterials = blendableSurfaces.Select(x => LoadBlendableReferenceMaterial(x.RenderProperties.MaterialName)).ToList();

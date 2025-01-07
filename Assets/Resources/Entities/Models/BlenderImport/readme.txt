@@ -11,10 +11,12 @@ In Blender:
 	- Add textures to the materials and correctly map the uv
 	- All textures need to be in the Unity project directory!
 
-- Before saving, remove the camera and light in the scene
-- Before saving select object > press Ctrl+A > All transforms
-- Save file as .blend for future edits
-- Export file as .fbx to use in Unity 
+- Before saving:
+	> Remove the camera and light in the scene
+	> Merge all objects into one mesh ("a" to select all, "ctrl+j" to merge)
+	> Select object > press Ctrl+A > All transforms
+- Save file with suffix _blend as .blend for future edits
+- Export file with suffix _fbx as .fbx to use in Unity 
 	> (VERY IMPORTANT: Set the chechbox "Apply Transform" when exporting)
 
 - Check log_2x1_blend.blend as reference

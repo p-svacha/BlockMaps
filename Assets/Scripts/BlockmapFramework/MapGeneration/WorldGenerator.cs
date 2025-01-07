@@ -129,10 +129,12 @@ namespace BlockmapFramework
         }
 
         #region Helper Functions
-        protected void ApplyHeightmap(int[,] heightMap)
+        /// <summary>
+        /// Sets all ground node heights according to the given height map.
+        /// </summary>
+        protected static void ApplyHeightmap(World world, int[,] heightMap)
         {
-
-            foreach (GroundNode n in World.GetAllGroundNodes())
+            foreach (GroundNode n in world.GetAllGroundNodes())
             {
                 Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
                     {
@@ -142,6 +144,24 @@ namespace BlockmapFramework
                         { Direction.NW, heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
                     };
                 n.SetAltitude(nodeHeights);
+            }
+        }
+
+        /// <summary>
+        /// Adds the heights of the given heightmap to the altitude of all ground nodes.
+        /// </summary>
+        protected static void AddHeightmap(World world, int[,] heightMap)
+        {
+            foreach (GroundNode n in world.GetAllGroundNodes())
+            {
+                Dictionary<Direction, int> newNodeHeights = new Dictionary<Direction, int>()
+                {
+                    { Direction.SW, n.Altitude[Direction.SW] + heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y] },
+                    { Direction.SE, n.Altitude[Direction.SE] + heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y] },
+                    { Direction.NE, n.Altitude[Direction.NE] + heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
+                    { Direction.NW, n.Altitude[Direction.NW] + heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
+                };
+                n.SetAltitude(newNodeHeights);
             }
         }
 

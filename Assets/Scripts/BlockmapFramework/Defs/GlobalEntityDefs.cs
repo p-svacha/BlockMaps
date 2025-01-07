@@ -213,6 +213,50 @@ namespace BlockmapFramework.Defs
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "crate/crate01_fbx"),
                 },
             },
+
+            new EntityDef()
+            {
+                DefName = "Saguaro01_Big",
+                Label = "saguaro cactus (big)",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                Dimensions = new Vector3Int(1, 12, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                },
+            },
+
+            new EntityDef()
+            {
+                DefName = "Saguaro01_Medium",
+                Label = "saguaro cactus (medium)",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                Dimensions = new Vector3Int(1, 9, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                    ModelScale = new Vector3(0.75f, 0.75f, 0.75f),
+                },
+            },
+
+            new EntityDef()
+            {
+                DefName = "Saguaro01_Small",
+                Label = "saguaro cactus (small)",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                Dimensions = new Vector3Int(1, 6, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "cactus/saguaro01_fbx"),
+                    ModelScale = new Vector3(0.5f, 0.5f, 0.5f),
+                },
+            },
         };
     }
 }

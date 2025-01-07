@@ -32,9 +32,19 @@ namespace BlockmapFramework
         public int NumNodesPerSide => ChunkSize * NumChunksPerSide;
 
         /// <summary>
+        /// Amount of ground nodes on the map. (A world with 2x2 chunks has WorldArea = 32 * 32 = 1024).
+        /// </summary>
+        public int WorldArea => NumNodesPerSide * NumNodesPerSide;
+
+        /// <summary>
+        /// The total amount of chunks in the world.
+        /// </summary>
+        public int TotalNumChunks => NumChunksPerSide * NumChunksPerSide;
+
+        /// <summary>
         /// Maximum y coordiante a tile can have.
         /// </summary>
-        public const int MAX_ALTITUDE = 30;
+        public const int MAX_ALTITUDE = 60;
         public const int MAX_NODE_STEEPNESS = 4;
 
         /// <summary>
@@ -266,7 +276,7 @@ namespace BlockmapFramework
             Camera = GameObject.Find("Main Camera").GetComponent<BlockmapCamera>();
             BlockmapNode initialCameraFocusNode = GetGroundNode(new Vector2Int(NumNodesPerSide / 4, NumNodesPerSide / 4));
             Camera.SetPosition(new Vector3(initialCameraFocusNode.WorldCoordinates.x, initialCameraFocusNode.BaseAltitude * NodeHeight, initialCameraFocusNode.WorldCoordinates.y));
-            Camera.SetZoom(10f);
+            Camera.SetZoom(20f);
             Camera.SetAngle(225);
 
             // Calculate world bounds

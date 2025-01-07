@@ -527,14 +527,22 @@ public static class HelperFunctions
     }
     public static Sprite GetAssetPreviewSprite(string path)
     {
-        return null;
-        /*
-        Object asset = Resources.Load(path);
-        if (asset == null) throw new System.Exception($"Could not find asset with path {path}.");
-        Texture2D assetPreviewTexture = AssetPreview.GetAssetPreview(asset);
-        //if (assetPreviewTexture == null) throw new System.Exception($"Could not create asset preview texture of {asset} ({path}).");
+#if UNITY_EDITOR
+        // Only executes in the Unity Editor
+        UnityEngine.Object asset = Resources.Load(path);
+        if (asset == null)
+            throw new System.Exception($"Could not find asset with path {path}.");
+
+        // The AssetPreview class is also editor-only
+        Texture2D assetPreviewTexture = UnityEditor.AssetPreview.GetAssetPreview(asset);
+        // if (assetPreviewTexture == null) 
+        //    throw new System.Exception($"Could not create asset preview texture of {asset} ({path}).");
+
         return TextureToSprite(assetPreviewTexture);
-        */
+#else
+    // Always returns null in builds
+    return null;
+#endif
     }
 
     public static Sprite TextureToSprite(string resourcePath)

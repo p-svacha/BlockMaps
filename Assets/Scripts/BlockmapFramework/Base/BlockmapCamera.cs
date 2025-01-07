@@ -183,7 +183,7 @@ namespace BlockmapFramework
                 UpdatePosition();
             }
 
-            // [ADDED] Always track the last mouse position (end of frame)
+            // Always track the last mouse position (end of frame)
             lastMousePos = Input.mousePosition;
         }
 

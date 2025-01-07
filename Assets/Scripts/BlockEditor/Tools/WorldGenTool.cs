@@ -55,7 +55,7 @@ namespace WorldEditor
             {
                 if (ActiveGenerator.IsDone)
                 {
-                    Editor.SetAndInitializeWorld(ActiveGenerator.World);
+                    Editor.SetAndInitializeWorld(ActiveGenerator.World, OnWorldInitializationDone);
                     ActiveGenerator = null;
                 }
                 else ActiveGenerator.UpdateGeneration();
@@ -91,7 +91,13 @@ namespace WorldEditor
             int seed = generateRandomSeed ? WorldGenerator.GetRandomSeed() : int.Parse(SeedInput.text);
             SeedInput.text = seed.ToString(); // Put seed in seed input field
             ActiveGenerator.StartGeneration(numChunks, seed);
+        }
 
+        private void OnWorldInitializationDone()
+        {
+            // Default draw mode
+            World.ShowTextures(true);
+            World.ShowTileBlending(true);
         }
 
         private void SaveButton_OnClick()
