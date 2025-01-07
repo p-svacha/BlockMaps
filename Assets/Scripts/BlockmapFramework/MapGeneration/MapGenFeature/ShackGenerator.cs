@@ -48,7 +48,7 @@ namespace BlockmapFramework.WorldGeneration
 
             // Generate noises used when placing the building
             Dictionary<Direction, PerlinNoise> windowNoises = new Dictionary<Direction, PerlinNoise>();
-            foreach (Direction side in HelperFunctions.GetSides()) windowNoises.Add(side, new PerlinNoise() { Scale = 0.2f });
+            foreach (Direction side in HelperFunctions.GetSides()) windowNoises.Add(side, new PerlinNoise(scale: 0.2f));
 
             // Declare dictionaries that are filled when placing the building
             Dictionary<Vector2Int, BlockmapNode> buildingFloorNodes = new Dictionary<Vector2Int, BlockmapNode>(); // the erdgeschoss ground/air node for each coordinate

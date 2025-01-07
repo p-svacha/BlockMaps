@@ -23,5 +23,6 @@ namespace WorldEditor
         Door,
         Void,
         MapGenFeature,
+        WorldModifier,
     }
 }

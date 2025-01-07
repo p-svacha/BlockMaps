@@ -11,19 +11,15 @@ namespace UltimateNoiseLibrary
     {
         public override string Name => "Perlin";
 
-        // Parameters
-        public float Scale;
-
         // Random Values
         private float XShift;
         private float YShift;
 
-        public PerlinNoise() : base() { }
-        public PerlinNoise(int seed) : base(seed) { }
+        public PerlinNoise(float scale) : base(scale) { }
+        public PerlinNoise(int seed, float scale) : base(seed, scale) { }
 
         protected override void OnNewSeed()
         {
-            Scale = 0.05f;
             XShift = GetRandomFloat(-10000f, 10000f);
             YShift = GetRandomFloat(-10000f, 10000f);
         }
@@ -35,7 +31,7 @@ namespace UltimateNoiseLibrary
 
         public override GradientNoise GetCopy()
         {
-            return new PerlinNoise(Seed);
+            return new PerlinNoise(Seed, Scale);
         }
     }
 }

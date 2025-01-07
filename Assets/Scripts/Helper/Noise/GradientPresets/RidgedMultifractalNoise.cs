@@ -10,25 +10,25 @@ namespace UltimateNoiseLibrary
     public class RidgedMultifractalNoise : GradientNoise
     {
         public override string Name => "Ridged Multifractal";
-        private const float BASE_SCALE = 0.05f;
 
-        public RidgedMultifractalNoise() : base() { }
-        public RidgedMultifractalNoise(int seed) : base(seed) { }
+        public RidgedMultifractalNoise(float scale) : base(scale) { }
+        public RidgedMultifractalNoise(int seed, float scale) : base(seed, scale) { }
 
         protected override void OnNewSeed()
         {
+            Scale = 0.05f;
             UpdateWeights();
         }
 
         public override float GetValue(float x, float y)
         {
-            float val = (float)(GetValue(x * BASE_SCALE, y * BASE_SCALE, 1));
+            float val = (float)(GetValue(x * Scale, y * Scale, 1));
             return val;
         }
 
         public override GradientNoise GetCopy()
         {
-            return new RidgedMultifractalNoise(Seed);
+            return new RidgedMultifractalNoise(Seed, Scale);
         }
 
         #region Fields

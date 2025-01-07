@@ -34,8 +34,7 @@ namespace BlockmapFramework.WorldGeneration
 
         private void GenerateNoise()
         {
-            PerlinNoise noise = new PerlinNoise();
-            noise.Scale = 0.02f;
+            PerlinNoise noise = new PerlinNoise(scale: 0.02f);
             LayerOperation op = new LayerOperation(4, 2, 0.5f);
 
             float heightModifier = 20f;
@@ -144,8 +143,7 @@ namespace BlockmapFramework.WorldGeneration
 
         private void AddForests()
         {
-            PerlinNoise forestDensityMap = new PerlinNoise();
-            forestDensityMap.Scale = 0.1f;
+            PerlinNoise forestDensityMap = new PerlinNoise(scale: 0.1f);
             float densityModifier = 0.15f; // max tree chance per tile
 
             for (int x = 0; x < WorldSize; x++)
@@ -275,7 +273,7 @@ namespace BlockmapFramework.WorldGeneration
         private void AddFencesAroundPaths()
         {
             // Create mask of where to create fences
-            PerlinNoise fenceMask = new PerlinNoise();
+            PerlinNoise fenceMask = new PerlinNoise(scale: 0.05f);
             CutoffOperation cutoff = new CutoffOperation(FENCE_PROBABILITY, FENCE_PROBABILITY);
 
             for (int x = 0; x < WorldSize; x++)

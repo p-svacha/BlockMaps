@@ -8,8 +8,8 @@ namespace UltimateNoiseLibrary
     {
         public override string Name => "White";
 
-        public WhiteNoise() : base() { }
-        public WhiteNoise(int seed) : base(seed) { }
+        public WhiteNoise(float scale) : base(scale) { }
+        public WhiteNoise(int seed, float scale) : base(seed, scale) { }
 
 
         public override float GetValue(float x, float y)
@@ -19,7 +19,7 @@ namespace UltimateNoiseLibrary
 
         public override GradientNoise GetCopy()
         {
-            return new WhiteNoise(Seed);
+            return new WhiteNoise(Seed, Scale);
         }
     }
 }

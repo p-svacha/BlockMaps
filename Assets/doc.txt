@@ -1,11 +1,22 @@
 ------------------------- CTF v0.0.6 -------------------------
-More maps update
+make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 
 New map(s): ideas listed below
 
 desert map gen
-	sand, cactus, mostly flat
-	very few country roads through it
+	soft sand areas
+	hard sand areas
+	mostly flat
+	dunes
+	cactus +  shrub clusters
+	shrubs
+	palm clusters
+	oasis (water with many trees around, some grass)
+	single dead trees
+	rocky mountains
+	rocky mesas
+	single small desert rocks
+
 
 brutalist structure map
 
@@ -20,12 +31,8 @@ farm map
 
 inside dungeon like map
 
-New EditorTool: Map Modifiers
-	- a function that affects the whole map
-	- basically a single step of map gen process
-
 New map: MegaRandom
-	just repeats random map modifiers
+	just repeats random world modifiers
 
 
 

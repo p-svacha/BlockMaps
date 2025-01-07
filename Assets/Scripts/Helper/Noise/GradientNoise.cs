@@ -11,7 +11,8 @@ namespace UltimateNoiseLibrary
     public abstract class GradientNoise : Noise
     {
         public GradientNoise() : base() { }
-        public GradientNoise(int seed) : base(seed) { }
+        public GradientNoise(float scale) : base(scale) { }
+        public GradientNoise(int seed, float scale) : base(seed, scale) { }
         public abstract GradientNoise GetCopy();
         public abstract float GetValue(float x, float y);
 

@@ -12,13 +12,21 @@ namespace UltimateNoiseLibrary
     {
         public int Seed { get; private set; }
         public abstract string Name { get; }
+        public float Scale { get; protected set; }
 
         public Noise()
         {
+            Scale = 1f;
             RandomizeSeed();
         }
-        public Noise(int seed)
+        public Noise(float scale)
         {
+            Scale = scale;
+            RandomizeSeed();
+        }
+        public Noise(int seed, float scale)
+        {
+            Scale = scale;
             SetSeed(seed);
         }
 
@@ -27,6 +35,11 @@ namespace UltimateNoiseLibrary
             Seed = newSeed;
             Random.InitState(Seed);
             OnNewSeed();
+        }
+
+        public void SetScale(float newScale)
+        {
+            Scale = newScale;
         }
 
         /// <summary>

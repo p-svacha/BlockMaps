@@ -869,7 +869,7 @@ namespace BlockmapFramework
 
         #region Systems Update (Navmesh / Draw / Vision)
 
-        public void UpdateFullWorld(System.Action callback) => UpdateWorldSystems(null, callback);
+        public void UpdateFullWorld(System.Action callback = null) => UpdateWorldSystems(null, callback);
         public void UpdateWorldSystems(Vector2Int worldCoordinates) => UpdateWorldSystems(new Parcel(this, worldCoordinates, Vector2Int.one));
 
         /// <summary>

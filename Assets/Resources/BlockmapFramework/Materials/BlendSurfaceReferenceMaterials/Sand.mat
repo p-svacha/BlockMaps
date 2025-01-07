@@ -97,7 +97,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TextureScale: 5
+    - _TextureScale: 10
     - _TriplanarBlendSharpness: 1
     - _UVSec: 0
     - _UseTextures: 1

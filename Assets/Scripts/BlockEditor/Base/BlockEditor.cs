@@ -44,6 +44,7 @@ namespace WorldEditor
         public WallTool WallTool;
         public DoorTool DoorTool;
         public MapGenFeatureTool MapGenFeatureTool;
+        public WorldModifierTool WorldModifierTool;
 
         // Editor
         private bool isInitialized = false;
@@ -56,6 +57,7 @@ namespace WorldEditor
         {
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
+            DefDatabase<WorldModifierDef>.AddDefs(EditorDefs.WorldModifierDefs);
             DefDatabase<EntityDef>.AddDefs(EditorDefs.EntityDefs);
             DefDatabase<SkillDef>.AddDefs(CaptureTheFlag.SkillDefs.Defs);
             DefDatabase<StatDef>.AddDefs(CaptureTheFlag.StatDefs.Defs);
@@ -95,6 +97,7 @@ namespace WorldEditor
                 { EditorToolId.Ladder, LadderTool },
                 { EditorToolId.Water, WaterTool },
                 { EditorToolId.MapGenFeature, MapGenFeatureTool },
+                { EditorToolId.WorldModifier, WorldModifierTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
                 { EditorToolId.MoveCharacter, MoveCharacterTool },
             };

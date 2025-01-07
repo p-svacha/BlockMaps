@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using BlockmapFramework;
+using BlockmapFramework.WorldGeneration;
 
 namespace WorldEditor
 {
@@ -27,6 +28,17 @@ namespace WorldEditor
                 {
                     new CompProperties_Movement() { },
                 },
+            }
+        };
+
+        public static List<WorldModifierDef> WorldModifierDefs = new List<WorldModifierDef>()
+        {
+            new WorldModifierDef()
+            {
+                DefName = "Desert_BaseHeightMap",
+                Label = "desert base heightmap",
+                Description = "Applies the base height map of the desert world generator to the whole map.",
+                ModifierAction = WorldGenerator_Desert.ApplyBaseHeightmap,
             }
         };
     }

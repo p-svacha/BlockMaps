@@ -129,6 +129,21 @@ namespace BlockmapFramework
         }
 
         #region Helper Functions
+        protected void ApplyHeightmap(int[,] heightMap)
+        {
+
+            foreach (GroundNode n in World.GetAllGroundNodes())
+            {
+                Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
+                    {
+                        { Direction.SW, heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y] },
+                        { Direction.SE, heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y] },
+                        { Direction.NE, heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
+                        { Direction.NW, heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
+                    };
+                n.SetAltitude(nodeHeights);
+            }
+        }
 
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
         protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
