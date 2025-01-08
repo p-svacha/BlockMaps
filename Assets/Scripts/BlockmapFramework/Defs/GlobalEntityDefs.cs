@@ -257,6 +257,134 @@ namespace BlockmapFramework.Defs
                     ModelScale = new Vector3(0.5f, 0.5f, 0.5f),
                 },
             },
+
+            new EntityDef()
+            {
+                DefName = "DesertRock01_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                Dimensions = new Vector3Int(1, 2, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock01_Medium",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                Dimensions = new Vector3Int(2, 4, 2),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                    ModelScale = new Vector3(2f, 2f, 2f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock01_Big",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                Dimensions = new Vector3Int(3, 6, 3),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                    ModelScale = new Vector3(3f, 3f, 3f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock01_Large",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                Dimensions = new Vector3Int(4, 8, 4),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
+                    ModelScale = new Vector3(4f, 4f, 4f),
+                },
+            },
+
+            new EntityDef()
+            {
+                DefName = "DesertRock02_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_02_fbx"),
+                Dimensions = new Vector3Int(1, 2, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_02_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock03_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_03_fbx"),
+                Dimensions = new Vector3Int(1, 2, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_03_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock04_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_04_fbx"),
+                Dimensions = new Vector3Int(1, 2, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_04_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock05_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_05_fbx"),
+                Dimensions = new Vector3Int(1, 1, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_05_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
+            new EntityDef()
+            {
+                DefName = "DesertRock06_Small",
+                Label = "desert rock",
+                Description = "",
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_06_fbx"),
+                Dimensions = new Vector3Int(1, 3, 1),
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "rocks/desert_rock_06_fbx"),
+                    ModelScale = new Vector3(1f, 1f, 1f),
+                },
+            },
         };
     }
 }
