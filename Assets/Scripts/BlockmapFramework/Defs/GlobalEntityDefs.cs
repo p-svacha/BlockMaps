@@ -35,16 +35,13 @@ namespace BlockmapFramework.Defs
                 EntityClass = typeof(Door),
                 VariableHeight = true,
                 Impassable = false,
+                VisionColliderType = VisionColliderType.CustomImplementation,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneGenerated,
                     StandaloneRenderFunction = Door.GenerateDoorMesh,
                     GetWorldPositionFunction = Door.GetWorldPosition,
                 },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    VisionColliderType = VisionColliderType.CustomImplementation,
-                }
             },
 
             new EntityDef()
@@ -55,15 +52,12 @@ namespace BlockmapFramework.Defs
                 EntityClass = typeof(Ladder),
                 VariableHeight = true,
                 Impassable = false,
+                BlocksVision = false,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneGenerated,
                     StandaloneRenderFunction = LadderMeshGenerator.GenerateLadderMesh,
                     GetWorldPositionFunction = Ladder.GetLadderWorldPosition,
-                },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    BlocksVision = false,
                 },
             },
 
@@ -119,20 +113,16 @@ namespace BlockmapFramework.Defs
                 Description = "A car.",
                 UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "car/car1_fbx"),
                 Dimensions = new Vector3Int(4, 3, 2),
+                OverrideHeights = new Dictionary<Vector2Int, int>()
+                {
+                    { new Vector2Int(0, 0), 2 },
+                    { new Vector2Int(0, 1), 2 },
+                },
                 RequiresFlatTerrain = true,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car1_fbx"),
-                },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    VisionColliderType = VisionColliderType.BlockPerNode,
-                    VisionBlockHeights = new Dictionary<Vector2Int, int>()
-                    {
-                        { new Vector2Int(0, 0), 2 },
-                        { new Vector2Int(0, 1), 2 },
-                    },
                 },
             },
 
@@ -143,20 +133,16 @@ namespace BlockmapFramework.Defs
                 Description = "A car.",
                 UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "car/car2_fbx"),
                 Dimensions = new Vector3Int(3, 3, 2),
+                OverrideHeights = new Dictionary<Vector2Int, int>()
+                {
+                    { new Vector2Int(0, 0), 2 },
+                    { new Vector2Int(0, 1), 2 },
+                },
                 RequiresFlatTerrain = true,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car2_fbx"),
-                },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    VisionColliderType = VisionColliderType.BlockPerNode,
-                    VisionBlockHeights = new Dictionary<Vector2Int, int>()
-                    {
-                        { new Vector2Int(0, 0), 2 },
-                        { new Vector2Int(0, 1), 2 },
-                    },
                 },
             },
 
@@ -167,20 +153,16 @@ namespace BlockmapFramework.Defs
                 Description = "A car.",
                 UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "car/car3_fbx"),
                 Dimensions = new Vector3Int(4, 4, 2),
+                OverrideHeights = new Dictionary<Vector2Int, int>()
+                {
+                    { new Vector2Int(0, 0), 3 },
+                    { new Vector2Int(0, 1), 3 },
+                },
                 RequiresFlatTerrain = true,
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "car/car3_fbx"),
-                },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    VisionColliderType = VisionColliderType.BlockPerNode,
-                    VisionBlockHeights = new Dictionary<Vector2Int, int>()
-                    {
-                        { new Vector2Int(0, 0), 3 },
-                        { new Vector2Int(0, 1), 3 },
-                    },
                 },
             },
 
@@ -293,6 +275,15 @@ namespace BlockmapFramework.Defs
                 Description = "",
                 UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(3, 6, 3),
+                OverrideHeights = new Dictionary<Vector2Int, int>()
+                {
+                    { new Vector2Int(0, 0), 4 },
+                    { new Vector2Int(0, 1), 4 },
+                    { new Vector2Int(0, 2), 4 },
+                    { new Vector2Int(1, 0), 5 },
+                    { new Vector2Int(2, 0), 5 },
+                    { new Vector2Int(2, 2), 5 },
+                },
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
@@ -307,6 +298,18 @@ namespace BlockmapFramework.Defs
                 Description = "",
                 UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(4, 8, 4),
+                OverrideHeights = new Dictionary<Vector2Int, int>()
+                {
+                    { new Vector2Int(0, 0), 0 },
+                    { new Vector2Int(2, 0), 0 },
+                    { new Vector2Int(3, 0), 0 },
+                    { new Vector2Int(0, 3), 0 },
+                    { new Vector2Int(0, 1), 5 },
+                    { new Vector2Int(0, 2), 5 },
+                    { new Vector2Int(3, 3), 6 },
+                    { new Vector2Int(3, 1), 7 },
+                    { new Vector2Int(3, 2), 7 },
+                },
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,

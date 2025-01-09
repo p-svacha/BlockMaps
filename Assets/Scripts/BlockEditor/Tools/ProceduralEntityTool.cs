@@ -58,7 +58,7 @@ namespace WorldEditor
                 int height = int.Parse(HeightInput.text);
 
                 Color c = Color.white;
-                if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION)) c = Color.red;
+                if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false)) c = Color.red;
 
                 // Build Preview
                 BuildPreview.SetActive(true);
@@ -94,13 +94,13 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
-            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION)) return;
+            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false)) return;
             if (HeightInput.text == "") return;
 
             int height = int.Parse(HeightInput.text);
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, owner, updateWorld: true, height);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false, owner, updateWorld: true, height);
         }
 
         public override void HandleRightClick()

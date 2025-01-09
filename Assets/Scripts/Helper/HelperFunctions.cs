@@ -442,7 +442,7 @@ public static class HelperFunctions
 
     public static float GetDirectionAngle(Direction dir)
     {
-        if (dir == Direction.N) return 180f;
+        if (dir == Direction.N) return 180f; // 180 offset is so that in blender facing north means facing north in unity too
         if (dir == Direction.NE) return 225f;
         if (dir == Direction.E) return 270f;
         if (dir == Direction.SE) return 315f;

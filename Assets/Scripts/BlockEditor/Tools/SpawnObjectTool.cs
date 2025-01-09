@@ -53,7 +53,7 @@ namespace WorldEditor
             // Preview
             if (World.HoveredNode != null)
             {
-                bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation);
+                bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, allowCollisions: true);
 
                 BuildPreview.gameObject.SetActive(true);
                 BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, SelectedEntity.Dimensions.y, false);
@@ -85,10 +85,10 @@ namespace WorldEditor
         public override void HandleLeftClick()
         {
             if (World.HoveredNode == null) return;
-            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation)) return;
+            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, allowCollisions: true)) return;
 
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, owner, updateWorld: true, isMirrored: MirrorToggle.isOn);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, owner, updateWorld: true);
         }
 
         public override void HandleRightClick()

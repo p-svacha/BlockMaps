@@ -194,11 +194,11 @@ namespace BlockmapFramework
             return base.CanChangeShape(mode, isIncrease);
         }
 
-        protected override bool IsGenerallyPassable()
+        public override bool IsImpassable()
         {
-            if (IsCenterUnderWater) return false;
-            if (IsVoid) return false;
-            return base.IsGenerallyPassable();
+            if (IsCenterUnderWater) return true;
+            if (IsVoid) return true;
+            return base.IsImpassable();
         }
 
         public bool IsCenterUnderWater => (WaterNode != null && MeshCenterWorldPosition.y < WaterNode.WaterBody.WaterSurfaceWorldHeight);

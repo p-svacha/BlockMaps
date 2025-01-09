@@ -12,9 +12,9 @@ namespace BlockmapFramework
         FullBox,
 
         /// <summary>
-        /// One BoxCollider per node, where each have its own height.
+        /// One BoxCollider per node, where the height of each considers the OverrideHeights of the EntityDef.
         /// </summary>
-        BlockPerNode,
+        EntityShape,
 
         /// <summary>
         /// The VisionCollider uses the same mesh as the MeshObject of the entity.

@@ -1161,7 +1161,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode node in belowNodes)
             {
                 foreach (Entity e in node.Entities)
-                    if (e.MaxAltitude >= altitude)
+                    if (e.GetMaxAltitudeAt(node) > altitude)
                         return false;
 
                 foreach (Fence fence in node.Fences.Values)
@@ -1214,11 +1214,11 @@ namespace BlockmapFramework
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
         }
 
-        public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, int height = -1, bool forceHeadspaceRecalc = false)
+        public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, int height = -1, bool forceHeadspaceRecalc = false, bool allowCollisions = false)
         {
             if (def == null) throw new System.Exception($"Cannot check if entity is spawnable because EntityDef is null");
 
-            HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, height); // get nodes that would be occupied when placing the entity on the given node
+            HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, isMirrored, height); // get nodes that would be occupied when placing the entity on the given node
 
             // Terrain below entity is not fully connected and therefore occupiedNodes is null
             if (occupiedNodes == null) return false;
@@ -1235,6 +1235,9 @@ namespace BlockmapFramework
                 // Recalculate passability (useful if spawned during world generation before navmesh is calculated)
                 if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
 
+                // Check if the place position is under water
+                if (occupiedNode is GroundNode groundNode && groundNode.IsCenterUnderWater) return false;
+
                 // Check if the place position is on water
                 if (occupiedNode is WaterNode && def.WaterBehaviour == WaterBehaviour.Forbidden) return false;
 
@@ -1242,8 +1245,8 @@ namespace BlockmapFramework
                 int headSpace = occupiedNode.MaxPassableHeight[Direction.None];
                 if (minAltitude + headSpace <= maxAltitude) return false;
 
-                // Check if alredy has an entity
-                if (occupiedNode.Entities.Count > 0) return false;
+                // Check if node already has an entity
+                if (!allowCollisions && occupiedNode.Entities.Count > 0) return false;
 
                 // Check if flat
                 if (def.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
@@ -1254,7 +1257,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
         /// </summary>
-        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, Actor actor, bool updateWorld, int height = -1, bool isMirrored = false, System.Action<Entity> preInit = null)
+        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, Actor actor, bool updateWorld, int height = -1, System.Action<Entity> preInit = null)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
             if (node == null) throw new System.Exception("The node on which to spawn an entity must not be null.");
@@ -1632,7 +1635,7 @@ namespace BlockmapFramework
         public bool CanBuildLadder(BlockmapNode from, Direction side, BlockmapNode to) => GetPossibleLadderTargetNodes(from, side).Contains(to);
         public void BuildLadder(BlockmapNode from, BlockmapNode to, Direction side, bool updateWorld)
         {
-            SpawnEntity(EntityDefOf.Ladder, from, side, Gaia, preInit: e => ((Ladder)e).PreInit(to), isMirrored: false, updateWorld: updateWorld);
+            SpawnEntity(EntityDefOf.Ladder, from, side, isMirrored: false, Gaia, preInit: e => ((Ladder)e).PreInit(to), updateWorld: updateWorld);
         }
 
         public bool CanBuildDoor(BlockmapNode node, Direction side, int height)
@@ -1641,7 +1644,7 @@ namespace BlockmapFramework
         }
         public Door BuildDoor(BlockmapNode node, Direction side, int height, bool isMirrored, bool updateWorld)
         {
-            return (Door)(SpawnEntity(EntityDefOf.Door, node, side, Gaia, updateWorld, height, isMirrored));
+            return (Door)(SpawnEntity(EntityDefOf.Door, node, side, isMirrored, Gaia, updateWorld, height));
         }
 
         public Zone AddZone(HashSet<Vector2Int> coordinates, Actor actor, bool providesVision, ZoneVisibility visibility)

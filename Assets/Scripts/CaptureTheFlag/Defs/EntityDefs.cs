@@ -17,16 +17,13 @@ namespace CaptureTheFlag
             UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
             Dimensions = new Vector3Int(1, 3, 1),
             Impassable = false,
+            BlocksVision = false,
             WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
                 Model = Resources.Load<GameObject>(BlenderImportBasePath + "human/human_fbx"),
                 PlayerColorMaterialIndex = 0,
-            },
-            VisionImpactProperties = new EntityVisionImpactProperties()
-            {
-                BlocksVision = false,
             },
             Components = new List<CompProperties>()
                 {
@@ -60,16 +57,13 @@ namespace CaptureTheFlag
             EntityClass = typeof(CtfCharacter),
             UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
             Impassable = false,
+            BlocksVision = false,
             WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
                 Model = Resources.Load<GameObject>(BlenderImportBasePath + "dog/dog_2_fbx"),
                 PlayerColorMaterialIndex = 1,
-            },
-            VisionImpactProperties = new EntityVisionImpactProperties()
-            {
-                BlocksVision = false,
             },
             Components = new List<CompProperties>()
                 {
@@ -198,6 +192,7 @@ namespace CaptureTheFlag
                 EntityClass = typeof(Entity),
                 Dimensions = new Vector3Int(1, 2, 1),
                 Impassable = false,
+                BlocksVision = false,
                 WaterBehaviour = WaterBehaviour.AboveWater,
                 RenderProperties = new EntityRenderProperties()
                 {
@@ -205,10 +200,6 @@ namespace CaptureTheFlag
                     Model = Resources.Load<GameObject>(BlenderImportBasePath + "flag/flag_fbx"),
                     PlayerColorMaterialIndex = 1,
                 },
-                VisionImpactProperties = new EntityVisionImpactProperties()
-                {
-                    BlocksVision = false,
-                }
             },
         };
     }

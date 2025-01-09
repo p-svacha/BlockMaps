@@ -22,11 +22,6 @@ namespace BlockmapFramework
         public EntityRenderProperties RenderProperties { get; init; } = null;
 
         /// <summary>
-        /// Definitions of how this entity affects the vision of other entities.
-        /// </summary>
-        public EntityVisionImpactProperties VisionImpactProperties { get; init; } = new EntityVisionImpactProperties();
-
-        /// <summary>
         /// Components that add custom behaviour to this entity.
         /// </summary>
         public List<CompProperties> Components { get; init; } = new();
@@ -42,9 +37,27 @@ namespace BlockmapFramework
         public Vector3Int Dimensions { get; init; } = new Vector3Int(1, 1, 1);
 
         /// <summary>
+        /// If the height of some nodes of the entity differs from the default height (Dimensions.y), it can be overwritten here.
+        /// <br/>If a node within the dimensions of an shouldn't be affected at all by it, overwrite that coordinate with a height of 0.
+        /// <br/>The key refers to the local coordinate within the entity, and the value to the overwritten height.
+        /// </summary>
+        public Dictionary<Vector2Int, int> OverrideHeights { get; init; } = new Dictionary<Vector2Int, int>();
+
+        /// <summary>
         /// If true, characters can never move on nodes that the entity occupies.
         /// </summary>
         public bool Impassable { get; init; } = true;
+
+        /// <summary>
+        /// If true, the entity will block incoming vision rays and stuff behind will not be visible.
+        /// <br/>If false, the entity will be see-through.
+        /// </summary>
+        public bool BlocksVision { get; init; } = true;
+
+        /// <summary>
+        /// How this entity affects the vision of other entities.
+        /// </summary>
+        public VisionColliderType VisionColliderType { get; init; } = VisionColliderType.EntityShape;
 
         /// <summary>
         /// Flag if entity can only be placed when the whole footprint is flat.
@@ -80,10 +93,12 @@ namespace BlockmapFramework
             // EntityDef
             EntityClass = orig.EntityClass;
             RenderProperties = new EntityRenderProperties(orig.RenderProperties);
-            VisionImpactProperties = new EntityVisionImpactProperties(orig.VisionImpactProperties);
+            BlocksVision = orig.BlocksVision;
+            VisionColliderType = orig.VisionColliderType;
             Components = orig.Components.Select(c => c.Clone()).ToList();
             VisionRange = orig.VisionRange;
             Dimensions = new Vector3Int(orig.Dimensions.x, orig.Dimensions.y, orig.Dimensions.z);
+            OverrideHeights = orig.OverrideHeights.ToDictionary(x => new Vector2Int(x.Key.x, x.Key.y), x => x.Value);
             Impassable = orig.Impassable;
             RequiresFlatTerrain = orig.RequiresFlatTerrain;
             VariableHeight = orig.VariableHeight;
@@ -114,7 +129,7 @@ namespace BlockmapFramework
         {
             if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) ThrowValidationError("Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
             if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) ThrowValidationError("x and z dimensions must be 1 for batch-rendered entities.");
-            if (VisionImpactProperties.VisionColliderType == VisionColliderType.BlockPerNode && VisionImpactProperties.VisionBlockHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
+            if (VisionColliderType == VisionColliderType.EntityShape && OverrideHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
 
             foreach (CompProperties props in Components)
                 if(!props.Validate(this))

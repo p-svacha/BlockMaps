@@ -274,13 +274,6 @@ namespace BlockmapFramework
         {
             foreach (Direction corner in HelperFunctions.GetCorners()) MaxPassableHeight[corner] = -1;
 
-            // Set max possible to 0 for all sides if not generally passable
-            if (!IsGenerallyPassable())
-            {   
-                foreach (Direction dir in HelperFunctions.GetAllDirections9()) MaxPassableHeight[dir] = 0;
-                return;
-            }
-
             // Get free head space for all directions
             RecalculateFreeHeadSpace();
 
@@ -1030,13 +1023,12 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns if it is even theoretically possible for any entity to stand on this node.
-        /// <br/>Use IsPassable for public use, since that checks this plus additional criteria.
+        /// Returns if this node is completely impassable for any kind of moving entity.
         /// </summary>
-        protected virtual bool IsGenerallyPassable()
+        public virtual bool IsImpassable()
         {
-            if (Entities.Any(x => x.Def.Impassable)) return false; // An entity is blocking this node
-            return true;
+            if (Entities.Any(e => e.Def.Impassable)) return true; // An entity is blocking this node
+            return false;
         }
         /// <summary>
         /// Returns if an entity can stand on this node.
@@ -1046,10 +1038,10 @@ namespace BlockmapFramework
             return true;
         }
 
-        public bool IsPassable() => IsPassable(Direction.None);
-        public bool IsPassable(Direction dir) => MaxPassableHeight[dir] > 0;
-        public bool IsPassable(Entity e) => IsPassable(Direction.None, e);
-        public bool IsPassable(Direction dir, Entity e) => MaxPassableHeight[dir] >= e.Height && CanEntityStandHere(e);
+        public bool IsPassable() => !IsImpassable() && IsPassable(Direction.None);
+        public bool IsPassable(Direction dir) => !IsImpassable() && MaxPassableHeight[dir] > 0;
+        public bool IsPassable(Entity e) => !IsImpassable() && IsPassable(Direction.None, e);
+        public bool IsPassable(Direction dir, Entity e) => !IsImpassable() && MaxPassableHeight[dir] >= e.Height && CanEntityStandHere(e);
 
         /// <summary>
         /// Returns if the given corner is blocked by a fence or wall.

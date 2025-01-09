@@ -311,10 +311,10 @@ namespace BlockmapFramework
             VisionColliderObject = new GameObject("visionCollider");
             VisionColliderObject.layer = World.Layer_EntityVisionCollider;
             VisionColliderObject.transform.SetParent(Wrapper.transform);
-            if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
 
-            if (Def.VisionImpactProperties.VisionColliderType == VisionColliderType.FullBox) // Create a single box collider with the bounds of the whole entity
+            if (Def.VisionColliderType == VisionColliderType.FullBox || (Def.VisionColliderType == VisionColliderType.EntityShape && Def.OverrideHeights.Count == 0)) // Create a single box collider with the bounds of the whole entity
             {
+                if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
                 BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
                 if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
                 else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
@@ -323,15 +323,16 @@ namespace BlockmapFramework
                 WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
                 evc.Object = this;
             }
-            else if (Def.VisionImpactProperties.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
+            else if (Def.VisionColliderType == VisionColliderType.MeshCollider) // Create a vision collider that is the same as the entitys mesh collider
             {
+                if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
                 MeshCollider collider = VisionColliderObject.AddComponent<MeshCollider>();
                 collider.sharedMesh = MeshCollider.sharedMesh;
 
                 WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();
                 evc.Object = this;
             }
-            else if(Def.VisionImpactProperties.VisionColliderType == VisionColliderType.BlockPerNode) // Create a box collider per node, each one with its own height
+            else if(Def.VisionColliderType == VisionColliderType.EntityShape) // Create a box collider per node, each one with its own height, according the entity shape
             {
                 for (int x = 0; x < Dimensions.x; x++)
                 {
@@ -339,15 +340,16 @@ namespace BlockmapFramework
                     {
                         Vector2Int localCoords = new Vector2Int(x, y);
 
+                        float height = Dimensions.y; // default height
+                        if (Def.OverrideHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
+                        if (height == 0) continue; // no vision collider needed here
+
                         GameObject perNodeColliderObject = new GameObject("visionCollider_" + x + "_" + y);
                         perNodeColliderObject.layer = World.Layer_EntityVisionCollider;
                         perNodeColliderObject.transform.SetParent(VisionColliderObject.transform);
                         BoxCollider collider = perNodeColliderObject.AddComponent<BoxCollider>();
 
-                        float height = Dimensions.y; // default height
-                        if (Def.VisionImpactProperties.VisionBlockHeights.TryGetValue(localCoords, out int overwrittenHeight)) height = overwrittenHeight; // overwritten height
-
-                        if (MeshObject != null) collider.size = new Vector3(1f / MeshObject.transform.localScale.x, (height * World.NodeHeight) / MeshObject.transform.localScale.y, 1f / MeshObject.transform.localScale.z);
+                        if (MeshObject != null) collider.size = new Vector3(1f, height * World.NodeHeight, 1f);
                         collider.center = new Vector3((Dimensions.x / 2f) - x - 0.5f, collider.size.y / 2, (Dimensions.z / 2f) - y - 0.5f);
                         if (IsMirrored) collider.center = new Vector3(collider.center.x * -1f, collider.center.y, collider.center.z);
 
@@ -356,7 +358,7 @@ namespace BlockmapFramework
                     }
                 }
             }
-            else if(Def.VisionImpactProperties.VisionColliderType == VisionColliderType.CustomImplementation)
+            else if(Def.VisionColliderType == VisionColliderType.CustomImplementation)
             {
                 throw new System.NotImplementedException($"No custom implementation found. CreateVisionCollider() seems to not be overriden for entity with DefName={Def.DefName}.");
             }
@@ -640,10 +642,11 @@ namespace BlockmapFramework
         public virtual int MaxHopDownDistance => MovementComp.MaxHopDownDistance;
 
         public virtual float VisionRange => Def.VisionRange;
-        public virtual bool BlocksVision() => Def.VisionImpactProperties.BlocksVision;
+        public virtual bool BlocksVision() => Def.BlocksVision;
         public virtual bool BlocksVision(WorldObjectCollider collider) => BlocksVision();
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
+        public Vector2Int Dimensions2d => new Vector2Int(Dimensions.x, Dimensions.z);
 
         // Aptitudes (affect the cost of using of transitions in the navmesh)
         public virtual float ClimbingAptitude => MovementComp.ClimbingAptitude;
@@ -662,6 +665,23 @@ namespace BlockmapFramework
         public int GetSkillLevel(SkillDef def) => SkillsComp.GetSkillLevel(def);
         public List<Stat> GetAllStats() => StatsComp.GetAllStats();
         public float GetStat(StatDef def) => StatsComp.GetStat(def);
+
+        /// <summary>
+        /// Returns the height this entity has on the given node.
+        /// </summary>
+        public int GetHeightAt(BlockmapNode node)
+        {
+            if (!OccupiedNodes.Contains(node)) throw new System.Exception("Can't return height for a node that is entity is not on.");
+            Vector2Int localCoordinates = node.WorldCoordinates - OriginNode.WorldCoordinates;
+            localCoordinates = EntityManager.GetTranslatedPosition(localCoordinates, Dimensions2d, Rotation, IsMirrored);
+            if (Def.OverrideHeights.TryGetValue(localCoordinates, out int overrideHeight)) return overrideHeight;
+            else return Height;
+        }
+
+        /// <summary>
+        /// Returns the maximum altitude this entity covers on the given node.
+        /// </summary>
+        public int GetMaxAltitudeAt(BlockmapNode node) => MinAltitude + GetHeightAt(node);
 
         /// <summary>
         /// Returns if the target node is reachable with a path that costs less than the given limit.
@@ -687,7 +707,7 @@ namespace BlockmapFramework
         /// </summary>
         public Vector3Int GetTranslatedDimensions()
         {
-            return EntityManager.TranslatedDimensions(Def, Rotation, overrideHeight);
+            return EntityManager.GetTranslatedDimensions(Def, Rotation, overrideHeight);
         }
 
         /// <summary>
@@ -725,7 +745,7 @@ namespace BlockmapFramework
                     }
                 }
             }
-            throw new System.Exception($"Component {typeof(T)} not found on Entity {Label}. Entity has {Components.Count} components.");
+            throw new System.Exception($"Component {typeof(T)} not found on Entity {LabelCap}. Entity has {Components.Count} components.");
         }
 
         /// <summary>
@@ -763,7 +783,7 @@ namespace BlockmapFramework
         /// </summary>
         public HashSet<BlockmapNode> GetOccupiedNodes()
         {
-            return EntityManager.GetOccupiedNodes(Def, World, OriginNode, Rotation, overrideHeight);
+            return EntityManager.GetOccupiedNodes(Def, World, OriginNode, Rotation, IsMirrored, overrideHeight);
         }
 
         /// <summary>
@@ -773,7 +793,7 @@ namespace BlockmapFramework
 
         public override string ToString()
         {
-            return $"{Label} ({Def.DefName}) alt: {MinAltitude} - {MaxAltitude} {Rotation}";
+            return $"{Label} ({Def.DefName}) alt: {MinAltitude} - {MaxAltitude} {Rotation} mir?{IsMirrored}";
         }
 
         #endregion

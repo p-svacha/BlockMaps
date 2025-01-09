@@ -1,6 +1,16 @@
 ------------------------- CTF v0.0.6 -------------------------
 make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 
+(/)IsImpassable rework
+	use it in pathfinder
+	use it in canspawnentity
+(/)allow entities to be placed on top of each other
+(/)give option to entityshader to allow for triplanar texture
+(/)always place entities at base altitude of lowest node it covers
+(/)allow entities to not cover all nodes in the foot print (allow L, T, ¬, shapes etc.)
+	adjust isImpassable on nodes
+	adjust canPlaceAirNode based on height of entity below
+
 New map(s): ideas listed below
 
 desert map gen
@@ -8,7 +18,8 @@ desert map gen
 	(/)hard sand areas
 	(/)mostly flat
 	(/)dunes
-	cactus +  shrub clusters
+	rocks
+	cactus
 	shrubs
 	palm clusters
 	oasis (water with many trees around, some grass)
@@ -138,13 +149,6 @@ mapgen forest: hedges should be straighter
 - Show entity stats in static entity tool in editor
 	> same way as moving entities
 	> IsPassable, BlocksVision, Dimensions, RequiresFlatTerrain
-
-- Static entities with weird shapes
-	> adjust collider generation accordingly
-	> occupiednodes turns into footprint
-	> shape is a dictionary<vector2int, list<bool>> whereas the key is the position in the footprint and the value list represents which nodes are blocked based on height
-	> keep dimensions as a general entity attribute, add shape to static entity
-	> Make editor script for static entity that allows defining shape and previewing box colliders
 
 - Make vision radius of entities based on their dimensions
 

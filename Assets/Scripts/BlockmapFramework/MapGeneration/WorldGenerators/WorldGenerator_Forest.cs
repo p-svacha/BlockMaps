@@ -120,9 +120,9 @@ namespace BlockmapFramework.WorldGeneration
                     if (!World.IsInWorld(position)) break;
 
                     GroundNode node = World.GetGroundNode(position);
-                    if (World.CanSpawnEntity(EntityDefOf.ProcHedge, node, Direction.N,hedgeHeight, forceHeadspaceRecalc: true))
+                    if (World.CanSpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, isMirrored: false, hedgeHeight, forceHeadspaceRecalc: true))
                     {
-                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, World.Gaia, updateWorld: false, hedgeHeight);
+                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, isMirrored: false, World.Gaia, updateWorld: false, hedgeHeight);
                     }
 
                     // Next position
@@ -162,12 +162,13 @@ namespace BlockmapFramework.WorldGeneration
         {
             BlockmapNode targetNode = World.GetGroundNode(new Vector2Int(x, y));
             Direction rotation = HelperFunctions.GetRandomSide();
+            bool isMirrored = Random.value < 0.5f;
 
             EntityDef def = GetRandomTreeDef();
 
-            if (World.CanSpawnEntity(def, targetNode, rotation, forceHeadspaceRecalc: true))
+            if (World.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true))
             {
-                World.SpawnEntity(def, targetNode, rotation, World.Gaia, updateWorld: false);
+                World.SpawnEntity(def, targetNode, rotation, isMirrored, World.Gaia, updateWorld: false);
             }
         }
         private EntityDef GetRandomTreeDef()
