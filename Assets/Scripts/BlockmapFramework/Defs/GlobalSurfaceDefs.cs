@@ -78,7 +78,7 @@ namespace BlockmapFramework.Defs
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
-                    CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "ConcreteDark", "Concrete2", 0.1f, 0.1f, 0.1f),
+                    CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Materials/NodeMaterials/ConcreteDark", "Materials/NodeMaterials/Concrete2", 0.1f, 0.1f, 0.1f),
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },
@@ -91,7 +91,7 @@ namespace BlockmapFramework.Defs
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.CustomMeshGeneration,
-                    CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Asphalt", "Cobblestone", 0.05f, 0.05f, 0.2f),
+                    CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Materials/NodeMaterials/Asphalt", "Materials/NodeMaterials/Cobblestone", 0.05f, 0.05f, 0.2f),
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
             },

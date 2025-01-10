@@ -57,6 +57,11 @@ namespace BlockmapFramework
         public bool IsMirrored;
 
         /// <summary>
+        /// The index of the variant of the index. Variants can change certain materials on entities.
+        /// </summary>
+        public int Variant;
+
+        /// <summary>
         /// The exact world position this entity is at the moment.
         /// <br/> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
@@ -147,7 +152,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Gets called after this Entity got instantiated when spawned in the world.
         /// </summary>
-        public void OnCreate(EntityDef def, int id, World world, BlockmapNode origin, int height, Direction rotation, Actor owner, bool isMirrored)
+        public void OnCreate(EntityDef def, int id, World world, BlockmapNode origin, int height, Direction rotation, Actor owner, bool isMirrored, int variant)
         {
             Def = def;
 
@@ -160,6 +165,7 @@ namespace BlockmapFramework
             Rotation = rotation;
             Actor = owner;
             IsMirrored = isMirrored;
+            Variant = variant;
 
             // Initialize components
             InitializeComps();
@@ -280,11 +286,25 @@ namespace BlockmapFramework
                     MeshCollider = MeshObject.GetComponent<MeshCollider>();
                 }
 
+                // Variant materials
+                if (Def.RenderProperties.Variants.Count > 0)
+                {
+                    Debug.Log("has variat");
+                    EntityVariant variant = Def.RenderProperties.Variants[Variant];
+                    Material[] modelMaterials = MeshRenderer.materials;
+                    foreach (var variantMat in variant.OverwrittenMaterials)
+                    {
+                        modelMaterials[variantMat.Key] = variantMat.Value;
+                        Debug.Log($"Changing material at index {variantMat.Key} to {variantMat.Value.name}.");
+                    }
+                    MeshRenderer.materials = modelMaterials;
+                }
+
                 // Player color
                 if (Def.RenderProperties.PlayerColorMaterialIndex != -1)
                 {
                     MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].color = Actor.Color;
-                    MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].SetColor("_TintColor", Actor.Color);
+                    MeshRenderer.materials[Def.RenderProperties.PlayerColorMaterialIndex].SetColor("_TintColor", new Color(Actor.Color.r, Actor.Color.g, Actor.Color.b, 0.5f));
                 }
 
                 // Draw mode
@@ -295,7 +315,7 @@ namespace BlockmapFramework
                 ec.Object = this;
 
                 // Selection indicator
-                SelectionIndicator = GameObject.Instantiate(Resources.Load<Projector>("BlockmapFramework/Prefabs/SelectionIndicator"));
+                SelectionIndicator = GameObject.Instantiate(Resources.Load<Projector>("Prefabs/SelectionIndicator"));
                 SelectionIndicator.transform.SetParent(MeshObject != null ? MeshObject.transform : Wrapper.transform);
                 SelectionIndicator.transform.localPosition = new Vector3(0f, 0.5f, 0f);
                 SelectionIndicator.orthographicSize = 0.5f;
@@ -573,7 +593,6 @@ namespace BlockmapFramework
                 if (IsVisibleBy(player))
                 {
                     MeshRenderer.enabled = true;
-                    MeshRenderer.material.SetColor("_TintColor", Color.clear);
 
                     MeshObject.transform.position = WorldPosition;
                     MeshObject.transform.rotation = WorldRotation;
@@ -591,7 +610,6 @@ namespace BlockmapFramework
                 else if (IsExploredBy(player))
                 {
                     MeshRenderer.enabled = true;
-                    MeshRenderer.material.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.5f));
 
                     MeshObject.transform.position = LastKnownPosition[player].Value;
                     MeshObject.transform.rotation = LastKnownRotation[player].Value;
@@ -1232,6 +1250,7 @@ namespace BlockmapFramework
             SaveLoadManager.SaveOrLoadReference(ref OriginNode, "originNode");
             SaveLoadManager.SaveOrLoadPrimitive(ref overrideHeight, "overrideHeight");
             SaveLoadManager.SaveOrLoadPrimitive(ref IsMirrored, "isMirrored");
+            SaveLoadManager.SaveOrLoadPrimitive(ref Variant, "variant");
             SaveLoadManager.SaveOrLoadPrimitive(ref Rotation, "rotation");
             SaveLoadManager.SaveOrLoadReference(ref Actor, "owner");
 

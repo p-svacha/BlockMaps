@@ -16,7 +16,7 @@ namespace BlockmapFramework.Defs
                 DefName = "WoodenFence",
                 Label = "wooden Fence",
                 Description = "A simple wooden fence.",
-                UiPreviewSprite = HelperFunctions.TextureToSprite(GlobalEntityDefs.ThumbnailBasePath + "Fences/WoodenFence"),
+                UiPreviewSprite = HelperFunctions.TextureToSprite(GlobalEntityDefs.ThumbnailPath + "Fences/WoodenFence"),
                 GenerateMeshFunction = MeshGen_WoodenFence.DrawMesh,
             }
         };

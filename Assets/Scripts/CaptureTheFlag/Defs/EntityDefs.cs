@@ -3,14 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static BlockmapFramework.Defs.GlobalEntityDefs;
 
 namespace CaptureTheFlag
 {
     public static class EntityDefs
     {
-        private static string BlenderImportBasePath = "Entities/Models/BlenderImport/";
-        public static string ThumbnailBasePath = "Editor/Thumbnails/";
-
         private static EntityDef HumanBase = new EntityDef()
         {
             EntityClass = typeof(CtfCharacter),
@@ -22,7 +20,7 @@ namespace CaptureTheFlag
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
-                Model = Resources.Load<GameObject>(BlenderImportBasePath + "human/human_fbx"),
+                Model = Resources.Load<GameObject>(EntityModelPath + "human/human_fbx"),
                 PlayerColorMaterialIndex = 0,
             },
             Components = new List<CompProperties>()
@@ -62,7 +60,7 @@ namespace CaptureTheFlag
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
-                Model = Resources.Load<GameObject>(BlenderImportBasePath + "dog/dog_2_fbx"),
+                Model = Resources.Load<GameObject>(EntityModelPath + "dog/dog_2_fbx"),
                 PlayerColorMaterialIndex = 1,
             },
             Components = new List<CompProperties>()
@@ -188,7 +186,7 @@ namespace CaptureTheFlag
                 DefName = "Flag",
                 Label = "flag",
                 Description = "The flag to protect or capture.",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(BlenderImportBasePath + "flag/flag_fbx"),
+                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "flag/flag_fbx"),
                 EntityClass = typeof(Entity),
                 Dimensions = new Vector3Int(1, 2, 1),
                 Impassable = false,
@@ -197,7 +195,7 @@ namespace CaptureTheFlag
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<GameObject>(BlenderImportBasePath + "flag/flag_fbx"),
+                    Model = Resources.Load<GameObject>(EntityModelPath + "flag/flag_fbx"),
                     PlayerColorMaterialIndex = 1,
                 },
             },

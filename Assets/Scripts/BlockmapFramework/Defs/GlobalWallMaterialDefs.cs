@@ -16,7 +16,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Brick",
                 Label = "brick",
                 Description = "Just red bricks",
-                Material = MaterialManager.LoadMaterial("Brick"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/Brick"),
                 ClimbSkillRequirement = ClimbingCategory.Advanced,
             },
 
@@ -25,7 +25,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Plaster",
                 Label = "plaster",
                 Description = "White smooth plaster",
-                Material = MaterialManager.LoadMaterial("Plaster"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/Plaster"),
             },
 
             new WallMaterialDef()
@@ -33,28 +33,28 @@ namespace BlockmapFramework.Defs
                 DefName = "Tiles",
                 Label = "tiles",
                 Description = "Small blue bathroom tiles",
-                Material = MaterialManager.LoadMaterial("TilesBlue"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/TilesBlue"),
             },
 
             new WallMaterialDef()
             {
                 DefName = "CorrugatedSteel",
                 Label = "corrugated steel",
-                Material = MaterialManager.LoadMaterial("CorrugatedSteel"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/CorrugatedSteel"),
             },
 
             new WallMaterialDef()
             {
                 DefName = "WoodPlanks",
                 Label = "wood planks",
-                Material = MaterialManager.LoadMaterial("WoodPlanks"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/WoodPlanks"),
             },
 
             new WallMaterialDef()
             {
                 DefName = "MetalDark",
                 Label = "dark metal",
-                Material = MaterialManager.LoadMaterial("MetalDark"),
+                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/MetalDark"),
             },
         };
     }

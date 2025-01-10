@@ -24,6 +24,7 @@ namespace WorldEditor
         public TMP_Dropdown PlayerDropdown;
         public UI_SelectionPanel EntitySelection;
         public Toggle MirrorToggle;
+        public TMP_Dropdown VariantDropdown;
 
         public override void Init(BlockEditor editor)
         {
@@ -88,7 +89,7 @@ namespace WorldEditor
             if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, allowCollisions: true)) return;
 
             Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, owner, updateWorld: true);
+            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, owner, updateWorld: true, variantIndex: VariantDropdown.value);
         }
 
         public override void HandleRightClick()
@@ -118,9 +119,23 @@ namespace WorldEditor
                     // Apply materials
                     MeshRenderer previewRenderer = BuildPreview.GetComponent<MeshRenderer>();
                     previewRenderer.sharedMaterials = prefabMeshRenderer.sharedMaterials;
+                    foreach (Material mat in previewRenderer.materials) mat.SetFloat("_UseTextures", 0);
                 }
 
                 BuildPreview.gameObject.SetActive(false);
+            }
+
+            // Update variant dropdown
+            VariantDropdown.ClearOptions();
+            if(SelectedEntity.RenderProperties.Variants.Count == 0) // No variants
+            {
+                VariantDropdown.AddOptions(new List<string> { "Default" });
+                VariantDropdown.interactable = false;
+            }
+            else
+            {
+                VariantDropdown.AddOptions(SelectedEntity.RenderProperties.Variants.Select(v => v.VariantName).ToList());
+                VariantDropdown.interactable = true;
             }
         }
 

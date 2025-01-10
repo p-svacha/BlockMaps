@@ -110,7 +110,7 @@ namespace BlockmapFramework
                 return;
             }
 
-            Debug.Log("Starting World Generation Step: " + GenerationSteps[CurrentGenerationStep].Method.Name);
+            Debug.Log($"Starting World Generation Step: {GenerationSteps[CurrentGenerationStep].Method.Name}");
             Profiler.Begin(GenerationSteps[CurrentGenerationStep].Method.Name);
             GenerationSteps[CurrentGenerationStep].Invoke();
             Profiler.End(GenerationSteps[CurrentGenerationStep].Method.Name);

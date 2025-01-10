@@ -1,19 +1,12 @@
 ------------------------- CTF v0.0.6 -------------------------
-make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 
-(/)IsImpassable rework
-	use it in pathfinder
-	use it in canspawnentity
-(/)allow entities to be placed on top of each other
-(/)give option to entityshader to allow for triplanar texture
-(/)always place entities at base altitude of lowest node it covers
-(/)allow entities to not cover all nodes in the foot print (allow L, T, ¬, shapes etc.)
-	adjust isImpassable on nodes
-	adjust canPlaceAirNode based on height of entity below
+(/)entity variants
+entities can slow down movement
 
-New map(s): ideas listed below
+(only entities that block vision revel nodes underneath) - maybe idk?
+allow entities to be placed on highest instead of lowest node as a def-setting
 
-desert map gen
+New desert map
 	(/)soft sand areas
 	(/)hard sand areas
 	(/)mostly flat
@@ -27,25 +20,11 @@ desert map gen
 	rocky mountains
 	rocky mesas
 	single small desert rocks
+	chance for big mountains on either side to make kind of a valley
 
+make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 
-brutalist structure map
-
-make valley map gen
-	high sides with player spawns
-	river in the middle
-	some bridge crossings
-
-farm map
-	different crop fields with movement and vision modifiers
-	one big farm building around neutral axis
-
-inside dungeon like map
-
-New map: MegaRandom
-	just repeats random world modifiers
-
-
+rename stamina skill to endurance
 
 ------------------------- END CTF v0.0.6 -------------------------
 
@@ -72,12 +51,24 @@ Walking on an item adds it to the characters inventory if they don't hold anothe
 >>> List of items <<<
 	jail-trap (2x2)
 	catapult-trap (2x2)
+	vision-trap (2x2) - enemy running onto it gets visible
 	food that gives stamina
 	tag-gun
 	item that restores action points
 	fernrohr that increases vision for one turn by a lot
 	item that gives another character that disappears when tagged
 		or small robot that will run out of battery
+
+
+Notifications:
+	Rimworld like messages that appear for a player on certain triggers
+	Messages can have related entities, that the camera jumps to when clicked on (cycles through them with each click)
+	also shows arrows towards related entities when hovering over it
+	Examples for notifications
+		enemy gets visible
+		character has been tagged (with reason)
+		enemy stood on your trap
+		you stood on enemy trap
 
 ------------------------- END CTF v0.0.7 -------------------------
 
@@ -93,6 +84,11 @@ if that works, try hosting the game on a website
 
 
 Framework Updates:
+
+Entity variants:
+	- add a variant option (by string) to EntityDef
+	- each variant CAN have a different material (meaning the texture and/or color can be different)
+	- variants do NOT change shape, size, model, or any other attribute, ONLY material (texture/color)
 
 World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
 	test by quickly changing surface of many nodes in editor
@@ -339,6 +335,38 @@ CTF: Rework hover pathfinding
 	> Cache paths (forever since they can never change atm)
 	> Path preview max distance: If distance is bigger take node in that direction that is at max distance and show path to there
 	> Clicking on yellow path moves as far as possible
+
+CTF Map Ideas:
+		
+	- Caste ruins:
+		- inspired by ruine farnsburg
+		- Mix of inside and outside areas
+
+	- Brutalist structure:
+		- non-realistic concrete structures
+		- hard edges
+		- stairs
+		- many layers
+		- inspired by old video games
+
+	- Valley:
+		- High elevation on both sides where players start
+		- River in the low valley in the middle neutral area
+		- Some bridge crossings over the river
+		- Some cliffs in the elevation
+
+	- Farm:
+		- Many crop fields with paths and/or tree lines between them
+		- Crops that can be moved through but reduce vision (i.e. corn)
+		- Big farm building somewhere in neutral area
+
+	- Dungeon:
+		- inspired by fallout tactics, binding of isaac
+		- just random rooms stitched together
+
+	- MegaRandom:
+		- just repeats different world modifiers from other generators
+		- some restrctions (i.e. in first step just terrain modifiers, then entity modifiers, then buildings, etc.)
 
 -------- POSSIBLE PROJECT IDEAS WITH FRAMEWORK --------
 

@@ -212,8 +212,8 @@ namespace BlockmapFramework
 
         public static void GenerateDoorMesh(MeshBuilder meshBuilder, int height, bool isMirrored, bool isPreview)
         {
-            int doorSubmesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("WoodParquet"));
-            int handleSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Special/LadderMaterial"));
+            int doorSubmesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Materials/NodeMaterials/WoodParquet"));
+            int handleSubmesh = meshBuilder.GetSubmesh(MaterialManager.LoadMaterial("Materials/Special/LadderMaterial"));
 
             // Anchor point (needed for correct door rotation)
             float anchorPointOffsetX = DOOR_WIDTH / 2f;

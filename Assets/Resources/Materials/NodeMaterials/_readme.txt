@@ -1,0 +1,1 @@
+This folder contains all materials using a NodeMaterialShader that can be applied to a NodeMesh and support things like being in/visible and having overlays per node within a chunk.

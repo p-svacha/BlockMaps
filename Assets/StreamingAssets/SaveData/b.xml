@@ -9246,14 +9246,99 @@
     </nodes>
     <entities>
       <li Key="0">
-        <Value Type="CaptureTheFlag.CTFCharacter">
+        <Value Type="BlockmapFramework.Entity">
           <id>0</id>
-          <def Type="BlockmapFramework.EntityDef">Human</def>
-          <originNode>170</originNode>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>771</originNode>
           <overrideHeight>-1</overrideHeight>
           <isMirrored>False</isMirrored>
+          <variant>1</variant>
+          <rotation>N</rotation>
+          <owner>0</owner>
+        </Value>
+      </li>
+      <li Key="1">
+        <Value Type="BlockmapFramework.Entity">
+          <id>1</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>238</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>1</variant>
           <rotation>N</rotation>
           <owner>1</owner>
+        </Value>
+      </li>
+      <li Key="2">
+        <Value Type="BlockmapFramework.Entity">
+          <id>2</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>553</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>1</variant>
+          <rotation>E</rotation>
+          <owner>1</owner>
+        </Value>
+      </li>
+      <li Key="3">
+        <Value Type="BlockmapFramework.Entity">
+          <id>3</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>156</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>0</variant>
+          <rotation>E</rotation>
+          <owner>1</owner>
+        </Value>
+      </li>
+      <li Key="4">
+        <Value Type="BlockmapFramework.Entity">
+          <id>4</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>199</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>0</variant>
+          <rotation>S</rotation>
+          <owner>1</owner>
+        </Value>
+      </li>
+      <li Key="5">
+        <Value Type="BlockmapFramework.Entity">
+          <id>5</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>372</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>0</variant>
+          <rotation>S</rotation>
+          <owner>2</owner>
+        </Value>
+      </li>
+      <li Key="6">
+        <Value Type="BlockmapFramework.Entity">
+          <id>6</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>105</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>0</variant>
+          <rotation>S</rotation>
+          <owner>2</owner>
+        </Value>
+      </li>
+      <li Key="7">
+        <Value Type="BlockmapFramework.Entity">
+          <id>7</id>
+          <def Type="BlockmapFramework.EntityDef">DesertRock01_Large</def>
+          <originNode>482</originNode>
+          <overrideHeight>-1</overrideHeight>
+          <isMirrored>False</isMirrored>
+          <variant>0</variant>
+          <rotation>S</rotation>
+          <owner>2</owner>
         </Value>
       </li>
     </entities>

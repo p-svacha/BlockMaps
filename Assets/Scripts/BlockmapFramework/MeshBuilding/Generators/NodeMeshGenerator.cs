@@ -49,7 +49,7 @@ namespace BlockmapFramework
                     // Also draw bottom side for air nodes
                     if (node is AirNode)
                     {
-                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Cliff");
+                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Materials/NodeMaterials/Cliff");
                         meshBuilder.BuildTriangle(bottomSideSubmesh, v1a.Position, v3a.Position, v2a.Position);
                         meshBuilder.BuildTriangle(bottomSideSubmesh, v1b.Position, v4b.Position, v3b.Position);
                     }
@@ -62,7 +62,7 @@ namespace BlockmapFramework
                     // Also draw bottom side for air nodes
                     if (node is AirNode)
                     {
-                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Cliff");
+                        int bottomSideSubmesh = meshBuilder.GetSubmesh("Materials/NodeMaterials/Cliff");
                         meshBuilder.BuildTriangle(bottomSideSubmesh, v1a.Position, v4a.Position, v2a.Position);
                         meshBuilder.BuildTriangle(bottomSideSubmesh, v2b.Position, v4b.Position, v3b.Position);
                     }
@@ -74,16 +74,16 @@ namespace BlockmapFramework
         /// <summary>
         /// Builds a surface that connects to adjacent nodes with the same surface and draws a curb to other surfaces.
         /// </summary>
-        public static void BuildBorderedNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, string mainMaterialSubpath, string curbMaterialSubpath, float mainHeight, float curbHeight, float curbWidth)
+        public static void BuildBorderedNodeSurface(BlockmapNode node, MeshBuilder meshBuilder, string mainMaterialPath, string curbMaterialPath, float mainHeight, float curbHeight, float curbWidth)
         {
             if(node is AirNode airNode && airNode.IsStairs)
             {
-                BuildStairs(meshBuilder, node, mainHeight, MaterialManager.LoadMaterial(mainMaterialSubpath));
+                BuildStairs(meshBuilder, node, mainHeight, MaterialManager.LoadMaterial(mainMaterialPath));
                 return;
             }
 
-            int mainSubmesh = meshBuilder.GetSubmesh(mainMaterialSubpath);
-            int curbSubmesh = meshBuilder.GetSubmesh(curbMaterialSubpath);
+            int mainSubmesh = meshBuilder.GetSubmesh(mainMaterialPath);
+            int curbSubmesh = meshBuilder.GetSubmesh(curbMaterialPath);
 
             // Center plane
             meshBuilder.DrawShapePlane(node, mainSubmesh, mainHeight, curbWidth, 1f - curbWidth, curbWidth, 1f - curbWidth); // top

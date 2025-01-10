@@ -7,21 +7,19 @@ namespace BlockmapFramework
 {
     public static class MaterialManager
     {
-        private static string MaterialsBasePath = "BlockmapFramework/Materials/";
-        private static string BlendableSurfaceReferenceMaterialsBasePath = "BlockmapFramework/Materials/BlendSurfaceReferenceMaterials/";
+        private static string BlendableSurfaceReferenceMaterialsBasePath = "Materials/BlendSurfaceReferenceMaterials/";
         private static Dictionary<string, Material> CachedMaterials = new Dictionary<string, Material>();
         private static Dictionary<SurfaceDef, int> CachedSurfaceArrayIndices = new Dictionary<SurfaceDef, int>();
 
-        public static Material LoadMaterial(string materialSubpath)
+        public static Material LoadMaterial(string resourcePath)
         {
             // cached
-            if (CachedMaterials.TryGetValue(materialSubpath, out Material mat)) return mat;
+            if (CachedMaterials.TryGetValue(resourcePath, out Material mat)) return mat;
 
             // not yet cached
-            string fullPath = MaterialsBasePath + materialSubpath;
-            Material newMat = Resources.Load<Material>(fullPath);
-            if (newMat == null) throw new System.Exception($"Failed to load material {fullPath}.");
-            CachedMaterials.Add(materialSubpath, newMat);
+            Material newMat = Resources.Load<Material>(resourcePath);
+            if (newMat == null) throw new System.Exception($"Failed to load material {resourcePath}.");
+            CachedMaterials.Add(resourcePath, newMat);
             return newMat;
         }
         private static Material LoadBlendableReferenceMaterial(string materialSubpath)
@@ -73,8 +71,8 @@ namespace BlockmapFramework
         }
 
         // Quick accessors for special materials
-        public static Material BlendbaleSurfaceMaterial => LoadMaterial("Special/SurfaceMaterial");
-        public static Material BuildPreviewMaterial => LoadMaterial("Special/BuildPreviewMaterial");
+        public static Material BlendbaleSurfaceMaterial => LoadMaterial("Materials/Special/SurfaceMaterial");
+        public static Material BuildPreviewMaterial => LoadMaterial("Materials/Special/BuildPreviewMaterial");
 
         #region Textures
 

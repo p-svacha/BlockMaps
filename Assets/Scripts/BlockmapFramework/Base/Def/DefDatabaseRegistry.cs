@@ -26,7 +26,7 @@ namespace BlockmapFramework
             DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
             DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
             DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(GlobalEntityDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(GlobalEntityDefs.GetAllGlobalEntityDefs());
             DefDatabase<FenceDef>.AddDefs(GlobalFenceDefs.Defs);
             DefDatabase<MapGenFeatureDef>.AddDefs(GlobalMapGenFeatureDefs.Defs);
         }

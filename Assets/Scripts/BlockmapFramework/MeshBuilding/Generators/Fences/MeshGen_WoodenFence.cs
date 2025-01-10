@@ -22,7 +22,7 @@ namespace BlockmapFramework
 
         private static void DrawSide(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Wood"));
+            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Materials/NodeMaterials/Wood"));
 
             // Poles
             float poleStep = 1f / NUM_POLES;
@@ -69,7 +69,7 @@ namespace BlockmapFramework
 
         private static void DrawCorner(MeshBuilder meshBuilder, BlockmapNode node, Direction side, int height, bool isPreview)
         {
-            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Wood"));
+            int submesh = meshBuilder.GetSubmesh(isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Materials/NodeMaterials/Wood"));
 
             float startX = 0;
             float dimX = POLE_WIDTH;

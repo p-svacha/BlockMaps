@@ -775,7 +775,7 @@ namespace BlockmapFramework
         {
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.NoRender) return;
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_Blend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.BlendbaleSurfaceMaterial, height: 0f);
-            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_NoBlend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.LoadMaterial(SurfaceDef.RenderProperties.MaterialName), SurfaceDef.RenderProperties.Height);
+            if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.Default_NoBlend) NodeMeshGenerator.DrawDefaultNodeSurface(this, meshBuilder, MaterialManager.LoadMaterial("Materials/NodeMaterials" + SurfaceDef.RenderProperties.MaterialName), SurfaceDef.RenderProperties.Height);
             if (SurfaceDef.RenderProperties.Type == SurfaceRenderType.CustomMeshGeneration) SurfaceDef.RenderProperties.CustomRenderFunction(this, meshBuilder);
         }
 

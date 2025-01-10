@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BlockmapFramework;
 using BlockmapFramework.WorldGeneration;
+using static BlockmapFramework.Defs.GlobalEntityDefs;
 
 namespace WorldEditor
 {
@@ -22,7 +23,7 @@ namespace WorldEditor
                 RenderProperties = new EntityRenderProperties()
                 {
                     RenderType = EntityRenderType.StandaloneModel,
-                    Model = Resources.Load<GameObject>("Entities/Models/BlenderImport/character/character_fbx"),
+                    Model = Resources.Load<GameObject>(EntityModelPath + "character/character_fbx"),
                 },
                 Components = new List<CompProperties>()
                 {

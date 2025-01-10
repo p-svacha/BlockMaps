@@ -1257,7 +1257,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
         /// </summary>
-        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, Actor actor, bool updateWorld, int height = -1, System.Action<Entity> preInit = null)
+        public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, Actor actor, bool updateWorld, int height = -1, System.Action<Entity> preInit = null, int variantIndex = 0)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
             if (node == null) throw new System.Exception("The node on which to spawn an entity must not be null.");
@@ -1266,7 +1266,7 @@ namespace BlockmapFramework
             Entity newEntity = (Entity)System.Activator.CreateInstance(def.EntityClass);
 
             // Call OnCreate to initialize all basic info that are passed to SpawnEntity
-            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored);
+            newEntity.OnCreate(def, EntityIdCounter++, this, node, height, rotation, actor, isMirrored, variantIndex);
 
             // Call entity-specific PreInit to maybe set more entity-specific values
             preInit?.Invoke(newEntity);

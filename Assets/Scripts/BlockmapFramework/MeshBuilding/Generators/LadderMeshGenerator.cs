@@ -43,7 +43,7 @@ namespace BlockmapFramework
         private static Material GetMaterial(bool isPreview)
         {
             if (isPreview) return MaterialManager.BuildPreviewMaterial;
-            else return MaterialManager.LoadMaterial("Special/LadderMaterial");
+            else return MaterialManager.LoadMaterial("Materials/Special/LadderMaterial");
         }
     }
 }

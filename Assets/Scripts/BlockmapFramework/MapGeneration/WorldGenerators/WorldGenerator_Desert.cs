@@ -15,11 +15,26 @@ namespace BlockmapFramework.WorldGeneration
         {
             return new List<System.Action>()
             {
-                () => ApplyBaseHeightmap(World),
-                () => SetBaseSurfaces(World),
-                () => AddDunes(World),
+                ApplyBaseHeightmap,
+                SetBaseSurfaces,
+                AddDunes,
             };
         }
+
+        private void ApplyBaseHeightmap()
+        {
+            ApplyBaseHeightmap(World);
+        }
+        private void SetBaseSurfaces()
+        {
+            SetBaseSurfaces(World);
+        }
+        private void AddDunes()
+        {
+            AddDunes(World);
+        }
+
+
 
         public static void ApplyBaseHeightmap(World world)
         {
@@ -81,7 +96,7 @@ namespace BlockmapFramework.WorldGeneration
             );
             var noise6 = new ModularGradientNoise(
                 new GradientNoise[] { noise7 },
-                new CutoffOperation(0.55f, 0.65f)
+                new CutoffOperation(0.6f, 0.7f)
             );
             var noise0 = new ModularGradientNoise(
                 new GradientNoise[] { noise1, noise4, noise6 },

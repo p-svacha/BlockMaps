@@ -12,7 +12,7 @@ namespace BlockmapFramework
 
         public static void BuildHedgeMesh(MeshBuilder meshBuilder, BlockmapNode node, int height, bool isPreview = false)
         {
-            Material mat = isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Hedge");
+            Material mat = isPreview ? MaterialManager.BuildPreviewMaterial : MaterialManager.LoadMaterial("Materials/NodeMaterials/Hedge");
             int submesh = meshBuilder.GetSubmesh(mat);
 
             float hedgeWidth = 1f - 2 * EDGE_OFFSET;

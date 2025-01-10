@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -31,6 +32,12 @@ namespace BlockmapFramework
         public int PlayerColorMaterialIndex { get; init; } = -1;
 
         /// <summary>
+        /// If an entity has multiple variants, this list contains them. If an entity has only a single variant, this list is empty and the materials defined in the Model are used.
+        /// <br/>Each variant can define specific materials that overwritten with other materials.
+        /// </summary>
+        public List<EntityVariant> Variants { get; init; } = new();
+
+        /// <summary>
         /// If Type is set to Batch, this function will render the entity.
         /// </summary>
         public System.Action<MeshBuilder, BlockmapNode, int, bool> BatchRenderFunction { get; init; } = (meshBuilder, node, height, isPreview) => throw new System.Exception("BatchRenderFunction not defined");
@@ -60,6 +67,7 @@ namespace BlockmapFramework
             Model = orig.Model;
             ModelScale = new Vector3(orig.ModelScale.x, orig.ModelScale.y, orig.ModelScale.z);
             PlayerColorMaterialIndex = orig.PlayerColorMaterialIndex;
+            Variants = orig.Variants.Select(v => new EntityVariant(v)).ToList();
             BatchRenderFunction = orig.BatchRenderFunction;
             StandaloneRenderFunction = orig.StandaloneRenderFunction;
             GetWorldPositionFunction = orig.GetWorldPositionFunction;
