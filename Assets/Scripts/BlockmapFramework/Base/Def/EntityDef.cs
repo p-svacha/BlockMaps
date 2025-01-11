@@ -49,6 +49,11 @@ namespace BlockmapFramework
         public bool Impassable { get; init; } = true;
 
         /// <summary>
+        /// The amount the entity increases the cost when traversing a node that it is on.
+        /// </summary>
+        public float MovementSlowdown { get; init; } = 0f;
+
+        /// <summary>
         /// If true, the entity will block incoming vision rays and stuff behind will not be visible.
         /// <br/>If false, the entity will be see-through.
         /// </summary>
@@ -100,6 +105,7 @@ namespace BlockmapFramework
             Dimensions = new Vector3Int(orig.Dimensions.x, orig.Dimensions.y, orig.Dimensions.z);
             OverrideHeights = orig.OverrideHeights.ToDictionary(x => new Vector2Int(x.Key.x, x.Key.y), x => x.Value);
             Impassable = orig.Impassable;
+            MovementSlowdown = orig.MovementSlowdown;
             RequiresFlatTerrain = orig.RequiresFlatTerrain;
             VariableHeight = orig.VariableHeight;
             WaterBehaviour = orig.WaterBehaviour;
@@ -130,6 +136,7 @@ namespace BlockmapFramework
             if (RenderProperties.RenderType == EntityRenderType.StandaloneModel && RenderProperties.Model == null) ThrowValidationError("Model cannot be null in an EntityDef with RenderType = StandaloneModel.");
             if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) ThrowValidationError("x and z dimensions must be 1 for batch-rendered entities.");
             if (VisionColliderType == VisionColliderType.EntityShape && OverrideHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
+            if (Impassable && MovementSlowdown > 0f) ThrowValidationError("An EntityDef can not have a MovementSlowdown when it is impassable. It's either or.");
 
             foreach (CompProperties props in Components)
                 if(!props.Validate(this))

@@ -754,7 +754,7 @@ namespace BlockmapFramework
             if (actor == null) return true; // Everything is visible
             if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
             if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Node is seen by an entity of given actor
-            if (Entities.Any(e => e.IsVisibleBy(actor))) return true; // An entity on this node is visible
+            if (Entities.Where(e => e.BlocksVision()).Any(e => e.IsVisibleBy(actor))) return true; // A vision-blocking entity on this node is visible
 
             return false;
         }
@@ -1027,7 +1027,7 @@ namespace BlockmapFramework
         /// </summary>
         public virtual bool IsImpassable()
         {
-            if (Entities.Any(e => e.Def.Impassable)) return true; // An entity is blocking this node
+            if (Entities.Any(e => e.Impassable)) return true; // An entity is blocking this node
             return false;
         }
         /// <summary>
@@ -1177,10 +1177,14 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the movement cost for walking one unit (1 meter) on this node.
         /// </summary>
-        public float GetMovementCost(Entity e)
+        public float GetMovementCost(Entity entity)
         {
-            float value = 1f / SurfaceDef.MovementSpeedModifier;
-            if (e != null) value *= 1f / e.GetSurfaceAptitude(SurfaceDef);
+            float value = 1f / SurfaceDef.MovementSpeedModifier; // Value from surface
+            foreach(Entity entityOnNode in Entities)
+            {
+                value += entityOnNode.MovementSlowdown;
+            }
+            if (entity != null) value *= 1f / entity.GetSurfaceAptitude(SurfaceDef);
             return value;
         }
 

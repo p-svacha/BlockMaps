@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ShrubMaterial_Default
+  m_Name: ShrubMaterial_Temperate
   m_Shader: {fileID: 4800000, guid: 0bc5dcfe839b7b5438adba1d148140e9, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:

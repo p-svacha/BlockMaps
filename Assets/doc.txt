@@ -1,10 +1,8 @@
 ------------------------- CTF v0.0.6 -------------------------
 
 (/)entity variants
-entities can slow down movement
-
-(only entities that block vision revel nodes underneath) - maybe idk?
-allow entities to be placed on highest instead of lowest node as a def-setting
+(/)entities can slow down movement
+(/)only entities that block vision revel nodes underneath
 
 New desert map
 	(/)soft sand areas
@@ -13,9 +11,9 @@ New desert map
 	(/)dunes
 	rocks
 	cactus
-	shrubs
+	shrub/grass/bushes in areas
 	palm clusters
-	oasis (water with many trees around, some grass)
+	oasis (water with many palm trees around, some grass surface)
 	single dead trees
 	rocky mountains
 	rocky mesas

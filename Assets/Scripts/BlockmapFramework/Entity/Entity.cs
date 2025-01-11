@@ -659,6 +659,9 @@ namespace BlockmapFramework
         public virtual int MaxHopUpDistance => MovementComp.MaxHopUpDistance;
         public virtual int MaxHopDownDistance => MovementComp.MaxHopDownDistance;
 
+        public virtual bool Impassable => Def.Impassable;
+        public virtual float MovementSlowdown => Def.MovementSlowdown;
+
         public virtual float VisionRange => Def.VisionRange;
         public virtual bool BlocksVision() => Def.BlocksVision;
         public virtual bool BlocksVision(WorldObjectCollider collider) => BlocksVision();
@@ -712,10 +715,7 @@ namespace BlockmapFramework
         public float GetCurrentWalkingSpeed()
         {
             float value = MovementSpeed;
-
-            SurfaceDef surface = OriginNode.SurfaceDef;
-            value *= surface.MovementSpeedModifier;
-            value *= GetSurfaceAptitude(surface);
+            value *= (1f / OriginNode.GetMovementCost(this));
 
             return value;
         }

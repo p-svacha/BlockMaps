@@ -126,6 +126,7 @@ namespace WorldEditor
             }
 
             // Update variant dropdown
+            string prevSelectedOption = VariantDropdown.options.Count == 0 ? "" : VariantDropdown.options[VariantDropdown.value].text;
             VariantDropdown.ClearOptions();
             if(SelectedEntity.RenderProperties.Variants.Count == 0) // No variants
             {
@@ -136,6 +137,10 @@ namespace WorldEditor
             {
                 VariantDropdown.AddOptions(SelectedEntity.RenderProperties.Variants.Select(v => v.VariantName).ToList());
                 VariantDropdown.interactable = true;
+
+                // If there's a variant with the same name as the previously selected variant, select it again
+                EntityVariant matchingVariant = SelectedEntity.RenderProperties.Variants.FirstOrDefault(v => v.VariantName == prevSelectedOption);
+                if (matchingVariant != null) VariantDropdown.value = SelectedEntity.RenderProperties.Variants.IndexOf(matchingVariant);
             }
         }
 

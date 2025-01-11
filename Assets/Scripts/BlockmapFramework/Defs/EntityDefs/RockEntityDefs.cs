@@ -9,7 +9,7 @@ namespace BlockmapFramework.Defs
     {
         private static EntityDef RockBase = new EntityDef()
         {
-            Label = "Rock",
+            Label = "rock",
             Impassable = true,
             BlocksVision = true,
             RenderProperties = new EntityRenderProperties()
