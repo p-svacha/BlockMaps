@@ -31,6 +31,7 @@ namespace CaptureTheFlag
         public static List<WorldGenerator> WorldGenerators = new List<WorldGenerator>()
         {
             new WorldGenerator_Forest(),
+            new WorldGenerator_Desert(),
         };
         public static Dictionary<string, int> MapSizes = new Dictionary<string, int>()
         {

@@ -1,25 +1,5 @@
 ------------------------- CTF v0.0.6 -------------------------
 
-(/)entity variants
-(/)entities can slow down movement
-(/)only entities that block vision revel nodes underneath
-
-New desert map
-	(/)soft sand areas
-	(/)hard sand areas
-	(/)mostly flat
-	(/)dunes
-	rocks
-	cactus
-	shrub/grass/bushes in areas
-	palm clusters
-	oasis (water with many palm trees around, some grass surface)
-	single dead trees
-	rocky mountains
-	rocky mesas
-	single small desert rocks
-	chance for big mountains on either side to make kind of a valley
-
 make path cost take slopes into consideration, down *1.2, up *1.5 per cell
 
 rename stamina skill to endurance
@@ -27,6 +7,8 @@ rename stamina skill to endurance
 ------------------------- END CTF v0.0.6 -------------------------
 
 ------------------------- CTF v0.0.7 -------------------------
+
+reconsider if invisible nodes should still draw shadows
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
@@ -83,10 +65,13 @@ if that works, try hosting the game on a website
 
 Framework Updates:
 
-Entity variants:
-	- add a variant option (by string) to EntityDef
-	- each variant CAN have a different material (meaning the texture and/or color can be different)
-	- variants do NOT change shape, size, model, or any other attribute, ONLY material (texture/color)
+Entity Pivot:
+entities have an additional PivotDirection (SW, SE, NW, NE). Default is SW
+	it defines what corner of the entity OriginNode represents
+	adapt GetOccupiednodes and GetWorldPosition to support this new system
+	when implemented, remove/make optional requirement that footprint needs to be fully connected. If it's not, then these just don't get added to occupied nodes
+		i need this i.e. so that rocks can clip into cliffs
+		THEN ALSO CHECK in blockmapnode.isImpassable if another nearby entity blocks this node according to its pivot, size and shape
 
 World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
 	test by quickly changing surface of many nodes in editor

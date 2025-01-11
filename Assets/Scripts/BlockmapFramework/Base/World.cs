@@ -68,6 +68,9 @@ namespace BlockmapFramework
 
         public string Name;
 
+        public string CliffMaterialPath;
+        public Material CliffMaterial => MaterialManager.LoadMaterial(CliffMaterialPath);
+
         public bool IsInitialized { get; private set; }
         private System.Action OnInitializationDoneCallback;
 
@@ -182,11 +185,6 @@ namespace BlockmapFramework
 
         #region Init
 
-        public World()
-        {
-            OnCreate();
-        }
-
         /// <summary>
         /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass.
         /// </summary>
@@ -234,6 +232,8 @@ namespace BlockmapFramework
             Layer_WallVisionCollider = LayerMask.NameToLayer("WallVisionCollider");
 
             Layer_AllMeshLayers = (1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
+
+            CliffMaterialPath = "Materials/NodeMaterials/Cliff";
         }
 
         private void CreateChunksAndGameObjects()
@@ -1127,6 +1127,7 @@ namespace BlockmapFramework
 
         public void SetSurface(DynamicNode node, SurfaceDef surface, bool updateWorld)
         {
+            if (node == null) return;
             node.SetSurface(surface);
 
             // Update world around coordinates
@@ -1423,6 +1424,68 @@ namespace BlockmapFramework
 
             // Update world around water body
             if (updateWorld) UpdateWorldSystems(new Parcel(this, new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), new Vector2Int(newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1)));
+        }
+        public void AddWaterBody(GroundNode sourceNode, int shoreHeight, bool updateWorld)
+        {
+            if (shoreHeight >= World.MAX_ALTITUDE) return;
+
+            WaterBody waterBody = new WaterBody(); // dummy water body to store data that can later be used to create a real water body
+            waterBody.ShoreHeight = shoreHeight;
+            waterBody.CoveredGroundNodes = new List<GroundNode>();
+
+            List<System.Tuple<GroundNode, Direction>> checkedNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that were already checked for water expansion in one direction
+            List<System.Tuple<GroundNode, Direction>> expansionNodes = new List<System.Tuple<GroundNode, Direction>>(); // nodes that need to be checked for water expansion and in what direction
+            expansionNodes.Add(new System.Tuple<GroundNode, Direction>(sourceNode, Direction.None));
+
+            // Check the following:
+            // > If the node goes deeper than maxDepth, return false
+            // > If the node is below shoreDepth (meaning also underwater), mark it to check
+            // > If the node is above shoreDepth, do nothing
+            while (expansionNodes.Count > 0)
+            {
+                System.Tuple<GroundNode, Direction> check = expansionNodes[0];
+                GroundNode checkNode = check.Item1;
+                Direction checkDir = check.Item2;
+                expansionNodes.RemoveAt(0);
+
+                if (checkNode == null) continue;
+                if (waterBody.CoveredGroundNodes.Contains(checkNode)) continue;
+                if (checkedNodes.Contains(check)) continue;
+
+                checkedNodes.Add(check);
+
+                if (checkNode.WaterNode != null) return; // already has water here
+
+                bool isUnderwater = (
+                    ((checkDir == Direction.None || checkDir == Direction.N) && (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.NE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.E) && (checkNode.Altitude[Direction.NE] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight)) ||
+                    ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.NW] < shoreHeight))
+                    );
+                Debug.Log($"node at {checkNode.WorldCoordinates} would be underwater? {isUnderwater}. shore height is {shoreHeight}");
+                if (isUnderwater) // underwater
+                {
+                    // Remove drowned entities
+                    List<Entity> drownedEntities = GetEntities(checkNode.WorldCoordinates, 0, shoreHeight - 1);
+                    foreach (Entity drownedEntity in drownedEntities) RemoveEntity(drownedEntity, updateWorld: false);
+
+                    // Remove drowned air nodes
+                    List<AirNode> drownedAirNodes = GetAirNodes(checkNode.WorldCoordinates, 0, shoreHeight - 1);
+                    foreach (AirNode drownedAirNode in drownedAirNodes) RemoveAirNode(drownedAirNode, updateWorld: false);
+
+                    waterBody.CoveredGroundNodes.Add(checkNode);
+
+                    if (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.NE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.N), Direction.S));
+                    if (checkNode.Altitude[Direction.NE] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.E), Direction.W));
+                    if (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.S), Direction.N));
+                    if (checkNode.Altitude[Direction.NW] < shoreHeight || checkNode.Altitude[Direction.SW] < shoreHeight) expansionNodes.Add(new System.Tuple<GroundNode, Direction>(GetAdjacentGroundNode(checkNode, Direction.W), Direction.E));
+                }
+                else { } // above water
+            }
+
+            Debug.Log($"water body would have {waterBody.CoveredGroundNodes.Count} nodes.");
+            if (waterBody.CoveredGroundNodes.Count > 0) AddWaterBody(waterBody, updateWorld);
+
         }
         public void RemoveWaterBody(WaterBody water, bool updateWorld)
         {

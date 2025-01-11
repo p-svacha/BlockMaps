@@ -191,7 +191,21 @@ namespace BlockmapFramework.Defs
                     Height = 0.1f,
                 },
                 UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "CorrugatedSteel005/CorrugatedSteel005_1K-JPG_Color"),
-            }
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "Sandstone",
+                Label = "sandstone",
+                Description = "",
+                MovementSpeedModifier = 1f,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_Blend,
+                    MaterialName = "Sandstone",
+                },
+                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Sandstone"),
+            },
         };
     }
 }

@@ -7,11 +7,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PineNeedlesMaterial
-  m_Shader: {fileID: 4800000, guid: 0bc5dcfe839b7b5438adba1d148140e9, type: 3}
+  m_Name: Cliff_Desert
+  m_Shader: {fileID: 4800000, guid: 27d0a4720f656d24cb01ea33470b6860, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _TEXTUREISTRIPLANAR_ON
+  - _FULLVISIBILITY_ON
+  - _SHOWGRID_ON
   - _USETEXTURES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -22,6 +23,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AOMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -42,11 +47,27 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GridTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 738d1a289adcbfb4685c9a026e9e5273, type: 3}
+        m_Texture: {fileID: 2800000, guid: b06ea66f6a864f04db67099b51787ac1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -58,30 +79,59 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RoughnessTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TileOverlayTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
+    - _CanShowOverlays: 0
+    - _CanShowTileOverlay: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _FullVisibility: 1
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _HeightPower: 0
     - _Metallic: 0
+    - _MetallicPower: 0
     - _Mode: 0
+    - _NormalStrength: 0
     - _OcclusionStrength: 1
-    - _OnlyFlatShading: 0
+    - _Offset: 0
     - _Parallax: 0.02
+    - _Scale: 1
+    - _ShowGrid: 1
+    - _ShowTileOverlay: 0
+    - _SideOnlySteepness: 0.7
+    - _SideStartSteepness: 0.3
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TextureIsTriplanar: 1
-    - _TriplanarTextureScale: 0.6
+    - _TextureRotation: 0
+    - _TextureScale: 10
+    - _TileOverlayX: 0
+    - _TileOverlayY: 0
+    - _TriplanarBlendSharpness: 1
     - _UVSec: 0
+    - _UseAO: 0
     - _UseTextures: 1
+    - _ZPriority: 1
     - _ZWrite: 1
+    - _ZoneBorderWidth: 0.1
     m_Colors:
-    - _Color: {r: 0.3529412, g: 0.5529412, b: 0.25882354, a: 1}
+    - _Color: {r: 0.8117648, g: 0.56078434, b: 0.31764707, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
+    - _GridColor: {r: 0, g: 0, b: 0, a: 0}
+    - _TextureTint: {r: 1, g: 1, b: 1, a: 0.4392157}
+    - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
+    - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

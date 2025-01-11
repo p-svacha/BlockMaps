@@ -64,51 +64,6 @@ namespace BlockmapFramework.Defs
 
                 new EntityDef()
                 {
-                    DefName = "PineSmall",
-                    Label = "pine tree (1x1)",
-                    Description = "A small pine tree",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
-                    Dimensions = new Vector3Int(1, 3, 1),
-                    RenderProperties = new EntityRenderProperties()
-                    {
-                        RenderType = EntityRenderType.StandaloneModel,
-                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
-                        ModelScale = new Vector3(0.25f, 0.25f, 0.25f),
-                    }
-                },
-
-                new EntityDef()
-                {
-                    DefName = "PineMedium",
-                    Label = "pine tree (2x2)",
-                    Description = "A medium pine tree",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
-                    Dimensions = new Vector3Int(2, 7, 2),
-                    RenderProperties = new EntityRenderProperties()
-                    {
-                        RenderType = EntityRenderType.StandaloneModel,
-                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
-                        ModelScale = new Vector3(0.6f, 0.6f, 0.6f),
-                    }
-                },
-
-                new EntityDef()
-                {
-                    DefName = "PineBig",
-                    Label = "pine tree (3x3)",
-                    Description = "A big pine tree",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
-                    Dimensions = new Vector3Int(3, 10, 3),
-                    RenderProperties = new EntityRenderProperties()
-                    {
-                        RenderType = EntityRenderType.StandaloneModel,
-                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
-                        ModelScale = new Vector3(0.9f, 0.9f, 0.9f),
-                    }
-                },
-
-                new EntityDef()
-                {
                     DefName = "Car01",
                     Label = "car 1",
                     Description = "A car.",
@@ -169,7 +124,7 @@ namespace BlockmapFramework.Defs
 
                 new EntityDef()
                 {
-                    DefName = "LogSmall",
+                    DefName = "Log_01_Small",
                     Label = "small log",
                     Description = "A small log.",
                     UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "log_2x1/log_2x1_fbx"),
@@ -199,7 +154,7 @@ namespace BlockmapFramework.Defs
 
                 new EntityDef()
                 {
-                    DefName = "Saguaro01_Big",
+                    DefName = "Saguaro_01_Big",
                     Label = "saguaro cactus",
                     Description = "",
                     UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
@@ -213,7 +168,7 @@ namespace BlockmapFramework.Defs
 
                 new EntityDef()
                 {
-                    DefName = "Saguaro01_Medium",
+                    DefName = "Saguaro_01_Medium",
                     Label = "saguaro cactus",
                     Description = "",
                     UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
@@ -228,7 +183,7 @@ namespace BlockmapFramework.Defs
 
                 new EntityDef()
                 {
-                    DefName = "Saguaro01_Small",
+                    DefName = "Saguaro_01_Small",
                     Label = "saguaro cactus",
                     Description = "",
                     UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
@@ -244,6 +199,7 @@ namespace BlockmapFramework.Defs
 
             Defs.AddRange(RockEntityDefs.Defs);
             Defs.AddRange(ShrubEntityDefs.Defs);
+            Defs.AddRange(TreeEntityDefs.Defs);
 
             return Defs;
         }

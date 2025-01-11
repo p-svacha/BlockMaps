@@ -55,7 +55,23 @@ namespace WorldEditor
                 DefName = "Desert_AddDunes",
                 Label = "add dunes",
                 Description = "Adds sandy dunes to some parts of the map.",
-                ModifierAction = WorldGenerator_Desert.AddDunes,
+                ModifierAction = (w) => WorldGenerator_Desert.AddDunes(w, new()),
+            },
+
+            new WorldModifierDef()
+            {
+                DefName = "Desert_AddShrubs",
+                Label = "add desert shrubs",
+                Description = "Adds desert shrubs to some parts of the map.",
+                ModifierAction = (w) => WorldGenerator_Desert.AddShrubClusters(w, new()),
+            },
+
+            new WorldModifierDef()
+            {
+                DefName = "Desert_AddMesas",
+                Label = "add mesas",
+                Description = "Adds some mesas (elevated flat mountains) scattered around the map.",
+                ModifierAction = (w) => WorldGenerator_Desert.AddMesas(w, new()),
             },
         };
     }

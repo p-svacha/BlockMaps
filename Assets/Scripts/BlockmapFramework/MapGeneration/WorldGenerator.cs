@@ -2,6 +2,8 @@ using BlockmapFramework.Profiling;
 using BlockmapFramework.WorldGeneration;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UltimateNoiseLibrary;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -130,43 +132,119 @@ namespace BlockmapFramework
 
         #region Helper Functions
         /// <summary>
-        /// Sets all ground node heights according to the given height map.
+        /// Sets the corner altitudes of all ground nodes according to the given height map.
         /// </summary>
         protected static void ApplyHeightmap(World world, int[,] heightMap)
         {
             foreach (GroundNode n in world.GetAllGroundNodes())
             {
-                Dictionary<Direction, int> nodeHeights = new Dictionary<Direction, int>()
-                    {
-                        { Direction.SW, heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y] },
-                        { Direction.SE, heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y] },
-                        { Direction.NE, heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
-                        { Direction.NW, heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
-                    };
-                n.SetAltitude(nodeHeights);
+                ApplyHeightmap(world, heightMap, n);
             }
         }
 
         /// <summary>
-        /// Adds the heights of the given heightmap to the altitude of all ground nodes.
+        /// Sets the corner altitudes of a ground nodes according to the given height map.
+        /// <br/>Returns if anything has been changed on the node.
+        /// </summary>
+        protected static bool ApplyHeightmap(World world, int[,] heightMap, GroundNode node, bool raiseOnly = false)
+        {
+            if (raiseOnly)
+            {
+                if (node.Altitude[Direction.SW] >= heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y] &&
+                    node.Altitude[Direction.SE] >= heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y] &&
+                    node.Altitude[Direction.NE] >= heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y + 1] &&
+                    node.Altitude[Direction.NW] >= heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y + 1]) return false; // no change needed
+
+                Dictionary<Direction, int> newNodeAltitudes = new Dictionary<Direction, int>()
+                {
+                    { Direction.SW, Mathf.Max(node.Altitude[Direction.SW], heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y]) },
+                    { Direction.SE, Mathf.Max(node.Altitude[Direction.SE], heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y]) },
+                    { Direction.NE, Mathf.Max(node.Altitude[Direction.NE], heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y + 1]) },
+                    { Direction.NW, Mathf.Max(node.Altitude[Direction.NW], heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y + 1]) },
+                };
+                node.SetAltitude(newNodeAltitudes);
+                return true;
+            }
+            else
+            {
+                Dictionary<Direction, int> newNodeAltitudes = new Dictionary<Direction, int>()
+                {
+                    { Direction.SW, heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y] },
+                    { Direction.SE, heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y] },
+                    { Direction.NE, heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y + 1] },
+                    { Direction.NW, heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y + 1] },
+                };
+                node.SetAltitude(newNodeAltitudes);
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Adds the altitudes on all corners of all ground nodes according to the given height map.
         /// </summary>
         protected static void AddHeightmap(World world, int[,] heightMap)
         {
             foreach (GroundNode n in world.GetAllGroundNodes())
             {
-                Dictionary<Direction, int> newNodeHeights = new Dictionary<Direction, int>()
-                {
-                    { Direction.SW, n.Altitude[Direction.SW] + heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y] },
-                    { Direction.SE, n.Altitude[Direction.SE] + heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y] },
-                    { Direction.NE, n.Altitude[Direction.NE] + heightMap[n.WorldCoordinates.x + 1, n.WorldCoordinates.y + 1] },
-                    { Direction.NW, n.Altitude[Direction.NW] + heightMap[n.WorldCoordinates.x, n.WorldCoordinates.y + 1] },
-                };
-                n.SetAltitude(newNodeHeights);
+                AddHeightmap(world, heightMap, n);
             }
+        }
+
+        /// <summary>
+        /// Adds the altitudes on all corners of a ground node according to the given height map.
+        /// </summary>
+        protected static void AddHeightmap(World world, int[,] heightMap, GroundNode node)
+        {
+            Dictionary<Direction, int> newNodeHeights = new Dictionary<Direction, int>()
+                {
+                    { Direction.SW, node.Altitude[Direction.SW] + heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y] },
+                    { Direction.SE, node.Altitude[Direction.SE] + heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y] },
+                    { Direction.NE, node.Altitude[Direction.NE] + heightMap[node.WorldCoordinates.x + 1, node.WorldCoordinates.y + 1] },
+                    { Direction.NW, node.Altitude[Direction.NW] + heightMap[node.WorldCoordinates.x, node.WorldCoordinates.y + 1] },
+                };
+            node.SetAltitude(newNodeHeights);
         }
 
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
         protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
+
+        protected static void TrySpawnRandomEntityDefOnGround(World world, int x, int y, Dictionary<EntityDef, float> entityDefProbabilities, string variantName = "")
+        {
+            BlockmapNode targetNode = world.GetGroundNode(new Vector2Int(x, y));
+            Direction rotation = HelperFunctions.GetRandomSide();
+            bool isMirrored = Random.value < 0.5f;
+
+            EntityDef def = entityDefProbabilities.GetWeightedRandomElement();
+
+            if (world.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true))
+            {
+                if(variantName != "")
+                {
+                    EntityVariant variant = def.RenderProperties.Variants.FirstOrDefault(v => v.VariantName == variantName);
+                    int variantIndex = variant != null ? def.RenderProperties.Variants.IndexOf(variant) : 0;
+                    world.SpawnEntity(def, targetNode, rotation, isMirrored, world.Gaia, updateWorld: false, variantIndex: variantIndex);
+                }
+                else world.SpawnEntity(def, targetNode, rotation, isMirrored, world.Gaia, updateWorld: false);
+            }
+        }
+
+        /// <summary>
+        /// Generates a height map from a noise, given the min and max altitudes referring to the noises 0 and 1 values.
+        /// <br/>The int[,] height map can then be used with add/apply heightmap to create smooth terrain.
+        /// </summary>
+        protected static int[,] GetHeightMapFromNoise(World world, GradientNoise noise, int minAltitude, int maxAltitude)
+        {
+            int[,] heightMap = new int[world.NumNodesPerSide + 1, world.NumNodesPerSide + 1];
+            for (int x = 0; x < world.NumNodesPerSide + 1; x++)
+            {
+                for (int y = 0; y < world.NumNodesPerSide + 1; y++)
+                {
+                    int value = (int)((noise.GetValue(x, y) * (maxAltitude - minAltitude)) + minAltitude);
+                    heightMap[x, y] = (int)value;
+                }
+            }
+            return heightMap;
+        }
 
         protected void Log(string message)
         {

@@ -15,6 +15,15 @@ namespace BlockmapFramework.WorldGeneration
 
         private int[,] HeightMap;
 
+        private static Dictionary<EntityDef, float> TreeProbabilities = new Dictionary<EntityDef, float>()
+        {
+            { EntityDefOf.Pine_01_Tiny, 1f },
+            { EntityDefOf.Pine_01_Small, 1f },
+            { EntityDefOf.Pine_01_Medium, 1f },
+            { EntityDefOf.Pine_01_Big, 1f },
+            { EntityDefOf.Log_01_Small, 0.3f },
+        };
+
         protected override List<System.Action> GetGenerationSteps()
         {
             return new List<System.Action>()
@@ -153,35 +162,10 @@ namespace BlockmapFramework.WorldGeneration
                     float densityMapValue = forestDensityMap.GetValue(x, y);
                     if (densityMapValue > 0.3f && Random.value < densityMapValue * densityModifier)
                     {
-                        SpawnRandomTree(x, y);
+                        TrySpawnRandomEntityDefOnGround(World, x, y, TreeProbabilities);
                     }
                 }
             }
-        }
-        private void SpawnRandomTree(int x, int y)
-        {
-            BlockmapNode targetNode = World.GetGroundNode(new Vector2Int(x, y));
-            Direction rotation = HelperFunctions.GetRandomSide();
-            bool isMirrored = Random.value < 0.5f;
-
-            EntityDef def = GetRandomTreeDef();
-
-            if (World.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true))
-            {
-                World.SpawnEntity(def, targetNode, rotation, isMirrored, World.Gaia, updateWorld: false);
-            }
-        }
-        private EntityDef GetRandomTreeDef()
-        {
-            Dictionary<string, float> candidateDefNames = new Dictionary<string, float>()
-            {
-                { "PineSmall", 1f },
-                { "PineMedium", 3f },
-                { "PineBig", 1f },
-                { "LogSmall", 0.3f },
-            };
-            string chosenDef = HelperFunctions.GetWeightedRandomElement(candidateDefNames);
-            return DefDatabase<EntityDef>.GetNamed(chosenDef);
         }
 
         #endregion

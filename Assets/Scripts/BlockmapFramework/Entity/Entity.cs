@@ -289,13 +289,11 @@ namespace BlockmapFramework
                 // Variant materials
                 if (Def.RenderProperties.Variants.Count > 0)
                 {
-                    Debug.Log("has variat");
                     EntityVariant variant = Def.RenderProperties.Variants[Variant];
                     Material[] modelMaterials = MeshRenderer.materials;
                     foreach (var variantMat in variant.OverwrittenMaterials)
                     {
                         modelMaterials[variantMat.Key] = variantMat.Value;
-                        Debug.Log($"Changing material at index {variantMat.Key} to {variantMat.Value.name}.");
                     }
                     MeshRenderer.materials = modelMaterials;
                 }

@@ -15,6 +15,7 @@ namespace UltimateNoiseLibrary
         public GradientNoise(int seed, float scale) : base(seed, scale) { }
         public abstract GradientNoise GetCopy();
         public abstract float GetValue(float x, float y);
+        public float GetValue(Vector2Int pos) => GetValue(pos.x, pos.y);
 
         public override Sprite CreateTestSprite(int size = 128)
         {

@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PineNeedlesMaterial
+  m_Name: LeafMaterial
   m_Shader: {fileID: 4800000, guid: 0bc5dcfe839b7b5438adba1d148140e9, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
@@ -43,8 +43,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 738d1a289adcbfb4685c9a026e9e5273, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 8d94c51d7ef8ac842bfd2e5dd131622f, type: 3}
+        m_Scale: {x: 2, y: 2}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -76,12 +76,12 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TextureIsTriplanar: 1
-    - _TriplanarTextureScale: 0.6
+    - _TriplanarTextureScale: 3
     - _UVSec: 0
     - _UseTextures: 1
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.3529412, g: 0.5529412, b: 0.25882354, a: 1}
+    - _Color: {r: 0.4431373, g: 0.6392157, b: 0.14117648, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TintColor: {r: 0, g: 0, b: 0, a: 0.7490196}
   m_BuildTextureStacks: []

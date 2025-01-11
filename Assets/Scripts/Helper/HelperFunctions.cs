@@ -506,6 +506,63 @@ public static class HelperFunctions
         throw new System.Exception($"{corner} is not a valid corner direction.");
     }
 
+    /// <summary>
+    /// Groups the given coordinates into clusters based on 4-directional connectivity.
+    /// </summary>
+    /// <param name="coordinates">A set of 2D coordinates.</param>
+    /// <returns>A list of clusters, each cluster represented as a HashSet of connected coordinates.</returns>
+    public static List<HashSet<Vector2Int>> GetConnectedClusters(HashSet<Vector2Int> coordinates)
+    {
+        var clusters = new List<HashSet<Vector2Int>>();
+        var visited = new HashSet<Vector2Int>();
+
+        // For each coordinate, if it's not yet visited, perform a BFS or DFS to find its cluster
+        foreach (var coord in coordinates)
+        {
+            if (!visited.Contains(coord))
+            {
+                var cluster = new HashSet<Vector2Int>();
+                var queue = new Queue<Vector2Int>();
+
+                // Start BFS
+                visited.Add(coord);
+                queue.Enqueue(coord);
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    cluster.Add(current);
+
+                    // Check all 4 possible neighbors
+                    foreach (var neighbor in GetNeighbors(current))
+                    {
+                        // If neighbor is part of the original set and not yet visited, add it
+                        if (coordinates.Contains(neighbor) && !visited.Contains(neighbor))
+                        {
+                            visited.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
+
+                clusters.Add(cluster);
+            }
+        }
+
+        return clusters;
+    }
+
+    /// <summary>
+    /// Returns the 4 orthogonal neighbors for a given coordinate.
+    /// </summary>
+    private static IEnumerable<Vector2Int> GetNeighbors(Vector2Int coord)
+    {
+        yield return new Vector2Int(coord.x + 1, coord.y);
+        yield return new Vector2Int(coord.x - 1, coord.y);
+        yield return new Vector2Int(coord.x, coord.y + 1);
+        yield return new Vector2Int(coord.x, coord.y - 1);
+    }
+
     #endregion
 
     #region UI

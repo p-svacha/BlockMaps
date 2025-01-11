@@ -2359,7 +2359,7 @@ MonoBehaviour:
   ArrowPrefab: {fileID: 919132149155446097, guid: 6f69892969657d445bd8e50bdfc27b66, type: 3}
   ToolButtonContainer: {fileID: 1523611163}
   ToolNamePanel: {fileID: 588553661}
-  ToolNameText: {fileID: 1581618922}
+  ToolNameText: {fileID: 173020814}
   TileInfoText: {fileID: 111172741}
   ToolWindow: {fileID: 9765087}
   DisplayOptions: {fileID: 2063505688}

@@ -209,54 +209,64 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns an entity on a random node near the given point and returns the entity instance.
         /// </summary>
-        public static Entity SpawnEntityAround(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, float standard_deviation, Direction rotation, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        public static Entity SpawnEntityAround(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, float standard_deviation, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false)
         {
-            int maxAttempts = 50;
             if (standard_deviation == 0f) maxAttempts = 1;
             int numAttempts = 0;
 
             while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
             {
                 Vector2Int targetCoordinates = HelperFunctions.GetRandomNearPosition(worldCoordinates, standard_deviation);
-                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored: false, requiredRoamingArea, forbiddenNodes);
+                Direction rotation = forcedRotation == Direction.None ? HelperFunctions.GetRandomSide() : forcedRotation;
+                bool isMirrored = randomMirror ? Random.value < 0.5f : false;
+
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes);
                 if (spawnedEntity != null) return spawnedEntity;
             }
 
-            Debug.LogWarning($"Could not spawn {def.Label} around {worldCoordinates} after {maxAttempts} attempts.");
+            Debug.Log($"Could not spawn {def.DefName} around {worldCoordinates} after {maxAttempts} attempts.");
             return null;
         }
 
         /// <summary>
         /// Spawns an entity within a given area in the world and returns the entity instance.
         /// </summary>
-        public static Entity SpawnEntityWithin(World world, EntityDef def, Actor player, Direction rotation, int minX, int maxX, int minY, int maxY, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        public static Entity SpawnEntityWithin(World world, EntityDef def, Actor player, int minX, int maxX, int minY, int maxY, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false)
         {
-            int maxAttempts = 50;
             int numAttempts = 0;
-
             while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
             {
                 Vector2Int targetCoordinates = new Vector2Int(Random.Range(minX, maxX + 1), Random.Range(minY, maxY + 1));
-                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored: false, requiredRoamingArea, forbiddenNodes);
+                Direction rotation = forcedRotation == Direction.None ? HelperFunctions.GetRandomSide() : forcedRotation;
+                bool isMirrored = randomMirror ? Random.value < 0.5f : false;
+
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes);
                 if (spawnedEntity != null) return spawnedEntity;
             }
 
-            Debug.LogWarning($"Could not spawn {def.Label} within x:{minX}-{maxX}, y:{minY}-{maxY} after {maxAttempts} attempts.");
+            Debug.Log($"Could not spawn {def.Label} within x:{minX}-{maxX}, y:{minY}-{maxY} after {maxAttempts} attempts.");
             return null;
         }
 
         /// <summary>
         /// Tries spawning an entity on a random node on the given coordinates with all the given restrictions.
         /// <br/>Returns the entity instance if successful or null of not successful.
-        private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, bool isMirrored, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, bool isMirrored, string variantName = "", int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
         {
             if (!world.IsInWorld(worldCoordinates)) return null;
 
             BlockmapNode targetNode = world.GetNodes(worldCoordinates).RandomElement();
             if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) return null;
-            if (!world.CanSpawnEntity(def, targetNode, rotation, isMirrored)) return null;
+            if (!world.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true)) return null;
 
-            Entity spawnedEntity = world.SpawnEntity(def, targetNode, rotation, isMirrored, player, updateWorld: false);
+            int variantIndex = 0;
+            if (variantName != "")
+            {
+                EntityVariant variant = def.RenderProperties.Variants.FirstOrDefault(v => v.VariantName == variantName);
+                variantIndex = variant != null ? def.RenderProperties.Variants.IndexOf(variant) : 0;
+            }
+
+            Entity spawnedEntity = world.SpawnEntity(def, targetNode, rotation, isMirrored, player, updateWorld: false, variantIndex: variantIndex);
 
             if (requiredRoamingArea > 0 && !Pathfinder.HasRoamingArea(targetNode, requiredRoamingArea, spawnedEntity, forbiddenNodes))
             {
