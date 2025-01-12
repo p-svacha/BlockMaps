@@ -710,10 +710,10 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the movement speed this entity has right now taking into account the surface its on.
         /// </summary>
-        public float GetCurrentWalkingSpeed()
+        public float GetCurrentWalkingSpeed(Direction from, Direction to)
         {
             float value = MovementSpeed;
-            value *= (1f / OriginNode.GetMovementCost(this));
+            value *= (1f / OriginNode.GetMovementCost(this, from, to));
 
             return value;
         }

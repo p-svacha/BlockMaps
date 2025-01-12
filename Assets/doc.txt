@@ -1,14 +1,19 @@
 ------------------------- CTF v0.0.6 -------------------------
 
-make path cost take slopes into consideration, down *1.2, up *1.5 per cell
+(/)make path cost take slopes into consideration, down *1.2, up *1.5 per cell
+(/)rename stamina skill to endurance
+(/)characters can run further in a turn
 
-rename stamina skill to endurance
+desert:
+no spawn on mountains
+sandstone areas on mesas and rare otherwise
+more random grass around oasis
+
+new screenshots and description to github
 
 ------------------------- END CTF v0.0.6 -------------------------
 
 ------------------------- CTF v0.0.7 -------------------------
-
-reconsider if invisible nodes should still draw shadows
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem

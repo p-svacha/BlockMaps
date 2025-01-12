@@ -14,6 +14,9 @@ namespace BlockmapFramework
     /// </summary>
     public abstract class BlockmapNode : WorldDatabaseObject, IVisionTarget, ISaveAndLoadable
     {
+        public const float TRAVERSAL_COST_MODIFIER_PER_ALTITUDE_UPWARDS = 0.2f; // The cost of traversing rises by this % per altitude going up.
+        public const float TRAVERSAL_COST_MODIFIER_PER_ALTITUDE_DOWNWARDS = -0.1f; // The cost of traversing rises by this % per altitude going down.
+
         /// <summary>
         /// Unique identifier of the node.
         /// </summary>
@@ -1175,15 +1178,38 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the movement cost for walking one unit (1 meter) on this node.
+        /// Returns the movement cost for walking from the given point to the given point on this node.
+        /// <br/>Either from or to must be the center of the node.
         /// </summary>
-        public float GetMovementCost(Entity entity)
+        public float GetMovementCost(Entity entity, Direction from, Direction to)
         {
-            float value = 1f / SurfaceDef.MovementSpeedModifier; // Value from surface
+            // Base cost from surface
+            float value = 1f / SurfaceDef.MovementSpeedModifier;
+
+            // Modifiers from entities on the node (additive)
             foreach(Entity entityOnNode in Entities)
             {
                 value += entityOnNode.MovementSlowdown;
             }
+
+            // Modifiers from slope (multiplicative)
+            if(from != Direction.None && to != Direction.None) throw new System.Exception($"Either from or to must be the center of the node (Direction.None). from = {from}, to = {to}.");
+            if(from == Direction.None && to == Direction.None) throw new System.Exception($"Either from or to must be the side/corner of the node (Direction != None). from = {from}, to = {to}.");
+            float fromAltitude = GetLocalShapeAltitude(HelperFunctions.GetDirectionVectorFloat(from, distance: 0.5f));
+            float toAltitude = GetLocalShapeAltitude(HelperFunctions.GetDirectionVectorFloat(to, distance: 0.5f));
+            float altitudeDiff = toAltitude - fromAltitude;
+            if (altitudeDiff > 0) // going upwards
+            {
+                float costModifier = altitudeDiff * TRAVERSAL_COST_MODIFIER_PER_ALTITUDE_UPWARDS;
+                value *= (1f + costModifier);
+            }
+            if (altitudeDiff < 0)
+            {
+                float costModifier = Mathf.Abs(altitudeDiff) * TRAVERSAL_COST_MODIFIER_PER_ALTITUDE_DOWNWARDS;
+                value *= (1f + costModifier);
+            }
+
+            // Surface aptitude from entity (multiplicative)
             if (entity != null) value *= 1f / entity.GetSurfaceAptitude(SurfaceDef);
             return value;
         }

@@ -336,9 +336,9 @@ public static class HelperFunctions
 
     public static Vector2Int GetCoordinatesInDirection(Vector2Int coordinates, Direction dir)
     {
-        return coordinates + GetDirectionVector(dir);
+        return coordinates + GetDirectionVectorInt(dir);
     }
-    public static Vector2Int GetDirectionVector(Direction dir, int distance = 1)
+    public static Vector2Int GetDirectionVectorInt(Direction dir, int distance = 1)
     {
         if (dir == Direction.N) return new Vector2Int(0, distance);
         if (dir == Direction.E) return new Vector2Int(distance, 0);
@@ -349,6 +349,19 @@ public static class HelperFunctions
         if (dir == Direction.SE) return new Vector2Int(distance, -distance);
         if (dir == Direction.SW) return new Vector2Int(-distance, -distance);
         return new Vector2Int(0, 0);
+    }
+
+    public static Vector2 GetDirectionVectorFloat(Direction dir, float distance = 1f)
+    {
+        if (dir == Direction.N) return new Vector2(0, distance);
+        if (dir == Direction.E) return new Vector2(distance, 0);
+        if (dir == Direction.S) return new Vector2(0, -distance);
+        if (dir == Direction.W) return new Vector2(-distance, 0);
+        if (dir == Direction.NE) return new Vector2(distance, distance);
+        if (dir == Direction.NW) return new Vector2(-distance, distance);
+        if (dir == Direction.SE) return new Vector2(distance, -distance);
+        if (dir == Direction.SW) return new Vector2(-distance, -distance);
+        return new Vector2(0, 0);
     }
 
     /// <summary>

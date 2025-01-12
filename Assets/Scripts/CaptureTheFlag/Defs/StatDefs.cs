@@ -29,7 +29,7 @@ namespace CaptureTheFlag
             {
                 DefName = "RunningAptitude",
                 Label = "running aptitude",
-                Description = "Modifier of how many action points running costs.",
+                Description = "Modifier of how many action points running costs. The higher the aptitude the lower the cost.",
                 Type = StatType.Percent,
                 BaseValue = 0f,
                 SkillOffsets = new List<SkillImpact>()
@@ -37,7 +37,7 @@ namespace CaptureTheFlag
                     new SkillImpact()
                     {
                         SkillDefName = "Running",
-                        LinearPerLevelValue = 0.1f,
+                        LinearPerLevelValue = 0.15f,
                     }
                 },
             },
@@ -70,7 +70,7 @@ namespace CaptureTheFlag
                 {
                     new SkillImpact()
                     {
-                        SkillDefName = "Stamina",
+                        SkillDefName = "Endurance",
                         LinearPerLevelValue = 3,
                     }
                 },

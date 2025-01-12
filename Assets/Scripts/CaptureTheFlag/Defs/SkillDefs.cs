@@ -26,9 +26,9 @@ namespace CaptureTheFlag
 
             new SkillDef()
             {
-                DefName = "Stamina",
-                Label = "stamina",
-                Description = "How much stamina this character has when fully rested.",
+                DefName = "Endurance",
+                Label = "endurance",
+                Description = "Affects how much stamina this character has when fully rested.",
             },
 
             new SkillDef()

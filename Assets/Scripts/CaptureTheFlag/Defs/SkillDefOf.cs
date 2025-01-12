@@ -10,7 +10,7 @@ namespace CaptureTheFlag
     {
         public static SkillDef Running;
         public static SkillDef Vision;
-        public static SkillDef Stamina;
+        public static SkillDef Endurance;
         public static SkillDef Regeneration;
         public static SkillDef Climbing;
         public static SkillDef Swimming;

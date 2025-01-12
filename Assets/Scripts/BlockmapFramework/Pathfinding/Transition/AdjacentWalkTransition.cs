@@ -13,7 +13,7 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(Entity entity)
         {
-            float value = (0.5f * From.GetMovementCost(entity)) + (0.5f * To.GetMovementCost(entity));
+            float value = (0.5f * From.GetMovementCost(entity, from: Direction.None, to: Direction)) + (0.5f * To.GetMovementCost(entity, from: OppositeDirection, to: Direction.None));
             if(HelperFunctions.IsCorner(Direction)) value *= 1.4142f; // Because diagonal
             return value;
         }
@@ -40,7 +40,9 @@ namespace BlockmapFramework
             Vector2 nextNodePosition2d = new Vector2(nextNodePosition.x, nextNodePosition.z);
 
             // Calculate new 2d world position and coordinates by moving towards next node in 2d
-            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.GetCurrentWalkingSpeed() * Time.deltaTime);
+            Direction fromDirection = entity.OriginNode == From ? Direction.None : OppositeDirection;
+            Direction toDirection = entity.OriginNode == From ? Direction : Direction.None;
+            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.GetCurrentWalkingSpeed(fromDirection, toDirection) * Time.deltaTime);
             Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
 
             // Set origin node according to 2d coordinates

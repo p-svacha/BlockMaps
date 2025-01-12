@@ -19,6 +19,7 @@ namespace BlockmapFramework
         public BlockmapNode From { get; private set; }
         public BlockmapNode To { get; private set; }
         public Direction Direction { get; private set; }
+        public Direction OppositeDirection { get; private set; }
 
         /// <summary>
         /// The maximum height a moving entity is allowed to have to use this transition.
@@ -30,6 +31,7 @@ namespace BlockmapFramework
             From = from;
             To = to;
             Direction = dir;
+            OppositeDirection = HelperFunctions.GetOppositeDirection(Direction);
             MaxHeight = maxHeight;
         }
 

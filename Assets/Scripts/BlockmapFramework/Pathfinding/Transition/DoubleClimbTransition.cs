@@ -35,7 +35,7 @@ namespace BlockmapFramework
 
         public override float GetMovementCost(Entity entity)
         {
-            float value = (0.5f * From.GetMovementCost(entity)) + (0.5f * To.GetMovementCost(entity)); // Cost of moving between start and end tile
+            float value = (0.5f * From.GetMovementCost(entity, from: Direction.None, to: Direction)) + (0.5f * To.GetMovementCost(entity, from: OppositeDirection, to: Direction.None)); // Cost of moving between start and end tile
 
             // Add cost of climbing
             foreach (IClimbable climb in ClimbUp) value += climb.GetClimbCostUp(entity);
@@ -74,7 +74,7 @@ namespace BlockmapFramework
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.GetCurrentWalkingSpeed() * Time.deltaTime);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.GetCurrentWalkingSpeed(Direction.None, Direction) * Time.deltaTime);
 
                         // Calculate altitude
                         float y = World.GetWorldAltitudeAt(newPosition2d, From);
@@ -195,7 +195,7 @@ namespace BlockmapFramework
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.GetCurrentWalkingSpeed() * Time.deltaTime);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.GetCurrentWalkingSpeed(OppositeDirection, Direction.None) * Time.deltaTime);
 
                         // Calculate altitude
                         float y = World.GetWorldAltitudeAt(newPosition2d, To);
@@ -253,8 +253,8 @@ namespace BlockmapFramework
             float offset = (climbDir == climb.ClimbSide) ? climb.ClimbTransformOffset : 0f;
 
             float entityLength = (entity != null) ? entity.WorldSize.x / 2f : 0f;
-            if (isAscend) return new Vector3(HelperFunctions.GetDirectionVector(Direction).x, 0f, HelperFunctions.GetDirectionVector(Direction).y) * (0.5f - entityLength - offset);
-            else return new Vector3(HelperFunctions.GetDirectionVector(Direction).x, 0f, HelperFunctions.GetDirectionVector(Direction).y) * (0.5f + entityLength + offset);
+            if (isAscend) return new Vector3(HelperFunctions.GetDirectionVectorInt(Direction).x, 0f, HelperFunctions.GetDirectionVectorInt(Direction).y) * (0.5f - entityLength - offset);
+            else return new Vector3(HelperFunctions.GetDirectionVectorInt(Direction).x, 0f, HelperFunctions.GetDirectionVectorInt(Direction).y) * (0.5f + entityLength + offset);
         }
 
         public override List<Vector3> GetPreviewPath()
