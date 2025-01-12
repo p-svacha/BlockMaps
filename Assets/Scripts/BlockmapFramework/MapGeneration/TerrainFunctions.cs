@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework.WorldGeneration
@@ -7,7 +8,14 @@ namespace BlockmapFramework.WorldGeneration
     public static class TerrainFunctions
     {
 
-        public static void SmoothOutside(BlockmapNode node, int smoothStep, List<SurfaceDef> ignoredSurfaces = null) => SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep, ignoredSurfaces);
+        public static void SmoothOutside(GroundNode node, int smoothStep, List<SurfaceDef> ignoredSurfaces = null, List<string> ignoredTags = null)
+        {
+            if (ignoredSurfaces != null && ignoredSurfaces.Contains(node.SurfaceDef)) return;
+            if (ignoredTags != null && node.HasAnyOfTags(ignoredTags)) return; // Skip if node has an ignored tag
+            if (ignoredTags != null && node.GetAdjacentGroundNodes8().Any(n => n.HasAnyOfTags(ignoredTags))) return; // Skip if any adjacent node has an ignored tag
+
+            SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep, ignoredSurfaces, ignoredTags);
+        }
 
         /// <summary>
         /// Smooths the ground area outside the given parcel so there are no hard edges around the parcel.
@@ -15,7 +23,7 @@ namespace BlockmapFramework.WorldGeneration
         /// <br/>Smooth step defines the targeted steepness along the smoothed area.
         /// <br/>Returns the modified area as a new parcel.
         /// </summary>
-        public static Parcel SmoothOutside(World world, Parcel parcel, int smoothStep = 1, List<SurfaceDef> ignoredSurfaces = null)
+        public static Parcel SmoothOutside(World world, Parcel parcel, int smoothStep = 1, List<SurfaceDef> ignoredSurfaces = null, List<string> ignoredTags = null)
         {
             bool anotherLayerRequired;
 
@@ -44,8 +52,8 @@ namespace BlockmapFramework.WorldGeneration
 
                         Vector2Int worldCoords = new Vector2Int(x, y);
                         GroundNode groundNode = world.GetGroundNode(worldCoords);
-                        if (groundNode == null) continue;
-                        if (ignoredSurfaces != null && ignoredSurfaces.Contains(groundNode.SurfaceDef)) continue;
+
+                        if (ShouldSkip(groundNode, ignoredSurfaces, ignoredTags)) continue;
 
                         // East
                         if (isEastEdge && !isSouthEdge && !isNorthEdge)
@@ -196,8 +204,8 @@ namespace BlockmapFramework.WorldGeneration
 
                         Vector2Int worldCoords = new Vector2Int(x, y);
                         GroundNode groundNode = world.GetGroundNode(worldCoords);
-                        if (groundNode == null) continue;
-                        if (ignoredSurfaces != null && ignoredSurfaces.Contains(groundNode.SurfaceDef)) continue;
+
+                        if (ShouldSkip(groundNode, ignoredSurfaces, ignoredTags)) continue;
 
                         // SW
                         if (isWestEdge && isSouthEdge)
@@ -325,5 +333,16 @@ namespace BlockmapFramework.WorldGeneration
 
             return new Parcel(world, new Vector2Int(startX - 1, startY - 1), new Vector2Int((endX - startX) + 2, (endY - startY) + 2));
         }
+
+        private static bool ShouldSkip(GroundNode node, List<SurfaceDef> ignoredSurfaces, List<string> ignoredTags)
+        {
+            if (node == null) return true;
+            if (ignoredSurfaces != null && ignoredSurfaces.Contains(node.SurfaceDef)) return true; // Skip if nose has an ignored surface
+            if (ignoredTags != null && node.HasAnyOfTags(ignoredTags)) return true; // Skip if node has an ignored tag
+            if (ignoredTags != null && node.GetAdjacentGroundNodes8().Any(n => n.HasAnyOfTags(ignoredTags))) return true; // Skip if any adjacent node has an ignored tag
+
+            return false;
+        }
+
     }
 }

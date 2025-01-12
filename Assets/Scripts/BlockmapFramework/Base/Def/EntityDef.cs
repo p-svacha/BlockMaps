@@ -112,6 +112,11 @@ namespace BlockmapFramework
         }
 
 
+        public bool HasCompProperties<T>()
+        {
+            return Components != null && Components.Any(c => c is T);
+        }
+
         /// <summary>
         /// Retrieve specific CompProperties of this def. Throws an error if it doesn't have it.
         /// </summary>

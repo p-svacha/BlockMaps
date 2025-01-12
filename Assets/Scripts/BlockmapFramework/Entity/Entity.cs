@@ -332,10 +332,8 @@ namespace BlockmapFramework
 
             if (Def.VisionColliderType == VisionColliderType.FullBox || (Def.VisionColliderType == VisionColliderType.EntityShape && Def.OverrideHeights.Count == 0)) // Create a single box collider with the bounds of the whole entity
             {
-                if (MeshObject != null) VisionColliderObject.transform.localScale = MeshObject.transform.localScale;
                 BoxCollider collider = VisionColliderObject.AddComponent<BoxCollider>();
-                if (MeshObject != null) collider.size = new Vector3(Dimensions.x / MeshObject.transform.localScale.x, (Dimensions.y * World.NodeHeight) / MeshObject.transform.localScale.y, Dimensions.z / MeshObject.transform.localScale.z);
-                else collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
+                collider.size = new Vector3(Dimensions.x, (Dimensions.y * World.NodeHeight), Dimensions.z);
                 collider.center = new Vector3(0f, collider.size.y / 2, 0f);
 
                 WorldObjectCollider evc = VisionColliderObject.AddComponent<WorldObjectCollider>();

@@ -56,6 +56,11 @@ namespace BlockmapFramework
         public int Steepness { get; protected set; }
 
         /// <summary>
+        /// What tags this node has. Can be anything and be used for anything. Often set by world generators to mark specific nodes/areas.
+        /// </summary>
+        public HashSet<string> Tags;
+
+        /// <summary>
         /// Shapes with the format "1010" or "0101" have two possible variants (center high or center low). This flag decides which variant is used in that case.
         /// </summary>
         public bool LastHeightChangeWasIncrease;
@@ -149,6 +154,8 @@ namespace BlockmapFramework
             
             Altitude = height;
             SurfaceDef = surfaceDef;
+
+            Tags = new HashSet<string>();
 
             Init();
         }
@@ -863,6 +870,11 @@ namespace BlockmapFramework
             Zones.Remove(z);
         }
 
+        public void AddTag(string tag)
+        {
+            Tags.Add(tag);
+        }
+
         #endregion
 
         #region Getters
@@ -916,6 +928,9 @@ namespace BlockmapFramework
                     return true;
             return false;
         }
+
+        public bool HasTag(string tag) => Tags.Contains(tag);
+        public bool HasAnyOfTags(List<string> tags) => tags != null && tags.Any(t => Tags.Contains(t));
 
         /// <summary>
         /// Returns the local altitude on the node on the given local position (0f-1f) purely based on the nodes shape.
@@ -1124,6 +1139,13 @@ namespace BlockmapFramework
             text += "\nWorld Mesh Y: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
             text += "\n" + mph;
             text += "\n" + headspace;
+
+            string tags = "";
+            foreach (string tag in Tags) tags += tag + ", ";
+            tags = tags.TrimEnd(',');
+            text += "\nTags: " + tags;
+
+
             if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";
 
             return text;
@@ -1227,6 +1249,7 @@ namespace BlockmapFramework
             SaveLoadManager.SaveOrLoadVector2Int(ref LocalCoordinates, "localCoordinates");
             SaveLoadManager.SaveOrLoadAltitudeDictionary(ref Altitude);
             SaveLoadManager.SaveOrLoadDef(ref SurfaceDef, "surface");
+            SaveLoadManager.SaveOrLoadStringHashSet(ref Tags, "tags");
         }
 
         #endregion

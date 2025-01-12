@@ -1,3 +1,4 @@
+using CaptureTheFlag;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace BlockmapFramework.WorldGeneration
     public class WorldGenerator_Desert : WorldGenerator
     {
         public override string Label => "Desert";
-        public override string Description => "Very sparse, flat and empty map with lots of sand.";
+        public override string Description => "A mainly sparse and flat and map with lots of sand. Scattered mesas and oasis can help or hinder moving around the otherwise harsh desert landscape";
 
         private HashSet<Vector2Int> DuneNodes;
         private HashSet<Vector2Int> MesaNodes;
@@ -29,7 +30,6 @@ namespace BlockmapFramework.WorldGeneration
             { EntityDefOf.Palm_Tree_01, 0.01f },
             { EntityDefOf.Palm_Tree_02, 0.01f },
         };
-
         private static Dictionary<EntityDef, float> OasisPlantProbabilities = new Dictionary<EntityDef, float>()
         {
             { EntityDefOf.Shrub_01, 0.2f },
@@ -44,7 +44,6 @@ namespace BlockmapFramework.WorldGeneration
             { EntityDefOf.Palm_Tree_01, 2f },
             { EntityDefOf.Palm_Tree_02, 2f },
         };
-
         private static Dictionary<EntityDef, float> MesaEdgeRockProbabilities = new Dictionary<EntityDef, float>()
         {
             { EntityDefOf.Rock_01_Small, 1f },
@@ -55,7 +54,6 @@ namespace BlockmapFramework.WorldGeneration
             { EntityDefOf.Rock_06_Small, 1f },
             { EntityDefOf.Rock_01_Medium, 0.1f },
         };
-
         private static Dictionary<EntityDef, float> ScatteredObjectsProbabilities = new Dictionary<EntityDef, float>()
         {
             { EntityDefOf.Rock_01_Small, 0.1f },
@@ -178,12 +176,19 @@ namespace BlockmapFramework.WorldGeneration
             var basePerlin = new PerlinNoise(0.05f);
             var layeredPerlin = new ModularGradientNoise(new GradientNoise[] { basePerlin }, new LayerOperation(5, 2f, 0.5f));
 
+            var sandstoneNoise = new ModularGradientNoise(new GradientNoise[] { new PerlinNoise(0.05f) }, new LayerOperation(4, 2f, 0.5f));
+
             foreach (GroundNode node in world.GetAllGroundNodes())
             {
                 float surfaceNoiseValue = layeredPerlin.GetValue(node.WorldCoordinates.x, node.WorldCoordinates.y);
+                float sandstoneNoiseValue = sandstoneNoise.GetValue(node.WorldCoordinates.x, node.WorldCoordinates.y);
 
-                if (surfaceNoiseValue < 0.35f) node.SetSurface(SurfaceDefOf.SandSoft);
-                else node.SetSurface(SurfaceDefOf.Sand);
+                if (sandstoneNoiseValue > 0.72f) node.SetSurface(SurfaceDefOf.Sandstone);
+                else
+                {
+                    if (surfaceNoiseValue < 0.35f) node.SetSurface(SurfaceDefOf.SandSoft);
+                    else node.SetSurface(SurfaceDefOf.Sand);
+                }
             }
         }
         public static void AddDunes(World world, HashSet<Vector2Int> affectedCoordinates)
@@ -276,6 +281,9 @@ namespace BlockmapFramework.WorldGeneration
             int MESA_MIN_ALTITUDE = 10;
             int MESA_MAX_ALTITUDE = 17;
 
+            int MIN_SANDSTONE_RADIUS = 0;
+            int MAX_SANDSTONE_RADIUS = 8;
+
             // Generate mesa mask noise (binary noise deciding which ground nodes are affected)
             var noise2 = new PerlinNoise(0.02f);
             var noise1_op_layer = new LayerOperation(2, 4f, 0.1f);
@@ -294,6 +302,22 @@ namespace BlockmapFramework.WorldGeneration
             var mesaNoise = new PerlinNoise(0.01f);
             int[,] mesaHeightMap = GetHeightMapFromNoise(world, mesaNoise, MESA_MIN_ALTITUDE, MESA_MAX_ALTITUDE);
 
+            // Generate mask noise for sandstone on top of mesas
+            var ssMain = new PerlinNoise(0.25f);
+            var ssLayered = new ModularGradientNoise(
+                new GradientNoise[] { ssMain },
+                new LayerOperation(3, 0.5f, 2f)
+            );
+            var ssCutOff = new ModularGradientNoise(
+                new GradientNoise[] { ssLayered },
+                new CutoffOperation(0.5f, 0.5f)
+            );
+            var ssInverse = new ModularGradientNoise(
+                new GradientNoise[] { ssCutOff },
+                new InverseOperation()
+            );
+            GradientNoise sandStoneMaskNoise = ssInverse;
+
             for (int x = 0; x < world.NumNodesPerSide; x++)
             {
                 for (int y = 0; y < world.NumNodesPerSide; y++)
@@ -308,6 +332,10 @@ namespace BlockmapFramework.WorldGeneration
 
                         affectedCoordinates.Add(groundNode.WorldCoordinates);
 
+                        // Sandstone surface
+                        if (sandStoneMaskNoise.GetValue(x, y) >= 1f) groundNode.SetSurface(SurfaceDefOf.Sandstone);
+
+                        // Mesa Edge
                         if(isMesaEdge && changeMade)
                         {
                             // Chance to randomly lower a mesa edge
@@ -316,6 +344,20 @@ namespace BlockmapFramework.WorldGeneration
                             // Spawn a rock nearby
                             EntityDef rock = MesaEdgeRockProbabilities.GetWeightedRandomElement();
                             EntityManager.SpawnEntityAround(world, rock, world.Gaia, groundNode.WorldCoordinates, standard_deviation: 2f, randomMirror: true, variantName: "Desert");
+
+                            // Set surface to sandstone around edge
+                            int radius = Random.Range(MIN_SANDSTONE_RADIUS, MAX_SANDSTONE_RADIUS + 1);
+                            for (int dx = -radius; dx < radius + 1; dx++)
+                            {
+                                for (int dy = -radius; dy < radius + 1; dy++)
+                                {
+                                    if (Mathf.Abs(dx) + Mathf.Abs(dy) > radius) continue;
+                                    if (Random.value > 0.6f)
+                                    {
+                                        world.SetSurface(world.GetGroundNode(x + dx, y + dy), SurfaceDefOf.Sandstone, updateWorld: false);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -358,6 +400,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         GroundNode groundNode = world.GetGroundNode(new Vector2Int(x, y));
                         ApplyHeightmap(world, mountainHeightMap, groundNode);
+                        groundNode.AddTag(CtfMapGenerator.NO_SPAWN_TAG);
 
                         affectedCoordinates.Add(groundNode.WorldCoordinates);
                     }
@@ -371,6 +414,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         GroundNode groundNode = world.GetGroundNode(new Vector2Int(x, y));
                         ApplyHeightmap(world, mountainHeightMap, groundNode);
+                        groundNode.AddTag(CtfMapGenerator.NO_SPAWN_TAG);
 
                         affectedCoordinates.Add(groundNode.WorldCoordinates);
                     }
@@ -384,6 +428,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         GroundNode groundNode = world.GetGroundNode(new Vector2Int(x, y));
                         ApplyHeightmap(world, mountainHeightMap, groundNode);
+                        groundNode.AddTag(CtfMapGenerator.NO_SPAWN_TAG);
 
                         affectedCoordinates.Add(groundNode.WorldCoordinates);
                     }
@@ -397,6 +442,7 @@ namespace BlockmapFramework.WorldGeneration
                     {
                         GroundNode groundNode = world.GetGroundNode(new Vector2Int(x, y));
                         ApplyHeightmap(world, mountainHeightMap, groundNode);
+                        groundNode.AddTag(CtfMapGenerator.NO_SPAWN_TAG);
 
                         affectedCoordinates.Add(groundNode.WorldCoordinates);
                     }
@@ -419,7 +465,7 @@ namespace BlockmapFramework.WorldGeneration
         public static void AddOasis(World world, HashSet<Vector2Int> forbiddenCoordinates = null)
         {
             int MIN_GRASS_RADIUS = 2;
-            int MAX_GRASS_RADIUS = 5;
+            int MAX_GRASS_RADIUS = 6;
 
             // Generate oasis mask noise (binary noise deciding which ground nodes are affected)
             var noise2 = new PerlinNoise(0.02f);
@@ -449,7 +495,6 @@ namespace BlockmapFramework.WorldGeneration
                         // Lower ground
                         GroundNode groundNode = world.GetGroundNode(new Vector2Int(x, y));
                         groundNode.SetAltitude(1);
-                        TerrainFunctions.SmoothOutside(groundNode, smoothStep: 5);
                         oasisCoordinates.Add(groundNode.WorldCoordinates);
 
                         // Check if we're on an edge
@@ -457,11 +502,15 @@ namespace BlockmapFramework.WorldGeneration
                         foreach(Direction side in HelperFunctions.GetSides())
                         {
                             Vector2Int coords = HelperFunctions.GetCoordinatesInDirection(new Vector2Int(x, y), side);
-                            if (oasisMaskNoise.GetValue(coords) < 1) isOasisEdge = true;
+                            if (oasisMaskNoise.GetValue(coords) < 1 || forbiddenCoordinates.Contains(coords)) isOasisEdge = true;
                         }
 
+                        // Smooth edge
+                        List<string> ignoredTags = new List<string>() { CtfMapGenerator.NO_SPAWN_TAG };
+                        if (isOasisEdge && !groundNode.GetAdjacentGroundNodes8().Any(n => n.HasAnyOfTags(ignoredTags))) TerrainFunctions.SmoothOutside(groundNode, smoothStep: 5, ignoredTags: ignoredTags);
+
                         // Spawn plants if on an edge
-                        if(isOasisEdge)
+                        if (isOasisEdge)
                         {
                             for (int i = 0; i < 2; i++)
                             {

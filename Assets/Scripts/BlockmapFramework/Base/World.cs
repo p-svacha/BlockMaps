@@ -1255,9 +1255,6 @@ namespace BlockmapFramework
 
             return true;
         }
-        /// <summary>
-        /// Creates a new entity from a def, registers it in the world and updates the world, navmesh and vision around it. 
-        /// </summary>
         public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, Actor actor, bool updateWorld, int height = -1, System.Action<Entity> preInit = null, int variantIndex = 0)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
@@ -1462,7 +1459,6 @@ namespace BlockmapFramework
                     ((checkDir == Direction.None || checkDir == Direction.S) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.SE] < shoreHeight)) ||
                     ((checkDir == Direction.None || checkDir == Direction.W) && (checkNode.Altitude[Direction.SW] < shoreHeight || checkNode.Altitude[Direction.NW] < shoreHeight))
                     );
-                Debug.Log($"node at {checkNode.WorldCoordinates} would be underwater? {isUnderwater}. shore height is {shoreHeight}");
                 if (isUnderwater) // underwater
                 {
                     // Remove drowned entities
@@ -1483,7 +1479,6 @@ namespace BlockmapFramework
                 else { } // above water
             }
 
-            Debug.Log($"water body would have {waterBody.CoveredGroundNodes.Count} nodes.");
             if (waterBody.CoveredGroundNodes.Count > 0) AddWaterBody(waterBody, updateWorld);
 
         }

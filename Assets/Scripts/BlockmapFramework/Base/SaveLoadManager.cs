@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -331,6 +332,28 @@ namespace BlockmapFramework
                         SaveOrLoadObject(ref value, "Value");
                         list.Add(value);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save and load a list.
+        /// </summary>
+        public static void SaveOrLoadStringHashSet(ref HashSet<string> list, string label) 
+        {
+            if (IsSaving)
+            {
+                string saveText = "";
+                foreach (string s in list) saveText += s + ",";
+                saveText = saveText.TrimEnd(',');
+                writer.WriteElementString(label, saveText);
+            }
+            else if (IsLoading)
+            {
+                if (reader.ReadToFollowing(label))
+                {
+                    string value = reader.ReadElementContentAsString();
+                    list = value.Split(',').ToHashSet();
                 }
             }
         }

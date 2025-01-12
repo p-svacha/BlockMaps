@@ -13,16 +13,8 @@ namespace CaptureTheFlag
             {
                 DefName = "MovementSpeed",
                 Label = "movement speed",
-                Description = "How many tiles per second this character moves when running.",
-                BaseValue = 0f,
-                SkillOffsets = new List<SkillImpact>()
-                {
-                    new SkillImpact()
-                    {
-                        SkillDefName = "Running",
-                        LinearPerLevelValue = 0.2f,
-                    }
-                },
+                Description = "The base amount tiles per second this character moves when running.\nThe actual is speed is also influenced by the running aptitude.",
+                BaseValue = 2f
             },
 
             new StatDef()
@@ -37,7 +29,7 @@ namespace CaptureTheFlag
                     new SkillImpact()
                     {
                         SkillDefName = "Running",
-                        LinearPerLevelValue = 0.15f,
+                        LinearPerLevelValue = 0.1f,
                     }
                 },
             },

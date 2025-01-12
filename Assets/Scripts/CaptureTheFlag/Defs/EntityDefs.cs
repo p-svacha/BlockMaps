@@ -150,7 +150,7 @@ namespace CaptureTheFlag
                     DefName = "Dog1",
                     Label = "chevap",
                     Description = "Bigger dog that can run fast, but low vision and needs to rest for longer periods of time.",
-                    Dimensions = new Vector3Int(1, 4, 1),
+                    Dimensions = new Vector3Int(1, 2, 1),
                 };
                 blotto.RenderProperties.ModelScale = new Vector3(1f, 1.8f, 1f);
                 blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels["Vaulting"] = 10;

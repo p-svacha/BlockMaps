@@ -203,6 +203,18 @@ namespace BlockmapFramework
 
         public bool IsCenterUnderWater => (WaterNode != null && MeshCenterWorldPosition.y < WaterNode.WaterBody.WaterSurfaceWorldHeight);
 
+        public List<GroundNode> GetAdjacentGroundNodes8()
+        {
+            List<GroundNode> adjNodes = new List<GroundNode>();
+
+            foreach(Direction dir in HelperFunctions.GetAllDirections8())
+            {
+                GroundNode adjNode = World.GetAdjacentGroundNode(this, dir);
+                if (adjNode != null) adjNodes.Add(adjNode);
+            }
+            return adjNodes;
+        }
+
         #endregion
 
     }

@@ -19,7 +19,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Grass",
                 Label = "grass",
                 Description = "Short grass",
-                MovementSpeedModifier = 0.6f,
+                MovementSpeedModifier = 0.65f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,
@@ -33,7 +33,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Sand",
                 Label = "sand",
                 Description = "Sand",
-                MovementSpeedModifier = 0.4f,
+                MovementSpeedModifier = 0.5f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,
@@ -47,7 +47,7 @@ namespace BlockmapFramework.Defs
                 DefName = "SandSoft",
                 Label = "soft sand",
                 Description = "Soft sand",
-                MovementSpeedModifier = 0.3f,
+                MovementSpeedModifier = 0.4f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,
@@ -198,7 +198,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Sandstone",
                 Label = "sandstone",
                 Description = "",
-                MovementSpeedModifier = 1f,
+                MovementSpeedModifier = 0.9f,
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_Blend,

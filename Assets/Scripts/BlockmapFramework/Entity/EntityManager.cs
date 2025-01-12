@@ -111,14 +111,27 @@ namespace BlockmapFramework
             if (occupiedNodes == null) return new Vector3(basePosition.x, originNode.BaseWorldAltitude, basePosition.y);
 
             // Else calculate the exact y position
-            // Identify the lowest node of all occupied nodes.
-            float lowestY = occupiedNodes.Min(n => n.BaseWorldAltitude);
-            List<BlockmapNode> lowestYNodes = occupiedNodes.Where(n => n.BaseWorldAltitude == lowestY).ToList();
-            float y = lowestY;
+            float y = 0;
+            bool isInWater = false;
+
+            // For moving characters (always 1x1, just take the center world position of the node)
+            if (def.HasCompProperties<CompProperties_Movement>())
+            {
+                y = occupiedNodes.First().MeshCenterWorldPosition.y;
+                isInWater = occupiedNodes.First() is WaterNode;
+            }
+
+            // For static objects the lowest node of all occupied nodes.
+            else
+            {
+                float lowestY = occupiedNodes.Min(n => n.BaseWorldAltitude);
+                List<BlockmapNode> lowestYNodes = occupiedNodes.Where(n => n.BaseWorldAltitude == lowestY).ToList();
+                y = lowestY;
+                isInWater = lowestYNodes.Any(n => n is WaterNode || (n is GroundNode ground && ground.WaterNode != null && ground.IsCenterUnderWater));
+            }
 
             // Move position halfway below water surface if required
-            bool placementIsInWater = lowestYNodes.Any(n => n is WaterNode || (n is GroundNode ground && ground.WaterNode != null && ground.IsCenterUnderWater));
-            if (placementIsInWater && def.WaterBehaviour == WaterBehaviour.HalfBelowWaterSurface)
+            if (isInWater && def.WaterBehaviour == WaterBehaviour.HalfBelowWaterSurface)
             {
                 y -= (entityHeight * World.NodeHeight) / 2;
             }
@@ -209,7 +222,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns an entity on a random node near the given point and returns the entity instance.
         /// </summary>
-        public static Entity SpawnEntityAround(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, float standard_deviation, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false)
+        public static Entity SpawnEntityAround(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, float standard_deviation, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false, List<string> forbiddenTags = null)
         {
             if (standard_deviation == 0f) maxAttempts = 1;
             int numAttempts = 0;
@@ -220,7 +233,7 @@ namespace BlockmapFramework
                 Direction rotation = forcedRotation == Direction.None ? HelperFunctions.GetRandomSide() : forcedRotation;
                 bool isMirrored = randomMirror ? Random.value < 0.5f : false;
 
-                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes);
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes, forbiddenTags);
                 if (spawnedEntity != null) return spawnedEntity;
             }
 
@@ -231,7 +244,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Spawns an entity within a given area in the world and returns the entity instance.
         /// </summary>
-        public static Entity SpawnEntityWithin(World world, EntityDef def, Actor player, int minX, int maxX, int minY, int maxY, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false)
+        public static Entity SpawnEntityWithin(World world, EntityDef def, Actor player, int minX, int maxX, int minY, int maxY, Direction forcedRotation = Direction.None, int maxAttempts = 1, int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, string variantName = "", bool randomMirror = false, List<string> forbiddenTags = null)
         {
             int numAttempts = 0;
             while (numAttempts++ < maxAttempts) // Keep searching until we find a suitable position
@@ -240,7 +253,7 @@ namespace BlockmapFramework
                 Direction rotation = forcedRotation == Direction.None ? HelperFunctions.GetRandomSide() : forcedRotation;
                 bool isMirrored = randomMirror ? Random.value < 0.5f : false;
 
-                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes);
+                Entity spawnedEntity = TrySpawnEntity(world, def, player, targetCoordinates, rotation, isMirrored, variantName, requiredRoamingArea, forbiddenNodes, forbiddenTags);
                 if (spawnedEntity != null) return spawnedEntity;
             }
 
@@ -251,12 +264,17 @@ namespace BlockmapFramework
         /// <summary>
         /// Tries spawning an entity on a random node on the given coordinates with all the given restrictions.
         /// <br/>Returns the entity instance if successful or null of not successful.
-        private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, bool isMirrored, string variantName = "", int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null)
+        private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, bool isMirrored, string variantName = "", int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, List<string> forbiddenTags = null)
         {
             if (!world.IsInWorld(worldCoordinates)) return null;
 
             BlockmapNode targetNode = world.GetNodes(worldCoordinates).RandomElement();
             if (forbiddenNodes != null && forbiddenNodes.Contains(targetNode)) return null;
+            if (forbiddenTags != null && targetNode.Tags.Any(t => forbiddenTags.Contains(t)))
+            {
+                Debug.Log($"Not spawning {def.LabelCap} on {targetNode} because it has a forbidden tag");
+                return null;
+            }
             if (!world.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true)) return null;
 
             int variantIndex = 0;
