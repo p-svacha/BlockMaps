@@ -1,34 +1,56 @@
 ------------------------- CTF v0.0.7 -------------------------
 
+Fix: Entities should see other entities when inside them
+Fix: Tagging opponent inside flag area crashes game because can't find path into own flag area
+Fix: Game crash after tagging opponent and then searching for new path (?)
+
+
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
 	Active or Passive
-	Characters can hold 1 item at a time
+	Characters can hold 1 item at a time (to start with)
 	Item is shown in CharacterInfo next to bars in a little square
 	new action: use item
 	new action: drop item
+	new action: give item
 	new actions are added to special actions
 	new actions can also be done by clicking on item in character info
 
-Add "tag" system to map generator:
-	Generators can apply tags (strings) to certain nodes
-	Use these tags for spawning items
-		Forest tags inside building nodes as spawnable for items
-	CtfMapCreator will read these tags and have a chance to spawn an item on tagged nodes
-
 Walking on an item adds it to the characters inventory if they don't hold another item yet
 
->>> List of items <<<
-	jail-trap (2x2)
-	catapult-trap (2x2)
-	vision-trap (2x2) - enemy running onto it gets visible
-	food that gives stamina
-	tag-gun
-	item that restores action points
-	fernrohr that increases vision for one turn by a lot
-	item that gives another character that disappears when tagged
-		or small robot that will run out of battery
+REQUIRES HEDIFF SYSTEM that some items can give
+	Hediff: "Motivated"
+	Hediff: "Visible"
+	Hediff: "Invisible"
 
+>>> List of items <<<
+	Active: Items that can be activated any time
+		Consumables: Foods/Drinks for instant stamina & AP regeneration, maybe other lasting effect, free to use
+			> Apple: +20 stamina
+			> Carrot: +10 stamina, "Carrot" for 5 turns (Vision +3)
+			> Cheese: +40 stamina
+			> Energy-Drink: +10 AP, +10 stamina
+			> Dog treat: usable by dogs only, +20 stamina, "Motivated" for 5 turns (Running +3, Regeneration +3)
+		Utility: Items with a unique effect, cost AP to use
+			> Recall-Whistle: Usable only by humans. Choose a friendly dog to instanly teleport nearby.
+			> Tag-Gun: Tag any opponent in your territory with direct line of sight
+			> Camouflage cloak: Get "Invisible" for 2 turns
+	Passive:
+		Equipment: Items that are worn by the character and visible.
+			> Spyglass: Vision +5
+			> Running shoes: Running +5
+			> Water helmet: Regeneration +5
+	Placeable: Items that are placaeble in the world
+		Traps: 2x2 items, invisible to the opponent, trigger an effect when they step on it
+			> Jail trap: Victim gets sent to jail immediately
+			> Catapult trap: Victim gets catapulted towards their direction ~40 tiles.
+			> Color trap: Victim gets "Visible" for 5 turns
+		Utility: items, lasting for x turns
+			> Camera: Gives a medium amount vision around it for 5 turns
+			> Scanner: Flying, Gives a huge amount of vision around it for 1 turn
+	Companion: Neutral characters that can be activated to become part of your Temperature
+		Robots: Characters with battery life (BL) instead of stamina, depletes (-5) instead of regenerates each turn. Disappear when battery is empty
+			> Little Robot: Low stat character with 100 BL
 
 Notifications:
 	Rimworld like messages that appear for a player on certain triggers
@@ -136,6 +158,9 @@ examples are AutumnLeaves, Snow, Moss
 
 ---
 
+Framework: Make vision system optional
+	i.e. Ecosystem sim won't need it / can't afford its performance cost
+
 
 - Add MaxSteepness movement attribute and disallow walking on very steep nodes
 
@@ -233,18 +258,18 @@ Framework: fix: water fill algorithm should stop after a while (like 1000 tiles?
 	- entities can pick up and carry items
 	- add carry capacity attribute to entities
 
-- Improve GitHub page with desc and screenshots
-	> make a release
-
 - sound & smell
 	hearing & smelling
+
+CTF: "Scenting" Skill to detect things and flag outside of vision range:
+	0 for humans, high for dogs
+	Scented things get drawn as kind of a blob near the item (not revealing where and what EXACTLY it is)
 
 - dig/tunnel?
 
 - Add additional movement methods (jump/fly)
 - Stealth/Invisibility
 - Teleportation
-- Terrain affinity
 
 - Weather / Temperature (Snow/Mud)
 
@@ -290,10 +315,6 @@ CTF: more logic for dogs
   - can get distracted
 
 CTF: Improve performance for far away pathfinding or disable, just find a solution for the lag spikes
-
-CTF: Slopes use more action points
-	> downwards * 1.25
-	> upwards * 1.5
 
 CTF: more general modifier system
 	> modifiers have a duration and effect, name, description, icon
@@ -345,6 +366,7 @@ CTF Map Ideas:
 
 - EcosystemSimulation3D
 - Solo/Squad RPG (like CDDA)
+- Ironmon-like roguelike
 
 
 -------- KNOWN ISSES --------

@@ -9,8 +9,8 @@ namespace BlockmapFramework.Defs
     /// </summary>
     public static class GlobalSurfaceDefs
     {
-        private static string SurfaceTextureBasePath = "BlockmapFramework/Textures/Surface/";
-        private static string SurfaceMaterialBasePath = "BlockmapFramework/Textures/MaterialTextures/";
+        private static string SurfaceTextureBasePath = "Textures/Surface/";
+        private static string SurfaceMaterialBasePath = "Textures/MaterialTextures/";
 
         public static List<SurfaceDef> Defs = new List<SurfaceDef>()
         {
