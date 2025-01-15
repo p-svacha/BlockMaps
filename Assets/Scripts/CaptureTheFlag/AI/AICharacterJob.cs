@@ -216,6 +216,7 @@ namespace CaptureTheFlag.AI
             {
                 BlockmapNode positionToSearch = Player.OpponentPositionsToCheckForDefense[opp];
                 if (positionToSearch == null) continue;
+                if (!Character.CanStandOn(positionToSearch)) continue;
 
                 if (Character.IsInRange(positionToSearch, maxDistanceCost, out float cost))
                 {

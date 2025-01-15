@@ -1,18 +1,16 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-Fix: Entities should see other entities when inside them
-Fix: Tagging opponent inside flag area crashes game because can't find path into own flag area
-Fix: Game crash after tagging opponent and then searching for new path (?)
-
+Change sandstone cliff texture
+When standing on a cliff edge/roof edge, the node where you could jump to should be visible
+	> Add all nodes to SeenBy entity, that the node of the entity has a transition towards
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
 	Active or Passive
-	Characters can hold 1 item at a time (to start with)
+	Characters can hold 1 item at a time
 	Item is shown in CharacterInfo next to bars in a little square
 	new action: use item
 	new action: drop item
-	new action: give item
 	new actions are added to special actions
 	new actions can also be done by clicking on item in character info
 
@@ -21,7 +19,6 @@ Walking on an item adds it to the characters inventory if they don't hold anothe
 REQUIRES HEDIFF SYSTEM that some items can give
 	Hediff: "Motivated"
 	Hediff: "Visible"
-	Hediff: "Invisible"
 
 >>> List of items <<<
 	Active: Items that can be activated any time
@@ -43,6 +40,7 @@ REQUIRES HEDIFF SYSTEM that some items can give
 	Placeable: Items that are placaeble in the world
 		Traps: 2x2 items, invisible to the opponent, trigger an effect when they step on it
 			> Jail trap: Victim gets sent to jail immediately
+			> Bear trap: Immobilizes victim for 3 turns and makes them visible
 			> Catapult trap: Victim gets catapulted towards their direction ~40 tiles.
 			> Color trap: Victim gets "Visible" for 5 turns
 		Utility: items, lasting for x turns
@@ -51,6 +49,10 @@ REQUIRES HEDIFF SYSTEM that some items can give
 	Companion: Neutral characters that can be activated to become part of your Temperature
 		Robots: Characters with battery life (BL) instead of stamina, depletes (-5) instead of regenerates each turn. Disappear when battery is empty
 			> Little Robot: Low stat character with 100 BL
+
+"Scenting" Skill to detect things and flag outside of vision range:
+	0 for humans, high for dogs
+	Scented things get drawn as kind of a blob near the item (not revealing where and what EXACTLY it is)
 
 Notifications:
 	Rimworld like messages that appear for a player on certain triggers

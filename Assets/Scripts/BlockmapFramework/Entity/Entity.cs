@@ -552,8 +552,9 @@ namespace BlockmapFramework
         {
             if (actor == null) return true; // Everything is visible
             if (Actor == actor) return true; // This entity belongs to the given actor
-            if (OccupiedNodes.Any(n => n.Zones.Any(z => z.ProvidesVision && z.Actor == actor))) return true; // Entity is inside a zone of actor that provides vision
             if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Entity is seen by an entity of given actor
+            if (OccupiedNodes.Any(n => n.Zones.Any(z => z.ProvidesVision && z.Actor == actor))) return true; // Entity is inside a zone of actor that provides vision
+            if (actor.Entities.Any(e => e.OriginNode == OriginNode)) return true; // Entity of given actor is on the same node as this
 
             return false;
         }
