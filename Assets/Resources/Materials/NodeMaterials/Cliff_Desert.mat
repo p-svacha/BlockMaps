@@ -56,7 +56,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: b06ea66f6a864f04db67099b51787ac1, type: 3}
+        m_Texture: {fileID: 2800000, guid: ef9e64900da7ead4fa6bb93e221e3b69, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -131,7 +131,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogOfWarColor: {r: 0, g: 0, b: 0, a: 0.5}
     - _GridColor: {r: 0, g: 0, b: 0, a: 0}
-    - _TextureTint: {r: 1, g: 1, b: 1, a: 0.4392157}
+    - _TextureTint: {r: 0.8117648, g: 0.56078434, b: 0.31764707, a: 0.4392157}
     - _TileOverlayColor: {r: 0, g: 0, b: 0, a: 0}
     - _ZoneBorderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

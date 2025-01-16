@@ -1,9 +1,5 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-Change sandstone cliff texture
-When standing on a cliff edge/roof edge, the node where you could jump to should be visible
-	> Add all nodes to SeenBy entity, that the node of the entity has a transition towards
-
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
 	Active or Passive

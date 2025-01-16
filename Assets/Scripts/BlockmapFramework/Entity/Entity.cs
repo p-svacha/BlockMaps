@@ -901,6 +901,14 @@ namespace BlockmapFramework
                 }
             }
 
+            // Add all nodes to the current vision that are reachable from the entity's current position
+            foreach(Transition t in OriginNode.Transitions)
+            {
+                BlockmapNode reachableNode = t.To;
+                finalVision.AddVisibleNode(reachableNode);
+            }
+
+            // Return final vision
             return finalVision;
         }
 

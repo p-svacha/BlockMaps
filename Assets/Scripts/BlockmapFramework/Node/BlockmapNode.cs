@@ -741,6 +741,12 @@ namespace BlockmapFramework
         /// </summary>
         private HashSet<Entity> SeenBy = new HashSet<Entity>();
 
+        /// <summary>
+        /// Returns if this entity is currently being seen by any entity of the given actor. 
+        /// <br/>ATTENTION: Use IsVisibleBy to check full visibility - this is just for checking entity to entity vision.
+        /// </summary>
+        public bool IsSeenByEntityFrom(Actor actor) => SeenBy.Any(e => e.Actor == actor);
+
         public void AddVisionBy(Entity e)
         {
             ExploredBy.Add(e.Actor);
@@ -763,7 +769,7 @@ namespace BlockmapFramework
         {
             if (actor == null) return true; // Everything is visible
             if (Zones.Any(x => x.ProvidesVision && x.Actor == actor)) return true; // Node is in a zone of actor that provides vision
-            if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Node is seen by an entity of given actor
+            if (IsSeenByEntityFrom(actor)) return true; // Node is seen by an entity of given actor
             if (Entities.Where(e => e.BlocksVision()).Any(e => e.IsVisibleBy(actor))) return true; // A vision-blocking entity on this node is visible
 
             return false;
