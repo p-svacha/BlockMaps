@@ -12,7 +12,7 @@ namespace CaptureTheFlag
         private static EntityDef HumanBase = new EntityDef()
         {
             EntityClass = typeof(CtfCharacter),
-            UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
+            UiSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
             Dimensions = new Vector3Int(1, 3, 1),
             Impassable = false,
             BlocksVision = false,
@@ -22,6 +22,7 @@ namespace CaptureTheFlag
                 RenderType = EntityRenderType.StandaloneModel,
                 Model = Resources.Load<GameObject>(EntityModelPath + "human/human_fbx"),
                 PlayerColorMaterialIndex = 0,
+                PositionType = PositionType.CenterPoint,
             },
             Components = new List<CompProperties>()
                 {
@@ -53,7 +54,7 @@ namespace CaptureTheFlag
         private static EntityDef DogBase = new EntityDef()
         {
             EntityClass = typeof(CtfCharacter),
-            UiPreviewSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
+            UiSprite = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
             Impassable = false,
             BlocksVision = false,
             WaterBehaviour = WaterBehaviour.HalfBelowWaterSurface,
@@ -62,6 +63,7 @@ namespace CaptureTheFlag
                 RenderType = EntityRenderType.StandaloneModel,
                 Model = Resources.Load<GameObject>(EntityModelPath + "dog/dog_2_fbx"),
                 PlayerColorMaterialIndex = 1,
+                PositionType = PositionType.CenterPoint,
             },
             Components = new List<CompProperties>()
                 {
@@ -186,7 +188,7 @@ namespace CaptureTheFlag
                 DefName = "Flag",
                 Label = "flag",
                 Description = "The flag to protect or capture.",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "flag/flag_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "flag/flag_fbx"),
                 EntityClass = typeof(Entity),
                 Dimensions = new Vector3Int(1, 2, 1),
                 Impassable = false,

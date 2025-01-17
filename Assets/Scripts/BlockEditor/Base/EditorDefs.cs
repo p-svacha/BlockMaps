@@ -16,7 +16,7 @@ namespace WorldEditor
                 DefName = "EditorDynamicCharacter",
                 Label = "Dynamic Character",
                 Description = "A character whose moving attributes can be set dynamically in the editor",
-                UiPreviewSprite = HelperFunctions.TextureToSprite("Editor/Icons/DynamicCharacter"),
+                UiSprite = HelperFunctions.TextureToSprite("Editor/Icons/DynamicCharacter"),
                 EntityClass = typeof(EditorMovingEntity),
                 VariableHeight = true,
                 Impassable = false,
@@ -24,6 +24,7 @@ namespace WorldEditor
                 {
                     RenderType = EntityRenderType.StandaloneModel,
                     Model = Resources.Load<GameObject>(EntityModelPath + "character/character_fbx"),
+                    PositionType = PositionType.CenterPoint,
                 },
                 Components = new List<CompProperties>()
                 {

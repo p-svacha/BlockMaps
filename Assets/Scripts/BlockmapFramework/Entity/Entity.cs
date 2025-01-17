@@ -444,7 +444,7 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Gets called every frame
+        /// Gets called every frame. Used to set the actual transform.position and transform.rotation of the Entity based on its WorldPosition, WorldRotation (if visible) or LastKnowPosition, LastKnownRotation (if explored).
         /// </summary>
         public virtual void Render(float alpha) { }
 
@@ -664,6 +664,7 @@ namespace BlockmapFramework
         public virtual string Label => Def.Label;
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
+        public virtual Sprite UiSprite => Def.UiSprite;
 
         public virtual bool Impassable => Def.Impassable;
         public virtual float MovementSlowdown => Def.MovementSlowdown;

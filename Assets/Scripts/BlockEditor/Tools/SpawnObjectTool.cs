@@ -35,7 +35,7 @@ namespace WorldEditor
             EntitySelection.Clear();
             foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.RenderProperties.RenderType == EntityRenderType.StandaloneModel && !x.Components.Any(y => y is CompProperties_Movement)))
             {
-                EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
+                EntitySelection.AddElement(def.UiSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
 
             EntitySelection.SelectFirstElement();

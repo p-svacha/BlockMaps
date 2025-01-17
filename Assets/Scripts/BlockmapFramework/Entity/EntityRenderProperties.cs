@@ -48,8 +48,14 @@ namespace BlockmapFramework
         public System.Action<MeshBuilder, int, bool, bool> StandaloneRenderFunction { get; init; } = (meshBuilder, height, isMirrored, isPreview) => throw new System.Exception("StandaloneRenderFunction not defined");
 
         /// <summary>
+        /// Defines where exactly the entity transform is located when placed somewhere.
+        /// </summary>
+        public PositionType PositionType { get; init; } = PositionType.LowestPoint;
+
+        /// <summary>
         /// The function to retrieve the exact world position of the entity if placed on the given node with the given properties.
         /// <br/>Parameters are: EntityDef, World, TargetNode, TargetRotation, EntityHeight, IsMirrored.
+        /// <br/>Only needs to be changed if PositionType is set to custom.
         /// </summary>
         public System.Func<EntityDef, World, BlockmapNode, Direction, int, bool, Vector3> GetWorldPositionFunction { get; init; } = EntityManager.GetWorldPosition;
 
@@ -70,7 +76,37 @@ namespace BlockmapFramework
             Variants = orig.Variants.Select(v => new EntityVariant(v)).ToList();
             BatchRenderFunction = orig.BatchRenderFunction;
             StandaloneRenderFunction = orig.StandaloneRenderFunction;
+            PositionType = orig.PositionType;
             GetWorldPositionFunction = orig.GetWorldPositionFunction;
         }
+    }
+
+    public enum PositionType
+    {
+        /// <summary>
+        /// The entity gets placed in the x/z center of all occupied nodes.
+        /// <br/>Its y position will be set according to the lowest base world altitude of all occupied nodes.
+        /// <br/>Commonly used for natural static objects (like rocks, trees) where clipping into terrain is fine.
+        /// </summary>
+        LowestPoint,
+
+        /// <summary>
+        /// The entity gets placed in the x/z center of all occupied nodes.
+        /// <br/>Its y position will be set according to the center mesh world position point of the center-most occupied node.
+        /// <br/>Commonly used for moving entities / characters so they are exactly at the same position when placed as they would be when walking there.
+        /// </summary>
+        CenterPoint,
+
+        /// <summary>
+        /// The entity gets placed in the x/z center of all occupied nodes.
+        /// <br/>Its y position will be set according to the highest max world altitude of all occupied nodes.
+        /// <br/>Commonly used for entities that should never clip the ground and are okay with floating above some of their occupied nodes.
+        /// </summary>
+        HighestPoint,
+
+        /// <summary>
+        /// The entity world position gets calculated by a custom function, referenced in WorldPositionFunction.
+        /// </summary>
+        Custom
     }
 }

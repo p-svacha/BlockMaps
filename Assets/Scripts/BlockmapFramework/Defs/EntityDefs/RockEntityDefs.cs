@@ -42,7 +42,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_01_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(1, 2, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -53,7 +53,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_01_Medium",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(2, 4, 2),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -64,7 +64,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_01_Big",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(3, 6, 3),
                 OverrideHeights = new Dictionary<Vector2Int, int>()
                 {
@@ -84,7 +84,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_01_Large",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_01_fbx"),
                 Dimensions = new Vector3Int(4, 8, 4),
                 OverrideHeights = new Dictionary<Vector2Int, int>()
                 {
@@ -108,7 +108,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_02_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_02_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_02_fbx"),
                 Dimensions = new Vector3Int(1, 2, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -119,7 +119,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_03_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_03_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_03_fbx"),
                 Dimensions = new Vector3Int(1, 2, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -131,7 +131,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_04_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_04_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_04_fbx"),
                 Dimensions = new Vector3Int(1, 2, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -142,7 +142,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_05_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_05_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_05_fbx"),
                 Dimensions = new Vector3Int(1, 1, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {
@@ -153,7 +153,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(RockBase)
             {
                 DefName = "Rock_06_Small",
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_06_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "rocks/desert_rock_06_fbx"),
                 Dimensions = new Vector3Int(1, 3, 1),
                 RenderProperties = new EntityRenderProperties(RockBase.RenderProperties)
                 {

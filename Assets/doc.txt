@@ -1,10 +1,27 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-(/)Fix world saving/loading
-(/)Implement clear tick/render loop distinction
-(/)bar blinking doesnt stop when arriving
-(/)World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
-	test by quickly changing surface of many nodes in editor
+(/)Add WorldPositionType to EntityDef
+	LowestPoint / HighestPoint / CenterPoint / Custom
+	additional field CustomWorldPositionFunction used when type = custom
+	> make item use high
+	> make ctf characters use center
+	> make rocks use lowest
+	default = lowest001
+
+Inventory System:
+	Add CanBeAddedToInventory to EntityDef
+	Add AddToInventory(Entity holder, Entity item) function to World
+	Add RemoveFromInventory(Entity item, BlockmapNode dropNode) function to World
+	Add List<Entity> Inventory to Entity
+	Add Entity Holder to Entity
+		> Entities then either have an OriginNode or a Holder
+		> Add IsInInventory property
+	In rendering rules, render pickupable items as transparent on last known position when they are explored but not visible
+		> But if their last known position is visible again and they are not there, remove last known position and stop rendering them
+	Add InventoryTool to Editor
+		> You can select characters which then shows the inventory items as a list
+		> Clicking on items in the world adds to the inventory
+		> Clicking on items in the inventory list removes them from the inventory and drops them in the world again
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem

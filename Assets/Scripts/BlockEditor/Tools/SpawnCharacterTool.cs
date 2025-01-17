@@ -36,7 +36,7 @@ namespace WorldEditor
             EntitySelection.Clear();
             foreach (EntityDef def in DefDatabase<EntityDef>.AllDefs.Where(x => x.Components.Any(x => x is CompProperties_Movement)))
             {
-                EntitySelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectEntity(def));
+                EntitySelection.AddElement(def.UiSprite, Color.white, def.LabelCap, () => SelectEntity(def));
             }
             EntitySelection.SelectFirstElement();
         }

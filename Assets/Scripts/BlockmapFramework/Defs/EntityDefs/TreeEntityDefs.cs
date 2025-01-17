@@ -20,7 +20,7 @@ namespace BlockmapFramework.Defs
         private static EntityDef PineBase = new EntityDef(TreeBase)
         {
             Label = "pine tree",
-            UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
+            UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
             RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
             {
                 Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
@@ -74,7 +74,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Palm_Tree_01",
                 Label = "palm tree",
                 Dimensions = new Vector3Int(1, 10, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_01_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_01_fbx"),
@@ -86,7 +86,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Palm_Tree_02",
                 Label = "palm tree",
                 Dimensions = new Vector3Int(1, 10, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_02_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_02_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_02_fbx"),
@@ -99,7 +99,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Dead_Tree_01",
                 Label = "dead tree",
                 Dimensions = new Vector3Int(1, 8, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_01_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_01_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_01_fbx"),
@@ -111,7 +111,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Dead_Tree_02",
                 Label = "dead tree",
                 Dimensions = new Vector3Int(1, 10, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_02_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_02_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_02_fbx"),
@@ -123,7 +123,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Dead_Tree_03",
                 Label = "dead tree",
                 Dimensions = new Vector3Int(1, 10, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_03_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_03_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_03_fbx"),
@@ -135,7 +135,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Dead_Tree_04",
                 Label = "dead tree",
                 Dimensions = new Vector3Int(1, 6, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_04_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_04_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_04_fbx"),
@@ -147,7 +147,7 @@ namespace BlockmapFramework.Defs
                 DefName = "Dead_Tree_05",
                 Label = "dead tree",
                 Dimensions = new Vector3Int(1, 10, 1),
-                UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_05_fbx"),
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_05_fbx"),
                 RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
                     Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_05_fbx"),

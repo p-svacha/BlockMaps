@@ -25,7 +25,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Grass",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
             },
 
             new SurfaceDef()
@@ -39,7 +39,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Sand",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
             },
 
             new SurfaceDef()
@@ -53,7 +53,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "SandSoft",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "SoftSand"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "SoftSand"),
             },
 
             new SurfaceDef()
@@ -67,7 +67,7 @@ namespace BlockmapFramework.Defs
                     MaterialName = "ConcreteLight",
                     DrawSlopeAsStairs = true,
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },
 
             new SurfaceDef()
@@ -80,7 +80,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Materials/NodeMaterials/ConcreteDark", "Materials/NodeMaterials/Concrete2", 0.1f, 0.1f, 0.1f),
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },
 
             new SurfaceDef()
@@ -93,7 +93,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.CustomMeshGeneration,
                     CustomRenderFunction = (node, meshBuilder) => NodeMeshGenerator.BuildBorderedNodeSurface(node, meshBuilder, "Materials/NodeMaterials/Asphalt", "Materials/NodeMaterials/Cobblestone", 0.05f, 0.05f, 0.2f),
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "CrackedConcrete"),
             },
 
             new SurfaceDef()
@@ -107,7 +107,7 @@ namespace BlockmapFramework.Defs
                     MaterialName = "RoofingTiles",
                     UseLongEdges = true,
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -120,7 +120,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "WoodParquet",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -133,7 +133,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "TilesWhite",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -147,7 +147,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "DirtPath",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -161,7 +161,7 @@ namespace BlockmapFramework.Defs
                 {
                     Type = SurfaceRenderType.NoRender,
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "WaterChestDeepRamp"),
             },
 
             new SurfaceDef()
@@ -175,7 +175,7 @@ namespace BlockmapFramework.Defs
                 {
                     Type = SurfaceRenderType.NoRender,
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Void"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Void"),
             },
 
             new SurfaceDef()
@@ -190,7 +190,7 @@ namespace BlockmapFramework.Defs
                     MaterialName = "CorrugatedSteel",
                     Height = 0.1f,
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "CorrugatedSteel005/CorrugatedSteel005_1K-JPG_Color"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "CorrugatedSteel005/CorrugatedSteel005_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -204,7 +204,7 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Sandstone",
                 },
-                UiPreviewSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Sandstone"),
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Sandstone"),
             },
         };
     }

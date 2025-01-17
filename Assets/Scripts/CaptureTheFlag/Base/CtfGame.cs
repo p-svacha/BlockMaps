@@ -44,6 +44,7 @@ namespace CaptureTheFlag
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<EntityDef>.AddDefs(EntityDefs.ObjectDefs);
             DefDatabase<EntityDef>.AddDefs(EntityDefs.CharacterDefs);
+            DefDatabase<EntityDef>.AddDefs(ItemDefs.Defs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

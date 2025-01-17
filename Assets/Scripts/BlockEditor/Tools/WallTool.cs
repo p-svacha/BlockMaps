@@ -36,12 +36,12 @@ namespace WorldEditor
 
             ShapeSelection.Clear();
             foreach (WallShapeDef def in DefDatabase<WallShapeDef>.AllDefs)
-                ShapeSelection.AddElement(def.UiPreviewSprite, Color.white, def.Label, () => SelectWallShape(def));
+                ShapeSelection.AddElement(def.UiSprite, Color.white, def.Label, () => SelectWallShape(def));
             ShapeSelection.SelectFirstElement();
 
             MaterialSelection.Clear();
             foreach (WallMaterialDef def in DefDatabase<WallMaterialDef>.AllDefs)
-                MaterialSelection.AddElement(def.UiPreviewSprite, Color.white, def.Label, () => SelectWallMaterial(def));
+                MaterialSelection.AddElement(def.UiSprite, Color.white, def.Label, () => SelectWallMaterial(def));
             MaterialSelection.SelectFirstElement();
         }
 

@@ -93,7 +93,7 @@ namespace BlockmapFramework
             DefName = orig.DefName;
             Label = orig.Label;
             Description = orig.Description;
-            UiPreviewSprite = orig.UiPreviewSprite;
+            UiSprite = orig.UiSprite;
 
             // EntityDef
             EntityClass = orig.EntityClass;
@@ -142,6 +142,10 @@ namespace BlockmapFramework
             if (RenderProperties.RenderType == EntityRenderType.Batch && (Dimensions.x > 1 || Dimensions.z > 1)) ThrowValidationError("x and z dimensions must be 1 for batch-rendered entities.");
             if (VisionColliderType == VisionColliderType.EntityShape && OverrideHeights.Any(x => x.Value > Dimensions.y)) ThrowValidationError("The height of a vision collider cannot be higher than the height of the entity.");
             if (Impassable && MovementSlowdown > 0f) ThrowValidationError("An EntityDef can not have a MovementSlowdown when it is impassable. It's either or.");
+
+            if (RenderProperties.PositionType == PositionType.Custom && RenderProperties.GetWorldPositionFunction == EntityManager.GetWorldPosition) ThrowValidationError("GetWorldPositionFunction needs to be set to a custom function if PositionType is set to Custom.");
+            if (RenderProperties.PositionType != PositionType.Custom && RenderProperties.GetWorldPositionFunction != EntityManager.GetWorldPosition) ThrowValidationError("GetWorldPositionFunction cannot be changed if PositionType is not set to Custom.");
+            if (RenderProperties.PositionType == PositionType.CenterPoint && (Dimensions.x != 1 || Dimensions.z != 1)) ThrowValidationError("CenterPoint positioning is only implemented for 1x1 entities atm.");
 
             foreach (CompProperties props in Components)
                 if(!props.Validate(this))

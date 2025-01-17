@@ -28,7 +28,7 @@ namespace WorldEditor
             FenceSelection.Clear();
             foreach (FenceDef def in DefDatabase<FenceDef>.AllDefs)
             {
-                FenceSelection.AddElement(def.UiPreviewSprite, Color.white, def.LabelCap, () => SelectFence(def));
+                FenceSelection.AddElement(def.UiSprite, Color.white, def.LabelCap, () => SelectFence(def));
             }
             FenceSelection.SelectFirstElement();
         }

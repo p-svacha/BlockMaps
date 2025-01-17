@@ -96,10 +96,12 @@ namespace BlockmapFramework
 
         /// <summary>
         /// Returns the world position that an entity of a specific EntityDef would have when placed on the given originNode with the given properties.
-        /// <br/>By default this is in the center of the entity in the x and z axis and on the bottom in the y axis.
         /// </summary>
         public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, int entityHeight, bool isMirrored)
         {
+            // Validate
+            if (def.RenderProperties.PositionType == PositionType.Custom) throw new System.Exception("PositionType is set to custom. This function handles the default positioning types.");
+
             // Take 2d center of entity as x/z position
             Vector3Int dimensions = GetTranslatedDimensions(def, rotation);
             Vector2 basePosition = originNode.WorldCoordinates + new Vector2(dimensions.x * 0.5f, dimensions.z * 0.5f);
@@ -110,27 +112,24 @@ namespace BlockmapFramework
             // If placement is invalid, just set the placement node as altitude
             if (occupiedNodes == null) return new Vector3(basePosition.x, originNode.BaseWorldAltitude, basePosition.y);
 
-            // Else calculate the exact y position
+            // Calculate y position based on PositionType
             float y = 0;
-            bool isInWater = false;
-
-            // For moving characters (always 1x1, just take the center world position of the node)
-            if (def.HasCompProperties<CompProperties_Movement>())
+            if (def.RenderProperties.PositionType == PositionType.LowestPoint)
             {
-                y = occupiedNodes.First().MeshCenterWorldPosition.y;
-                isInWater = occupiedNodes.First() is WaterNode;
+                y = occupiedNodes.Min(n => n.BaseWorldAltitude);
             }
-
-            // For static objects the lowest node of all occupied nodes.
-            else
+            if (def.RenderProperties.PositionType == PositionType.CenterPoint)
             {
-                float lowestY = occupiedNodes.Min(n => n.BaseWorldAltitude);
-                List<BlockmapNode> lowestYNodes = occupiedNodes.Where(n => n.BaseWorldAltitude == lowestY).ToList();
-                y = lowestY;
-                isInWater = lowestYNodes.Any(n => n is WaterNode || (n is GroundNode ground && ground.WaterNode != null && ground.IsCenterUnderWater));
+                // Only works properly for 1x1 entities
+                y = occupiedNodes.First().MeshCenterWorldPosition.y;
+            }
+            if (def.RenderProperties.PositionType == PositionType.HighestPoint)
+            {
+                y = occupiedNodes.Max(n => n.MaxWorldAltitude);
             }
 
             // Move position halfway below water surface if required
+            bool isInWater = occupiedNodes.Any(n => n is WaterNode || (n is GroundNode ground && ground.WaterNode != null && ground.IsCenterUnderWater));
             if (isInWater && def.WaterBehaviour == WaterBehaviour.HalfBelowWaterSurface)
             {
                 y -= (entityHeight * World.NodeHeight) / 2;

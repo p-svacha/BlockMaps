@@ -19,7 +19,7 @@ namespace BlockmapFramework.Defs
                     DefName = "ProcHedge",
                     Label = "hedge",
                     Description = "A solid hedge",
-                    UiPreviewSprite = HelperFunctions.TextureToSprite(ThumbnailPath + "ProceduralEntities/Hedge"),
+                    UiSprite = HelperFunctions.TextureToSprite(ThumbnailPath + "ProceduralEntities/Hedge"),
                     VariableHeight = true,
                     RenderProperties = new EntityRenderProperties()
                     {
@@ -41,6 +41,7 @@ namespace BlockmapFramework.Defs
                     {
                         RenderType = EntityRenderType.StandaloneGenerated,
                         StandaloneRenderFunction = Door.GenerateDoorMesh,
+                        PositionType = PositionType.Custom,
                         GetWorldPositionFunction = Door.GetWorldPosition,
                     },
                 },
@@ -58,6 +59,7 @@ namespace BlockmapFramework.Defs
                     {
                         RenderType = EntityRenderType.StandaloneGenerated,
                         StandaloneRenderFunction = LadderMeshGenerator.GenerateLadderMesh,
+                        PositionType = PositionType.Custom,
                         GetWorldPositionFunction = Ladder.GetLadderWorldPosition,
                     },
                 },
@@ -67,7 +69,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Car01",
                     Label = "car 1",
                     Description = "A car.",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car1_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car1_fbx"),
                     Dimensions = new Vector3Int(4, 3, 2),
                     OverrideHeights = new Dictionary<Vector2Int, int>()
                     {
@@ -87,7 +89,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Car02",
                     Label = "car 2",
                     Description = "A car.",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car2_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car2_fbx"),
                     Dimensions = new Vector3Int(3, 3, 2),
                     OverrideHeights = new Dictionary<Vector2Int, int>()
                     {
@@ -107,7 +109,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Car03",
                     Label = "car 3",
                     Description = "A car.",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car3_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "car/car3_fbx"),
                     Dimensions = new Vector3Int(4, 4, 2),
                     OverrideHeights = new Dictionary<Vector2Int, int>()
                     {
@@ -127,7 +129,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Log_01_Small",
                     Label = "small log",
                     Description = "A small log.",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "log_2x1/log_2x1_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "log_2x1/log_2x1_fbx"),
                     Dimensions = new Vector3Int(2, 1, 1),
                     RequiresFlatTerrain = true,
                     RenderProperties = new EntityRenderProperties()
@@ -142,7 +144,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Crate",
                     Label = "crate",
                     Description = "A crate.",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "crate/crate01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "crate/crate01_fbx"),
                     Dimensions = new Vector3Int(2, 2, 2),
                     RequiresFlatTerrain = true,
                     RenderProperties = new EntityRenderProperties()
@@ -157,7 +159,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Saguaro_01_Big",
                     Label = "saguaro cactus",
                     Description = "",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
                     Dimensions = new Vector3Int(1, 12, 1),
                     RenderProperties = new EntityRenderProperties()
                     {
@@ -171,7 +173,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Saguaro_01_Medium",
                     Label = "saguaro cactus",
                     Description = "",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
                     Dimensions = new Vector3Int(1, 9, 1),
                     RenderProperties = new EntityRenderProperties()
                     {
@@ -186,7 +188,7 @@ namespace BlockmapFramework.Defs
                     DefName = "Saguaro_01_Small",
                     Label = "saguaro cactus",
                     Description = "",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "cactus/saguaro01_fbx"),
                     Dimensions = new Vector3Int(1, 6, 1),
                     RenderProperties = new EntityRenderProperties()
                     {

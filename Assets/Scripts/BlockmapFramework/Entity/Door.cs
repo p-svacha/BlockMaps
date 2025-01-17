@@ -152,7 +152,9 @@ namespace BlockmapFramework
 
         public static Vector3 GetWorldPosition(EntityDef def, World world, BlockmapNode originNode, Direction rotation, int height, bool isMirrored)
         {
-            Vector3 basePosition = EntityManager.GetWorldPosition(EntityDefOf.Door, world, originNode, rotation, height, isMirrored);
+            if (def.Dimensions.x != 1 || def.Dimensions.z != 1) throw new System.Exception("GetWorldPosition not yet implemented for doors that are not 1x1.");
+
+            Vector3 basePosition = originNode.MeshCenterWorldPosition;
             float worldY = World.NodeHeight * originNode.GetMinAltitude(rotation);
 
             Vector3 offsetPosition = basePosition + Door.GetWorldPositionOffset(rotation, isMirrored);

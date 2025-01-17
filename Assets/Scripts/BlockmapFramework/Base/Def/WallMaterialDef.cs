@@ -9,7 +9,7 @@ namespace BlockmapFramework
     /// </summary>
     public class WallMaterialDef : Def
     {
-        public override Sprite UiPreviewSprite { get => HelperFunctions.TextureToSprite(Material.mainTexture); }
+        public override Sprite UiSprite { get => HelperFunctions.TextureToSprite(Material.mainTexture); }
 
         /// <summary>
         /// The material that is used to render walls with this material.

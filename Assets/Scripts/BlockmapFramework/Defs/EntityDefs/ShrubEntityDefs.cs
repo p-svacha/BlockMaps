@@ -43,7 +43,7 @@ namespace BlockmapFramework.Defs
             new EntityDef(ShrubBase)
                 {
                     DefName = "Shrub_01",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_01_fbx"),
                     Dimensions = new Vector3Int(1, 1, 1),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {
@@ -55,7 +55,7 @@ namespace BlockmapFramework.Defs
                 new EntityDef(ShrubBase)
                 {
                     DefName = "Shrub_02_Small",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_02_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_02_fbx"),
                     Dimensions = new Vector3Int(1, 1, 1),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {
@@ -67,7 +67,7 @@ namespace BlockmapFramework.Defs
                 new EntityDef(ShrubBase)
                 {
                     DefName = "Shrub_02_Medium",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_02_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_02_fbx"),
                     Dimensions = new Vector3Int(2, 2, 2),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {
@@ -80,7 +80,7 @@ namespace BlockmapFramework.Defs
                 {
                     DefName = "Shrub_Tall_01",
                     Label = "tall shrub",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_tall_01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_tall_01_fbx"),
                     Dimensions = new Vector3Int(1, 3, 1),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {
@@ -93,7 +93,7 @@ namespace BlockmapFramework.Defs
                 {
                     DefName = "Shrub_Wide_01",
                     Label = "wide shrub",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_wide_01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_wide_01_fbx"),
                     Dimensions = new Vector3Int(2, 1, 2),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {
@@ -106,7 +106,7 @@ namespace BlockmapFramework.Defs
                 {
                     DefName = "Grass_01",
                     Label = "grass",
-                    UiPreviewSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/grass_01_fbx"),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/grass_01_fbx"),
                     Dimensions = new Vector3Int(2, 1, 2),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)
                     {

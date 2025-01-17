@@ -43,6 +43,7 @@ namespace BlockmapFramework
         /// Highest altitude of this node.
         /// </summary>
         public int MaxAltitude { get; private set; }
+        public float MaxWorldAltitude => MaxAltitude * World.NodeHeight;
 
         /// <summary>
         /// Shape is a string that stores for each corner (SW, SE, NE, NW) if it is raised (1) or equal the base altitude of the node (0).
