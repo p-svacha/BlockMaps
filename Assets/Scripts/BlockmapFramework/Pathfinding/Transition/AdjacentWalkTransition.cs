@@ -11,14 +11,14 @@ namespace BlockmapFramework
     {
         public AdjacentWalkTransition(BlockmapNode from, BlockmapNode to, Direction dir, int maxHeight) : base(from, to, dir, maxHeight) { }
 
-        public override float GetMovementCost(Entity entity)
+        public override float GetMovementCost(MovingEntity entity)
         {
             float value = (0.5f * From.GetMovementCost(entity, from: Direction.None, to: Direction)) + (0.5f * To.GetMovementCost(entity, from: OppositeDirection, to: Direction.None));
             if(HelperFunctions.IsCorner(Direction)) value *= 1.4142f; // Because diagonal
             return value;
         }
 
-        public override bool CanPass(Entity entity)
+        public override bool CanPass(MovingEntity entity)
         {
             if (!From.IsPassable(Direction, entity)) return false;
             if (!To.IsPassable(HelperFunctions.GetOppositeDirection(Direction), entity)) return false;
@@ -26,11 +26,11 @@ namespace BlockmapFramework
             return base.CanPass(entity);
         }
 
-        public override void OnTransitionStart(Entity entity)
+        public override void OnTransitionStart(MovingEntity entity)
         {
             entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
         }
-        public override void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode originNode)
+        public override void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
         {
             // Get current 2d position of entity
             Vector2 oldPosition2d = new Vector2(entity.WorldPosition.x, entity.WorldPosition.z);
@@ -42,7 +42,7 @@ namespace BlockmapFramework
             // Calculate new 2d world position and coordinates by moving towards next node in 2d
             Direction fromDirection = entity.OriginNode == From ? Direction.None : OppositeDirection;
             Direction toDirection = entity.OriginNode == From ? Direction : Direction.None;
-            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.GetCurrentWalkingSpeed(fromDirection, toDirection) * Time.deltaTime);
+            Vector2 newPosition2d = Vector2.MoveTowards(oldPosition2d, nextNodePosition2d, entity.GetCurrentWalkingSpeed(fromDirection, toDirection));
             Vector2Int newWorldCoordinates = World.GetWorldCoordinates(newPosition2d);
 
             // Set origin node according to 2d coordinates

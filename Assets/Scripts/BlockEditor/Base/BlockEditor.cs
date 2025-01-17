@@ -11,7 +11,7 @@ using BlockmapFramework.Defs;
 
 namespace WorldEditor
 {
-    public class BlockEditor : BlockmapGame
+    public class BlockEditor : GameLoop
     {
         [Header("Prefabs")]
         public UI_EditorToolButton EditorToolButtonPrefab;
@@ -52,6 +52,8 @@ namespace WorldEditor
         public List<WorldGenerator> Generators;
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
+
+        public World World { get; private set; }
 
         void Start()
         {
@@ -123,10 +125,20 @@ namespace WorldEditor
             // Set initialized to true if everything here did run through without throwing an error
             isInitialized = true;
         }
-
-        public override void SetAndInitializeWorld(World world, System.Action onInitializationDoneCallback = null)
+        /// <summary>
+        /// Sets a world object as the new world of this game.
+        /// <br/>Also starts the initialization of that world (drawing, navmesh, vision etc.).
+        /// </summary>
+        public virtual void SetAndInitializeWorld(World world, System.Action callback = null)
         {
-            base.SetAndInitializeWorld(world, onInitializationDoneCallback);
+            // Destory GameObject of previous world
+            if (World != null) Destroy(World.WorldObject);
+
+            // Set new world
+            World = world;
+
+            // Start world initialization
+            World.Initialize(callback);
 
             // Init hooks
             World.OnHoveredGroundNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -139,17 +151,14 @@ namespace WorldEditor
             DisplayOptions.OnNewWorld();
         }
 
-        #region Controls
-
-        protected override void Update()
+        public void DestroyWorld()
         {
-            if (!isInitialized) return;
-            base.Update();
+            Destroy(World.WorldObject);
+            World = null;
+        }
 
-            UpdateHoverInfoText();
-
-            CurrentTool.UpdateTool();
-
+        protected override void HandleInputs()
+        {
             // Click
             bool isMouseOverUi = HelperFunctions.IsMouseOverUi();
             HelperFunctions.UnfocusNonInputUiElements();
@@ -169,6 +178,27 @@ namespace WorldEditor
             DisplayOptions.HandleKeyboardInputs();
             CurrentTool.HandleKeyboardInputs();
         }
+        protected override void Tick()
+        {
+            World?.Tick();
+        }
+        protected override void OnFrame()
+        {
+            CurrentTool.UpdateTool();
+        }
+        protected override void Render(float alpha)
+        {
+            if (!isInitialized) return;
+            UpdateHoverInfoText();
+
+            World?.Render(alpha);
+        }
+        protected override void OnFixedUpdate()
+        {
+            World?.FixedUpdate();
+        }
+
+        #region Controls
 
         private void UpdateHoverInfoText()
         {
@@ -189,6 +219,7 @@ namespace WorldEditor
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;
             text += "\n" + Mathf.Ceil(fps).ToString() + " FPS";
+            text += "\n" + GameLoop.TPS.ToString() + " TPS";
             text += "\nHold alt for more info";
 
             text = text.TrimStart('\n');

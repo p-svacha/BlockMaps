@@ -122,7 +122,7 @@ namespace BlockmapFramework
         /// Returns the cost for a specified entity to complete this path.
         /// <br/>This function assumes that the entity is allowed and capable of taking this path, it won't check that.
         /// </summary>
-        public float GetCost(Entity entity)
+        public float GetCost(MovingEntity entity)
         {
             return Transitions.Sum(t => t.GetMovementCost(entity));
         }
@@ -151,7 +151,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Checks and returns if this path can be fully used by the given entity.
         /// </summary>
-        public bool CanPass(Entity e)
+        public bool CanPass(MovingEntity e)
         {
             if (!IsValid()) return false;
             if (Nodes.Any(n => !n.IsPassable(e))) return false;

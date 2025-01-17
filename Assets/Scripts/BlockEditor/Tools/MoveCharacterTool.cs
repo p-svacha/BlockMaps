@@ -12,7 +12,7 @@ namespace WorldEditor
         public override string Name => "Move Entity";
         public override Sprite Icon => ResourceManager.Singleton.MoveEntityToolSprite;
 
-        private Entity SelectedEntity;
+        private MovingEntity SelectedEntity;
 
         private const float PATH_PREVIEW_WIDTH = 0.1f;
         private Color PATH_PREVIEW_COLOR = new Color(1f, 1f, 1f, 0.5f);
@@ -35,7 +35,7 @@ namespace WorldEditor
             PathPreview.gameObject.SetActive(false);
         }
 
-        public void SelectEntity(Entity e)
+        public void SelectEntity(MovingEntity e)
         {
             if (SelectedEntity != null) SelectedEntity.ShowSelectionIndicator(false);
             SelectedEntity = e;
@@ -94,9 +94,9 @@ namespace WorldEditor
             // Select entity
             if (World.HoveredEntity != null)
             {
-                if (World.HoveredEntity.HasComponent<Comp_Movement>())
+                if (World.HoveredEntity is MovingEntity movingEntity)
                 {
-                    SelectEntity(World.HoveredEntity);
+                    SelectEntity(movingEntity);
                 }
             }
         }

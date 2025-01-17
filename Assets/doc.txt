@@ -1,5 +1,11 @@
 ------------------------- CTF v0.0.7 -------------------------
 
+(/)Fix world saving/loading
+(/)Implement clear tick/render loop distinction
+(/)bar blinking doesnt stop when arriving
+(/)World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
+	test by quickly changing surface of many nodes in editor
+
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
 	Active or Passive
@@ -82,9 +88,6 @@ entities have an additional PivotDirection (SW, SE, NW, NE). Default is SW
 	when implemented, remove/make optional requirement that footprint needs to be fully connected. If it's not, then these just don't get added to occupied nodes
 		i need this i.e. so that rocks can clip into cliffs
 		THEN ALSO CHECK in blockmapnode.isImpassable if another nearby entity blocks this node according to its pivot, size and shape
-
-World.UpdateWorldSystems should enqueue changes so they don't get overwritten if the next World.UpdateWorldSystems is called while the previous is still running
-	test by quickly changing surface of many nodes in editor
 
 Walls that are not actually explored are visible when a wall on the same cell is explored
 	> maybe one mesh per direction per height level?

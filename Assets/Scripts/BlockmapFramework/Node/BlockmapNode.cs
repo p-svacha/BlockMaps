@@ -238,7 +238,7 @@ namespace BlockmapFramework
         /// Returns the cheapest transition for the given entity to get from this node to the specified target node.
         /// <br/>Returns null if no transition to the target node exists.
         /// </summary>
-        public Transition GetCheapestTransition(Entity entity, BlockmapNode target)
+        public Transition GetCheapestTransition(MovingEntity entity, BlockmapNode target)
         {
             Transition cheapestTransition = null;
             float cheapestCost = float.MaxValue;
@@ -1133,6 +1133,8 @@ namespace BlockmapFramework
         {
             string text = ToString();
 
+            text += $"\nAltitude: {BaseAltitude}-{MaxAltitude}";
+            text += $"\nMesh Center: {MeshCenterWorldPosition}";
             string mph = "Max Passable Height:";
             foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
             string headspace = "Free Head Space:";
@@ -1160,7 +1162,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.
         /// </summary>
-        public List<BlockmapNode> GetNodesInRange(float maxCost, Entity entity = null)
+        public List<BlockmapNode> GetNodesInRange(float maxCost, MovingEntity entity = null)
         {
             // Setup
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
@@ -1209,7 +1211,7 @@ namespace BlockmapFramework
         /// Returns the movement cost for walking from the given point to the given point on this node.
         /// <br/>Either from or to must be the center of the node.
         /// </summary>
-        public float GetMovementCost(Entity entity, Direction from, Direction to)
+        public float GetMovementCost(MovingEntity entity, Direction from, Direction to)
         {
             // Base cost from surface
             float value = 1f / SurfaceDef.MovementSpeedModifier;

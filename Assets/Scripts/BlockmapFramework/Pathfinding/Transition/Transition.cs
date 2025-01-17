@@ -38,7 +38,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns if the given entity can use this transition.
         /// </summary>
-        public virtual bool CanPass(Entity entity)
+        public virtual bool CanPass(MovingEntity entity)
         {
             if (entity.Height > MaxHeight) return false;
 
@@ -49,18 +49,18 @@ namespace BlockmapFramework
         /// Returns the amount of energy is required for the given entity to use this transition.
         /// <br/>Walking to one adjacent tile has a cost of about 1 - 4 depending on surface. (1.1 for tarmac, 2 for grass, 3.3 for sand).
         /// </summary>
-        public abstract float GetMovementCost(Entity entity);
+        public abstract float GetMovementCost(MovingEntity entity);
 
         /// <summary>
         /// Gets executed when the given entity starts using this transition.
         /// </summary>
-        public abstract void OnTransitionStart(Entity entity);
+        public abstract void OnTransitionStart(MovingEntity entity);
         /// <summary>
-        /// Updates the position of an entity using this transition in 1 frame.
+        /// Updates the position of an entity using this transition in 1 tick.
         /// <br/> Returns if the entity has finished this transition as an out param.
         /// <br/> Returns the node that the entity is currently on (its origin node) as an out param.
         /// </summary>
-        public abstract void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode currentNode);
+        public abstract void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode);
 
         /// <summary>
         /// Returns a list of points that approximately show the path within this transition.

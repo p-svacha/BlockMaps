@@ -13,8 +13,8 @@ namespace BlockmapFramework
         /// <summary>
         /// The parent this component is attached to.
         /// </summary>
-        public Entity Entity;
-        public World World => Entity.World;
+        protected Entity entity;
+        public World World => entity.World;
 
         /// <summary>
         /// The properties defining the behaviour rules of this comp.
@@ -22,8 +22,9 @@ namespace BlockmapFramework
         /// </summary>
         protected CompProperties props;
 
-        public virtual void Initialize(CompProperties props)
+        public virtual void Initialize(CompProperties props, Entity entity)
         {
+            this.entity = entity;
             this.props = props;
         }
 

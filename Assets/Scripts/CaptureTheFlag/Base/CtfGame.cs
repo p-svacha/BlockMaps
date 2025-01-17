@@ -12,9 +12,9 @@ namespace CaptureTheFlag
     /// <summary>
     /// The god object of capture the flag handling all overarching systems like the main menu, loading screen, starting and stopping games, networking etc.
     /// </summary>
-    public class CtfGame : MonoBehaviour
+    public class CtfGame : GameLoop
     {
-        public static string VERSION = "0.0.6";
+        public static string VERSION = "0.0.7-dev";
 
         [Header("UIs")]
         public UI_MainMenu MainMenuUI;
@@ -35,11 +35,6 @@ namespace CaptureTheFlag
         private bool WeJustConnectedToServer;
         private CtfMatchLobby UpdatedLobbyInfo;
         private bool IsMultiplayerMatchReady;
-
-        // Ticks
-        private float TickAccumulator = 0f;
-        private const float TICKS_PER_SECOND = 60f;
-        private const float TICK_INTERVAL = 1f / TICKS_PER_SECOND;
 
         private void Start()
         {
@@ -65,26 +60,18 @@ namespace CaptureTheFlag
             LobbyUI.gameObject.SetActive(false);
         }
 
-        private void Update()
+        protected override void HandleInputs()
         {
-            if (ActiveMatch != null)
-            {
-                ActiveMatch.Update();
-
-                // Ticks
-                float dt = Time.deltaTime;
-                TickAccumulator += dt;
-
-                // Process as many ticks as fit into this frame
-                while (TickAccumulator >= TICK_INTERVAL)
-                {
-                    TickAccumulator -= TICK_INTERVAL;
-                    ActiveMatch.Tick();
-                }
-            }
-
+            ActiveMatch?.HandleInputs();
+        }
+        protected override void Tick()
+        {
+            ActiveMatch?.Tick();
+        }
+        protected override void OnFrame()
+        {
             // The list of connected clients (ClientInfos) changed since last update
-            if(ClientUpdateReceived)
+            if (ClientUpdateReceived)
             {
                 ClientUpdateReceived = false;
 
@@ -99,7 +86,7 @@ namespace CaptureTheFlag
                 else { }
             }
 
-            else if(UpdatedLobbyInfo != null)
+            else if (UpdatedLobbyInfo != null)
             {
                 if (ActiveLobby == null) GoToLobby();
                 SetLobbyData(UpdatedLobbyInfo);
@@ -107,16 +94,19 @@ namespace CaptureTheFlag
                 UpdatedLobbyInfo = null;
             }
 
-            if(IsMultiplayerMatchReady)
+            if (IsMultiplayerMatchReady)
             {
                 IsMultiplayerMatchReady = false;
                 StartMatch();
             }
         }
-
-        private void FixedUpdate()
+        protected override void Render(float alpha)
         {
-            ActiveMatch?.World?.FixedUpdate();
+            ActiveMatch?.Render(alpha);
+        }
+        protected override void OnFixedUpdate()
+        {
+            ActiveMatch?.FixedUpdate();
         }
 
         public void StartSingleplayerLobby()

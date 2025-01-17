@@ -64,7 +64,7 @@ namespace CaptureTheFlag
 
         // Match state
         public MatchState State { get; private set; }
-        public bool IsMatchRunning => (State != MatchState.Loading_GeneratingWorld && State != MatchState.Loading_InitializingWorld && State != MatchState.MatchReadyToStart && State != MatchState.GameFinished);
+        public bool IsMatchRunning => (State == MatchState.CountdownBeforePlayerTurn || State == MatchState.PlayerTurn || State == MatchState.WaitingForOtherPlayerTurn || State == MatchState.NpcTurn);
         public int CurrentTick { get; private set; }
         private float CountdownBeforePlayerTurn;
 
@@ -330,11 +330,8 @@ namespace CaptureTheFlag
 
         #region Update / Tick
 
-        // Called every frame: Use this for detecting and handling client-side stuff like inputs etc.
-        public void Update()
+        public void HandleInputs()
         {
-            World?.Update();
-
             HelperFunctions.UnfocusNonInputUiElements();
 
             // V - Vision (debug)
@@ -345,6 +342,35 @@ namespace CaptureTheFlag
                 else World.SetActiveVisionActor(LocalPlayer.Actor);
             }
 
+            switch(State)
+            {
+                case MatchState.PlayerTurn:
+                    HandlePlayerInputs();
+                    break;
+            }
+        }
+
+        public void Tick()
+        {
+            World?.Tick();
+
+            if (IsMatchRunning)
+            {
+                CurrentTick++;
+
+                if (MatchType == CtfMatchType.Multiplayer)
+                {
+                    foreach (System.Tuple<CharacterAction, int> queuedAction in QueuedCharacterActions)
+                    {
+                        if (queuedAction.Item2 == CurrentTick)
+                        {
+                            queuedAction.Item1.Perform();
+                        }
+                    }
+                    QueuedCharacterActions = QueuedCharacterActions.Where(x => x.Item2 > CurrentTick).ToList(); // Remove actions that were performed this tick
+                }
+            }
+
             switch (State)
             {
                 case MatchState.Loading_GeneratingWorld:
@@ -352,19 +378,11 @@ namespace CaptureTheFlag
                     break;
 
                 case MatchState.Loading_InitializingWorld:
-                    // Handled in World.Update()
+                    // Handled in World.Tick()
                     break;
 
                 case MatchState.MatchReadyToStart: // Multiplayer only
                     if (Players.All(p => p.ReadyToStartMultiplayerMatch)) StartGame();
-                    break;
-
-                case MatchState.CountdownBeforePlayerTurn: // Multiplayer only
-                    UpdateCountdownBeforePlayerTurn();
-                    break;
-
-                case MatchState.PlayerTurn:
-                    UpdatePlayerTurn();
                     break;
 
                 case MatchState.WaitingForOtherPlayerTurn: // Multiplayer only
@@ -375,37 +393,39 @@ namespace CaptureTheFlag
                     if (MatchType == CtfMatchType.Singleplayer)
                     {
                         AIPlayer opp = (AIPlayer)Opponent;
-                        opp.UpdateTurn();
+                        opp.TickTurn();
                         if (opp.TurnFinished) EndNpcTurn();
                     }
                     else EndNpcTurn(); // no NPCs in multiplayer (yet)
                     break;
             }
+        }
+
+        public void Render(float alpha)
+        {
+            World?.Render(alpha);
 
             if (IsMatchRunning)
             {
                 UpdateHoveredMove();
                 UpdateCharacterSelection();
             }
+
+            switch(State)
+            {
+                case MatchState.PlayerTurn:
+                    if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowCenterNotification("Opponent has ended their turn", Color.cyan); // Notifications UI
+                    break;
+
+                case MatchState.CountdownBeforePlayerTurn: // Multiplayer only
+                    UpdateCountdownBeforePlayerTurn();
+                    break;
+            }
         }
 
-        // Called every tick (exactly 60 TPS): Use this for game simulation logic so it's deterministic across all players
-        public void Tick()
+        public void FixedUpdate()
         {
-            if(!IsMatchRunning) return;
-            CurrentTick++;
-
-            if(MatchType == CtfMatchType.Multiplayer)
-            {
-                foreach(System.Tuple<CharacterAction, int> queuedAction in QueuedCharacterActions)
-                {
-                    if (queuedAction.Item2 == CurrentTick)
-                    {
-                        queuedAction.Item1.Perform();
-                    }
-                }
-                QueuedCharacterActions = QueuedCharacterActions.Where(x => x.Item2 > CurrentTick).ToList(); // Remove actions that were performed this tick
-            }
+            World?.FixedUpdate();
         }
 
         private void UpdateCountdownBeforePlayerTurn()
@@ -425,7 +445,7 @@ namespace CaptureTheFlag
         /// <summary>
         /// Gets called every frame during your turn.
         /// </summary>
-        private void UpdatePlayerTurn()
+        private void HandlePlayerInputs()
         {
             // Vision cutoff
             UpdateVisionCutoff();
@@ -446,9 +466,6 @@ namespace CaptureTheFlag
                     UnhighlightNodes(); // Unhighlight nodes
                 }
             }
-
-            // Notifications UI
-            if (Opponent.TurnEnded && !LocalPlayer.TurnEnded) UI.ShowCenterNotification("Opponent has ended their turn", Color.cyan);
         }
 
         /// <summary>
@@ -697,9 +714,9 @@ namespace CaptureTheFlag
         public void PerformMultiplayerAction(CharacterAction action)
         {
             NetworkMessage_CharacterAction characterActionMessage = action.GetNetworkAction();
-            characterActionMessage.Tick = CurrentTick + MultiplayerActionTickOffset;
+            //characterActionMessage.Tick = CurrentTick + MultiplayerActionTickOffset; // seems to work better without
 
-            NetworkClient.Instance.SendMessage(action.GetNetworkAction());
+            NetworkClient.Instance.SendMessage(characterActionMessage);
         }
 
         /// <summary>

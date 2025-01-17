@@ -9,7 +9,7 @@ namespace WorldEditor
     /// <summary>
     /// A dynamic entity for the editor where all movement attributes can be set to custom values.
     /// </summary>
-    public class EditorMovingEntity : Entity
+    public class EditorMovingEntity : MovingEntity
     {
         public GameObject TargetFlag;
         private float TargetFlagScale = 0.1f;

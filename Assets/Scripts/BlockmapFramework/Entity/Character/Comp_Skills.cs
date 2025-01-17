@@ -14,14 +14,14 @@ namespace BlockmapFramework
 
         private Dictionary<SkillDef, Skill> Skills;
 
-        public override void Initialize(CompProperties props)
+        public override void Initialize(CompProperties props, Entity entity)
         {
-            base.Initialize(props);
+            base.Initialize(props, entity);
 
             Skills = new Dictionary<SkillDef, Skill>();
             foreach (SkillDef skillDef in DefDatabase<SkillDef>.AllDefs)
             {
-                Skills.Add(skillDef, new Skill(skillDef, Entity, Props.InitialSkillLevels[skillDef.DefName]));
+                Skills.Add(skillDef, new Skill(skillDef, entity, Props.InitialSkillLevels[skillDef.DefName]));
             }
         }
 

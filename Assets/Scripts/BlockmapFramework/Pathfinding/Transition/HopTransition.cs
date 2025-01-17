@@ -41,7 +41,7 @@ namespace BlockmapFramework
             HopArc = HelperFunctions.CreateArc(from.MeshCenterWorldPosition, to.MeshCenterWorldPosition, arcHeight, segments: 12);
         }
 
-        public override bool CanPass(Entity entity)
+        public override bool CanPass(MovingEntity entity)
         {
             if (entity.MaxHopUpDistance < HopUpDistance) return false;
             if (entity.MaxHopDownDistance < HopDownDistance) return false;
@@ -49,7 +49,7 @@ namespace BlockmapFramework
             return base.CanPass(entity);
         }
 
-        public override float GetMovementCost(Entity entity)
+        public override float GetMovementCost(MovingEntity entity)
         {
             float value = BaseCost;
             float costFromDistance = (HopUpDistance * CostPerHopUpAltitude) + (HopDownDistance * CostPerHopDownAltitude);
@@ -63,7 +63,7 @@ namespace BlockmapFramework
             return HopArc;
         }
 
-        public override void OnTransitionStart(Entity entity)
+        public override void OnTransitionStart(MovingEntity entity)
         {
             Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
 
@@ -72,7 +72,7 @@ namespace BlockmapFramework
             moveComp.TransitionSpeed = TransitionSpeed;
         }
 
-        public override void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode currentNode)
+        public override void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
         {
             finishedTransition = false;
             Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
@@ -81,7 +81,7 @@ namespace BlockmapFramework
             Vector3 segmentEnd = HopArc[moveComp.TransitionPathIndex + 1];
 
             // Move the entity based on the current speed
-            Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, segmentEnd, moveComp.TransitionSpeed * Time.deltaTime);
+            Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, segmentEnd, moveComp.TransitionSpeed);
 
             if (Vector3.Distance(segmentEnd, newPosition) < 0.01f) // reached segment end point
             {

@@ -22,7 +22,7 @@ namespace BlockmapFramework
         /// <br/>Returned path includes both source and target.
         /// </summary>
         /// <param name="considerUnexploredNodes">If true, only nodes that are explored by the entity's actor are considered for a path.</param>
-        public static NavigationPath GetPath(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        public static NavigationPath GetPath(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             if (from == null || to == null) return null;
             if (from == to || !to.IsPassable(entity)) return null;
@@ -96,7 +96,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Returns the cost of going from any one node to any other for a specified entity when taking the cheapest possible path.
         /// </summary>
-        public static float GetPathCost(Entity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
+        public static float GetPathCost(MovingEntity entity, BlockmapNode from, BlockmapNode to, bool considerUnexploredNodes = false, List<BlockmapNode> forbiddenNodes = null)
         {
             NavigationPath path = GetPath(entity, from, to, considerUnexploredNodes, forbiddenNodes);
             if (path == null) return float.MaxValue;
@@ -114,7 +114,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Real cost of going from one node to another.
         /// </summary>
-        private static float GetCCost(Transition t, Entity e)
+        private static float GetCCost(Transition t, MovingEntity e)
         {
             return t.GetMovementCost(e);
         }
@@ -154,7 +154,7 @@ namespace BlockmapFramework
         /// available to move around (for the given entity if != null).
         /// <br/>Useful to check if entities are stuck in enclosed or blocked spaces.
         /// </summary>
-        public static bool HasRoamingArea(BlockmapNode startNode, int numNodes, Entity e = null, List<BlockmapNode> forbiddenNodes = null)
+        public static bool HasRoamingArea(BlockmapNode startNode, int numNodes, MovingEntity e = null, List<BlockmapNode> forbiddenNodes = null)
         {
             // 1) Get the node where the entity currently stands.
             if (startNode == null) return false;

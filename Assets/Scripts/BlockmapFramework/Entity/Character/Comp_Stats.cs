@@ -15,14 +15,14 @@ namespace BlockmapFramework
 
         private Dictionary<StatDef, Stat> Stats;
 
-        public override void Initialize(CompProperties props)
+        public override void Initialize(CompProperties props, Entity entity)
         {
-            base.Initialize(props);
+            base.Initialize(props, entity);
 
             Stats = new Dictionary<StatDef, Stat>();
             foreach (StatDef statDef in DefDatabase<StatDef>.AllDefs)
             {
-                Stats.Add(statDef, new Stat(statDef, Entity));
+                Stats.Add(statDef, new Stat(statDef, entity));
             }
         }
 

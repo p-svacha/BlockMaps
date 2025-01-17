@@ -79,7 +79,7 @@ namespace BlockmapFramework
         {
             if(FollowedEntity != null)
             {
-                CurrentPosition = FollowedEntity.WorldPosition;
+                CurrentPosition = FollowedEntity.MeshObject.transform.position;
                 UpdatePosition();
             }
         }

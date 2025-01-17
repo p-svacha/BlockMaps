@@ -12,14 +12,15 @@ namespace BlockmapFramework
     {
         public const int MaxEntityHeight = 5;
 
+        public MovingEntity Entity => (MovingEntity)entity;
         public CompProperties_Movement Props => (CompProperties_Movement)props;
 
-        public override void Initialize(CompProperties props)
+        public override void Initialize(CompProperties props, Entity entity)
         {
-            base.Initialize(props);
+            base.Initialize(props, entity);
 
-            if (Entity.Dimensions.x != 1 || Entity.Dimensions.z != 1) throw new System.Exception("Moving entities can't be bigger than 1x1.");
-            if (Entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel && Entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneGenerated) 
+            if (entity.Dimensions.x != 1 || entity.Dimensions.z != 1) throw new System.Exception("Moving entities can't be bigger than 1x1.");
+            if (entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneModel && entity.Def.RenderProperties.RenderType != EntityRenderType.StandaloneGenerated) 
                 throw new System.Exception("Moving entities must have standalone rendering.");
 
             IsMoving = false;
@@ -75,35 +76,27 @@ namespace BlockmapFramework
             // Movement
             if (IsMoving && !IsMovementPaused)
             {
-                CurrentTransition.UpdateEntityMovement(Entity, out bool finishedTransition, out BlockmapNode currentOriginNode);
+                CurrentTransition.EntityMovementTick(Entity, out bool finishedTransition, out BlockmapNode currentOriginNode);
 
-                if (Entity.OriginNode != currentOriginNode)
+                if (entity.OriginNode != currentOriginNode)
                 {
-                    Entity.SetOriginNode(currentOriginNode);
+                    entity.SetOriginNode(currentOriginNode);
 
                     // Recalculate vision of all nearby entities (including this)
-                    if (Entity.BlocksVision()) World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.MeshCenterWorldPosition, callback: Entity.UpdateVisibility);
+                    if (entity.BlocksVision()) World.UpdateVisionOfNearbyEntitiesDelayed(entity.OriginNode.MeshCenterWorldPosition, callback: entity.UpdateVisibility);
                     else // If this entity doesn't block vision, only update the vision of itself and of entities from other actors
                     {
-                        World.UpdateVisionOfNearbyEntitiesDelayed(Entity.OriginNode.MeshCenterWorldPosition, callback: Entity.UpdateVisibility, excludeActor: Entity.Actor);
-                        Entity.UpdateVision();
+                        World.UpdateVisionOfNearbyEntitiesDelayed(entity.OriginNode.MeshCenterWorldPosition, callback: entity.UpdateVisibility, excludeActor: entity.Actor);
+                        entity.UpdateVision();
                     }
                 }
                 if (finishedTransition) ReachNextNode();
-
-
-                // Update transform if visible
-                if (Entity.IsVisibleBy(World.ActiveVisionActor))
-                {
-                    Entity.MeshObject.transform.position = Entity.WorldPosition;
-                    Entity.MeshObject.transform.rotation = Entity.WorldRotation;
-                }
             }
         }
 
         public override void Validate()
         {
-            if (Entity.Height > MaxEntityHeight) throw new System.Exception($"Height cannot be greater than {MaxEntityHeight} for moving entities.");
+            if (entity.Height > MaxEntityHeight) throw new System.Exception($"Height cannot be greater than {MaxEntityHeight} for moving entities.");
         }
 
         #region Actions
@@ -114,7 +107,7 @@ namespace BlockmapFramework
         public void MoveTo(BlockmapNode target)
         {
             // Get node where to start from. If we are moving take the next node in our current path. Else just where we are standing now.
-            BlockmapNode startNode = IsMoving ? CurrentTransition.To : Entity.OriginNode;
+            BlockmapNode startNode = IsMoving ? CurrentTransition.To : entity.OriginNode;
 
             // Find path to target
             NavigationPath path = Pathfinder.GetPath(Entity, startNode, target);
@@ -181,7 +174,7 @@ namespace BlockmapFramework
             TargetPath.RemoveFirstTransition();
 
             // Update the last known position of this entity for all actors that can currently see it
-            foreach (Entity e in Entity.SeenBy) Entity.UpdateLastKnownPositionFor(e.Actor);
+            foreach (Entity e in entity.SeenBy) entity.UpdateLastKnownPositionFor(e.Actor);
 
             // Target reached
             if(reachedNode == Target)
@@ -199,7 +192,7 @@ namespace BlockmapFramework
                 if (newTransition != null && newTransition.CanPass(Entity))
                 {
                     IsMoving = true;
-                    newNextNode.AddEntity(Entity);
+                    newNextNode.AddEntity(entity);
                     TargetPath.RemoveFirstNode();
                     SetCurrentTransition(newTransition);
                 }
@@ -332,7 +325,7 @@ namespace BlockmapFramework
             totalCost = 0;
 
             // First check if the target node is even close. If not: skip detailed check
-            if (Vector2.Distance(Entity.OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
+            if (Vector2.Distance(entity.OriginNode.WorldCoordinates, targetNode.WorldCoordinates) > maxCost) return false;
 
             // Setup
             Dictionary<BlockmapNode, float> priorityQueue = new Dictionary<BlockmapNode, float>();
@@ -340,7 +333,7 @@ namespace BlockmapFramework
             Dictionary<BlockmapNode, float> nodeCosts = new Dictionary<BlockmapNode, float>();
 
             // Start with origin node
-            BlockmapNode sourceNode = Entity.OriginNode;
+            BlockmapNode sourceNode = entity.OriginNode;
             priorityQueue.Add(sourceNode, 0f);
             nodeCosts.Add(sourceNode, 0f);
 

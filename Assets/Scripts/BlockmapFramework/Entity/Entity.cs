@@ -68,10 +68,20 @@ namespace BlockmapFramework
         public Vector3 WorldPosition { get; private set; }
 
         /// <summary>
+        /// Exact world position of the previous tick. Used for smooth render interpolation.
+        /// </summary>
+        public Vector3 WorldPositionPrev { get; private set; }
+
+        /// <summary>
         /// The exact world rotation this entity is rotated at at the moment.
         /// <br/> Equals transform.position when the entity is visible (in vision system).
         /// </summary>
         public Quaternion WorldRotation { get; protected set; }
+
+        /// <summary>
+        /// Exact world rotation of the previous tick. Used for smooth render interpolation.
+        /// </summary>
+        public Quaternion WorldRotationPrev { get; protected set; }
 
         /// <summary>
         /// List of tiles that this entity is currently on.
@@ -130,7 +140,6 @@ namespace BlockmapFramework
         private Projector SelectionIndicator;
 
         // Component cache
-        public Comp_Movement MovementComp { get; private set; }
         public Comp_Skills SkillsComp { get; private set; }
         public Comp_Stats StatsComp { get; private set; }
 
@@ -193,7 +202,6 @@ namespace BlockmapFramework
             if (Height <= 0) throw new System.Exception($"Cannot create an entity with height = {Height}. Must be positive.");
 
             // Component cache
-            if (HasComponent<Comp_Movement>()) MovementComp = GetComponent<Comp_Movement>();
             if (HasComponent<Comp_Skills>()) SkillsComp = GetComponent<Comp_Skills>();
             if (HasComponent<Comp_Stats>()) StatsComp = GetComponent<Comp_Stats>();
 
@@ -229,9 +237,8 @@ namespace BlockmapFramework
             foreach (CompProperties compProps in Def.Components)
             {
                 EntityComp newComp = newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
-                newComp.Entity = this;
                 Components.Add(newComp);
-                newComp.Initialize(compProps);
+                newComp.Initialize(compProps, this);
 
                 try
                 {
@@ -428,10 +435,18 @@ namespace BlockmapFramework
         /// </summary>
         public void Tick()
         {
+            WorldPositionPrev = WorldPosition;
+            WorldRotationPrev = WorldRotation;
+
             foreach (EntityComp comp in Components) comp.Tick();
 
             OnTick();
         }
+
+        /// <summary>
+        /// Gets called every frame
+        /// </summary>
+        public virtual void Render(float alpha) { }
 
         /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode and Dimensions of the entity. 
@@ -650,12 +665,6 @@ namespace BlockmapFramework
         public virtual string LabelCap => Label.CapitalizeFirst();
         public virtual string Description => Def.Description;
 
-        public virtual float MovementSpeed => MovementComp.MovementSpeed;
-        public virtual bool CanSwim => MovementComp.CanSwim;
-        public virtual ClimbingCategory ClimbingSkill => MovementComp.ClimbingSkill;
-        public virtual int MaxHopUpDistance => MovementComp.MaxHopUpDistance;
-        public virtual int MaxHopDownDistance => MovementComp.MaxHopDownDistance;
-
         public virtual bool Impassable => Def.Impassable;
         public virtual float MovementSlowdown => Def.MovementSlowdown;
 
@@ -665,11 +674,6 @@ namespace BlockmapFramework
         public virtual bool RequiresFlatTerrain => Def.RequiresFlatTerrain;
         public virtual Vector3Int Dimensions => Def.VariableHeight ? new Vector3Int(Def.Dimensions.x, overrideHeight, Def.Dimensions.z) : Def.Dimensions;
         public Vector2Int Dimensions2d => new Vector2Int(Dimensions.x, Dimensions.z);
-
-        // Aptitudes (affect the cost of using of transitions in the navmesh)
-        public virtual float ClimbingAptitude => MovementComp.ClimbingAptitude;
-        public virtual float GetSurfaceAptitude(SurfaceDef def) => MovementComp.GetSurfaceAptitude(def);
-        public virtual float HoppingAptitude => 1f;
 
         public int MinAltitude => Mathf.FloorToInt(GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight); // Rounded down to y-position of its center
         public int MaxAltitude => Mathf.CeilToInt((GetWorldPosition(OriginNode, Rotation, Height, IsMirrored).y / World.NodeHeight) + (Height - 1)); // Rounded up to y-position of its center + height
@@ -700,22 +704,6 @@ namespace BlockmapFramework
         /// Returns the maximum altitude this entity covers on the given node.
         /// </summary>
         public int GetMaxAltitudeAt(BlockmapNode node) => MinAltitude + GetHeightAt(node);
-
-        /// <summary>
-        /// Returns if the target node is reachable with a path that costs less than the given limit.
-        /// </summary>
-        public bool IsInRange(BlockmapNode targetNode, float maxCost, out float totalCost) => MovementComp.IsInRange(targetNode, maxCost, out totalCost);
-
-        /// <summary>
-        /// Returns the movement speed this entity has right now taking into account the surface its on.
-        /// </summary>
-        public float GetCurrentWalkingSpeed(Direction from, Direction to)
-        {
-            float value = MovementSpeed;
-            value *= (1f / OriginNode.GetMovementCost(this, from, to));
-
-            return value;
-        }
 
         /// <summary>
         /// Returns the dimensions of this object taking into account its current rotation.

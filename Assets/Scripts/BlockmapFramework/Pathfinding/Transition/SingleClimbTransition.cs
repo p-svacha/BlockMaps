@@ -46,7 +46,7 @@ namespace BlockmapFramework
             ClimbSkillRequirement = (ClimbingCategory)(climb.Max(x => (int)x.ClimbSkillRequirement));
         }
 
-        public override float GetMovementCost(Entity entity)
+        public override float GetMovementCost(MovingEntity entity)
         {
             float value = (0.5f * From.GetMovementCost(entity, from: Direction.None, to: Direction)) + (0.5f * To.GetMovementCost(entity, from: OppositeDirection, to: Direction.None)); // Cost of moving between start and end tile
 
@@ -56,7 +56,7 @@ namespace BlockmapFramework
             return value;
         }
 
-        public override bool CanPass(Entity entity)
+        public override bool CanPass(MovingEntity entity)
         {
             // Climb skill
             if ((int)entity.ClimbingSkill < (int)ClimbSkillRequirement) return false;
@@ -67,12 +67,12 @@ namespace BlockmapFramework
             return base.CanPass(entity);
         }
 
-        public override void OnTransitionStart(Entity entity)
+        public override void OnTransitionStart(MovingEntity entity)
         {
             entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
             entity.GetComponent<Comp_Movement>().ClimbPhase = ClimbPhase.PreClimb;
         }
-        public override void UpdateEntityMovement(Entity entity, out bool finishedTransition, out BlockmapNode currentNode)
+        public override void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
         {
             Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
 
@@ -88,7 +88,7 @@ namespace BlockmapFramework
                         Vector2 startClimbPoint2d = new Vector2(startClimbPoint.x, startClimbPoint.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.GetCurrentWalkingSpeed(Direction.None, Direction) * Time.deltaTime);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, startClimbPoint2d, entity.GetCurrentWalkingSpeed(Direction.None, Direction));
 
                         // Calculate y coordinate
                         float y;
@@ -126,7 +126,7 @@ namespace BlockmapFramework
 
                         // Move towards climb end
                         Vector3 nextPoint = GetEndClimbPoint(entity, climb, index);
-                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, Time.deltaTime * (IsAscend ? climb.GetClimbSpeedUp(entity) : climb.GetClimbSpeedDown(entity)));
+                        Vector3 newPosition = Vector3.MoveTowards(entity.WorldPosition, nextPoint, IsAscend ? climb.GetClimbSpeedUp(entity) : climb.GetClimbSpeedDown(entity));
 
                         // Set new position
                         entity.SetWorldPosition(newPosition);
@@ -159,7 +159,7 @@ namespace BlockmapFramework
                         Vector2 endPosition2d = new Vector2(endPosition.x, endPosition.z);
 
                         // Calculate new 2d world position and coordinates by moving towards next node in 2d
-                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.GetCurrentWalkingSpeed(OppositeDirection, Direction.None) * Time.deltaTime);
+                        Vector2 newPosition2d = Vector2.MoveTowards(entityPosition2d, endPosition2d, entity.GetCurrentWalkingSpeed(OppositeDirection, Direction.None));
 
                         // Calculate altitude
                         float y;

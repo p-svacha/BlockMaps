@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class CtfCharacter : Entity
+    public class CtfCharacter : MovingEntity
     {
         public CtfMatch Match;
         public Player Owner { get; private set; }
@@ -35,6 +35,8 @@ namespace CaptureTheFlag
 
         protected override void OnCompInitialized(EntityComp comp)
         {
+            base.OnCompInitialized(comp);
+
             if (comp is Comp_CtfCharacter ctf) CtfComp = ctf;
         }
 

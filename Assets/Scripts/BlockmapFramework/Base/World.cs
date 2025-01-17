@@ -81,10 +81,9 @@ namespace BlockmapFramework
         public int MinX, MaxX, MinY, MaxY;
 
         // World updates
-        private bool IsUpdatingWorldSystems;
+        private WorldSystemUpdateInfo CurrentWorldSystemUpdate;
+        private Queue<WorldSystemUpdateInfo> PendingWorldUpdates = new Queue<WorldSystemUpdateInfo>();
         private int WorldUpdateFrame;
-        private Parcel WorldUpdateArea; // if null, the full world is getting updated
-        private System.Action WorldUpdateCallback;
 
         private int UpdateEntityVisionIn;
         private List<Entity> VisionUpdateEntities;
@@ -170,7 +169,7 @@ namespace BlockmapFramework
         // Draw modes
         public bool IsShowingGrid { get; private set; }
         public bool IsShowingNavmesh { get; private set; }
-        public Entity NavmeshEntity { get; private set; }
+        public MovingEntity NavmeshEntity { get; private set; }
         public bool IsShowingTextures { get; private set; }
         public bool IsShowingTileBlending { get; private set; }
         public bool IsVisionCutoffEnabled { get; private set; }
@@ -184,6 +183,11 @@ namespace BlockmapFramework
 
 
         #region Init
+
+        /// <summary>
+        /// Empty constructor needed for loading world.
+        /// </summary>
+        public World() { }
 
         /// <summary>
         /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass.
@@ -220,6 +224,11 @@ namespace BlockmapFramework
         /// </summary>
         private void OnCreate()
         {
+            CliffMaterialPath = "Materials/NodeMaterials/Cliff";
+        }
+
+        private void CreateChunksAndGameObjects()
+        {
             // Set layers
             Layer_GroundNodeMesh = LayerMask.NameToLayer("Terrain");
             Layer_EntityMesh = LayerMask.NameToLayer("EntityMesh");
@@ -233,11 +242,6 @@ namespace BlockmapFramework
 
             Layer_AllMeshLayers = (1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
 
-            CliffMaterialPath = "Materials/NodeMaterials/Cliff";
-        }
-
-        private void CreateChunksAndGameObjects()
-        {
             // Create chunks
             for (int chunkX = 0; chunkX < NumChunksPerSide; chunkX++)
             {
@@ -308,19 +312,31 @@ namespace BlockmapFramework
 
         #region Update
 
-        public void Update()
+        public void Render(float alpha)
         {
             if (!IsInitialized) return;
 
-            // Regular updates
+            // Hovered objects
             UpdateHoveredObjects();
+
+            // Entities
+            foreach (Entity e in Entities.Values) e.Render(alpha);
+        }
+
+        public void Tick()
+        {
+            // Entities
             foreach (Entity e in Entities.Values) e.Tick();
         }
 
+        /// <summary>
+        /// World system updates need to be performed in fixed update to ensure the physics enginge updates come through between the different update steps.
+        /// </summary>
         public void FixedUpdate()
         {
-            // Update world systems
-            if (IsUpdatingWorldSystems) WorldSystemUpdate();
+            // Update world systems (DO NOT REMOVE THIS FROM FixedUpdate - I've tried it multiple times and it needs to be here)
+            WorldSystemUpdate();
+
             if (UpdateEntityVisionIn > 0)
             {
                 UpdateEntityVisionIn--;
@@ -888,44 +904,46 @@ namespace BlockmapFramework
         /// </summary>
         public void UpdateWorldSystems(Parcel area, System.Action callback = null)
         {
-            if (IsUpdatingWorldSystems) return;
-
-            IsUpdatingWorldSystems = true;
-            WorldUpdateArea = area;
-            WorldUpdateFrame = 0;
-            WorldUpdateCallback = callback;
+            PendingWorldUpdates.Enqueue(new WorldSystemUpdateInfo(area, callback));
         }
 
         /// <summary>
-        /// Gets executed each frame while the world is being updated
+        /// Gets executed each fixed update while the world is being updated
         /// </summary>
         private void WorldSystemUpdate()
         {
-            if (!IsUpdatingWorldSystems) return;
+            if (CurrentWorldSystemUpdate == null && PendingWorldUpdates.Count > 0) // Moving to next pending update
+            {
+                CurrentWorldSystemUpdate = PendingWorldUpdates.Dequeue();
+                WorldUpdateFrame = 0;
+            }
+
+            if (CurrentWorldSystemUpdate == null) return; // nothing to update
+
             WorldUpdateFrame++;
 
             // Step 1: Draw meshes
             if (WorldUpdateFrame == 1)
             {
                 Profiler.Begin("Draw Meshes");
-                if (WorldUpdateArea == null) RedrawFullWorld();
-                else RedrawNodes(WorldUpdateArea);
+                if (CurrentWorldSystemUpdate.Area == null) RedrawFullWorld();
+                else RedrawNodes(CurrentWorldSystemUpdate.Area);
                 Profiler.End("Draw Meshes");
             }
 
             // Step 2: Calculate node center world positions
-            if (WorldUpdateFrame == 3)
+            if (WorldUpdateFrame == 2)
             {
                 Profiler.Begin("Calculate Node Centers");
-                if (WorldUpdateArea == null)
+                if (CurrentWorldSystemUpdate.Area == null)
                 {
                     foreach (BlockmapNode n in GetAllNodes()) n.RecalculateMeshCenterWorldPosition();
                 }
                 else
                 {
-                    for (int x = WorldUpdateArea.Position.x - 1; x < WorldUpdateArea.Position.x + WorldUpdateArea.Dimensions.x + 1; x++)
+                    for (int x = CurrentWorldSystemUpdate.Area.Position.x - 1; x < CurrentWorldSystemUpdate.Area.Position.x + CurrentWorldSystemUpdate.Area.Dimensions.x + 1; x++)
                     {
-                        for (int y = WorldUpdateArea.Position.y - 1; y < WorldUpdateArea.Position.y + WorldUpdateArea.Dimensions.y + 1; y++)
+                        for (int y = CurrentWorldSystemUpdate.Area.Position.y - 1; y < CurrentWorldSystemUpdate.Area.Position.y + CurrentWorldSystemUpdate.Area.Dimensions.y + 1; y++)
                         {
                             if (!IsInWorld(new Vector2Int(x, y))) continue;
                             foreach (BlockmapNode n in GetNodes(new Vector2Int(x, y))) n.RecalculateMeshCenterWorldPosition();
@@ -936,20 +954,20 @@ namespace BlockmapFramework
 
                 // Step 3: Generate navmesh
                 Profiler.Begin("Generate Navmesh");
-                if (WorldUpdateArea == null) GenerateFullNavmesh();
-                else UpdateNavmesh(WorldUpdateArea);
+                if (CurrentWorldSystemUpdate.Area == null) GenerateFullNavmesh();
+                else UpdateNavmesh(CurrentWorldSystemUpdate.Area);
                 Profiler.End("Generate Navmesh");
 
                 // Step 4: Reposition standalone entities
                 Profiler.Begin("Reposition Entities");
                 HashSet<Entity> entitiesToUpdate = new HashSet<Entity>();
 
-                if (WorldUpdateArea == null) entitiesToUpdate = Entities.Values.ToHashSet();
+                if (CurrentWorldSystemUpdate.Area == null) entitiesToUpdate = Entities.Values.ToHashSet();
                 else
                 {
-                    for (int x = WorldUpdateArea.Position.x - 1; x < WorldUpdateArea.Position.x + WorldUpdateArea.Dimensions.x + 1; x++)
+                    for (int x = CurrentWorldSystemUpdate.Area.Position.x - 1; x < CurrentWorldSystemUpdate.Area.Position.x + CurrentWorldSystemUpdate.Area.Dimensions.x + 1; x++)
                     {
-                        for (int y = WorldUpdateArea.Position.y - 1; y < WorldUpdateArea.Position.y + WorldUpdateArea.Dimensions.y + 1; y++)
+                        for (int y = CurrentWorldSystemUpdate.Area.Position.y - 1; y < CurrentWorldSystemUpdate.Area.Position.y + CurrentWorldSystemUpdate.Area.Dimensions.y + 1; y++)
                         {
                             if (!IsInWorld(new Vector2Int(x, y))) continue;
                             foreach (BlockmapNode n in GetNodes(new Vector2Int(x, y)))
@@ -969,17 +987,17 @@ namespace BlockmapFramework
                 Profiler.End("Reposition Entities");
             }
 
-            if (WorldUpdateFrame == 4)
+            if (WorldUpdateFrame == 3)
             {
                 // Step 5: Update entity vision
                 Profiler.Begin("Update Entity Vision");
-                if (WorldUpdateArea == null) UpdateVisionOfAllEntities();
-                else UpdateVisionOfNearbyEntities(WorldUpdateArea);
+                if (CurrentWorldSystemUpdate.Area == null) UpdateVisionOfAllEntities();
+                else UpdateVisionOfNearbyEntities(CurrentWorldSystemUpdate.Area);
                 Profiler.End("Update Entity Vision");
 
                 // Step 6: Done and callback
-                IsUpdatingWorldSystems = false;
-                WorldUpdateCallback?.Invoke();
+                CurrentWorldSystemUpdate.Callback?.Invoke();
+                CurrentWorldSystemUpdate = null;
             }
         }
 
@@ -1875,7 +1893,7 @@ namespace BlockmapFramework
             IsShowingNavmesh = !IsShowingNavmesh;
             UpdateNavmeshDisplay();
         }
-        public void SetNavmeshEntity(Entity entity)
+        public void SetNavmeshEntity(MovingEntity entity)
         {
             NavmeshEntity = entity;
             UpdateNavmeshDisplay();
@@ -2342,6 +2360,7 @@ namespace BlockmapFramework
                 }
             }
 
+            Debug.Log($"Couldn't detect world altitude at {worldPosition2d} for {node}. Applying fallback: {node.BaseWorldAltitude}");
             return node.BaseWorldAltitude; // fallback
 
             throw new System.Exception("World height not found for node of type " + node.Type.ToString());
@@ -2445,6 +2464,7 @@ namespace BlockmapFramework
         {
             SaveLoadManager.SaveOrLoadPrimitive(ref Name, "name");
             SaveLoadManager.SaveOrLoadPrimitive(ref numChunksPerSide, "numChunksPerSide");
+            SaveLoadManager.SaveOrLoadPrimitive(ref CliffMaterialPath, "cliffMaterial");
 
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Actors, "actors");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Nodes, "nodes");

@@ -118,7 +118,7 @@ namespace CaptureTheFlag.AI
         /// <summary>
         /// Gets called every frame during the AI's turn.
         /// </summary>
-        public void UpdateTurn()
+        public void TickTurn()
         {
             UpdateCharacterActions();
             UpdateCameraFollow();
@@ -130,7 +130,6 @@ namespace CaptureTheFlag.AI
             // Characters are iterated through one by one
             if (CurrentAction == null || CurrentAction.IsDone)
             {
-                Debug.Log(CurrentCharacterIndex);
                 CtfCharacter currentCharacter = CurrentCharacterIndex > -1 ? ShuffledCharacters[CurrentCharacterIndex] : null;
                 CharacterAction nextAction = CurrentCharacterIndex > -1 ? GetNextCharacterAction(currentCharacter) : null;
 

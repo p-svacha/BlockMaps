@@ -52,7 +52,7 @@ namespace BlockmapFramework
         protected override bool CanEntityStandHere(Entity entity)
         {
             if (entity == null) return false;
-            if (!entity.CanSwim) return false;
+            if (entity is MovingEntity mEntity && !mEntity.CanSwim) return false;
             
             return base.CanEntityStandHere(entity);
         }

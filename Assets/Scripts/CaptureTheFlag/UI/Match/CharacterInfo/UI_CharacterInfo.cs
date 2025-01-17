@@ -55,19 +55,21 @@ namespace CaptureTheFlag.UI
                 CtfCharacter c = Match.SelectedCharacter;
                 if (!gameObject.activeSelf) gameObject.SetActive(true);
 
+                // Some elements only need to be redrawn when selected character changes
                 if (c != displayedCharacter)
                 {
                     TitleText.text = c.LabelCap;
                     DescriptionText.text = c.Description.ToString();
                     RefreshSkillPanel(c);
-                    ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
-                    StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
                     ActionPointsPerTurnText.text = $"+{c.CtfComp.MaxActionPoints} / turn";
                     StaminaPerTurnText.text = $"+{c.StaminaRegeneration.ToString("0.#")} / turn";
 
                     displayedCharacter = c;
                 }
 
+                // Some elements need to be redrawn every frame
+                ActionBar.SetValue(c.ActionPoints, c.MaxActionPoints, showText: true, "0.#");
+                StaminaBar.SetValue(c.Stamina, c.MaxStamina, showText: true, "0.#");
                 VisionCutoffButton.SetToggle(Match.IsVisionCutoffEnabled);
 
                 if (Match.HoveredAction != null)

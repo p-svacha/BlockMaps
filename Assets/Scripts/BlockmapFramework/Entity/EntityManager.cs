@@ -266,6 +266,7 @@ namespace BlockmapFramework
         /// <br/>Returns the entity instance if successful or null of not successful.
         private static Entity TrySpawnEntity(World world, EntityDef def, Actor player, Vector2Int worldCoordinates, Direction rotation, bool isMirrored, string variantName = "", int requiredRoamingArea = -1, List<BlockmapNode> forbiddenNodes = null, List<string> forbiddenTags = null)
         {
+            if (requiredRoamingArea > 0 && !def.HasCompProperties<CompProperties_Movement>()) throw new System.Exception("Can't try to spawn a non-moving entity with a required roam area");
             if (!world.IsInWorld(worldCoordinates)) return null;
 
             BlockmapNode targetNode = world.GetNodes(worldCoordinates).RandomElement();
@@ -286,7 +287,7 @@ namespace BlockmapFramework
 
             Entity spawnedEntity = world.SpawnEntity(def, targetNode, rotation, isMirrored, player, updateWorld: false, variantIndex: variantIndex);
 
-            if (requiredRoamingArea > 0 && !Pathfinder.HasRoamingArea(targetNode, requiredRoamingArea, spawnedEntity, forbiddenNodes))
+            if (requiredRoamingArea > 0 && !Pathfinder.HasRoamingArea(targetNode, requiredRoamingArea, (MovingEntity)spawnedEntity, forbiddenNodes))
             {
                 Debug.Log($"[EntityManager - SpawnEntityAround] Removing {spawnedEntity.LabelCap} from {targetNode} because it didn't have enough roaming space there.");
                 world.RemoveEntity(spawnedEntity, updateWorld: false);
