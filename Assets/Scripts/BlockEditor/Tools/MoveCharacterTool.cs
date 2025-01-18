@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 namespace WorldEditor
 {
@@ -51,9 +52,24 @@ namespace WorldEditor
 
         public override void HandleKeyboardInputs()
         {
+            // R - Update vision with debug rays in editor
             if(Input.GetKeyDown(KeyCode.R))
             {
                 if (SelectedEntity != null) SelectedEntity.UpdateVision(debugVisionRays: true);
+            }
+
+            // P - Pick up all pickubable entities on same node
+            if(Input.GetKeyDown(KeyCode.P))
+            {
+                List<Entity> entitesToPickUp = SelectedEntity.OriginNode.Entities.Where(e => e.CanBeHeldByOtherEntities).ToList();
+                foreach (Entity entityToPickUp in entitesToPickUp) World.AddToInventory(entityToPickUp, SelectedEntity);
+            }
+
+            // F - Drop all entities in inventory on same node
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                List<Entity> entitiesToDrop = new List<Entity>(SelectedEntity.Inventory);
+                foreach (Entity entityToDrop in entitiesToDrop) World.DropFromInventory(entityToDrop, SelectedEntity.OriginNode);
             }
         }
 

@@ -30,6 +30,10 @@ namespace CaptureTheFlag
         public const int JAIL_ZONE_MAX_FLAG_DISTANCE = 11; // maximum distance from jail zone center to flag
         public const float FLAG_ZONE_RADIUS = 7.5f;  // Amount of tiles around flag that can't be entered by own team
 
+        // Items
+        private const float MIN_ITEM_DENSITY = 0.5f; // per chunk
+        private const float MAX_ITEM_DENSITY = 2f; // per chunk
+
         // Tags
         public const string NO_SPAWN_TAG = "NO_SPAWN";
 
@@ -71,6 +75,7 @@ namespace CaptureTheFlag
 
             CreateMapZones();
             CreatePlayerBases();
+            AddItems();
 
             // Recalculate vision
             world.UpdateEntityVisionDelayed(CreatedEntities, onDoneCallback);
@@ -206,6 +211,37 @@ namespace CaptureTheFlag
             World.AddZone(ownZoneNodes, P1Actor, providesVision: false, ZoneVisibility.VisibleForEveryone); // id = 0: Blue player territory
             World.AddZone(neutralZoneNodes, World.Gaia, providesVision: false, ZoneVisibility.VisibleForEveryone); // id = 1: Neutral territory
             World.AddZone(opponentZoneNodes, P2Actor, providesVision: false, ZoneVisibility.VisibleForEveryone);// id = 2: Red player territory
+        }
+
+        private static void AddItems()
+        {
+            float itemDensity = Random.Range(MIN_ITEM_DENSITY, MAX_ITEM_DENSITY);
+            Debug.Log($"itemDensity = {itemDensity}");
+
+            float chancePerNode = itemDensity / 256;
+
+            foreach(BlockmapNode node in World.GetAllNodes())
+            {
+                if(Random.value < chancePerNode)
+                {
+                    if (node.IsImpassable()) continue;
+                    if (node.Entities.Any(e => e is CtfCharacter)) continue;
+                    if (node.Entities.Any(e => e.Def == EntityDefOf.Flag)) continue;
+
+                    SpawnRandomItem(node);
+                }
+            }
+        }
+
+        private static void SpawnRandomItem(BlockmapNode node)
+        {
+            EntityDef itemDef = EntityDefOf.CtfItem_Apple;
+            Direction rotation = Direction.N;
+            bool isMirrored = false;
+            Actor actor = World.Gaia;
+
+            if (World.CanSpawnEntity(itemDef, node, rotation, isMirrored))
+                World.SpawnEntity(itemDef, node, rotation, isMirrored, actor, updateWorld: false);
         }
     }
 

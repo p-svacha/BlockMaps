@@ -19,5 +19,7 @@ namespace CaptureTheFlag
         public static EntityDef Human6;
         public static EntityDef Dog1;
         public static EntityDef Dog2;
+
+        public static EntityDef CtfItem_Apple;
     }
 }

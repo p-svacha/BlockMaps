@@ -80,6 +80,11 @@ namespace BlockmapFramework
         public WaterBehaviour WaterBehaviour { get; init; } = WaterBehaviour.Forbidden;
 
         /// <summary>
+        /// Flag, if this entity can exist in the inventory of other entities.
+        /// </summary>
+        public bool CanBeHeldByOtherEntities { get; init; } = false;
+
+        /// <summary>
         /// Creates a new EntityDef.
         /// </summary>
         public EntityDef() { }
@@ -109,6 +114,7 @@ namespace BlockmapFramework
             RequiresFlatTerrain = orig.RequiresFlatTerrain;
             VariableHeight = orig.VariableHeight;
             WaterBehaviour = orig.WaterBehaviour;
+            CanBeHeldByOtherEntities = orig.CanBeHeldByOtherEntities;
         }
 
 

@@ -238,6 +238,13 @@ namespace CaptureTheFlag
                     SendToJail(ownCharacter);
             }
 
+            // Pick up items
+            CtfItem itemToPickup = (CtfItem)node.Entities.FirstOrDefault(e => e is CtfItem);
+            if(itemToPickup != null)
+            {
+                World.AddToInventory(itemToPickup, action.Character);
+            }
+
             // Update possible actions for all characters
             foreach (CtfCharacter character in Characters) character.UpdatePossibleActions();
 

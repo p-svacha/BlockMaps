@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ItemTextureMaterial
-  m_Shader: {fileID: 4800000, guid: 0bc5dcfe839b7b5438adba1d148140e9, type: 3}
+  m_Shader: {fileID: 4800000, guid: 75f566a228e6bae40850886180384223, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _USETEXTURES_ON
@@ -75,6 +75,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TextureIsTriplanar: 0
+    - _Transparency: 0
     - _TriplanarTextureScale: 1
     - _UVSec: 0
     - _UseTextures: 1

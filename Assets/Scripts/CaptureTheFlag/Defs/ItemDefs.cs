@@ -16,6 +16,7 @@ namespace CaptureTheFlag
             Dimensions = new Vector3Int(1, 2, 1),
             Impassable = false,
             BlocksVision = false,
+            CanBeHeldByOtherEntities = true,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
@@ -28,7 +29,7 @@ namespace CaptureTheFlag
         {
             new EntityDef(ItemBaseDef)
             {
-                DefName = "Apple",
+                DefName = "CtfItem_Apple",
                 Label = "apple",
                 Description = "Restores 20 stamina upon consumption",
                 UiSprite = HelperFunctions.TextureToSprite(Resources.Load<Texture>(ItemTexturePath + "Apple")),

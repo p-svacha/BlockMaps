@@ -38,15 +38,20 @@ namespace CaptureTheFlag
 
         public override void Render(float alpha)
         {
+            UpdateMeshObjectTransform();
+        }
+
+        protected override void SetMeshObjectTransform(Vector3 position, Quaternion rotation)
+        {
             // Rotate the object
             RotationOffset += ROTATION_SPEED * Time.deltaTime;
             if (RotationOffset > 360) RotationOffset -= 360;
-            MeshObject.transform.rotation = Quaternion.Euler(WorldRotation.eulerAngles + new Vector3(0, RotationOffset, 0));
+            MeshObject.transform.rotation = Quaternion.Euler(rotation.eulerAngles + new Vector3(0, RotationOffset, 0));
 
             // Bob up and down
             BobOffset += BOB_SPEED * Time.deltaTime;
             float bobHeight = Mathf.Sin(BobOffset) * BOB_HEIGHT;
-            MeshObject.transform.position = new Vector3(WorldPosition.x, WorldPosition.y + bobHeight, WorldPosition.z);
+            MeshObject.transform.position = new Vector3(position.x, position.y + bobHeight, position.z);
         }
 
         #endregion

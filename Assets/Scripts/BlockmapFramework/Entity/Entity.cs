@@ -89,6 +89,16 @@ namespace BlockmapFramework
         public HashSet<BlockmapNode> OccupiedNodes { get; private set; }
 
         /// <summary>
+        /// List of all entities currently held by this entity.
+        /// </summary>
+        public List<Entity> Inventory { get; private set; }
+
+        /// <summary>
+        /// Entity currently holding this entity.
+        /// </summary>
+        public Entity Holder;
+
+        /// <summary>
         /// List of all objects that are currenlty visible or half-visible by this entity.
         /// <br/>Half-visible means that the object will be marked as explored but is not currently in vision.
         /// </summary>
@@ -206,6 +216,7 @@ namespace BlockmapFramework
             if (HasComponent<Comp_Stats>()) StatsComp = GetComponent<Comp_Stats>();
 
             // Initialize some objects
+            Inventory = new List<Entity>();
             OccupiedNodes = new HashSet<BlockmapNode>();
             CurrentVision = new VisionData();
             LastKnownPosition = new Dictionary<Actor, Vector3?>();
@@ -454,10 +465,13 @@ namespace BlockmapFramework
         private void UpdateOccupiedNodes()
         {
             // Remove entity from all currently occupied nodes and chunks
-            foreach (BlockmapNode t in OccupiedNodes)
+            if (OccupiedNodes != null) // OccupiedNodes can be null if the entity was in an inventory
             {
-                t.RemoveEntity(this);
-                t.Chunk.RemoveEntity(this);
+                foreach (BlockmapNode t in OccupiedNodes)
+                {
+                    t.RemoveEntity(this);
+                    t.Chunk.RemoveEntity(this);
+                }
             }
 
             // Get list of nodes that are currently occupied
@@ -489,7 +503,7 @@ namespace BlockmapFramework
 
             // Add chunks from old vision to changedVisibilityChunks
             foreach (BlockmapNode n in previousVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
-            foreach (Entity e in previousVision.VisibleEntities) changedVisibilityChunks.Add(e.Chunk);
+            foreach (Entity e in previousVision.VisibleEntities.Where(e => !e.IsInInventory)) changedVisibilityChunks.Add(e.Chunk);
             foreach (Wall w in previousVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
 
             // Get list of everything that this entity currently sees
@@ -565,6 +579,8 @@ namespace BlockmapFramework
         }
         public bool IsVisibleBy(Actor actor)
         {
+            if (IsInInventory) return false; // An entity can never be visible inside an inventory
+
             if (actor == null) return true; // Everything is visible
             if (Actor == actor) return true; // This entity belongs to the given actor
             if (SeenBy.FirstOrDefault(x => x.Actor == actor) != null) return true; // Entity is seen by an entity of given actor
@@ -576,6 +592,7 @@ namespace BlockmapFramework
 
         public bool IsExploredBy(Actor actor)
         {
+            if (actor == null) return true;
             if (IsVisibleBy(actor)) return true; // Is currently visible by the given actor
 
             return LastKnownPosition[actor] != null; // There is a last known position for the given actor meaning they have discovered this entity
@@ -596,49 +613,133 @@ namespace BlockmapFramework
         /// </summary>
         public virtual void UpdateVisibility(Actor player)
         {
-            if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return;
+            if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return; // Entities doesn't need to be rendered
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
 
             if (IsStandaloneEntity)
             {
-                // Entity is currently visible => render normally at current position
+                // Update transform where the entity gets rendered
+                UpdateMeshObjectTransform();
+
+                // Entity is currently visible => fully opaque
                 if (IsVisibleBy(player))
                 {
-                    MeshRenderer.enabled = true;
+                    // Render entity fully opaque (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
+                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
 
-                    MeshObject.transform.position = WorldPosition;
-                    MeshObject.transform.rotation = WorldRotation;
-
-                    if (HasComponent<Comp_Movement>())
+                    // Remove fog of war tint
+                    for (int i = 0; i < MeshRenderer.materials.Length; i++)
                     {
-                        foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0);
+                        Material m = MeshRenderer.materials[i];
+                        if(i == Def.RenderProperties.PlayerColorMaterialIndex)
+                        {
+                            m.SetColor("_TintColor", new Color(Actor.Color.r, Actor.Color.g, Actor.Color.b, 0.5f));
+                        }
+                        else
+                        {
+                            m.SetColor("_TintColor", Color.clear);
+                        }
                     }
-
-                    // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
-                    if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;
                 }
 
-                // Entity was explored before but not currently visible => render transparent at last known position
+                // Entity was explored before but not currently visible => transparent
                 else if (IsExploredBy(player))
                 {
-                    MeshRenderer.enabled = true;
+                    // Render entity transparent (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
+                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
 
-                    MeshObject.transform.position = LastKnownPosition[player].Value;
-                    MeshObject.transform.rotation = LastKnownRotation[player].Value;
-
-                    // Render entity transparent if it can move (because it gets rendered at last known position)
-                    if (HasComponent<Comp_Movement>())
+                    // Add fog of war tint
+                    for (int i = 0; i < MeshRenderer.materials.Length; i++)
                     {
-                        foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
+                        Material m = MeshRenderer.materials[i];
+                        if (i == Def.RenderProperties.PlayerColorMaterialIndex)
+                        {
+                            m.SetColor("_TintColor", new Color(Actor.Color.r / 2f, Actor.Color.g / 2f, Actor.Color.b / 2f, 0.5f));
+                        }
+                        else
+                        {
+                            m.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.4f));
+                        }
                     }
+                }
+            }
+        }
 
-                    // Don't render it if vision cutoff is enabled and entity is higher up than the altitude
-                    if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude) MeshRenderer.enabled = false;
+        /// <summary>
+        /// Returns the world position and rotation where this entity should be rendered based on the currently active vision actor.
+        /// </summary>
+        public void GetCurrentRenderPosition(out bool doRender, out Vector3? position, out Quaternion? rotation)
+        {
+            Actor actor = World.ActiveVisionActor;
+
+            // Render at real position if currently visible
+            if (IsVisibleBy(actor))
+            {
+                // Don't render if disabled by vision cutoff settings OR in inventory
+                if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude)
+                {
+                    doRender = false;
+                    position = null;
+                    rotation = null;
+                    return;
                 }
 
-                // Entity was not yet explored => don't render it
-                else MeshRenderer.enabled = false;
+                doRender = true;
+                position = WorldPosition;
+                rotation = WorldRotation;
             }
+
+            // Render at last known position if explored but not currently visible
+            else if(actor != null && IsExploredBy(actor))
+            {
+                // Don't render if disabled by vision cutoff settings
+                if (LastKnownNode[actor].Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude)
+                {
+                    doRender = false;
+                    position = null;
+                    rotation = null;
+                    return;
+                }
+
+                doRender = true;
+                position = LastKnownPosition[actor].Value;
+                rotation = LastKnownRotation[actor].Value;
+            }
+
+            // Don't render if never explored
+            else
+            {
+                doRender = false;
+                position = null;
+                rotation = null;
+            }
+        }
+
+        protected void UpdateMeshObjectTransform()
+        {
+            if (!IsStandaloneEntity) throw new System.Exception("Can't update transform for entities that are not rendered as standalone objects.");
+
+            GetCurrentRenderPosition(out bool doRender, out Vector3? position, out Quaternion? rotation);
+
+            if(doRender)
+            {
+                MeshRenderer.enabled = true;
+                SetMeshObjectTransform((Vector3)position, (Quaternion)rotation);
+            }
+            else
+            {
+                MeshRenderer.enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Sets the transform.position and transform.rotation of this Entity.
+        /// <br/>The parameters are the position and rotation the entity needs to be rendered at.
+        /// </summary>
+        protected virtual void SetMeshObjectTransform(Vector3 position, Quaternion rotation)
+        {
+            MeshObject.transform.position = position;
+            MeshObject.transform.rotation = rotation;
         }
 
         /// <summary>
@@ -681,7 +782,10 @@ namespace BlockmapFramework
         public int Height => Dimensions.y;
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
+
         public bool CanSee => VisionRange > 0;
+        public virtual bool CanBeHeldByOtherEntities => Def.CanBeHeldByOtherEntities;
+        public bool IsInInventory => Holder != null;
 
         // Skills and Stats
         public List<Skill> GetAllSkills() => SkillsComp.GetAllSkills();
@@ -1144,8 +1248,7 @@ namespace BlockmapFramework
                 if (actor == Actor) continue;
                 if (!IsVisibleBy(actor))
                 {
-                    LastKnownPosition[actor] = null;
-                    LastKnownNode[actor] = null;
+                    RemoveLastKnownPositionFor(actor);
                 }
             }
 
@@ -1170,8 +1273,13 @@ namespace BlockmapFramework
             pm_SetOriginNode.Begin();
 
             // Before setting new origin, update last known position for all players seeing this entity
-            foreach (Actor p in World.GetAllActors())
-                if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
+            if (OriginNode != null) // Only if it had an origin node before
+            {
+                foreach (Actor p in World.GetAllActors())
+                {
+                    if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
+                }
+            }
 
             // Set new origin
             OriginNode = node;
@@ -1181,6 +1289,66 @@ namespace BlockmapFramework
             UpdateVisionColliderPosition();
 
             pm_SetOriginNode.End();
+        }
+
+        /// <summary>
+        /// Gets executed after this entity got added to Holder's inventory.
+        /// </summary>
+        public void OnAddedToInventory(Entity newHolder)
+        {
+            // Remove last known position for everyone who sees it getting picked up
+            foreach(Actor actor in World.GetAllActors())
+            {
+                if(IsVisibleBy(actor))
+                {
+                    RemoveLastKnownPositionFor(actor);
+                }
+            }
+
+            // Set to be in the holders inventory
+            Holder = newHolder;
+            newHolder.Inventory.Add(this);
+
+            // Remove entity from all currently occupied nodes and chunks
+            foreach (BlockmapNode t in OccupiedNodes)
+            {
+                t.RemoveEntity(this);
+                t.Chunk.RemoveEntity(this);
+            }
+
+            // Remove own references to position in world
+            OriginNode = null;
+            OccupiedNodes = null;
+
+            // Disable mesh collider
+            MeshCollider.enabled = false;
+
+            // Disable vision collider
+            VisionColliderObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// Gets executed after this entity got removed from an inventory and placed back into the world on the given node.
+        /// </summary>
+        public void OnRemovedFromInventory(BlockmapNode dropNode)
+        {
+            // Set new origin node
+            SetOriginNode(dropNode);
+
+            // Set occupied nodes
+            UpdateOccupiedNodes();
+
+            // Set new world position / rotation
+            ResetWorldPositonAndRotation();
+
+            // Update transform
+            UpdateMeshObjectTransform();
+
+            // Enable mesh collider
+            MeshCollider.enabled = true;
+
+            // Enable vision collider
+            VisionColliderObject.SetActive(true);
         }
 
         /// <summary>
@@ -1224,7 +1392,7 @@ namespace BlockmapFramework
             LastKnownNode[actor] = OriginNode;
             LastKnownRotation[actor] = WorldRotation;
         }
-        public void ResetLastKnownPositionFor(Actor actor)
+        public void RemoveLastKnownPositionFor(Actor actor)
         {
             LastKnownPosition[actor] = null;
             LastKnownNode[actor] = null;

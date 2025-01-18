@@ -1111,7 +1111,7 @@ namespace BlockmapFramework
         public void ResetExploration(Actor actor)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
-            foreach (Entity entity in Entities.Values) entity.ResetLastKnownPositionFor(actor);
+            foreach (Entity entity in Entities.Values) entity.RemoveLastKnownPositionFor(actor);
             foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
 
             foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
@@ -1128,8 +1128,6 @@ namespace BlockmapFramework
 
             UpdateVisibility();
         }
-
-
 
         public bool CanChangeShape(DynamicNode node, Direction mode, bool isIncrease)
         {
@@ -1729,6 +1727,19 @@ namespace BlockmapFramework
             Zone newZone = new Zone(this, id, actor, coordinates, providesVision, visibility);
             Zones.Add(id, newZone);
             return newZone;
+        }
+
+        public void AddToInventory(Entity item, Entity holder)
+        {
+            if (!item.CanBeHeldByOtherEntities) throw new System.Exception($"Can't add {item.LabelCap} to the inventory of {holder.LabelCap} because it can't be held by other entities.");
+            
+            item.OnAddedToInventory(holder);
+        }
+        public void DropFromInventory(Entity item, BlockmapNode newOriginNode)
+        {
+            item.Holder.Inventory.Remove(item);
+            item.Holder = null;
+            item.OnRemovedFromInventory(newOriginNode);
         }
 
         // Helpers
