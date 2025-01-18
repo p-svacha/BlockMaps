@@ -189,9 +189,6 @@ namespace BlockmapFramework
             // Initialize components
             InitializeComps();
 
-            // Set position and rotation
-            ResetWorldPositonAndRotation();
-
             OnCreated();
         }
 
@@ -225,6 +222,9 @@ namespace BlockmapFramework
             foreach (Actor p in World.GetAllActors()) LastKnownNode.Add(p, null);
             LastKnownRotation = new Dictionary<Actor, Quaternion?>();
             foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
+
+            // Set position and rotation
+            ResetWorldPositonAndRotation();
 
             // Initialize game objects
             InitializeGameObject();
@@ -515,6 +515,7 @@ namespace BlockmapFramework
             pm_HandleVisibilityChange.Begin();
             // Add entitiy vision to visible nodes
             
+            // Set nodes from vision as visible
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
 
             // Set nodes as explored that are explored by this entity but not visible (in fog of war)
@@ -528,6 +529,18 @@ namespace BlockmapFramework
 
             // Set walls as explored
             foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
+
+            // If we see a node that had "LastKnownPosition_UntilReexplored" entities on it that we have last seen there, remove their last known position
+            foreach (BlockmapNode n in CurrentVision.VisibleNodes)
+            {
+                foreach(Entity e in World.GetAllEntities())
+                {
+                    if(e.LastKnownNode[Actor] == n && !e.IsVisibleBy(Actor) && e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
+                    {
+                        e.RemoveLastKnownPositionFor(Actor);
+                    }
+                }
+            }
 
             // Add chunks from new vision to changedVisibilityChunks
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
@@ -615,6 +628,18 @@ namespace BlockmapFramework
         {
             if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return; // Entities doesn't need to be rendered
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
+
+            // Enable / Disable colliders based on if this entity currently exists in the world or in an inventory
+            if(IsInInventory)
+            {
+                MeshCollider.enabled = false;
+                VisionColliderObject.SetActive(false);
+            }
+            else
+            {
+                MeshCollider.enabled = true;
+                VisionColliderObject.SetActive(true);
+            }
 
             if (IsStandaloneEntity)
             {
@@ -783,6 +808,7 @@ namespace BlockmapFramework
         public float WorldHeight => World.GetWorldY(Height);
         public Vector3 WorldSize => Vector3.Scale(MeshObject.GetComponent<MeshFilter>().mesh.bounds.size, MeshObject.transform.localScale);
 
+        public virtual ExploredBehaviour ExploredBehaviour => Def.ExploredBehaviour;
         public bool CanSee => VisionRange > 0;
         public virtual bool CanBeHeldByOtherEntities => Def.CanBeHeldByOtherEntities;
         public bool IsInInventory => Holder != null;
@@ -1294,7 +1320,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Gets executed after this entity got added to Holder's inventory.
         /// </summary>
-        public void OnAddedToInventory(Entity newHolder)
+        public void AddToInventory(Entity newHolder)
         {
             // Remove last known position for everyone who sees it getting picked up
             foreach(Actor actor in World.GetAllActors())
@@ -1320,18 +1346,19 @@ namespace BlockmapFramework
             OriginNode = null;
             OccupiedNodes = null;
 
-            // Disable mesh collider
-            MeshCollider.enabled = false;
-
-            // Disable vision collider
-            VisionColliderObject.SetActive(false);
+            // Update visibility (has to be done here because updateWorldSystems will not consider this entity anymore since it's not part of any chunk)
+            UpdateVisibility();
         }
 
         /// <summary>
         /// Gets executed after this entity got removed from an inventory and placed back into the world on the given node.
         /// </summary>
-        public void OnRemovedFromInventory(BlockmapNode dropNode)
+        public void RemoveFromInventory(BlockmapNode dropNode)
         {
+            // Remove references from inventory
+            Holder.Inventory.Remove(this);
+            Holder = null;
+
             // Set new origin node
             SetOriginNode(dropNode);
 
@@ -1341,14 +1368,8 @@ namespace BlockmapFramework
             // Set new world position / rotation
             ResetWorldPositonAndRotation();
 
-            // Update transform
-            UpdateMeshObjectTransform();
-
-            // Enable mesh collider
-            MeshCollider.enabled = true;
-
-            // Enable vision collider
-            VisionColliderObject.SetActive(true);
+            // Update visibility (has to be done here because updateWorldSystems will not consider this entity anymore since it's not part of any chunk)
+            UpdateVisibility();
         }
 
         /// <summary>
@@ -1369,12 +1390,13 @@ namespace BlockmapFramework
             WorldPosition = pos;
         }
         /// <summary>
-        /// Sets the direction this entity is currently facing.
+        /// Sets the rotation and updates the WorldRotation accordingly.
         /// <br/> Only gets rendered in that rotation there if actually visible.
         /// </summary>
-        public void SetWorldRotation(Quaternion quat)
+        public void SetRotation(Direction rotation)
         {
-            WorldRotation = quat;
+            Rotation = rotation;
+            WorldRotation = HelperFunctions.Get2dRotationByDirection(rotation);
         }
 
         /// <summary>
@@ -1388,6 +1410,8 @@ namespace BlockmapFramework
 
         public void UpdateLastKnownPositionFor(Actor actor)
         {
+            if (ExploredBehaviour == ExploredBehaviour.None) return; // Don't save last known positions for entities that can't be explored (They are either visible or not)
+
             LastKnownPosition[actor] = WorldPosition;
             LastKnownNode[actor] = OriginNode;
             LastKnownRotation[actor] = WorldRotation;

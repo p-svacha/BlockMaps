@@ -20,7 +20,7 @@ namespace BlockmapFramework
 
         // Hop path
         private List<Vector3> HopArc;
-        private const float TransitionSpeed = 5f;
+        private const float TransitionSpeed = 0.5f;
 
         /// <summary>
         /// The required distance an entity must be able to hop up to use this transition.
@@ -67,7 +67,7 @@ namespace BlockmapFramework
         {
             Comp_Movement moveComp = entity.GetComponent<Comp_Movement>();
 
-            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
+            entity.SetRotation(Direction);
             moveComp.TransitionPathIndex = 0;
             moveComp.TransitionSpeed = TransitionSpeed;
         }

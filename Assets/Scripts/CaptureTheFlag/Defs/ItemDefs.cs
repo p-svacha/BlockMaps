@@ -17,6 +17,7 @@ namespace CaptureTheFlag
             Impassable = false,
             BlocksVision = false,
             CanBeHeldByOtherEntities = true,
+            ExploredBehaviour = ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition,
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,

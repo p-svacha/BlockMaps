@@ -1,8 +1,10 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-player who drops item doesnt immediately see it
-item doesnt get rendered transparent when switching to player vision who explored it but not visible
-item last know position doesnt disappear when looking at node where it previously way but is no longer
+(/)players dont immediately see item when dropped, only when dropper walks away
+(/)item doesnt get rendered transparent when switching to player vision who explored it but not visible
+(/)item last know position doesnt disappear when looking at node where it previously way but is no longer (ExploredBehaviour)
+
+test adding / removing from inventory during world gen
 
 Inventory System:
 	(/)Add CanBeAddedToInventory to EntityDef

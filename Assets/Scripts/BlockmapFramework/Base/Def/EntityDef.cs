@@ -75,6 +75,11 @@ namespace BlockmapFramework
         public bool VariableHeight { get; init; } = false;
 
         /// <summary>
+        /// How the entity gets rendered when explored, but not currently visible
+        /// </summary>
+        public ExploredBehaviour ExploredBehaviour { get; init; } = ExploredBehaviour.ExploredForever;
+
+        /// <summary>
         /// How the entity behaves around water - if and how it can exist on water.
         /// </summary>
         public WaterBehaviour WaterBehaviour { get; init; } = WaterBehaviour.Forbidden;
@@ -113,6 +118,7 @@ namespace BlockmapFramework
             MovementSlowdown = orig.MovementSlowdown;
             RequiresFlatTerrain = orig.RequiresFlatTerrain;
             VariableHeight = orig.VariableHeight;
+            ExploredBehaviour = orig.ExploredBehaviour;
             WaterBehaviour = orig.WaterBehaviour;
             CanBeHeldByOtherEntities = orig.CanBeHeldByOtherEntities;
         }
@@ -159,6 +165,29 @@ namespace BlockmapFramework
 
             return base.Validate();
         }
+    }
+
+    /// <summary>
+    /// How the explored state of the entity behaves.
+    /// </summary>
+    public enum ExploredBehaviour
+    {
+        /// <summary>
+        /// Once explored, the entity stays in that explored state until it is seen again.
+        /// <br/>Default behaviour that works well for static entities that never move and also for characters where you want to know where you've last seen them.
+        /// </summary>
+        ExploredForever,
+
+        /// <summary>
+        /// Once explored, the entity stays in that explored state until we go back to the node where we have last seen it (LastKnownPosition).
+        /// <br/>If it is still there, it is visible and therefore explored. If it is no longer there, it gets marked as unexplored again (LastKnownPosition gets removed).
+        /// </summary>
+        ExploredUntilNotSeenOnLastKnownPosition,
+
+        /// <summary>
+        /// The entity has no explored state. It is either visible or unexplored.
+        /// </summary>
+        None
     }
 
     public enum WaterBehaviour

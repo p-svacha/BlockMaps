@@ -1729,17 +1729,20 @@ namespace BlockmapFramework
             return newZone;
         }
 
-        public void AddToInventory(Entity item, Entity holder)
+        public void AddToInventory(Entity item, Entity holder, bool updateWorld)
         {
             if (!item.CanBeHeldByOtherEntities) throw new System.Exception($"Can't add {item.LabelCap} to the inventory of {holder.LabelCap} because it can't be held by other entities.");
-            
-            item.OnAddedToInventory(holder);
+
+            BlockmapNode node = item.OriginNode;
+            item.AddToInventory(holder);
+
+            if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
         }
-        public void DropFromInventory(Entity item, BlockmapNode newOriginNode)
+        public void DropFromInventory(Entity item, BlockmapNode newOriginNode, bool updateWorld)
         {
-            item.Holder.Inventory.Remove(item);
-            item.Holder = null;
-            item.OnRemovedFromInventory(newOriginNode);
+            item.RemoveFromInventory(newOriginNode);
+
+            if (updateWorld) UpdateWorldSystems(newOriginNode.WorldCoordinates);
         }
 
         // Helpers

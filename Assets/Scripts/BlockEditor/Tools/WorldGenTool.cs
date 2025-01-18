@@ -119,7 +119,7 @@ namespace WorldEditor
             string worldToLoad = SavedWorlds[LoadDropdown.value];
 
             World loadedWorld = SaveLoadManager.Load(worldToLoad);
-            Editor.SetAndInitializeWorld(loadedWorld);
+            Editor.SetAndInitializeWorld(loadedWorld, OnWorldInitializationDone);
 
             SaveNameInput.text = worldToLoad;
             

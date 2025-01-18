@@ -69,7 +69,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+            entity.SetRotation(Direction); // Look straight ahead
             entity.GetComponent<Comp_Movement>().ClimbPhase = ClimbPhase.PreClimb;
         }
         public override void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode currentNode)
@@ -109,7 +109,7 @@ namespace BlockmapFramework
                         {
                             moveComp.ClimbPhase = ClimbPhase.InClimb;
                             moveComp.ClimbIndex = 0;
-                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction))); // Look at fence
+                            entity.SetRotation(IsAscend ? Direction : HelperFunctions.GetOppositeDirection(Direction)); // Look at fence
                         }
 
                         // Out params
@@ -139,7 +139,7 @@ namespace BlockmapFramework
                             if (moveComp.ClimbIndex == Climb.Count) // Reached the top
                             {
                                 moveComp.ClimbPhase = ClimbPhase.PostClimb;
-                                entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+                                entity.SetRotation(Direction); // Look straight ahead
                             }
                         }
 

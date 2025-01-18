@@ -28,7 +28,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction));
+            entity.SetRotation(Direction);
         }
         public override void EntityMovementTick(MovingEntity entity, out bool finishedTransition, out BlockmapNode originNode)
         {

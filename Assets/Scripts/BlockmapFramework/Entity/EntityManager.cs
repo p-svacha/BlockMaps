@@ -28,6 +28,7 @@ namespace BlockmapFramework
             HashSet<BlockmapNode> nodes = new HashSet<BlockmapNode>() { originNode };
 
             Vector3Int dimensions = GetTranslatedDimensions(def, rotation, customHeight);
+            if (dimensions.x == 1 && dimensions.z == 1) return nodes; // Shortcut for 1x1 entities
 
             // For each x, try to connect all the way up and see if everything is connected
             BlockmapNode yBaseNode = originNode;
@@ -144,7 +145,9 @@ namespace BlockmapFramework
         /// </summary>
         public static Vector3Int GetTranslatedDimensions(EntityDef def, Direction rotation, int customHeight = 0)
         {
-            Vector3Int sourceDimensions = def.VariableHeight ? new Vector3Int(def.Dimensions.x, customHeight, def.Dimensions.z) : def.Dimensions;
+            if (def.Dimensions.x == def.Dimensions.z) return new Vector3Int(def.Dimensions.x, def.Dimensions.y, def.Dimensions.z);
+
+            Vector3Int sourceDimensions = def.VariableHeight ? new Vector3Int(def.Dimensions.x, customHeight, def.Dimensions.z) : new Vector3Int(def.Dimensions.x, def.Dimensions.y, def.Dimensions.z);
             return GetTranslatedDimensions(sourceDimensions, rotation);
         }
 
@@ -153,7 +156,7 @@ namespace BlockmapFramework
         /// </summary>
         public static Vector3Int GetTranslatedDimensions(Vector3Int sourceDimensions, Direction rotation)
         {
-            if (rotation == Direction.N || rotation == Direction.S) return sourceDimensions;
+            if (rotation == Direction.N || rotation == Direction.S) return new Vector3Int(sourceDimensions.x, sourceDimensions.y, sourceDimensions.z);
             if (rotation == Direction.E || rotation == Direction.W) return new Vector3Int(sourceDimensions.z, sourceDimensions.y, sourceDimensions.x);
             throw new System.Exception(rotation.ToString() + " is not a valid rotation");
         }

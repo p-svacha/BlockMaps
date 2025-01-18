@@ -62,14 +62,16 @@ namespace WorldEditor
             if(Input.GetKeyDown(KeyCode.P))
             {
                 List<Entity> entitesToPickUp = SelectedEntity.OriginNode.Entities.Where(e => e.CanBeHeldByOtherEntities).ToList();
-                foreach (Entity entityToPickUp in entitesToPickUp) World.AddToInventory(entityToPickUp, SelectedEntity);
+                Debug.Log($"Picking up {entitesToPickUp.Count} entities.");
+                foreach (Entity entityToPickUp in entitesToPickUp) World.AddToInventory(entityToPickUp, SelectedEntity, updateWorld: true);
             }
 
             // F - Drop all entities in inventory on same node
             if (Input.GetKeyDown(KeyCode.F))
             {
                 List<Entity> entitiesToDrop = new List<Entity>(SelectedEntity.Inventory);
-                foreach (Entity entityToDrop in entitiesToDrop) World.DropFromInventory(entityToDrop, SelectedEntity.OriginNode);
+                Debug.Log($"Dropping {entitiesToDrop.Count} entities.");
+                foreach (Entity entityToDrop in entitiesToDrop) World.DropFromInventory(entityToDrop, SelectedEntity.OriginNode, updateWorld: true);
             }
         }
 

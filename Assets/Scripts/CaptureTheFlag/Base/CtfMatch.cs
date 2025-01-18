@@ -242,7 +242,7 @@ namespace CaptureTheFlag
             CtfItem itemToPickup = (CtfItem)node.Entities.FirstOrDefault(e => e is CtfItem);
             if(itemToPickup != null)
             {
-                World.AddToInventory(itemToPickup, action.Character);
+                World.AddToInventory(itemToPickup, action.Character, updateWorld: true);
             }
 
             // Update possible actions for all characters

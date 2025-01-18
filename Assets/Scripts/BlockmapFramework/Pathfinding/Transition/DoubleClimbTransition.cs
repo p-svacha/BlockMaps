@@ -54,7 +54,7 @@ namespace BlockmapFramework
 
         public override void OnTransitionStart(MovingEntity entity)
         {
-            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+            entity.SetRotation(Direction); // Look straight ahead
             entity.GetComponent<Comp_Movement>().ClimbPhase = ClimbPhase.PreClimb;
         }
 
@@ -89,7 +89,7 @@ namespace BlockmapFramework
                         {
                             moveComp.ClimbPhase = ClimbPhase.ClimbUp;
                             moveComp.ClimbIndex = 0;
-                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+                            entity.SetRotation(Direction); // Look straight ahead
                         }
 
                         // Out params
@@ -119,7 +119,7 @@ namespace BlockmapFramework
                             {
                                 moveComp.ClimbIndex = ClimbDown.Count - 1;
                                 moveComp.ClimbPhase = ClimbPhase.ClimbTransfer;
-                                entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+                                entity.SetRotation(Direction); // Look straight ahead
                             }
                         }
 
@@ -145,7 +145,7 @@ namespace BlockmapFramework
                         if (Vector3.Distance(newPosition, nextPoint) <= REACH_EPSILON)
                         {
                             moveComp.ClimbPhase = ClimbPhase.ClimbDown;
-                            entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(HelperFunctions.GetOppositeDirection(Direction))); // Look at fence
+                            entity.SetRotation(HelperFunctions.GetOppositeDirection(Direction)); // Look at fence
                         }
 
                         // Out params
@@ -175,7 +175,7 @@ namespace BlockmapFramework
                             if (moveComp.ClimbIndex == -1) // Reached the bottom
                             {
                                 moveComp.ClimbPhase = ClimbPhase.PostClimb;
-                                entity.SetWorldRotation(HelperFunctions.Get2dRotationByDirection(Direction)); // Look straight ahead
+                                entity.SetRotation(Direction); // Look straight ahead
                             }
                         }
 
