@@ -630,15 +630,18 @@ namespace BlockmapFramework
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
 
             // Enable / Disable colliders based on if this entity currently exists in the world or in an inventory
-            if(IsInInventory)
+            if (MeshCollider != null) // Only applies if entity is properly initialized 
             {
-                MeshCollider.enabled = false;
-                VisionColliderObject.SetActive(false);
-            }
-            else
-            {
-                MeshCollider.enabled = true;
-                VisionColliderObject.SetActive(true);
+                if (IsInInventory)
+                {
+                    MeshCollider.enabled = false;
+                    VisionColliderObject.SetActive(false);
+                }
+                else
+                {
+                    MeshCollider.enabled = true;
+                    VisionColliderObject.SetActive(true);
+                }
             }
 
             if (IsStandaloneEntity)
@@ -1348,6 +1351,9 @@ namespace BlockmapFramework
 
             // Update visibility (has to be done here because updateWorldSystems will not consider this entity anymore since it's not part of any chunk)
             UpdateVisibility();
+
+            // Hook
+            Holder.OnEntityAddedToInventory(this);
         }
 
         /// <summary>
@@ -1355,6 +1361,8 @@ namespace BlockmapFramework
         /// </summary>
         public void RemoveFromInventory(BlockmapNode dropNode)
         {
+            Entity prevHolder = Holder;
+
             // Remove references from inventory
             Holder.Inventory.Remove(this);
             Holder = null;
@@ -1370,7 +1378,20 @@ namespace BlockmapFramework
 
             // Update visibility (has to be done here because updateWorldSystems will not consider this entity anymore since it's not part of any chunk)
             UpdateVisibility();
+
+            // Hook
+            prevHolder.OnEntityRemovedFromInventory(this);
         }
+
+        /// <summary>
+        /// Hook that gets called when an entity was added to this entity's inventory.
+        /// </summary>
+        protected virtual void OnEntityAddedToInventory(Entity entity) { }
+
+        /// <summary>
+        /// Hook that gets called when an entity was removed from this entity's inventory.
+        /// </summary>
+        protected virtual void OnEntityRemovedFromInventory(Entity entity) { }
 
         /// <summary>
         /// Updates the position of all vision colliders according to the current OriginNode and rotation of this entity.
@@ -1378,7 +1399,9 @@ namespace BlockmapFramework
         public void UpdateVisionColliderPosition()
         {
             VisionColliderObject.transform.position = GetWorldPosition(OriginNode, Rotation, Height, IsMirrored);
-            VisionColliderObject.transform.rotation = WorldRotation;
+
+            if (Dimensions.x == 1 && Dimensions.z == 1) VisionColliderObject.transform.rotation = Quaternion.Euler(Vector3.zero);
+            else VisionColliderObject.transform.rotation = WorldRotation;
         }
 
         /// <summary>

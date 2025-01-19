@@ -26,6 +26,8 @@ namespace CaptureTheFlag.UI
         public TextMeshProUGUI StaminaPerTurnText;
         public UI_ProgressBar StaminaBar;
 
+        public Image ItemIcon;
+
         [Header("Prefabs")]
         public UI_SkillRow SkillRowPrefab;
 
@@ -42,6 +44,9 @@ namespace CaptureTheFlag.UI
             SkillPanel.SetActive(false);
         }
 
+        /// <summary>
+        /// Called every frame.
+        /// </summary>
         public void UpdateCharacterInfo()
         {
             if(Match.SelectedCharacter == null)
@@ -65,6 +70,9 @@ namespace CaptureTheFlag.UI
                     StaminaPerTurnText.text = $"+{c.StaminaRegeneration.ToString("0.#")} / turn";
 
                     displayedCharacter = c;
+
+                    // Item
+                    RefreshItemDisplay();
                 }
 
                 // Some elements need to be redrawn every frame
@@ -79,6 +87,21 @@ namespace CaptureTheFlag.UI
                         ShowActionPreview(c, Match.HoveredAction.Cost);
                     }
                 }
+            }
+        }
+
+        public void RefreshItemDisplay()
+        {
+            if (Match.SelectedCharacter == null) return;
+
+            if (Match.SelectedCharacter.HeldItem != null)
+            {
+                ItemIcon.gameObject.SetActive(true);
+                ItemIcon.sprite = Match.SelectedCharacter.HeldItem.UiSprite;
+            }
+            else
+            {
+                ItemIcon.gameObject.SetActive(false);
             }
         }
 

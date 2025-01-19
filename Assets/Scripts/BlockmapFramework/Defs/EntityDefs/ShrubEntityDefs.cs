@@ -80,8 +80,6 @@ namespace BlockmapFramework.Defs
                 {
                     DefName = "Shrub_Tall_01",
                     Label = "tall shrub",
-                    BlocksVision = true, // todo: remove
-                    CanBeHeldByOtherEntities = true, // todo: remove
                     UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_tall_01_fbx"),
                     Dimensions = new Vector3Int(1, 3, 1),
                     RenderProperties = new EntityRenderProperties(ShrubBase.RenderProperties)

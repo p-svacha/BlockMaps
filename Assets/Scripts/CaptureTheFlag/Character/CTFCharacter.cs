@@ -28,6 +28,9 @@ namespace CaptureTheFlag
         public List<SpecialCharacterAction> PossibleSpecialActions { get; private set; } // Actions that can be performed via button
         public CharacterAction CurrentAction { get; private set; }
 
+        // Item
+        public CtfItem HeldItem => Inventory.Count == 0 ? null : (CtfItem)Inventory[0];
+
         // UI
         public UI_CharacterLabel UI_Label;
 
@@ -111,6 +114,15 @@ namespace CaptureTheFlag
         public void RefreshLabelText()
         {
             UI_Label.SetLabelText(GetLabelText());
+        }
+
+        #endregion
+
+        #region Item
+
+        protected override void OnEntityAddedToInventory(Entity entity)
+        {
+            Match.UI.CharacterInfo.RefreshItemDisplay();
         }
 
         #endregion
@@ -284,7 +296,5 @@ namespace CaptureTheFlag
         }
 
         #endregion
-
-
     }
 }

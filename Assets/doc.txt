@@ -1,21 +1,14 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-(/)players dont immediately see item when dropped, only when dropper walks away
-(/)item doesnt get rendered transparent when switching to player vision who explored it but not visible
-(/)item last know position doesnt disappear when looking at node where it previously way but is no longer (ExploredBehaviour)
+(/)expanded framework description on github
 
-test adding / removing from inventory during world gen
+(/)only pick up item when none in inventory
+(/)show inventory item in ui
+(/)vision collider should never be rotated 45°
 
-Inventory System:
-	(/)Add CanBeAddedToInventory to EntityDef
-	(/)Add AddToInventory(Entity holder, Entity item) function to World
-	(/)Add RemoveFromInventory(Entity item, BlockmapNode dropNode) function to World
-	(/)Add List<Entity> Inventory to Entity
-	(/)Add Entity Holder to Entity
-		> Entities then either have an OriginNode or a Holder
-		> Add IsInInventory property
-	In rendering rules, render pickupable items as transparent on last known position when they are explored but not visible
-		> But if their last known position is visible again and they are not there, remove last known position and stop rendering them
+add float menu as base ui element (maybe take from keep wandering)
+add item actions
+show item actions on float menu when clicking item
 
 Add Items to CTF:
 	new Comp_CtfItem & CompProperties_CtfItem
@@ -62,6 +55,8 @@ REQUIRES HEDIFF SYSTEM that some items can give
 	Companion: Neutral characters that can be activated to become part of your Temperature
 		Robots: Characters with battery life (BL) instead of stamina, depletes (-5) instead of regenerates each turn. Disappear when battery is empty
 			> Little Robot: Low stat character with 100 BL
+
+Alberto should be able to climb cliffs and more walls
 
 "Scenting" Skill to detect things and flag outside of vision range:
 	0 for humans, high for dogs
