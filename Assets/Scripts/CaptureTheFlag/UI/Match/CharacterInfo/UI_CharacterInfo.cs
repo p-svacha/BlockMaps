@@ -27,6 +27,7 @@ namespace CaptureTheFlag.UI
         public UI_ProgressBar StaminaBar;
 
         public Image ItemIcon;
+        public Button ItemButton;
 
         [Header("Prefabs")]
         public UI_SkillRow SkillRowPrefab;
@@ -42,6 +43,7 @@ namespace CaptureTheFlag.UI
             StatButton.Button.onClick.AddListener(StatButton_OnClick);
             InfoButton.onClick.AddListener(() => UI_EntityInfoWindow.Instance.Show(Match.SelectedCharacter));
             SkillPanel.SetActive(false);
+            ItemButton.onClick.AddListener(Item_OnClick);
         }
 
         /// <summary>
@@ -103,6 +105,19 @@ namespace CaptureTheFlag.UI
             {
                 ItemIcon.gameObject.SetActive(false);
             }
+        }
+
+        private void Item_OnClick()
+        {
+            if (Match.SelectedCharacter == null) return;
+            if (Match.SelectedCharacter.HeldItem == null) return;
+
+            List<ContextMenuOption> options = new List<ContextMenuOption>()
+            {
+                new ContextMenuOption("Consume", () => { Debug.Log("Consume"); }),
+                new ContextMenuOption("Drop", () => { Debug.Log("Drop"); }),
+            };
+            ContextMenu.Instance.Show(options);
         }
 
         private void StatButton_OnClick()

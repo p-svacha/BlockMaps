@@ -1,13 +1,17 @@
 ------------------------- CTF v0.0.7 -------------------------
 
-(/)expanded framework description on github
-
-(/)only pick up item when none in inventory
-(/)show inventory item in ui
-(/)vision collider should never be rotated 45°
-
 add float menu as base ui element (maybe take from keep wandering)
+
+context menu shouldnt go off screen
+context menu should disappear when clicking somewhere
+
 add item actions
+	drop always available (except when on other item)
+	swap item available when on other item
+	item-specific actions (i.e. "consume")
+
+hovering item shows more info
+
 show item actions on float menu when clicking item
 
 Add Items to CTF:
