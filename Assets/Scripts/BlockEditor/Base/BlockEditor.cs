@@ -76,7 +76,8 @@ namespace WorldEditor
             // Init generators
             Generators = new List<WorldGenerator>()
             {
-                new WorldGenerator_Empty(),
+                new WorldGenerator_Flat(),
+                new WorldGenerator_Void(),
                 new WorldGenerator_SimplePerlin(),
                 new WorldGenerator_Forest(),
                 new WorldGenerator_Parcels(),

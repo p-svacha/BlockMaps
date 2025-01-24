@@ -12,7 +12,7 @@ namespace BlockmapFramework
         private GameObject MeshObject;
 
         public List<MeshVertex> Vertices = new List<MeshVertex>(); // Vertices and uv's are shared across all submeshes
-        private List<List<MeshTriangle>> Triangles = new List<List<MeshTriangle>>(); // Each list contains the triangles of one submesh
+        private List<List<MeshTriangle>> SubmeshTriangles = new List<List<MeshTriangle>>(); // Each list contains the triangles of one submesh
         public int CurrentSubmesh = -1;
         private Dictionary<Material, int> Submeshes; // Stores the materials for each submesh
 
@@ -58,11 +58,11 @@ namespace BlockmapFramework
             meshFilter.mesh.SetVertices(Vertices.Select(x => x.Position).ToArray()); // Set the vertices
             meshFilter.mesh.SetUVs(0, Vertices.Select(x => x.UV).ToArray()); // Set the UV's
             meshFilter.mesh.SetUVs(1, Vertices.Select(x => x.UV2).ToArray()); // Set the UV's
-            meshFilter.mesh.subMeshCount = Triangles.Count; // Set the submesh count
-            for (int i = 0; i < Triangles.Count; i++) // Set the triangles for each submesh
+            meshFilter.mesh.subMeshCount = SubmeshTriangles.Count; // Set the submesh count
+            for (int i = 0; i < SubmeshTriangles.Count; i++) // Set the triangles for each submesh
             {
                 List<int> triangles = new List<int>();
-                foreach (MeshTriangle triangle in Triangles[i])
+                foreach (MeshTriangle triangle in SubmeshTriangles[i])
                 {
                     triangles.Add(triangle.Vertex1.Id);
                     triangles.Add(triangle.Vertex2.Id);
@@ -77,7 +77,7 @@ namespace BlockmapFramework
 
             // Update collider
             GameObject.Destroy(MeshObject.GetComponent<MeshCollider>());
-            if (addCollider && Vertices.Count > 0) MeshObject.AddComponent<MeshCollider>();
+            if (addCollider && SubmeshTriangles.Count > 0 && SubmeshTriangles.Any(x => x.Count > 0)) MeshObject.AddComponent<MeshCollider>();
 
             return MeshObject;
         }
@@ -103,7 +103,7 @@ namespace BlockmapFramework
         public MeshTriangle AddTriangle(int submeshIndex, MeshVertex vertex1, MeshVertex vertex2, MeshVertex vertex3, bool mirror = false)
         {
             MeshTriangle triangle = mirror ? new MeshTriangle(submeshIndex, vertex1, vertex3, vertex2) : new MeshTriangle(submeshIndex, vertex1, vertex2, vertex3);
-            Triangles[submeshIndex].Add(triangle);
+            SubmeshTriangles[submeshIndex].Add(triangle);
             return triangle;
         }
         /// <summary>
@@ -111,7 +111,7 @@ namespace BlockmapFramework
         /// </summary>
         public void RemoveTriangle(MeshTriangle triangle)
         {
-            Triangles[triangle.SubmeshIndex].Remove(triangle);
+            SubmeshTriangles[triangle.SubmeshIndex].Remove(triangle);
         }
 
         public int GetSubmesh(string materialPath) => GetSubmesh(MaterialManager.LoadMaterial(materialPath));
@@ -122,7 +122,7 @@ namespace BlockmapFramework
         }
         private int AddNewSubmesh(Material material)
         {
-            Triangles.Add(new List<MeshTriangle>());
+            SubmeshTriangles.Add(new List<MeshTriangle>());
             CurrentSubmesh++;
 
             Materials.Add(material);

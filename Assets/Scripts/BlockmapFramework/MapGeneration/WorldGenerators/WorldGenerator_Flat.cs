@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace BlockmapFramework.WorldGeneration
 {
-    public class WorldGenerator_Empty : WorldGenerator
+    public class WorldGenerator_Flat : WorldGenerator
     {
-        public override string Label => "Empty";
+        public override string Label => "Flat";
         public override string Description => "Completely empty, flag, grass map.";
+        public override bool StartAsVoid => false;
 
         protected override List<System.Action> GetGenerationSteps()
         {

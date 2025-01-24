@@ -348,7 +348,7 @@ namespace BlockmapFramework
             List<GroundNode> nodes = new List<GroundNode>();
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
-                    nodes.Add(GetGroundNode(x,y));
+                    nodes.Add(GroundNodes[x, y]);
             return nodes;
         }
         public GroundNode GetGroundNode(int x, int y)

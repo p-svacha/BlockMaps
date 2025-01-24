@@ -281,12 +281,14 @@ namespace BlockmapFramework
         /// <summary>
         /// Recalculates the maximum height an entity is allowed to have so it can still pass through this node for all directions.
         /// </summary>
-        public void RecalcuatePassability()
+        public void RecalculatePassability()
         {
             foreach (Direction corner in HelperFunctions.GetCorners()) MaxPassableHeight[corner] = -1;
 
             // Get free head space for all directions
             RecalculateFreeHeadSpace();
+
+            if (SurfaceDef == SurfaceDefOf.Void) return;
 
             // Assign general/center headspace first (ignores all walls/fences/etc)
             MaxPassableHeight[Direction.None] = FreeHeadSpace[Direction.None];
@@ -338,6 +340,7 @@ namespace BlockmapFramework
         private void RecalculateFreeHeadSpace()
         {
             foreach (Direction dir in HelperFunctions.GetAllDirections9()) FreeHeadSpace[dir] = World.MAX_ALTITUDE;
+            if (SurfaceDef == SurfaceDefOf.Void) return;
 
             List<BlockmapNode> nodesAbove = World.GetNodes(WorldCoordinates, BaseAltitude, World.MAX_ALTITUDE);
             List<Wall> wallsOnCoordinate = World.GetWalls(WorldCoordinates);
@@ -891,11 +894,25 @@ namespace BlockmapFramework
         /// The center world position of this node purely by shape. Can be retrieved without a drawn mesh.
         /// </summary>
         public Vector3 ShapeCenterWorldPosition { get; protected set; }
+
         /// <summary>
         /// The real center world position of this mode based on its drawn mesh.
         /// </summary>
         public Vector3 MeshCenterWorldPosition { get; protected set; }
-        public abstract void RecalculateMeshCenterWorldPosition();
+
+        /// <summary>
+        /// Recalculates MeshCenterWorldPosition.
+        /// </summary>
+        public void RecalculateMeshCenter()
+        {
+            MeshCenterWorldPosition = GetMeshCenter();
+        }
+
+        /// <summary>
+        /// Returns the mesh center of the node, which is the world position in the x/z center of this node taking the mesh shape into account, so the altitude is exactly on top of the mesh.
+        /// </summary>
+        protected abstract Vector3 GetMeshCenter();
+
         protected void RecalculateShapeCenterWorldPosition()
         {
             ShapeCenterWorldPosition = new Vector3(WorldCoordinates.x + 0.5f, GetWorldShapeAltitude(new Vector2(0.5f, 0.5f)), WorldCoordinates.y + 0.5f);

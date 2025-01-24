@@ -15,6 +15,7 @@ namespace BlockmapFramework
 
         public abstract string Label { get; }
         public abstract string Description { get; }
+        public abstract bool StartAsVoid { get; }
 
         /// <summary>
         /// The amount of chunks on each side of the map. (A world with 2x2 chunks has NumChunksPerSide = 2).
@@ -74,8 +75,10 @@ namespace BlockmapFramework
         /// </summary>
         private void CreateEmptyWorld()
         {
+            Profiler.Begin("Create Empty World");
             // Create empty world to start with
-            World = new World(NumChunksPerSide);
+            World = new World(NumChunksPerSide, StartAsVoid);
+            Profiler.End("Create Empty World");
 
             GenerationPhase = GenerationPhase.Generating;
             CurrentGenerationStep = 0;

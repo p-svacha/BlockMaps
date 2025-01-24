@@ -12,6 +12,7 @@ namespace BlockmapFramework.WorldGeneration
     {
         public override string Label => "Forest";
         public override string Description => "A forest with varying density across different regions. Dirt paths make moving throught the forest easier. Some shacks and ponds may be scattered throughout the forest.";
+        public override bool StartAsVoid => false;
 
         private int[,] HeightMap;
 

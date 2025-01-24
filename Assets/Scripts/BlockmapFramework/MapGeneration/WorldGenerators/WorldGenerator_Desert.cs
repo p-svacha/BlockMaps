@@ -11,6 +11,7 @@ namespace BlockmapFramework.WorldGeneration
     {
         public override string Label => "Desert";
         public override string Description => "A mainly sparse and flat and map with lots of sand. Scattered mesas and oasis can help or hinder moving around the otherwise harsh desert landscape";
+        public override bool StartAsVoid => false;
 
         private HashSet<Vector2Int> DuneNodes;
         private HashSet<Vector2Int> MesaNodes;

@@ -8,7 +8,8 @@ namespace BlockmapFramework.WorldGeneration
     {
         public override string Label => "Simple Perlin";
         public override string Description => "Empty hilly grass map.";
-
+        public override bool StartAsVoid => false;
+        
         private int[,] HeightMap;
 
         protected override List<System.Action> GetGenerationSteps()

@@ -54,7 +54,7 @@ namespace BlockmapFramework
 
         public const int MAP_EDGE_ALTITUDE = -1;
 
-        public const float MAP_EDGE_HEIGHT = (MAP_EDGE_ALTITUDE * NodeHeight);
+        public const float MAP_EDGE_WORLD_ALTITUDE = (MAP_EDGE_ALTITUDE * NodeHeight);
 
         /// <summary>
         /// How much the colors/textures of adjacent surface tiles flow into each other (0 - 0.5).
@@ -190,9 +190,9 @@ namespace BlockmapFramework
         public World() { }
 
         /// <summary>
-        /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass.
+        /// Creates a new flat and empty world with 3 actors (gaia, player 1, player 2) and a flat ground made out of grass (or nothing if isVoid = true).
         /// </summary>
-        public World(int numChunksPerSide)
+        public World(int numChunksPerSide, bool isVoid)
         {
             this.numChunksPerSide = numChunksPerSide;
 
@@ -212,7 +212,9 @@ namespace BlockmapFramework
                 {
                     for (int localY = 0; localY < ChunkSize; localY++)
                     {
-                        GroundNode node = new GroundNode(this, chunk, NodeIdCounter++, new Vector2Int(localX, localY), HelperFunctions.GetFlatHeights(5), SurfaceDefOf.Grass);
+                        GroundNode node;
+                        if(isVoid) node = new GroundNode(this, chunk, NodeIdCounter++, new Vector2Int(localX, localY), HelperFunctions.GetFlatHeights(0), SurfaceDefOf.Void);
+                        else node = new GroundNode(this, chunk, NodeIdCounter++, new Vector2Int(localX, localY), HelperFunctions.GetFlatHeights(5), SurfaceDefOf.Grass);
                         RegisterNode(node);
                     }
                 }
@@ -934,10 +936,10 @@ namespace BlockmapFramework
             // Step 2: Calculate node center world positions
             if (WorldUpdateFrame == 2)
             {
-                Profiler.Begin("Calculate Node Centers");
+                Profiler.Begin("Recalculate Node Mesh Center");
                 if (CurrentWorldSystemUpdate.Area == null)
                 {
-                    foreach (BlockmapNode n in GetAllNodes()) n.RecalculateMeshCenterWorldPosition();
+                    foreach (BlockmapNode n in GetAllNodes()) n.RecalculateMeshCenter();
                 }
                 else
                 {
@@ -946,11 +948,11 @@ namespace BlockmapFramework
                         for (int y = CurrentWorldSystemUpdate.Area.Position.y - 1; y < CurrentWorldSystemUpdate.Area.Position.y + CurrentWorldSystemUpdate.Area.Dimensions.y + 1; y++)
                         {
                             if (!IsInWorld(new Vector2Int(x, y))) continue;
-                            foreach (BlockmapNode n in GetNodes(new Vector2Int(x, y))) n.RecalculateMeshCenterWorldPosition();
+                            foreach (BlockmapNode n in GetNodes(new Vector2Int(x, y))) n.RecalculateMeshCenter();
                         }
                     }
                 }
-                Profiler.End("Calculate Node Centers");
+                Profiler.End("Recalculate Node Mesh Center");
 
                 // Step 3: Generate navmesh
                 Profiler.Begin("Generate Navmesh");
@@ -1041,7 +1043,7 @@ namespace BlockmapFramework
             }
 
             Profiler.Begin("Recalculate Passability");
-            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalcuatePassability();
+            foreach (BlockmapNode node in navmeshUpdateNodes) node.RecalculatePassability();
             Profiler.End("Recalculate Passability");
 
             foreach (BlockmapNode node in navmeshUpdateNodes) node.ResetTransitions();
@@ -1250,7 +1252,7 @@ namespace BlockmapFramework
             foreach (BlockmapNode occupiedNode in occupiedNodes)
             {
                 // Recalculate passability (useful if spawned during world generation before navmesh is calculated)
-                if (forceHeadspaceRecalc) occupiedNode.RecalcuatePassability();
+                if (forceHeadspaceRecalc) occupiedNode.RecalculatePassability();
 
                 // Check if the place position is under water
                 if (occupiedNode is GroundNode groundNode && groundNode.IsCenterUnderWater) return false;
