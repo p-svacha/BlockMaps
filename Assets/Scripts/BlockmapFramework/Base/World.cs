@@ -1834,6 +1834,7 @@ namespace BlockmapFramework
             chunk.ShowTextures(IsShowingTextures);
             chunk.ShowTileBlending(IsShowingTileBlending);
             chunk.DrawZoneBorders(ActiveVisionActor);
+            chunk.SetVisionCutoffAltitude(IsVisionCutoffEnabled ? VisionCutoffAltitude : -1);
             pm_RedrawChunk.End();
         }
 

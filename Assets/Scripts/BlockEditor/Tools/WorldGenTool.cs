@@ -81,7 +81,7 @@ namespace WorldEditor
             int numChunks = int.Parse(NumChunksInput.text);
 
             if (World.ChunkSize * numChunks > WorldGenerator.MAX_WORLD_SIZE) return;
-            if (World.ChunkSize * numChunks < 32) return;
+            if (numChunks <= 0) return;
 
             if (World != null) Editor.DestroyWorld();
             WorldGenerator selectedGenerator = Editor.Generators[GeneratorDropdown.value];

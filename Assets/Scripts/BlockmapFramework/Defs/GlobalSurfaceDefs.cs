@@ -206,6 +206,34 @@ namespace BlockmapFramework.Defs
                 },
                 UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Sandstone"),
             },
+
+            new SurfaceDef()
+            {
+                DefName = "MetalPlates",
+                Label = "metal plates",
+                Description = "",
+                MovementSpeedModifier = 1f,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "MetalPlates",
+                },
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "MetalPlates001/MetalPlates001_1K-JPG_Color"),
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "DiamondPlate",
+                Label = "metal",
+                Description = "",
+                MovementSpeedModifier = 1f,
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "DiamondPlate",
+                },
+                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "DiamondPlate001/DiamondPlate001_1K-JPG_Color"),
+            },
         };
     }
 }

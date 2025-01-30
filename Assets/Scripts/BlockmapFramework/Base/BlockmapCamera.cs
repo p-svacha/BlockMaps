@@ -7,6 +7,7 @@ namespace BlockmapFramework
 {
     public class BlockmapCamera : MonoBehaviour
     {
+        public static BlockmapCamera Instance; // Singleton instance
         public Camera Camera;
 
         private const float TURN_SPEED = 80f;
@@ -19,10 +20,7 @@ namespace BlockmapFramework
         private const float MIN_ZOOM_HEIGHT = 1.5f;
         private const float MAX_ZOOM_HEIGHT = 60f;
 
-        // EDGE SCROLL
-        private const float EDGE_SCROLL_MARGIN = 10f; // in pixels from screen edge
-
-        // RIGHT MOUSE ROTATE DRAG
+        private const int EDGE_SCROLL_MARGIN = 10; // in pixels from screen edge
         private const float RMB_ROTATE_SPEED = 0.15f;
         private Vector3 lastMousePos;
 
@@ -40,10 +38,16 @@ namespace BlockmapFramework
         public bool InUnbreakableFollow; // If true, moving camera is disabled until Unfollow()
 
         // Camera Position
-        private float CurrentAngle;
-        private float OffsetRadius;
-        private float CurrentZoom;
-        private Vector3 CurrentPosition; // Camera is currently looking at this position
+        public float CurrentAngle { get; private set; }
+        public Direction CurrentDirection { get; private set; }
+        public float OffsetRadius { get; private set; }
+        public float CurrentZoom { get; private set; }
+        public Vector3 CurrentPosition { get; private set; } // Camera is currently looking at this position
+
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         public void Update()
         {
@@ -189,29 +193,33 @@ namespace BlockmapFramework
 
         private void MoveForward(float speed)
         {
-            CurrentPosition.x -= speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-            CurrentPosition.z -= speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            float deltaX = -(speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime);
+            float deltaZ = -(speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime);
+            CurrentPosition += new Vector3(deltaX, 0f, deltaZ);
             UpdatePosition();
             FollowedEntity = null;
         }
         private void MoveBackward(float speed)
         {
-            CurrentPosition.x += speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
-            CurrentPosition.z += speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            float deltaX = speed * Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            float deltaZ = speed * Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * Time.deltaTime;
+            CurrentPosition += new Vector3(deltaX, 0f, deltaZ);
             UpdatePosition();
             FollowedEntity = null;
         }
         private void MoveLeft(float speed)
         {
-            CurrentPosition.x += speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-            CurrentPosition.z += speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            float deltaX = speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            float deltaZ = speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            CurrentPosition += new Vector3(deltaX, 0f, deltaZ);
             UpdatePosition();
             FollowedEntity = null;
         }
         private void MoveRight(float speed)
         {
-            CurrentPosition.x -= speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
-            CurrentPosition.z -= speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime;
+            float deltaX = -(speed * Mathf.Sin(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime);
+            float deltaZ = -(speed * Mathf.Cos(Mathf.Deg2Rad * (CurrentAngle + 90)) * Time.deltaTime);
+            CurrentPosition += new Vector3(deltaX, 0f, deltaZ);
             UpdatePosition();
             FollowedEntity = null;
         }
@@ -224,10 +232,41 @@ namespace BlockmapFramework
 
             float cameraOffsetX = Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
             float cameraOffsetY = Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
+            CurrentDirection = GetCurrentDirection();
 
             if (Camera == null) Camera = GetComponent<Camera>();
             Camera.transform.position = new Vector3(CurrentPosition.x + cameraOffsetX, CurrentPosition.y + CurrentZoom, CurrentPosition.z + cameraOffsetY);
             Camera.transform.LookAt(CurrentPosition);
+        }
+
+        private Direction GetCurrentDirection()
+        {
+            // Normalize angle to the [0, 360) range
+            float angleDegrees = CurrentAngle;
+            angleDegrees %= 360f;
+            if (angleDegrees < 0)
+            {
+                angleDegrees += 360f;
+            }
+
+            // Offset by 22.5 so that each 45° segment is centered
+            double offset = (angleDegrees + 22.5) % 360f;
+
+            // Determine which 45° segment the angle belongs in
+            int segment = (int)(offset / 45.0);
+
+            switch (segment)
+            {
+                case 0: return Direction.S;   // 0° centered => South
+                case 1: return Direction.SW;
+                case 2: return Direction.W;   // 90° centered => West
+                case 3: return Direction.NW;
+                case 4: return Direction.N;   // 180° centered => North
+                case 5: return Direction.NE;
+                case 6: return Direction.E;   // 270° centered => East
+                case 7: return Direction.SE;
+                default: return Direction.None;
+            }
         }
 
         public void SetPosition(Vector3 pos)

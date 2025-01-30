@@ -13,7 +13,13 @@ namespace WorldEditor
         private BlockEditor Editor;
         private World World => Editor.World;
 
-        [Header("Elements")]
+        [Header("Camera Info")]
+        public TMP_InputField CameraPositionInput;
+        public TMP_InputField CameraZoomInput;
+        public TMP_InputField CameraAngleInput;
+        public TMP_InputField CameraDirectionInput;
+
+        [Header("Display Settings")]
         public TMP_Dropdown VisionDropdown;
         public Toggle VisionCutoffToggle;
         public TMP_InputField VisionCutoffAltitudeInput;
@@ -50,44 +56,49 @@ namespace WorldEditor
             VisionDropdown.AddOptions(visionOptions);
 
             SetVisionCutoffAlitude(10);
-            UpdateUiElements();
+            RefreshSettings();
         }
 
-        public void HandleKeyboardInputs()
+        private void Update()
+        {
+            HandleKeyboardInputs();
+            UpdateCameraInfo();
+        }
+        private void HandleKeyboardInputs()
         {
             // G - Toggle Grid
             if (Input.GetKeyDown(KeyCode.G))
             {
                 World.ToggleGridOverlay();
-                UpdateUiElements();
+                RefreshSettings();
             }
 
             // N - Toggle Navmesh
             if (Input.GetKeyDown(KeyCode.N))
             {
                 World.ToggleNavmesh();
-                UpdateUiElements();
+                RefreshSettings();
             }
 
             // T - Texture mode
             if (Input.GetKeyDown(KeyCode.T))
             {
                 World.ToggleTextureMode();
-                UpdateUiElements();
+                RefreshSettings();
             }
 
             // B - Surface blending
             if (Input.GetKeyDown(KeyCode.B))
             {
                 World.ToggleTileBlending();
-                UpdateUiElements();
+                RefreshSettings();
             }
 
             // V - Toggle vision cutoff
             if (Input.GetKeyDown(KeyCode.V))
             {
                 World.ToggleVisionCutoff();
-                UpdateUiElements();
+                RefreshSettings();
             }
 
             // Alt + Scroll - Change vision cutoff altitude
@@ -97,6 +108,21 @@ namespace WorldEditor
                 if (Input.mouseScrollDelta.y > 0) SetVisionCutoffAlitude(World.VisionCutoffAltitude + 1);
             }
         }
+
+        #region Camera Info
+
+        private void UpdateCameraInfo()
+        {
+            CameraPositionInput.text = BlockmapCamera.Instance.CurrentPosition.ToString();
+            CameraZoomInput.text = BlockmapCamera.Instance.CurrentZoom.ToString("0.#");
+            CameraAngleInput.text = BlockmapCamera.Instance.CurrentAngle.ToString("0.#");
+            CameraDirectionInput.text = BlockmapCamera.Instance.CurrentDirection.ToString();
+        }
+
+        #endregion
+
+
+        #region Display Settings
 
         private void SetVisionCutoffAlitude(int alt)
         {
@@ -125,7 +151,7 @@ namespace WorldEditor
             else return World.GetActor(VisionDropdown.options[VisionDropdown.value].text);
         }
 
-        public void UpdateUiElements()
+        public void RefreshSettings()
         {
             gameObject.SetActive(World != null);
             if (World == null) return;
@@ -139,5 +165,7 @@ namespace WorldEditor
             NavmeshToggle.isOn = World.IsShowingNavmesh;
             VisionCutoffToggle.isOn = World.IsVisionCutoffEnabled;
         }
+
+        #endregion
     }
 }

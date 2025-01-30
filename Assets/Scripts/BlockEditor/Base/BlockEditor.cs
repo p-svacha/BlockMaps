@@ -8,6 +8,7 @@ using BlockmapFramework;
 using TMPro;
 using BlockmapFramework.WorldGeneration;
 using BlockmapFramework.Defs;
+using ExodusOutposAlpha.WorldGeneration;
 
 namespace WorldEditor
 {
@@ -82,6 +83,7 @@ namespace WorldEditor
                 new WorldGenerator_Forest(),
                 new WorldGenerator_Parcels(),
                 new WorldGenerator_Desert(),
+                new WorldGenerator_Exodus(),
             };
 
             // Init tools
@@ -177,7 +179,6 @@ namespace WorldEditor
 
             if (isUiElementFocussed) return; // Don't check for keyboard inputs when a ui element is focussed
 
-            DisplayOptions.HandleKeyboardInputs();
             CurrentTool.HandleKeyboardInputs();
         }
         protected override void Tick()

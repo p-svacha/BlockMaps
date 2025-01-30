@@ -9,6 +9,7 @@ namespace BlockmapFramework
     {
         public static SurfaceDef Concrete;
         public static SurfaceDef CorrugatedSteel;
+        public static SurfaceDef DiamondPlate;
         public static SurfaceDef DirtPath;
         public static SurfaceDef Grass;
         public static SurfaceDef Sand;
