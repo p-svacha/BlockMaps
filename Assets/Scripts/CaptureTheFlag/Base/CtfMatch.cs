@@ -543,19 +543,19 @@ namespace CaptureTheFlag
         {
             if(SelectedCharacter == null)
             {
-                if (World.IsVisionCutoffEnabled) World.ShowVisionCutoff(false);
+                if (World.DisplaySettings.IsVisionCutoffEnabled) World.SetVisionCutoffMode(VisionCutoffMode.Off);
             }
 
             else
             {
-                if (!IsVisionCutoffEnabled && World.IsVisionCutoffEnabled) World.ShowVisionCutoff(false);
+                if (!IsVisionCutoffEnabled && World.DisplaySettings.IsVisionCutoffEnabled) World.SetVisionCutoffMode(VisionCutoffMode.Off);
                 else if (IsVisionCutoffEnabled)
                 {
-                    int currentCutoffAltitude = World.VisionCutoffAltitude;
+                    int currentCutoffAltitude = World.DisplaySettings.VisionCutoffAltitude;
                     int targetCutoffAltitude = SelectedCharacter.OriginNode.MaxAltitude + 3;
-                    if (currentCutoffAltitude != targetCutoffAltitude || !World.IsVisionCutoffEnabled)
+                    if (currentCutoffAltitude != targetCutoffAltitude || !World.DisplaySettings.IsVisionCutoffEnabled)
                     {
-                        World.ShowVisionCutoffAt(targetCutoffAltitude);
+                        World.EnableAbsoluteVisionCutoffAt(targetCutoffAltitude);
                     }
                 }
             }

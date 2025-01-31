@@ -31,7 +31,7 @@ namespace BlockmapFramework
             Renderer = GetComponent<MeshRenderer>();
             SetChunkShaderValues();
         }
-        public abstract void SetVisibility(Actor player);
+        public abstract void SetVisibility(Actor activeVisionActor);
 
         public void ShowTextures(bool show)
         {

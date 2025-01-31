@@ -42,7 +42,7 @@ namespace CaptureTheFlag.UI
             CharacterInfo.Init(Match);
 
             DevModeButton.onClick.AddListener(() => Match.ToggleDevMode());
-            ToggleGridButton.Button.onClick.AddListener(() => { Match.World.ToggleGridOverlay(); ToggleGridButton.SetToggle(Match.World.IsShowingGrid); });
+            ToggleGridButton.Button.onClick.AddListener(() => { Match.World.ToggleGridOverlay(); ToggleGridButton.SetToggle(Match.World.DisplaySettings.IsShowingGrid); });
             EndTurnButton.onClick.AddListener(() => Match.EndPlayerTurn());
 
             GameOverPanel.Init(match);

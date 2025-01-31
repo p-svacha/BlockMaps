@@ -25,23 +25,26 @@ namespace BlockmapFramework
             return World.GetAirNodes(Chunk.GetWorldCoordinates(localCoordinates), Altitude).OrderBy(x => x.MaxAltitude).FirstOrDefault();
         }
 
-        public override void SetVisibility(Actor player)
+        public override void SetVisibility(Actor activeVisionActor)
         {
-            // Define visibility array
+            // Define visibility array, for each world coordinate (including all world coordinates of chunk):
+            // 0 = not rendered
+            // 1 = fog of war (tinted / sometimes transparent)
+            // 2 = visible
             List<float> visibilityArray = new List<float>();
             for (int x = -1; x <= Chunk.Size; x++)
             {
                 for (int y = -1; y <= Chunk.Size; y++)
                 {
-                    int visibility = 0; // 0 = unexplored
+                    int visibility = 0; // 0 = not rendered
 
                     Vector2Int localCoordinates = new Vector2Int(x, y);
                     Vector2Int worldCoordiantes = Chunk.GetWorldCoordinates(localCoordinates);
 
                     List<AirNode> nodes = Chunk.World.GetAirNodes(worldCoordiantes, Altitude);
 
-                    if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
-                    else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
+                    if (nodes.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.Visible)) visibility = 2; // 2 = visible
+                    else if (nodes.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.FogOfWar)) visibility = 1; // 1 = fog of war
 
                     visibilityArray.Add(visibility);
                 }

@@ -235,6 +235,20 @@ namespace BlockmapFramework
 
         public bool BlocksVision => Shape.BlocksVision;
 
+        /// <summary>
+        /// Returns the visibility of this wall taking into account the given active vision actor and current world display settings.
+        /// </summary>
+        public VisibilityType GetVisibility(Actor activeVisionActor)
+        {
+            // Check if we need to hide because of vision cutoff
+            if (Chunk.World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+
+            // Else visibility is based on vision of actor
+            if (IsVisibleBy(activeVisionActor)) return VisibilityType.Visible;
+            else if (IsExploredBy(activeVisionActor)) return VisibilityType.FogOfWar;
+            return VisibilityType.Hidden;
+        }
+
         #endregion
 
         #region Save / Load

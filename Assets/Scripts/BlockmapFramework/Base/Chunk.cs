@@ -245,14 +245,6 @@ namespace BlockmapFramework
             GroundMesh.ShowTileBlending(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTileBlending(show);
         }
-        public void SetVisionCutoffAltitude(int value)
-        {
-            foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
-            foreach (FenceMesh mesh in FenceMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
-            foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.Renderer.enabled = (value == -1 || mesh.Altitude < value);
-            foreach (Entity e in Entities) e.UpdateVisibility();
-        }
 
         public void DrawZoneBorders(Actor actor)
         {

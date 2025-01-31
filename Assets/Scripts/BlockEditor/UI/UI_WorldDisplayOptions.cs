@@ -21,8 +21,9 @@ namespace WorldEditor
 
         [Header("Display Settings")]
         public TMP_Dropdown VisionDropdown;
-        public Toggle VisionCutoffToggle;
+        public TMP_Dropdown VisionCutoffDropdown;
         public TMP_InputField VisionCutoffAltitudeInput;
+        public TMP_InputField VisionCutoffAltitudePerspectiveMaxInput;
 
         public Button ResetExplorationButton;
         public Button ExploreEverythingButton;
@@ -43,7 +44,15 @@ namespace WorldEditor
             TextureToggle.onValueChanged.AddListener((b) => World.ShowTextures(b));
             BlendToggle.onValueChanged.AddListener((b) => World.ShowTileBlending(b));
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
-            VisionCutoffToggle.onValueChanged.AddListener((b) => World.ShowVisionCutoff(b));
+            VisionCutoffDropdown.onValueChanged.AddListener((v) => World.SetVisionCutoffMode((VisionCutoffMode)v));
+
+            // Vision cutoff dropdown
+            List<string> visionCutoffOptions = new List<string>();
+            foreach(VisionCutoffMode mode in System.Enum.GetValues(typeof(VisionCutoffMode)))
+            {
+                visionCutoffOptions.Add(mode.ToString());
+            }
+            VisionCutoffDropdown.AddOptions(visionCutoffOptions);
         }
         public void OnNewWorld()
         {
@@ -55,7 +64,6 @@ namespace WorldEditor
             foreach (Actor p in World.GetAllActors()) visionOptions.Add(p.Label);
             VisionDropdown.AddOptions(visionOptions);
 
-            SetVisionCutoffAlitude(10);
             RefreshSettings();
         }
 
@@ -94,18 +102,19 @@ namespace WorldEditor
                 RefreshSettings();
             }
 
-            // V - Toggle vision cutoff
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                World.ToggleVisionCutoff();
-                RefreshSettings();
-            }
-
             // Alt + Scroll - Change vision cutoff altitude
             if (Input.GetKey(KeyCode.LeftAlt))
             {
-                if (Input.mouseScrollDelta.y < 0) SetVisionCutoffAlitude(World.VisionCutoffAltitude - 1);
-                if (Input.mouseScrollDelta.y > 0) SetVisionCutoffAlitude(World.VisionCutoffAltitude + 1);
+                if (Input.mouseScrollDelta.y < 0)
+                {
+                    SetVisionCutoffAlitude(World.DisplaySettings.VisionCutoffAltitude - 1);
+                    SetVisionCutoffPerspectiveMaxAlitude(World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude - 1);
+                }
+                if (Input.mouseScrollDelta.y > 0)
+                {
+                    SetVisionCutoffAlitude(World.DisplaySettings.VisionCutoffAltitude + 1);
+                    SetVisionCutoffPerspectiveMaxAlitude(World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude + 1);
+                }
             }
         }
 
@@ -127,7 +136,12 @@ namespace WorldEditor
         private void SetVisionCutoffAlitude(int alt)
         {
             World.SetVisionCutoffAltitude(alt);
-            VisionCutoffAltitudeInput.text = World.VisionCutoffAltitude.ToString();
+            VisionCutoffAltitudeInput.text = World.DisplaySettings.VisionCutoffAltitude.ToString();
+        }
+        private void SetVisionCutoffPerspectiveMaxAlitude(int alt)
+        {
+            World.SetVisionCutoffPerspectiveMaxAltitude(alt);
+            VisionCutoffAltitudePerspectiveMaxInput.text = World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude.ToString();
         }
 
         private void VisionDropdown_OnValueChanged(int value)
@@ -159,11 +173,13 @@ namespace WorldEditor
             if (World.ActiveVisionActor == null) VisionDropdown.value = 0;
             else VisionDropdown.value = VisionDropdown.options.Where(x => x.text == World.ActiveVisionActor.Label).Select(x => VisionDropdown.options.IndexOf(x)).First();
 
-            GridToggle.isOn = World.IsShowingGrid;
-            TextureToggle.isOn = World.IsShowingTextures;
-            BlendToggle.isOn = World.IsShowingTileBlending;
-            NavmeshToggle.isOn = World.IsShowingNavmesh;
-            VisionCutoffToggle.isOn = World.IsVisionCutoffEnabled;
+            GridToggle.isOn = World.DisplaySettings.IsShowingGrid;
+            TextureToggle.isOn = World.DisplaySettings.IsShowingTextures;
+            BlendToggle.isOn = World.DisplaySettings.IsShowingTileBlending;
+            NavmeshToggle.isOn = World.DisplaySettings.IsShowingNavmesh;
+            VisionCutoffDropdown.value = (int)World.DisplaySettings.VisionCutoffMode;
+            VisionCutoffAltitudeInput.text = World.DisplaySettings.VisionCutoffAltitude.ToString();
+            VisionCutoffAltitudePerspectiveMaxInput.text = World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude.ToString();
         }
 
         #endregion

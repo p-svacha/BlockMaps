@@ -19,6 +19,14 @@ namespace BlockmapFramework
 
         public bool IsStairs => IsSlope();
 
+        public override VisibilityType GetVisibility(Actor activeVisionActor)
+        {
+            // Check if we need to hide because of vision cutoff
+            if (Chunk.World.DisplaySettings.IsVisionCutoffEnabled && BaseAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+
+            return base.GetVisibility(activeVisionActor);
+        }
+
         #endregion
     }
 }

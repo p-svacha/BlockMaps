@@ -324,7 +324,7 @@ namespace BlockmapFramework
                 }
 
                 // Draw mode
-                ShowTextures(World.IsShowingTextures);
+                ShowTextures(World.DisplaySettings.IsShowingTextures);
 
                 // Reference entity in its collider
                 WorldObjectCollider ec = MeshObject.AddComponent<WorldObjectCollider>();
@@ -698,49 +698,53 @@ namespace BlockmapFramework
         /// </summary>
         public void GetCurrentRenderPosition(out bool doRender, out Vector3? position, out Quaternion? rotation)
         {
-            Actor actor = World.ActiveVisionActor;
+            VisibilityType visibility = GetVisibility(World.ActiveVisionActor);
 
             // Render at real position if currently visible
-            if (IsVisibleBy(actor))
+            if (visibility == VisibilityType.Visible)
             {
-                // Don't render if disabled by vision cutoff settings OR in inventory
-                if (OriginNode.Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude)
-                {
-                    doRender = false;
-                    position = null;
-                    rotation = null;
-                    return;
-                }
-
                 doRender = true;
                 position = WorldPosition;
                 rotation = WorldRotation;
             }
 
-            // Render at last known position if explored but not currently visible
-            else if(actor != null && IsExploredBy(actor))
+            // Render at last known position if visibility is fog of war
+            else if(visibility == VisibilityType.FogOfWar)
             {
-                // Don't render if disabled by vision cutoff settings
-                if (LastKnownNode[actor].Type != NodeType.Ground && World.IsVisionCutoffEnabled && MinAltitude > World.VisionCutoffAltitude)
-                {
-                    doRender = false;
-                    position = null;
-                    rotation = null;
-                    return;
-                }
-
                 doRender = true;
-                position = LastKnownPosition[actor].Value;
-                rotation = LastKnownRotation[actor].Value;
+                position = LastKnownPosition[World.ActiveVisionActor].Value;
+                rotation = LastKnownRotation[World.ActiveVisionActor].Value;
             }
 
-            // Don't render if never explored
+            // Don't render if visibility is hidden
             else
             {
                 doRender = false;
                 position = null;
                 rotation = null;
             }
+        }
+
+        /// <summary>
+        /// Returns the visibility of this entity taking into account the given active vision actor and current world display settings.
+        /// </summary>
+        public virtual VisibilityType GetVisibility(Actor activeVisionActor)
+        {
+            if (IsVisibleBy(activeVisionActor))
+            {
+                bool isHiddenByVisionCutoff = (OriginNode.Type != NodeType.Ground && Chunk.World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude);
+                if (isHiddenByVisionCutoff) return VisibilityType.Hidden;
+                else return VisibilityType.Visible;
+            }
+
+            else if (IsExploredBy(activeVisionActor))
+            {
+                bool isHiddenByVisionCutoff = (LastKnownNode[activeVisionActor].Type != NodeType.Ground && World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > World.DisplaySettings.VisionCutoffAltitude);
+                if (isHiddenByVisionCutoff) return VisibilityType.Hidden;
+                else return VisibilityType.FogOfWar;
+            }
+
+            return VisibilityType.Hidden;
         }
 
         protected void UpdateMeshObjectTransform()

@@ -112,6 +112,8 @@ namespace BlockmapFramework
 
         // Camera
         public BlockmapCamera Camera { get; private set; }
+        public WorldDisplaySettings DisplaySettings { get; private set; }
+        public MovingEntity NavmeshEntity { get; private set; }
 
         // Actors
         /// <summary>
@@ -166,15 +168,6 @@ namespace BlockmapFramework
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
         public event System.Action<Entity, Entity> OnHoveredEntityChanged;
 
-        // Draw modes
-        public bool IsShowingGrid { get; private set; }
-        public bool IsShowingNavmesh { get; private set; }
-        public MovingEntity NavmeshEntity { get; private set; }
-        public bool IsShowingTextures { get; private set; }
-        public bool IsShowingTileBlending { get; private set; }
-        public bool IsVisionCutoffEnabled { get; private set; }
-        public int VisionCutoffAltitude { get; private set; }
-
         // Cache
         private static readonly List<BlockmapNode> EmptyNodeList = new List<BlockmapNode>();
 
@@ -203,7 +196,7 @@ namespace BlockmapFramework
             AddActor("Player 1", Color.blue);
             AddActor("Player 2", Color.red);
 
-            CreateChunksAndGameObjects();
+            Init();
 
             // Create initial nodes
             foreach (Chunk chunk in GetAllChunks())
@@ -229,8 +222,14 @@ namespace BlockmapFramework
             CliffMaterialPath = "Materials/NodeMaterials/Cliff";
         }
 
-        private void CreateChunksAndGameObjects()
+        /// <summary>
+        /// Gets executed once when or loading a world creating a new world (before nodes are created).
+        /// </summary>
+        private void Init()
         {
+            // Create display settings
+            DisplaySettings = new WorldDisplaySettings();
+
             // Set layers
             Layer_GroundNodeMesh = LayerMask.NameToLayer("Terrain");
             Layer_EntityMesh = LayerMask.NameToLayer("EntityMesh");
@@ -423,7 +422,7 @@ namespace BlockmapFramework
                 {
                     AirNode hitNode = GetAirNodeFromRaycastHit(hit);
 
-                    if (hitNode != null && hitNode.IsExploredBy(ActiveVisionActor) && hitNode.Mesh.Renderer.enabled)
+                    if (hitNode != null && hitNode.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredAirNode = hitNode;
                         newHoveredNode = hitNode;
@@ -460,7 +459,7 @@ namespace BlockmapFramework
                 {
                     Fence hitFence = GetFenceFromRaycastHit(hit);
                     
-                    if (hitFence != null && hitFence.Node.IsExploredBy(ActiveVisionActor) && objectHit.GetComponent<MeshRenderer>().enabled)
+                    if (hitFence != null && hitFence.Node.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredFence = hitFence;
                         HoveredWorldCoordinates = hitFence.Node.WorldCoordinates;
@@ -474,7 +473,7 @@ namespace BlockmapFramework
                 {
                     Wall hitWall = GetWallFromRaycastHit(hit);
                     
-                    if (hitWall != null && hitWall.IsExploredBy(ActiveVisionActor) && hitWall.Mesh.Renderer.enabled)
+                    if (hitWall != null && hitWall.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredWall = hitWall;
                         HoveredWorldCoordinates = hitWall.WorldCoordinates;
@@ -488,7 +487,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
-                    if(hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.MeshRenderer.enabled)
+                    if(hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
@@ -502,7 +501,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = GetBatchEntityFromRaycastHit(hit);
 
-                    if (hitEntity != null && hitEntity.IsExploredBy(ActiveVisionActor) && hitEntity.BatchEntityMesh.Renderer.enabled)
+                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
@@ -1830,11 +1829,10 @@ namespace BlockmapFramework
             pm_RedrawChunk.Begin();
             chunk.DrawMeshes();
             chunk.SetVisibility(ActiveVisionActor);
-            chunk.ShowGrid(IsShowingGrid);
-            chunk.ShowTextures(IsShowingTextures);
-            chunk.ShowTileBlending(IsShowingTileBlending);
+            chunk.ShowGrid(DisplaySettings.IsShowingGrid);
+            chunk.ShowTextures(DisplaySettings.IsShowingTextures);
+            chunk.ShowTileBlending(DisplaySettings.IsShowingTileBlending);
             chunk.DrawZoneBorders(ActiveVisionActor);
-            chunk.SetVisionCutoffAltitude(IsVisionCutoffEnabled ? VisionCutoffAltitude : -1);
             pm_RedrawChunk.End();
         }
 
@@ -1887,18 +1885,18 @@ namespace BlockmapFramework
 
         public void ToggleGridOverlay()
         {
-            IsShowingGrid = !IsShowingGrid;
+            DisplaySettings.ToggleGrid();
             UpdateGridOverlay();
         }
         public void ShowGridOverlay(bool value)
         {
             if (!IsInitialized) return;
-            IsShowingGrid = value;
+            DisplaySettings.ShowGrid(value);
             UpdateGridOverlay();
         }
         private void UpdateGridOverlay()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.ShowGrid(IsShowingGrid);
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowGrid(DisplaySettings.IsShowingGrid);
         }
         private void UpdateZoneBorders()
         {
@@ -1907,7 +1905,7 @@ namespace BlockmapFramework
 
         public void ToggleNavmesh()
         {
-            IsShowingNavmesh = !IsShowingNavmesh;
+            DisplaySettings.ToggleNavmesh();
             UpdateNavmeshDisplay();
         }
         public void SetNavmeshEntity(MovingEntity entity)
@@ -1918,7 +1916,7 @@ namespace BlockmapFramework
         public void ShowNavmesh(bool value)
         {
             if (!IsInitialized) return;
-            IsShowingNavmesh = value;
+            DisplaySettings.ShowNavmesh(value);
             UpdateNavmeshDisplay();
         }
 
@@ -1926,68 +1924,61 @@ namespace BlockmapFramework
         {
             if (NavmeshVisualizer.Singleton == null) return;
 
-            if (IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
+            if (DisplaySettings.IsShowingNavmesh) NavmeshVisualizer.Singleton.Visualize(this, NavmeshEntity);
             else NavmeshVisualizer.Singleton.ClearVisualization();
         }
 
         public void ToggleTextureMode()
         {
-            IsShowingTextures = !IsShowingTextures;
+            DisplaySettings.ToggleTextures();
             UpdateTextureMode();
         }
         public void ShowTextures(bool value)
         {
             if (!IsInitialized) return;
-            IsShowingTextures = value;
+            DisplaySettings.ShowTextures(value);
             UpdateTextureMode();
         }
         private void UpdateTextureMode()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.ShowTextures(IsShowingTextures);
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowTextures(DisplaySettings.IsShowingTextures);
         }
 
         public void ToggleTileBlending()
         {
-            IsShowingTileBlending = !IsShowingTileBlending;
+            DisplaySettings.ToggleTileBlending();
             UpdateTileBlending();
         }
         public void ShowTileBlending(bool value)
         {
             if (!IsInitialized) return;
-            IsShowingTileBlending = value;
+            DisplaySettings.ShowTileBlending(value);
             UpdateTileBlending();
         }
         private void UpdateTileBlending()
         {
-            foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(IsShowingTileBlending);
+            foreach (Chunk chunk in Chunks.Values) chunk.ShowTileBlending(DisplaySettings.IsShowingTileBlending);
         }
-        public void ToggleVisionCutoff()
+        public void SetVisionCutoffMode(VisionCutoffMode mode)
         {
-            IsVisionCutoffEnabled = !IsVisionCutoffEnabled;
-            UpdateVisionCutoff();
-        }
-        public void ShowVisionCutoff(bool value)
-        {
-            IsVisionCutoffEnabled = value;
-            UpdateVisionCutoff();
+            DisplaySettings.SetVisionCutoffMode(mode);
+            UpdateVisibility();
         }
         public void SetVisionCutoffAltitude(int altitude)
         {
-            VisionCutoffAltitude = altitude;
-            if (VisionCutoffAltitude < 0) VisionCutoffAltitude = 0;
-            if (VisionCutoffAltitude > MAX_ALTITUDE) VisionCutoffAltitude = MAX_ALTITUDE;
-
-            if (IsVisionCutoffEnabled) UpdateVisionCutoff();
+            DisplaySettings.SetVisionCutoffAltitude(Mathf.Clamp(altitude, 0, MAX_ALTITUDE));
+            UpdateVisibility();
         }
-        public void ShowVisionCutoffAt(int altitude)
+        public void SetVisionCutoffPerspectiveMaxAltitude(int altitude)
         {
-            IsVisionCutoffEnabled = true;
-            VisionCutoffAltitude = altitude;
-            UpdateVisionCutoff();
+            DisplaySettings.SetVisionCutoffPerspectiveMaxAltitude(Mathf.Clamp(altitude, 0, MAX_ALTITUDE));
+            UpdateVisibility();
         }
-        private void UpdateVisionCutoff()
+        public void EnableAbsoluteVisionCutoffAt(int altitude)
         {
-            foreach (Chunk c in Chunks.Values) c.SetVisionCutoffAltitude(IsVisionCutoffEnabled ? VisionCutoffAltitude : -1);
+            DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.AbsoluteCutoff);
+            DisplaySettings.SetVisionCutoffAltitude(altitude);
+            UpdateVisibility();
         }
 
         public void SetActiveVisionActor(Actor actor)
@@ -2493,7 +2484,7 @@ namespace BlockmapFramework
 
             if (SaveLoadManager.IsLoading)
             {
-                CreateChunksAndGameObjects();
+                Init();
 
                 foreach (Actor actor in Actors.Values) actor.PostLoad();
                 foreach (BlockmapNode node in Nodes.Values) node.PostLoad();

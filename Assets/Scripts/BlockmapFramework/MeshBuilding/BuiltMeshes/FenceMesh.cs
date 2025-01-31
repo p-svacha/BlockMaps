@@ -17,7 +17,7 @@ namespace BlockmapFramework
             gameObject.layer = chunk.World.Layer_FenceMesh;
         }
 
-        public override void SetVisibility(Actor player)
+        public override void SetVisibility(Actor activeVisionActor)
         {
             // Define visibility array
             List<float> visibilityArray = new List<float>();
@@ -32,8 +32,8 @@ namespace BlockmapFramework
 
                     List<BlockmapNode> nodes = Chunk.World.GetNodes(worldCoordiantes, Altitude).ToList();
 
-                    if (nodes.Any(x => x.IsVisibleBy(player))) visibility = 2; // 2 = visible
-                    else if (nodes.Any(x => x.IsExploredBy(player))) visibility = 1; // 1 = fog of war
+                    if (nodes.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.Visible)) visibility = 2; // 2 = visible
+                    else if (nodes.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.FogOfWar)) visibility = 1; // 1 = fog of war
 
                     visibilityArray.Add(visibility);
                 }

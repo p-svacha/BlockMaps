@@ -1146,6 +1146,17 @@ namespace BlockmapFramework
             return World.IsAbove(Altitude, otherNode.Altitude);
         }
 
+        /// <summary>
+        /// Returns the visibility of this node taking into account the given active vision actor and current world display settings.
+        /// </summary>
+        public virtual VisibilityType GetVisibility(Actor activeVisionActor)
+        {
+            // Visibility is based on vision of actor
+            if (IsVisibleBy(activeVisionActor)) return VisibilityType.Visible;
+            else if (IsExploredBy(activeVisionActor)) return VisibilityType.FogOfWar;
+            return VisibilityType.Hidden;
+        }
+
         public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}{Type.ToString()[0]}";
         public string DebugInfoLong()
         {

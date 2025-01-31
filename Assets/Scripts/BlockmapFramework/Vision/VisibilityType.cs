@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public enum VisionType
+    public enum VisibilityType
     {
-        Visible,
-        FogOfWar,
-        Unexplored
+        Hidden = 0,
+        FogOfWar = 1,
+        Visible = 2,
     }
 }
