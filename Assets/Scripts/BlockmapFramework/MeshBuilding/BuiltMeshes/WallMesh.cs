@@ -8,12 +8,14 @@ namespace BlockmapFramework
     public class WallMesh : ChunkMesh
     {
         public int Altitude { get; private set; }
+        public Direction Side { get; private set; }
 
-        public void Init(Chunk chunk, int level)
+        public void Init(Chunk chunk, int level, Direction side)
         {
             OnInit(chunk);
 
             Altitude = level;
+            Side = side;
             gameObject.layer = chunk.World.Layer_WallMesh;
         }
 
@@ -39,16 +41,16 @@ namespace BlockmapFramework
                     }
                     Vector3Int globalCellCoordinates = new Vector3Int(worldCoordiantes.x, Altitude, worldCoordiantes.y);
 
-                    List<Wall> walls = World.GetWalls(globalCellCoordinates);
+                    Wall wall = World.GetWall(globalCellCoordinates, Side);
 
-                    if(walls == null) // No walls in this cell
+                    if(wall == null) // No wall in this cell on this side
                     {
                         visibilityArray.Add(0); // 0 = not rendered
                         continue;
                     }
 
-                    if (walls.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.Visible)) visibility = 2; // 2 = visible
-                    else if (walls.Any(x => x.GetVisibility(activeVisionActor) == VisibilityType.FogOfWar)) visibility = 1; // 1 = fog of war
+                    if (wall.GetVisibility(activeVisionActor) == VisibilityType.Visible) visibility = 2; // 2 = visible
+                    else if (wall.GetVisibility(activeVisionActor) == VisibilityType.FogOfWar) visibility = 1; // 1 = fog of war
 
                     visibilityArray.Add(visibility);
                 }

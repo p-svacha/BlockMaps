@@ -23,7 +23,8 @@ namespace WorldEditor
         public TMP_Dropdown VisionDropdown;
         public TMP_Dropdown VisionCutoffDropdown;
         public TMP_InputField VisionCutoffAltitudeInput;
-        public TMP_InputField VisionCutoffAltitudePerspectiveMaxInput;
+        public TMP_InputField VisionCutoffPerspectiveHeightInput;
+        public TMP_InputField VisionCutoffTargetInput;
 
         public Button ResetExplorationButton;
         public Button ExploreEverythingButton;
@@ -45,13 +46,12 @@ namespace WorldEditor
             BlendToggle.onValueChanged.AddListener((b) => World.ShowTileBlending(b));
             NavmeshToggle.onValueChanged.AddListener((b) => World.ShowNavmesh(b));
             VisionCutoffDropdown.onValueChanged.AddListener((v) => World.SetVisionCutoffMode((VisionCutoffMode)v));
+            VisionCutoffAltitudeInput.onValueChanged.AddListener(VisionCutoffAltitudeInput_OnValueChanged);
+            VisionCutoffPerspectiveHeightInput.onValueChanged.AddListener(VisionCutoffHeightInput_OnValueChanged);
 
             // Vision cutoff dropdown
             List<string> visionCutoffOptions = new List<string>();
-            foreach(VisionCutoffMode mode in System.Enum.GetValues(typeof(VisionCutoffMode)))
-            {
-                visionCutoffOptions.Add(mode.ToString());
-            }
+            foreach(VisionCutoffMode mode in System.Enum.GetValues(typeof(VisionCutoffMode))) visionCutoffOptions.Add(mode.ToString());
             VisionCutoffDropdown.AddOptions(visionCutoffOptions);
         }
         public void OnNewWorld()
@@ -102,18 +102,26 @@ namespace WorldEditor
                 RefreshSettings();
             }
 
+            // V - Enable perspective vision cutoff
+            if(Input.GetKeyDown(KeyCode.V))
+            {
+                if(World.HoveredEntity != null)
+                {
+                    World.EnablePerspectiveVisionCutoff(World.HoveredEntity);
+                    RefreshSettings();
+                }
+            }
+
             // Alt + Scroll - Change vision cutoff altitude
             if (Input.GetKey(KeyCode.LeftAlt))
             {
                 if (Input.mouseScrollDelta.y < 0)
                 {
                     SetVisionCutoffAlitude(World.DisplaySettings.VisionCutoffAltitude - 1);
-                    SetVisionCutoffPerspectiveMaxAlitude(World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude - 1);
                 }
                 if (Input.mouseScrollDelta.y > 0)
                 {
                     SetVisionCutoffAlitude(World.DisplaySettings.VisionCutoffAltitude + 1);
-                    SetVisionCutoffPerspectiveMaxAlitude(World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude + 1);
                 }
             }
         }
@@ -125,7 +133,7 @@ namespace WorldEditor
             CameraPositionInput.text = BlockmapCamera.Instance.CurrentPosition.ToString();
             CameraZoomInput.text = BlockmapCamera.Instance.CurrentZoom.ToString("0.#");
             CameraAngleInput.text = BlockmapCamera.Instance.CurrentAngle.ToString("0.#");
-            CameraDirectionInput.text = BlockmapCamera.Instance.CurrentDirection.ToString();
+            CameraDirectionInput.text = BlockmapCamera.Instance.CurrentFacingDirection.ToString();
         }
 
         #endregion
@@ -133,15 +141,18 @@ namespace WorldEditor
 
         #region Display Settings
 
+        private void VisionCutoffAltitudeInput_OnValueChanged(string value)
+        {
+            if(int.TryParse(value, out int v)) World.SetVisionCutoffAltitude(v);
+        }
+        private void VisionCutoffHeightInput_OnValueChanged(string value)
+        {
+            if (int.TryParse(value, out int v)) World.SetVisionCutoffPerspectiveHeight(v);
+        }
         private void SetVisionCutoffAlitude(int alt)
         {
             World.SetVisionCutoffAltitude(alt);
             VisionCutoffAltitudeInput.text = World.DisplaySettings.VisionCutoffAltitude.ToString();
-        }
-        private void SetVisionCutoffPerspectiveMaxAlitude(int alt)
-        {
-            World.SetVisionCutoffPerspectiveMaxAltitude(alt);
-            VisionCutoffAltitudePerspectiveMaxInput.text = World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude.ToString();
         }
 
         private void VisionDropdown_OnValueChanged(int value)
@@ -179,7 +190,8 @@ namespace WorldEditor
             NavmeshToggle.isOn = World.DisplaySettings.IsShowingNavmesh;
             VisionCutoffDropdown.value = (int)World.DisplaySettings.VisionCutoffMode;
             VisionCutoffAltitudeInput.text = World.DisplaySettings.VisionCutoffAltitude.ToString();
-            VisionCutoffAltitudePerspectiveMaxInput.text = World.DisplaySettings.VisionCutoffPerpectiveMaxAltitude.ToString();
+            VisionCutoffPerspectiveHeightInput.text = World.DisplaySettings.VisionCutoffPerpectiveHeight.ToString();
+            VisionCutoffTargetInput.text = World.DisplaySettings.PerspectiveVisionCutoffTarget?.LabelCap;
         }
 
         #endregion

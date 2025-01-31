@@ -98,6 +98,7 @@ namespace BlockmapFramework
         private Dictionary<int, Fence> Fences = new Dictionary<int, Fence>();
         private Dictionary<int, Wall> Walls = new Dictionary<int, Wall>();
         private Dictionary<int, Zone> Zones = new Dictionary<int, Zone>();
+        private Dictionary<int, Room> Rooms = new Dictionary<int, Room>();
 
         private int NodeIdCounter;
         private int EntityIdCounter;
@@ -106,6 +107,7 @@ namespace BlockmapFramework
         private int ZoneIdCounter;
         private int FenceIdCounter;
         private int WallIdCounter;
+        private int RoomIdCounter;
 
         // Database indexes
         private Dictionary<Vector2Int, List<Wall>> WallsByWorldCoordinates2D = new Dictionary<Vector2Int, List<Wall>>();
@@ -223,6 +225,15 @@ namespace BlockmapFramework
         }
 
         /// <summary>
+        /// Command to destroy this world.
+        /// </summary>
+        public void Destroy()
+        {
+            BlockmapCamera.Instance.OnFacingDirectionChanged -= OnCameraFacingDirectionChanged;
+            GameObject.Destroy(WorldObject);
+        }
+
+        /// <summary>
         /// Gets executed once when or loading a world creating a new world (before nodes are created).
         /// </summary>
         private void Init()
@@ -257,6 +268,9 @@ namespace BlockmapFramework
             // Create game objects for world and each chunk
             WorldObject = new GameObject(string.IsNullOrEmpty(Name) ? "World" : Name);
             foreach (Chunk chunk in GetAllChunks()) chunk.InitGameObjects();
+
+            // Attach hooks
+            BlockmapCamera.Instance.OnFacingDirectionChanged += OnCameraFacingDirectionChanged;
         }
 
         /// <summary>
@@ -298,6 +312,7 @@ namespace BlockmapFramework
             ZoneIdCounter = Zones.Count == 0 ? 0 : Zones.Max(x => x.Key) + 1;
             FenceIdCounter = Fences.Count == 0 ? 0 : Fences.Max(x => x.Key) + 1;
             WallIdCounter = Walls.Count == 0 ? 0 : Walls.Max(x => x.Key) + 1;
+            RoomIdCounter = Rooms.Count == 0 ? 0 : Rooms.Max(x => x.Key) + 1;
         }
 
         private void OnInitializationDone()
@@ -1619,7 +1634,7 @@ namespace BlockmapFramework
 
             return true;
         }
-        public void BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool updateWorld, bool mirrored = false)
+        public Wall BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool updateWorld, bool mirrored = false)
         {
             //if (!CanBuildWall(globalCellCoordinates, side)) return;
 
@@ -1629,6 +1644,8 @@ namespace BlockmapFramework
 
             // Update world around cell
             if (updateWorld) UpdateWorldSystems(newWall.WorldCoordinates);
+
+            return newWall;
         }
         public void RegisterWall(Wall wall, bool registerInWorld = true) // add to database and add all references in different objects
         {
@@ -1728,6 +1745,14 @@ namespace BlockmapFramework
             Zone newZone = new Zone(this, id, actor, coordinates, providesVision, visibility);
             Zones.Add(id, newZone);
             return newZone;
+        }
+
+        public Room AddRoom(string label, List<BlockmapNode> nodes, List<Wall> interiorWalls)
+        {
+            int id = RoomIdCounter++;
+            Room newRoom = new Room(id, label, nodes, interiorWalls);
+            Rooms.Add(id, newRoom);
+            return newRoom;
         }
 
         public void AddToInventory(Entity item, Entity holder, bool updateWorld)
@@ -1852,6 +1877,14 @@ namespace BlockmapFramework
             c.DrawZoneBorders(ActiveVisionActor);
         }
 
+        private void OnCameraFacingDirectionChanged()
+        {
+            if(DisplaySettings.VisionCutoffMode == VisionCutoffMode.PerspectiveCutoff && DisplaySettings.PerspectiveVisionCutoffTarget != null)
+            {
+                UpdateVisibility();
+            }
+        }
+
         /// <summary>
         /// Gets called when the visibility of a node changes on the specified chunk for the specified actor.
         /// </summary>
@@ -1969,15 +2002,22 @@ namespace BlockmapFramework
             DisplaySettings.SetVisionCutoffAltitude(Mathf.Clamp(altitude, 0, MAX_ALTITUDE));
             UpdateVisibility();
         }
-        public void SetVisionCutoffPerspectiveMaxAltitude(int altitude)
+        public void SetVisionCutoffPerspectiveHeight(int height)
         {
-            DisplaySettings.SetVisionCutoffPerspectiveMaxAltitude(Mathf.Clamp(altitude, 0, MAX_ALTITUDE));
+            DisplaySettings.SetVisionCutoffPerspectiveHeight(Mathf.Clamp(height, 0, MAX_ALTITUDE));
             UpdateVisibility();
         }
         public void EnableAbsoluteVisionCutoffAt(int altitude)
         {
             DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.AbsoluteCutoff);
             DisplaySettings.SetVisionCutoffAltitude(altitude);
+            UpdateVisibility();
+        }
+        public void EnablePerspectiveVisionCutoff(Entity target)
+        {
+            DisplaySettings.SetVisionCutoffPerspectiveTarget(target);
+            DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.PerspectiveCutoff);
+            DisplaySettings.SetVisionCutoffAltitude(target.MinAltitude);
             UpdateVisibility();
         }
 
@@ -2477,10 +2517,11 @@ namespace BlockmapFramework
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Actors, "actors");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Nodes, "nodes");
             SaveLoadManager.SaveOrLoadDeepDictionary(ref Entities, "entities");
-            SaveLoadManager.SaveOrLoadDeepDictionary(ref Fences, "entities");
-            SaveLoadManager.SaveOrLoadDeepDictionary(ref Walls, "entities");
-            SaveLoadManager.SaveOrLoadDeepDictionary(ref WaterBodies, "entities");
-            SaveLoadManager.SaveOrLoadDeepDictionary(ref Zones, "entities");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Fences, "fences");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Walls, "walls");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref WaterBodies, "waterBodies");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Zones, "zones");
+            SaveLoadManager.SaveOrLoadDeepDictionary(ref Rooms, "rooms");
 
             if (SaveLoadManager.IsLoading)
             {
@@ -2493,6 +2534,7 @@ namespace BlockmapFramework
                 foreach (Wall w in Walls.Values) w.PostLoad();
                 foreach (WaterBody wb in WaterBodies.Values) wb.PostLoad();
                 foreach (Zone z in Zones.Values) z.PostLoad();
+                foreach (Room r in Rooms.Values) r.PostLoad();
             }
         }
 

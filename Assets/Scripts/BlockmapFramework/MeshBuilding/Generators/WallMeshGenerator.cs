@@ -12,31 +12,35 @@ namespace BlockmapFramework
         /// <summary>
         /// Generates the meshes for all altitude levels of a chunk
         /// </summary>
-        public static Dictionary<int, WallMesh> GenerateMeshes(Chunk chunk)
+        public static Dictionary<int, Dictionary<Direction, WallMesh>> GenerateMeshes(Chunk chunk)
         {
-            Dictionary<int, WallMesh> meshes = new Dictionary<int, WallMesh>();
+            Dictionary<int, Dictionary<Direction, WallMesh>> meshes = new Dictionary<int, Dictionary<Direction, WallMesh>>();
 
             for (int altitude = 0; altitude < World.MAX_ALTITUDE; altitude++)
             {
-                // Get walls for altitude level
-                List<Wall> wallsToDraw = chunk.GetWalls(altitude);
-                if (wallsToDraw.Count == 0) continue;
-
-                // Generate mesh
-                GameObject meshObject = new GameObject("WallMesh_" + altitude);
-                WallMesh mesh = meshObject.AddComponent<WallMesh>();
-                mesh.Init(chunk, altitude);
-
-                MeshBuilder meshBuilder = new MeshBuilder(meshObject);
-                foreach(Wall wall in wallsToDraw)
+                foreach (Direction side in HelperFunctions.GetAllDirections8())
                 {
-                    wall.Shape.RenderFunction(chunk.World, meshBuilder, wall.GlobalCellCoordinates, wall.LocalCellCoordinates, wall.Side, wall.Material.Material, wall.IsMirrored);
-                    wall.SetMesh(mesh);
-                }
-                meshBuilder.ApplyMesh();
-                mesh.OnMeshApplied();
+                    // Get walls for altitude level
+                    List<Wall> wallsToDraw = chunk.GetWalls(altitude, side);
+                    if (wallsToDraw.Count == 0) continue;
 
-                meshes.Add(altitude, mesh);
+                    // Generate mesh
+                    GameObject meshObject = new GameObject("WallMesh_" + altitude + "_" + side);
+                    WallMesh mesh = meshObject.AddComponent<WallMesh>();
+                    mesh.Init(chunk, altitude, side);
+
+                    MeshBuilder meshBuilder = new MeshBuilder(meshObject);
+                    foreach (Wall wall in wallsToDraw)
+                    {
+                        wall.Shape.RenderFunction(chunk.World, meshBuilder, wall.GlobalCellCoordinates, wall.LocalCellCoordinates, wall.Side, wall.Material.Material, wall.IsMirrored);
+                        wall.SetMesh(mesh);
+                    }
+                    meshBuilder.ApplyMesh();
+                    mesh.OnMeshApplied();
+
+                    if (meshes.ContainsKey(altitude)) meshes[altitude].Add(side, mesh);
+                    else meshes.Add(altitude, new Dictionary<Direction, WallMesh>() { { side, mesh } });
+                }
             }
 
             return meshes;

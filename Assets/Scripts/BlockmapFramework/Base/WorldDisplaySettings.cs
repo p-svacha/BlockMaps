@@ -16,9 +16,27 @@ namespace BlockmapFramework
         public bool IsShowingTileBlending { get; private set; }
 
         public VisionCutoffMode VisionCutoffMode { get; private set; }
+
+        /// <summary>
+        /// Everything higher than this altitude will be hidden when vision cutoff is enabled.
+        /// </summary>
         public int VisionCutoffAltitude { get; private set; }
-        public int VisionCutoffPerpectiveMaxAltitude { get; private set; }
+
+        /// <summary>
+        /// Walls behind the PerspectiveVisionCutoffTarget will still be rendered this much higher than VisionCutoffAltitude.
+        /// </summary>
+        public int VisionCutoffPerpectiveHeight { get; private set; }
+
+        /// <summary>
+        /// When VisionCutoffMode is set to PerspectiveCutoff, this entity will be used as a reference point.
+        /// </summary>
+        public Entity PerspectiveVisionCutoffTarget { get; private set; }
+
+        /// <summary>
+        /// True if VisionCutoffMode is not set to Off.
+        /// </summary>
         public bool IsVisionCutoffEnabled => VisionCutoffMode != VisionCutoffMode.Off;
+        
 
         public void ShowGrid(bool value) => IsShowingGrid = value;
         public void ToggleGrid() => IsShowingGrid = !IsShowingGrid;
@@ -34,7 +52,8 @@ namespace BlockmapFramework
 
         public void SetVisionCutoffMode(VisionCutoffMode mode) => VisionCutoffMode = mode;
         public void SetVisionCutoffAltitude(int alt) => VisionCutoffAltitude = alt;
-        public void SetVisionCutoffPerspectiveMaxAltitude(int alt) => VisionCutoffPerpectiveMaxAltitude = alt;
+        public void SetVisionCutoffPerspectiveHeight(int h) => VisionCutoffPerpectiveHeight = h;
+        public void SetVisionCutoffPerspectiveTarget(Entity e) => PerspectiveVisionCutoffTarget = e;
     }
 
     public enum VisionCutoffMode

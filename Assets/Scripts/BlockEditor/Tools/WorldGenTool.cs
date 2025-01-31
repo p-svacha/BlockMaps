@@ -55,7 +55,7 @@ namespace WorldEditor
             {
                 if (ActiveGenerator.IsDone)
                 {
-                    Editor.SetAndInitializeWorld(ActiveGenerator.World, OnWorldInitializationDone);
+                    Editor.SetAndInitializeWorld(ActiveGenerator.World);
                     ActiveGenerator = null;
                 }
                 else ActiveGenerator.UpdateGeneration();
@@ -93,13 +93,6 @@ namespace WorldEditor
             ActiveGenerator.StartGeneration(numChunks, seed);
         }
 
-        private void OnWorldInitializationDone()
-        {
-            // Default draw mode
-            World.ShowTextures(true);
-            World.ShowTileBlending(true);
-        }
-
         private void SaveButton_OnClick()
         {
             if (ActiveGenerator != null) return; // Disabled while in generation process
@@ -119,7 +112,7 @@ namespace WorldEditor
             string worldToLoad = SavedWorlds[LoadDropdown.value];
 
             World loadedWorld = SaveLoadManager.Load(worldToLoad);
-            Editor.SetAndInitializeWorld(loadedWorld, OnWorldInitializationDone);
+            Editor.SetAndInitializeWorld(loadedWorld);
 
             SaveNameInput.text = worldToLoad;
             

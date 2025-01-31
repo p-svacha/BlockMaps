@@ -135,14 +135,19 @@ namespace WorldEditor
         /// </summary>
         public virtual void SetAndInitializeWorld(World world, System.Action callback = null)
         {
-            // Destory GameObject of previous world
-            if (World != null) Destroy(World.WorldObject);
+            // Destroy GameObject of previous world
+            if (World != null) World.Destroy();
 
             // Set new world
             World = world;
 
+            // Set initial display settings
+            World.DisplaySettings.ShowTextures(true);
+            World.DisplaySettings.ShowTileBlending(true);
+            World.DisplaySettings.SetVisionCutoffPerspectiveHeight(4);
+
             // Start world initialization
-            World.Initialize(callback);
+            World.Initialize(() => { callback?.Invoke(); DisplayOptions.OnNewWorld(); });
 
             // Init hooks
             World.OnHoveredGroundNodeChanged += OnHoveredSurfaceNodeChanged;
@@ -152,7 +157,6 @@ namespace WorldEditor
 
             // Feedback
             foreach (EditorTool tool in Tools.Values) tool.OnNewWorld();
-            DisplayOptions.OnNewWorld();
         }
 
         public void DestroyWorld()
@@ -207,17 +211,23 @@ namespace WorldEditor
         {
             if (World == null) return;
 
+            bool isShowingExpandedDebugInfo = Input.GetKey(KeyCode.LeftAlt);
+
             string text = "";
             if (World.IsHoveringWorld) text += World.HoveredWorldCoordinates.ToString();
             if (World.HoveredNode != null)
             {
-                if (Input.GetKey(KeyCode.LeftAlt)) text += "\n" + World.HoveredNode.DebugInfoLong();
+                if (isShowingExpandedDebugInfo) text += "\n" + World.HoveredNode.DebugInfoLong();
                 else text += "\n" + World.HoveredNode;
             }
             if (World.HoveredEntity != null) text += "\nEntity: " + World.HoveredEntity.ToString();
             if (World.HoveredWaterBody != null) text += "\nWaterbody";
             if (World.HoveredFence != null) text += "\nFence: " + World.HoveredFence.ToString();
-            if (World.HoveredWall != null) text += "\nWall: " + World.HoveredWall.ToString();
+            if (World.HoveredWall != null)
+            {
+                if (isShowingExpandedDebugInfo) text += "\n" + World.HoveredWall.DebugInfoLong();
+                else text += "\nWall: " + World.HoveredWall.ToString();
+            }
 
             deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
             float fps = 1.0f / deltaTime;

@@ -39,10 +39,13 @@ namespace BlockmapFramework
 
         // Camera Position
         public float CurrentAngle { get; private set; }
-        public Direction CurrentDirection { get; private set; }
+        public Direction CurrentFacingDirection { get; private set; }
         public float OffsetRadius { get; private set; }
         public float CurrentZoom { get; private set; }
         public Vector3 CurrentPosition { get; private set; } // Camera is currently looking at this position
+
+        // Events
+        public event System.Action OnFacingDirectionChanged;
 
         private void Awake()
         {
@@ -232,7 +235,9 @@ namespace BlockmapFramework
 
             float cameraOffsetX = Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
             float cameraOffsetY = Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
-            CurrentDirection = GetCurrentDirection();
+            Direction prevFacingDirection = CurrentFacingDirection;
+            CurrentFacingDirection = GetCurrentDirection();
+            if (prevFacingDirection != CurrentFacingDirection) OnFacingDirectionChanged?.Invoke();
 
             if (Camera == null) Camera = GetComponent<Camera>();
             Camera.transform.position = new Vector3(CurrentPosition.x + cameraOffsetX, CurrentPosition.y + CurrentZoom, CurrentPosition.z + cameraOffsetY);

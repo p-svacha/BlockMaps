@@ -57,6 +57,11 @@ namespace BlockmapFramework
         public int Steepness { get; protected set; }
 
         /// <summary>
+        /// The room that this node is part of its floor.
+        /// </summary>
+        public Room Room { get; private set; }
+
+        /// <summary>
         /// What tags this node has. Can be anything and be used for anything. Often set by world generators to mark specific nodes/areas.
         /// </summary>
         public HashSet<string> Tags;
@@ -885,6 +890,11 @@ namespace BlockmapFramework
             Tags.Add(tag);
         }
 
+        public void SetRoom(Room room)
+        {
+            Room = room;
+        }
+
         #endregion
 
         #region Getters
@@ -1157,37 +1167,6 @@ namespace BlockmapFramework
             return VisibilityType.Hidden;
         }
 
-        public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}{Type.ToString()[0]}";
-        public string DebugInfoLong()
-        {
-            string text = ToString();
-
-            text += $"\nAltitude: {BaseAltitude}-{MaxAltitude}";
-            text += $"\nMesh Center: {MeshCenterWorldPosition}";
-            string mph = "Max Passable Height:";
-            foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
-            string headspace = "Free Head Space:";
-            foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
-
-            text += "\nMovement Speed Modifier: " + SurfaceDef.MovementSpeedModifier;
-            text += "\nShape: " + World.HoveredNode.Shape;
-            text += "\nLocal Shape Y: " + World.HoveredNode.GetLocalShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
-            text += "\nWorld Shape Y: " + World.HoveredNode.GetWorldShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
-            text += "\nWorld Mesh Y: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
-            text += "\n" + mph;
-            text += "\n" + headspace;
-
-            string tags = "";
-            foreach (string tag in Tags) tags += tag + ", ";
-            tags = tags.TrimEnd(',');
-            text += "\nTags: " + tags;
-
-
-            if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";
-
-            return text;
-        }
-
         /// <summary>
         /// Returns a list with all nodes where a path to exists for the given entity with a cost less than the given limit.
         /// </summary>
@@ -1246,14 +1225,14 @@ namespace BlockmapFramework
             float value = 1f / SurfaceDef.MovementSpeedModifier;
 
             // Modifiers from entities on the node (additive)
-            foreach(Entity entityOnNode in Entities)
+            foreach (Entity entityOnNode in Entities)
             {
                 value += entityOnNode.MovementSlowdown;
             }
 
             // Modifiers from slope (multiplicative)
-            if(from != Direction.None && to != Direction.None) throw new System.Exception($"Either from or to must be the center of the node (Direction.None). from = {from}, to = {to}.");
-            if(from == Direction.None && to == Direction.None) throw new System.Exception($"Either from or to must be the side/corner of the node (Direction != None). from = {from}, to = {to}.");
+            if (from != Direction.None && to != Direction.None) throw new System.Exception($"Either from or to must be the center of the node (Direction.None). from = {from}, to = {to}.");
+            if (from == Direction.None && to == Direction.None) throw new System.Exception($"Either from or to must be the side/corner of the node (Direction != None). from = {from}, to = {to}.");
             float fromAltitude = GetLocalShapeAltitude(HelperFunctions.GetDirectionVectorFloat(from, distance: 0.5f));
             float toAltitude = GetLocalShapeAltitude(HelperFunctions.GetDirectionVectorFloat(to, distance: 0.5f));
             float altitudeDiff = toAltitude - fromAltitude;
@@ -1271,6 +1250,45 @@ namespace BlockmapFramework
             // Surface aptitude from entity (multiplicative)
             if (entity != null) value *= 1f / entity.GetSurfaceAptitude(SurfaceDef);
             return value;
+        }
+
+        public override string ToString() => $"{SurfaceDef.LabelCap} {WorldCoordinates} {BaseAltitude}{Type.ToString()[0]}";
+        public string DebugInfoLong()
+        {
+            string text = ToString();
+
+            text += $"\nAltitude: {BaseAltitude}-{MaxAltitude}";
+            text += $"\nMesh Center: {MeshCenterWorldPosition}";
+            string mph = "Max Passable Height:";
+            foreach (var x in MaxPassableHeight) mph += x.Key.ToString() + ":" + x.Value + ",";
+            string headspace = "Free Head Space:";
+            foreach (var x in FreeHeadSpace) headspace += x.Key.ToString() + ":" + x.Value + ",";
+
+            text += "\nMovement Speed Modifier: " + SurfaceDef.MovementSpeedModifier;
+            text += "\nShape: " + World.HoveredNode.Shape;
+            text += "\nLocal Shape Y: " + World.HoveredNode.GetLocalShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Shape Y: " + World.HoveredNode.GetWorldShapeAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\nWorld Mesh Y: " + World.HoveredNode.GetWorldMeshAltitude(new Vector2(World.HoveredWorldPosition.x - World.HoveredWorldCoordinates.x, World.HoveredWorldPosition.z - World.HoveredWorldCoordinates.y));
+            text += "\n" + mph;
+            text += "\n" + headspace;
+
+            // Tags
+            if (Tags.Count > 0)
+            {
+                string tags = "";
+                foreach (string tag in Tags) tags += tag + ", ";
+                tags = tags.TrimEnd(' ');
+                tags = tags.TrimEnd(',');
+                text += "\nTags: " + tags;
+            }
+
+            // Room
+            if (Room != null) text += $"\nRoom: {Room.LabelCap}";
+
+            // Entities on node
+            if (Entities.Count > 0) text += $"\nis origin node of {Entities.Count} entities";
+
+            return text;
         }
 
         #endregion

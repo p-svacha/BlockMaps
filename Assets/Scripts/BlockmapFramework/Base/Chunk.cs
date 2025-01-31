@@ -53,7 +53,7 @@ namespace BlockmapFramework
         public Dictionary<int, AirNodeMesh> AirNodeMeshes;
         public WaterMesh WaterMesh;
         public Dictionary<int, FenceMesh> FenceMeshes;
-        public Dictionary<int, WallMesh> WallMeshes;
+        public Dictionary<int, Dictionary<Direction, WallMesh>> WallMeshes; // 8 wall meshes per altitude level (1 per direction)
         public Dictionary<int, BatchEntityMesh> ProceduralEntityMeshes;
 
         // Performance Profilers
@@ -101,7 +101,7 @@ namespace BlockmapFramework
 
             AirNodeMeshes = new Dictionary<int, AirNodeMesh>();
             FenceMeshes = new Dictionary<int, FenceMesh>();
-            WallMeshes = new Dictionary<int, WallMesh>();
+            WallMeshes = new Dictionary<int, Dictionary<Direction, WallMesh>>();
             ProceduralEntityMeshes = new Dictionary<int, BatchEntityMesh>();
         }
 
@@ -193,7 +193,13 @@ namespace BlockmapFramework
             pm_GenerateFenceMeshes.End();
 
             pm_GenerateWallMeshes.Begin();
-            foreach (WallMesh mesh in WallMeshes.Values) GameObject.Destroy(mesh.gameObject);
+            foreach (var altitudeLevel in WallMeshes.Values)
+            {
+                foreach (WallMesh mesh in altitudeLevel.Values)
+                {
+                    GameObject.Destroy(mesh.gameObject);
+                }
+            }
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
             pm_GenerateWallMeshes.End();
 
@@ -217,11 +223,13 @@ namespace BlockmapFramework
             WaterMesh.SetVisibility(actor);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(actor);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(actor);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.SetVisibility(actor);
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
+            foreach (var altitudeLevel in WallMeshes.Values)
+                foreach (WallMesh mesh in altitudeLevel.Values)
+                    mesh.SetVisibility(actor);
 
             // Entity visibility
-            foreach(Entity e in Entities) e.UpdateVisibility(actor);
+            foreach (Entity e in Entities) e.UpdateVisibility(actor);
         }
 
         public void ShowGrid(bool show)
@@ -235,10 +243,12 @@ namespace BlockmapFramework
             GroundMesh.ShowTextures(show);
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.ShowTextures(show);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.ShowTextures(show);
-            foreach (WallMesh mesh in WallMeshes.Values) mesh.ShowTextures(show);
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.ShowTextures(show);
             foreach (Entity entity in Entities.Where(x => x.IsStandaloneEntity)) entity.ShowTextures(show);
             WaterMesh.ShowTextures(show);
+            foreach (var altitudeLevel in WallMeshes.Values)
+                foreach (WallMesh mesh in altitudeLevel.Values)
+                    mesh.ShowTextures(show);
         }
         public void ShowTileBlending(bool show)
         {
@@ -414,6 +424,11 @@ namespace BlockmapFramework
         {
             return Walls.Where(x => x.Key.y == altitude).Select(x => x.Value).SelectMany(x => x).ToList();
         }
+        public List<Wall> GetWalls(int altitude, Direction side)
+        {
+            return Walls.Where(x => x.Key.y == altitude).Select(x => x.Value.Where(w => w.Side == side)).SelectMany(x => x).ToList();
+        }
+
         public List<Fence> GetFences(int altitude)
         {
             return Fences.Select(x => x.Value).SelectMany(x => x).Where(x => x.Node.BaseAltitude == altitude).ToList();

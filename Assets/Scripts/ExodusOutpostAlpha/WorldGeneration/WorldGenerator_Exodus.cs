@@ -31,11 +31,14 @@ namespace ExodusOutposAlpha.WorldGeneration
 
             int hallwayWidth = 4;
             int hallwayStartY = World.NumNodesPerSide / 2 - hallwayWidth / 2;
-            CreateRoom(new Parcel(World, new Vector2Int(hallwayStartX, hallwayStartY), new Vector2Int(hallwayLength, hallwayWidth)));
+            CreateRoom("hallway", new Parcel(World, new Vector2Int(hallwayStartX, hallwayStartY), new Vector2Int(hallwayLength, hallwayWidth)));
         }
 
-        private void CreateRoom(Parcel parcel)
+        private void CreateRoom(string label, Parcel parcel)
         {
+            List<BlockmapNode> floorNodes = new List<BlockmapNode>();
+            List<Wall> interiorWalls = new List<Wall>();
+
             // Floor
             for (int x = parcel.MinX; x < parcel.MaxX; x++)
             {
@@ -46,36 +49,46 @@ namespace ExodusOutposAlpha.WorldGeneration
                     // Floor
                     GroundNode node = World.GetGroundNode(coords);
                     World.SetSurface(node, SurfaceDefOf.DiamondPlate, updateWorld: false);
+                    floorNodes.Add(node);
 
                     // Wall
                     if(x == parcel.MinX)
                     {
-                        BuildWalls(coords, Direction.W, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT);
+                        BuildWalls(coords, Direction.W, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT, out List<Wall> builtWalls);
+                        interiorWalls.AddRange(builtWalls);
                     }
                     if (x == parcel.MaxX - 1)
                     {
-                        BuildWalls(coords, Direction.E, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT);
+                        BuildWalls(coords, Direction.E, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT, out List<Wall> builtWalls);
+                        interiorWalls.AddRange(builtWalls);
                     }
                     if (y == parcel.MinY)
                     {
-                        BuildWalls(coords, Direction.S, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT);
+                        BuildWalls(coords, Direction.S, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT, out List<Wall> builtWalls);
+                        interiorWalls.AddRange(builtWalls);
                     }
                     if (y == parcel.MaxY - 1)
                     {
-                        BuildWalls(coords, Direction.N, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT);
+                        BuildWalls(coords, Direction.N, GROUND_FLOOR_ALTITUDE, FLOOR_HEIGHT, out List<Wall> builtWalls);
+                        interiorWalls.AddRange(builtWalls);
                     }
 
                     // Ceiling
                     World.BuildAirNode(coords, GROUND_FLOOR_ALTITUDE + FLOOR_HEIGHT, SurfaceDefOf.DiamondPlate, updateWorld: false);
                 }
             }
+
+            // Room
+            World.AddRoom(label, floorNodes, interiorWalls);
         }
 
-        private void BuildWalls(Vector2Int coordinates, Direction side, int startAltitude, int height)
+        private void BuildWalls(Vector2Int coordinates, Direction side, int startAltitude, int height, out List<Wall> builtWalls)
         {
+            builtWalls = new List<Wall>();
             for(int i = startAltitude; i < startAltitude + height; i++)
             {
-                World.BuildWall(new Vector3Int(coordinates.x, i, coordinates.y), side, WallShapeDefOf.Solid, WallMaterialDefOf.CorrugatedSteel, updateWorld: false);
+                Wall builtWall = World.BuildWall(new Vector3Int(coordinates.x, i, coordinates.y), side, WallShapeDefOf.Solid, WallMaterialDefOf.CorrugatedSteel, updateWorld: false);
+                builtWalls.Add(builtWall);
             }
         }
     }

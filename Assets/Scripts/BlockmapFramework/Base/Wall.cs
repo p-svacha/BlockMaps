@@ -49,6 +49,11 @@ namespace BlockmapFramework
         public bool IsMirrored;
 
         /// <summary>
+        /// The room that this wall piece is part of the interior.
+        /// </summary>
+        public Room InteriorRoom { get; private set; }
+
+        /// <summary>
         /// Zones that this wall is inside of
         /// </summary>
         public List<Zone> Zones = new List<Zone>();
@@ -163,6 +168,8 @@ namespace BlockmapFramework
             Zones.Remove(z);
         }
 
+        public void SetInteriorRoom(Room room) => InteriorRoom = room;
+
         #endregion
 
         #region Vision Target
@@ -205,6 +212,7 @@ namespace BlockmapFramework
         #endregion
 
         #region Getters
+
         public virtual string Label => Material.LabelCap + " " + Shape.LabelCap;
         public virtual string Description => Shape.Description;
 
@@ -228,11 +236,6 @@ namespace BlockmapFramework
             return cellCenter + directionOffset;
         }
 
-        public override string ToString()
-        {
-            return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Label + " " + Material.Label;
-        }
-
         public bool BlocksVision => Shape.BlocksVision;
 
         /// <summary>
@@ -241,12 +244,47 @@ namespace BlockmapFramework
         public VisibilityType GetVisibility(Actor activeVisionActor)
         {
             // Check if we need to hide because of vision cutoff
-            if (Chunk.World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+            WorldDisplaySettings displaySettings = Chunk.World.DisplaySettings;
+            if (displaySettings.VisionCutoffMode == VisionCutoffMode.AbsoluteCutoff)
+            {
+                if (MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+            }
+
+            if (displaySettings.VisionCutoffMode == VisionCutoffMode.PerspectiveCutoff && displaySettings.PerspectiveVisionCutoffTarget != null)
+            {
+                if (MinAltitude > displaySettings.VisionCutoffAltitude + displaySettings.VisionCutoffPerpectiveHeight) return VisibilityType.Hidden;
+
+                Room targetRoom = displaySettings.PerspectiveVisionCutoffTarget.OriginNode.Room;
+                if (targetRoom != null)
+                {
+                    Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
+                    List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(HelperFunctions.GetOppositeDirection(cameraFacingDirection));
+
+                    if (wallSidesToHide.Contains(Side) && MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+                }
+            }
 
             // Else visibility is based on vision of actor
             if (IsVisibleBy(activeVisionActor)) return VisibilityType.Visible;
             else if (IsExploredBy(activeVisionActor)) return VisibilityType.FogOfWar;
             return VisibilityType.Hidden;
+        }
+
+        public override string ToString()
+        {
+            return GlobalCellCoordinates.ToString() + " " + Side.ToString() + " " + Shape.Label + " " + Material.Label;
+        }
+        public string DebugInfoLong()
+        {
+            string text = "";
+
+            text += $"Cell: {GlobalCellCoordinates.ToString()}";
+            text += $"\nSide: {Side}";
+            text += $"\nShape: {Shape.LabelCap}";
+            text += $"\nMaterial: {Material.LabelCap}";
+            if(InteriorRoom != null) text += $"\nRoom (Int): {InteriorRoom.LabelCap}";
+
+            return text;
         }
 
         #endregion

@@ -353,7 +353,8 @@ namespace BlockmapFramework
                 if (reader.ReadToFollowing(label))
                 {
                     string value = reader.ReadElementContentAsString();
-                    list = value.Split(',').ToHashSet();
+                    if (value == "") list = new HashSet<string>();
+                    else list = value.Split(',').ToHashSet();
                 }
             }
         }
@@ -548,6 +549,7 @@ namespace BlockmapFramework
                         if (typeof(Actor).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetActor(objId) as T;
                         else if (typeof(BlockmapNode).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetNode(objId) as T;
                         else if (typeof(Entity).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetEntity(objId) as T;
+                        else if (typeof(Wall).IsAssignableFrom(typeof(T))) resolvedObj = LoadingWorld.GetWall(objId) as T;
                         else throw new Exception($"Unsupported reference type '{typeof(T)}' in list '{label}'.");
 
                         // Validate that the reference was successfully resolved

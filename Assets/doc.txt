@@ -186,7 +186,6 @@ Framework: Make vision system optional
 - Allow entites to have their own nodes
 ---
 
-- Editor-Bug: Vision cutoff doesn't correctly reset when generating new map
 - Editor-Bug: Decreasing tool size in ground sculpting doesn't remove overlay over previous chunks
 - Editor-Feature: World Generation Tool: Expand by x chunks in direction
 
