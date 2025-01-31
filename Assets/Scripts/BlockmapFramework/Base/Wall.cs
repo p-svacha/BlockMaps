@@ -32,6 +32,7 @@ namespace BlockmapFramework
         /// The side within the cell this wall covers.
         /// </summary>
         public Direction Side;
+        public Direction OppositeSide => HelperFunctions.GetOppositeDirection(Side);
 
         /// <summary>
         /// The shape of this wall (i.e. solid, window).
@@ -49,9 +50,19 @@ namespace BlockmapFramework
         public bool IsMirrored;
 
         /// <summary>
-        /// The room that this wall piece is part of the interior.
+        /// The wall piece that is right on the other side of this wall.
+        /// </summary>
+        public Wall OppositeWall { get; private set; }
+
+        /// <summary>
+        /// The room on the inside (node the wall is part of) of this wall piece.
         /// </summary>
         public Room InteriorRoom { get; private set; }
+
+        /// <summary>
+        /// The room on the outside (adjacent node of wall) of this wall piece.
+        /// </summary>
+        public Room ExteriorRoom => OppositeWall?.InteriorRoom;
 
         /// <summary>
         /// Zones that this wall is inside of
@@ -168,7 +179,9 @@ namespace BlockmapFramework
             Zones.Remove(z);
         }
 
+        public void SetOppositeWall(Wall wall) => OppositeWall = wall;
         public void SetInteriorRoom(Room room) => InteriorRoom = room;
+
 
         #endregion
 
@@ -250,17 +263,42 @@ namespace BlockmapFramework
                 if (MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
             }
 
-            if (displaySettings.VisionCutoffMode == VisionCutoffMode.PerspectiveCutoff && displaySettings.PerspectiveVisionCutoffTarget != null)
+
+            if (displaySettings.VisionCutoffMode == VisionCutoffMode.RoomPerspectiveCutoff && displaySettings.PerspectiveVisionCutoffTarget != null && MinAltitude > displaySettings.VisionCutoffAltitude)
             {
                 if (MinAltitude > displaySettings.VisionCutoffAltitude + displaySettings.VisionCutoffPerpectiveHeight) return VisibilityType.Hidden;
 
                 Room targetRoom = displaySettings.PerspectiveVisionCutoffTarget.OriginNode.Room;
                 if (targetRoom != null)
                 {
-                    Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
-                    List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(HelperFunctions.GetOppositeDirection(cameraFacingDirection));
+                    // Check if wall is part of the room the target is in
+                    if (InteriorRoom == targetRoom)
+                    {
+                        Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
+                        List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(HelperFunctions.GetOppositeDirection(cameraFacingDirection));
 
-                    if (wallSidesToHide.Contains(Side) && MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+                        if (wallSidesToHide.Contains(Side)) return VisibilityType.Hidden;
+                    }
+
+                    else // Wall is not part of target room
+                    {
+                        // Check if wall is right on the other side of the room the target is in
+                        if (OppositeWall != null && OppositeWall.InteriorRoom == targetRoom)
+                        {
+                            Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
+                            List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(cameraFacingDirection);
+
+                            if (wallSidesToHide.Contains(Side)) return VisibilityType.Hidden;
+                        }
+
+                        // Check if wall is close to target room in the direction the camera is facing
+                        int maxDistance = 2;
+                        for (int i = 1; i <= maxDistance; i++)
+                        {
+                            Vector2Int coordinates = WorldCoordinates + HelperFunctions.GetDirectionVectorInt(BlockmapCamera.Instance.CurrentFacingDirection, distance: i);
+                            if (targetRoom.WorldCoordinates.Contains(coordinates)) return VisibilityType.Hidden;
+                        }
+                    }
                 }
             }
 
@@ -278,11 +316,12 @@ namespace BlockmapFramework
         {
             string text = "";
 
-            text += $"Cell: {GlobalCellCoordinates.ToString()}";
+            text += $"Cell: {GlobalCellCoordinates}";
             text += $"\nSide: {Side}";
             text += $"\nShape: {Shape.LabelCap}";
             text += $"\nMaterial: {Material.LabelCap}";
             if(InteriorRoom != null) text += $"\nRoom (Int): {InteriorRoom.LabelCap}";
+            if (OppositeWall != null) text += $"\nOpposite Wall: {OppositeWall}";
 
             return text;
         }

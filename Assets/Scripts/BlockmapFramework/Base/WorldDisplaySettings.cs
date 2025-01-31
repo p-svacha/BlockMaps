@@ -66,8 +66,9 @@ namespace BlockmapFramework
         /// <summary>
         /// Everything at and above VisionCutoffPerpectiveMaxAltitude will not be rendered.
         /// <br/>Additionally walls in front of the character are hidden starting from VisionCutoffAltitude.
+        /// <br/>Wall identification is room based.
         /// </summary>
-        PerspectiveCutoff,
+        RoomPerspectiveCutoff,
 
         /// <summary>
         /// Everything at and above VisionCutoffAltitude will not be rendered.

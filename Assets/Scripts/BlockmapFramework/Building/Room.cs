@@ -15,6 +15,7 @@ namespace BlockmapFramework
         public World World;
         public string Label;
         public string LabelCap => Label.CapitalizeFirst();
+        public HashSet<Vector2Int> WorldCoordinates;
         public List<BlockmapNode> FloorNodes;
         public List<Wall> InteriorWalls;
 
@@ -34,7 +35,11 @@ namespace BlockmapFramework
         /// </summary>
         private void Init()
         {
-            // Set references in all nodes and walls of this room
+            // Set coordinates
+            WorldCoordinates = new HashSet<Vector2Int>();
+            foreach (BlockmapNode node in FloorNodes) WorldCoordinates.Add(node.WorldCoordinates);
+
+            // Set references in all nodes and walls inside this room
             foreach (BlockmapNode node in FloorNodes) node.SetRoom(this);
             foreach (Wall wall in InteriorWalls) wall.SetInteriorRoom(this);
         }

@@ -305,14 +305,14 @@ namespace BlockmapFramework
             MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
 
             // Init database id's
-            NodeIdCounter = Nodes.Count == 0 ? 0 : Nodes.Max(x => x.Key) + 1;
-            EntityIdCounter = Entities.Count == 0 ? 0 : Entities.Max(x => x.Key) + 1;
-            WaterBodyIdCounter = WaterBodies.Count == 0 ? 0 : WaterBodies.Max(x => x.Key) + 1;
-            ActorIdCounter = Actors.Count == 0 ? 0 : Actors.Max(x => x.Key) + 1;
-            ZoneIdCounter = Zones.Count == 0 ? 0 : Zones.Max(x => x.Key) + 1;
-            FenceIdCounter = Fences.Count == 0 ? 0 : Fences.Max(x => x.Key) + 1;
-            WallIdCounter = Walls.Count == 0 ? 0 : Walls.Max(x => x.Key) + 1;
-            RoomIdCounter = Rooms.Count == 0 ? 0 : Rooms.Max(x => x.Key) + 1;
+            NodeIdCounter = Nodes.Count == 0 ? 1 : Nodes.Max(x => x.Key) + 1;
+            EntityIdCounter = Entities.Count == 0 ? 1 : Entities.Max(x => x.Key) + 1;
+            WaterBodyIdCounter = WaterBodies.Count == 0 ? 1 : WaterBodies.Max(x => x.Key) + 1;
+            ActorIdCounter = Actors.Count == 0 ? 1 : Actors.Max(x => x.Key) + 1;
+            ZoneIdCounter = Zones.Count == 0 ? 1 : Zones.Max(x => x.Key) + 1;
+            FenceIdCounter = Fences.Count == 0 ? 1 : Fences.Max(x => x.Key) + 1;
+            WallIdCounter = Walls.Count == 0 ? 1 : Walls.Max(x => x.Key) + 1;
+            RoomIdCounter = Rooms.Count == 0 ? 1 : Rooms.Max(x => x.Key) + 1;
         }
 
         private void OnInitializationDone()
@@ -1636,8 +1636,6 @@ namespace BlockmapFramework
         }
         public Wall BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool updateWorld, bool mirrored = false)
         {
-            //if (!CanBuildWall(globalCellCoordinates, side)) return;
-
             // Create and register new wall
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
             RegisterWall(newWall);
@@ -1658,6 +1656,14 @@ namespace BlockmapFramework
 
             // In chunk
             wall.Chunk.RegisterWall(wall);
+
+            // Opposite wall references
+            Wall oppositeWall = GetWall(HelperFunctions.GetAdjacentCellCoordinates(wall.GlobalCellCoordinates, wall.Side), HelperFunctions.GetOppositeDirection(wall.Side));
+            if(oppositeWall != null)
+            {
+                wall.SetOppositeWall(oppositeWall);
+                oppositeWall.SetOppositeWall(wall);
+            }
         }
         public void RemoveWall(Wall wall, bool updateWorld)
         {
@@ -1675,6 +1681,11 @@ namespace BlockmapFramework
             Walls.Remove(wall.Id);
             wall.Chunk.DeregisterWall(wall);
             WallsByWorldCoordinates2D[wall.WorldCoordinates].Remove(wall);
+            if(wall.OppositeWall != null)
+            {
+                wall.OppositeWall.SetOppositeWall(null);
+                wall.SetOppositeWall(null);
+            }
         }
 
         public List<BlockmapNode> GetPossibleLadderTargetNodes(BlockmapNode source, Direction side)
@@ -1879,7 +1890,7 @@ namespace BlockmapFramework
 
         private void OnCameraFacingDirectionChanged()
         {
-            if(DisplaySettings.VisionCutoffMode == VisionCutoffMode.PerspectiveCutoff && DisplaySettings.PerspectiveVisionCutoffTarget != null)
+            if(DisplaySettings.VisionCutoffMode == VisionCutoffMode.RoomPerspectiveCutoff && DisplaySettings.PerspectiveVisionCutoffTarget != null)
             {
                 UpdateVisibility();
             }
@@ -2016,7 +2027,7 @@ namespace BlockmapFramework
         public void EnablePerspectiveVisionCutoff(Entity target)
         {
             DisplaySettings.SetVisionCutoffPerspectiveTarget(target);
-            DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.PerspectiveCutoff);
+            DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.RoomPerspectiveCutoff);
             DisplaySettings.SetVisionCutoffAltitude(target.MinAltitude);
             UpdateVisibility();
         }

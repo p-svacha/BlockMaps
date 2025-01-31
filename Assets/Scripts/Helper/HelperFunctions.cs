@@ -472,6 +472,15 @@ public static class HelperFunctions
     }
 
     /// <summary>
+    /// Returns the cell coordinates when going from source coordinates into a 2d direction on the same altitude level.
+    /// </summary>
+    public static Vector3Int GetAdjacentCellCoordinates(Vector3Int cellCoordinates, Direction dir)
+    {
+        Vector2Int dirVector = GetDirectionVectorInt(dir);
+        return new Vector3Int(cellCoordinates.x + dirVector.x, cellCoordinates.y, cellCoordinates.z + dirVector.y);
+    }
+
+    /// <summary>
     /// Returns the global cell coordinates of the wall that is to the left/right/above/below a wall piece with the given source coordinates and side.
     /// <br/> dir refers which direction we want to search, whereas (N = Above, S = Below, W = Left, E = Right).
     /// </summary>
