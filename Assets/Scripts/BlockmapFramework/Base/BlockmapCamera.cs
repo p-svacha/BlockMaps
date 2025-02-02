@@ -8,7 +8,7 @@ namespace BlockmapFramework
     public class BlockmapCamera : MonoBehaviour
     {
         public static BlockmapCamera Instance; // Singleton instance
-        public Camera Camera;
+        public Camera Camera { get; private set; }
 
         private const float TURN_SPEED = 80f;
 
@@ -35,7 +35,7 @@ namespace BlockmapFramework
 
         // Follow
         public Entity FollowedEntity { get; private set; }
-        public bool InUnbreakableFollow; // If true, moving camera is disabled until Unfollow()
+        private bool InUnbreakableFollow; // If true, moving camera is disabled until Unfollow()
 
         // Camera Position
         public float CurrentAngle { get; private set; }
@@ -50,6 +50,7 @@ namespace BlockmapFramework
         private void Awake()
         {
             Instance = this;
+            Camera = GetComponent<Camera>();
         }
 
         public void Update()
@@ -236,42 +237,12 @@ namespace BlockmapFramework
             float cameraOffsetX = Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
             float cameraOffsetY = Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * OffsetRadius;
             Direction prevFacingDirection = CurrentFacingDirection;
-            CurrentFacingDirection = GetCurrentDirection();
+            CurrentFacingDirection = HelperFunctions.GetDirection8FromAngle(CurrentAngle, offset: 180);
             if (prevFacingDirection != CurrentFacingDirection) OnFacingDirectionChanged?.Invoke();
 
             if (Camera == null) Camera = GetComponent<Camera>();
             Camera.transform.position = new Vector3(CurrentPosition.x + cameraOffsetX, CurrentPosition.y + CurrentZoom, CurrentPosition.z + cameraOffsetY);
             Camera.transform.LookAt(CurrentPosition);
-        }
-
-        private Direction GetCurrentDirection()
-        {
-            // Normalize angle to the [0, 360) range
-            float angleDegrees = CurrentAngle;
-            angleDegrees %= 360f;
-            if (angleDegrees < 0)
-            {
-                angleDegrees += 360f;
-            }
-
-            // Offset by 22.5 so that each 45° segment is centered
-            double offset = (angleDegrees + 22.5) % 360f;
-
-            // Determine which 45° segment the angle belongs in
-            int segment = (int)(offset / 45.0);
-
-            switch (segment)
-            {
-                case 0: return Direction.S;   // 0° centered => South
-                case 1: return Direction.SW;
-                case 2: return Direction.W;   // 90° centered => West
-                case 3: return Direction.NW;
-                case 4: return Direction.N;   // 180° centered => North
-                case 5: return Direction.NE;
-                case 6: return Direction.E;   // 270° centered => East
-                case 7: return Direction.SE;
-                default: return Direction.None;
-            }
         }
 
         public void SetPosition(Vector3 pos)

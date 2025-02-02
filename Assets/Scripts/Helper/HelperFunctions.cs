@@ -319,7 +319,63 @@ public static class HelperFunctions
         };
     }
 
-   
+    public static Direction GetDirection8FromAngle(float angle, float offset = 0)
+    {
+        // Normalize angle to the [0, 360) range
+        float angleDegrees = angle + offset;
+        angleDegrees %= 360f;
+        if (angleDegrees < 0)
+        {
+            angleDegrees += 360f;
+        }
+
+        // Offset by 22.5 so that each 45° segment is centered
+        double segmentOffset = (angleDegrees + 22.5) % 360f;
+
+        // Determine which 45° segment the angle belongs in
+        int segment = (int)(segmentOffset / 45.0);
+
+        switch (segment)
+        {
+            case 0: return Direction.N;
+            case 1: return Direction.NE;
+            case 2: return Direction.E;
+            case 3: return Direction.SE;
+            case 4: return Direction.S;
+            case 5: return Direction.SW;
+            case 6: return Direction.W;
+            case 7: return Direction.NW;
+            default: return Direction.None;
+        }
+    }
+
+    public static Direction GetDirection4FromAngle(float angle, float offset = 0)
+    {
+        // Normalize angle to the [0, 360) range
+        float angleDegrees = angle + offset;
+        angleDegrees %= 360f;
+        if (angleDegrees < 0)
+        {
+            angleDegrees += 360f;
+        }
+
+        // Offset by 45 so that each 90° segment is centered
+        double segmentOffset = (angleDegrees + 45) % 360f;
+
+        // Determine which 90° segment the angle belongs in
+        int segment = (int)(segmentOffset / 90.0);
+
+        switch (segment)
+        {
+            case 0: return Direction.N;
+            case 1: return Direction.E;
+            case 2: return Direction.S;
+            case 3: return Direction.W;
+            default: return Direction.None;
+        }
+    }
+
+
     private static List<Direction> _Directions8 = new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     public static List<Direction> GetAllDirections8() => _Directions8;
     

@@ -89,7 +89,14 @@ if that works, try hosting the game on a website
 ------------------------- END CTF v0.0.8 -------------------------
 
 
+
 Framework Updates:
+
+Bug: Doors are still bugged, vision colliders are at wrong rotations
+Bug: Seeing an airnode from below should only mark it as explored, not visible
+Bug: Should not  be able to see/explore entities that are on top of air nodes that you are below (else you see stuff a floor higher than you)
+Bug: In RoomPerspective cutoff mode, sometimes the edge of walls that should be invisible because of perspective still get rendered because adjacent wall does too (fog of war overlap)
+
 
 Entity Pivot:
 entities have an additional PivotDirection (SW, SE, NW, NE). Default is SW
@@ -98,12 +105,6 @@ entities have an additional PivotDirection (SW, SE, NW, NE). Default is SW
 	when implemented, remove/make optional requirement that footprint needs to be fully connected. If it's not, then these just don't get added to occupied nodes
 		i need this i.e. so that rocks can clip into cliffs
 		THEN ALSO CHECK in blockmapnode.isImpassable if another nearby entity blocks this node according to its pivot, size and shape
-
-Walls that are not actually explored are visible when a wall on the same cell is explored
-	> maybe one mesh per direction per height level?
-	> maybe pass direction to shader?
-
-Bug: redrawing entities resets their rotation because ResetWorldPositonAndRotation() is called in system update in reposition
 
 Increase performance of detecting climb transitions on empty perlin map
 maybe also other steps

@@ -67,6 +67,8 @@ namespace WorldEditor
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.ObjectDefs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.CharacterDefs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(ExodusOutposAlpha.CrewDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(ExodusOutposAlpha.RobotDefs.Defs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

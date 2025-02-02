@@ -474,14 +474,14 @@ Shader "Custom/SurfaceShader"
             }
             
             // ######################################################################### ZONE BORDER #########################################################################
-            int zoneValue = _ZoneBorders[tileIndex];
-            int borderWest = zoneValue % 10;
+            uint zoneValue = _ZoneBorders[tileIndex];
+            uint borderWest = zoneValue % 10;
             zoneValue /= 10;
-            int borderSouth = zoneValue % 10;
+            uint borderSouth = zoneValue % 10;
             zoneValue /= 10;
-            int borderEast = zoneValue % 10;
+            uint borderEast = zoneValue % 10;
             zoneValue /= 10;
-            int borderNorth = zoneValue % 10;
+            uint borderNorth = zoneValue % 10;
 
             bool drawBorderPattern = false;
             if (borderNorth == 1 && relativePos.y > 1 - _ZoneBorderWidth) drawBorderPattern = true;

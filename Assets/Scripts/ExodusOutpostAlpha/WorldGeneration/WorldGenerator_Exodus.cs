@@ -13,9 +13,9 @@ namespace ExodusOutposAlpha.WorldGeneration
         public override string Description => "Creates a random map.";
         public override bool StartAsVoid => false;
 
-        private const int GROUND_FLOOR_ALTITUDE = 5;
-        private const int FLOOR_HEIGHT = 5;
-        private const int DOOR_HEIGHT = 4;
+        public const int GROUND_FLOOR_ALTITUDE = 5;
+        public const int FLOOR_HEIGHT = 5;
+        public const int DOOR_HEIGHT = 4;
 
         Room Hallway;
         Room Quarters;
@@ -150,7 +150,10 @@ namespace ExodusOutposAlpha.WorldGeneration
         private void SpawnCharacters()
         {
             BlockmapNode spawnNode = Quarters.FloorNodes.RandomElement();
-            World.SpawnEntity(DefDatabase<EntityDef>.GetNamed("Human4"), spawnNode, Direction.N, isMirrored: false, World.GetActor(1), updateWorld: false);
+            World.SpawnEntity(DefDatabase<EntityDef>.GetNamed("CrewMember"), spawnNode, Direction.N, isMirrored: false, World.GetActor(1), updateWorld: false);
+
+            BlockmapNode enemySpawnNode = StorageRoom.FloorNodes.RandomElement();
+            World.SpawnEntity(DefDatabase<EntityDef>.GetNamed("Drone"), enemySpawnNode, Direction.N, isMirrored: false, World.GetActor(2), updateWorld: false);
         }
 
         private int GetLevelAltitude(int level) => GROUND_FLOOR_ALTITUDE + level * FLOOR_HEIGHT;

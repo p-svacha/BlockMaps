@@ -42,19 +42,6 @@ public class PriorityQueue<T>
         return result;
     }
 
-    /// <summary>
-    /// Re-inserts the item with a new, lower priority if you discover a better path.
-    /// One simple approach is just to Enqueue again with a lower priority
-    /// (and ignore the older "worse" entry when dequeued).
-    /// </summary>
-    public void DecreasePriority(T item, float newPriority)
-    {
-        // For a naive approach, just re-enqueue it:
-        Enqueue(item, newPriority);
-        // In a more refined approach, you'd search for the item in _elements,
-        // update its priority, and bubble up. But re-enqueueing is simpler.
-    }
-
     private void BubbleUp(int index)
     {
         while (index > 0)

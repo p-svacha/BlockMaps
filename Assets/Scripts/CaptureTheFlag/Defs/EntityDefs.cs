@@ -25,31 +25,31 @@ namespace CaptureTheFlag
                 PositionType = PositionType.CenterPoint,
             },
             Components = new List<CompProperties>()
+            {
+                new CompProperties_Skills()
                 {
-                    new CompProperties_Skills()
+                    InitialSkillLevels = new Dictionary<string, int>()
                     {
-                        InitialSkillLevels = new Dictionary<string, int>()
-                        {
-                            { "Running", 10 },
-                            { "Vision", 8 },
-                            { "Endurance", 14 },
-                            { "Regeneration", 10 },
-                            { "Climbing", 6 },
-                            { "Swimming", 6 },
-                            { "Vaulting", 8 },
-                        },
-                    },
-                    new CompProperties_Movement()
-                    {
-                        ClimbingSkill = ClimbingCategory.Intermediate,
-                    },
-                    new CompProperties_Stats() { },
-                    new CompProperties_CtfCharacter()
-                    {
-                        Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
-                        CanUseDoors = true,
+                        { "Running", 10 },
+                        { "Vision", 8 },
+                        { "Endurance", 14 },
+                        { "Regeneration", 10 },
+                        { "Climbing", 6 },
+                        { "Swimming", 6 },
+                        { "Vaulting", 8 },
                     },
                 },
+                new CompProperties_Movement()
+                {
+                    ClimbingSkill = ClimbingCategory.Intermediate,
+                },
+                new CompProperties_Stats() { },
+                new CompProperties_CtfCharacter()
+                {
+                    Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/human_avatar"),
+                    CanUseDoors = true,
+                },
+            },
         };
         private static EntityDef DogBase = new EntityDef()
         {
@@ -66,28 +66,28 @@ namespace CaptureTheFlag
                 PositionType = PositionType.CenterPoint,
             },
             Components = new List<CompProperties>()
+            {
+                new CompProperties_Skills()
                 {
-                    new CompProperties_Skills()
+                    InitialSkillLevels = new Dictionary<string, int>()
                     {
-                        InitialSkillLevels = new Dictionary<string, int>()
-                        {
-                            { "Running", 15 },
-                            { "Vision", 5 },
-                            { "Endurance", 14 },
-                            { "Regeneration", 8 },
-                            { "Climbing", 0 },
-                            { "Swimming", 12 },
-                            { "Vaulting", 5 },
-                        },
-                    },
-                    new CompProperties_Movement() { },
-                    new CompProperties_Stats() { },
-                    new CompProperties_CtfCharacter()
-                    {
-                        Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
-                        CanUseDoors = false,
+                        { "Running", 15 },
+                        { "Vision", 5 },
+                        { "Endurance", 14 },
+                        { "Regeneration", 8 },
+                        { "Climbing", 0 },
+                        { "Swimming", 12 },
+                        { "Vaulting", 5 },
                     },
                 },
+                new CompProperties_Movement() { },
+                new CompProperties_Stats() { },
+                new CompProperties_CtfCharacter()
+                {
+                    Avatar = Resources.Load<Sprite>("CaptureTheFlag/Characters/dog_avatar"),
+                    CanUseDoors = false,
+                },
+            },
         };
         public static List<EntityDef> CharacterDefs
         {

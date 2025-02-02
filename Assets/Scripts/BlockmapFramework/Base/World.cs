@@ -1027,7 +1027,7 @@ namespace BlockmapFramework
 
         public void UpdateEntityVisionDelayed(List<Entity> entities, System.Action callback)
         {
-            UpdateEntityVisionIn = 3;
+            UpdateEntityVisionIn = 2;
             VisionUpdateEntities = entities;
             EntityVisionUpdateCallback = callback;
         }

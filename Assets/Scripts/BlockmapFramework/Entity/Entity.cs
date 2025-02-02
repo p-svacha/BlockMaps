@@ -1249,10 +1249,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Instantly teleports this entity to the given node.
         /// </summary>
-        public void Teleport(BlockmapNode targetNode)
+        public void Teleport(BlockmapNode targetNode, Direction newDirection = Direction.None)
         {
             BlockmapNode sourceNode = OriginNode;
             SetOriginNode(targetNode);
+            if (newDirection != Direction.None) Rotation = newDirection;
             ResetWorldPositonAndRotation();
 
             // Update vision from entities around source and target position
