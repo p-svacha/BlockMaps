@@ -9,9 +9,13 @@ namespace BlockmapFramework.WorldGeneration
     /// </summary>
     public abstract class Region : Parcel
     {
+        private World World;
         public abstract ParcelType Type { get; }
 
-        protected Region(World world, Vector2Int position, Vector2Int dimensions) : base(world, position, dimensions) { }
+        protected Region(World world, Vector2Int position, Vector2Int dimensions) : base(position, dimensions)
+        {
+            World = world;
+        }
 
         public abstract void Generate();
 

@@ -130,10 +130,12 @@ namespace BlockmapFramework.WorldGeneration
                     if (!World.IsInWorld(position)) break;
 
                     GroundNode node = World.GetGroundNode(position);
-                    if (World.CanSpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, isMirrored: false, hedgeHeight, forceHeadspaceRecalc: true))
+                    EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
                     {
-                        World.SpawnEntity(EntityDefOf.ProcHedge, node, Direction.N, isMirrored: false, World.Gaia, updateWorld: false, hedgeHeight);
-                    }
+                        Def = EntityDefOf.ProcHedge,
+                        PositionProperties = new EntitySpawnPositionProperties_OnNode(node),
+                        CustomHeight = hedgeHeight,
+                    });
 
                     // Next position
                     int numAttempts = 0;
@@ -163,7 +165,11 @@ namespace BlockmapFramework.WorldGeneration
                     float densityMapValue = forestDensityMap.GetValue(x, y);
                     if (densityMapValue > 0.3f && Random.value < densityMapValue * densityModifier)
                     {
-                        TrySpawnRandomEntityDefOnGround(World, x, y, TreeProbabilities);
+                        EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+                        {
+                            DefProbabilities = TreeProbabilities,
+                            PositionProperties = new EntitySpawnPositionProperties_OnNode(World.GetGroundNode(x,y)),
+                        });
                     }
                 }
             }
@@ -343,11 +349,11 @@ namespace BlockmapFramework.WorldGeneration
             Vector2Int parcelCenter = GetRandomWorldCoordinates();
             Vector2Int parcelPosition = new Vector2Int(parcelCenter.x - parcelSizeX / 2, parcelCenter.y - parcelSizeY / 2);
 
-            Parcel parcel = new Parcel(World, parcelPosition, new Vector2Int(parcelSizeX, parcelSizeY));
+            Parcel parcel = new Parcel(parcelPosition, new Vector2Int(parcelSizeX, parcelSizeY));
             if(CanPlaceShack(parcel))
             {
                 // Shack
-                ShackGenerator.GenerateShack(parcel, World.GetGroundNode(parcelCenter), updateWorld: false);
+                ShackGenerator.GenerateShack(World, parcel, World.GetGroundNode(parcelCenter), updateWorld: false);
 
                 // Path leading to shack
                 foreach(Door door in ShackGenerator.GeneratedShackInfo.Doors)
@@ -380,10 +386,10 @@ namespace BlockmapFramework.WorldGeneration
 
         private bool CanPlaceShack(Parcel parcel)
         {
-            if (!parcel.IsInWorld()) return false;
-            if (parcel.HasAnyWater()) return false;
-            if (parcel.HasAnyNodesWithSurface(SurfaceDefOf.CorrugatedSteel)) return false;
-            if (parcel.HasAnyNodesWithSurface(SurfaceDefOf.DirtPath)) return false;
+            if (!parcel.IsInWorld(World)) return false;
+            if (parcel.HasAnyWater(World)) return false;
+            if (parcel.HasAnyNodesWithSurface(World, SurfaceDefOf.CorrugatedSteel)) return false;
+            if (parcel.HasAnyNodesWithSurface(World, SurfaceDefOf.DirtPath)) return false;
             return true;
         }
 

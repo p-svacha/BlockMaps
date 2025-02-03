@@ -14,7 +14,7 @@ namespace BlockmapFramework.WorldGeneration
             if (ignoredTags != null && node.HasAnyOfTags(ignoredTags)) return; // Skip if node has an ignored tag
             if (ignoredTags != null && node.GetAdjacentGroundNodes8().Any(n => n.HasAnyOfTags(ignoredTags))) return; // Skip if any adjacent node has an ignored tag
 
-            SmoothOutside(node.World, new Parcel(node.World, node.WorldCoordinates, Vector2Int.one), smoothStep, ignoredSurfaces, ignoredTags);
+            SmoothOutside(node.World, new Parcel(node.WorldCoordinates, Vector2Int.one), smoothStep, ignoredSurfaces, ignoredTags);
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace BlockmapFramework.WorldGeneration
 
             } while (anotherLayerRequired);
 
-            return new Parcel(world, new Vector2Int(startX - 1, startY - 1), new Vector2Int((endX - startX) + 2, (endY - startY) + 2));
+            return new Parcel(new Vector2Int(startX - 1, startY - 1), new Vector2Int((endX - startX) + 2, (endY - startY) + 2));
         }
 
         private static bool ShouldSkip(GroundNode node, List<SurfaceDef> ignoredSurfaces, List<string> ignoredTags)

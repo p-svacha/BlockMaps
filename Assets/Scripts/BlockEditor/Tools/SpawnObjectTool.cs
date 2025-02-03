@@ -19,11 +19,13 @@ namespace WorldEditor
 
         private EntityDef SelectedEntity;
         private Direction CurrentRotation;
+        private EntitySpawnProperties SpawnProperties;
 
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
         public UI_SelectionPanel EntitySelection;
         public Toggle MirrorToggle;
+        public Toggle AllowCollisionsToggle;
         public TMP_Dropdown VariantDropdown;
 
         public override void Init(BlockEditor editor)
@@ -54,7 +56,23 @@ namespace WorldEditor
             // Preview
             if (World.HoveredNode != null)
             {
-                bool canPlace = World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, allowCollisions: true);
+                // Generate spawn properties
+                Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
+                SpawnProperties = new EntitySpawnProperties(World)
+                {
+                    Def = SelectedEntity,
+                    Actor = owner,
+                    PositionProperties = new EntitySpawnPositionProperties_OnNode(World.HoveredNode),
+                    Rotation = CurrentRotation,
+                    Mirrored = MirrorToggle.isOn,
+                    VariantName = VariantDropdown.options[VariantDropdown.value].text,
+                    AllowCollisionWithOtherEntities = AllowCollisionsToggle.isOn,
+                };
+                SpawnProperties.Validate(inWorldGen: false, out _);
+                SpawnProperties.Resolve();
+
+                // Check if entity can be placed
+                bool canPlace = EntitySpawner.CanSpawnEntity(SpawnProperties, inWorldGen: false, out string failReason);
 
                 BuildPreview.gameObject.SetActive(true);
                 BuildPreview.transform.position = SelectedEntity.RenderProperties.GetWorldPositionFunction(SelectedEntity, World, World.HoveredNode, CurrentRotation, SelectedEntity.Dimensions.y, false);
@@ -62,8 +80,19 @@ namespace WorldEditor
                 BuildPreview.transform.localScale = SelectedEntity.RenderProperties.ModelScale;
                 if (MirrorToggle.isOn) HelperFunctions.SetAsMirrored(BuildPreview);
 
-                foreach (Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
-                    mat.color = canPlace ? Color.green : Color.red;
+                if(canPlace)
+                {
+                    foreach (Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
+                        mat.color = Color.green;
+                    Tooltip.Instance.gameObject.SetActive(false);
+                }
+                else
+                {
+                    foreach (Material mat in BuildPreview.GetComponent<MeshRenderer>().materials)
+                        mat.color = Color.red;
+                    Tooltip.Instance.Init(Tooltip.TooltipType.TextOnly, "", failReason);
+                }
+                
             }
             else BuildPreview.gameObject.SetActive(false);
         }
@@ -76,20 +105,23 @@ namespace WorldEditor
 
             // M: Toggle mirrored
             if (Input.GetKeyDown(KeyCode.M)) SetMirrored(!MirrorToggle.isOn);
+
+            // C: Allow collisions
+            if (Input.GetKeyDown(KeyCode.C)) SetAllowCollisions(!AllowCollisionsToggle.isOn);
         }
 
         private void SetMirrored(bool show)
         {
             MirrorToggle.isOn = show;
         }
+        private void SetAllowCollisions(bool value)
+        {
+            AllowCollisionsToggle.isOn = value;
+        }
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredNode == null) return;
-            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, allowCollisions: true)) return;
-
-            Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, CurrentRotation, MirrorToggle.isOn, owner, updateWorld: true, variantIndex: VariantDropdown.value);
+            EntitySpawner.TrySpawnEntity(SpawnProperties, inWorldGen: false, updateWorld: true);
         }
 
         public override void HandleRightClick()

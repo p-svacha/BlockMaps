@@ -211,26 +211,6 @@ namespace BlockmapFramework
         protected Vector2Int GetRandomWorldCoordinates() => new Vector2Int(Random.Range(0, WorldSize), Random.Range(0, WorldSize));
         protected Vector2 GetRandomWorldPosition2d() => new Vector2(Random.Range(0f, WorldSize), Random.Range(0f, WorldSize));
 
-        protected static void TrySpawnRandomEntityDefOnGround(World world, int x, int y, Dictionary<EntityDef, float> entityDefProbabilities, string variantName = "")
-        {
-            BlockmapNode targetNode = world.GetGroundNode(new Vector2Int(x, y));
-            Direction rotation = HelperFunctions.GetRandomSide();
-            bool isMirrored = Random.value < 0.5f;
-
-            EntityDef def = entityDefProbabilities.GetWeightedRandomElement();
-
-            if (world.CanSpawnEntity(def, targetNode, rotation, isMirrored, forceHeadspaceRecalc: true))
-            {
-                if(variantName != "")
-                {
-                    EntityVariant variant = def.RenderProperties.Variants.FirstOrDefault(v => v.VariantName == variantName);
-                    int variantIndex = variant != null ? def.RenderProperties.Variants.IndexOf(variant) : 0;
-                    world.SpawnEntity(def, targetNode, rotation, isMirrored, world.Gaia, updateWorld: false, variantIndex: variantIndex);
-                }
-                else world.SpawnEntity(def, targetNode, rotation, isMirrored, world.Gaia, updateWorld: false);
-            }
-        }
-
         /// <summary>
         /// Generates a height map from a noise, given the min and max altitudes referring to the noises 0 and 1 values.
         /// <br/>The int[,] height map can then be used with add/apply heightmap to create smooth terrain.

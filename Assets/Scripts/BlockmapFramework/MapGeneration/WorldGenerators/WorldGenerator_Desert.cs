@@ -272,7 +272,12 @@ namespace BlockmapFramework.WorldGeneration
                     float densityMapValue = densityMap.GetValue(x, y);
                     if (densityMapValue > 0.65f && Random.value < densityMapValue * densityModifier)
                     {
-                        TrySpawnRandomEntityDefOnGround(world, x, y, ShrubClusterProbabilities, variantName: "Desert");
+                        EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
+                        {
+                            DefProbabilities = ShrubClusterProbabilities,
+                            PositionProperties = new EntitySpawnPositionProperties_OnNode(world.GetGroundNode(x,y)),
+                            VariantName = "Desert",
+                        });
                     }
                 }
             }
@@ -344,7 +349,14 @@ namespace BlockmapFramework.WorldGeneration
 
                             // Spawn a rock nearby
                             EntityDef rock = MesaEdgeRockProbabilities.GetWeightedRandomElement();
-                            EntityManager.SpawnEntityAround(world, rock, world.Gaia, groundNode.WorldCoordinates, standard_deviation: 2f, randomMirror: true, variantName: "Desert");
+                            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
+                            {
+                                Def = rock,
+                                PositionProperties = new EntitySpawnPositionProperties_AroundCoordinates(groundNode.WorldCoordinates, standardDeviation: 2f),
+                                RandomRotation = true,
+                                RandomMirrored = true,
+                                VariantName = "Desert"
+                            });
 
                             // Set surface to sandstone around edge
                             int radius = Random.Range(MIN_SANDSTONE_RADIUS, MAX_SANDSTONE_RADIUS + 1);
@@ -458,7 +470,12 @@ namespace BlockmapFramework.WorldGeneration
             {
                 if(Random.value < CHANCE)
                 {
-                    TrySpawnRandomEntityDefOnGround(world, groundNode.WorldCoordinates.x, groundNode.WorldCoordinates.y, ScatteredObjectsProbabilities, variantName: "Desert");
+                    EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
+                    {
+                        DefProbabilities = ScatteredObjectsProbabilities,
+                        PositionProperties = new EntitySpawnPositionProperties_OnNode(groundNode),
+                        VariantName = "Desert",
+                    });
                 }
             }
         }
@@ -516,7 +533,14 @@ namespace BlockmapFramework.WorldGeneration
                             for (int i = 0; i < 2; i++)
                             {
                                 EntityDef plant = OasisPlantProbabilities.GetWeightedRandomElement();
-                                EntityManager.SpawnEntityAround(world, plant, world.Gaia, groundNode.WorldCoordinates, standard_deviation: 4f, randomMirror: true, variantName: "Desert");
+                                EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
+                                {
+                                    Def = plant,
+                                    PositionProperties = new EntitySpawnPositionProperties_AroundCoordinates(groundNode.WorldCoordinates, standardDeviation: 4f),
+                                    RandomRotation = true,
+                                    RandomMirrored = true,
+                                    VariantName = "Desert"
+                                }, debug: true);
                             }
                         }
 

@@ -8,11 +8,22 @@ namespace ExodusOutposAlpha
 {
     public class UI_EoaGame : MonoBehaviour
     {
+        private EoaGame Game;
+
         public GameObject LoadingScreenOverlay;
 
-        public void OnGameStarting()
-        {
+        public TextMeshProUGUI TimeText;
 
+        public void OnGameStarting(EoaGame game)
+        {
+            Game = game;
+
+            RefreshTimeText();
+        }
+
+        public void RefreshTimeText()
+        {
+            TimeText.text = Game.GlobalSimulationTime.GetAbsoluteTimeString();
         }
     }
 }

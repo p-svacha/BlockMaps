@@ -12,6 +12,6 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Function used to generate the map feature.
         /// </summary>
-        public System.Action<Parcel, BlockmapNode, bool> GenerateAction { get; init; } = (parcel, node, updateWorld) => throw new System.Exception("GenerateAction not defined");
+        public System.Action<World, Parcel, BlockmapNode, bool> GenerateAction { get; init; } = (world, parcel, node, updateWorld) => throw new System.Exception("GenerateAction not defined");
     }
 }

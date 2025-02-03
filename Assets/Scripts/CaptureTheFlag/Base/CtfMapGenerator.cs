@@ -111,25 +111,21 @@ namespace CaptureTheFlag
 
             Direction faceDirection = isPlayer1 ? Direction.E : Direction.W;
 
-            // Position
-            int spawnY = Random.Range(MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE, World.NumNodesPerSide - MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE);
-            Vector2Int spawnAreaCenter = new Vector2Int(spawnX, spawnY);
-
             // Flag
-            Entity spawnedFlag = EntityManager.SpawnEntityAround(World, EntityDefOf.Flag, player, spawnAreaCenter, 0f, maxAttempts: 50, forbiddenTags: forbiddenTags);
-            int numAttempts = 0;
-            while(spawnedFlag == null && numAttempts++ < 50) // Keep searching if first position wasn't valid (i.e. occupied by a tree)
+            Entity spawnedFlag = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
-                spawnY = Random.Range(MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE, World.NumNodesPerSide - MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE);
-                spawnAreaCenter = new Vector2Int(spawnX, spawnY);
-                spawnedFlag = EntityManager.SpawnEntityAround(World, EntityDefOf.Flag, player, spawnAreaCenter, 0f, maxAttempts: 50, forbiddenTags: forbiddenTags);
-            }
+                Def = EntityDefOf.Flag,
+                Actor = player,
+                RandomRotation = true,
+                PositionProperties = new EntitySpawnPositionProperties_WithinArea(spawnX, spawnX, MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE, World.NumNodesPerSide - MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE),
+                ForbiddenNodeTags = forbiddenTags
+            }, inWorldGen: false, maxAttempts: 50);
             CreatedEntities.Add(spawnedFlag);
             
             // Jail zone
             HashSet<Vector2Int> jailZoneCoords = new HashSet<Vector2Int>();
             int flagDistanceX, flagDistanceY;
-            numAttempts = 0;
+            int numAttempts = 0;
             do
             {
                 flagDistanceX = Random.Range(JAIL_ZONE_MIN_FLAG_DISTANCE, JAIL_ZONE_MAX_FLAG_DISTANCE + 1);
@@ -173,7 +169,17 @@ namespace CaptureTheFlag
             {
                 if (SpawnType == CharacterSpawnType.AroundFlag)
                 {
-                    Entity spawnedCharacter = EntityManager.SpawnEntityAround(World, characterDef, player, spawnAreaCenter, CHARACTER_SPAWN_VARIATION_AROUND_FLAG, forcedRotation: faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes, maxAttempts: 50, forbiddenTags: forbiddenTags);
+                    Entity spawnedCharacter = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+                    {
+                        Def = characterDef,
+                        Actor = player,
+                        PositionProperties = new EntitySpawnPositionProperties_AroundCoordinates(spawnedFlag.OriginNode.WorldCoordinates, CHARACTER_SPAWN_VARIATION_AROUND_FLAG),
+                        Rotation = faceDirection,
+                        RequiredRoamingArea = REQUIRED_SPAWN_ROAMING_AREA,
+                        ForbiddenNodes = flagZone.Nodes,
+                        ForbiddenNodeTags = forbiddenTags
+
+                    }, inWorldGen: false, maxAttempts: 50);
                     if (spawnedCharacter == null) throw new System.Exception($"Failed to spawn character");
                     CreatedEntities.Add(spawnedCharacter);
                 }
@@ -186,7 +192,18 @@ namespace CaptureTheFlag
                     int minY = 0;
                     int maxY = World.NumNodesPerSide - 1;
 
-                    Entity spawnedCharacter = EntityManager.SpawnEntityWithin(World, characterDef, player, minX, maxX, minY, maxY, forcedRotation: faceDirection, requiredRoamingArea: REQUIRED_SPAWN_ROAMING_AREA, forbiddenNodes: flagZone.Nodes, maxAttempts: 50, forbiddenTags: forbiddenTags);
+                    Entity spawnedCharacter = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+                    {
+                        Def = characterDef,
+                        Actor = player,
+                        PositionProperties = new EntitySpawnPositionProperties_WithinArea(minX, maxX, minY, maxY),
+                        Rotation = faceDirection,
+                        RequiredRoamingArea = REQUIRED_SPAWN_ROAMING_AREA,
+                        ForbiddenNodes = flagZone.Nodes,
+                        ForbiddenNodeTags = forbiddenTags
+
+                    }, inWorldGen: false, maxAttempts: 50);
+
                     if (spawnedCharacter == null) throw new System.Exception($"Failed to spawn character");
                     CreatedEntities.Add(spawnedCharacter);
                 }
@@ -236,12 +253,12 @@ namespace CaptureTheFlag
         private static void SpawnRandomItem(BlockmapNode node)
         {
             EntityDef itemDef = EntityDefOf.CtfItem_Apple;
-            Direction rotation = Direction.N;
-            bool isMirrored = false;
-            Actor actor = World.Gaia;
 
-            if (World.CanSpawnEntity(itemDef, node, rotation, isMirrored))
-                World.SpawnEntity(itemDef, node, rotation, isMirrored, actor, updateWorld: false);
+            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            {
+                Def = itemDef,
+                PositionProperties = new EntitySpawnPositionProperties_OnNode(node),
+            });
         }
     }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace WorldEditor
 {
@@ -17,11 +18,13 @@ namespace WorldEditor
 
         private GameObject BuildPreview;
         private EntityDef SelectedEntity;
+        private EntitySpawnProperties SpawnProperties;
 
         [Header("Elements")]
         public TMP_Dropdown PlayerDropdown;
         public TMP_InputField HeightInput;
         public UI_SelectionPanel EntitySelection;
+        public Toggle AllowCollisionsToggle;
 
         public override void Init(BlockEditor editor)
         {
@@ -56,9 +59,27 @@ namespace WorldEditor
             {
                 if (HeightInput.text == "") return;
                 int height = int.Parse(HeightInput.text);
+                Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
 
+                // Check if can spawn
                 Color c = Color.white;
-                if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false)) c = Color.red;
+                SpawnProperties = new EntitySpawnProperties(World)
+                {
+                    Def = SelectedEntity,
+                    Actor = owner,
+                    PositionProperties = new EntitySpawnPositionProperties_OnNode(World.HoveredNode),
+                    CustomHeight = height,
+                    AllowCollisionWithOtherEntities = AllowCollisionsToggle.isOn,
+                };
+                SpawnProperties.Validate(inWorldGen: false, out _);
+                SpawnProperties.Resolve();
+
+                if (!EntitySpawner.CanSpawnEntity(SpawnProperties, inWorldGen: false, out string failReason))
+                {
+                    c = Color.red;
+                    Tooltip.Instance.Init(Tooltip.TooltipType.TextOnly, "", failReason);
+                }
+                else Tooltip.Instance.gameObject.SetActive(false);
 
                 // Build Preview
                 BuildPreview.SetActive(true);
@@ -89,18 +110,19 @@ namespace WorldEditor
                     HeightInput.text = height.ToString();
                 }
             }
+
+            // C: Allow collisions
+            if (Input.GetKeyDown(KeyCode.C)) SetAllowCollisions(!AllowCollisionsToggle.isOn);
+        }
+
+        private void SetAllowCollisions(bool value)
+        {
+            AllowCollisionsToggle.isOn = value;
         }
 
         public override void HandleLeftClick()
         {
-            if (World.HoveredNode == null) return;
-            if (!World.CanSpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false)) return;
-            if (HeightInput.text == "") return;
-
-            int height = int.Parse(HeightInput.text);
-            Actor owner = World.GetActor(PlayerDropdown.options[PlayerDropdown.value].text);
-
-            World.SpawnEntity(SelectedEntity, World.HoveredNode, DEFAULT_ROTATION, isMirrored: false, owner, updateWorld: true, height);
+            EntitySpawner.TrySpawnEntity(SpawnProperties, inWorldGen: false, updateWorld: true);
         }
 
         public override void HandleRightClick()
@@ -119,6 +141,7 @@ namespace WorldEditor
         {
             GameObject.Destroy(BuildPreview);
             if (World.HoveredNode != null) World.HoveredNode.ShowOverlay(false);
+            Tooltip.Instance.gameObject.SetActive(false);
         }
     }
 }

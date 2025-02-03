@@ -305,14 +305,14 @@ namespace BlockmapFramework
             MaxY = Chunks.Values.Max(x => x.Coordinates.y) * ChunkSize + (ChunkSize - 1);
 
             // Init database id's
-            NodeIdCounter = Nodes.Count == 0 ? 1 : Nodes.Max(x => x.Key) + 1;
-            EntityIdCounter = Entities.Count == 0 ? 1 : Entities.Max(x => x.Key) + 1;
-            WaterBodyIdCounter = WaterBodies.Count == 0 ? 1 : WaterBodies.Max(x => x.Key) + 1;
-            ActorIdCounter = Actors.Count == 0 ? 1 : Actors.Max(x => x.Key) + 1;
-            ZoneIdCounter = Zones.Count == 0 ? 1 : Zones.Max(x => x.Key) + 1;
-            FenceIdCounter = Fences.Count == 0 ? 1 : Fences.Max(x => x.Key) + 1;
-            WallIdCounter = Walls.Count == 0 ? 1 : Walls.Max(x => x.Key) + 1;
-            RoomIdCounter = Rooms.Count == 0 ? 1 : Rooms.Max(x => x.Key) + 1;
+            NodeIdCounter = Nodes.Count == 0 ? 0 : Nodes.Max(x => x.Key) + 1;
+            EntityIdCounter = Entities.Count == 0 ? 0 : Entities.Max(x => x.Key) + 1;
+            WaterBodyIdCounter = WaterBodies.Count == 0 ? 0 : WaterBodies.Max(x => x.Key) + 1;
+            ActorIdCounter = Actors.Count == 0 ? 0 : Actors.Max(x => x.Key) + 1;
+            ZoneIdCounter = Zones.Count == 0 ? 0 : Zones.Max(x => x.Key) + 1;
+            FenceIdCounter = Fences.Count == 0 ? 0 : Fences.Max(x => x.Key) + 1;
+            WallIdCounter = Walls.Count == 0 ? 0 : Walls.Max(x => x.Key) + 1;
+            RoomIdCounter = Rooms.Count == 0 ? 0 : Rooms.Max(x => x.Key) + 1;
         }
 
         private void OnInitializationDone()
@@ -912,7 +912,7 @@ namespace BlockmapFramework
         #region Systems Update (Navmesh / Draw / Vision)
 
         public void UpdateFullWorld(System.Action callback = null) => UpdateWorldSystems(null, callback);
-        public void UpdateWorldSystems(Vector2Int worldCoordinates) => UpdateWorldSystems(new Parcel(this, worldCoordinates, Vector2Int.one));
+        public void UpdateWorldSystems(Vector2Int worldCoordinates) => UpdateWorldSystems(new Parcel(worldCoordinates, Vector2Int.one));
 
         /// <summary>
         /// Updates all systems of the world for the given area over the course of the next few frames.
@@ -1247,46 +1247,7 @@ namespace BlockmapFramework
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
         }
 
-        public bool CanSpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, int height = -1, bool forceHeadspaceRecalc = false, bool allowCollisions = false)
-        {
-            if (def == null) throw new System.Exception($"Cannot check if entity is spawnable because EntityDef is null");
-
-            HashSet<BlockmapNode> occupiedNodes = EntityManager.GetOccupiedNodes(def, this, node, rotation, isMirrored, height); // get nodes that would be occupied when placing the entity on the given node
-
-            // Terrain below entity is not fully connected and therefore occupiedNodes is null
-            if (occupiedNodes == null) return false;
-
-            int actualHeight = def.VariableHeight ? height : def.Dimensions.y;
-
-            Vector3 placePos = def.RenderProperties.GetWorldPositionFunction(def, this, node, rotation, height, false);
-            int minAltitude = Mathf.FloorToInt(placePos.y); // min y coordinate that this entity will occupy on all occupied tiles
-            int maxAltitude = minAltitude + actualHeight - 1; // max y coordinate that this entity will occupy on all occupied tiles
-
-            // Make some checks for all nodes that would be occupied when placing the entity on the given node
-            foreach (BlockmapNode occupiedNode in occupiedNodes)
-            {
-                // Recalculate passability (useful if spawned during world generation before navmesh is calculated)
-                if (forceHeadspaceRecalc) occupiedNode.RecalculatePassability();
-
-                // Check if the place position is under water
-                if (occupiedNode is GroundNode groundNode && groundNode.IsCenterUnderWater) return false;
-
-                // Check if the place position is on water
-                if (occupiedNode is WaterNode && def.WaterBehaviour == WaterBehaviour.Forbidden) return false;
-
-                // Check if entity can stand here
-                int headSpace = occupiedNode.MaxPassableHeight[Direction.None];
-                if (minAltitude + headSpace <= maxAltitude) return false;
-
-                // Check if node already has an entity
-                if (!allowCollisions && occupiedNode.Entities.Count > 0) return false;
-
-                // Check if flat
-                if (def.RequiresFlatTerrain && !occupiedNode.IsFlat()) return false;
-            }
-
-            return true;
-        }
+        public Entity SpawnEntity(EntitySpawnProperties spawnProps) => SpawnEntity(spawnProps.ResolvedDef, spawnProps.ResolvedTargetNode, spawnProps.ResolvedRotation, spawnProps.ResolvedMirrored, spawnProps.ResolvedActor, updateWorld: false, height: spawnProps.CustomHeight, variantIndex: spawnProps.ResolvedVariantIndex);
         public Entity SpawnEntity(EntityDef def, BlockmapNode node, Direction rotation, bool isMirrored, Actor actor, bool updateWorld, int height = -1, System.Action<Entity> preInit = null, int variantIndex = 0)
         {
             if (actor == null) throw new System.Exception("Cannot spawn an entity without an actor");
@@ -1341,7 +1302,7 @@ namespace BlockmapFramework
             }
 
             // Update world around coordinates
-            if (updateWorld) UpdateWorldSystems(new Parcel(this, entityToRemove.OriginNode.WorldCoordinates, new Vector2Int(entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z)));
+            if (updateWorld) UpdateWorldSystems(new Parcel(entityToRemove.OriginNode.WorldCoordinates, new Vector2Int(entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z)));
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
             if (updateWorld && entityToRemove.Actor == ActiveVisionActor)
@@ -1363,7 +1324,7 @@ namespace BlockmapFramework
             if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.RegisterBatchEntity(entity);
 
             // Update world around coordinates
-            if (updateWorld) UpdateWorldSystems(new Parcel(this, entity.OriginNode.WorldCoordinates, new Vector2Int(entity.GetTranslatedDimensions().x, entity.GetTranslatedDimensions().z)));
+            if (updateWorld) UpdateWorldSystems(new Parcel(entity.OriginNode.WorldCoordinates, new Vector2Int(entity.GetTranslatedDimensions().x, entity.GetTranslatedDimensions().z)));
 
             entity.OnRegister();
         }
@@ -1452,7 +1413,7 @@ namespace BlockmapFramework
             WaterBodies.Add(newWaterBody.Id, newWaterBody);
 
             // Update world around water body
-            if (updateWorld) UpdateWorldSystems(new Parcel(this, new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), new Vector2Int(newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1)));
+            if (updateWorld) UpdateWorldSystems(new Parcel(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), new Vector2Int(newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1)));
         }
         public void AddWaterBody(GroundNode sourceNode, int shoreHeight, bool updateWorld)
         {
@@ -1526,7 +1487,7 @@ namespace BlockmapFramework
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
             // Update world around water body
-            if (updateWorld) UpdateWorldSystems(new Parcel(this, new Vector2Int(water.MinX, water.MinY), new Vector2Int(water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1)));
+            if (updateWorld) UpdateWorldSystems(new Parcel(new Vector2Int(water.MinX, water.MinY), new Vector2Int(water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1)));
         }
 
         public bool CanBuildFence(FenceDef def, BlockmapNode node, Direction side, int height)

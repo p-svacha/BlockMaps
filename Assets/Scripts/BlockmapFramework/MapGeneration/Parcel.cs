@@ -11,8 +11,6 @@ namespace BlockmapFramework
     /// </summary>
     public class Parcel
     {
-        public World World { get; private set; }
-
         /// <summary>
         /// The the coordinates of the SW corner of the parcel.
         /// </summary>
@@ -28,15 +26,13 @@ namespace BlockmapFramework
         public int MinY => Position.y;
         public int MaxY => Position.y + Dimensions.y;
 
-        public Parcel(World world, Vector2Int position, Vector2Int dimensions)
+        public Parcel(Vector2Int position, Vector2Int dimensions)
         {
-            World = world;
             Position = position;
             Dimensions = dimensions;
         }
         public Parcel(BlockmapNode swNode, int size = 1)
         {
-            World = swNode.World;
             Position = swNode.WorldCoordinates;
             Dimensions = new Vector2Int(size, size);
         }
@@ -49,12 +45,12 @@ namespace BlockmapFramework
 
         #region Getters
 
-        public bool IsInWorld()
+        public bool IsInWorld(World world)
         {
-            if (!World.IsInWorld(CornerNW)) return false;
-            if (!World.IsInWorld(CornerNE)) return false;
-            if (!World.IsInWorld(CornerSE)) return false;
-            if (!World.IsInWorld(CornerSW)) return false;
+            if (!world.IsInWorld(CornerNW)) return false;
+            if (!world.IsInWorld(CornerNE)) return false;
+            if (!world.IsInWorld(CornerSE)) return false;
+            if (!world.IsInWorld(CornerSW)) return false;
             return true;
         }
 
@@ -76,22 +72,22 @@ namespace BlockmapFramework
             return false;
         }
 
-        public bool HasAnyWater()
+        public bool HasAnyWater(World world)
         {
-            return HasAny(n => n is WaterNode);
+            return HasAny(world, n => n is WaterNode);
         }
-        public bool HasAnyNodesWithSurface(SurfaceDef def)
+        public bool HasAnyNodesWithSurface(World world, SurfaceDef def)
         {
-            return HasAny(n => n.SurfaceDef == def);
+            return HasAny(world, n => n.SurfaceDef == def);
         }
 
-        private bool HasAny(Func<BlockmapNode, bool> predicate)
+        private bool HasAny(World world, Func<BlockmapNode, bool> predicate)
         {
             for (int x = Position.x; x < Position.x + Dimensions.x; x++)
             {
                 for (int y = Position.y; y < Position.y + Dimensions.y; y++)
                 {
-                    if (World.GetNodes(new Vector2Int(x, y)).Any(predicate)) return true;
+                    if (world.GetNodes(new Vector2Int(x, y)).Any(predicate)) return true;
                 }
             }
             return false;

@@ -105,7 +105,7 @@ namespace BlockmapFramework
         public VisionData CurrentVision { get; private set; }
 
         /// <summary>
-        /// Who this entity belongs to.
+        /// The actor this entity will provide vision for.
         /// </summary>
         public Actor Actor;
 
@@ -175,7 +175,7 @@ namespace BlockmapFramework
         {
             Def = def;
 
-            if (!Def.VariableHeight && height != -1) throw new System.Exception($"Cannot create entity with def {def.DefName} with a custom height because that def doesn't support variable heights.");
+            if (!Def.VariableHeight && height > 0) throw new System.Exception($"Cannot create entity with def {def.DefName} with a custom height because that def doesn't support variable heights.");
 
             this.id = id;
             World = world;

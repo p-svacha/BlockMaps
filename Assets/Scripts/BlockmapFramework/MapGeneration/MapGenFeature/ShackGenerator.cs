@@ -21,13 +21,10 @@ namespace BlockmapFramework.WorldGeneration
             WallMaterialDefOf.WoodPlanks,
         };
 
-        public static void GenerateShack(Parcel parcel, BlockmapNode node, bool updateWorld)
+        public static void GenerateShack(World world, Parcel parcel, BlockmapNode node, bool updateWorld)
         {
             if (parcel.Dimensions.x < MinSize) return;
             if (parcel.Dimensions.y < MinSize) return;
-
-            World world = parcel.World;
-
 
             WallMaterialDef mainWallMaterial = GetRandomMaterial();
             SurfaceDef floor = SurfaceDefOf.WoodParquet;

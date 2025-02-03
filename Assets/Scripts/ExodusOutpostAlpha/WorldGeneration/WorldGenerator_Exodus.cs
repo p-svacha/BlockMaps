@@ -38,21 +38,21 @@ namespace ExodusOutposAlpha.WorldGeneration
 
             int hallwayWidth = 4;
             int hallwayStartY = World.NumNodesPerSide / 2 - hallwayWidth / 2;
-            Parcel hallwayParcel = new Parcel(World, new Vector2Int(hallwayStartX, hallwayStartY), new Vector2Int(hallwayLength, hallwayWidth));
+            Parcel hallwayParcel = new Parcel(new Vector2Int(hallwayStartX, hallwayStartY), new Vector2Int(hallwayLength, hallwayWidth));
             Hallway = CreateRoom("hallway", level: 0, hallwayParcel);
 
             // Quarters
             int quartersSize = 8;
             int quartersStartX = hallwayStartX + 5;
             int quartersStartY = hallwayStartY + hallwayWidth;
-            Parcel quartersParcel = new Parcel(World, new Vector2Int(quartersStartX, quartersStartY), new Vector2Int(quartersSize, quartersSize));
+            Parcel quartersParcel = new Parcel(new Vector2Int(quartersStartX, quartersStartY), new Vector2Int(quartersSize, quartersSize));
             Quarters = CreateRoom("quarters", level: 0, quartersParcel);
 
             // Storage
             int storageSize = 12;
             int storageStartX = hallwayStartX - 1;
             int storageStartY = hallwayParcel.MinY - storageSize;
-            Parcel storageParcel = new Parcel(World, new Vector2Int(storageStartX, storageStartY), new Vector2Int(storageSize, storageSize));
+            Parcel storageParcel = new Parcel(new Vector2Int(storageStartX, storageStartY), new Vector2Int(storageSize, storageSize));
             StorageRoom = CreateRoom("storage", level: 0, storageParcel);
 
             // Connect rooms
@@ -149,11 +149,31 @@ namespace ExodusOutposAlpha.WorldGeneration
 
         private void SpawnCharacters()
         {
-            BlockmapNode spawnNode = Quarters.FloorNodes.RandomElement();
-            World.SpawnEntity(DefDatabase<EntityDef>.GetNamed("CrewMember"), spawnNode, Direction.N, isMirrored: false, World.GetActor(1), updateWorld: false);
+            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            {
+                Def = DefDatabase<EntityDef>.GetNamed("CrewMember"),
+                Actor = World.GetActor(1),
+                PositionProperties = new EntitySpawnPositionProperties_InRoom(Quarters),
+            }, maxAttempts: 50);
+            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            {
+                Def = DefDatabase<EntityDef>.GetNamed("CrewMember"),
+                Actor = World.GetActor(1),
+                PositionProperties = new EntitySpawnPositionProperties_InRoom(Hallway),
+            }, maxAttempts: 50);
 
-            BlockmapNode enemySpawnNode = StorageRoom.FloorNodes.RandomElement();
-            World.SpawnEntity(DefDatabase<EntityDef>.GetNamed("Drone"), enemySpawnNode, Direction.N, isMirrored: false, World.GetActor(2), updateWorld: false);
+            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            {
+                Def = DefDatabase<EntityDef>.GetNamed("Drone"),
+                Actor = World.GetActor(2),
+                PositionProperties = new EntitySpawnPositionProperties_InRoom(StorageRoom),
+            }, maxAttempts: 50);
+            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            {
+                Def = DefDatabase<EntityDef>.GetNamed("Drone"),
+                Actor = World.GetActor(2),
+                PositionProperties = new EntitySpawnPositionProperties_InRoom(Hallway),
+            }, maxAttempts: 50);
         }
 
         private int GetLevelAltitude(int level) => GROUND_FLOOR_ALTITUDE + level * FLOOR_HEIGHT;

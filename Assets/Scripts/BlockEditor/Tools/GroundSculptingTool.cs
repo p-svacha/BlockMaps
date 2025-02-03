@@ -76,7 +76,7 @@ namespace WorldEditor
         {
             if (World.HoveredGroundNode == null) return;
 
-            Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
+            Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World.HoveredGroundNode.WorldCoordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
             World.UpdateWorldSystems(modifiedArea);
         }
 
@@ -117,7 +117,7 @@ namespace WorldEditor
                     // Smooth outside edges of affected nodes
                     if (SmoothEdgeToggle.isOn)
                     {
-                        Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(World, coordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
+                        Parcel modifiedArea = TerrainFunctions.SmoothOutside(World, new Parcel(coordinates, new Vector2Int(AreaSize, AreaSize)), int.Parse(SmoothStepInput.text));
                         World.UpdateWorldSystems(modifiedArea);
                     }
 

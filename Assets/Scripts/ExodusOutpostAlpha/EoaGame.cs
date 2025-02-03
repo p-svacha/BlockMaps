@@ -27,7 +27,7 @@ namespace ExodusOutposAlpha
         private void Awake()
         {
             Instance = this;
-            UI = GameObject.Find("Canvas").GetComponent<UI_EoaGame>();
+            UI = GameObject.Find("GameUI").GetComponent<UI_EoaGame>();
         }
 
         void Start()
@@ -114,7 +114,7 @@ namespace ExodusOutposAlpha
             GlobalSimulationTime = new EoaTime();
 
             // Notify match readiness
-            UI.OnGameStarting();
+            UI.OnGameStarting(this);
 
             GameState = EoaGameState.Running;
 
@@ -158,19 +158,19 @@ namespace ExodusOutposAlpha
                         if (CurrentTurnEntity.MoveActions.ContainsKey(dir))
                             CurrentTurnEntity.MoveActions[dir].Perform();
                     }
-                    if (Input.GetKey(KeyCode.LeftArrow))
+                    else if (Input.GetKey(KeyCode.LeftArrow))
                     {
                         Direction dir = HelperFunctions.GetDirection4FromAngle(BlockmapCamera.Instance.CurrentAngle, offset: 90);
                         if (CurrentTurnEntity.MoveActions.ContainsKey(dir))
                             CurrentTurnEntity.MoveActions[dir].Perform();
                     }
-                    if (Input.GetKey(KeyCode.DownArrow))
+                    else if(Input.GetKey(KeyCode.DownArrow))
                     {
                         Direction dir = HelperFunctions.GetDirection4FromAngle(BlockmapCamera.Instance.CurrentAngle, offset: 0);
                         if (CurrentTurnEntity.MoveActions.ContainsKey(dir))
                             CurrentTurnEntity.MoveActions[dir].Perform();
                     }
-                    if (Input.GetKey(KeyCode.RightArrow))
+                    else if(Input.GetKey(KeyCode.RightArrow))
                     {
                         Direction dir = HelperFunctions.GetDirection4FromAngle(BlockmapCamera.Instance.CurrentAngle, offset: 270);
                         if (CurrentTurnEntity.MoveActions.ContainsKey(dir))
@@ -187,9 +187,15 @@ namespace ExodusOutposAlpha
         private void StartNextTurn()
         {
             CurrentTurnEntity = ActionQueue.Dequeue();
-            GlobalSimulationTime.SetTime(CurrentTurnEntity.NextActionTime.ValueInSeconds);
+            SetGlobalSimulationTime(CurrentTurnEntity.NextActionTime.ValueInSeconds);
             CurrentTurnEntity.RefreshPossibleActions();
             CurrentTurnEntity.PerformNextAction();
+        }
+
+        private void SetGlobalSimulationTime(int secondsAbsolute)
+        {
+            GlobalSimulationTime.SetTime(CurrentTurnEntity.NextActionTime.ValueInSeconds);
+            UI.RefreshTimeText();
         }
 
 
