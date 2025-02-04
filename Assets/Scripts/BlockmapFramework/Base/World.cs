@@ -1979,6 +1979,7 @@ namespace BlockmapFramework
             DisplaySettings.SetVisionCutoffPerspectiveHeight(Mathf.Clamp(height, 0, MAX_ALTITUDE));
             UpdateVisibility();
         }
+
         public void EnableAbsoluteVisionCutoffAt(int altitude)
         {
             DisplaySettings.SetVisionCutoffMode(VisionCutoffMode.AbsoluteCutoff);

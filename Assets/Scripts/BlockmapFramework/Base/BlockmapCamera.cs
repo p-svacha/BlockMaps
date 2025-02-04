@@ -251,13 +251,13 @@ namespace BlockmapFramework
             UpdatePosition();
         }
 
-        public void PanTo(float time, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false)
+        public void PanTo(float duration, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false)
         {
             // Init pan
             IsPanning = true;
             PanSourcePosition = CurrentPosition;
             PanTargetPosition = targetPos;
-            PanDuration = time;
+            PanDuration = duration;
             PostPanFollowEntity = postPanFollowEntity;
             PanDelay = 0f;
             EnableUnbreakableFollowAfterPan = unbreakableFollow;

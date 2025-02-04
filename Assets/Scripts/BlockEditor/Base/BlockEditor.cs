@@ -8,7 +8,7 @@ using BlockmapFramework;
 using TMPro;
 using BlockmapFramework.WorldGeneration;
 using BlockmapFramework.Defs;
-using ExodusOutposAlpha.WorldGeneration;
+using TheThoriumChallenge.WorldGeneration;
 
 namespace WorldEditor
 {
@@ -67,8 +67,8 @@ namespace WorldEditor
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.ObjectDefs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.CharacterDefs);
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(ExodusOutposAlpha.CrewDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(ExodusOutposAlpha.RobotDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.CrewDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.RobotDefs.Defs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

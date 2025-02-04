@@ -95,4 +95,40 @@ public class PriorityQueue<T>
             index = smallestIndex;
         }
     }
+
+    /// <summary>
+    /// Converts the priority queue into a dictionary where items are keys and priorities are values.
+    /// </summary>
+    public Dictionary<T, float> ToDictionary()
+    {
+        var dictionary = new Dictionary<T, float>();
+        foreach (var (Item, Priority) in _elements)
+        {
+            dictionary[Item] = Priority;
+        }
+        return dictionary;
+    }
+
+    /// <summary>
+    /// Returns a sorted list of items based on their priority in ascending order.
+    /// </summary>
+    public List<T> ToSortedList()
+    {
+        var sortedList = new List<T>();
+        var tempQueue = new PriorityQueue<T>();
+
+        // Copy elements to a temporary queue to avoid modifying the original queue
+        foreach (var (Item, Priority) in _elements)
+        {
+            tempQueue.Enqueue(Item, Priority);
+        }
+
+        // Dequeue all elements in order
+        while (tempQueue.Count > 0)
+        {
+            sortedList.Add(tempQueue.Dequeue());
+        }
+
+        return sortedList;
+    }
 }

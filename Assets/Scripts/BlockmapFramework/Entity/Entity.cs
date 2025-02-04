@@ -286,9 +286,9 @@ namespace BlockmapFramework
                 if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneModel)
                 {
                     MeshFilter meshFilter = MeshObject.AddComponent<MeshFilter>();
-                    meshFilter.mesh = Def.RenderProperties.Model.GetComponent<MeshFilter>().sharedMesh;
+                    meshFilter.mesh = RenderModel.GetComponent<MeshFilter>().sharedMesh;
                     MeshRenderer = MeshObject.AddComponent<MeshRenderer>();
-                    MeshRenderer.sharedMaterials = Def.RenderProperties.Model.GetComponent<MeshRenderer>().sharedMaterials;
+                    MeshRenderer.sharedMaterials = RenderModel.GetComponent<MeshRenderer>().sharedMaterials;
                     MeshCollider = MeshObject.AddComponent<MeshCollider>();
 
                     // Scale
@@ -819,6 +819,10 @@ namespace BlockmapFramework
         public bool CanSee => VisionRange > 0;
         public virtual bool CanBeHeldByOtherEntities => Def.CanBeHeldByOtherEntities;
         public bool IsInInventory => Holder != null;
+
+        // Render properties
+        protected virtual GameObject RenderModel => Def.RenderProperties.Model;
+
 
         // Skills and Stats
         public List<Skill> GetAllSkills() => SkillsComp.GetAllSkills();

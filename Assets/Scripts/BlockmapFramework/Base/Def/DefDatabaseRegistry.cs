@@ -128,7 +128,7 @@ namespace BlockmapFramework
                 }
                 catch (TargetInvocationException e)
                 {
-                    Debug.LogWarning($"Failed to bind Def named '{defName}' in {type}: " + e.InnerException.Message);
+                    // Debug.LogWarning($"Failed to bind Def named '{defName}' in {type}: " + e.InnerException.Message);
                 }
             }
         }
