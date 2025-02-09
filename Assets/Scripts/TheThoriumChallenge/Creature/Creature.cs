@@ -5,8 +5,10 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public abstract class Creature : MovingEntity
+    public class Creature : MovingEntity
     {
+        new public CreatureDef Def => (CreatureDef)base.Def;
+
         // Attributes for simulation
         public TimeStamp NextActionTime;
         public bool IsPlayerControlled;
@@ -15,24 +17,15 @@ namespace TheThoriumChallenge
         private List<TurnAction> PossibleActions;
         public Dictionary<Direction, TurnAction_Move> MoveActions;
 
-        // Creature Stats
-        public abstract float BaseHpPerLevel { get; }
-        public abstract float BaseMovementSpeedModifier { get; }
-
-        // Creature Looks
-        protected abstract GameObject Model { get; }
-        public abstract int CreatureHeight { get; }
-
         // Helpers
-        protected const string ModelPath = "TheThoriumChallenge/CreatureModels/";
         private GameObject _RenderModel;
 
+        protected override void OnStartInitialization()
+        {
+            _RenderModel = Resources.Load<GameObject>("TheThoriumChallenge/CreatureModels/" + Def.DefName + "_fbx");
+        }
         protected override void OnInitialized()
         {
-            base.OnInitialized();
-
-            _RenderModel = Model;
-
             NextActionTime = new TimeStamp();
         }
 
@@ -79,7 +72,7 @@ namespace TheThoriumChallenge
         #region Getters
 
         protected override GameObject RenderModel => _RenderModel;
-        public override Vector3Int Dimensions => new Vector3Int(1, CreatureHeight, 1);
+        public override Vector3Int Dimensions => new Vector3Int(1, Def.CreatureHeight, 1);
         public override float VisionRange => 15;
         public override float MovementSpeed => 5;
 

@@ -41,7 +41,7 @@ namespace TheThoriumChallenge
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<AbilityDef>.AddDefs(AbilityDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(CreatureDefs.Defs);
+            DefDatabase<CreatureDef>.AddDefs(CreatureDefs.Defs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();

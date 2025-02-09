@@ -12,6 +12,11 @@ namespace BlockmapFramework
         FullBox,
 
         /// <summary>
+        /// The entity has no vision collider. Its visibility is fully based on its OriginNode.
+        /// </summary>
+        NodeBased,
+
+        /// <summary>
         /// One BoxCollider per node, where the height of each considers the OverrideHeights of the EntityDef.
         /// </summary>
         EntityShape,

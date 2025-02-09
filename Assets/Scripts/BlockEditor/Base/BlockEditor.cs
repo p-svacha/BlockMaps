@@ -9,6 +9,7 @@ using TMPro;
 using BlockmapFramework.WorldGeneration;
 using BlockmapFramework.Defs;
 using TheThoriumChallenge.WorldGeneration;
+using TheThoriumChallenge;
 
 namespace WorldEditor
 {
@@ -69,6 +70,7 @@ namespace WorldEditor
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.CrewDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.RobotDefs.Defs);
+            DefDatabase<CreatureDef>.AddDefs(TheThoriumChallenge.CreatureDefs.Defs);
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
             DefDatabaseRegistry.BindAllDefOfs();
@@ -86,6 +88,7 @@ namespace WorldEditor
                 new WorldGenerator_Parcels(),
                 new WorldGenerator_Desert(),
                 new WorldGenerator_Exodus(),
+                new TtcLevelGenerator_Forest(),
             };
 
             // Init tools

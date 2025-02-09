@@ -205,6 +205,9 @@ namespace BlockmapFramework
         /// </summary>
         public void Init()
         {
+            // Subclass hook
+            OnStartInitialization();
+
             // Validate
             if (Height <= 0) throw new System.Exception($"Cannot create an entity with height = {Height}. Must be positive.");
 
@@ -433,6 +436,11 @@ namespace BlockmapFramework
         protected virtual void OnInitialized() { }
 
         /// <summary>
+        /// Gets called before intialization is started.
+        /// </summary>
+        protected virtual void OnStartInitialization() { }
+
+        /// <summary>
         /// Gets called every tick.
         /// </summary>
         protected virtual void OnTick() { }
@@ -530,7 +538,7 @@ namespace BlockmapFramework
             // Set walls as explored
             foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
 
-            // If we see a node that had "LastKnownPosition_UntilReexplored" entities on it that we have last seen there, remove their last known position
+            // If we see a node that had "ExploredUntilNotSeenOnLastKnownPosition" entities on it that we have last seen there, remove their last known position
             foreach (BlockmapNode n in CurrentVision.VisibleNodes)
             {
                 foreach(Entity e in World.GetAllEntities())
@@ -1082,7 +1090,12 @@ namespace BlockmapFramework
                     // If we are clearly on a node (as in not close to an edge), mark this node as visible and stop the search
                     if (!isCloseToEdge)
                     {
+                        // Mark ground node as visible
                         vision.AddVisibleNode(hitGroundNode);
+
+                        // If the node has an entity with node-based visibility on it, add it to the vision too
+                        foreach (Entity e in hitGroundNode.Entities.Where(e => e.Def.VisionColliderType == VisionColliderType.NodeBased))
+                            vision.AddVisibleEntity(e);
 
                         if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                         return vision;
@@ -1116,6 +1129,10 @@ namespace BlockmapFramework
                     // Mark air node as visible
                     vision.AddVisibleNode(hitAirNode);
 
+                    // If the node has an entity with node-based visibility on it, add it to the vision too
+                    foreach(Entity e in hitAirNode.Entities.Where(e => e.Def.VisionColliderType == VisionColliderType.NodeBased))
+                        vision.AddVisibleEntity(e);
+
                     // Stop search as air nodes always block vision
                     if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
                     return vision;
@@ -1136,6 +1153,10 @@ namespace BlockmapFramework
 
                     // Mark the ground node below the water node as visible
                     vision.AddVisibleNode(hitWaterNode.GroundNode);
+
+                    // If the node has an entity with node-based visibility on it, add it to the vision too
+                    foreach (Entity e in hitWaterNode.Entities.Where(e => e.Def.VisionColliderType == VisionColliderType.NodeBased))
+                        vision.AddVisibleEntity(e);
 
                     // Stop search as water nodes always block vision
                     if (debugVisionRay) ShowDebugBlockedVisionRay(sourcePosition, targetPosition, hit.point);
