@@ -5,11 +5,14 @@ using UnityEngine;
 namespace BlockmapFramework
 {
     /// <summary>
-    /// A measurable attributes that defines a characters performance or efficiency in various activities, tasks, or states.
+    /// A measurable attribute that defines a characters performance or efficiency in various activities, tasks, or states.
     /// <br/>Stats numerical values calculated purely at runtime based on the state of various other systems (i.e. skills).
     /// </summary>
     public class Stat
     {
+        /// <summary>
+        /// The definition of this stat.
+        /// </summary>
         public StatDef Def { get; private set; }
 
         /// <summary>
@@ -17,7 +20,8 @@ namespace BlockmapFramework
         /// </summary>
         public Entity Entity { get; private set; }
 
-        public Stat(StatDef def, Entity entity)
+        public Stat() { }
+        public virtual void Initialize(StatDef def, Entity entity)
         {
             Def = def;
             Entity = entity;
@@ -26,9 +30,9 @@ namespace BlockmapFramework
         /// <summary>
         /// The current value of this stat.
         /// </summary>
-        public float GetValue()
+        public virtual float GetValue()
         {
-            float value = Def.BaseValue;
+            float value = BaseValue;
 
             // Return 0 if any skill requirement is not met
             foreach(string skillRequirement in Def.SkillRequirements)
@@ -57,6 +61,9 @@ namespace BlockmapFramework
             return value;
         }
 
+        protected virtual float BaseValue => Def.BaseValue;
+
+        public string GetValueText() => GetValueText(GetValue());
         public string GetValueText(float value)
         {
             switch (Def.Type)

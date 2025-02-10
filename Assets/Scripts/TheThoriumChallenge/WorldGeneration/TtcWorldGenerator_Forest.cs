@@ -6,18 +6,20 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public class TtcLevelGenerator_Forest : WorldGenerator
+    public class TtcWorldGenerator_Forest : TtcWorldGenerator
     {
         public override string Label => "TTC - Forest";
         public override string Description => throw new NotImplementedException();
         public override bool StartAsVoid => false;
+        public override Biome Biome => Biome.Forest;
 
         protected override List<Action> GetGenerationSteps()
         {
             return new List<Action>()
             {
                 PlaceTrees,
-                PlaceCreatures
+                PlacePlayerCreatures,
+                PlaceHostileCreatures,
             };
         }
 
@@ -25,14 +27,18 @@ namespace TheThoriumChallenge
         {
         }
 
-        private void PlaceCreatures()
+        private void PlaceHostileCreatures()
         {
-            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            Creature creature = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
-                Def = CreatureDefOf.Needlegrub,
+                Def = SpeciesDefOf.Needlegrub,
                 PositionProperties = new EntitySpawnPositionProperties_WithinArea(0, World.NumNodesPerSide, 0, World.NumNodesPerSide),
-                Actor = World.GetActor(1),
-            });
+                Actor = World.GetActor(2),
+            }) as Creature;
+            if(creature != null)
+            {
+                creature.InitializeCreature(level: 1, isPlayerControlled: false);
+            }
         }
     }
 }

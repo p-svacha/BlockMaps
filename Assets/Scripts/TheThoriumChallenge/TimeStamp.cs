@@ -12,6 +12,11 @@ namespace TheThoriumChallenge
         public const int GAME_START_HOUR = 8;
         public const int GAME_START_MINUTE = 0;
 
+        public TimeStamp(int seconds = 0)
+        {
+            ValueInSeconds = seconds;
+        }
+
         public void IncreaseTime(int seconds)
         {
             ValueInSeconds += seconds;
@@ -21,7 +26,7 @@ namespace TheThoriumChallenge
             ValueInSeconds = secondsAbsolute;
         }
 
-        public string GetAbsoluteTimeString(bool includeDays = true, bool includeHours = true, bool includeMinutes = true, bool includeSeconds = false)
+        public string GetAsString(bool includeDays = true, bool includeHours = true, bool includeMinutes = true, bool includeSeconds = false)
         {
             int seconds = ValueInSeconds % 60;
             int minutes = (GAME_START_MINUTE + (ValueInSeconds / 60)) % 60;
@@ -38,6 +43,27 @@ namespace TheThoriumChallenge
             if (includeSeconds) txt += $"{seconds.ToString("00")}";
 
             return txt;
+        }
+
+        // Operator Overloads
+        public static TimeStamp operator +(TimeStamp a, int seconds)
+        {
+            return new TimeStamp(a.ValueInSeconds + seconds);
+        }
+
+        public static TimeStamp operator -(TimeStamp a, int seconds)
+        {
+            return new TimeStamp(a.ValueInSeconds - seconds);
+        }
+
+        public static TimeStamp operator +(TimeStamp a, TimeStamp b)
+        {
+            return new TimeStamp(a.ValueInSeconds + b.ValueInSeconds);
+        }
+
+        public static TimeStamp operator -(TimeStamp a, TimeStamp b)
+        {
+            return new TimeStamp(a.ValueInSeconds - b.ValueInSeconds);
         }
     }
 }

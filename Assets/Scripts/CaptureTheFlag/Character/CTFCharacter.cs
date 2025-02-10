@@ -132,7 +132,6 @@ namespace CaptureTheFlag
         public Vector2Int WorldCoordinates => OriginNode.WorldCoordinates;
         public bool IsInAction => CurrentAction != null;
         public BlockmapNode Node => OriginNode;
-        public bool IsVisible => IsVisibleBy(Match.World.ActiveVisionActor);
         public bool IsVisibleByOpponent => IsVisibleBy(Owner.Opponent.Actor);
         public bool IsInOwnTerritory => Owner.Territory.ContainsNode(OriginNode);
         public bool IsInNeutralTerritory => Match.NeutralZone.ContainsNode(OriginNode);

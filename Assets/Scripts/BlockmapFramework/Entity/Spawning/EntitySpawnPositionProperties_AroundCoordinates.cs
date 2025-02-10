@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// Tries spawning the entity randomly around the given position with a normal distribution with the given standard deviation.
+    /// </summary>
     public class EntitySpawnPositionProperties_AroundCoordinates : EntitySpawnPositionProperties
     {
         private Vector2Int Center;

@@ -2004,9 +2004,13 @@ namespace BlockmapFramework
         {
             Camera.SetPosition(e.WorldPosition);
         }
-        public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan, bool unbreakableFollow = false)
+        public void CameraJumpToFocusNode(BlockmapNode n)
         {
-            Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null, unbreakableFollow);
+            Camera.SetPosition(n.ShapeCenterWorldPosition);
+        }
+        public void CameraPanToFocusEntity(Entity e, float duration, bool followAfterPan, bool unbreakableFollow = false, System.Action callback = null)
+        {
+            Camera.PanTo(duration, e.WorldPosition, followAfterPan ? e : null, unbreakableFollow, callback);
         }
 
         #endregion

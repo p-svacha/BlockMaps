@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// Tries spawning the entity randomly somewhere in the provided room.
+    /// </summary>
     public class EntitySpawnPositionProperties_InRoom : EntitySpawnPositionProperties
     {
         private Room Room;

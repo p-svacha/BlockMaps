@@ -13,18 +13,18 @@ namespace TheThoriumChallenge
         public Image Background;
         public Image PreviewImage;
         public TextMeshProUGUI NatHoursMinutesText;
-        public TextMeshProUGUI NatSecondsText;
 
         private TooltipTarget TooltipTarget;
 
-        public void Init(Creature e)
+        public void Init(Creature c)
         {
             TooltipTarget = GetComponent<TooltipTarget>();
-            TooltipTarget.Text = e.LabelCap;
+            TooltipTarget.Text = c.LabelCap;
 
-            PreviewImage.sprite = e.UiSprite;
-            NatHoursMinutesText.text = e.NextActionTime.GetAbsoluteTimeString(includeDays: false);
-            NatSecondsText.text = ":" + e.NextActionTime.GetAbsoluteTimeString(includeDays: false, includeHours: false, includeMinutes: false, includeSeconds: true);
+            PreviewImage.sprite = c.UiSprite;
+            NatHoursMinutesText.text = $"in {(c.NextActionTime - Game.Instance.CurrentLevel.GlobalSimulationTime).ValueInSeconds}s";
+
+            Background.color = c.IsPlayerControlled ? GameUI.Instance.FriendlyBackgroundColor : GameUI.Instance.HostileBackgroundColor;
         }
     }
 }

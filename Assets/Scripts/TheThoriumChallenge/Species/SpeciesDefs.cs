@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public static class CreatureDefs
+    public static class SpeciesDefs
     {
-        private static CreatureDef BaseCreature = new CreatureDef()
+        private static SpeciesDef BaseCreature = new SpeciesDef()
         {
             EntityClass = typeof(Creature),
             Impassable = false,
@@ -15,7 +15,7 @@ namespace TheThoriumChallenge
             VisionColliderType = VisionColliderType.NodeBased,
             Components = new List<CompProperties>()
             {
-                new CompProperties_Movement() { }
+                new CompProperties_Movement() { },
             },
             RenderProperties = new EntityRenderProperties()
             {
@@ -24,17 +24,18 @@ namespace TheThoriumChallenge
             }
         };
 
-        public static List<CreatureDef> Defs = new List<CreatureDef>()
+        public static List<SpeciesDef> Defs = new List<SpeciesDef>()
         {
-            new CreatureDef(BaseCreature)
+            new SpeciesDef(BaseCreature)
             {
                 DefName = "Needlegrub",
                 Label = "needlegrub",
                 Description = "A small, burrowing larva with sharp mandibles.",
                 CreatureHeight = 1,
                 VisionRange = 5,
-                HpPerLevel = 0.8f,
+                MaxHpPerLevel = 3f,
                 MovementSpeedModifier = 0.7f,
+                BiteStrengthPerLevel = 0.6f,
             }
         };
     }

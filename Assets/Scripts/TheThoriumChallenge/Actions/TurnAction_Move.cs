@@ -7,34 +7,41 @@ namespace TheThoriumChallenge
 {
     public class TurnAction_Move : TurnAction
     {
+        private Transition Transition;
         private BlockmapNode Target;
         private Direction Direction;
 
-        public TurnAction_Move(Creature e, BlockmapNode target, Direction dir) : base(e)
+        public TurnAction_Move(Creature e, Transition t, Direction dir) : base(e)
         {
-            Target = target;
+            Transition = t;
+            Target = t.To;
             Direction = dir;
         }
 
-        public override int Cost => 60;
+        public override int GetCost()
+        {
+            float baseCost = 60f;
+
+            return (int)(baseCost * Transition.GetMovementCost(Creature));
+        }
 
         protected override void OnPerformAction()
         {
-            if (Entity.IsVisibleBy(Game.Instance.LocalPlayer))
+            if (Creature.IsVisibleBy(Game.Instance.CurrentLevel.LocalPlayer))
             {
-                Entity.MovementComp.OnTargetReached += OnMovementDone;
-                Entity.MovementComp.MoveTo(Target);
+                Creature.MovementComp.OnTargetReached += OnMovementDone;
+                Creature.MovementComp.MoveTo(Target);
             }
             else
             {
-                Entity.Teleport(Target, Direction);
+                Creature.Teleport(Target, Direction);
                 EndAction();
             }
         }
 
         private void OnMovementDone()
         {
-            Entity.MovementComp.OnTargetReached -= OnMovementDone;
+            Creature.MovementComp.OnTargetReached -= OnMovementDone;
             EndAction();
         }
     }

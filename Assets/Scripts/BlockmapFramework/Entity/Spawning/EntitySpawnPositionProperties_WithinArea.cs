@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
+    /// <summary>
+    /// Tries spawning the entity somehwere randomly within the provided coordinate bounds.
+    /// </summary>
     public class EntitySpawnPositionProperties_WithinArea : EntitySpawnPositionProperties
     {
         private int MinX;

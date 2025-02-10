@@ -257,7 +257,7 @@ namespace CaptureTheFlag
             EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
                 Def = itemDef,
-                PositionProperties = new EntitySpawnPositionProperties_OnNode(node),
+                PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(node),
             });
         }
     }

@@ -57,6 +57,11 @@ namespace BlockmapFramework
         public virtual void ResolveReferences() { }
 
         /// <summary>
+		/// Gets called after all Defs are loaded and all DefOfs are bound.
+		/// </summary>
+        public virtual void OnLoadingDefsDone() { }
+
+        /// <summary>
         /// Gets called when loading a Def and returns if it is valid. If not an error is thrown.
         /// </summary>
         public virtual bool Validate()

@@ -61,12 +61,23 @@ namespace BlockmapFramework
         }
 
 		/// <summary>
-		/// Gets called through DefDatabaseRegistry after all loading steps are done.
+		/// Gets called through DefDatabaseRegistry after all loading steps are done and DefOfs are bound.
 		/// </summary>
 		public static void OnLoadingDone()
         {
 			Debug.Log("DefDatabase<" + typeof(T) + "> has loaded " + defsList.Count + " Defs.");
-        }
+			foreach (T def in defsList)
+			{
+				try
+				{
+					def.OnLoadingDefsDone();
+				}
+				catch (System.Exception e)
+				{
+					throw new System.Exception("Failed OnLoadingDone for Def '" + def.DefName + "' of type " + def.GetType() + ": " + e.Message);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Returns the Def of the given name. Throws an exception if it does not exist.

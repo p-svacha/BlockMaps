@@ -22,7 +22,9 @@ namespace BlockmapFramework
             Stats = new Dictionary<StatDef, Stat>();
             foreach (StatDef statDef in DefDatabase<StatDef>.AllDefs)
             {
-                Stats.Add(statDef, new Stat(statDef, entity));
+                Stat stat = new Stat();
+                stat.Initialize(statDef, entity);
+                Stats.Add(statDef, stat);
             }
         }
 

@@ -133,7 +133,7 @@ namespace BlockmapFramework.WorldGeneration
                     EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
                     {
                         Def = EntityDefOf.ProcHedge,
-                        PositionProperties = new EntitySpawnPositionProperties_OnNode(node),
+                        PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(node),
                         CustomHeight = hedgeHeight,
                     });
 
@@ -168,7 +168,7 @@ namespace BlockmapFramework.WorldGeneration
                         EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
                         {
                             DefProbabilities = TreeProbabilities,
-                            PositionProperties = new EntitySpawnPositionProperties_OnNode(World.GetGroundNode(x,y)),
+                            PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(World.GetGroundNode(x,y)),
                         });
                     }
                 }

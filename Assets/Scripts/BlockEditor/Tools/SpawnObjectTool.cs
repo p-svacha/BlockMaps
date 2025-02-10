@@ -62,7 +62,7 @@ namespace WorldEditor
                 {
                     Def = SelectedEntity,
                     Actor = owner,
-                    PositionProperties = new EntitySpawnPositionProperties_OnNode(World.HoveredNode),
+                    PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(World.HoveredNode),
                     Rotation = CurrentRotation,
                     Mirrored = MirrorToggle.isOn,
                     VariantName = VariantDropdown.options[VariantDropdown.value].text,

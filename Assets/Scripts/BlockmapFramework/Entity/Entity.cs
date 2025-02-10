@@ -827,6 +827,7 @@ namespace BlockmapFramework
         public bool CanSee => VisionRange > 0;
         public virtual bool CanBeHeldByOtherEntities => Def.CanBeHeldByOtherEntities;
         public bool IsInInventory => Holder != null;
+        public bool IsVisible => IsVisibleBy(World.ActiveVisionActor);
 
         // Render properties
         protected virtual GameObject RenderModel => Def.RenderProperties.Model;

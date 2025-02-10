@@ -67,7 +67,7 @@ namespace WorldEditor
                 {
                     Def = SelectedEntity,
                     Actor = owner,
-                    PositionProperties = new EntitySpawnPositionProperties_OnNode(World.HoveredNode),
+                    PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(World.HoveredNode),
                     CustomHeight = height,
                     AllowCollisionWithOtherEntities = AllowCollisionsToggle.isOn,
                 };

@@ -4,11 +4,14 @@ using UnityEngine;
 
 namespace BlockmapFramework
 {
-    public class EntitySpawnPositionProperties_OnNode : EntitySpawnPositionProperties
+    /// <summary>
+    /// Tries spawning the entity exactly on the provided node.
+    /// </summary>
+    public class EntitySpawnPositionProperties_ExactlyOnNode : EntitySpawnPositionProperties
     {
         BlockmapNode Node;
 
-        public EntitySpawnPositionProperties_OnNode(BlockmapNode node)
+        public EntitySpawnPositionProperties_ExactlyOnNode(BlockmapNode node)
         {
             Node = node;
         }

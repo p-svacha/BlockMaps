@@ -275,7 +275,7 @@ namespace BlockmapFramework.WorldGeneration
                         EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
                         {
                             DefProbabilities = ShrubClusterProbabilities,
-                            PositionProperties = new EntitySpawnPositionProperties_OnNode(world.GetGroundNode(x,y)),
+                            PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(world.GetGroundNode(x,y)),
                             VariantName = "Desert",
                         });
                     }
@@ -473,7 +473,7 @@ namespace BlockmapFramework.WorldGeneration
                     EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(world)
                     {
                         DefProbabilities = ScatteredObjectsProbabilities,
-                        PositionProperties = new EntitySpawnPositionProperties_OnNode(groundNode),
+                        PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(groundNode),
                         VariantName = "Desert",
                     });
                 }

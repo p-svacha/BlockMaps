@@ -44,6 +44,9 @@ namespace BlockmapFramework
         public float CurrentZoom { get; private set; }
         public Vector3 CurrentPosition { get; private set; } // Camera is currently looking at this position
 
+        // Callbacks
+        private System.Action OnPanDoneCallback;
+
         // Events
         public event System.Action OnFacingDirectionChanged;
 
@@ -73,6 +76,7 @@ namespace BlockmapFramework
                     FollowedEntity = PostPanFollowEntity;
                     IsPanning = false;
                     if(EnableUnbreakableFollowAfterPan) InUnbreakableFollow = true;
+                    OnPanDoneCallback?.Invoke();
                 }
 
                 else // Pan in progress
@@ -251,7 +255,7 @@ namespace BlockmapFramework
             UpdatePosition();
         }
 
-        public void PanTo(float duration, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false)
+        public void PanTo(float duration, Vector3 targetPos, Entity postPanFollowEntity = null, bool unbreakableFollow = false, System.Action callback = null)
         {
             // Init pan
             IsPanning = true;
@@ -261,6 +265,7 @@ namespace BlockmapFramework
             PostPanFollowEntity = postPanFollowEntity;
             PanDelay = 0f;
             EnableUnbreakableFollowAfterPan = unbreakableFollow;
+            OnPanDoneCallback = callback;
 
             // Immediately end pan if we are already very close to target position
             if (Vector3.Distance(CurrentPosition, targetPos) <= 0.1f)

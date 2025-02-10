@@ -1,4 +1,5 @@
 using BlockmapFramework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,16 +30,19 @@ namespace BlockmapFramework
         public List<string> SkillRequirements { get; init; } = new();
 
         /// <summary>
-        /// Values based on a skills level that are added to the value. Get applied before SkillFactors.
+        /// Values based on a skills level that are added to the value. Offsets get applied Factors.
         /// </summary>
         public List<SkillImpact> SkillOffsets { get; init; } = new();
 
         /// <summary>
-        /// Values based on a skills level that the value gets multiplied with. Get applied after SkillOffsets.
+        /// Values based on other stats that are added to the value. Offsets get applied Factors.
+        /// </summary>
+        public List<SkillImpact> StatOffsets { get; init; } = new();
+
+        /// <summary>
+        /// Values based on a skills level that the value gets multiplied with. Offsets get applied Factors.
         /// </summary>
         public List<SkillImpact> SkillFactors { get; init; } = new();
-
-        public bool HigherIsBetter { get; init; } = true;
     }
 
     public enum StatType
