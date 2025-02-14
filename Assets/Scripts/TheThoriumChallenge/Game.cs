@@ -27,6 +27,7 @@ namespace TheThoriumChallenge
 
         private void Awake()
         {
+            GameState = GameState.StartingGame;
             Instance = this;
             UI = GameObject.Find("GameUI").GetComponent<GameUI>();
         }
@@ -41,12 +42,11 @@ namespace TheThoriumChallenge
         {
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
-            DefDatabase<SpeciesStatDef>.AddDefs(SpeciesStatDefs.Defs);
-            DefDatabase<CreatureStatDef>.AddDefs(CreatureStatDefs.Defs);
-            DefDatabase<AbilityDef>.AddDefs(AbilityDefs.Defs);
-            DefDatabase<SpeciesDef>.AddDefs(SpeciesDefs.Defs);
+            DefDatabase<SkillDef>.AddDefs(SkillDefs.GetDefs());
+            DefDatabase<StatDef>.AddDefs(StatDefs.GetDefs());
+            DefDatabase<AbilityDef>.AddDefs(AbilityDefs.GetDefs());
+            DefDatabase<EntityDef>.AddDefs(SpeciesDefs.GetDefs());
             DefDatabaseRegistry.ResolveAllReferences();
-            DefDatabaseRegistry.BindAllDefOfs();
             DefDatabaseRegistry.OnLoadingDone();
 
             // Init materials
@@ -65,12 +65,12 @@ namespace TheThoriumChallenge
             {
                 new CreatureInfo()
                 {
-                    Def = SpeciesDefOf.Needlegrub,
+                    SpeciesDef = SpeciesDefOf.Squishgrub,
                     Level = 5,
                 },
                 new CreatureInfo()
                 {
-                    Def = SpeciesDefOf.Needlegrub,
+                    SpeciesDef = SpeciesDefOf.Squishgrub,
                     Level = 6,
                 },
             };

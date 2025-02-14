@@ -31,7 +31,7 @@ namespace TheThoriumChallenge
         {
             Creature creature = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
-                Def = SpeciesDefOf.Needlegrub,
+                Def = SpeciesDefOf.Squishgrub,
                 PositionProperties = new EntitySpawnPositionProperties_WithinArea(0, World.NumNodesPerSide, 0, World.NumNodesPerSide),
                 Actor = World.GetActor(2),
             }) as Creature;

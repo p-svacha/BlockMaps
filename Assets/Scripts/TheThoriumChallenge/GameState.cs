@@ -6,6 +6,7 @@ namespace TheThoriumChallenge
 {
     public enum GameState
     {
+        StartingGame,
         LoadingLevel_GeneratingWorld,
         LoadingLevel_InitializingWorld,
         Running

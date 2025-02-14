@@ -46,30 +46,7 @@ namespace BlockmapFramework
 
         public void ShowStatDetails(Stat stat)
         {
-            // Label
-            string text = stat.Def.LabelCap;
-
-            // Description
-            if(stat.Def.Description != "")
-            {
-                text += "\n\n" + stat.Def.Description;
-            }
-
-            // Base value
-            text += $"\n\nBase Value: {stat.GetValueText(stat.Def.BaseValue)}";
-
-            // Skill offsets
-            foreach(SkillImpact skillOffset in stat.Def.SkillOffsets)
-            {
-                float offsetValue = skillOffset.GetValueFor(stat.Entity);
-                string sign = offsetValue > 0 ? "+" : "";
-                text += $"\n\t{skillOffset.SkillDef.LabelCap} Skill: {sign}{stat.GetValueText(offsetValue)}";
-            }
-
-            // Final value
-            text += $"\n\nFinal Value: {stat.GetValueText(stat.GetValue())}";
-
-            StatDetailsText.text = text;
+            StatDetailsText.text = stat.GetBreakdownString();
         }
     }
 }

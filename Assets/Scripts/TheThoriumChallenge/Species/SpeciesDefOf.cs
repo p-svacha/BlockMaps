@@ -8,6 +8,6 @@ namespace TheThoriumChallenge
     [DefOf]
     public class SpeciesDefOf
     {
-        public static SpeciesDef Needlegrub;
+        public static EntityDef Squishgrub;
     }
 }

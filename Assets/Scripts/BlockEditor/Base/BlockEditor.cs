@@ -63,17 +63,16 @@ namespace WorldEditor
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<WorldModifierDef>.AddDefs(EditorDefs.WorldModifierDefs);
             DefDatabase<EntityDef>.AddDefs(EditorDefs.EntityDefs);
-            DefDatabase<SkillDef>.AddDefs(CaptureTheFlag.SkillDefs.Defs);
-            DefDatabase<StatDef>.AddDefs(CaptureTheFlag.StatDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.ObjectDefs);
-            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.CharacterDefs);
-            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.Defs);
+            DefDatabase<SkillDef>.AddDefs(CaptureTheFlag.SkillDefs.GetDefs());
+            DefDatabase<StatDef>.AddDefs(CaptureTheFlag.StatDefs.GetDefs());
+            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.GetObjectDefs());
+            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.GetCharacterDefs());
+            DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.GetDefs());
             DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.CrewDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.RobotDefs.Defs);
-            DefDatabase<SpeciesDef>.AddDefs(TheThoriumChallenge.SpeciesDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.SpeciesDefs.GetDefs());
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
-            DefDatabaseRegistry.BindAllDefOfs();
 
             // Init materials
             MaterialManager.InitializeBlendableSurfaceMaterial();

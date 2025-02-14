@@ -6,9 +6,12 @@ namespace TheThoriumChallenge
 {
     public static class AbilityDefs
     {
-        public static List<AbilityDef> Defs = new List<AbilityDef>()
+        public static List<AbilityDef> GetDefs()
         {
-            new AbilityDef() { DefName="Bite", AbilityClass = typeof(Ability001_Bite) }
-        };
+            return new List<AbilityDef>()
+            {
+                new AbilityDef() { DefName="Bite", AbilityClass = typeof(Ability001_Bite) }
+            };
+        }
     }
 }

@@ -8,7 +8,9 @@ namespace TheThoriumChallenge
 {
     public class Creature : MovingEntity
     {
-        public SpeciesDef SpeciesDef => (SpeciesDef)Def;
+        // Comps
+        public Comp_Stats Stats { get; private set; }
+        public Comp_Skills Skills { get; private set; }
 
         // Simulation
         public TimeStamp NextActionTime { get; private set; }
@@ -21,10 +23,9 @@ namespace TheThoriumChallenge
         // State
         public int Level { get; private set; }
         public int HP { get; private set; }
-        public Dictionary<CreatureStatDef, CreatureStat> Stats { get; private set; }
 
         // Stats
-        public int MaxHP => (int)Stats[CreatureStatDefOf.MaxHP].GetValue();
+        public int MaxHP => (int)Stats.GetStatValue(StatDefOf.MaxHP);
 
         // UI
         public UI_CreatureLabel OverheadLabel;
@@ -35,8 +36,14 @@ namespace TheThoriumChallenge
 
         protected override void OnStartInitialization()
         {
-            _RenderModel = Resources.Load<GameObject>("TheThoriumChallenge/CreatureModels/" + SpeciesDef.DefName + "_fbx");
-            _UiSprite = Resources.Load<Sprite>("TheThoriumChallenge/CreaturePreviewImages/" + SpeciesDef.DefName);
+            _RenderModel = Resources.Load<GameObject>("TheThoriumChallenge/CreatureModels/" + Def.DefName + "_fbx");
+            _UiSprite = Resources.Load<Sprite>("TheThoriumChallenge/CreaturePreviewImages/" + Def.DefName);
+        }
+
+        protected override void OnCompInitialized(EntityComp comp)
+        {
+            if (comp is Comp_Stats statComp) Stats = statComp;
+            if (comp is Comp_Skills skillComp) Skills = skillComp;
         }
 
         public void InitializeCreature(int level, bool isPlayerControlled)
@@ -44,23 +51,10 @@ namespace TheThoriumChallenge
             IsPlayerControlled = isPlayerControlled;
             Level = level;
 
-            InitStats();
-
             HP = MaxHP;
             NextActionTime = new TimeStamp();
 
             InitUiLabel();
-        }
-
-        private void InitStats()
-        {
-            Stats = new Dictionary<CreatureStatDef, CreatureStat>();
-            foreach(CreatureStatDef def in DefDatabase<CreatureStatDef>.AllDefs)
-            {
-                CreatureStat stat = new CreatureStat();
-                stat.Initialize(def, this);
-                Stats.Add(def, stat);
-            }
         }
 
         private void InitUiLabel()
@@ -106,8 +100,7 @@ namespace TheThoriumChallenge
 
         public override Sprite UiSprite => _UiSprite;
         protected override GameObject RenderModel => _RenderModel;
-        public override Vector3Int Dimensions => new Vector3Int(1, SpeciesDef.CreatureHeight, 1);
-        public override float VisionRange => Stats[CreatureStatDefOf.VisionRange].GetValue();
+        public override float VisionRange => Stats.GetStatValue(StatDefOf.VisionRange);
         public override float MovementSpeed => 5;
 
         #endregion

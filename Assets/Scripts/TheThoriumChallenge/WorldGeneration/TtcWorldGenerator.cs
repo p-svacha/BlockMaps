@@ -29,7 +29,7 @@ namespace TheThoriumChallenge
             {
                 Creature playerCreature = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
                 {
-                    Def = info.Def,
+                    Def = info.SpeciesDef,
                     PositionProperties = new EntitySpawnPositionProperties_AsCloseToNodeAsPossible(World.GetGroundNode(EntryPoint)),
                     Actor = World.GetActor(1),
                 }, maxAttempts: 50) as Creature;

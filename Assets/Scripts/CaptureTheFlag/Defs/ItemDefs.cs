@@ -26,23 +26,25 @@ namespace CaptureTheFlag
             }
         };
 
-        public static List<EntityDef> Defs = new List<EntityDef>()
+        public static List<EntityDef> GetDefs()
         {
-            new EntityDef(ItemBaseDef)
-            {
-                DefName = "CtfItem_Apple",
-                Label = "apple",
-                Description = "Restores 20 stamina upon consumption",
-                UiSprite = HelperFunctions.TextureToSprite(Resources.Load<Texture>(ItemTexturePath + "Apple")),
-                Components = new List<CompProperties>()
+            return new List<EntityDef>() {
+                new EntityDef(ItemBaseDef)
                 {
-                    new CompProperties_CtfItem()
+                    DefName = "CtfItem_Apple",
+                    Label = "apple",
+                    Description = "Restores 20 stamina upon consumption",
+                    UiSprite = HelperFunctions.TextureToSprite(Resources.Load<Texture>(ItemTexturePath + "Apple")),
+                    Components = new List<CompProperties>()
                     {
-                        CompClass = typeof(Comp_CtfItem_Apple),
-                        ItemTexture = Resources.Load<Texture>(ItemTexturePath + "Apple"),
+                        new CompProperties_CtfItem()
+                        {
+                            CompClass = typeof(Comp_CtfItem_Apple),
+                            ItemTexture = Resources.Load<Texture>(ItemTexturePath + "Apple"),
+                        }
                     }
                 }
-            }
-        };
+            };
+        }
     }
 }

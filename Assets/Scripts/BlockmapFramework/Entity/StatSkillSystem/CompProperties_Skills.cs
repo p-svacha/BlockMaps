@@ -18,7 +18,7 @@ namespace BlockmapFramework
         /// <summary>
         /// The initial skill levels the entity has when created.
         /// </summary>
-        public Dictionary<string, int> InitialSkillLevels { get; init; } = new();
+        public Dictionary<SkillDef, int> InitialSkillLevels { get; init; } = new();
 
         public override CompProperties Clone()
         {

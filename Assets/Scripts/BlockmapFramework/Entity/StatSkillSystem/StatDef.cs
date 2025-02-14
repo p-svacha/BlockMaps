@@ -25,24 +25,10 @@ namespace BlockmapFramework
         public float MaxValue { get; init; } = -1;
 
         /// <summary>
-        /// If the level of any of these skills is 0, then the value of this stat is also 0.
+        /// List containing all sub-parts / modifiers that affect the stat calculation.
+        /// <br/>The stat parts will be applied in the order they are defined in this list.
         /// </summary>
-        public List<string> SkillRequirements { get; init; } = new();
-
-        /// <summary>
-        /// Values based on a skills level that are added to the value. Offsets get applied Factors.
-        /// </summary>
-        public List<SkillImpact> SkillOffsets { get; init; } = new();
-
-        /// <summary>
-        /// Values based on other stats that are added to the value. Offsets get applied Factors.
-        /// </summary>
-        public List<SkillImpact> StatOffsets { get; init; } = new();
-
-        /// <summary>
-        /// Values based on a skills level that the value gets multiplied with. Offsets get applied Factors.
-        /// </summary>
-        public List<SkillImpact> SkillFactors { get; init; } = new();
+        public List<StatPart> StatParts { get; init; } = new();
     }
 
     public enum StatType

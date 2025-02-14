@@ -7,16 +7,12 @@ namespace TheThoriumChallenge
 {
     public static class SpeciesDefs
     {
-        private static SpeciesDef BaseCreature = new SpeciesDef()
+        private static EntityDef BaseCreature = new EntityDef()
         {
             EntityClass = typeof(Creature),
             Impassable = false,
             BlocksVision = false,
             VisionColliderType = VisionColliderType.NodeBased,
-            Components = new List<CompProperties>()
-            {
-                new CompProperties_Movement() { },
-            },
             RenderProperties = new EntityRenderProperties()
             {
                 RenderType = EntityRenderType.StandaloneModel,
@@ -24,19 +20,41 @@ namespace TheThoriumChallenge
             }
         };
 
-        public static List<SpeciesDef> Defs = new List<SpeciesDef>()
+        public static List<EntityDef> GetDefs()
         {
-            new SpeciesDef(BaseCreature)
+            return new List<EntityDef>()
             {
-                DefName = "Needlegrub",
-                Label = "needlegrub",
-                Description = "A small, burrowing larva with sharp mandibles.",
-                CreatureHeight = 1,
-                VisionRange = 5,
-                MaxHpPerLevel = 3f,
-                MovementSpeedModifier = 0.7f,
-                BiteStrengthPerLevel = 0.6f,
-            }
-        };
+                new EntityDef(BaseCreature)
+                {
+                    DefName = "Squishgrub",
+                    Label = "squishgrub",
+                    Description = "A small, squishy larva with sharp mandibles.",
+                    Dimensions = new Vector3Int(1, 1, 1),
+                    Components = new List<CompProperties>()
+                    {
+                        new CompProperties_Movement(),
+                        new CompProperties_Skills()
+                        {
+                            InitialSkillLevels = new Dictionary<SkillDef, int>()
+                            {
+                                { SkillDefOf.Health, 3 },
+                                { SkillDefOf.Moving, 5 },
+                                { SkillDefOf.Vision, 5 },
+                                { SkillDefOf.Biting, 8 },
+                                { SkillDefOf.Punching, 0 },
+                                { SkillDefOf.Kicking, 1 },
+                            }
+                        },
+                        new CompProperties_Stats()
+                        {
+                            StatBases = new Dictionary<StatDef, float>()
+                            {
+                                { StatDefOf.XpPerLevel, 10f },
+                            }
+                        }
+                    }
+                }
+            };
+        }
     }
 }

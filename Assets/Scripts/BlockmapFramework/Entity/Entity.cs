@@ -837,7 +837,7 @@ namespace BlockmapFramework
         public List<Skill> GetAllSkills() => SkillsComp.GetAllSkills();
         public int GetSkillLevel(SkillDef def) => SkillsComp.GetSkillLevel(def);
         public List<Stat> GetAllStats() => StatsComp.GetAllStats();
-        public float GetStat(StatDef def) => StatsComp.GetStat(def);
+        public float GetStat(StatDef def) => StatsComp.GetStatValue(def);
 
         /// <summary>
         /// Returns the height this entity has on the given node.

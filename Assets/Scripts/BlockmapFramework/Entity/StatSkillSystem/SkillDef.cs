@@ -9,6 +9,9 @@ namespace BlockmapFramework
     /// </summary>
     public class SkillDef : Def
     {
+        /// <summary>
+        /// The maximum level the skill can have.
+        /// </summary>
         public int MaxLevel { get; init; } = 20;
     }
 }

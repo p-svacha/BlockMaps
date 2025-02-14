@@ -21,7 +21,7 @@ namespace BlockmapFramework
             Skills = new Dictionary<SkillDef, Skill>();
             foreach (SkillDef skillDef in DefDatabase<SkillDef>.AllDefs)
             {
-                Skills.Add(skillDef, new Skill(skillDef, entity, Props.InitialSkillLevels[skillDef.DefName]));
+                Skills.Add(skillDef, new Skill(skillDef, entity, Props.InitialSkillLevels[skillDef]));
             }
         }
 

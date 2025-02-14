@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using BlockmapFramework;
 
 namespace TheThoriumChallenge
 {
@@ -26,16 +27,14 @@ namespace TheThoriumChallenge
 
         public void Show(Creature creature)
         {
-            NameText.text = creature.SpeciesDef.LabelCap;
+            NameText.text = creature.Def.LabelCap;
             LevelText.text = creature.Level.ToString();
-            DescriptionText.text = creature.SpeciesDef.Description;
+            DescriptionText.text = creature.Def.Description;
             HealthBar.SetValue(creature.HP, creature.MaxHP, showText: true);
 
             HelperFunctions.DestroyAllChildredImmediately(StatContainer);
-            foreach(CreatureStat stat in creature.Stats.Values)
+            foreach(Stat stat in creature.Stats.GetAllStats())
             {
-                if (!stat.Def.ShowInCreatureInfo) continue;
-
                 UI_CreatureInfoStatRow statRow = Instantiate(StatRowPrefab, StatContainer.transform);
                 statRow.Init(stat);
             }

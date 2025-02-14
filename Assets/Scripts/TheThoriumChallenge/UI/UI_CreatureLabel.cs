@@ -21,7 +21,7 @@ namespace TheThoriumChallenge
 
             WorldOffset = new Vector3(0f, (creature.Height / 2f) + 0.1f, 0f);
 
-            NameText.text = $"{creature.SpeciesDef.LabelCap} [{creature.Level}]";
+            NameText.text = $"{creature.Def.LabelCap} [{creature.Level}]";
             Color color = creature.IsPlayerControlled ? GameUI.Instance.FriendlyTextColor : GameUI.Instance.HostileTextColor;
             NameText.color = color;
             HealthBar.SetValue(creature.HP, creature.MaxHP, showText: false);

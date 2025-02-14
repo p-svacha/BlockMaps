@@ -10,6 +10,11 @@ namespace BlockmapFramework
     /// </summary>
     public class CompProperties_Stats : CompProperties
     {
+        /// <summary>
+        /// The base values of certain stats can be overriden with this list.
+        /// </summary>
+        public Dictionary<StatDef, float> StatBases { get; init; } = new();
+
         public CompProperties_Stats()
         {
             CompClass = typeof(Comp_Stats);

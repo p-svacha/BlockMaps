@@ -39,15 +39,14 @@ namespace CaptureTheFlag
         private void Start()
         {
             // Load defs
-            DefDatabase<SkillDef>.AddDefs(SkillDefs.Defs);
-            DefDatabase<StatDef>.AddDefs(StatDefs.Defs);
+            DefDatabase<SkillDef>.AddDefs(SkillDefs.GetDefs());
+            DefDatabase<StatDef>.AddDefs(StatDefs.GetDefs());
             DefDatabaseRegistry.AddAllGlobalDefs();
-            DefDatabase<EntityDef>.AddDefs(EntityDefs.ObjectDefs);
-            DefDatabase<EntityDef>.AddDefs(EntityDefs.CharacterDefs);
-            DefDatabase<EntityDef>.AddDefs(ItemDefs.Defs);
+            DefDatabase<EntityDef>.AddDefs(EntityDefs.GetObjectDefs());
+            DefDatabase<EntityDef>.AddDefs(EntityDefs.GetCharacterDefs());
+            DefDatabase<EntityDef>.AddDefs(ItemDefs.GetDefs());
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
-            DefDatabaseRegistry.BindAllDefOfs();
 
             // Init materials
             MaterialManager.InitializeBlendableSurfaceMaterial();

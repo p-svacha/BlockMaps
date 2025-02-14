@@ -20,8 +20,7 @@ namespace BlockmapFramework
         /// </summary>
         public Entity Entity { get; private set; }
 
-        public Stat() { }
-        public virtual void Initialize(StatDef def, Entity entity)
+        public Stat(StatDef def, Entity entity)
         {
             Def = def;
             Entity = entity;
@@ -34,22 +33,10 @@ namespace BlockmapFramework
         {
             float value = BaseValue;
 
-            // Return 0 if any skill requirement is not met
-            foreach(string skillRequirement in Def.SkillRequirements)
+            // Apply stat parts
+            foreach(StatPart statPart in Def.StatParts)
             {
-                if (Entity.GetSkillLevel(DefDatabase<SkillDef>.GetNamed(skillRequirement)) == 0) return 0;
-            }
-
-            // Apply additive offsets
-            foreach(SkillImpact skillOffset in Def.SkillOffsets)
-            {
-                value += skillOffset.GetValueFor(Entity);
-            }
-
-            // Apply multiplicative factors
-            foreach(SkillImpact skillFactor in Def.SkillFactors)
-            {
-                value *= skillFactor.GetValueFor(Entity);
+                statPart.TransformValue(Entity, this, ref value);
             }
 
             if (Def.Type == StatType.Int) value = (int)(value);
@@ -81,6 +68,33 @@ namespace BlockmapFramework
                     return value.ToString("P0");
             }
             throw new System.Exception($"Type {Def.Type} not handled.");
+        }
+
+        public string GetBreakdownString()
+        {
+            // Label
+            string text = Def.LabelCap;
+
+            // Description
+            if (Def.Description != "")
+            {
+                text += "\n\n" + Def.Description;
+            }
+
+            // Base value
+            text += $"\n\nBase Value: {GetValueText(Def.BaseValue)}";
+
+            // Stat parts
+            if (Def.StatParts.Count > 0) text += "\n";
+            foreach (StatPart statPart in Def.StatParts)
+            {
+                text += $"\n{statPart.ExplanationString(Entity, this)}";
+            }
+
+            // Final value
+            text += $"\n\nFinal Value: {GetValueText(GetValue())}";
+
+            return text;
         }
     }
 }
