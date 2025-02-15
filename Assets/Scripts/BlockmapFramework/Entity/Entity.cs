@@ -257,6 +257,7 @@ namespace BlockmapFramework
                 try
                 {
                     newComp.Validate();
+                    Debug.Log($"Comp {newComp} has been initialized on {LabelCap}.");
                 }
                 catch(System.Exception e)
                 {

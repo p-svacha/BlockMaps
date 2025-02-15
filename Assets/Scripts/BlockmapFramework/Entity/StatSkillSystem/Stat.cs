@@ -11,6 +11,11 @@ namespace BlockmapFramework
     public class Stat
     {
         /// <summary>
+        /// The stats component this stat is attached to.
+        /// </summary>
+        private Comp_Stats Comp;
+
+        /// <summary>
         /// The definition of this stat.
         /// </summary>
         public StatDef Def { get; private set; }
@@ -20,8 +25,9 @@ namespace BlockmapFramework
         /// </summary>
         public Entity Entity { get; private set; }
 
-        public Stat(StatDef def, Entity entity)
+        public Stat(Comp_Stats comp, StatDef def, Entity entity)
         {
+            Comp = comp;
             Def = def;
             Entity = entity;
         }
@@ -31,7 +37,7 @@ namespace BlockmapFramework
         /// </summary>
         public virtual float GetValue()
         {
-            float value = BaseValue;
+            float value = GetBaseValue();
 
             // Apply stat parts
             foreach(StatPart statPart in Def.StatParts)
@@ -48,7 +54,14 @@ namespace BlockmapFramework
             return value;
         }
 
-        protected virtual float BaseValue => Def.BaseValue;
+        protected float GetBaseValue()
+        {
+            // Check if the EntityDef has overridden the base value for this StatDef
+            if (Comp.Props.StatBases.TryGetValue(Def, out float overriddenBaseStat)) return overriddenBaseStat;
+
+            // If not, just return the base value as defined in the StatDef
+            return Def.BaseValue;
+        }
 
         public string GetValueText() => GetValueText(GetValue());
         public string GetValueText(float value)
@@ -82,7 +95,7 @@ namespace BlockmapFramework
             }
 
             // Base value
-            text += $"\n\nBase Value: {GetValueText(Def.BaseValue)}";
+            text += $"\n\nBase Value: {GetValueText(GetBaseValue())}";
 
             // Stat parts
             if (Def.StatParts.Count > 0) text += "\n";

@@ -28,7 +28,7 @@ namespace TheThoriumChallenge
         public void Show(Creature creature)
         {
             NameText.text = creature.Def.LabelCap;
-            LevelText.text = creature.Level.ToString();
+            LevelText.text = $"Level {creature.Level}";
             DescriptionText.text = creature.Def.Description;
             HealthBar.SetValue(creature.HP, creature.MaxHP, showText: true);
 

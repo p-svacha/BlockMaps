@@ -21,6 +21,16 @@ namespace TheThoriumChallenge
                     Label = "max HP",
                     Description = "The maximum HP of this creature.",
                     Type = StatType.Int,
+                    BaseValue = 3,
+                    StatParts = new List<StatPart>()
+                    {
+                        new StatPart_SkillImpact()
+                        {
+                            SkillDef = SkillDefOf.Health,
+                            LinearPerLevelValue = 0.1f,
+                        },
+                        new StatPart_CreatureLevel()
+                    }
                 },
 
                 new StatDef()
@@ -29,6 +39,14 @@ namespace TheThoriumChallenge
                     Label = "vision range",
                     Description = "How many tiles around itself the creature sees.",
                     Type = StatType.Float,
+                    StatParts = new List<StatPart>()
+                    {
+                        new StatPart_SkillImpact()
+                        {
+                            SkillDef = SkillDefOf.Vision,
+                            LinearPerLevelValue = 1f,
+                        },
+                    }
                 },
 
                 new StatDef()
@@ -37,6 +55,16 @@ namespace TheThoriumChallenge
                     Label = "movement speed",
                     Description = "How many tiles this creature can move within 60s. Affects cost of movement abilities..",
                     Type = StatType.Float,
+                    BaseValue = 1,
+                    StatParts = new List<StatPart>()
+                    {
+                        new StatPart_SkillImpact()
+                        {
+                            SkillDef = SkillDefOf.Moving,
+                            Type = SkillImpactType.Multiplicative,
+                            LinearPerLevelValue = 0.1f,
+                        },
+                    }
                 },
 
                 new StatDef()
@@ -45,6 +73,17 @@ namespace TheThoriumChallenge
                     Label = "bite strength",
                     Description = "How harsh this creature can bite. Affects the damage of bite-based abilities.",
                     Type = StatType.Float,
+                    BaseValue = 1,
+                    StatParts = new List<StatPart>()
+                    {
+                        new StatPart_SkillImpact()
+                        {
+                            SkillDef = SkillDefOf.Biting,
+                            Type = SkillImpactType.Multiplicative,
+                            LinearPerLevelValue = 0.1f,
+                        },
+                        new StatPart_CreatureLevel()
+                    }
                 },
 
                 new StatDef()

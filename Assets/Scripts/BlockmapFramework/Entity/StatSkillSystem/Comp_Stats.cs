@@ -11,7 +11,7 @@ namespace BlockmapFramework
     /// </summary>
     public class Comp_Stats : EntityComp
     {
-        private CompProperties_Stats Props => (CompProperties_Stats)props;
+        public CompProperties_Stats Props => (CompProperties_Stats)props;
 
         private Dictionary<StatDef, Stat> Stats;
 
@@ -22,7 +22,7 @@ namespace BlockmapFramework
             Stats = new Dictionary<StatDef, Stat>();
             foreach (StatDef statDef in DefDatabase<StatDef>.AllDefs)
             {
-                Stat stat = new Stat(statDef, entity);
+                Stat stat = new Stat(this, statDef, entity);
                 Stats.Add(statDef, stat);
             }
         }

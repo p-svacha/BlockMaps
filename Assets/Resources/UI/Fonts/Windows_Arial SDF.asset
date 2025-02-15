@@ -176,23 +176,23 @@ MonoBehaviour:
     m_FaceIndex: 0
     m_FamilyName: Arial
     m_StyleName: Regular
-    m_PointSize: 12
+    m_PointSize: 24
     m_Scale: 1
-    m_LineHeight: 13.798828
-    m_AscentLine: 10.863281
-    m_CapLine: 9
-    m_MeanLine: 7
+    m_LineHeight: 27.597656
+    m_AscentLine: 21.726562
+    m_CapLine: 17
+    m_MeanLine: 13
     m_Baseline: 0
-    m_DescentLine: -2.5429688
-    m_SuperscriptOffset: 10.863281
+    m_DescentLine: -5.0859375
+    m_SuperscriptOffset: 21.726562
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -2.5429688
+    m_SubscriptOffset: -5.0859375
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -1.7109375
-    m_UnderlineThickness: 0.87890625
-    m_StrikethroughOffset: 2.8
-    m_StrikethroughThickness: 0.87890625
-    m_TabWidth: 3
+    m_UnderlineOffset: -3.421875
+    m_UnderlineThickness: 1.7578125
+    m_StrikethroughOffset: 5.2
+    m_StrikethroughThickness: 1.7578125
+    m_TabWidth: 7
   m_GlyphTable: []
   m_CharacterTable: []
   m_AtlasTextures:
@@ -244,7 +244,7 @@ MonoBehaviour:
     sourceFontFileName: 
     sourceFontFileGUID: 3f1f9b5f6aa001c4f8410e1a860a5f0b
     pointSizeSamplingMode: 1
-    pointSize: 12
+    pointSize: 24
     padding: 9
     packingMode: 0
     atlasWidth: 1024

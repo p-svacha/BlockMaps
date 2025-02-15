@@ -42,6 +42,8 @@ namespace TheThoriumChallenge
 
         protected override void OnCompInitialized(EntityComp comp)
         {
+            base.OnCompInitialized(comp);
+
             if (comp is Comp_Stats statComp) Stats = statComp;
             if (comp is Comp_Skills skillComp) Skills = skillComp;
         }
