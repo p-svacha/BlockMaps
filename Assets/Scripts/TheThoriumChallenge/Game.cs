@@ -14,10 +14,10 @@ namespace TheThoriumChallenge
         public GameUI UI { get; private set; }
         public GameState GameState { get; private set; }
         public TtcWorldGenerator ActiveLevelGenerator { get; private set; }
-        public Level CurrentLevel { get; private set; }
+        public Stage CurrentStage { get; private set; }
         public List<CreatureInfo> PlayerCreatures { get; private set; }
 
-        public Actor LocalPlayer => CurrentLevel.LocalPlayer;
+        public Actor LocalPlayer => CurrentStage.LocalPlayer;
 
 
         private List<TtcWorldGenerator> LevelGenerators = new List<TtcWorldGenerator>()
@@ -83,24 +83,24 @@ namespace TheThoriumChallenge
         {
             UI.LoadingScreenOverlay.SetActive(true);
             GameState = GameState.LoadingLevel_GeneratingWorld;
-            CurrentLevel = null;
+            CurrentStage = null;
             ActiveLevelGenerator = LevelGenerators.First(x => x.Biome == biome);
             ActiveLevelGenerator.StartLevelGeneration(PlayerCreatures, onDoneCallback: OnWorldGenerationDone);
         }
 
         private void OnWorldGenerationDone()
         {
-            CurrentLevel = ActiveLevelGenerator.GetLevel(this);
+            CurrentStage = ActiveLevelGenerator.GetLevel(this);
 
             // Start world initialization
-            CurrentLevel.World.Initialize(OnWorldInitializationDone);
+            CurrentStage.World.Initialize(OnWorldInitializationDone);
             GameState = GameState.LoadingLevel_InitializingWorld;
         }
 
         private void OnWorldInitializationDone()
         {
             UI.OnGameStarting(this);
-            CurrentLevel.Start();
+            CurrentStage.Start();
 
             GameState = GameState.Running;
             UI.LoadingScreenOverlay.SetActive(false);
@@ -108,23 +108,23 @@ namespace TheThoriumChallenge
 
         #region Udate Loop
 
-        protected override void OnFixedUpdate() => CurrentLevel?.World?.FixedUpdate();
-        protected override void Render(float alpha) => CurrentLevel?.World?.Render(alpha);
+        protected override void OnFixedUpdate() => CurrentStage?.World?.FixedUpdate();
+        protected override void Render(float alpha) => CurrentStage?.World?.Render(alpha);
         
         protected override void OnFrame() { }
 
         protected override void Tick()
         {
-            CurrentLevel?.World?.Tick();
+            CurrentStage?.World?.Tick();
 
             if (GameState == GameState.LoadingLevel_GeneratingWorld) ActiveLevelGenerator.UpdateGeneration();
 
-            if (GameState == GameState.Running) CurrentLevel.Tick();
+            if (GameState == GameState.Running) CurrentStage.Tick();
         }
 
         protected override void HandleInputs()
         {
-            if (GameState == GameState.Running) CurrentLevel.HandleInputs();
+            if (GameState == GameState.Running) CurrentStage.HandleInputs();
         }
 
         #endregion

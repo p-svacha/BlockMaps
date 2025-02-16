@@ -250,7 +250,7 @@ namespace BlockmapFramework
             Components = new List<EntityComp>();
             foreach (CompProperties compProps in Def.Components)
             {
-                EntityComp newComp = newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
+                EntityComp newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
                 Components.Add(newComp);
                 newComp.Initialize(compProps, this);
 
@@ -1276,11 +1276,11 @@ namespace BlockmapFramework
         /// <summary>
         /// Instantly teleports this entity to the given node.
         /// </summary>
-        public void Teleport(BlockmapNode targetNode, Direction newDirection = Direction.None)
+        public void Teleport(BlockmapNode targetNode, Direction newRotation = Direction.None)
         {
             BlockmapNode sourceNode = OriginNode;
             SetOriginNode(targetNode);
-            if (newDirection != Direction.None) Rotation = newDirection;
+            if (newRotation != Direction.None) Rotation = newRotation;
             ResetWorldPositonAndRotation();
 
             // Update vision from entities around source and target position

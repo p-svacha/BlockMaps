@@ -27,7 +27,7 @@ namespace TheThoriumChallenge
 
         protected override void OnPerformAction()
         {
-            if (Creature.IsVisibleBy(Game.Instance.CurrentLevel.LocalPlayer))
+            if (Creature.IsVisibleBy(Game.Instance.CurrentStage.LocalPlayer))
             {
                 Creature.MovementComp.OnTargetReached += OnMovementDone;
                 Creature.MovementComp.MoveTo(Target);

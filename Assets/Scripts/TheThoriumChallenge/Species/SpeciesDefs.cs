@@ -30,12 +30,12 @@ namespace TheThoriumChallenge
                     Label = "squishgrub",
                     Description = "A small, squishy larva with sharp mandibles.",
                     Dimensions = new Vector3Int(1, 1, 1),
-                    Components = new List<CompProperties>()
+                    Components = new()
                     {
                         new CompProperties_Movement(),
                         new CompProperties_Skills()
                         {
-                            InitialSkillLevels = new Dictionary<SkillDef, int>()
+                            InitialSkillLevels = new()
                             {
                                 { SkillDefOf.Health, 3 },
                                 { SkillDefOf.Moving, 5 },
@@ -47,9 +47,16 @@ namespace TheThoriumChallenge
                         },
                         new CompProperties_Stats()
                         {
-                            StatBases = new Dictionary<StatDef, float>()
+                            StatBases = new()
                             {
                                 { StatDefOf.XpPerLevel, 10f },
+                            }
+                        },
+                        new CompProperties_Abilities()
+                        {
+                            InternalizedAbilities = new()
+                            {
+                                AbilityDefOf.Move
                             }
                         }
                     }

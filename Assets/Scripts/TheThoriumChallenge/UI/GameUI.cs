@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using BlockmapFramework;
 
 namespace TheThoriumChallenge
 {
@@ -13,16 +14,24 @@ namespace TheThoriumChallenge
 
         [Header("Elements")]
         public GameObject LoadingScreenOverlay;
+        public UI_EntityInfoWindow EntityInfoWindow;
 
         public TextMeshProUGUI TimeText;
         public UI_ActionTimeline ActionTimeline;
         public GameObject CreatureLabelContainer;
         public UI_CreatureInfo CreatureInfo;
+        public UI_ActionSelection ActionSelection;
 
         [Header("Prefabs")]
         public UI_CreatureLabel CreatureLabelPrefab;
 
-        [Header("Colors")]
+        [Header("UI Base Colors")]
+        public Color UiBackgroundColor;
+        public Color UiButtonColor_Default;
+        public Color UiButtonColor_Highlighted;
+        public Color UiButtonColor_Selected;
+
+        [Header("Special Colors")]
         public Color FriendlyTextColor;
         public Color FriendlyBackgroundColor;
         public Color HostileTextColor;
@@ -31,6 +40,7 @@ namespace TheThoriumChallenge
         private void Awake()
         {
             Instance = this;
+            EntityInfoWindow.gameObject.SetActive(false);
         }
 
         public void OnGameStarting(Game game)
@@ -40,7 +50,7 @@ namespace TheThoriumChallenge
 
         public void RefreshTimeText()
         {
-            TimeText.text = Game.CurrentLevel.GlobalSimulationTime.GetAsString();
+            TimeText.text = Game.CurrentStage.GlobalSimulationTime.GetAsString();
         }
 
         public void ShowCreatureInfo(Creature creature)
@@ -51,6 +61,16 @@ namespace TheThoriumChallenge
         public void HideCreatureInfo()
         {
             CreatureInfo.gameObject.SetActive(false);
+        }
+
+        public void ShowCreatureActionSelection(Creature creature)
+        {
+            ActionSelection.gameObject.SetActive(true);
+            ActionSelection.Init(creature);
+        }
+        public void HidereatureActionSelection()
+        {
+            ActionSelection.gameObject.SetActive(false);
         }
     }
 }

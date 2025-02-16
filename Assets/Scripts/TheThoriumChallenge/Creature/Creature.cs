@@ -11,13 +11,14 @@ namespace TheThoriumChallenge
         // Comps
         public Comp_Stats Stats { get; private set; }
         public Comp_Skills Skills { get; private set; }
+        public Comp_Abilities Abilities { get; private set; }
 
         // Simulation
         public TimeStamp NextActionTime { get; private set; }
         public bool IsPlayerControlled { get; private set; }
         public bool IsInTurn { get; set; }
         public bool IsInAction { get; set; }
-        private List<TurnAction> PossibleActions;
+        public List<TurnAction> PossibleActions { get; private set; }
         public Dictionary<Direction, TurnAction_Move> MoveActions { get; private set; }
 
         // State
@@ -46,6 +47,7 @@ namespace TheThoriumChallenge
 
             if (comp is Comp_Stats statComp) Stats = statComp;
             if (comp is Comp_Skills skillComp) Skills = skillComp;
+            if (comp is Comp_Abilities abilitiesComp) Abilities = abilitiesComp;
         }
 
         public void InitializeCreature(int level, bool isPlayerControlled)
@@ -69,6 +71,9 @@ namespace TheThoriumChallenge
         {
             PossibleActions = new List<TurnAction>();
             MoveActions = new Dictionary<Direction, TurnAction_Move>();
+
+            // Do Nothing
+            PossibleActions.Add(new TurnAction_DoNothing(this));
 
             // Move
             foreach (Direction dir in HelperFunctions.GetSides())
@@ -104,6 +109,7 @@ namespace TheThoriumChallenge
         protected override GameObject RenderModel => _RenderModel;
         public override float VisionRange => Stats.GetStatValue(StatDefOf.VisionRange);
         public override float MovementSpeed => 5;
+        public float CreatureMovementSpeed => Stats.GetStatValue(StatDefOf.MovementSpeed);
 
         #endregion
     }

@@ -32,7 +32,7 @@ namespace TheThoriumChallenge
         {
             if (Creature == null) return;
 
-            bool showLabel = Creature.IsVisible || Creature.IsExploredBy(Game.Instance.CurrentLevel.LocalPlayer);
+            bool showLabel = Creature.IsVisible || Creature.IsExploredBy(Game.Instance.CurrentStage.LocalPlayer);
 
             if (showLabel)
             {

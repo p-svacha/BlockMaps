@@ -10,7 +10,8 @@ namespace TheThoriumChallenge
         {
             return new List<AbilityDef>()
             {
-                new AbilityDef() { DefName="Bite", AbilityClass = typeof(Ability001_Bite) }
+                new AbilityDef() { DefName="Move", AbilityClass = typeof(Ability_Move) },
+                new AbilityDef() { DefName="Bite", AbilityClass = typeof(Ability_Bite) }
             };
         }
     }

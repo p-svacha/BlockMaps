@@ -22,7 +22,7 @@ namespace TheThoriumChallenge
             TooltipTarget.Text = c.LabelCap;
 
             PreviewImage.sprite = c.UiSprite;
-            NatHoursMinutesText.text = $"in {(c.NextActionTime - Game.Instance.CurrentLevel.GlobalSimulationTime).ValueInSeconds}s";
+            NatHoursMinutesText.text = $"in {(c.NextActionTime - Game.Instance.CurrentStage.GlobalSimulationTime).ValueInSeconds}s";
 
             Background.color = c.IsPlayerControlled ? GameUI.Instance.FriendlyBackgroundColor : GameUI.Instance.HostileBackgroundColor;
         }

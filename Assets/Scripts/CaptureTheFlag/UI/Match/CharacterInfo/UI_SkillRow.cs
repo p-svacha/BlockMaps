@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using BlockmapFramework;
 
-namespace CaptureTheFlag.UI
+namespace BlockmapFramework.UI
 {
     public class UI_SkillRow : MonoBehaviour
     {
@@ -19,17 +19,15 @@ namespace CaptureTheFlag.UI
         {
             LabelText.text = skill.Def.LabelCap;
             int value = skill.GetSkillLevel();
+            ValueText.text = value.ToString("0.#");
 
             if (value == 0)
             {
-                ValueText.text = "Unable";
                 HideValueBar();
             }
 
             else
             {
-                ValueText.text = value.ToString("0.#");
-
                 float maxValue = skill.Def.MaxLevel;
                 float ratio = value / maxValue;
                 ValueBar.GetComponent<RectTransform>().anchorMax = new Vector2(ratio, 1f);

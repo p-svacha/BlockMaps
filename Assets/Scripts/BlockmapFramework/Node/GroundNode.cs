@@ -240,6 +240,17 @@ namespace BlockmapFramework
             }
             return adjNodes;
         }
+        public List<GroundNode> GetAdjacentGroundNodes4()
+        {
+            List<GroundNode> adjNodes = new List<GroundNode>();
+
+            foreach (Direction dir in HelperFunctions.GetSides())
+            {
+                GroundNode adjNode = World.GetAdjacentGroundNode(this, dir);
+                if (adjNode != null) adjNodes.Add(adjNode);
+            }
+            return adjNodes;
+        }
 
         #endregion
 

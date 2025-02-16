@@ -1,6 +1,7 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BlockmapFramework
@@ -25,6 +26,7 @@ namespace BlockmapFramework
             return new CompProperties_Stats()
             {
                 CompClass = this.CompClass,
+                StatBases = this.StatBases.ToDictionary(x => x.Key, x => x.Value)
             };
         }
     }

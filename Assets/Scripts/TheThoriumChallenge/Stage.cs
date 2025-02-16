@@ -1,11 +1,12 @@
 using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public class Level
+    public class Stage
     {
         public Game Game { get; private set; }
         public World World { get; private set; }
@@ -19,7 +20,7 @@ namespace TheThoriumChallenge
 
         private PriorityQueue<Creature> ActionQueue;
 
-        public Level(Game game, World world, Vector2Int entryPoint, Dictionary<Vector2Int, Biome> exitPoints)
+        public Stage(Game game, World world, Vector2Int entryPoint, Dictionary<Vector2Int, Biome> exitPoints)
         {
             Game = game;
             World = world;
@@ -78,6 +79,47 @@ namespace TheThoriumChallenge
             }
         }
 
+        
+
+        #region Turn Loop
+
+        private void StartNextTurn()
+        {
+            
+            SetGlobalSimulationTime(ActionQueue.ToSortedList()[0].NextActionTime.ValueInSeconds);
+            Game.UI.ActionTimeline.Refresh(ActionQueue);
+            ActiveTurnCreature = ActionQueue.Dequeue();
+            ActiveTurnCreature.IsInTurn = true;
+
+            ActiveTurnCreature.RefreshPossibleActions();
+
+            if (ActiveTurnCreature.IsPlayerControlled)
+            {
+                World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false);
+                Game.UI.ShowCreatureInfo(ActiveTurnCreature);
+                Game.UI.ShowCreatureActionSelection(ActiveTurnCreature);
+                ActiveTurnCreature.PerformNextAction();
+            }
+            else
+            {
+                Game.UI.HideCreatureInfo();
+                Game.UI.HidereatureActionSelection();
+                if (ActiveTurnCreature.IsVisible) World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false, callback: () => ActiveTurnCreature.PerformNextAction());
+                else ActiveTurnCreature.PerformNextAction();
+            }
+        }
+
+        private void SetGlobalSimulationTime(int secondsAbsolute)
+        {
+            GlobalSimulationTime.SetTime(secondsAbsolute);
+            Game.UI.RefreshTimeText();
+        }
+
+
+        #endregion
+
+        #region Player Inputs
+
         public void HandleInputs()
         {
             if (ActiveTurnCreature.IsPlayerControlled && !ActiveTurnCreature.IsInAction)
@@ -109,38 +151,21 @@ namespace TheThoriumChallenge
             }
         }
 
-        #region Turn Loop
-
-        private void StartNextTurn()
+        /// <summary>
+        /// Switches to the mode where the player has to choose a node as the target.
+        /// </summary>
+        public void GoToChooseTargetMode(Ability ability)
         {
-            
-            SetGlobalSimulationTime(ActionQueue.ToSortedList()[0].NextActionTime.ValueInSeconds);
-            Game.UI.ActionTimeline.Refresh(ActionQueue);
-            ActiveTurnCreature = ActionQueue.Dequeue();
-            ActiveTurnCreature.IsInTurn = true;
 
-            ActiveTurnCreature.RefreshPossibleActions();
-
-            if (ActiveTurnCreature.IsPlayerControlled)
-            {
-                World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false);
-                Game.UI.ShowCreatureInfo(ActiveTurnCreature);
-                ActiveTurnCreature.PerformNextAction();
-            }
-            else
-            {
-                Game.UI.HideCreatureInfo();
-                if (ActiveTurnCreature.IsVisible) World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false, callback: () => ActiveTurnCreature.PerformNextAction());
-                else ActiveTurnCreature.PerformNextAction();
-            }
         }
 
-        private void SetGlobalSimulationTime(int secondsAbsolute)
+        /// <summary>
+        /// Makes the ActiveTurnCreature perform the Do Nothing action.
+        /// </summary>
+        public void DoNothing()
         {
-            GlobalSimulationTime.SetTime(secondsAbsolute);
-            Game.UI.RefreshTimeText();
+            ActiveTurnCreature.PossibleActions.First(a => a is TurnAction_DoNothing).Perform();
         }
-
 
         #endregion
 

@@ -291,16 +291,6 @@ public static class HelperFunctions
 
         throw new System.Exception("The two given coordinates are not equal or adjacent to each other.");
     }
-    public static Direction GetGeneralDirection(Vector2Int from, Vector2Int to)
-    {
-        if (to == from) return Direction.None;
-
-        int deltaX = to.x - from.x;
-        int deltaY = to.y - from.y;
-        float angle = Vector2.SignedAngle(to - from, Vector2.up);
-        // todo
-        return Direction.None;
-    }
 
     public static Direction GetOppositeDirection(Direction dir)
     {

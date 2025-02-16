@@ -18,9 +18,9 @@ namespace TheThoriumChallenge
             StartGeneration(2, WorldGenerator.GetRandomSeed(), onDoneCallback);
         }
 
-        public Level GetLevel(Game game)
+        public Stage GetLevel(Game game)
         {
-            return new Level(game, World, EntryPoint, ExitPoints);
+            return new Stage(game, World, EntryPoint, ExitPoints);
         }
 
         protected void PlacePlayerCreatures()

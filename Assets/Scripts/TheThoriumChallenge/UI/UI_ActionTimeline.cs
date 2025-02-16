@@ -16,7 +16,7 @@ namespace TheThoriumChallenge
 
             foreach(Creature entity in ActionQueue.ToSortedList())
             {
-                if(entity.IsVisibleBy(Game.Instance.CurrentLevel.LocalPlayer))
+                if(entity.IsVisibleBy(Game.Instance.CurrentStage.LocalPlayer))
                 {
                     UI_ActionTimelineElement elem = Instantiate(ElementPrefab, Container.transform);
                     elem.Init(entity);
