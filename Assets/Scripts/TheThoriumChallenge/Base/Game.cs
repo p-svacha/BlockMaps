@@ -73,12 +73,12 @@ namespace TheThoriumChallenge
                 new CreatureInfo()
                 {
                     SpeciesDef = SpeciesDefOf.Squishgrub,
-                    Level = 5,
+                    Level = 16,
                 },
                 new CreatureInfo()
                 {
                     SpeciesDef = SpeciesDefOf.Squishgrub,
-                    Level = 6,
+                    Level = 19,
                 },
             };
         }

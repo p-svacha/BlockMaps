@@ -2,17 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageInfo : MonoBehaviour
+namespace TheThoriumChallenge
 {
-    // Start is called before the first frame update
-    void Start()
+    public class DamageInfo
     {
-        
-    }
+        public Creature Source { get; private set; }
+        public Creature Target { get; private set; }
+        public DamageTypeDef Type { get; private set; }
+        public float Amount { get; private set; }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public DamageInfo(Creature source, Creature target, DamageTypeDef type, float amount)
+        {
+            Source = source;
+            Target = target;
+            Type = type;
+            Amount = amount;
+        }
     }
 }

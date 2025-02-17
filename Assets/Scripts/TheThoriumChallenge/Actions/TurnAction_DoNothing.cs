@@ -15,6 +15,7 @@ namespace TheThoriumChallenge
 
         protected override void OnPerformAction()
         {
+            Debug.Log($"{Creature} is skipping its turn.");
             EndAction();
         }
     }

@@ -25,7 +25,10 @@ namespace TheThoriumChallenge
         }
         public override void OnPerform(BlockmapNode target)
         {
-            throw new System.NotImplementedException();
+            Creature targetCreature = target.GetCreature();
+            float damage = 2f * Creature.GetStat(StatDefOf.BiteStrength);
+
+            targetCreature.ApplyDamage(new DamageInfo(Creature, targetCreature, DamageTypeDefOf.Pierce, damage), onHealthChangeDoneCallback: Finish);
         }
     }
 }

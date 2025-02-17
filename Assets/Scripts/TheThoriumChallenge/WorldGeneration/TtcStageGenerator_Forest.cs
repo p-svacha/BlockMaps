@@ -1,5 +1,4 @@
 using BlockmapFramework;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,13 +8,13 @@ namespace TheThoriumChallenge
     public class TtcStageGenerator_Forest : TtcStageGenerator
     {
         public override string Label => "TTC - Forest";
-        public override string Description => throw new NotImplementedException();
+        public override string Description => throw new System.NotImplementedException();
         public override bool StartAsVoid => false;
         public override Biome Biome => Biome.Forest;
 
-        protected override List<Action> GetGenerationSteps()
+        protected override List<System.Action> GetGenerationSteps()
         {
-            return new List<Action>()
+            return new List<System.Action>()
             {
                 PlaceTrees,
                 PlacePlayerCreatures,
@@ -45,7 +44,7 @@ namespace TheThoriumChallenge
             }) as Creature;
             if (creature != null)
             {
-                creature.InitializeCreature(level: 1, isPlayerControlled: false);
+                creature.InitializeCreature(level: Random.Range(10, 21), isPlayerControlled: false);
             }
         }
     }

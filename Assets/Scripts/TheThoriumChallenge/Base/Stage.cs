@@ -123,6 +123,29 @@ namespace TheThoriumChallenge
             Game.UI.RefreshTimeText();
         }
 
+        public void PerformTurnAction(TurnAction action)
+        {
+            HoveredTargetNode = null;
+            PossibleTargetNodes = null;
+            ActiveTargetChoosingAbility = null;
+            UpdateHighlightedNodes();
+
+            action.StartPerform();
+        }
+
+        /// <summary>
+        /// Makes the ActiveTurnCreature perform the Do Nothing action.
+        /// </summary>
+        public void DoNothing()
+        {
+            PerformTurnAction(ActiveTurnCreature.PossibleActions.First(a => a is TurnAction_DoNothing));
+        }
+
+        public void RemoveCreatureFromStage(Creature creature)
+        {
+            Creatures.Remove(creature);
+            ActionQueue.Remove(creature);
+        }
 
         #endregion
 
@@ -168,13 +191,14 @@ namespace TheThoriumChallenge
                 }
 
                 // Hovered creature
-                if(World.HoveredNode != null)
+                if (World.HoveredNode != null)
                 {
                     HoveredCreature = World.HoveredNode.GetCreature();
                 }
+                else HoveredCreature = null;
 
                 // Hovered ability target
-                if(ActiveTargetChoosingAbility != null)
+                if (ActiveTargetChoosingAbility != null)
                 {
                     if (PossibleTargetNodes.Contains(World.HoveredNode))
                     {
@@ -286,24 +310,6 @@ namespace TheThoriumChallenge
         {
             foreach (BlockmapNode node in HighlightedNodes) node.HideMultiOverlay();
             HighlightedNodes.Clear();
-        }
-
-        public void PerformTurnAction(TurnAction action)
-        {
-            HoveredTargetNode = null;
-            PossibleTargetNodes = null;
-            ActiveTargetChoosingAbility = null;
-            UpdateHighlightedNodes();
-
-            action.StartPerform();
-        }
-
-        /// <summary>
-        /// Makes the ActiveTurnCreature perform the Do Nothing action.
-        /// </summary>
-        public void DoNothing()
-        {
-            PerformTurnAction(ActiveTurnCreature.PossibleActions.First(a => a is TurnAction_DoNothing));
         }
 
         #endregion

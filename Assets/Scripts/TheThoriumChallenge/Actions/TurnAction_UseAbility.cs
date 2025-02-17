@@ -23,6 +23,7 @@ namespace TheThoriumChallenge
 
         protected override void OnPerformAction()
         {
+            Debug.Log($"{Creature} is using the ability {Ability.Label}.");
             Ability.Perform(Target, onDoneCallback: EndAction);
         }
     }

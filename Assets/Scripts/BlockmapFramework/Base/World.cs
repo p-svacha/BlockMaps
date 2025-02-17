@@ -72,6 +72,7 @@ namespace BlockmapFramework
         public Material CliffMaterial => MaterialManager.LoadMaterial(CliffMaterialPath);
 
         public bool IsInitialized { get; private set; }
+        public int CurrentTick { get; private set; }
         private System.Action OnInitializationDoneCallback;
 
         /// <summary>
@@ -88,6 +89,8 @@ namespace BlockmapFramework
         private int UpdateEntityVisionIn;
         private List<Entity> VisionUpdateEntities;
         private System.Action EntityVisionUpdateCallback;
+
+        private List<Entity> EntitiesToRemoveThisTick = new();
 
         // Database
         private Dictionary<int, BlockmapNode> Nodes = new Dictionary<int, BlockmapNode>();
@@ -321,6 +324,7 @@ namespace BlockmapFramework
             Profiler.End("Initialize World");
             Profiler.LogAndClearResults();
 
+            CurrentTick = 0;
             OnInitializationDoneCallback?.Invoke();
         }
 
@@ -341,8 +345,14 @@ namespace BlockmapFramework
 
         public void Tick()
         {
+            CurrentTick++;
+
             // Entities
             foreach (Entity e in Entities.Values) e.Tick();
+
+            // Remove entities that are marked to be removed
+            foreach (Entity e in EntitiesToRemoveThisTick) RemoveEntity(e, updateWorld: true);
+            EntitiesToRemoveThisTick.Clear();
         }
 
         /// <summary>
@@ -1271,6 +1281,7 @@ namespace BlockmapFramework
             // Return new instance
             return newEntity;
         }
+        public void MarkEntityToBeRemovedThisTick(Entity e) => EntitiesToRemoveThisTick.Add(e);
         public void RemoveEntity(Entity entityToRemove, bool updateWorld)
         {
             // De-register entity

@@ -58,6 +58,11 @@ namespace TheThoriumChallenge
             LastClickTime = Time.time;
         }
 
+        private void Update()
+        {
+            if(Creature != null) ShowSelectedFrame(Creature == Creature.Stage?.HoveredCreature);
+        }
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             Creature.OverheadLabel.ShowSelectedFrame(true);
@@ -66,6 +71,11 @@ namespace TheThoriumChallenge
         public void OnPointerExit(PointerEventData eventData)
         {
             if(!IsActingNow) Creature.OverheadLabel.ShowSelectedFrame(false);
+        }
+
+        private void OnDestroy()
+        {
+            Creature?.OverheadLabel?.ShowSelectedFrame(false);
         }
 
         public void ShowSelectedFrame(bool show)

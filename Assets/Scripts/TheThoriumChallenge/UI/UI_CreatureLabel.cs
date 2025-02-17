@@ -55,6 +55,12 @@ namespace TheThoriumChallenge
                 // Transparent when not currently visible
                 if (Creature.IsVisible && NameText.color.a != 1f) NameText.color = new Color(NameText.color.r, NameText.color.g, NameText.color.b, 1f);
                 else if (!Creature.IsVisible && NameText.color.a != 0.5f) NameText.color = new Color(NameText.color.r, NameText.color.g, NameText.color.b, 0.3f);
+
+                // Healthbar
+                if (Creature.IsVisible)
+                {
+                    HealthBar.SetValue(Creature.HP, Creature.MaxHP, showText: false);
+                }
             }
 
             else

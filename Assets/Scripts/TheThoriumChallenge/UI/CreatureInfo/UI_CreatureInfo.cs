@@ -35,10 +35,11 @@ namespace TheThoriumChallenge
         public void Show(Creature creature)
         {
             Creature = creature;
-            Color color = creature.IsPlayerControlled ? GameUI.Instance.FriendlyTextColor : GameUI.Instance.HostileTextColor;
+            Color textColor = creature.IsPlayerControlled ? GameUI.Instance.FriendlyTextColor : GameUI.Instance.HostileTextColor;
+            Color barColor = creature.IsPlayerControlled ? GameUI.Instance.FriendlyBackgroundColor : GameUI.Instance.HostileTextColor;
 
             NameText.text = creature.Def.LabelCap;
-            NameText.color = color;
+            NameText.color = textColor;
             LevelText.text = $"Level {creature.Level}";
 
             HelperFunctions.DestroyAllChildredImmediately(ClassesContainer);
@@ -50,9 +51,14 @@ namespace TheThoriumChallenge
 
             DescriptionText.text = creature.Def.Description;
             HealthBar.SetValue(creature.HP, creature.MaxHP, showText: creature.IsPlayerControlled);
-            HealthBar.SetBarColor(color);
+            HealthBar.SetBarColor(barColor);
 
             SkillList.Init(creature.SkillsComp);
+        }
+
+        public void UpdateHealthBar()
+        {
+            HealthBar.SetValue(Creature.HP, Creature.MaxHP, showText: Creature.IsPlayerControlled);
         }
     }
 }

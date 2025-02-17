@@ -1,18 +1,13 @@
+using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageTypeDefOf : MonoBehaviour
+namespace TheThoriumChallenge
 {
-    // Start is called before the first frame update
-    void Start()
+    [DefOf]
+    public static class DamageTypeDefOf
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public static DamageTypeDef Pierce;
     }
 }

@@ -75,9 +75,14 @@ namespace TheThoriumChallenge
             else
             {
                 if (prevInfoCreature == null) CreatureInfo.gameObject.SetActive(true);
+
                 if (CreatureInfoCreature != prevInfoCreature)
                 {
                     CreatureInfo.Show(CreatureInfoCreature);
+                }
+                else
+                {
+                    CreatureInfo.UpdateHealthBar();
                 }
             }
         }

@@ -97,6 +97,27 @@ public class PriorityQueue<T>
     }
 
     /// <summary>
+    /// Removes a specific item from the queue.
+    /// </summary>
+    public void Remove(T item)
+    {
+        int index = _elements.FindIndex(e => EqualityComparer<T>.Default.Equals(e.Item, item));
+        if (index == -1)
+            return;
+
+        // Move the last item to the removed spot
+        _elements[index] = _elements[_elements.Count - 1];
+        _elements.RemoveAt(_elements.Count - 1);
+
+        // Restore heap property by bubbling up or down
+        if (index < _elements.Count)
+        {
+            BubbleUp(index);
+            BubbleDown(index);
+        }
+    }
+
+    /// <summary>
     /// Converts the priority queue into a dictionary where items are keys and priorities are values.
     /// </summary>
     public Dictionary<T, float> ToDictionary()
