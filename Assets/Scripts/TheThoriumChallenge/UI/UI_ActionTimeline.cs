@@ -14,12 +14,15 @@ namespace TheThoriumChallenge
         {
             HelperFunctions.DestroyAllChildredImmediately(Container);
 
-            foreach(Creature entity in ActionQueue.ToSortedList())
+            List<Creature> fullTimeline = ActionQueue.ToSortedList();
+
+            foreach (Creature creature in fullTimeline)
             {
-                if(entity.IsVisibleBy(Game.Instance.CurrentStage.LocalPlayer))
+                if(creature.IsVisibleBy(Game.Instance.CurrentStage.LocalPlayer))
                 {
                     UI_ActionTimelineElement elem = Instantiate(ElementPrefab, Container.transform);
-                    elem.Init(entity);
+                    bool isActingNow = (creature == fullTimeline[0]);
+                    elem.Init(creature, isActingNow);
                 }
             }
 

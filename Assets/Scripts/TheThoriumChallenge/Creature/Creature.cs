@@ -9,9 +9,9 @@ namespace TheThoriumChallenge
     public class Creature : MovingEntity
     {
         // Comps
-        public Comp_Stats Stats { get; private set; }
-        public Comp_Skills Skills { get; private set; }
-        public Comp_Abilities Abilities { get; private set; }
+        private Comp_Stats Stats { get; set; }
+        private Comp_Skills Skills { get; set; }
+        private Comp_Creature CreatureInfo { get; set; }
 
         // Simulation
         public TimeStamp NextActionTime { get; private set; }
@@ -46,7 +46,7 @@ namespace TheThoriumChallenge
 
             if (comp is Comp_Stats statComp) Stats = statComp;
             if (comp is Comp_Skills skillComp) Skills = skillComp;
-            if (comp is Comp_Abilities abilitiesComp) Abilities = abilitiesComp;
+            if (comp is Comp_Creature creatureComp) CreatureInfo = creatureComp;
         }
 
         public void InitializeCreature(int level, bool isPlayerControlled)
@@ -74,7 +74,7 @@ namespace TheThoriumChallenge
             PossibleActions.Add(new TurnAction_DoNothing(this));
 
             // Abilities
-            foreach(Ability ability in Abilities.GetAllAbilities())
+            foreach(Ability ability in CreatureInfo.GetAllAbilities())
             {
                 foreach(BlockmapNode possibleTarget in ability.GetPossibleTargets())
                 {
@@ -99,13 +99,20 @@ namespace TheThoriumChallenge
             IsInTurn = false;
         }
 
-        #region Getters
+        #region Entity Properties
 
         public override Sprite UiSprite => _UiSprite;
         protected override GameObject RenderModel => _RenderModel;
         public override float VisionRange => Stats.GetStatValue(StatDefOf.VisionRange);
         public override float MovementSpeed => 5;
         public float CreatureMovementSpeed => Stats.GetStatValue(StatDefOf.MovementSpeed);
+
+        #endregion
+
+        #region Creature Properties
+
+        public List<Ability> Abilities => CreatureInfo.GetAllAbilities();
+        public List<CreatureClassDef> Classes => CreatureInfo.Props.Classes;
 
         #endregion
     }

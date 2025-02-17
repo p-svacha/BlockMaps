@@ -12,7 +12,12 @@ namespace TheThoriumChallenge
         private Vector3 WorldOffset;
 
         [Header("Elements")]
+        public GameObject Content;
+
+        public GameObject SelectionFrame;
         public TextMeshProUGUI NameText;
+        public Image LevelBackground;
+        public TextMeshProUGUI LevelText;
         public UI_ProgressBar HealthBar;
 
         public void Init(Creature creature)
@@ -21,9 +26,14 @@ namespace TheThoriumChallenge
 
             WorldOffset = new Vector3(0f, (creature.Height / 2f) + 0.1f, 0f);
 
-            NameText.text = $"{creature.Def.LabelCap} [{creature.Level}]";
+            NameText.text = $"{creature.Def.LabelCap}";
+            LevelText.text = $"{creature.Level}";
+
             Color color = creature.IsPlayerControlled ? GameUI.Instance.FriendlyTextColor : GameUI.Instance.HostileTextColor;
             NameText.color = color;
+            LevelBackground.color = color;
+            SelectionFrame.GetComponent<Image>().color = color;
+
             HealthBar.SetValue(creature.HP, creature.MaxHP, showText: false);
             HealthBar.ProgressBar.GetComponent<Image>().color = color;
         }
@@ -36,8 +46,7 @@ namespace TheThoriumChallenge
 
             if (showLabel)
             {
-                NameText.gameObject.SetActive(true);
-                HealthBar.gameObject.SetActive(true);
+                Content.SetActive(true);
 
                 Vector3 targetWorldPosition = Creature.IsVisible ? Creature.MeshObject.transform.position + WorldOffset : (Vector3)Creature.LastKnownPosition[Game.Instance.LocalPlayer] + WorldOffset;
                 Vector3 screenPosition = Creature.World.Camera.Camera.WorldToScreenPoint(targetWorldPosition);
@@ -50,9 +59,13 @@ namespace TheThoriumChallenge
 
             else
             {
-                NameText.gameObject.SetActive(false);
-                HealthBar.gameObject.SetActive(false);
+                Content.SetActive(false);
             }
+        }
+
+        public void ShowSelectedFrame(bool show)
+        {
+            SelectionFrame.SetActive(show);
         }
     }
 }

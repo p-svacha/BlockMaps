@@ -29,13 +29,21 @@ namespace TheThoriumChallenge
 
         private void PlaceHostileCreatures()
         {
+            for(int i = 0; i < 10; i++)
+            {
+                TryPlaceRandomHostileCreature();
+            }
+        }
+
+        private void TryPlaceRandomHostileCreature()
+        {
             Creature creature = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
                 Def = SpeciesDefOf.Squishgrub,
                 PositionProperties = new EntitySpawnPositionProperties_WithinArea(0, World.NumNodesPerSide, 0, World.NumNodesPerSide),
                 Actor = World.GetActor(2),
             }) as Creature;
-            if(creature != null)
+            if (creature != null)
             {
                 creature.InitializeCreature(level: 1, isPlayerControlled: false);
             }

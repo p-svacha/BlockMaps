@@ -660,7 +660,6 @@ MonoBehaviour:
   Background: {fileID: 922483963481444202}
   PreviewImage: {fileID: 3573117198988349833}
   NatHoursMinutesText: {fileID: 6360225524334074223}
-  NatSecondsText: {fileID: 0}
 --- !u!114 &2380903364528639987
 MonoBehaviour:
   m_ObjectHideFlags: 0

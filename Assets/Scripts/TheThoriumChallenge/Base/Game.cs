@@ -49,6 +49,8 @@ namespace TheThoriumChallenge
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<SkillDef>.AddDefs(SkillDefs.GetDefs());
             DefDatabase<StatDef>.AddDefs(StatDefs.GetDefs());
+            DefDatabase<CreatureClassDef>.AddDefs(CreatureClassDefs.GetDefs());
+            DefDatabase<DamageTypeDef>.AddDefs(DamageTypeDefs.GetDefs());
             DefDatabase<AbilityDef>.AddDefs(AbilityDefs.GetDefs());
             DefDatabase<EntityDef>.AddDefs(SpeciesDefs.GetDefs());
             DefDatabaseRegistry.ResolveAllReferences();

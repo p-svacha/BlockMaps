@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TheThoriumChallenge;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -938,6 +939,8 @@ namespace BlockmapFramework
         public int GetMaxAltitude(Direction side) => Altitude.Where(x => HelperFunctions.GetAffectedCorners(side).Contains(x.Key)).Max(x => x.Value);
 
         public Vector3Int BaseCellCoordinates => new Vector3Int(WorldCoordinates.x, BaseAltitude, WorldCoordinates.y);
+
+        public Creature FirstOrDefault { get; internal set; }
 
         /// <summary>
         /// Checks and returns if a node with the same surface exists in the given direction with a matching height to this node.

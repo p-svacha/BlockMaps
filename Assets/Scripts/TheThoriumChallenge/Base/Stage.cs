@@ -19,7 +19,8 @@ namespace TheThoriumChallenge
         private PriorityQueue<Creature> ActionQueue;
 
         // Current turn
-        private Creature ActiveTurnCreature;
+        public Creature ActiveTurnCreature { get; private set; }
+        public Creature HoveredCreature { get; private set; }
         private Ability ActiveTargetChoosingAbility;
         private HashSet<BlockmapNode> PossibleTargetNodes;
         private HashSet<BlockmapNode> HighlightedNodes = new();
@@ -91,7 +92,10 @@ namespace TheThoriumChallenge
 
         private void StartNextTurn()
         {
-            
+            // Reset selections from last turn
+            ActiveTurnCreature?.OverheadLabel.ShowSelectedFrame(false);
+
+            // Set next creature to act
             SetGlobalSimulationTime(ActionQueue.ToSortedList()[0].NextActionTime.ValueInSeconds);
             Game.UI.ActionTimeline.Refresh(ActionQueue);
             ActiveTurnCreature = ActionQueue.Dequeue();
@@ -102,13 +106,11 @@ namespace TheThoriumChallenge
             if (ActiveTurnCreature.IsPlayerControlled)
             {
                 World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false);
-                Game.UI.ShowCreatureInfo(ActiveTurnCreature);
                 Game.UI.ShowCreatureActionSelection(ActiveTurnCreature);
                 ActiveTurnCreature.PerformNextAction();
             }
             else
             {
-                Game.UI.HideCreatureInfo();
                 Game.UI.HidereatureActionSelection();
                 if (ActiveTurnCreature.IsVisible) World.CameraPanToFocusEntity(ActiveTurnCreature, duration: 0.6f, followAfterPan: false, callback: () => ActiveTurnCreature.PerformNextAction());
                 else ActiveTurnCreature.PerformNextAction();
@@ -165,7 +167,13 @@ namespace TheThoriumChallenge
                     if (moveAction != null) PerformTurnAction(moveAction);
                 }
 
-                // Hovered target
+                // Hovered creature
+                if(World.HoveredNode != null)
+                {
+                    HoveredCreature = World.HoveredNode.GetCreature();
+                }
+
+                // Hovered ability target
                 if(ActiveTargetChoosingAbility != null)
                 {
                     if (PossibleTargetNodes.Contains(World.HoveredNode))
@@ -185,11 +193,21 @@ namespace TheThoriumChallenge
             }
         }
 
+        public void SelectCreature(Creature creature)
+        {
+            // Can't select creature if actively choosing a target for an ability
+            if (ActiveTargetChoosingAbility != null) return;
+
+        }
+
         /// <summary>
         /// Switches to the mode where the player has to choose a node as the target.
         /// </summary>
         public void GoToChooseTargetMode(Ability ability)
         {
+            // Stop if no valid targets
+            if (ability.GetPossibleTargets().Count == 0) return;
+
             // Leave mode if reselecting ability we are currently in
             if (ActiveTargetChoosingAbility == ability)
             {

@@ -19,6 +19,9 @@ namespace TheThoriumChallenge
 
         public GameObject AbilitySelectionRowContainer;
 
+        public GameObject NotificationTextPanel;
+        public TextMeshProUGUI NotificationText;
+
         [Header("Prefabs")]
         public GameObject AbilitySelectionRowPrefab;
         public UI_AbilitySelectionElement AbilitySelectionElementPrefab;
@@ -40,7 +43,7 @@ namespace TheThoriumChallenge
             AbilitySelectionButtons = new Dictionary<int, UI_AbilitySelectionElement>();
 
             HelperFunctions.DestroyAllChildredImmediately(AbilitySelectionRowContainer);
-            Abilities = creature.Abilities.GetAllAbilities();
+            Abilities = creature.Abilities;
             int numAbilities = Abilities.Count;
             int numRows = ((numAbilities - 1) / numAbilitiesPerRow) + 1;
 
@@ -68,7 +71,7 @@ namespace TheThoriumChallenge
             if (HighlightedAbility != null) HighlightedAbility.Background.color = GameUI.Instance.UiButtonColor_Default;
             HighlightedAbility = AbilitySelectionButtons[index];
             HighlightedAbility.Background.color = GameUI.Instance.UiButtonColor_Highlighted;
-            if (index >= Abilities.Count)
+            if (index >= Abilities.Count) // Dummy button - no ability
             {
                 DescriptionPanel.gameObject.SetActive(false);
                 CostPanel.gameObject.SetActive(false);
@@ -80,6 +83,13 @@ namespace TheThoriumChallenge
                 CostPanel.gameObject.SetActive(true);
                 AbilityDescriptionText.text = ability.Description;
                 AbilityCostText.text = ability.BaseCost.ToString();
+
+                if(ability.GetPossibleTargets().Count == 0)
+                {
+                    NotificationTextPanel.SetActive(true);
+                    NotificationText.text = "No valid targets";
+                }
+                else NotificationTextPanel.SetActive(false);
             }
         }
         public void SetSelectedAbility(Ability ability)

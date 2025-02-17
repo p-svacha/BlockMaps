@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public class Comp_Abilities : EntityComp
+    public class Comp_Creature : EntityComp
     {
-        private CompProperties_Abilities Props => (CompProperties_Abilities)props;
+        public CompProperties_Creature Props => (CompProperties_Creature)props;
 
         private Dictionary<AbilityDef, Ability> Abilities;
 

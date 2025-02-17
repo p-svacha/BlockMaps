@@ -90,7 +90,7 @@ namespace TheThoriumChallenge
                 {
                     DefName = "XpPerLevel",
                     Label = "XP / Level",
-                    Description = "How many XP this creature gives for each XP.",
+                    Description = "How many XP this creature gives for each level.",
                     Type = StatType.Int,
                 },
             };

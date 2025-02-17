@@ -5,21 +5,26 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public class CompProperties_Abilities : CompProperties
+    public class CompProperties_Creature : CompProperties
     {
-        public CompProperties_Abilities()
+        public CompProperties_Creature()
         {
-            CompClass = typeof(Comp_Abilities);
+            CompClass = typeof(Comp_Creature);
         }
 
         /// <summary>
         /// The abilities the creature will have learned when spawned.
         /// </summary>
-        public List<AbilityDef> InternalizedAbilities { get; init; } = new();
+        public List<AbilityDef> InternalizedAbilities { get; init; }
+
+        /// <summary>
+        /// The classes the creature has.
+        /// </summary>
+        public List<CreatureClassDef> Classes { get; init; }
 
         public override CompProperties Clone()
         {
-            return new CompProperties_Abilities()
+            return new CompProperties_Creature()
             {
                 CompClass = this.CompClass,
                 InternalizedAbilities = new List<AbilityDef>(this.InternalizedAbilities)

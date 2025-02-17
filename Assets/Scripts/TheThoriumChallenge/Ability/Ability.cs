@@ -56,6 +56,6 @@ namespace TheThoriumChallenge
             }
         }
 
-        protected HashSet<BlockmapNode> AdjacentNodesWithEnemies => AdjacentNodes.Where(n => n.Entities.Any(e => e is Creature creature && !creature.IsPlayerControlled)).ToHashSet();
+        protected HashSet<BlockmapNode> AdjacentNodesWithEnemies => AdjacentNodes.Where(n => n.Entities.Any(e => e is Creature otherCreature && otherCreature.Actor != Creature.Actor)).ToHashSet();
     }
 }

@@ -5,10 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/CaptureTheFlag.unity
     guid: 37ef18eba78e8254b96c451995785ac1
   - enabled: 0
     path: Assets/Scenes/BlockEditor.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/TheThoriumChallenge.unity
+    guid: a738c53b8bf00544ca6b242cf10343c0
   m_configObjects: {}

@@ -37,6 +37,8 @@ namespace TheThoriumChallenge
         public Color HostileTextColor;
         public Color HostileBackgroundColor;
 
+        private Creature CreatureInfoCreature;
+
         private void Awake()
         {
             Instance = this;
@@ -48,19 +50,36 @@ namespace TheThoriumChallenge
             Game = game;
         }
 
+        private void Update()
+        {
+            if (Game == null) return;
+
+            UpdateCreatureInfo();
+        }
+
         public void RefreshTimeText()
         {
             TimeText.text = Game.CurrentStage.GlobalSimulationTime.GetAsString();
         }
 
-        public void ShowCreatureInfo(Creature creature)
+        public void UpdateCreatureInfo()
         {
-            CreatureInfo.gameObject.SetActive(true);
-            CreatureInfo.Show(creature);
-        }
-        public void HideCreatureInfo()
-        {
-            CreatureInfo.gameObject.SetActive(false);
+            Stage stage = Game.CurrentStage;
+
+            Creature prevInfoCreature = CreatureInfoCreature;
+            if (stage.HoveredCreature != null) CreatureInfoCreature = stage.HoveredCreature;
+            else if (stage.ActiveTurnCreature != null && stage.ActiveTurnCreature.IsVisible) CreatureInfoCreature = stage.ActiveTurnCreature;
+            else CreatureInfoCreature = null;
+
+            if(CreatureInfoCreature == null) CreatureInfo.gameObject.SetActive(false);
+            else
+            {
+                if (prevInfoCreature == null) CreatureInfo.gameObject.SetActive(true);
+                if (CreatureInfoCreature != prevInfoCreature)
+                {
+                    CreatureInfo.Show(CreatureInfoCreature);
+                }
+            }
         }
 
         public void ShowCreatureActionSelection(Creature creature)

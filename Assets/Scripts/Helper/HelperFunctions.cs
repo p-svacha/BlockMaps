@@ -810,6 +810,11 @@ public static class HelperFunctions
 
     #region Color
 
+    public static Color GetColorFromRgb255(int r, int g, int b)
+    {
+        return new Color(r / 255f, g / 255f, b / 255f);
+    }
+
     public static Color SmoothLerpColor(Color c1, Color c2, float t)
     {
         t = Mathf.Clamp01(t); // Ensure t is in the range [0, 1]
