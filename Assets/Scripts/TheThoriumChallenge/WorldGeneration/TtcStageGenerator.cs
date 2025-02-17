@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public abstract class TtcWorldGenerator : WorldGenerator
+    public abstract class TtcStageGenerator : WorldGenerator
     {
         public abstract Biome Biome { get; }
         protected Vector2Int EntryPoint;

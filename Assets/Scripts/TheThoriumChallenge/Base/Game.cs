@@ -13,30 +13,35 @@ namespace TheThoriumChallenge
 
         public GameUI UI { get; private set; }
         public GameState GameState { get; private set; }
-        public TtcWorldGenerator ActiveLevelGenerator { get; private set; }
+        public TtcStageGenerator ActiveStageGenerator { get; private set; }
         public Stage CurrentStage { get; private set; }
         public List<CreatureInfo> PlayerCreatures { get; private set; }
 
         public Actor LocalPlayer => CurrentStage.LocalPlayer;
 
 
-        private List<TtcWorldGenerator> LevelGenerators = new List<TtcWorldGenerator>()
+        // Cache
+        private List<TtcStageGenerator> StageGenerators = new List<TtcStageGenerator>()
         {
-            new TtcWorldGenerator_Forest()
+            new TtcStageGenerator_Forest()
         };
+        
+        public Texture2D TileOverlay { get; private set; }
 
         private void Awake()
         {
             GameState = GameState.StartingGame;
             Instance = this;
             UI = GameObject.Find("GameUI").GetComponent<GameUI>();
+
+            // Load textures
+            TileOverlay = MaterialManager.LoadTexture("TheThoriumChallenge/NodeOverlays/TileOverlay");
         }
 
         void Start()
         {
             InitializeGame();
         }
-
 
         private void InitializeGame()
         {
@@ -84,13 +89,13 @@ namespace TheThoriumChallenge
             UI.LoadingScreenOverlay.SetActive(true);
             GameState = GameState.LoadingLevel_GeneratingWorld;
             CurrentStage = null;
-            ActiveLevelGenerator = LevelGenerators.First(x => x.Biome == biome);
-            ActiveLevelGenerator.StartLevelGeneration(PlayerCreatures, onDoneCallback: OnWorldGenerationDone);
+            ActiveStageGenerator = StageGenerators.First(x => x.Biome == biome);
+            ActiveStageGenerator.StartLevelGeneration(PlayerCreatures, onDoneCallback: OnWorldGenerationDone);
         }
 
         private void OnWorldGenerationDone()
         {
-            CurrentStage = ActiveLevelGenerator.GetLevel(this);
+            CurrentStage = ActiveStageGenerator.GetLevel(this);
 
             // Start world initialization
             CurrentStage.World.Initialize(OnWorldInitializationDone);
@@ -117,7 +122,7 @@ namespace TheThoriumChallenge
         {
             CurrentStage?.World?.Tick();
 
-            if (GameState == GameState.LoadingLevel_GeneratingWorld) ActiveLevelGenerator.UpdateGeneration();
+            if (GameState == GameState.LoadingLevel_GeneratingWorld) ActiveStageGenerator.UpdateGeneration();
 
             if (GameState == GameState.Running) CurrentStage.Tick();
         }

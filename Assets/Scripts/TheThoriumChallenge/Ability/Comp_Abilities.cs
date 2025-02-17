@@ -20,7 +20,7 @@ namespace TheThoriumChallenge
             foreach (AbilityDef abilityDef in Props.InternalizedAbilities)
             {
                 Ability ability = (Ability)System.Activator.CreateInstance(abilityDef.AbilityClass);
-                ability.Init((Creature)entity);
+                ability.Init(abilityDef, (Creature)entity);
                 Abilities.Add(abilityDef, ability);
             }
         }

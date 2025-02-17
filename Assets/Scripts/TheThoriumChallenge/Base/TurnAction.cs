@@ -7,6 +7,7 @@ namespace TheThoriumChallenge
     public abstract class TurnAction
     {
         public Creature Creature;
+        private int DefinitiveCost;
 
         public TurnAction(Creature c)
         {
@@ -16,16 +17,18 @@ namespace TheThoriumChallenge
         public abstract int GetCost();
         protected abstract void OnPerformAction();
 
-        public void Perform()
+        public void StartPerform()
         {
+            DefinitiveCost = GetCost();
             Creature.IsInAction = true;
             OnPerformAction();
         }
 
+
         protected void EndAction()
         {
             Creature.IsInAction = false;
-            Creature.NextActionTime.IncreaseTime(GetCost());
+            Creature.NextActionTime.IncreaseTime(DefinitiveCost);
             Creature.EndTurn();
         }
 

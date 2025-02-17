@@ -57,9 +57,9 @@ float _TileOverlayY;
 float _TileOverlaySize;
 
 // Overlay texture over multiple tiles repeated
-float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
+float _MultiOverlayColorIndices[256]; // index of which color of _MultiOverlayColors should be shown (-1 = overlay not drawn)
 sampler2D _MultiOverlayTex;
-fixed4 _MultiOverlayColor;
+fixed4 _MultiOverlayColors[8]; // color for the multi-overlay on each tile
 
 // Zone borders
 // Each list element represents one node and the value represents the sides on which the border should be drawn. (0/1 for each side N/E/S/W)
@@ -287,10 +287,11 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
     }
 
     // Overlay texture that gets repeated over multuple tiles
-    if (_ShowMultiOverlay[tileIndex] == 1 && isFacingUpwards == 1)
+    float colorIndex = _MultiOverlayColorIndices[tileIndex];
+    if (colorIndex != -1 && isFacingUpwards == 1)
     {
-        fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
-        c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
+        fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColors[colorIndex];
+        c = lerp(c, overlayColor, overlayColor.a);
     }
 
     // ######################################################################### ZONE BORDER #########################################################################

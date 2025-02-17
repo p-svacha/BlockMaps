@@ -10,7 +10,8 @@ namespace TheThoriumChallenge
     public class UI_AbilitySelectionElement : MonoBehaviour, IPointerEnterHandler
     {
         private UI_ActionSelection ActionSelection;
-        private int AbilityIndex;
+        public Ability Ability { get; private set; }
+        public int AbilityIndex { get; private set; }
 
         [Header("Elements")]
         public Image Background;
@@ -20,6 +21,7 @@ namespace TheThoriumChallenge
         public void Init(UI_ActionSelection actionSelection, Ability ability, int abilityIndex)
         {
             ActionSelection = actionSelection;
+            Ability = ability;
             AbilityIndex = abilityIndex;
 
             if (ability == null)

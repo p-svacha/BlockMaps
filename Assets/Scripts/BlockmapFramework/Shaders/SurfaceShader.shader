@@ -81,9 +81,9 @@ Shader "Custom/SurfaceShader"
         float _TileOverlaySize;
 
         // Overlay texture over multiple tiles repeated
-        float _ShowMultiOverlay[256]; // bool for each tile if the overlay is shown
+        float _MultiOverlayColorIndices[256]; // index of which color of _MultiOverlayColors should be shown (-1 = overlay not drawn)
         sampler2D _MultiOverlayTex;
-        fixed4 _MultiOverlayColor;
+        fixed4 _MultiOverlayColors[4]; // color for the multi-overlay on each tile
 
         // Material attributes
         half _Glossiness;
@@ -466,11 +466,12 @@ Shader "Custom/SurfaceShader"
                 }
             }
 
-            // Overlay texture that gets repeated over multiple tiles
-            if (_ShowMultiOverlay[tileIndex] == 1)
+            // Overlay texture that gets repeated over multuple tiles
+            float colorIndex = _MultiOverlayColorIndices[tileIndex];
+            if (colorIndex != -1)
             {
-                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColor;
-                c = (overlayColor.a * overlayColor) + ((1 - overlayColor.a) * c);
+                fixed4 overlayColor = tex2D(_MultiOverlayTex, IN.uv2_MultiOverlayTex) * _MultiOverlayColors[colorIndex];
+                c = lerp(c, overlayColor, overlayColor.a);
             }
             
             // ######################################################################### ZONE BORDER #########################################################################

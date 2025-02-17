@@ -14,7 +14,7 @@ namespace BlockmapFramework
         protected Chunk Chunk { get; private set; }
 
         public MeshRenderer Renderer { get; private set; }
-        private bool[] ShowMultiOverlay;
+        private float[] MultiOverlayColorIndices;
 
         protected void OnInit(Chunk chunk)
         {
@@ -23,7 +23,8 @@ namespace BlockmapFramework
             transform.SetParent(chunk.ChunkObject.transform);
             transform.localPosition = Vector3.zero;
 
-            ShowMultiOverlay = new bool[256];
+            MultiOverlayColorIndices = new float[256];
+            for (int i = 0; i < MultiOverlayColorIndices.Length; i++) MultiOverlayColorIndices[i] = -1;
         }
 
         public virtual void OnMeshApplied()
@@ -68,27 +69,31 @@ namespace BlockmapFramework
             }
         }
 
-        public void SetMultiOverlayTexture(Texture2D texture, Color color)
+        public void SetMultiOverlayTexture(Texture2D texture)
         {
             for (int i = 0; i < Renderer.materials.Length; i++)
             {
                 Renderer.materials[i].SetTexture("_MultiOverlayTex", texture);
-                Renderer.materials[i].SetColor("_MultiOverlayColor", color);
             }
         }
-        public void ShowMultiOverlayOnNode(Vector2Int localCoordinates)
+        public void ShowMultiOverlayOnNode(Vector2Int localCoordinates, MultiOverlayColor color)
         {
-            ShowMultiOverlay[localCoordinates.x * 16 + localCoordinates.y] = true;
+            int index = localCoordinates.x * 16 + localCoordinates.y;
+            MultiOverlayColorIndices[index] = (int)color;
 
             for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloatArray("_ShowMultiOverlay", ShowMultiOverlay.Select(b => b ? 1.0f : 0.0f).ToArray());
+            {
+                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
+            }
         }
         public void HideMultiOverlayOnNode(Vector2Int localCoordinates)
         {
-            ShowMultiOverlay[localCoordinates.x * 16 + localCoordinates.y] = false;
+            MultiOverlayColorIndices[localCoordinates.x * 16 + localCoordinates.y] = -1;
 
             for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloatArray("_ShowMultiOverlay", ShowMultiOverlay.Select(b => b ? 1.0f : 0.0f).ToArray());
+            {
+                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
+            }
         }
 
         public void ShowZoneBorders(float[] zoneBorderArray, float[] zoneBorderColors)
@@ -101,15 +106,20 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Passes all static data from the chunk to all shaders of this mesh.
+        /// Passes all static (and initial) data from the chunk to all shaders of this mesh.
         /// </summary>
         public void SetChunkShaderValues()
         {
             for (int i = 0; i < Renderer.materials.Length; i++)
             {
+                // Static values
                 Renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
                 Renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
                 Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
+                Renderer.materials[i].SetColorArray("_MultiOverlayColors", new List<Color>() { Color.white, Color.green, Color.yellow }); // Needs to match enum MultiOverlayColor
+
+                // Initial values
+                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
             }
         }
         protected void SetShaderVisibilityData(List<float> visibilityArray)
@@ -122,5 +132,12 @@ namespace BlockmapFramework
                 Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
             }
         }
+    }
+
+    public enum MultiOverlayColor
+    {
+        White = 0,
+        Green = 1,
+        Yellow = 2
     }
 }

@@ -26,6 +26,7 @@ namespace TheThoriumChallenge
         private List<Ability> Abilities;
         private Dictionary<int, UI_AbilitySelectionElement> AbilitySelectionButtons;
         private UI_AbilitySelectionElement HighlightedAbility;
+        private UI_AbilitySelectionElement SelectedAbility;
 
         private void Awake()
         {
@@ -62,6 +63,8 @@ namespace TheThoriumChallenge
 
         public void SetHighlightedAbility(int index)
         {
+            if (SelectedAbility != null) return;
+
             if (HighlightedAbility != null) HighlightedAbility.Background.color = GameUI.Instance.UiButtonColor_Default;
             HighlightedAbility = AbilitySelectionButtons[index];
             HighlightedAbility.Background.color = GameUI.Instance.UiButtonColor_Highlighted;
@@ -81,11 +84,33 @@ namespace TheThoriumChallenge
         }
         public void SetSelectedAbility(Ability ability)
         {
+            if (SelectedAbility != null) SelectedAbility.Background.color = GameUI.Instance.UiButtonColor_Default;
+            if (HighlightedAbility != null)
+            {
+                HighlightedAbility.Background.color = GameUI.Instance.UiButtonColor_Default;
+                HighlightedAbility = null;
+            }
 
+            SelectedAbility = AbilitySelectionButtons[Abilities.IndexOf(ability)];
+            SelectedAbility.Background.color = GameUI.Instance.UiButtonColor_Selected;
         }
+        public void UnsetSelectedAbility()
+        {
+            if (SelectedAbility != null)
+            {
+                UI_AbilitySelectionElement selectedAbility = SelectedAbility;
+                SelectedAbility = null;
+                SetHighlightedAbility(selectedAbility.AbilityIndex);
+            }
+        }
+
         public void SetHighlightedTarget(BlockmapNode node)
         {
-
+            AbilityCostText.text = SelectedAbility.Ability.GetCost(node).ToString();
+        }
+        public void UnsetHighlightedTarget()
+        {
+            AbilityCostText.text = SelectedAbility.Ability.BaseCost.ToString();
         }
     }
 }

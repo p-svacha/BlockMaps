@@ -19,7 +19,6 @@ namespace TheThoriumChallenge
         public bool IsInTurn { get; set; }
         public bool IsInAction { get; set; }
         public List<TurnAction> PossibleActions { get; private set; }
-        public Dictionary<Direction, TurnAction_Move> MoveActions { get; private set; }
 
         // State
         public int Level { get; private set; }
@@ -70,20 +69,17 @@ namespace TheThoriumChallenge
         public void RefreshPossibleActions()
         {
             PossibleActions = new List<TurnAction>();
-            MoveActions = new Dictionary<Direction, TurnAction_Move>();
 
             // Do Nothing
             PossibleActions.Add(new TurnAction_DoNothing(this));
 
-            // Move
-            foreach (Direction dir in HelperFunctions.GetSides())
+            // Abilities
+            foreach(Ability ability in Abilities.GetAllAbilities())
             {
-                if (OriginNode.WalkTransitions.TryGetValue(dir, out Transition t) && t.CanPass(this))
+                foreach(BlockmapNode possibleTarget in ability.GetPossibleTargets())
                 {
-                    if (t.To.Entities.Any(e => e is Creature)) continue;
-                    TurnAction_Move moveAction = new TurnAction_Move(this, t, dir);
-                    PossibleActions.Add(moveAction);
-                    MoveActions.Add(dir, moveAction);
+                    TurnAction_UseAbility abilityAction = new TurnAction_UseAbility(this, possibleTarget, ability);
+                    PossibleActions.Add(abilityAction);
                 }
             }
 
@@ -94,7 +90,7 @@ namespace TheThoriumChallenge
         {
             if (!IsPlayerControlled)
             {
-                PossibleActions.RandomElement().Perform();
+                Game.Instance.CurrentStage.PerformTurnAction(PossibleActions.RandomElement());
             }
         }
 

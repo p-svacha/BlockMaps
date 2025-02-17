@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TheThoriumChallenge
 {
-    public class TtcWorldGenerator_Forest : TtcWorldGenerator
+    public class TtcStageGenerator_Forest : TtcStageGenerator
     {
         public override string Label => "TTC - Forest";
         public override string Description => throw new NotImplementedException();

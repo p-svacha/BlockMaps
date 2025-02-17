@@ -838,10 +838,10 @@ namespace BlockmapFramework
             }
         }
 
-        public void ShowMultiOverlay(Texture2D texture, Color color)
+        public void ShowMultiOverlay(Texture2D texture, MultiOverlayColor color)
         {
-            Mesh.SetMultiOverlayTexture(texture, color);
-            Mesh.ShowMultiOverlayOnNode(LocalCoordinates);
+            Mesh.SetMultiOverlayTexture(texture);
+            Mesh.ShowMultiOverlayOnNode(LocalCoordinates, color);
         }
         public void HideMultiOverlay()
         {

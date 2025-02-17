@@ -11,13 +11,17 @@ namespace TheThoriumChallenge
         public override string Description => "Deal 60% of Bite Strength as Pierce Damage to an adjacent creature.";
         public override int BaseCost => 60;
 
-        public override List<BlockmapNode> GetPossibleTargets()
+        public override HashSet<BlockmapNode> GetPossibleTargets()
         {
-            throw new System.NotImplementedException();
+            return AdjacentNodesWithEnemies;
+        }
+        public override HashSet<BlockmapNode> GetImpactedNodes(BlockmapNode target)
+        {
+            return new HashSet<BlockmapNode>() { target };
         }
         public override int GetCost(BlockmapNode target)
         {
-            throw new System.NotImplementedException();
+            return BaseCost;
         }
         public override void OnPerform(BlockmapNode target)
         {

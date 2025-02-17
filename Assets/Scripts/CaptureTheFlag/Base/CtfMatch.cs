@@ -617,10 +617,10 @@ namespace CaptureTheFlag
             HashSet<BlockmapNode> addedNodes = new HashSet<BlockmapNode>();
             foreach (BlockmapNode node in HighlightedNodes)
             {
-                node.ShowMultiOverlay(ReachableTileOverlay, Color.green);
+                node.ShowMultiOverlay(ReachableTileOverlay, MultiOverlayColor.Green);
                 if (node is GroundNode surfaceNode && surfaceNode.WaterNode != null) // Also highlight waternodes on top of surface nodes
                 {
-                    surfaceNode.WaterNode.ShowMultiOverlay(ReachableTileOverlay, Color.green);
+                    surfaceNode.WaterNode.ShowMultiOverlay(ReachableTileOverlay, MultiOverlayColor.Green);
                     addedNodes.Add(surfaceNode.WaterNode);
                 }
             }

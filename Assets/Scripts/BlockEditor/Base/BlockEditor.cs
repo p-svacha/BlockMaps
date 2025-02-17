@@ -87,7 +87,7 @@ namespace WorldEditor
                 new WorldGenerator_Parcels(),
                 new WorldGenerator_Desert(),
                 new WorldGenerator_Exodus(),
-                new TtcWorldGenerator_Forest(),
+                new TtcStageGenerator_Forest(),
             };
 
             // Init tools

@@ -56,7 +56,8 @@ namespace TheThoriumChallenge
                         {
                             InternalizedAbilities = new()
                             {
-                                AbilityDefOf.Move
+                                AbilityDefOf.Move,
+                                AbilityDefOf.Bite,
                             }
                         }
                     }

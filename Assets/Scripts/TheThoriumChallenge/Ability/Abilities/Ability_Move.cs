@@ -12,9 +12,9 @@ namespace TheThoriumChallenge
         public override string Description => "Move to an adjacent tile.";
         public override int BaseCost => 60;
 
-        public override List<BlockmapNode> GetPossibleTargets()
+        public override HashSet<BlockmapNode> GetPossibleTargets()
         {
-            List<BlockmapNode> targets = new List<BlockmapNode>();
+            HashSet<BlockmapNode> targets = new HashSet<BlockmapNode>();
             foreach(Direction dir in HelperFunctions.GetSides())
             {
                 if (OriginNode.WalkTransitions.TryGetValue(dir, out Transition t) && t.CanPass(Creature))
@@ -26,6 +26,12 @@ namespace TheThoriumChallenge
 
             return targets;
         }
+
+        public override HashSet<BlockmapNode> GetImpactedNodes(BlockmapNode target)
+        {
+            return new HashSet<BlockmapNode>() { target };
+        }
+
         public override int GetCost(BlockmapNode target)
         {
             float cost = BaseCost;
