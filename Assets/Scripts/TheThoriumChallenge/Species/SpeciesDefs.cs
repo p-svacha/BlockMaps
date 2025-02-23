@@ -42,7 +42,7 @@ namespace TheThoriumChallenge
                                 { SkillDefOf.Vision, 5 },
                                 { SkillDefOf.Biting, 8 },
                                 { SkillDefOf.Punching, 0 },
-                                { SkillDefOf.Kicking, 1 },
+                                { SkillDefOf.Kicking, 2 },
                             }
                         },
                         new CompProperties_Stats()
@@ -58,6 +58,50 @@ namespace TheThoriumChallenge
                             {
                                 CreatureClassDefOf.Squishy,
                                 CreatureClassDefOf.Insect
+                            },
+
+                            InternalizedAbilities = new List<AbilityDef>()
+                            {
+                                AbilityDefOf.Move,
+                                AbilityDefOf.Bite,
+                            }
+                        }
+                    }
+                },
+
+                new EntityDef(BaseCreature)
+                {
+                    DefName = "Snapper",
+                    Label = "snapper",
+                    Description = "A small, heavily armored reptilian with a powerful bite and slow movement. Prefers to clamp onto prey and hold on.",
+                    Dimensions = new Vector3Int(1, 1, 1),
+                    Components = new List<CompProperties>()
+                    {
+                        new CompProperties_Movement(),
+                        new CompProperties_Skills()
+                        {
+                            InitialSkillLevels = new Dictionary<SkillDef, int>()
+                            {
+                                { SkillDefOf.Health, 10 },
+                                { SkillDefOf.Moving, 5 },
+                                { SkillDefOf.Vision, 6 },
+                                { SkillDefOf.Biting, 10 },
+                                { SkillDefOf.Punching, 1 },
+                                { SkillDefOf.Kicking, 1 },
+                            }
+                        },
+                        new CompProperties_Stats()
+                        {
+                            StatBases = new Dictionary<StatDef, float>()
+                            {
+                                { StatDefOf.XpPerLevel, 10f },
+                            }
+                        },
+                        new CompProperties_Creature()
+                        {
+                            Classes = new List<CreatureClassDef>()
+                            {
+                                CreatureClassDefOf.Armored
                             },
 
                             InternalizedAbilities = new List<AbilityDef>()

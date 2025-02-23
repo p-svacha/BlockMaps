@@ -9,5 +9,6 @@ namespace TheThoriumChallenge
     public class SpeciesDefOf
     {
         public static EntityDef Squishgrub;
+        public static EntityDef Snapper;
     }
 }

@@ -8,6 +8,7 @@ namespace TheThoriumChallenge
     [DefOf]
     public static class CreatureClassDefOf
     {
+        public static CreatureClassDef Armored;
         public static CreatureClassDef Squishy;
         public static CreatureClassDef Insect;
     }

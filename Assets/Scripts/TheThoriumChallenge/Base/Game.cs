@@ -77,7 +77,7 @@ namespace TheThoriumChallenge
                 },
                 new CreatureInfo()
                 {
-                    SpeciesDef = SpeciesDefOf.Squishgrub,
+                    SpeciesDef = SpeciesDefOf.Snapper,
                     Level = 19,
                 },
             };

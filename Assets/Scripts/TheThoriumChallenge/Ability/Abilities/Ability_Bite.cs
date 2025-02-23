@@ -8,7 +8,7 @@ namespace TheThoriumChallenge
     public class Ability_Bite : Ability
     {
         public override string Label => "Bite";
-        public override string Description => "Deal 60% of Bite Strength as Pierce Damage to an adjacent creature.";
+        public override string Description => "Deal 100% of Bite Strength as Pierce Damage to an adjacent creature.";
         public override int BaseCost => 60;
 
         public override HashSet<BlockmapNode> GetPossibleTargets()
@@ -26,7 +26,7 @@ namespace TheThoriumChallenge
         public override void OnPerform(BlockmapNode target)
         {
             Creature targetCreature = target.GetCreature();
-            float damage = 2f * Creature.GetStat(StatDefOf.BiteStrength);
+            float damage = 1.0f * Creature.GetStat(StatDefOf.BiteStrength);
 
             targetCreature.ApplyDamage(new DamageInfo(Creature, targetCreature, DamageTypeDefOf.Pierce, damage), onHealthChangeDoneCallback: Finish);
         }

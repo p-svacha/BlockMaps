@@ -12,6 +12,14 @@ namespace TheThoriumChallenge
             {
                 new CreatureClassDef()
                 {
+                    DefName = "Armored",
+                    Label = "armored",
+                    Description = "Creatures with protective features like shells.",
+                    Color = HelperFunctions.GetColorFromRgb255(128, 128, 128),
+                },
+
+                new CreatureClassDef()
+                {
                     DefName = "Squishy",
                     Label = "squishy",
                     Description = "Gooey creatures without a vertebrae.",
