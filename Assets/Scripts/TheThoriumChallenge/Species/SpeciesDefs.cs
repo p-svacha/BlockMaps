@@ -7,21 +7,25 @@ namespace TheThoriumChallenge
 {
     public static class SpeciesDefs
     {
-        private static EntityDef BaseCreature = new EntityDef()
-        {
-            EntityClass = typeof(Creature),
-            Impassable = false,
-            BlocksVision = false,
-            VisionColliderType = VisionColliderType.NodeBased,
-            RenderProperties = new EntityRenderProperties()
-            {
-                RenderType = EntityRenderType.StandaloneModel,
-                PositionType = PositionType.CenterPoint,
-            }
-        };
-
         public static List<EntityDef> GetDefs()
         {
+            // Base defs
+
+            EntityDef BaseCreature = new EntityDef()
+            {
+                EntityClass = typeof(Creature),
+                Impassable = false,
+                BlocksVision = false,
+                VisionColliderType = VisionColliderType.NodeBased,
+                RenderProperties = new EntityRenderProperties()
+                {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    PositionType = PositionType.CenterPoint,
+                }
+            };
+
+            // Final defs
+
             return new List<EntityDef>()
             {
                 new EntityDef(BaseCreature)

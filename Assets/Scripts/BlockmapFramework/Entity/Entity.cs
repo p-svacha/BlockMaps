@@ -544,7 +544,7 @@ namespace BlockmapFramework
             {
                 foreach(Entity e in World.GetAllEntities())
                 {
-                    if(e.LastKnownNode[Actor] == n && !e.IsVisibleBy(Actor) && e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
+                    if(e.GetLastKnownNode(Actor) == n && !e.IsVisibleBy(Actor) && e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
                     {
                         e.RemoveLastKnownPositionFor(Actor);
                     }
@@ -579,7 +579,7 @@ namespace BlockmapFramework
         /// <summary>
         /// Stores the origin node at which each actor has seen this entity the last time.
         /// </summary>
-        public Dictionary<Actor, BlockmapNode> LastKnownNode { get; private set; }
+        protected Dictionary<Actor, BlockmapNode> LastKnownNode { get; private set; }
         /// <summary>
         /// Stores the exact world rotation at which each actor has seen this entity the last time.
         /// </summary>
@@ -614,8 +614,8 @@ namespace BlockmapFramework
 
         public bool IsExploredBy(Actor actor)
         {
-            if (actor == null) return true;
             if (IsVisibleBy(actor)) return true; // Is currently visible by the given actor
+            if (actor == null) return false; // If full vision is active, nothing should in the explored state.
 
             return LastKnownPosition[actor] != null; // There is a last known position for the given actor meaning they have discovered this entity
         }
@@ -635,6 +635,8 @@ namespace BlockmapFramework
         /// </summary>
         public virtual void UpdateVisibility(Actor player)
         {
+            Debug.Log($"updating visibility of {Label}.");
+
             if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return; // Entities doesn't need to be rendered
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
 
@@ -682,6 +684,8 @@ namespace BlockmapFramework
                 // Entity was explored before but not currently visible => transparent
                 else if (IsExploredBy(player))
                 {
+                    Debug.Log($"making {Label} transparent");
+
                     // Render entity transparent (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
                     foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
 
@@ -741,19 +745,29 @@ namespace BlockmapFramework
         {
             if (IsVisibleBy(activeVisionActor))
             {
-                bool isHiddenByVisionCutoff = (OriginNode.Type != NodeType.Ground && Chunk.World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude);
-                if (isHiddenByVisionCutoff) return VisibilityType.Hidden;
+                if(IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Hidden;
                 else return VisibilityType.Visible;
             }
 
             else if (IsExploredBy(activeVisionActor))
             {
-                bool isHiddenByVisionCutoff = (LastKnownNode[activeVisionActor].Type != NodeType.Ground && World.DisplaySettings.IsVisionCutoffEnabled && MinAltitude > World.DisplaySettings.VisionCutoffAltitude);
-                if (isHiddenByVisionCutoff) return VisibilityType.Hidden;
+                if (IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Hidden;
                 else return VisibilityType.FogOfWar;
             }
 
             return VisibilityType.Hidden;
+        }
+
+        /// <summary>
+        /// Returns if this entity gets hidden by the current vision altitude cutoff settings, given the vision of the provided actor.
+        /// </summary>
+        private bool IsHiddenByVisionCutoff(Actor activeVisionActor)
+        {
+            if (!World.DisplaySettings.IsVisionCutoffEnabled) return false;
+            if (MinAltitude <= World.DisplaySettings.VisionCutoffAltitude) return false;
+            if (GetLastKnownNode(activeVisionActor).Type == NodeType.Ground) return false; // we always render entities attached to ground nodes
+
+            return true;
         }
 
         protected void UpdateMeshObjectTransform()
@@ -910,6 +924,16 @@ namespace BlockmapFramework
         public virtual Vector3 GetWorldPosition(BlockmapNode originNode, Direction rotation, int height, bool isMirrored)
         {
             return Def.RenderProperties.GetWorldPositionFunction(Def, World, originNode, rotation, height, isMirrored);
+        }
+
+        /// <summary>
+        /// Returns the node, where the given actor has last seen this entity.
+        /// Should always equal the entitys origin node if the entity is visible.
+        /// </summary>
+        public BlockmapNode GetLastKnownNode(Actor actor)
+        {
+            if (actor == null) return OriginNode;
+            else return LastKnownNode[actor];
         }
 
         /// <summary>

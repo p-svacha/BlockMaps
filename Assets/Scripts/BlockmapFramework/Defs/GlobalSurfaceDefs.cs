@@ -12,7 +12,7 @@ namespace BlockmapFramework.Defs
         private static string SurfaceTextureBasePath = "Textures/Surface/";
         private static string SurfaceMaterialBasePath = "Textures/MaterialTextures/";
 
-        public static List<SurfaceDef> Defs = new List<SurfaceDef>()
+        public static List<SurfaceDef> Defs => new List<SurfaceDef>()
         {
             new SurfaceDef()
             {

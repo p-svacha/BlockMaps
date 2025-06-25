@@ -68,9 +68,6 @@ namespace WorldEditor
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.GetObjectDefs());
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.EntityDefs.GetCharacterDefs());
             DefDatabase<EntityDef>.AddDefs(CaptureTheFlag.ItemDefs.GetDefs());
-            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.CrewDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.RobotDefs.Defs);
-            DefDatabase<EntityDef>.AddDefs(TheThoriumChallenge.SpeciesDefs.GetDefs());
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
 

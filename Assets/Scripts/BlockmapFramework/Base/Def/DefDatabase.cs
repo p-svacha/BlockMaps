@@ -52,6 +52,15 @@ namespace BlockmapFramework
 		}
 
 		/// <summary>
+		/// Clears the database.
+		/// </summary>
+		public static void Clear()
+		{
+			defsList.Clear();
+			defsByName.Clear();
+		}
+
+		/// <summary>
 		/// Resolves all references of all defs within the database so references within defs to other defs can be accessed correctly.
 		/// <br/>Gets called through DefDatabaseRegistry.
 		/// </summary>

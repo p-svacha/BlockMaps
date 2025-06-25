@@ -26,6 +26,7 @@ namespace BlockmapFramework
         /// </summary>
         public static void AddAllGlobalDefs()
         {
+            ClearAllDatabases();
             DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
             DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
             DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
@@ -40,6 +41,17 @@ namespace BlockmapFramework
             if (!registeredDefDatabases.Contains(defDatabaseType))
             {
                 registeredDefDatabases.Add(defDatabaseType);
+            }
+        }
+
+        // Calls Clear on each registered DefDatabase type
+        public static void ClearAllDatabases()
+        {
+            foreach (Type defDatabaseType in registeredDefDatabases)
+            {
+                // Invoke the static ResolveReferences method
+                MethodInfo resolveMethod = defDatabaseType.GetMethod("Clear", BindingFlags.Static | BindingFlags.Public);
+                resolveMethod?.Invoke(null, null);
             }
         }
 

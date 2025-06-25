@@ -112,6 +112,10 @@ Goal: 512 x 512 map (32 chunks) in 10 seconds preferred, 20 max. Now it takes li
 
 fix arc for hop transitions - arc always has a height of 1 and going further down/up is just straight
 
+Walls and Fences should be entities - climbability should be an inherent part of entities
+
+45° angles for walls and surfaces, would be make round shapes and corners way nicer
+
 
 
 --- Entity Nodes

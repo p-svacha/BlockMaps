@@ -9,7 +9,7 @@ namespace BlockmapFramework.Defs
     /// </summary>
     public static class GlobalWallMaterialDefs
     {
-        public static List<WallMaterialDef> Defs = new List<WallMaterialDef>()
+        public static List<WallMaterialDef> Defs => new List<WallMaterialDef>()
         {
             new WallMaterialDef()
             {

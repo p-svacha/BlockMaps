@@ -9,7 +9,7 @@ namespace BlockmapFramework.Defs
     /// </summary>
     public static class GlobalFenceDefs
     {
-        public static List<FenceDef> Defs = new List<FenceDef>()
+        public static List<FenceDef> Defs => new List<FenceDef>()
         {
             new FenceDef()
             {

@@ -122,7 +122,7 @@ namespace CaptureTheFlag
 
         protected override void OnEntityAddedToInventory(Entity entity)
         {
-            Match.UI.CharacterInfo.RefreshItemDisplay();
+            if (Match != null) Match.UI.CharacterInfo.RefreshItemDisplay();
         }
 
         #endregion

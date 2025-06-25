@@ -7,17 +7,21 @@ namespace BlockmapFramework.Defs
 {
     public static class ShrubEntityDefs
     {
-        private static EntityDef ShrubBase = new EntityDef()
+        public static List<EntityDef> GetDefs()
         {
-            Label = "shrub",
-            Impassable = false,
-            MovementSlowdown = 1f,
-            BlocksVision = false,
-            RenderProperties = new EntityRenderProperties()
+            // Base defs
+
+            EntityDef ShrubBase = new EntityDef()
             {
-                RenderType = EntityRenderType.StandaloneModel,
-                Variants = new List<EntityVariant>()
+                Label = "shrub",
+                Impassable = false,
+                MovementSlowdown = 1f,
+                BlocksVision = false,
+                RenderProperties = new EntityRenderProperties()
                 {
+                    RenderType = EntityRenderType.StandaloneModel,
+                    Variants = new List<EntityVariant>()
+                    {
                     new EntityVariant()
                     {
                         VariantName = "Temperate",
@@ -25,22 +29,24 @@ namespace BlockmapFramework.Defs
                         {
                             { 0, MaterialManager.LoadMaterial(EntityModelPath + "shrubs/ShrubMaterial_Temperate") },
                         }
-                    },
-                    new EntityVariant()
-                    {
-                        VariantName = "Desert",
-                        OverwrittenMaterials = new Dictionary<int, Material>()
+                        },
+                        new EntityVariant()
                         {
-                            { 0, MaterialManager.LoadMaterial(EntityModelPath + "shrubs/ShrubMaterial_Desert") },
-                        }
-                    },
+                            VariantName = "Desert",
+                            OverwrittenMaterials = new Dictionary<int, Material>()
+                            {
+                                { 0, MaterialManager.LoadMaterial(EntityModelPath + "shrubs/ShrubMaterial_Desert") },
+                            }
+                        },
+                    }
                 }
-            }
-        };
+            };
 
-        public static List<EntityDef> Defs = new List<EntityDef>()
-        {
-            new EntityDef(ShrubBase)
+            // Final defs
+
+            return new List<EntityDef>()
+            {
+                new EntityDef(ShrubBase)
                 {
                     DefName = "Shrub_01",
                     UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "shrubs/shrub_grass_01_fbx"),
@@ -114,6 +120,7 @@ namespace BlockmapFramework.Defs
                         ModelScale = new Vector3(0.5f, 0.5f, 0.5f),
                     },
                 },
-        };
+            };
+        }
     }
 }

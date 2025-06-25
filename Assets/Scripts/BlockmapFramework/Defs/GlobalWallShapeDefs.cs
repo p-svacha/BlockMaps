@@ -9,7 +9,7 @@ namespace BlockmapFramework.Defs
     /// </summary>
     public static class GlobalWallShapeDefs
     {
-        private static string PreviewSpriteBasePath = "Editor/Thumbnails/WallShapes/";
+        private static string PreviewSpriteBasePath => "Editor/Thumbnails/WallShapes/";
 
         public static List<WallShapeDef> Defs = new List<WallShapeDef>()
         {

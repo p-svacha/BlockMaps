@@ -7,153 +7,161 @@ namespace BlockmapFramework.Defs
 {
     public static class TreeEntityDefs
     {
-        private static EntityDef TreeBase = new EntityDef()
+        public static List<EntityDef> GetDefs()
         {
-            Label = "tree",
-            Impassable = true,
-            BlocksVision = true,
-            RenderProperties = new EntityRenderProperties()
-            {
-                RenderType = EntityRenderType.StandaloneModel,
-            }
-        };
-        private static EntityDef PineBase = new EntityDef(TreeBase)
-        {
-            Label = "pine tree",
-            UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
-            RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
-            {
-                Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
-            },
-        };
+            // Base defs
 
-        public static List<EntityDef> Defs = new List<EntityDef>()
-        {
-            new EntityDef(PineBase)
+            EntityDef TreeBase = new EntityDef()
             {
-                DefName = "Pine_01_Tiny",
-                Dimensions = new Vector3Int(1, 3, 1),
-                RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                Label = "tree",
+                Impassable = true,
+                BlocksVision = true,
+                RenderProperties = new EntityRenderProperties()
                 {
-                    ModelScale = new Vector3(0.25f, 0.25f, 0.25f),
+                    RenderType = EntityRenderType.StandaloneModel,
                 }
-            },
+            };
 
-            new EntityDef(PineBase)
+            EntityDef PineBase = new EntityDef(TreeBase)
             {
-                DefName = "Pine_01_Small",
-                Dimensions = new Vector3Int(2, 7, 2),
-                RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                Label = "pine tree",
+                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/pine_tree_01_fbx"),
+                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
                 {
-                    ModelScale = new Vector3(0.6f, 0.6f, 0.6f),
-                }
-            },
+                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/pine_tree_01_fbx"),
+                },
+            };
 
-            new EntityDef(PineBase)
-            {
-                DefName = "Pine_01_Medium",
-                Dimensions = new Vector3Int(3, 10, 3),
-                RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
-                {
-                    ModelScale = new Vector3(0.9f, 0.9f, 0.9f),
-                }
-            },
+            // Final defs
 
-            new EntityDef(PineBase)
+            return new List<EntityDef>()
             {
-                DefName = "Pine_01_Big",
-                Dimensions = new Vector3Int(4, 13, 4),
-                RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                new EntityDef(PineBase)
                 {
-                    ModelScale = new Vector3(1.2f, 1.2f, 1.2f),
-                }
-            },
+                    DefName = "Pine_01_Tiny",
+                    Dimensions = new Vector3Int(1, 3, 1),
+                    RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                    {
+                        ModelScale = new Vector3(0.25f, 0.25f, 0.25f),
+                    }
+                },
 
-            new EntityDef(TreeBase)
-            {
-                DefName = "Palm_Tree_01",
-                Label = "palm tree",
-                Dimensions = new Vector3Int(1, 10, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_01_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                new EntityDef(PineBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_01_fbx"),
+                    DefName = "Pine_01_Small",
+                    Dimensions = new Vector3Int(2, 7, 2),
+                    RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                    {
+                        ModelScale = new Vector3(0.6f, 0.6f, 0.6f),
+                    }
                 },
-            },
 
-            new EntityDef(TreeBase)
-            {
-                DefName = "Palm_Tree_02",
-                Label = "palm tree",
-                Dimensions = new Vector3Int(1, 10, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_02_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                new EntityDef(PineBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_02_fbx"),
-                    ModelScale = new Vector3(0.2f, 0.2f, 0.2f),
+                    DefName = "Pine_01_Medium",
+                    Dimensions = new Vector3Int(3, 10, 3),
+                    RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                    {
+                        ModelScale = new Vector3(0.9f, 0.9f, 0.9f),
+                    }
                 },
-            },
 
-            new EntityDef(TreeBase)
-            {
-                DefName = "Dead_Tree_01",
-                Label = "dead tree",
-                Dimensions = new Vector3Int(1, 8, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_01_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                new EntityDef(PineBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_01_fbx"),
-                    ModelScale = new Vector3(1f, 1f, 1f),
+                    DefName = "Pine_01_Big",
+                    Dimensions = new Vector3Int(4, 13, 4),
+                    RenderProperties = new EntityRenderProperties(PineBase.RenderProperties)
+                    {
+                        ModelScale = new Vector3(1.2f, 1.2f, 1.2f),
+                    }
                 },
-            },
-            new EntityDef(TreeBase)
-            {
-                DefName = "Dead_Tree_02",
-                Label = "dead tree",
-                Dimensions = new Vector3Int(1, 10, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_02_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+
+                new EntityDef(TreeBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_02_fbx"),
-                    ModelScale = new Vector3(1f, 1f, 1f),
+                    DefName = "Palm_Tree_01",
+                    Label = "palm tree",
+                    Dimensions = new Vector3Int(1, 10, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_01_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_01_fbx"),
+                    },
                 },
-            },
-            new EntityDef(TreeBase)
-            {
-                DefName = "Dead_Tree_03",
-                Label = "dead tree",
-                Dimensions = new Vector3Int(1, 10, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_03_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+
+                new EntityDef(TreeBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_03_fbx"),
-                    ModelScale = new Vector3(1f, 1f, 1f),
+                    DefName = "Palm_Tree_02",
+                    Label = "palm tree",
+                    Dimensions = new Vector3Int(1, 10, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/palm_tree_02_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/palm_tree_02_fbx"),
+                        ModelScale = new Vector3(0.2f, 0.2f, 0.2f),
+                    },
                 },
-            },
-            new EntityDef(TreeBase)
-            {
-                DefName = "Dead_Tree_04",
-                Label = "dead tree",
-                Dimensions = new Vector3Int(1, 6, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_04_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+
+                new EntityDef(TreeBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_04_fbx"),
-                    ModelScale = new Vector3(1f, 1f, 1f),
+                    DefName = "Dead_Tree_01",
+                    Label = "dead tree",
+                    Dimensions = new Vector3Int(1, 8, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_01_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_01_fbx"),
+                        ModelScale = new Vector3(1f, 1f, 1f),
+                    },
                 },
-            },
-            new EntityDef(TreeBase)
-            {
-                DefName = "Dead_Tree_05",
-                Label = "dead tree",
-                Dimensions = new Vector3Int(1, 10, 1),
-                UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_05_fbx"),
-                RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                new EntityDef(TreeBase)
                 {
-                    Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_05_fbx"),
-                    ModelScale = new Vector3(1f, 1f, 1f),
+                    DefName = "Dead_Tree_02",
+                    Label = "dead tree",
+                    Dimensions = new Vector3Int(1, 10, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_02_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_02_fbx"),
+                        ModelScale = new Vector3(1f, 1f, 1f),
+                    },
                 },
-            },
-        };
+                new EntityDef(TreeBase)
+                {
+                    DefName = "Dead_Tree_03",
+                    Label = "dead tree",
+                    Dimensions = new Vector3Int(1, 10, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_03_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_03_fbx"),
+                        ModelScale = new Vector3(1f, 1f, 1f),
+                    },
+                },
+                new EntityDef(TreeBase)
+                {
+                    DefName = "Dead_Tree_04",
+                    Label = "dead tree",
+                    Dimensions = new Vector3Int(1, 6, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_04_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_04_fbx"),
+                        ModelScale = new Vector3(1f, 1f, 1f),
+                    },
+                },
+                new EntityDef(TreeBase)
+                {
+                    DefName = "Dead_Tree_05",
+                    Label = "dead tree",
+                    Dimensions = new Vector3Int(1, 10, 1),
+                    UiSprite = HelperFunctions.GetAssetPreviewSprite(EntityModelPath + "trees/dead_tree_05_fbx"),
+                    RenderProperties = new EntityRenderProperties(TreeBase.RenderProperties)
+                    {
+                        Model = Resources.Load<GameObject>(EntityModelPath + "trees/dead_tree_05_fbx"),
+                        ModelScale = new Vector3(1f, 1f, 1f),
+                    },
+                },
+            };
+        }
     }
 }

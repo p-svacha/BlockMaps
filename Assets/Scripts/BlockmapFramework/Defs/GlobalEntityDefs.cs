@@ -199,9 +199,9 @@ namespace BlockmapFramework.Defs
                 },
             };
 
-            Defs.AddRange(RockEntityDefs.Defs);
-            Defs.AddRange(ShrubEntityDefs.Defs);
-            Defs.AddRange(TreeEntityDefs.Defs);
+            Defs.AddRange(RockEntityDefs.GetDefs());
+            Defs.AddRange(ShrubEntityDefs.GetDefs());
+            Defs.AddRange(TreeEntityDefs.GetDefs());
 
             return Defs;
         }
