@@ -14,10 +14,15 @@ BlockMaps worlds are composed of three primary elements: Nodes, Walls, and Entit
 ### Nodes
 Nodes are the places where things exist. A node exists in one 2d-grid-cell and can have differing altitudes in each of its 4 corners. Multiple nodes can exist in the same 2d-grid-cell, allowing for 3-dimenstional worlds.
 Nodes provide the foundation for the navmesh, movement and pathfinding, since entities will be placed on them and move between them.
-Each node has a surface, which will defines how the node behaves and interacts with other systems.
+
+Each node has a surface, which defines how the node looks and how it interacts with the navmesh and pathfinding.
 
 Each 2d-grid-cell contains exactly one ground node, making up the terrain and lowest layer of nodes. The terrain layer of nodes will also automatically create cliffs between adjacent nodes of different altitudes.
 Any amount of nodes can exist above the ground/terrain layer.
+
+<br/><img src="Screenshots/Nodes.png" alt="nodes" width="600" /><br/>
+_Example of a world that has both ground and air nodes with various shapes and surfaces._
+<br/>
 
 ### Walls and Fences
 Walls exist in cells on the 3d-grid an are placed on a specific side or corner within a cell. They are not directly related to nodes and exist independetly of them.
@@ -48,6 +53,8 @@ The navmesh will be generated during world initialization based on all nodes, wa
 
 The framework comes with a custom implementation of the A* algorithm that is used for pathfinding. Pathfinding is entity-specific and takes into account an entity's specific movement attributes and skills.
 When searching for paths, various options can be configures like forbidden zones, or the vision system (i.e. only take into account explored nodes).
+
+Each path from one node to another is specific to an entity has a specific cost, which can is affected by various factors, such as the attributes, stats and skills of entity moving on it, the surface and shape of the nodes traversed and other entities passed through along the path.
 
 <br/><img src="Screenshots/Navmesh.png" alt="navmesh" width="600" /><br/>
 _Navmesh preview in the world editor showing different kinds of transitions (walk, climb, hop, swim)_

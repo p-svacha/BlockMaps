@@ -32,6 +32,11 @@ namespace BlockmapFramework
         public List<EntityComp> Components;
 
         /// <summary>
+        /// How this entity is positioned in the world.
+        /// </summary>
+        public EntityPlacementType PlacementType;
+
+        /// <summary>
         /// Node that the southwest corner of this entity is on at this moment.
         /// </summary>
         public BlockmapNode OriginNode;
@@ -169,7 +174,7 @@ namespace BlockmapFramework
         public Entity() { }
 
         /// <summary>
-        /// Gets called after this Entity got instantiated when spawned in the world.
+        /// Gets called after this Entity got instantiated when spawned in the world attached to a node.
         /// </summary>
         public void OnCreate(EntityDef def, int id, World world, BlockmapNode origin, int height, Direction rotation, Actor owner, bool isMirrored, int variant)
         {
@@ -185,6 +190,7 @@ namespace BlockmapFramework
             Actor = owner;
             IsMirrored = isMirrored;
             Variant = variant;
+            PlacementType = EntityPlacementType.AttachedToNode;
 
             // Initialize components
             InitializeComps();
@@ -840,7 +846,7 @@ namespace BlockmapFramework
         public virtual ExploredBehaviour ExploredBehaviour => Def.ExploredBehaviour;
         public bool CanSee => VisionRange > 0;
         public virtual bool CanBeHeldByOtherEntities => Def.CanBeHeldByOtherEntities;
-        public bool IsInInventory => Holder != null;
+        public bool IsInInventory => PlacementType == EntityPlacementType.InInventory;
         public bool IsVisible => IsVisibleBy(World.ActiveVisionActor);
 
         // Render properties
@@ -1301,6 +1307,8 @@ namespace BlockmapFramework
         /// </summary>
         public void Teleport(BlockmapNode targetNode, Direction newRotation = Direction.None)
         {
+            if (PlacementType != EntityPlacementType.AttachedToNode) throw new System.Exception("Teleport is only supported for entities attached to node.");
+
             BlockmapNode sourceNode = OriginNode;
             SetOriginNode(targetNode);
             if (newRotation != Direction.None) Rotation = newRotation;
@@ -1356,6 +1364,8 @@ namespace BlockmapFramework
         {
             pm_SetOriginNode.Begin();
 
+            if (PlacementType != EntityPlacementType.AttachedToNode) throw new System.Exception($"Can't set origin node of {LabelCap} because its placement type is not 'AttachedToNode'.");
+
             // Before setting new origin, update last known position for all players seeing this entity
             if (OriginNode != null) // Only if it had an origin node before
             {
@@ -1390,6 +1400,7 @@ namespace BlockmapFramework
             }
 
             // Set to be in the holders inventory
+            PlacementType = EntityPlacementType.InInventory;
             Holder = newHolder;
             newHolder.Inventory.Add(this);
 
@@ -1412,15 +1423,16 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Gets executed after this entity got removed from an inventory and placed back into the world on the given node.
+        /// Removes this entity from its holders inventory and places back into the world on the given node.
         /// </summary>
-        public void RemoveFromInventory(BlockmapNode dropNode)
+        public void DropFromInventory(BlockmapNode dropNode)
         {
             Entity prevHolder = Holder;
 
             // Remove references from inventory
-            Holder.Inventory.Remove(this);
+            Holder.RemoveFromInventory(this);
             Holder = null;
+            PlacementType = EntityPlacementType.AttachedToNode;
 
             // Set new origin node
             SetOriginNode(dropNode);
@@ -1436,6 +1448,15 @@ namespace BlockmapFramework
 
             // Hook
             prevHolder.OnEntityRemovedFromInventory(this);
+        }
+
+        /// <summary>
+        /// Removes the specified entity from this entity's inventory.
+        /// </summary>
+        public void RemoveFromInventory(Entity entityToRemove)
+        {
+            if (!Inventory.Contains(entityToRemove)) throw new System.Exception($"Can't remove {entityToRemove.LabelCap} from {LabelCap}'s inventory because it is not in it.");
+            Inventory.Remove(entityToRemove);
         }
 
         /// <summary>
@@ -1511,6 +1532,7 @@ namespace BlockmapFramework
 
             SaveLoadManager.SaveOrLoadPrimitive(ref id, "id");
             SaveLoadManager.SaveOrLoadDef(ref Def, "def");
+            SaveLoadManager.SaveOrLoadPrimitive(ref PlacementType, "placementType");
             SaveLoadManager.SaveOrLoadReference(ref OriginNode, "originNode");
             SaveLoadManager.SaveOrLoadPrimitive(ref overrideHeight, "overrideHeight");
             SaveLoadManager.SaveOrLoadPrimitive(ref IsMirrored, "isMirrored");

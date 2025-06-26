@@ -1306,14 +1306,26 @@ namespace BlockmapFramework
             }
 
             // Remove node & chunk occupation
-            foreach (BlockmapNode node in entityToRemove.OccupiedNodes)
+            if (entityToRemove.PlacementType == EntityPlacementType.AttachedToNode)
             {
-                node.RemoveEntity(entityToRemove);
-                node.Chunk.RemoveEntity(entityToRemove);
+                foreach (BlockmapNode node in entityToRemove.OccupiedNodes)
+                {
+                    node.RemoveEntity(entityToRemove);
+                    node.Chunk.RemoveEntity(entityToRemove);
+                }
+            }
+
+            // Remove from inventory
+            if (entityToRemove.IsInInventory)
+            {
+                entityToRemove.Holder.RemoveFromInventory(entityToRemove);
             }
 
             // Update world around coordinates
-            if (updateWorld) UpdateWorldSystems(new Parcel(entityToRemove.OriginNode.WorldCoordinates, new Vector2Int(entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z)));
+            if (!entityToRemove.IsInInventory)
+            {
+                if (updateWorld) UpdateWorldSystems(new Parcel(entityToRemove.OriginNode.WorldCoordinates, new Vector2Int(entityToRemove.GetTranslatedDimensions().x, entityToRemove.GetTranslatedDimensions().z)));
+            }
 
             // Update visibility of all chunks affected by the entity vision if the entity belongs to the active vision actor
             if (updateWorld && entityToRemove.Actor == ActiveVisionActor)
@@ -1749,7 +1761,7 @@ namespace BlockmapFramework
         }
         public void DropFromInventory(Entity item, BlockmapNode newOriginNode, bool updateWorld)
         {
-            item.RemoveFromInventory(newOriginNode);
+            item.DropFromInventory(newOriginNode);
 
             if (updateWorld) UpdateWorldSystems(newOriginNode.WorldCoordinates);
         }

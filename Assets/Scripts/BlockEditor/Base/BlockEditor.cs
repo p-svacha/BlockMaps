@@ -279,6 +279,7 @@ namespace WorldEditor
             {
                 ToolButtons[oldTool.Id].SetSelected(false);
                 oldTool.OnDeselect();
+                Tooltip.Instance.Hide();
             }
 
             // Handle selection of new tool

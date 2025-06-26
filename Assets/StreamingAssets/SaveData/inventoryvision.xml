@@ -10274,7 +10274,8 @@
         <Value Type="CaptureTheFlag.CtfCharacter">
           <id>0</id>
           <def Type="BlockmapFramework.EntityDef">Human1</def>
-          <originNode>448</originNode>
+          <placementType>AttachedToNode</placementType>
+          <originNode>432</originNode>
           <overrideHeight>-1</overrideHeight>
           <isMirrored>False</isMirrored>
           <variant>0</variant>
@@ -10286,7 +10287,8 @@
         <Value Type="CaptureTheFlag.CtfCharacter">
           <id>1</id>
           <def Type="BlockmapFramework.EntityDef">Human2</def>
-          <originNode>205</originNode>
+          <placementType>AttachedToNode</placementType>
+          <originNode>173</originNode>
           <overrideHeight>-1</overrideHeight>
           <isMirrored>False</isMirrored>
           <variant>0</variant>
@@ -10298,7 +10300,8 @@
         <Value Type="CaptureTheFlag.CtfItem">
           <id>2</id>
           <def Type="BlockmapFramework.EntityDef">CtfItem_Apple</def>
-          <originNode>254</originNode>
+          <placementType>AttachedToNode</placementType>
+          <originNode>238</originNode>
           <overrideHeight>0</overrideHeight>
           <isMirrored>False</isMirrored>
           <variant>0</variant>

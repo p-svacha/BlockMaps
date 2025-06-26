@@ -35,6 +35,7 @@ namespace BlockmapFramework
         /// <param name="fileName">The name of the file where the XML data will be saved.</param>
         public static void Save<T>(T rootObject, string fileName) where T : class, ISaveAndLoadable
         {
+            IsLoading = false;
             IsSaving = true;
 
             using (FileStream fileStream = new FileStream(SaveDataPath + fileName + ".xml", FileMode.Create, FileAccess.Write))

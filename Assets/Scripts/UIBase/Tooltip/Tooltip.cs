@@ -57,6 +57,11 @@ public class Tooltip : MonoBehaviour
         gameObject.SetActive(true);
     }
 
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
     private void Update()
     {
         // If the tooltip is active, keep it following the mouse
