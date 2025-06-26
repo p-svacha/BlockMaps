@@ -1382,7 +1382,7 @@ namespace BlockmapFramework
         {
             // Create entity as ghost marker
             Entity newGhostMarker = (Entity)System.Activator.CreateInstance(removedEntity.Def.EntityClass);
-            newGhostMarker.InitAsGhostMarker(this, removedEntity.Def, removedEntity.Actor, removedEntity.OccupiedNodes, lastSeenInfo);
+            newGhostMarker.InitAsGhostMarker(this, removedEntity.Def, removedEntity.Actor, lastSeenInfo);
             actor.GhostMarkers.Add(newGhostMarker);
             newGhostMarker.SetGhostMarkerVisibility(ActiveVisionActor == actor);
         }

@@ -255,14 +255,14 @@ namespace BlockmapFramework
         /// Initializes this entity as a ghost marker.
         /// <br/>See IsGhostMarker attribute for more info.
         /// </summary>
-        public void InitAsGhostMarker(World world, EntityDef def, Actor owner, HashSet<BlockmapNode> nodes, LastSeenInfo lastSeenInfo)
+        public void InitAsGhostMarker(World world, EntityDef def, Actor owner, LastSeenInfo lastSeenInfo)
         {
             IsGhostMarker = true;
 
             World = world;
             Def = def;
             Actor = owner;
-            OccupiedNodes = new HashSet<BlockmapNode>(nodes);
+            OccupiedNodes = new HashSet<BlockmapNode>(lastSeenInfo.OccupiedNodes);
             InitializeGameObject();
             MeshObject.layer = 0;
             SetFogOfWarTintAndTransparency();
@@ -589,7 +589,7 @@ namespace BlockmapFramework
                         {
                             if (!e.IsVisibleBy(Actor))
                             {
-                                if (e.GetLastSeenInfo(Actor).Node == n)
+                                if (e.GetLastSeenInfo(Actor).OriginNode == n)
                                 {
                                     e.RemoveLastSeenInformationFor(Actor);
                                 }
@@ -828,7 +828,7 @@ namespace BlockmapFramework
         {
             if (!World.DisplaySettings.IsVisionCutoffEnabled) return false;
             if (MinAltitude <= World.DisplaySettings.VisionCutoffAltitude) return false;
-            if (LastSeenInfo[activeVisionActor].Node.Type == NodeType.Ground) return false; // we always render entities attached to ground nodes
+            if (LastSeenInfo[activeVisionActor].OriginNode.Type == NodeType.Ground) return false; // we always render entities attached to ground nodes
 
             return true;
         }
@@ -995,7 +995,7 @@ namespace BlockmapFramework
         /// </summary>
         public LastSeenInfo GetLastSeenInfo(Actor actor)
         {
-            if (IsVisibleBy(actor)) return new LastSeenInfo(WorldPosition, WorldRotation, OriginNode);
+            if (IsVisibleBy(actor)) return new LastSeenInfo(WorldPosition, WorldRotation, OriginNode, OccupiedNodes);
             return LastSeenInfo[actor];
         }
 
@@ -1572,7 +1572,7 @@ namespace BlockmapFramework
         {
             if (ExploredBehaviour == ExploredBehaviour.None) return; // Don't save last known positions for entities that can't be explored (They are either visible or not)
 
-            LastSeenInfo[actor] = new LastSeenInfo(WorldPosition, WorldRotation, OriginNode);
+            LastSeenInfo[actor] = new LastSeenInfo(WorldPosition, WorldRotation, OriginNode, OccupiedNodes);
         }
 
         /// <summary>

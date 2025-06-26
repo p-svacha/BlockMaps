@@ -10,25 +10,31 @@ namespace BlockmapFramework
     public class LastSeenInfo
     {
         /// <summary>
-        /// Stores the exact world position at which the entity has last been seen.
+        /// Exact world position at which the entity has last been seen.
         /// </summary>
         /// 
         public Vector3 Position { get; private set; }
         /// <summary>
-        /// Stores the exact world rotation at which the entity has last been seen.
+        /// Exact world rotation at which the entity has last been seen.
         /// </summary>
         public Quaternion Rotation { get; private set; }
 
         /// <summary>
-        /// Stores the origin node at which the entity has last been seen.
+        /// Origin node at which the entity has last been seen.
         /// </summary>
-        public BlockmapNode Node { get; private set; }
+        public BlockmapNode OriginNode { get; private set; }
 
-        public LastSeenInfo(Vector3 position, Quaternion rotation, BlockmapNode node)
+        /// <summary>
+        /// All nodes that where occupied when the entity has last been seen.
+        /// </summary>
+        public HashSet<BlockmapNode> OccupiedNodes { get; private set; }
+
+        public LastSeenInfo(Vector3 position, Quaternion rotation, BlockmapNode node, HashSet<BlockmapNode> occupiedNodes)
         {
             Position = position;
             Rotation = rotation;
-            Node = node;
+            OriginNode = node;
+            OccupiedNodes = new HashSet<BlockmapNode>(occupiedNodes);
         }
     }
 }

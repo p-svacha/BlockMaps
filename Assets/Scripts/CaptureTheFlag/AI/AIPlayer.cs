@@ -97,14 +97,14 @@ namespace CaptureTheFlag.AI
             foreach(CtfCharacter opponentCharacter in OpponentCharacters)
             {
                 // Last known node of an opponent is in our territory, but we don't see them anymore => flag them that we should search them
-                if(opponentCharacter.GetLastSeenInfo(Actor).Node != LastPositionsToBeChecked[opponentCharacter] &&
-                    opponentCharacter.GetLastSeenInfo(Actor).Node != null &&
+                if(opponentCharacter.GetLastSeenInfo(Actor).OriginNode != LastPositionsToBeChecked[opponentCharacter] &&
+                    opponentCharacter.GetLastSeenInfo(Actor).OriginNode != null &&
                     !opponentCharacter.IsVisibleBy(Actor) &&
-                    Territory.Nodes.Contains(opponentCharacter.GetLastSeenInfo(Actor).Node))
+                    Territory.Nodes.Contains(opponentCharacter.GetLastSeenInfo(Actor).OriginNode))
                 {
-                    Debug.Log($"[AI] Marking {opponentCharacter.LabelCap}'s last position ({opponentCharacter.GetLastSeenInfo(Actor).Node}) to be checked for search.");
-                    LastPositionsToBeChecked[opponentCharacter] = opponentCharacter.GetLastSeenInfo(Actor).Node;
-                    OpponentPositionsToCheckForDefense[opponentCharacter] = opponentCharacter.GetLastSeenInfo(Actor).Node;
+                    Debug.Log($"[AI] Marking {opponentCharacter.LabelCap}'s last position ({opponentCharacter.GetLastSeenInfo(Actor).OriginNode}) to be checked for search.");
+                    LastPositionsToBeChecked[opponentCharacter] = opponentCharacter.GetLastSeenInfo(Actor).OriginNode;
+                    OpponentPositionsToCheckForDefense[opponentCharacter] = opponentCharacter.GetLastSeenInfo(Actor).OriginNode;
                 }
 
                 // Last known position of an opponent character is flagged that we should check but now they're visible again => stop searching
