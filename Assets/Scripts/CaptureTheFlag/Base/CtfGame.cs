@@ -38,6 +38,8 @@ namespace CaptureTheFlag
 
         private void Start()
         {
+            DefDatabaseRegistry.ClearAllDatabases();
+
             // Load defs
             DefDatabase<SkillDef>.AddDefs(SkillDefs.GetDefs());
             DefDatabase<StatDef>.AddDefs(StatDefs.GetDefs());

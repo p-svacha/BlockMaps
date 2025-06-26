@@ -14,7 +14,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.GroundSculpting;
         public override string Name => "Edit Terrain";
-        public override Sprite Icon => ResourceManager.Singleton.GroundSculptingSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "GroundSculpting");
 
         private int AreaSize = 1;
 
@@ -30,7 +30,7 @@ namespace WorldEditor
                 if (AreaSize == 1) // Single tile height change
                 {
 
-                    Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode9);
+                    Texture2D overlayTexture = ResourceManager.GetTileSelector(World.NodeHoverMode9);
                     bool canIncrease = World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: true);
                     bool canDecrease = World.CanChangeShape(World.HoveredGroundNode, World.NodeHoverMode9, isIncrease: false);
 
@@ -44,7 +44,7 @@ namespace WorldEditor
 
                 else // Multitile height change
                 {
-                    Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(Direction.None);
+                    Texture2D overlayTexture = ResourceManager.FullTileSelector;
                     Color c = Color.white;
                     World.HoveredGroundNode.ShowOverlay(overlayTexture, c, AreaSize);
                 }

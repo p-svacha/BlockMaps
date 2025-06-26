@@ -9,14 +9,14 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.NodeShaping;
         public override string Name => "Edit Node Shapes";
-        public override Sprite Icon => ResourceManager.Singleton.NodeShapingSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "NodeShaping");
 
         public override void UpdateTool()
         {
             // Update tile overlay
             if (World.HoveredDynamicNode != null)
             {
-                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode9);
+                Texture2D overlayTexture = ResourceManager.GetTileSelector(World.NodeHoverMode9);
                 bool canIncrease = World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: true);
                 bool canDecrease = World.CanChangeShape(World.HoveredDynamicNode, World.NodeHoverMode9, isIncrease: false);
 

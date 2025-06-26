@@ -12,8 +12,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.MapGenFeature;
         public override string Name => "Place Feature";
-        private Sprite icon;
-        public override Sprite Icon => icon;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "MapGenFeature");
 
         private List<MapGenFeatureDef> Features;
 
@@ -33,8 +32,6 @@ namespace WorldEditor
         {
             base.Init(editor);
 
-            icon = Resources.Load<Sprite>(IconBasePath + "feature");
-
             // Generator dropdown
             FeatureDropdown.onValueChanged.AddListener(FeatureDropdown_OnValueChanged);
             Features = DefDatabase<MapGenFeatureDef>.AllDefs.ToList();
@@ -51,7 +48,7 @@ namespace WorldEditor
         {
             UpdateParcelSizeWithInput();
 
-            if(World.HoveredNode != null) World.HoveredNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
+            if(World.HoveredNode != null) World.HoveredNode.ShowOverlay(ResourceManager.FullTileSelector, Color.white);
         }
 
         private void UpdateParcelSizeWithInput()

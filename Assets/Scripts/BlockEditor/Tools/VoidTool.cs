@@ -11,7 +11,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.Void;
         public override string Name => "Void Tool";
-        public override Sprite Icon => ResourceManager.Singleton.VoidToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Void");
 
         private GameObject CoordinatesPreview;
         private Vector2Int HoveredCoordinates;

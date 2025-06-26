@@ -12,8 +12,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.WorldModifier;
         public override string Name => "Apply World Modifiers";
-        private Sprite icon;
-        public override Sprite Icon => icon;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "WorldModifier");
 
         private List<WorldModifierDef> Modifiers;
 
@@ -25,8 +24,6 @@ namespace WorldEditor
         public override void Init(BlockEditor editor)
         {
             base.Init(editor);
-
-            icon = Resources.Load<Sprite>(IconBasePath + "worldModifier");
 
             // Modifier dropdown
             ModifierDropdown.onValueChanged.AddListener(ModifierDropdown_OnValueChanged);

@@ -11,7 +11,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.Wall;
         public override string Name => "Build Walls";
-        public override Sprite Icon => ResourceManager.Singleton.WallToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Wall");
 
         private int BuildAltitude => int.Parse(AltitudeInput.text);
 

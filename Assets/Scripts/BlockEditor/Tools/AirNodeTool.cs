@@ -12,7 +12,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.AirNode;
         public override string Name => "Build Air Node";
-        public override Sprite Icon => ResourceManager.Singleton.AirNodeSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "AirNode");
 
         private GameObject BuildPreview;
         private SurfaceDef SelectedSurface;

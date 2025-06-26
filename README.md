@@ -1,11 +1,15 @@
 # About
-BlockMaps is a Unity framework to create detailed, 3D, grid-based worlds with real-time navmesh generation and intergrated pathfinding, vision and movement systems.
+BlockMaps is a Unity framework for building grid-based 3D worlds with integrated real-time navmesh generation for complex movement, actor-based vision system, and pathfinding.
+
+<br/><img src="Screenshots/editor_01.png" alt="editor_01" width="600" /><br/>
+_Example of a world built with the framework_
+<br/>
 
 # Framework Features
-The frameworks purpose is not only to create worlds, but also to be able to define attributes and behavioural rules of anything that can exist in that world. This should allow the framework to be useful for many different purposes.
+The frameworks purpose is to be able to create worlds, and also defining attributes and behavioural rules of anything that can exist in that world. This should allow the framework to be useful for many different purposes.
 
 ## Main World Elements
-The worlds created with the framework are at their code a collection of nodes, walls and entities. These are the main elements that make up all other systems.
+BlockMaps worlds are composed of three primary elements: Nodes, Walls, and Entities. These components form the basis of all other systems.
 
 ### Nodes
 Nodes are the places where things exist. A node exists in one 2d-grid-cell and can have differing altitudes in each of its 4 corners. Multiple nodes can exist in the same 2d-grid-cell, allowing for 3-dimenstional worlds.
@@ -22,11 +26,11 @@ Walls and fences directly affect the navmesh, pathfinding and vision system.
 Walls and fences can also be climbed and/or vaulted over by entities, depending on the attributes of both.
 
 ### Entities
-Entities represent all "things" in the world. This includes static, stateless objects like rocks, trees, shrubs, crates and also dynamic stateful objects like characters, doors, ladders and everything in between.
-Entities either exist on the world directly on a specific node, or in the inventory of another entity.
-Entities are the agents of the world, the main actors.
+Entities are all things that exist in the world, from static props like rocks and trees to dynamic agents like characters or interactive objects like doors and ladders.
 
-Entities can contain pre-built systems like skills, stats and modifiers that can be added through a modular component system. Components allow to easily extend the behaviour or capabilities in a specific way. Custom components and entities can be created as well.
+Entity blueprints (which define how an entity looks, behaves and interacts with various systems) are highly customizable. Things like how it's rendered (premade model, procedurally generated, texture variants) to it's exact shape of how it affects the navmesh and pathfinding (fully blocking, slowing down, decoration only), to how it interacts with the vision system (opaque, transparent), can all be easily defined in the blueprint.
+
+Entities can additionally contain pre-built or custom systems like movement, skills, stats and modifiers that can be added through a modular component system. Components allow to easily extend the behaviour or capabilities in a specific way. Custom components and entities can be created as well.
 The skill, stat and modifier components are already set up in a way that they can natively interact with each other. They can all be created in a project-specific way (just like all other content blueprints as well).
 
 ## Content Blueprints / Defs
@@ -44,6 +48,10 @@ The navmesh will be generated during world initialization based on all nodes, wa
 
 The framework comes with a custom implementation of the A* algorithm that is used for pathfinding. Pathfinding is entity-specific and takes into account an entity's specific movement attributes and skills.
 When searching for paths, various options can be configures like forbidden zones, or the vision system (i.e. only take into account explored nodes).
+
+<br/><img src="Screenshots/Navmesh.png" alt="navmesh" width="600" /><br/>
+_Navmesh preview in the world editor showing different kinds of transitions (walk, climb, hop, swim)_
+<br/>
 
 ## Actors and Vision
 Each world has a specific set of Actors, always including a netural actor called Gaia. Each entity belongs to a specific actor and each actor has its own vision state of the world.
@@ -97,9 +105,6 @@ The editor contains a big amount of tools which allow you to:
 
 <br/>
 
-<br/><img src="Screenshots/editor_01.png" alt="editor_01" width="600" /><br/>
-
-
 # Capture The Flag
 Capture The Flag is a 1v1 turn-based squad tactics game based on the classic outdoor game with the same name. It makes use of the pathfinding, vision and movement system of the framework and is a good showcase of what's possible with it.
 
@@ -110,5 +115,7 @@ Each turn every character gets 10 action points. In multiplayer turns are simult
 The game supports singleplayer and P2P-multiplayer.
 
 <br/><img src="Screenshots/ctf_01.png" alt="ctf_01" width="600" /><br/>
+_In-Game screenshot of a Capture the Flag match_
+<br/>
 
 

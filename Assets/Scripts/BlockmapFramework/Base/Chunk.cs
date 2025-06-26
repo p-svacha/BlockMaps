@@ -213,7 +213,8 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Updates the visible nodes on this chunk according to the vision of the specified player.
+        /// Shows or hides all nodes, walls, fences and entities according to the vision of the specified actor.
+        /// <br/> Also moves or tints entities according to their last known position of the specified actor.
         /// <br/> Does not change the vision values (SeenBy, ExploredBy) of the nodes, only accesses them.
         /// </summary>
         public void SetVisibility(Actor actor)
@@ -229,7 +230,7 @@ namespace BlockmapFramework
                     mesh.SetVisibility(actor);
 
             // Entity visibility
-            foreach (Entity e in Entities) e.UpdateVisibility(actor);
+            foreach (Entity e in Entities) e.SetVisibility(actor);
         }
 
         public void ShowGrid(bool show)

@@ -14,7 +14,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.WorldGen;
         public override string Name => "World Generation";
-        public override Sprite Icon => ResourceManager.Singleton.WorldGenSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "WorldGen");
 
         private List<string> SavedWorlds;
         private WorldGenerator ActiveGenerator;

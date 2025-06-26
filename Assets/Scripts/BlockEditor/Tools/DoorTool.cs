@@ -11,7 +11,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.Door;
         public override string Name => "Doors";
-        public override Sprite Icon => ResourceManager.Singleton.DoorToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Door");
 
         private GameObject BuildPreview;
         private int Height => int.Parse(HeightInput.text);
@@ -61,7 +61,7 @@ namespace WorldEditor
             {
                 BlockmapNode node = World.HoveredNode;
                 Direction side = World.NodeHoverModeSides;
-                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(side);
+                Texture2D overlayTexture = ResourceManager.GetTileSelector(side);
 
                 bool canBuild = World.CanBuildDoor(node, side, Height);
 

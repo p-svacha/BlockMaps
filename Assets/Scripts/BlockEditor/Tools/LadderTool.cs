@@ -9,7 +9,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.Ladder;
         public override string Name => "Build Ladder";
-        public override Sprite Icon => ResourceManager.Singleton.LadderToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Ladder");
 
         private int TargetIndex;
         private BlockmapNode TargetNode;
@@ -27,7 +27,7 @@ namespace WorldEditor
         {
             if (World.HoveredNode != null)
             {
-                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverModeSides);
+                Texture2D overlayTexture = ResourceManager.GetTileSelector(World.NodeHoverModeSides);
 
                 List<BlockmapNode> possibleTargets = World.GetPossibleLadderTargetNodes(World.HoveredNode, World.NodeHoverModeSides);
                 bool canBuild = possibleTargets.Count > 0;

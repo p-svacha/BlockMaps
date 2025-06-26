@@ -13,7 +13,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.SpawnObject;
         public override string Name => "Spawn Object";
-        public override Sprite Icon => ResourceManager.Singleton.StaticEntitySprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "SpawnObject");
 
         private GameObject BuildPreview;
 

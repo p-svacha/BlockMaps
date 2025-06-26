@@ -10,7 +10,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.SurfacePaint;
         public override string Name => "Surface Painting";
-        public override Sprite Icon => ResourceManager.Singleton.SurfaceToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "SurfacePaint");
 
         private SurfaceDef SelectedSurface;
 
@@ -38,7 +38,7 @@ namespace WorldEditor
         {
             // Update tile overlay
             if (World.HoveredDynamicNode != null)
-                World.HoveredDynamicNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
+                World.HoveredDynamicNode.ShowOverlay(ResourceManager.FullTileSelector, Color.white);
         }
 
         public override void HandleLeftDrag()
@@ -50,7 +50,7 @@ namespace WorldEditor
                 World.SetSurface(World.HoveredDynamicNode, SelectedSurface, updateWorld: true);
 
                 // Update overlay
-                World.HoveredDynamicNode.ShowOverlay(ResourceManager.Singleton.TileSelector, Color.white);
+                World.HoveredDynamicNode.ShowOverlay(ResourceManager.FullTileSelector, Color.white);
             }
         }
 

@@ -37,7 +37,7 @@ namespace WorldEditor
         public VoidTool VoidTool;
         public AirNodeTool AirNodeTool;
         public SpawnCharacterTool SpawnCharacterTool;
-        public MoveCharacterTool MoveCharacterTool;
+        public SelectAndMoveTool SelectAndMoveTool;
         public SpawnObjectTool SpawnObjectTool;
         public ProceduralEntityTool ProceduralEntityTool;
         public WaterTool WaterTool;
@@ -55,10 +55,16 @@ namespace WorldEditor
         private Dictionary<EditorToolId, EditorTool> Tools;
         public EditorTool CurrentTool;
 
+        // Colors
+        public static Color ButtonSelectedColor = new Color(0.4f, 0.4f, 0.11f);
+        public static Color ButtonUnselectedColor = new Color(0.27f, 0.27f, 0.27f);
+
         public World World { get; private set; }
 
         void Start()
         {
+            DefDatabaseRegistry.ClearAllDatabases();
+
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<WorldModifierDef>.AddDefs(EditorDefs.WorldModifierDefs);
@@ -106,7 +112,7 @@ namespace WorldEditor
                 { EditorToolId.MapGenFeature, MapGenFeatureTool },
                 { EditorToolId.WorldModifier, WorldModifierTool },
                 { EditorToolId.SpawnCharacter, SpawnCharacterTool },
-                { EditorToolId.MoveCharacter, MoveCharacterTool },
+                { EditorToolId.SelectAndMove, SelectAndMoveTool },
             };
             foreach (EditorTool tool in Tools.Values) tool.Init(this);
 
@@ -181,9 +187,9 @@ namespace WorldEditor
 
             if (Input.GetMouseButtonDown(2) && !isMouseOverUi) CurrentTool.HandleMiddleClick();
 
-
             if (isUiElementFocussed) return; // Don't check for keyboard inputs when a ui element is focussed
 
+            DisplayOptions.HandleKeyboardInputs();
             CurrentTool.HandleKeyboardInputs();
         }
         protected override void Tick()

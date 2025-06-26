@@ -69,10 +69,9 @@ namespace WorldEditor
 
         private void Update()
         {
-            HandleKeyboardInputs();
             UpdateCameraInfo();
         }
-        private void HandleKeyboardInputs()
+        public void HandleKeyboardInputs()
         {
             // G - Toggle Grid
             if (Input.GetKeyDown(KeyCode.G))

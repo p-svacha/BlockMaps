@@ -13,7 +13,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.SpawnCharacter;
         public override string Name => "Spawn Character";
-        public override Sprite Icon => ResourceManager.Singleton.MovingEntitySprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "SpawnCharacter");
 
         private EntityDef SelectedEntity;
 
@@ -92,7 +92,7 @@ namespace WorldEditor
             if (World.HoveredNode != null)
             {
                 bool canSpawn = World.HoveredNode.IsPassable();
-                World.HoveredNode.ShowOverlay(ResourceManager.Singleton.TileSelector, canSpawn ? Color.white : Color.red);
+                World.HoveredNode.ShowOverlay(ResourceManager.FullTileSelector, canSpawn ? Color.white : Color.red);
             }
         }
 

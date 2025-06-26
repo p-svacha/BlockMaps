@@ -10,7 +10,7 @@ namespace WorldEditor
     {
         public override EditorToolId Id => EditorToolId.Fence;
         public override string Name => "Build Fences";
-        public override Sprite Icon => ResourceManager.Singleton.FenceToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Fence");
 
         private FenceDef SelectedFenceDef;
 
@@ -47,7 +47,7 @@ namespace WorldEditor
                 if (HeightInput.text == "") return;
                 int height = int.Parse(HeightInput.text);
 
-                Texture2D overlayTexture = ResourceManager.Singleton.GetTileSelector(World.NodeHoverMode8);
+                Texture2D overlayTexture = ResourceManager.GetTileSelector(World.NodeHoverMode8);
 
                 Color c = Color.white;
                 if (!World.CanBuildFence(SelectedFenceDef, World.HoveredNode, World.NodeHoverMode8, height)) c = Color.red;

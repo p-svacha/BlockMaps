@@ -1850,9 +1850,6 @@ namespace BlockmapFramework
         public void UpdateVisibility()
         {
             foreach (Chunk c in Chunks.Values) UpdateVisibility(c);
-
-            // Entities in inventories need to be updated seperately because they are not attached to any chunk
-            foreach (Entity e in Entities.Values.Where(e => e.IsInInventory)) e.UpdateVisibility();
         }
         /// <summary>
         /// Updates the visibility display for one chunk according to the current actor vision.

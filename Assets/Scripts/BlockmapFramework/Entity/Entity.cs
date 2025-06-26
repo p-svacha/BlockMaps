@@ -627,15 +627,16 @@ namespace BlockmapFramework
         /// <summary>
         /// Updates the visibility according to the current active vision actor.
         /// </summary>
-        public void UpdateVisibility() => UpdateVisibility(World.ActiveVisionActor);
+        public void UpdateVisibility() => SetVisibility(World.ActiveVisionActor);
 
         /// <summary>
         /// Shows, hides or tints (fog of war) this entity according to if its visible by the given player.
         /// <br/> Also Moves the entitiy to the last or currently known position for the given player.
         /// </summary>
-        public virtual void UpdateVisibility(Actor player)
+        public virtual void SetVisibility(Actor player)
         {
-            Debug.Log($"updating visibility of {Label}.");
+            // Recursively also set the visibility for entities in this entitys inventory
+            foreach (Entity e in Inventory) e.SetVisibility(player);
 
             if (Def.RenderProperties.RenderType == EntityRenderType.NoRender) return; // Entities doesn't need to be rendered
             if (Def.RenderProperties.RenderType == EntityRenderType.Batch) return; // Visibility of batch entities is handled through chunk mesh shader
@@ -684,8 +685,6 @@ namespace BlockmapFramework
                 // Entity was explored before but not currently visible => transparent
                 else if (IsExploredBy(player))
                 {
-                    Debug.Log($"making {Label} transparent");
-
                     // Render entity transparent (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
                     foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
 

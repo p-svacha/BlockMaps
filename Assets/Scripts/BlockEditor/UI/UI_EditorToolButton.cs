@@ -30,7 +30,7 @@ namespace WorldEditor
         public void SetSelected(bool value)
         {
             //SelectedFrame.gameObject.SetActive(value);
-            Background.color = value ? ResourceManager.Singleton.UI_ButtonSelectedColor : ResourceManager.Singleton.UI_ButtonDefaultColor;
+            Background.color = value ? BlockEditor.ButtonSelectedColor : BlockEditor.ButtonUnselectedColor;
         }
 
         // Called when the mouse enters the button

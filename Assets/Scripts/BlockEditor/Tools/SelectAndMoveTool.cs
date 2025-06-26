@@ -7,11 +7,11 @@ using System.Linq;
 
 namespace WorldEditor
 {
-    public class MoveCharacterTool : EditorTool
+    public class SelectAndMoveTool : EditorTool
     {
-        public override EditorToolId Id => EditorToolId.MoveCharacter;
-        public override string Name => "Move Entity";
-        public override Sprite Icon => ResourceManager.Singleton.MoveEntityToolSprite;
+        public override EditorToolId Id => EditorToolId.SelectAndMove;
+        public override string Name => "Select & Move";
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "SelectAndMove");
 
         private MovingEntity SelectedEntity;
 
@@ -22,6 +22,14 @@ namespace WorldEditor
 
         [Header("Elements")]
         public TMP_InputField HoveredPathCostInput;
+
+        public GameObject SelectedEntityPanel;
+        public TextMeshProUGUI SelectedEntity_NameText;
+        public TextMeshProUGUI SelectedEntity_OwnerText;
+        public GameObject SelectedEntity_InventoryContainer;
+
+        [Header("Prefabs")]
+        public UI_EntityInventoryItem InventoryItemPrefab;
 
         // Cache
         private BlockmapNode CacheOriginNode;
@@ -43,6 +51,28 @@ namespace WorldEditor
             if(SelectedEntity != null) SelectedEntity.ShowSelectionIndicator(true);
 
             World.SetNavmeshEntity(SelectedEntity);
+
+            // UI
+            RefreshSelectedEntityPanel();
+        }
+
+        public void RefreshSelectedEntityPanel()
+        {
+            SelectedEntityPanel.SetActive(SelectedEntity != null);
+            if (SelectedEntity != null)
+            {
+                // General info
+                SelectedEntity_NameText.text = SelectedEntity.LabelCap;
+                SelectedEntity_OwnerText.text = SelectedEntity.Actor.Label;
+
+                // Inventory
+                HelperFunctions.DestroyAllChildredImmediately(SelectedEntity_InventoryContainer, skipElements: 1);
+                foreach (Entity inventoryItem in SelectedEntity.Inventory)
+                {
+                    UI_EntityInventoryItem display = GameObject.Instantiate(InventoryItemPrefab, SelectedEntity_InventoryContainer.transform);
+                    display.Init(this, inventoryItem);
+                }
+            }
         }
 
         public override void UpdateTool()
@@ -53,25 +83,20 @@ namespace WorldEditor
         public override void HandleKeyboardInputs()
         {
             // R - Update vision with debug rays in editor
-            if(Input.GetKeyDown(KeyCode.R))
+            if (Input.GetKeyDown(KeyCode.R))
             {
                 if (SelectedEntity != null) SelectedEntity.UpdateVision(debugVisionRays: true);
             }
 
-            // P - Pick up all pickubable entities on same node
-            if(Input.GetKeyDown(KeyCode.P))
+            // P - Pick up all pickup-able entities on same node
+            if (Input.GetKeyDown(KeyCode.P))
             {
-                List<Entity> entitesToPickUp = SelectedEntity.OriginNode.Entities.Where(e => e.CanBeHeldByOtherEntities).ToList();
-                Debug.Log($"Picking up {entitesToPickUp.Count} entities.");
-                foreach (Entity entityToPickUp in entitesToPickUp) World.AddToInventory(entityToPickUp, SelectedEntity, updateWorld: true);
-            }
-
-            // F - Drop all entities in inventory on same node
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                List<Entity> entitiesToDrop = new List<Entity>(SelectedEntity.Inventory);
-                Debug.Log($"Dropping {entitiesToDrop.Count} entities.");
-                foreach (Entity entityToDrop in entitiesToDrop) World.DropFromInventory(entityToDrop, SelectedEntity.OriginNode, updateWorld: true);
+                if (SelectedEntity != null)
+                {
+                    List<Entity> entitesToPickUp = SelectedEntity.OriginNode.Entities.Where(e => e.CanBeHeldByOtherEntities).ToList();
+                    foreach (Entity entityToPickUp in entitesToPickUp) World.AddToInventory(entityToPickUp, SelectedEntity, updateWorld: true);
+                    RefreshSelectedEntityPanel();
+                }
             }
         }
 
@@ -138,6 +163,7 @@ namespace WorldEditor
         public override void OnSelect()
         {
             PathCache.Clear();
+            SelectEntity(null);
         }
         public override void OnDeselect()
         {

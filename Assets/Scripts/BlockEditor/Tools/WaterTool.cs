@@ -13,7 +13,7 @@ namespace WorldEditor
 
         public override EditorToolId Id => EditorToolId.Water;
         public override string Name => "Water";
-        public override Sprite Icon => ResourceManager.Singleton.WaterToolSprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "Water");
 
         private WaterBody CurrentWaterBody;
         private GameObject WaterPreview;

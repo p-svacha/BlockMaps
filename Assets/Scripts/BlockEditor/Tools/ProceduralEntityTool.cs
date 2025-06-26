@@ -14,7 +14,7 @@ namespace WorldEditor
 
         public override EditorToolId Id => EditorToolId.ProceduralEntity;
         public override string Name => "Place Procedural Object";
-        public override Sprite Icon => ResourceManager.Singleton.ProceduralEntitySprite;
+        public override Sprite Icon => ResourceManager.LoadSprite(IconBasePath + "ProceduralEntity");
 
         private GameObject BuildPreview;
         private EntityDef SelectedEntity;

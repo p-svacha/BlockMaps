@@ -15,7 +15,7 @@ namespace WorldEditor
         SpawnCharacter,
         SpawnObject,
         ProceduralEntity,
-        MoveCharacter,
+        SelectAndMove,
         Water,
         Fence,
         Ladder,

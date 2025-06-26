@@ -45,6 +45,8 @@ namespace TheThoriumChallenge
 
         private void InitializeGame()
         {
+            DefDatabaseRegistry.ClearAllDatabases();
+
             // Load defs
             DefDatabaseRegistry.AddAllGlobalDefs();
             DefDatabase<SkillDef>.AddDefs(SkillDefs.GetDefs());
