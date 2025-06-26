@@ -66,7 +66,7 @@ namespace CaptureTheFlag
             {
                 NameText.gameObject.SetActive(true);
 
-                Vector3 targetWorldPosition = Character.IsVisible ? Character.MeshObject.transform.position + WorldOffset : (Vector3)Character.LastKnownPosition[Character.Match.LocalPlayer.Actor] + WorldOffset;
+                Vector3 targetWorldPosition = Character.GetLastSeenInfo(Character.Match.LocalPlayer.Actor).Position + WorldOffset;
                 Vector3 screenPosition = Character.Match.World.Camera.Camera.WorldToScreenPoint(targetWorldPosition);
                 transform.position = screenPosition;
 

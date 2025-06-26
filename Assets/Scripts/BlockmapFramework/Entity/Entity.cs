@@ -32,6 +32,13 @@ namespace BlockmapFramework
         public List<EntityComp> Components;
 
         /// <summary>
+        /// If this flag is true, then this entity does not actually exist, but rather marks the position of where a now destroyed entity has last been seen.
+        /// <br/>If true, this entity will only be rendered for its owner, and always in the Explored state, until one of the nodes it is attached (OccupiedNodes) to is visible again. At that point, it will be destroyed.
+        /// <br/>Ghost markers are not registered anywhere except for the actors that see them.
+        /// </summary>
+        public bool IsGhostMarker { get; private set; }
+
+        /// <summary>
         /// How this entity is positioned in the world.
         /// </summary>
         public EntityPlacementType PlacementType;
@@ -225,12 +232,8 @@ namespace BlockmapFramework
             Inventory = new List<Entity>();
             OccupiedNodes = new HashSet<BlockmapNode>();
             CurrentVision = new VisionData();
-            LastKnownPosition = new Dictionary<Actor, Vector3?>();
-            foreach (Actor p in World.GetAllActors()) LastKnownPosition.Add(p, null);
-            LastKnownNode = new Dictionary<Actor, BlockmapNode>();
-            foreach (Actor p in World.GetAllActors()) LastKnownNode.Add(p, null);
-            LastKnownRotation = new Dictionary<Actor, Quaternion?>();
-            foreach (Actor p in World.GetAllActors()) LastKnownRotation.Add(p, null);
+            LastSeenInfo = new Dictionary<Actor, LastSeenInfo>();
+            foreach (Actor p in World.GetAllActors()) LastSeenInfo.Add(p, null);
 
             // Set position and rotation
             ResetWorldPositonAndRotation();
@@ -246,6 +249,27 @@ namespace BlockmapFramework
 
             // Subclass hook
             OnInitialized();
+        }
+
+        /// <summary>
+        /// Initializes this entity as a ghost marker.
+        /// <br/>See IsGhostMarker attribute for more info.
+        /// </summary>
+        public void InitAsGhostMarker(World world, EntityDef def, Actor owner, HashSet<BlockmapNode> nodes, LastSeenInfo lastSeenInfo)
+        {
+            IsGhostMarker = true;
+
+            World = world;
+            Def = def;
+            Actor = owner;
+            OccupiedNodes = new HashSet<BlockmapNode>(nodes);
+            InitializeGameObject();
+            MeshObject.layer = 0;
+            SetFogOfWarTintAndTransparency();
+            Wrapper.name = $"{Label}_ghost-marker";
+            // Store exact world position and rotation in wrapper transform
+            Wrapper.transform.position = lastSeenInfo.Position;
+            Wrapper.transform.rotation = lastSeenInfo.Rotation;
         }
 
         /// <summary>
@@ -286,7 +310,7 @@ namespace BlockmapFramework
             Wrapper.transform.SetParent(World.WorldObject.transform);
 
             // Create object that holds the mesh and mesh collider
-            if(IsStandaloneEntity)
+            if (IsStandaloneEntity)
             {
                 MeshObject = new GameObject(Label);
                 MeshObject.layer = World.Layer_EntityMesh;
@@ -305,7 +329,7 @@ namespace BlockmapFramework
                     MeshObject.transform.localScale = Def.RenderProperties.ModelScale;
                     if (IsMirrored) HelperFunctions.SetAsMirrored(MeshObject);
                 }
-                if(Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
+                if (Def.RenderProperties.RenderType == EntityRenderType.StandaloneGenerated)
                 {
                     MeshBuilder meshBuilder = new MeshBuilder(MeshObject);
                     Def.RenderProperties.StandaloneRenderFunction(meshBuilder, Height, IsMirrored, false);
@@ -475,6 +499,15 @@ namespace BlockmapFramework
         public virtual void Render(float alpha) { }
 
         /// <summary>
+        /// Called every frame for ghost markers.
+        /// </summary>
+        public void RenderGhostMarker()
+        {
+            if (!IsGhostMarker) throw new System.Exception("Only call for ghost markers");
+            SetMeshObjectTransform(Wrapper.transform.position, Wrapper.transform.rotation);
+        }
+
+        /// <summary>
         /// Sets OccupiedNodes according to the current OriginNode and Dimensions of the entity. 
         /// </summary>
         private void UpdateOccupiedNodes()
@@ -550,12 +583,24 @@ namespace BlockmapFramework
             {
                 foreach(Entity e in World.GetAllEntities())
                 {
-                    if(e.GetLastKnownNode(Actor) == n && !e.IsVisibleBy(Actor) && e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
+                    if (e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
                     {
-                        e.RemoveLastKnownPositionFor(Actor);
+                        if (e.IsExploredBy(Actor))
+                        {
+                            if (!e.IsVisibleBy(Actor))
+                            {
+                                if (e.GetLastSeenInfo(Actor).Node == n)
+                                {
+                                    e.RemoveLastSeenInformationFor(Actor);
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+            // Remove ghost markers on nodes that are now visible
+            World.RemoveGhostMarkers(Actor, CurrentVision.VisibleNodes);
 
             // Add chunks from new vision to changedVisibilityChunks
             foreach (BlockmapNode n in CurrentVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
@@ -579,21 +624,13 @@ namespace BlockmapFramework
         public HashSet<Entity> SeenBy = new HashSet<Entity>();
 
         /// <summary>
-        /// Stores the exact world position at which each actor has seen this entity the last time.
+        /// Stores all information about where and in what state this entity has last been seen by each actor.
         /// </summary>
-        public Dictionary<Actor, Vector3?> LastKnownPosition { get; private set; }
-        /// <summary>
-        /// Stores the origin node at which each actor has seen this entity the last time.
-        /// </summary>
-        protected Dictionary<Actor, BlockmapNode> LastKnownNode { get; private set; }
-        /// <summary>
-        /// Stores the exact world rotation at which each actor has seen this entity the last time.
-        /// </summary>
-        public Dictionary<Actor, Quaternion?> LastKnownRotation { get; private set; }
+        private Dictionary<Actor, LastSeenInfo> LastSeenInfo;
 
         public void AddVisionBy(Entity e)
         {
-            UpdateLastKnownPositionFor(e.Actor);
+            UpdateLastSeenInformationFor(e.Actor);
             SeenBy.Add(e);
         }
         public void RemoveVisionBy(Entity e)
@@ -623,7 +660,7 @@ namespace BlockmapFramework
             if (IsVisibleBy(actor)) return true; // Is currently visible by the given actor
             if (actor == null) return false; // If full vision is active, nothing should in the explored state.
 
-            return LastKnownPosition[actor] != null; // There is a last known position for the given actor meaning they have discovered this entity
+            return LastSeenInfo[actor] != null; // There is a last known position for the given actor meaning they have discovered this entity
         }
 
         #endregion
@@ -691,24 +728,45 @@ namespace BlockmapFramework
                 // Entity was explored before but not currently visible => transparent
                 else if (IsExploredBy(player))
                 {
-                    // Render entity transparent (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
-                    foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
-
-                    // Add fog of war tint
-                    for (int i = 0; i < MeshRenderer.materials.Length; i++)
-                    {
-                        Material m = MeshRenderer.materials[i];
-                        if (i == Def.RenderProperties.PlayerColorMaterialIndex)
-                        {
-                            m.SetColor("_TintColor", new Color(Actor.Color.r / 2f, Actor.Color.g / 2f, Actor.Color.b / 2f, 0.5f));
-                        }
-                        else
-                        {
-                            m.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.4f));
-                        }
-                    }
+                    SetFogOfWarTintAndTransparency();
                 }
             }
+        }
+
+        /// <summary>
+        /// Adjusts the shaders to render the entity as being in fog of war.
+        /// <br/>Can only be done for standalone entities.
+        /// </summary>
+        private void SetFogOfWarTintAndTransparency()
+        {
+            if (!IsStandaloneEntity) throw new System.Exception($"Can't render as in fog of war for not standalone entity: {LabelCap}");
+
+            // Render entity transparent (will only have an effect on materials with EntityShaderTransparent, not EntityShaderOpaque
+            foreach (Material m in MeshRenderer.materials) m.SetFloat("_Transparency", 0.7f);
+
+            // Add fog of war tint
+            for (int i = 0; i < MeshRenderer.materials.Length; i++)
+            {
+                Material m = MeshRenderer.materials[i];
+                if (i == Def.RenderProperties.PlayerColorMaterialIndex)
+                {
+                    m.SetColor("_TintColor", new Color(Actor.Color.r / 2f, Actor.Color.g / 2f, Actor.Color.b / 2f, 0.5f));
+                }
+                else
+                {
+                    m.SetColor("_TintColor", new Color(0f, 0f, 0f, 0.4f));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Showes or hides the ghost marker. Only relevant for ghost markers.
+        /// </summary>
+        public void SetGhostMarkerVisibility(bool show)
+        {
+            if (!IsGhostMarker) throw new System.Exception("Only call this for ghost markers.");
+            MeshRenderer.enabled = show;
+            MeshCollider.enabled = show;
         }
 
         /// <summary>
@@ -730,8 +788,8 @@ namespace BlockmapFramework
             else if(visibility == VisibilityType.FogOfWar)
             {
                 doRender = true;
-                position = LastKnownPosition[World.ActiveVisionActor].Value;
-                rotation = LastKnownRotation[World.ActiveVisionActor].Value;
+                position = LastSeenInfo[World.ActiveVisionActor].Position;
+                rotation = LastSeenInfo[World.ActiveVisionActor].Rotation;
             }
 
             // Don't render if visibility is hidden
@@ -770,7 +828,7 @@ namespace BlockmapFramework
         {
             if (!World.DisplaySettings.IsVisionCutoffEnabled) return false;
             if (MinAltitude <= World.DisplaySettings.VisionCutoffAltitude) return false;
-            if (GetLastKnownNode(activeVisionActor).Type == NodeType.Ground) return false; // we always render entities attached to ground nodes
+            if (LastSeenInfo[activeVisionActor].Node.Type == NodeType.Ground) return false; // we always render entities attached to ground nodes
 
             return true;
         }
@@ -781,7 +839,7 @@ namespace BlockmapFramework
 
             GetCurrentRenderPosition(out bool doRender, out Vector3? position, out Quaternion? rotation);
 
-            if(doRender)
+            if (doRender)
             {
                 MeshRenderer.enabled = true;
                 SetMeshObjectTransform((Vector3)position, (Quaternion)rotation);
@@ -932,13 +990,13 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Returns the node, where the given actor has last seen this entity.
-        /// Should always equal the entitys origin node if the entity is visible.
+        /// Returns the all information about where and in what state this entity has last been seen by the given actor.
+        /// Equals the entity's current state if it is currently visible by the actor.
         /// </summary>
-        public BlockmapNode GetLastKnownNode(Actor actor)
+        public LastSeenInfo GetLastSeenInfo(Actor actor)
         {
-            if (actor == null) return OriginNode;
-            else return LastKnownNode[actor];
+            if (IsVisibleBy(actor)) return new LastSeenInfo(WorldPosition, WorldRotation, OriginNode);
+            return LastSeenInfo[actor];
         }
 
         /// <summary>
@@ -1340,7 +1398,7 @@ namespace BlockmapFramework
                 if (actor == Actor) continue;
                 if (!IsVisibleBy(actor))
                 {
-                    RemoveLastKnownPositionFor(actor);
+                    RemoveLastSeenInformationFor(actor);
                 }
             }
 
@@ -1371,7 +1429,7 @@ namespace BlockmapFramework
             {
                 foreach (Actor p in World.GetAllActors())
                 {
-                    if (IsVisibleBy(p)) UpdateLastKnownPositionFor(p);
+                    if (IsVisibleBy(p)) UpdateLastSeenInformationFor(p);
                 }
             }
 
@@ -1395,7 +1453,7 @@ namespace BlockmapFramework
             {
                 if(IsVisibleBy(actor))
                 {
-                    RemoveLastKnownPositionFor(actor);
+                    RemoveLastSeenInformationFor(actor);
                 }
             }
 
@@ -1507,19 +1565,22 @@ namespace BlockmapFramework
             WorldRotation = HelperFunctions.Get2dRotationByDirection(Rotation);
         }
 
-        public void UpdateLastKnownPositionFor(Actor actor)
+        /// <summary>
+        /// Sets the "last seen information" for the given actor to the entity's current state.
+        /// </summary>
+        public void UpdateLastSeenInformationFor(Actor actor)
         {
             if (ExploredBehaviour == ExploredBehaviour.None) return; // Don't save last known positions for entities that can't be explored (They are either visible or not)
 
-            LastKnownPosition[actor] = WorldPosition;
-            LastKnownNode[actor] = OriginNode;
-            LastKnownRotation[actor] = WorldRotation;
+            LastSeenInfo[actor] = new LastSeenInfo(WorldPosition, WorldRotation, OriginNode);
         }
-        public void RemoveLastKnownPositionFor(Actor actor)
+
+        /// <summary>
+        /// Removes all "last seen information" for the given actor about this entity.
+        /// </summary>
+        public void RemoveLastSeenInformationFor(Actor actor)
         {
-            LastKnownPosition[actor] = null;
-            LastKnownNode[actor] = null;
-            LastKnownRotation[actor] = null;
+            LastSeenInfo[actor] = null;
         }
 
         #endregion

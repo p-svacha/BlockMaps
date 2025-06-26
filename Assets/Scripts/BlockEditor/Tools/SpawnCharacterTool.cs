@@ -121,7 +121,7 @@ namespace WorldEditor
         public override void HandleRightClick()
         {
             if (World.HoveredEntity == null) return;
-            if (World.HoveredEntity.GetComponent<Comp_Movement>() == null) return;
+            if (!World.HoveredEntity.HasComponent<Comp_Movement>()) return;
 
             World.RemoveEntity(World.HoveredEntity, updateWorld: true);
         }

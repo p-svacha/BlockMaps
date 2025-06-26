@@ -166,7 +166,7 @@ namespace BlockmapFramework
         }
 
         /// <summary>
-        /// Gets triggered when a node of the target path is reached. Updates the NextNode and MoveDirection
+        /// Gets triggered when the center of a node of the target path is reached. Updates the NextNode and MoveDirection
         /// </summary>
         private void ReachNextNode()
         {
@@ -174,7 +174,7 @@ namespace BlockmapFramework
             TargetPath.RemoveFirstTransition();
 
             // Update the last known position of this entity for all actors that can currently see it
-            foreach (Entity e in entity.SeenBy) entity.UpdateLastKnownPositionFor(e.Actor);
+            foreach (Entity e in entity.SeenBy) entity.UpdateLastSeenInformationFor(e.Actor);
 
             // Target reached
             if(reachedNode == Target)

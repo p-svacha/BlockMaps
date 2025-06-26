@@ -17,6 +17,7 @@ namespace BlockmapFramework
         public Color Color;
 
         public List<Entity> Entities { get; private set; }
+        public List<Entity> GhostMarkers { get; private set; }
 
         public Actor() { }
         public Actor(World world, int id, string name, Color color)
@@ -37,6 +38,7 @@ namespace BlockmapFramework
         private void Init()
         {
             Entities = new List<Entity>();
+            GhostMarkers = new List<Entity>();
         }
 
         #region Save / Load

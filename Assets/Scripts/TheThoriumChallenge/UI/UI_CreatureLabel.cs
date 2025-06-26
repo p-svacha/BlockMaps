@@ -48,7 +48,7 @@ namespace TheThoriumChallenge
             {
                 Content.SetActive(true);
 
-                Vector3 targetWorldPosition = Creature.IsVisible ? Creature.MeshObject.transform.position + WorldOffset : (Vector3)Creature.LastKnownPosition[Game.Instance.LocalPlayer] + WorldOffset;
+                Vector3 targetWorldPosition = Creature.GetLastSeenInfo(Game.Instance.LocalPlayer).Position + WorldOffset;
                 Vector3 screenPosition = Creature.World.Camera.Camera.WorldToScreenPoint(targetWorldPosition);
                 transform.position = screenPosition;
 

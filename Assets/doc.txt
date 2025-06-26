@@ -88,10 +88,6 @@ if that works, try hosting the game on a website
 
 ------------------------- END CTF v0.0.8 -------------------------
 
-
-
-Framework Updates:
-
 Bug: Doors are still bugged, vision colliders are at wrong rotations
 Bug: Seeing an airnode from below should only mark it as explored, not visible
 Bug: Should not  be able to see/explore entities that are on top of air nodes that you are below (else you see stuff a floor higher than you)

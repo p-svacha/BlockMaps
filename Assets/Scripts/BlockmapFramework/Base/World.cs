@@ -341,6 +341,8 @@ namespace BlockmapFramework
 
             // Entities
             foreach (Entity e in Entities.Values) e.Render(alpha);
+            foreach(Actor a in Actors.Values)
+                foreach (Entity e in a.GhostMarkers) e.RenderGhostMarker();
         }
 
         public void Tick()
@@ -512,7 +514,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
-                    if(hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
@@ -1137,7 +1139,7 @@ namespace BlockmapFramework
         public void ResetExploration(Actor actor)
         {
             foreach (BlockmapNode node in Nodes.Values) node.RemoveExploredBy(actor);
-            foreach (Entity entity in Entities.Values) entity.RemoveLastKnownPositionFor(actor);
+            foreach (Entity entity in Entities.Values) entity.RemoveLastSeenInformationFor(actor);
             foreach (Wall wall in Walls.Values) wall.RemoveExploredBy(actor);
 
             foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
@@ -1147,7 +1149,7 @@ namespace BlockmapFramework
         public void ExploreEverything(Actor actor)
         {
             foreach (BlockmapNode node in Nodes.Values) node.AddExploredBy(actor);
-            foreach (Entity entity in Entities.Values) entity.UpdateLastKnownPositionFor(actor);
+            foreach (Entity entity in Entities.Values) entity.UpdateLastSeenInformationFor(actor);
             foreach (Wall wall in Walls.Values) wall.AddExploredBy(actor);
 
             foreach (Entity entity in Entities.Values.Where(x => x.Actor == actor)) entity.UpdateVision();
@@ -1287,6 +1289,22 @@ namespace BlockmapFramework
             // De-register entity
             DeregisterEntity(entityToRemove);
 
+            // Create ghost markers for actors that have previously explored the entity, but don't currently see it at their last known position.
+            // The ghost markers will disappear once actors see an affected node again.
+            if (entityToRemove.ExploredBehaviour != ExploredBehaviour.None)
+            {
+                foreach (Actor actor in GetAllActors())
+                {
+                    if (actor != entityToRemove.Actor)
+                    {
+                        if (!entityToRemove.IsVisibleBy(actor) && entityToRemove.IsExploredBy(actor))
+                        {
+                            CreateGhostMarker(entityToRemove, actor, entityToRemove.GetLastSeenInfo(actor));
+                        }
+                    }
+                }
+            }
+
             // Remove entity vision reference on all nodes, entities and walls
             HashSet<Chunk> chunksAffectedByVision = new HashSet<Chunk>();
             foreach (BlockmapNode node in entityToRemove.CurrentVision.VisibleNodes)
@@ -1358,6 +1376,31 @@ namespace BlockmapFramework
             if (entity.Def.RenderProperties.RenderType == EntityRenderType.Batch) entity.Chunk.DeregisterBatchEntity(entity);
 
             entity.OnDeregister();
+        }
+
+        public void CreateGhostMarker(Entity removedEntity, Actor actor, LastSeenInfo lastSeenInfo)
+        {
+            // Create entity as ghost marker
+            Entity newGhostMarker = (Entity)System.Activator.CreateInstance(removedEntity.Def.EntityClass);
+            newGhostMarker.InitAsGhostMarker(this, removedEntity.Def, removedEntity.Actor, removedEntity.OccupiedNodes, lastSeenInfo);
+            actor.GhostMarkers.Add(newGhostMarker);
+            newGhostMarker.SetGhostMarkerVisibility(ActiveVisionActor == actor);
+        }
+        public void RemoveGhostMarkers(Actor actor, HashSet<BlockmapNode> nodes) // Removes all ghost markers for the given actor that touch one of the given nodes
+        {
+            foreach (BlockmapNode n in nodes)
+            {
+                List<Entity> removedGhostMarkers = new List<Entity>();
+                foreach (Entity ghostMarker in actor.GhostMarkers)
+                {
+                    if (ghostMarker.OccupiedNodes.Contains(n))
+                    {
+                        ghostMarker.DestroyGameObject();
+                        removedGhostMarkers.Add(ghostMarker);
+                    }
+                }
+                foreach (Entity removedGhostMarker in removedGhostMarkers) actor.GhostMarkers.Remove(removedGhostMarker);
+            }
         }
 
         public WaterBody CanAddWater(GroundNode node, int maxDepth) // returns null when cannot
@@ -2021,6 +2064,15 @@ namespace BlockmapFramework
         {
             ActiveVisionActor = actor;
             UpdateVisibility();
+
+            // Ghost markers
+            foreach(Actor a in GetAllActors())
+            {
+                foreach (Entity ghostMaker in a.GhostMarkers)
+                {
+                    ghostMaker.SetGhostMarkerVisibility(actor == a);
+                }
+            }
         }
 
         public void CameraJumpToFocusEntity(Entity e)
