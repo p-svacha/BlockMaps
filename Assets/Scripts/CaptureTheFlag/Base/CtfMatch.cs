@@ -62,6 +62,8 @@ namespace CaptureTheFlag
         public Player LocalPlayer { get; private set; }
         public Player Opponent { get; private set; }
 
+        public List<CtfItem> Items { get; private set; }
+
         // Match state
         public MatchState State { get; private set; }
         public bool IsMatchRunning => (State == MatchState.CountdownBeforePlayerTurn || State == MatchState.PlayerTurn || State == MatchState.WaitingForOtherPlayerTurn || State == MatchState.NpcTurn);
@@ -110,6 +112,7 @@ namespace CaptureTheFlag
             if (MatchType == CtfMatchType.Multiplayer) Players.Add(new Player(matchInfo.Clients[1]));
 
             // Start world generation
+            Items = new List<CtfItem>();
             Game.LoadingScreenOverlay.SetActive(true);
             WorldGenerator = WorldGenerators[matchInfo.Settings.WorldGeneratorIndex];
             WorldGenerator.StartGeneration(matchInfo.Settings.WorldSize, matchInfo.Settings.Seed, onDoneCallback: OnWorldGenerationDone);
@@ -153,7 +156,7 @@ namespace CaptureTheFlag
         private void CreateCtfObjects(System.Action onDoneCallback)
         {
             // Turn world into a CTF map
-            CtfMapGenerator.CreateCtfMap(World, MatchInfo.Settings.SpawnType, onDoneCallback);
+            CtfMapGenerator.CreateCtfMap(this, World, MatchInfo.Settings.SpawnType, onDoneCallback);
 
             // Set map zones
             NeutralZone = World.GetZone(id: 1);
@@ -182,6 +185,14 @@ namespace CaptureTheFlag
         }
 
         /// <summary>
+        /// Registers an item that got created during ctf match objects creation.
+        /// </summary>
+        public void RegisterItem(CtfItem item)
+        {
+            Items.Add(item);
+        }
+
+        /// <summary>
         /// Gets called when everything is generated, created and initialized.
         /// <br/>After this function completes, the match should be immediately ready to start.
         /// </summary>
@@ -199,6 +210,7 @@ namespace CaptureTheFlag
 
             // Notify match readiness
             foreach (Player p in Players) p.OnMatchReady(this);
+            foreach (CtfItem item in Items) item.OnMatchReady(this);
             UI.OnMatchReady();
 
             State = MatchState.MatchReadyToStart;
@@ -596,6 +608,7 @@ namespace CaptureTheFlag
         {
             if (SelectedCharacter == null) return;
 
+            // UI
             UI.SelectCharacter(SelectedCharacter);
             SelectedCharacter.ShowSelectionIndicator(true);
 
@@ -669,6 +682,19 @@ namespace CaptureTheFlag
         public void ToggleVisionCutoff()
         {
             IsVisionCutoffEnabled = !IsVisionCutoffEnabled;
+        }
+
+        public void ConsumeItem(CtfItem item)
+        {
+            item.TriggerConsumeEffect();
+            World.RemoveEntity(item, updateWorld: true);
+            UI.CharacterInfo.RefreshItemDisplay();
+        }
+
+        public void DropItem(CtfItem item)
+        {
+            World.DropFromInventory(item, item.Holder.OriginNode, updateWorld: true);
+            UI.CharacterInfo.RefreshItemDisplay();
         }
 
         #endregion

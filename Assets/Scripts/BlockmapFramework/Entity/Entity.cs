@@ -280,21 +280,28 @@ namespace BlockmapFramework
             Components = new List<EntityComp>();
             foreach (CompProperties compProps in Def.Components)
             {
-                EntityComp newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
-                Components.Add(newComp);
-                newComp.Initialize(compProps, this);
-
                 try
                 {
-                    newComp.Validate();
-                    Debug.Log($"Comp {newComp} has been initialized on {LabelCap}.");
+                    EntityComp newComp = (EntityComp)System.Activator.CreateInstance(compProps.CompClass);
+                    Components.Add(newComp);
+                    newComp.Initialize(compProps, this);
+
+                    try
+                    {
+                        newComp.Validate();
+                        Debug.Log($"Comp {newComp} has been initialized on {LabelCap}.");
+                    }
+                    catch (System.Exception e)
+                    {
+                        throw new System.Exception($"The EntityComp {newComp.GetType()} is not valid on the entity {Label} (DefName={Def.DefName}).\nReason: {e.Message}");
+                    }
+
+                    OnCompInitialized(newComp);
                 }
                 catch(System.Exception e)
                 {
-                    throw new System.Exception($"The EntityComp {newComp.GetType()} is not valid on the entity {Label} (DefName={Def.DefName}).\nReason: {e.Message}");
+                    throw new System.Exception($"Failed to initialize comp {compProps.GetType()} on {Def.DefName}: {e.Message}");
                 }
-
-                OnCompInitialized(newComp);
             }
         }
 

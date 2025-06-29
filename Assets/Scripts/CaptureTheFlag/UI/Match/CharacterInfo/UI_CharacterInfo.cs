@@ -55,6 +55,7 @@ namespace CaptureTheFlag.UI
             if(Match.SelectedCharacter == null)
             {
                 if (gameObject.activeSelf) gameObject.SetActive(false);
+                displayedCharacter = null;
                 return;
             }
 
@@ -115,10 +116,20 @@ namespace CaptureTheFlag.UI
 
             List<ContextMenuOption> options = new List<ContextMenuOption>()
             {
-                new ContextMenuOption("Consume", () => { Debug.Log("Consume"); }),
-                new ContextMenuOption("Drop", () => { Debug.Log("Drop"); }),
+                new ContextMenuOption("Consume", ContextMenuOptionSelected_ConsumeItem),
+                new ContextMenuOption("Drop", ContextMenuOptionSelected_DropItem),
             };
             ContextMenu.Instance.Show(options);
+        }
+
+        private void ContextMenuOptionSelected_ConsumeItem()
+        {
+            Match.ConsumeItem(Match.SelectedCharacter.HeldItem);
+        }
+
+        private void ContextMenuOptionSelected_DropItem()
+        {
+            Match.DropItem(Match.SelectedCharacter.HeldItem);
         }
 
         private void StatButton_OnClick()

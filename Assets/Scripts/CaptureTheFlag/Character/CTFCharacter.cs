@@ -47,16 +47,16 @@ namespace CaptureTheFlag
 
         #region Game Loop
 
-        public void OnMatchReady(CtfMatch game, Player player, Player opponent)
+        public void OnMatchReady(CtfMatch match, Player player, Player opponent)
         {
-            Match = game;
+            Match = match;
             ActionPoints = MaxActionPoints;
             Stamina = MaxStamina;
             Owner = player;
             Opponent = opponent;
 
             // Create label
-            UI_Label = GameObject.Instantiate(game.UI.CharacterLabelPrefab, game.UI.CharacterLabelsContainer.transform);
+            UI_Label = GameObject.Instantiate(match.UI.CharacterLabelPrefab, match.UI.CharacterLabelsContainer.transform);
             UI_Label.Init(this);
         }
 
@@ -104,6 +104,11 @@ namespace CaptureTheFlag
         {
             ActionPoints -= amount;
             Stamina -= amount;
+        }
+
+        public void AddStamina(float amount)
+        {
+            Stamina = Mathf.Clamp(Stamina + amount, 0f, MaxStamina);
         }
 
         public void SetActionPointsToZero()

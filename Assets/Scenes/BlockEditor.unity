@@ -19013,6 +19013,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 926383006}
     m_Modifications:
+    - target: {fileID: 135511321402404762, guid: 1b744ce4cb50cbc4aa2d23cbc5ec7a5e, type: 3}
+      propertyPath: Text
+      value: Destroy Entity
+      objectReference: {fileID: 0}
     - target: {fileID: 135511321417312422, guid: 1b744ce4cb50cbc4aa2d23cbc5ec7a5e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

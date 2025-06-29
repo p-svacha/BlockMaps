@@ -34,15 +34,8 @@ namespace CaptureTheFlag
                     DefName = "CtfItem_Apple",
                     Label = "apple",
                     Description = "Restores 20 stamina upon consumption",
+                    EntityClass = typeof(CtfItem_Apple),
                     UiSprite = HelperFunctions.TextureToSprite(Resources.Load<Texture>(ItemTexturePath + "Apple")),
-                    Components = new List<CompProperties>()
-                    {
-                        new CompProperties_CtfItem()
-                        {
-                            CompClass = typeof(Comp_CtfItem_Apple),
-                            ItemTexture = Resources.Load<Texture>(ItemTexturePath + "Apple"),
-                        }
-                    }
                 }
             };
         }

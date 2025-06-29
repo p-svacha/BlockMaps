@@ -46,6 +46,11 @@ namespace BlockmapFramework
         // Unity Lifecycle Methods
         // ------------------------------------------------------------
 
+        private void Awake()
+        {
+            lastFrameTime = Time.realtimeSinceStartup;
+        }
+
         private void Update()
         {
             // 1) Register inputs for this frame

@@ -14,6 +14,9 @@ namespace CaptureTheFlag
     /// </summary>
     public static class CtfMapGenerator
     {
+        // Context
+        private static CtfMatch Match;
+
         // Flag spawn
         private const int MIN_FLAG_MAP_EDGE_OFFSET_ABSOLUTE = 15; // The flag will spawn at least this amount of nodes away from any map edge
         private const float MAX_FLAG_MAP_EDGE_OFFSET_RELATIVE = 0.15f; // The flag will spawn at maximum this far away from the x-axis map edge, in % of map size
@@ -62,10 +65,11 @@ namespace CaptureTheFlag
         /// Adds all CTF world objects (zones, flags, characters, etc.) to an existing, fully initialized world.
         /// <br/>When all objects are created and the vision of the placed characters is done being recalculated, a callback can be called.
         /// </summary>
-        public static void CreateCtfMap(World world, CharacterSpawnType spawnType, System.Action onDoneCallback)
+        public static void CreateCtfMap(CtfMatch match, World world, CharacterSpawnType spawnType, System.Action onDoneCallback)
         {
             if (!world.IsInitialized) throw new System.Exception("World needs to be initialized");
 
+            Match = match;
             World = world;
             SpawnType = spawnType;
 
@@ -254,11 +258,13 @@ namespace CaptureTheFlag
         {
             EntityDef itemDef = EntityDefOf.CtfItem_Apple;
 
-            EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
+            CtfItem item = EntitySpawner.TrySpawnEntity(new EntitySpawnProperties(World)
             {
                 Def = itemDef,
                 PositionProperties = new EntitySpawnPositionProperties_ExactlyOnNode(node),
-            });
+            }) as CtfItem;
+
+            if (item != null) Match.RegisterItem(item);
         }
     }
 

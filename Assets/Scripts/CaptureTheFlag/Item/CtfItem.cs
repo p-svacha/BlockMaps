@@ -5,10 +5,15 @@ using UnityEngine;
 
 namespace CaptureTheFlag
 {
-    public class CtfItem : Entity
+    public abstract class CtfItem : Entity
     {
-        // Components
-        public Comp_CtfItem ItemComp { get; private set; }
+        // Context
+        protected CtfMatch Match;
+        new public CtfCharacter Holder => (CtfCharacter)base.Holder;
+
+        // Texture
+        protected const string ITEM_TEXTURES_PATH = "CaptureTheFlag/Items/";
+        protected abstract Texture2D ItemTexture { get; }
 
         // Animation
         private const float ROTATION_SPEED = 20f;
@@ -19,18 +24,28 @@ namespace CaptureTheFlag
 
         #region Init
 
-        protected override void OnCompInitialized(EntityComp comp)
-        {
-            base.OnCompInitialized(comp);
-
-            if (comp is Comp_CtfItem item) ItemComp = item;
-        }
-
         protected override void OnInitialized()
         {
+            // Create UI Sprite
+            _UiSprite = HelperFunctions.TextureToSprite(ItemTexture);
+
             // Set item texture on model
-            MeshRenderer.materials[1].mainTexture = ItemComp.ItemTexture;
+            MeshRenderer.materials[1].mainTexture = ItemTexture;
         }
+
+        public void OnMatchReady(CtfMatch match)
+        {
+            Match = match;
+        }
+
+        #endregion
+
+        #region Actions
+
+        /// <summary>
+        /// The effect that gets triggered when this item is consumed.
+        /// </summary>
+        public abstract void TriggerConsumeEffect();
 
         #endregion
 
@@ -58,7 +73,8 @@ namespace CaptureTheFlag
 
         #region Getters
 
-        public override Sprite UiSprite => HelperFunctions.TextureToSprite(ItemComp.ItemTexture);
+        private Sprite _UiSprite;
+        public override Sprite UiSprite => _UiSprite;
 
         #endregion
     }
