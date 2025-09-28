@@ -43,7 +43,9 @@ namespace BlockmapFramework
             }
         }
 
-        // Calls Clear on each registered DefDatabase type
+        /// <summary>
+        /// Calls Clear() on each registered DefDatabase type and resets all DefOf references.
+        /// </summary>
         public static void ClearAllDatabases()
         {
             foreach (Type defDatabaseType in registeredDefDatabases)
@@ -52,6 +54,9 @@ namespace BlockmapFramework
                 MethodInfo resolveMethod = defDatabaseType.GetMethod("Clear", BindingFlags.Static | BindingFlags.Public);
                 resolveMethod?.Invoke(null, null);
             }
+
+            // Unbind DefOfs
+            UnbindAllDefOfs();
         }
 
         // Calls ResolveReferences on each registered DefDatabase type
@@ -119,6 +124,25 @@ namespace BlockmapFramework
                     if (field.Name == def.DefName && field.FieldType.IsAssignableFrom(def.GetType()))
                     {
                         field.SetValue(null, def);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets all static fields on all [DefOf] classes that are assignable to Def (or Def[]) to null.
+        /// </summary>
+        public static void UnbindAllDefOfs()
+        {
+            foreach (Type defOfClass in GetAllDefOfClasses())
+            {
+                var fields = defOfClass.GetFields(BindingFlags.Static | BindingFlags.Public);
+
+                foreach (FieldInfo field in fields)
+                {
+                    if (typeof(Def).IsAssignableFrom(field.FieldType))
+                    {
+                        field.SetValue(null, null);
                     }
                 }
             }

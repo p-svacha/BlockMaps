@@ -300,7 +300,7 @@ namespace BlockmapFramework
                 }
                 catch(System.Exception e)
                 {
-                    throw new System.Exception($"Failed to initialize comp {compProps.GetType()} on {Def.DefName}: {e.Message}");
+                    throw new System.Exception($"Failed to initialize comp {compProps.GetType()} on {Def.DefName}: {e.Message}\n\n{e.StackTrace}");
                 }
             }
         }

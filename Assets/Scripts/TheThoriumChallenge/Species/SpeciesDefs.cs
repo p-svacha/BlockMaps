@@ -2,6 +2,7 @@ using BlockmapFramework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static TheThoriumChallenge.SkillDefs;
 
 namespace TheThoriumChallenge
 {
@@ -39,14 +40,14 @@ namespace TheThoriumChallenge
                         new CompProperties_Movement(),
                         new CompProperties_Skills()
                         {
-                            InitialSkillLevels = new Dictionary<SkillDef, int>()
+                            InitialSkillLevels = new Dictionary<string, int>()
                             {
-                                { SkillDefOf.Health, 3 },
-                                { SkillDefOf.Moving, 5 },
-                                { SkillDefOf.Vision, 5 },
-                                { SkillDefOf.Biting, 8 },
-                                { SkillDefOf.Punching, 0 },
-                                { SkillDefOf.Kicking, 2 },
+                                { HEALTH, 3 },
+                                { MOVING, 5 },
+                                { VISION, 5 },
+                                { BITING, 8 },
+                                { PUNCHING, 0 },
+                                { KICKING, 2 },
                             }
                         },
                         new CompProperties_Stats()
@@ -84,14 +85,14 @@ namespace TheThoriumChallenge
                         new CompProperties_Movement(),
                         new CompProperties_Skills()
                         {
-                            InitialSkillLevels = new Dictionary<SkillDef, int>()
+                            InitialSkillLevels = new Dictionary<string, int>()
                             {
-                                { SkillDefOf.Health, 10 },
-                                { SkillDefOf.Moving, 5 },
-                                { SkillDefOf.Vision, 6 },
-                                { SkillDefOf.Biting, 10 },
-                                { SkillDefOf.Punching, 1 },
-                                { SkillDefOf.Kicking, 1 },
+                                { HEALTH, 10 },
+                                { MOVING, 5 },
+                                { VISION, 6 },
+                                { BITING, 10 },
+                                { PUNCHING, 1 },
+                                { KICKING, 1 },
                             }
                         },
                         new CompProperties_Stats()

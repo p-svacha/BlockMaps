@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static BlockmapFramework.Defs.GlobalEntityDefs;
+using static CaptureTheFlag.SkillDefs;
 
 namespace CaptureTheFlag
 {
@@ -30,15 +31,15 @@ namespace CaptureTheFlag
                 {
                     new CompProperties_Skills()
                     {
-                        InitialSkillLevels = new Dictionary<SkillDef, int>()
+                        InitialSkillLevels = new Dictionary<string, int>()
                         {
-                            { SkillDefOf.Running, 10 },
-                            { SkillDefOf.Vision, 8 },
-                            { SkillDefOf.Endurance, 14 },
-                            { SkillDefOf.Regeneration, 10 },
-                            { SkillDefOf.Climbing, 6 },
-                            { SkillDefOf.Swimming, 6 },
-                            { SkillDefOf.Vaulting, 8 },
+                            { RUNNING, 10 },
+                            { VISION, 8 },
+                            { ENDURANCE, 14 },
+                            { REGENERATION, 10 },
+                            { CLIMBING, 6 },
+                            { SWIMMING, 6 },
+                            { VAULTING, 8 },
                         },
                     },
                     new CompProperties_Movement()
@@ -72,15 +73,15 @@ namespace CaptureTheFlag
                 {
                     new CompProperties_Skills()
                     {
-                        InitialSkillLevels = new Dictionary<SkillDef, int>()
+                        InitialSkillLevels = new Dictionary<string, int>()
                         {
-                            { SkillDefOf.Running, 15 },
-                            { SkillDefOf.Vision, 5 },
-                            { SkillDefOf.Endurance, 14 },
-                            { SkillDefOf.Regeneration, 8 },
-                            { SkillDefOf.Climbing, 0 },
-                            { SkillDefOf.Swimming, 12 },
-                            { SkillDefOf.Vaulting, 5 },
+                            { RUNNING, 15 },
+                            { VISION, 5 },
+                            { ENDURANCE, 14 },
+                            { REGENERATION, 8 },
+                            { CLIMBING, 0 },
+                            { SWIMMING, 12 },
+                            { VAULTING, 5 },
                         },
                     },
                     new CompProperties_Movement() { },
@@ -99,7 +100,7 @@ namespace CaptureTheFlag
                 Label = "alberto",
                 Description = "Very good and fast climber."
             };
-            alberto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Climbing] = 20;
+            alberto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[CLIMBING] = 20;
 
             EntityDef usain = new EntityDef(HumanBase)
             {
@@ -109,8 +110,8 @@ namespace CaptureTheFlag
                 Dimensions = new Vector3Int(1, 4, 1),
             };
             usain.RenderProperties.ModelScale = new Vector3(1f, 1.3f, 1f);
-            usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Running] = 20;
-            usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Endurance] = 10;
+            usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[RUNNING] = 20;
+            usain.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[ENDURANCE] = 10;
 
             EntityDef eluid = new EntityDef(HumanBase)
             {
@@ -118,9 +119,9 @@ namespace CaptureTheFlag
                 Label = "eluid",
                 Description = "Quite fast and very high stamina and regeneration, meaning he will almost never need rest."
             };
-            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Running] = 12;
-            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Endurance] = 20;
-            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Regeneration] = 20;
+            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[RUNNING] = 12;
+            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[ENDURANCE] = 20;
+            eluid.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[REGENERATION] = 20;
 
             EntityDef veronica = new EntityDef(HumanBase)
             {
@@ -128,7 +129,7 @@ namespace CaptureTheFlag
                 Label = "veronica",
                 Description = "Extremely good vision, making her a great scout."
             };
-            veronica.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Vision] = 14;
+            veronica.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[VISION] = 14;
 
             EntityDef katie = new EntityDef(HumanBase)
             {
@@ -136,8 +137,8 @@ namespace CaptureTheFlag
                 Label = "katie",
                 Description = "Very fast swimmer with above-average stamina."
             };
-            katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Endurance] = 16;
-            katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Swimming] = 20;
+            katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[ENDURANCE] = 16;
+            katie.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SWIMMING] = 20;
 
             EntityDef yaroslava = new EntityDef(HumanBase)
             {
@@ -145,7 +146,7 @@ namespace CaptureTheFlag
                 Label = "yaroslava",
                 Description = "Very skilled at jumping over high obstacles and onto high platforms. She can also absorb higher drops."
             };
-            yaroslava.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Vaulting] = 20;
+            yaroslava.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[VAULTING] = 20;
 
             EntityDef blotto = new EntityDef(DogBase)
             {
@@ -155,8 +156,8 @@ namespace CaptureTheFlag
                 Dimensions = new Vector3Int(1, 2, 1),
             };
             blotto.RenderProperties.ModelScale = new Vector3(1f, 1.8f, 1f);
-            blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Vaulting] = 10;
-            blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Regeneration] = 6;
+            blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[VAULTING] = 10;
+            blotto.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[REGENERATION] = 6;
 
             EntityDef pierette = new EntityDef(DogBase)
             {
@@ -164,8 +165,8 @@ namespace CaptureTheFlag
                 Label = "cici",
                 Description = "Smaller dog with high stamina, but once that's gone she will need to rest long."
             };
-            pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Endurance] = 18;
-            pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[SkillDefOf.Running] = 12;
+            pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[ENDURANCE] = 18;
+            pierette.GetCompProperties<CompProperties_Skills>().InitialSkillLevels[RUNNING] = 12;
 
             return new List<EntityDef>()
             {

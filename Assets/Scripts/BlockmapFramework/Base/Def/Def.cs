@@ -52,7 +52,7 @@ namespace BlockmapFramework
 
 
         /// <summary>
-        /// Gets called after all Defs are loaded into the database. Used to resolve references to other Defs.
+        /// Gets called after all Defs are loaded into the database and before OnLoadingDone(). Used to resolve references to other Defs.
         /// </summary>
         public virtual void ResolveReferences() { }
 
@@ -74,6 +74,10 @@ namespace BlockmapFramework
         {
             throw new Exception(LoadingErrorPrefix + msg);
         }
-        
+
+        public override string ToString()
+        {
+            return base.ToString() + "_" + DefName;
+        }
     }
 }

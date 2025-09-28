@@ -38,6 +38,7 @@ namespace CaptureTheFlag
 
         private void Start()
         {
+            // Reset everything
             DefDatabaseRegistry.ClearAllDatabases();
 
             // Load defs
@@ -47,6 +48,7 @@ namespace CaptureTheFlag
             DefDatabase<EntityDef>.AddDefs(EntityDefs.GetObjectDefs());
             DefDatabase<EntityDef>.AddDefs(EntityDefs.GetCharacterDefs());
             DefDatabase<EntityDef>.AddDefs(ItemDefs.GetDefs());
+
             DefDatabaseRegistry.ResolveAllReferences();
             DefDatabaseRegistry.OnLoadingDone();
 

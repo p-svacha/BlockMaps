@@ -21,5 +21,10 @@ namespace BlockmapFramework
         {
             return true;
         }
+
+        /// <summary>
+        /// Gets called after all Defs are loaded into the database. Used to resolve references to other Defs.
+        /// </summary>
+        public virtual void ResolveReferences() { }
     }
 }

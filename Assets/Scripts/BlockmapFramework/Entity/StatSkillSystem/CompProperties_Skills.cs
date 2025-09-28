@@ -18,7 +18,15 @@ namespace BlockmapFramework
         /// <summary>
         /// The initial skill levels the entity has when created.
         /// </summary>
-        public Dictionary<SkillDef, int> InitialSkillLevels { get; init; } = new();
+        public Dictionary<string, int> InitialSkillLevels { get; init; }
+
+        public int GetInitialSkillLevel(SkillDef def)
+        {
+            if (def == null) throw new System.Exception("SkillDef is null.");
+            if (InitialSkillLevels == null) throw new System.Exception("InitialSkillLevels is null.");
+            if (InitialSkillLevels.TryGetValue(def.DefName, out var v)) return v;
+            throw new System.Exception($"InitialSkillLevels does not contain a value for {def.DefName}.");
+        }
 
         public override CompProperties Clone()
         {

@@ -34,7 +34,7 @@ namespace BlockmapFramework
         public virtual void Tick() { }
 
         /// <summary>
-        /// Checks if this comp is valid on the parent entity and returns an exception if not.
+        /// Checks if this comp is valid on the parent entity and throws an exception if not.
         /// </summary>
         public virtual void Validate() { }
 

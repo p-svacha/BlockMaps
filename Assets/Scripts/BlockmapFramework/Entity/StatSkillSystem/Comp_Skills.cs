@@ -21,8 +21,14 @@ namespace BlockmapFramework
             Skills = new Dictionary<SkillDef, Skill>();
             foreach (SkillDef skillDef in DefDatabase<SkillDef>.AllDefs)
             {
-                Skills.Add(skillDef, new Skill(skillDef, entity, Props.InitialSkillLevels[skillDef]));
+                // if (!Props.InitialSkillLevels.ContainsKey(skillDef)) throw new System.Exception($"InitialSkillLevels does not contain a key for {skillDef.DefName}.");
+                Skills.Add(skillDef, new Skill(skillDef, entity, Props.GetInitialSkillLevel(skillDef)));
             }
+        }
+
+        public override void Validate()
+        {
+            if (Props.InitialSkillLevels.Keys.Any(x => x == null)) throw new System.Exception("A SkillDef in CompProperties_Skills.InitialSkillLevels is null.");
         }
 
         public int GetSkillLevel(SkillDef def) => Skills[def].BaseLevel;

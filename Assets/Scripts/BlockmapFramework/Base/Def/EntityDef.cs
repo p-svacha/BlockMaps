@@ -110,7 +110,6 @@ namespace BlockmapFramework
             RenderProperties = new EntityRenderProperties(orig.RenderProperties);
             BlocksVision = orig.BlocksVision;
             VisionColliderType = orig.VisionColliderType;
-            Components = orig.Components.Select(c => c.Clone()).ToList();
             VisionRange = orig.VisionRange;
             Dimensions = new Vector3Int(orig.Dimensions.x, orig.Dimensions.y, orig.Dimensions.z);
             OverrideHeights = orig.OverrideHeights.ToDictionary(x => new Vector2Int(x.Key.x, x.Key.y), x => x.Value);
@@ -121,6 +120,8 @@ namespace BlockmapFramework
             ExploredBehaviour = orig.ExploredBehaviour;
             WaterBehaviour = orig.WaterBehaviour;
             CanBeHeldByOtherEntities = orig.CanBeHeldByOtherEntities;
+
+            Components = orig.Components.Select(c => c.Clone()).ToList();
         }
 
 
@@ -164,6 +165,11 @@ namespace BlockmapFramework
                     return false;
 
             return base.Validate();
+        }
+
+        public override void ResolveReferences()
+        {
+            foreach (CompProperties props in Components) props.ResolveReferences();
         }
     }
 
