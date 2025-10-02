@@ -1,6 +1,6 @@
-Shader "Custom/NodeMaterialShader"
+Shader "Custom/NodeMaterialShaderSimple"
 {
-    Properties // Exposed to editor in material insepctor
+    Properties
     {
         [Toggle] _FullVisibility("Full Visibility", Float) = 1
         [Toggle] _UseTextures("Use Textures", Float) = 1
@@ -23,41 +23,21 @@ Shader "Custom/NodeMaterialShader"
 
         _ZoneBorderWidth("Zone Border Width", Float) = 0.1
 
-        /* Should not be set in inspector
-        [Toggle] _ShowTileOverlay("Show Tile Overlay", Float) = 0
-        _TileOverlayTex("Overlay Texture", 2D) = "none" {}
-        _TileOverlayColor("Overlay Color", Color) = (0,0,0,0)
-        _TileOverlayX("Overlay X Coord", Float) = 0
-        _TileOverlayY("Overlay Y Coord", Float) = 0
-         _TileOverlaySize("Overlay Size", Float) = 1
-        */
-
-        _RoughnessTex("Roughness Texture", 2D) = "white" {}
-
-        _NormalMap("Normal Map", 2D) = "bump" {}  // New property for the normal map
-        _NormalStrength("Normal Strength", Range(-2, 2)) = 0  // New property for normal strength
-
-        _HeightMap("Height Map", 2D) = "white" {}
-        _HeightPower("Height Power", Range(0,.125)) = 0
-
-        _MetallicMap("Metallic Map", 2D) = "black" {}
-        _MetallicPower("Metallic Power", Range(0,1)) = 0
-
-        [Toggle] _UseAO("Use Ambient Occlusion?", Float) = 0
-        _AOMap("Ambient Occlusion Map", 2D) = "white" {}
+        _Smoothness("Smoothness", Range(0,1)) = 0
     }
 
-        SubShader
-        {
+    SubShader
+    {
         Tags { "RenderType" = "Opaque" }
-        Offset [_Offset], [_Offset]
+        Offset[_Offset],[_Offset]
         LOD 200
 
         CGPROGRAM
-        // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows addshadow
-
         #pragma target 3.5
+
+        // Tell the cginc to skip height/normal/roughness/metallic/AO work
+        #define NODEMATERIAL_SIMPLE 1
 
         struct Input
         {
@@ -67,15 +47,15 @@ Shader "Custom/NodeMaterialShader"
             float2 uv2_GridTex;
             float3 worldPos;
             float3 worldNormal;
-            float2 uv_NormalMap;
-            float2 uv_HeightMap;
             float3 viewDir;
             INTERNAL_DATA
         };
 
+        float _Smoothness;
+
         #include "Assets/Scripts/BlockmapFramework/Shaders/NodeMaterialShaderBase.cginc"
-        
-        void surf (Input IN, inout SurfaceOutputStandard o)
+
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
             NodeMaterialSurf(IN, o);
         }

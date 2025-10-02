@@ -12,9 +12,8 @@ Shader "Custom/NodeMaterialShaderTransparent"
         // Texture mode values
         _TextureScale("Texture Scale", Float) = 1
         _Transparency("Transparency", Range(0, 1)) = 1.0
-        _TriplanarBlendSharpness("Blend Sharpness",float) = 1
-        _SideStartSteepness("Side Texture Start Steepness",float) = 0.3 // The steepness where side texture starts to show through
-        _SideOnlySteepness("Side Texture Only Steepness",float) = 0.7 // The steepness where only side texture is shown
+
+        _TriplanarBlendSharpness("Blend Sharpness", Range(0.1, 8)) = 1
 
         // Overlays
         _FogOfWarColor("Fog of war Color", Color) = (0,0,0,0.5)

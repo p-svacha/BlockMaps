@@ -13,12 +13,12 @@ namespace BlockmapFramework
         NoRender,
 
         /// <summary>
-        /// Nodes with this RenderType will be rendered flat (according to node shape) and can blend with other nodes of this type.
+        /// Nodes with this RenderType will be rendered as a flat 2d mesh (according to node shape) and the texture blends with other nodes of this type.
         /// </summary>
         Default_Blend,
 
         /// <summary>
-        /// Nodes with this RenderType will be rendered flat (according to node shape) and won't blend with other nodes.
+        /// Nodes with this RenderType will be rendered as flat 2d mesh (according to node shape) and the texture won't blend with other nodes.
         /// <br/>They also support stairs.
         /// </summary>
         Default_NoBlend,

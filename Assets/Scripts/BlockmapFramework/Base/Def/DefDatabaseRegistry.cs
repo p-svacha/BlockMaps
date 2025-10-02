@@ -27,6 +27,7 @@ namespace BlockmapFramework
         public static void AddAllGlobalDefs()
         {
             DefDatabase<SurfaceDef>.AddDefs(GlobalSurfaceDefs.Defs);
+            DefDatabase<SurfaceDef>.AddDefs(RetroSurfaceDefs.Defs);
             DefDatabase<WallShapeDef>.AddDefs(GlobalWallShapeDefs.Defs);
             DefDatabase<WallMaterialDef>.AddDefs(GlobalWallMaterialDefs.Defs);
             DefDatabase<EntityDef>.AddDefs(GlobalEntityDefs.GetAllGlobalEntityDefs());

@@ -2,6 +2,14 @@
 // 
 // 
 
+// Feature flag, that en/disables heavy bits of the shader (height, normals, roughness, metallic, etc.) at compile time.
+// Doesn't impact runtime performace since it's compile time define.
+#ifndef NODEMATERIAL_SIMPLE
+    #define NM_HAS_HEAVY_MAPS 1
+#else
+    #define NM_HAS_HEAVY_MAPS 0
+#endif
+
 // Base values
 float _ChunkCoordinatesX;
 float _ChunkCoordinatesY;
@@ -178,74 +186,68 @@ void NodeMaterialSurf(Input IN, inout SurfaceOutputStandard o) {
         // Normalize blend weights so x+y+z=1
         blendWeights = blendWeights / (blendWeights.x + blendWeights.y + blendWeights.z);
 
-        // Determine top texture strength based on steepness
-        float steepness = 1 - blendWeights.y;
-        float topTextureStrength;
-        if (steepness < _SideStartSteepness)
-        {
-            topTextureStrength = 1;
-        }
-        else if (steepness < _SideOnlySteepness)
-        {
-            topTextureStrength = 1 - ((steepness - _SideStartSteepness) * (1 / (_SideOnlySteepness - _SideStartSteepness)));
-        }
-        else
-        {
-            topTextureStrength = 0;
-        }
-
-        // Get offset for height map (parallax)
-        float2 texOffsetY = ParallaxOffset(tex2D(_HeightMap, yUV).g, _HeightPower, IN.viewDir);
-        float2 texOffsetX = ParallaxOffset(tex2D(_HeightMap, xUV).g, _HeightPower, IN.viewDir);
-        float2 texOffsetZ = ParallaxOffset(tex2D(_HeightMap, zUV).g, _HeightPower, IN.viewDir);
+        #if NM_HAS_HEAVY_MAPS
+                float2 texOffsetY = ParallaxOffset(tex2D(_HeightMap, yUV).g, _HeightPower, IN.viewDir);
+                float2 texOffsetX = ParallaxOffset(tex2D(_HeightMap, xUV).g, _HeightPower, IN.viewDir);
+                float2 texOffsetZ = ParallaxOffset(tex2D(_HeightMap, zUV).g, _HeightPower, IN.viewDir);
+        #else
+                float2 texOffsetY = 0;
+                float2 texOffsetX = 0;
+                float2 texOffsetZ = 0;
+        #endif
 
         // Ambient Occlusion
-        if (_UseAO == 1)
-        {
-            half yAO = tex2D(_AOMap, yUV + texOffsetY).r;
-            half xAO = tex2D(_AOMap, xUV + texOffsetX).r;
-            half zAO = tex2D(_AOMap, zUV + texOffsetZ).r;
-
-            // Blend AO values using the same weights as other maps
-            half finalAO = xAO * blendWeights.x + yAO * blendWeights.y + zAO * blendWeights.z;
-
-            // Assign AO to the output struct
-            o.Occlusion = finalAO;
-        }
-        else
-        {
+        #if NM_HAS_HEAVY_MAPS
+            if (_UseAO == 1)
+            {
+                half yAO = tex2D(_AOMap, yUV + texOffsetY).r;
+                half xAO = tex2D(_AOMap, xUV + texOffsetX).r;
+                half zAO = tex2D(_AOMap, zUV + texOffsetZ).r;
+                half finalAO = xAO * blendWeights.x + yAO * blendWeights.y + zAO * blendWeights.z;
+                o.Occlusion = finalAO;
+            }
+            else
+            {
+                o.Occlusion = 1.0;
+            }
+        #else
             o.Occlusion = 1.0;
-        }
+        #endif
 
         // Metallic blending
-        half yMetallic = tex2D(_MetallicMap, yUV + texOffsetY).r;
-        half xMetallic = tex2D(_MetallicMap, xUV + texOffsetX).r;
-        half zMetallic = tex2D(_MetallicMap, zUV + texOffsetZ).r;
+        #if NM_HAS_HEAVY_MAPS
+            half yMetallic = tex2D(_MetallicMap, yUV + texOffsetY).r;
+            half xMetallic = tex2D(_MetallicMap, xUV + texOffsetX).r;
+            half zMetallic = tex2D(_MetallicMap, zUV + texOffsetZ).r;
+            o.Metallic = _MetallicPower * (xMetallic * blendWeights.x + yMetallic * blendWeights.y + zMetallic * blendWeights.z);
+        #else
+            o.Metallic = 0.0;
+        #endif
 
-        o.Metallic = _MetallicPower * (xMetallic * blendWeights.x + yMetallic * blendWeights.y + zMetallic * blendWeights.z);
-
-        // Diffuse blending
-        half3 yDiff = (1 - topTextureStrength) * tex2D(_MainTex, yUV + texOffsetY) + topTextureStrength * tex2D(_MainTex, yUV + texOffsetY);
-        half3 xDiff = (1 - topTextureStrength) * tex2D(_MainTex, xUV + texOffsetX) + topTextureStrength * tex2D(_MainTex, xUV + texOffsetX);
-        half3 zDiff = (1 - topTextureStrength) * tex2D(_MainTex, zUV + texOffsetZ) + topTextureStrength * tex2D(_MainTex, zUV + texOffsetZ);
+        // Diffuse blending (triplanar)
+        half3 yDiff = tex2D(_MainTex, yUV + texOffsetY).rgb;
+        half3 xDiff = tex2D(_MainTex, xUV + texOffsetX).rgb;
+        half3 zDiff = tex2D(_MainTex, zUV + texOffsetZ).rgb;
 
         c.rgb = xDiff * blendWeights.x + yDiff * blendWeights.y + zDiff * blendWeights.z;
 
         // Normal map blending
-        half3 normalY = UnpackScaleNormal(tex2D(_NormalMap, yUV + texOffsetY), _NormalStrength);
-        half3 normalX = UnpackScaleNormal(tex2D(_NormalMap, xUV + texOffsetX), _NormalStrength);
-        half3 normalZ = UnpackScaleNormal(tex2D(_NormalMap, zUV + texOffsetZ), _NormalStrength);
-
-        o.Normal.rgb = normalX * blendWeights.x + normalY * blendWeights.y + normalZ * blendWeights.z;
+        #if NM_HAS_HEAVY_MAPS
+            half3 normalY = UnpackScaleNormal(tex2D(_NormalMap, yUV + texOffsetY), _NormalStrength);
+            half3 normalX = UnpackScaleNormal(tex2D(_NormalMap, xUV + texOffsetX), _NormalStrength);
+            half3 normalZ = UnpackScaleNormal(tex2D(_NormalMap, zUV + texOffsetZ), _NormalStrength);
+            o.Normal.rgb = normalX * blendWeights.x + normalY * blendWeights.y + normalZ * blendWeights.z;
+        #endif
 
         // Roughness blending (smoothness = 1 - roughness)
-        half yRoughness = tex2D(_RoughnessTex, yUV + texOffsetY).r;
-        half xRoughness = tex2D(_RoughnessTex, xUV + texOffsetX).r;
-        half zRoughness = tex2D(_RoughnessTex, zUV + texOffsetZ).r;
-
-        o.Smoothness = 1.0 - (xRoughness * blendWeights.x + yRoughness * blendWeights.y + zRoughness * blendWeights.z);
-
-
+        #if NM_HAS_HEAVY_MAPS
+            half yRoughness = tex2D(_RoughnessTex, yUV + texOffsetY).r;
+            half xRoughness = tex2D(_RoughnessTex, xUV + texOffsetX).r;
+            half zRoughness = tex2D(_RoughnessTex, zUV + texOffsetZ).r;
+            o.Smoothness = 1.0 - (xRoughness * blendWeights.x + yRoughness * blendWeights.y + zRoughness * blendWeights.z);
+        #else
+            o.Smoothness = o.Smoothness = _Smoothness;
+        #endif
 
         // Tint
         c.rgb *= _TextureTint.rgb;
