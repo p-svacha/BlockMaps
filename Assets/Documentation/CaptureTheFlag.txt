@@ -1,10 +1,5 @@
 ========================= TODO's FOR v0.0.7 =========================
 
-add float menu as base ui element (maybe take from keep wandering)
-
-context menu shouldnt go off screen
-context menu should disappear when clicking somewhere
-
 add item actions
 	drop always available (except when on other item)
 	swap item available when on other item
@@ -105,6 +100,10 @@ make flag pole be in center of tile
 game crashes on winning
 
 give preview of where climbing is possible without needing ability to move there right now
+
+AI flees from ally towards its own territory, even though own character is closer to the center than it. It should go further into enemy territory
+
+mark nodes in neutral territory with enemies on them not as passable/green
 
 
 ====== GENERAL IDEAS

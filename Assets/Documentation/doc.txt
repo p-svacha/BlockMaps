@@ -1,3 +1,6 @@
+Walls adjacent to vision blocking entities should be visible if node is visible
+	maybe make walls on explored nodes also explored by default
+
 Bug: Doors are still bugged, vision colliders are at wrong rotations
 Bug: Seeing an airnode from below should only mark it as explored, not visible
 Bug: Should not  be able to see/explore entities that are on top of air nodes that you are below (else you see stuff a floor higher than you)

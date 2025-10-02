@@ -175,6 +175,7 @@ namespace BlockmapFramework
         static readonly ProfilerMarker pm_GetTargetNodes = new ProfilerMarker("Get Target Nodes");
         static readonly ProfilerMarker pm_GetTargetWalls = new ProfilerMarker("Get Target Walls");
         static readonly ProfilerMarker pm_HandleVisibilityChange = new ProfilerMarker("HandleVisibilityChange");
+        static readonly ProfilerMarker pm_ResetExploredUntilNotSeenOnLastKnownPositionEntities = new ProfilerMarker("ResetExploredUntilNotSeenOnLastKnownPositionEntities");
 
         #region Initialize
 
@@ -539,87 +540,6 @@ namespace BlockmapFramework
                 node.Chunk.AddEntity(this);
             }
         }
-
-        /// <summary>
-        /// Updates all references of what this entity currently sees according to its vision range and line of sight rules.
-        /// </summary>
-        public void UpdateVision(bool debugVisionRays = false)
-        {
-            if (!CanSee) return; // This entity cannot see
-            pm_UpdateVision.Begin();
-
-            HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
-
-            // Remove entity vision from previously visible nodes, entities and walls
-            VisionData previousVision = CurrentVision;
-            foreach (BlockmapNode n in previousVision.VisibleNodes) n.RemoveVisionBy(this);
-            foreach (Entity e in previousVision.VisibleEntities) e.RemoveVisionBy(this);
-            foreach (Wall w in previousVision.VisibleWalls) w.RemoveVisionBy(this);
-
-            // Add chunks from old vision to changedVisibilityChunks
-            foreach (BlockmapNode n in previousVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
-            foreach (Entity e in previousVision.VisibleEntities.Where(e => !e.IsInInventory)) changedVisibilityChunks.Add(e.Chunk);
-            foreach (Wall w in previousVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
-
-            // Get list of everything that this entity currently sees
-            pm_GetCurrentVision.Begin();
-            CurrentVision = GetCurrentVision(debugVisionRays);
-            //Debug.Log($"Vision for {Label}:\n{CurrentVision}");
-            pm_GetCurrentVision.End();
-
-            pm_HandleVisibilityChange.Begin();
-            // Add entitiy vision to visible nodes
-            
-            // Set nodes from vision as visible
-            foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
-
-            // Set nodes as explored that are explored by this entity but not visible (in fog of war)
-            foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Actor);
-
-            // Update last known position and rotation of all currently visible entities
-            foreach (Entity e in CurrentVision.VisibleEntities) e.AddVisionBy(this);
-
-            // Add entity vision to visible walls
-            foreach (Wall w in CurrentVision.VisibleWalls) w.AddVisionBy(this);
-
-            // Set walls as explored
-            foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
-
-            // If we see a node that had "ExploredUntilNotSeenOnLastKnownPosition" entities on it that we have last seen there, remove their last known position
-            foreach (BlockmapNode n in CurrentVision.VisibleNodes)
-            {
-                foreach(Entity e in World.GetAllEntities())
-                {
-                    if (e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
-                    {
-                        if (e.IsExploredBy(Actor))
-                        {
-                            if (!e.IsVisibleBy(Actor))
-                            {
-                                if (e.GetLastSeenInfo(Actor).OriginNode == n)
-                                {
-                                    e.RemoveLastSeenInformationFor(Actor);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Remove ghost markers on nodes that are now visible
-            World.RemoveGhostMarkers(Actor, CurrentVision.VisibleNodes);
-
-            // Add chunks from new vision to changedVisibilityChunks
-            foreach (BlockmapNode n in CurrentVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
-            foreach (Entity e in CurrentVision.VisibleEntities) changedVisibilityChunks.Add(e.Chunk);
-            foreach (Wall w in CurrentVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
-
-            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Actor);
-
-            pm_HandleVisibilityChange.End();
-            pm_UpdateVision.End();
-        }
-
 
         #endregion
 
@@ -1048,6 +968,88 @@ namespace BlockmapFramework
         #endregion
 
         #region Vision
+
+        /// <summary>
+        /// Updates all references of what this entity currently sees according to its vision range and line of sight rules.
+        /// </summary>
+        public void UpdateVision(bool debugVisionRays = false)
+        {
+            if (!CanSee) return; // This entity cannot see
+            pm_UpdateVision.Begin();
+
+            HashSet<Chunk> changedVisibilityChunks = new HashSet<Chunk>();
+
+            // Remove entity vision from previously visible nodes, entities and walls
+            VisionData previousVision = CurrentVision;
+            foreach (BlockmapNode n in previousVision.VisibleNodes) n.RemoveVisionBy(this);
+            foreach (Entity e in previousVision.VisibleEntities) e.RemoveVisionBy(this);
+            foreach (Wall w in previousVision.VisibleWalls) w.RemoveVisionBy(this);
+
+            // Add chunks from old vision to changedVisibilityChunks
+            foreach (BlockmapNode n in previousVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
+            foreach (Entity e in previousVision.VisibleEntities.Where(e => !e.IsInInventory)) changedVisibilityChunks.Add(e.Chunk);
+            foreach (Wall w in previousVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
+
+            // Get list of everything that this entity currently sees
+            pm_GetCurrentVision.Begin();
+            CurrentVision = GetCurrentVision(debugVisionRays);
+            //Debug.Log($"Vision for {Label}:\n{CurrentVision}");
+            pm_GetCurrentVision.End();
+
+            pm_HandleVisibilityChange.Begin();
+            // Add entitiy vision to visible nodes
+
+            // Set nodes from vision as visible
+            foreach (BlockmapNode n in CurrentVision.VisibleNodes) n.AddVisionBy(this);
+
+            // Set nodes as explored that are explored by this entity but not visible (in fog of war)
+            foreach (BlockmapNode n in CurrentVision.ExploredNodes) n.AddExploredBy(Actor);
+
+            // Update last known position and rotation of all currently visible entities
+            foreach (Entity e in CurrentVision.VisibleEntities) e.AddVisionBy(this);
+
+            // Add entity vision to visible walls
+            foreach (Wall w in CurrentVision.VisibleWalls) w.AddVisionBy(this);
+
+            // Set walls as explored
+            foreach (Wall w in CurrentVision.ExploredWalls) w.AddExploredBy(Actor);
+
+            // If we see a node that had "ExploredUntilNotSeenOnLastKnownPosition" entities on it that we have last seen there, remove their last known position
+            pm_ResetExploredUntilNotSeenOnLastKnownPositionEntities.Begin();
+            foreach (BlockmapNode n in CurrentVision.VisibleNodes)
+            {
+                foreach (Entity e in World.GetAllEntities())
+                {
+                    if (e.ExploredBehaviour == ExploredBehaviour.ExploredUntilNotSeenOnLastKnownPosition)
+                    {
+                        if (e.IsExploredBy(Actor))
+                        {
+                            if (!e.IsVisibleBy(Actor))
+                            {
+                                if (e.GetLastSeenInfo(Actor).OriginNode == n)
+                                {
+                                    e.RemoveLastSeenInformationFor(Actor);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            pm_ResetExploredUntilNotSeenOnLastKnownPositionEntities.End();
+
+            // Remove ghost markers on nodes that are now visible
+            World.RemoveGhostMarkers(Actor, CurrentVision.VisibleNodes);
+
+            // Add chunks from new vision to changedVisibilityChunks
+            foreach (BlockmapNode n in CurrentVision.VisibleNodes) changedVisibilityChunks.Add(n.Chunk);
+            foreach (Entity e in CurrentVision.VisibleEntities) changedVisibilityChunks.Add(e.Chunk);
+            foreach (Wall w in CurrentVision.VisibleWalls) changedVisibilityChunks.Add(w.Chunk);
+
+            foreach (Chunk c in changedVisibilityChunks) World.OnVisibilityChanged(c, Actor);
+
+            pm_HandleVisibilityChange.End();
+            pm_UpdateVision.End();
+        }
 
         /// <summary>
         /// Shoots rays from the entity's current position towards all nodes, entities and walls within vision range.

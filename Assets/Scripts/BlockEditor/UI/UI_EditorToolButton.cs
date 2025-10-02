@@ -24,7 +24,13 @@ namespace WorldEditor
             TitleText.text = tool.Name;
             Tool = tool;
             Icon.sprite = tool.Icon;
-            GetComponent<Button>().onClick.AddListener(() => editor.SelectTool(Tool.Id));
+            GetComponent<Button>().onClick.AddListener(ToolButton_OnClick);
+        }
+
+        private void ToolButton_OnClick()
+        {
+            if (Editor.World == null || !Editor.World.IsInitialized) return;
+            Editor.SelectTool(Tool.Id);
         }
 
         public void SetSelected(bool value)
