@@ -98,5 +98,5 @@ public static class ResourceManager
         if (dir == Direction.SE) return LoadTexture(TileOverlaysPath + "TileSelectionSE");
         return null;
     }
-    public static Texture2D FullTileSelector => GetTileSelector(Direction.N);
+    public static Texture2D FullTileSelector => GetTileSelector(Direction.None);
 }

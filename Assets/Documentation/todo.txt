@@ -1,0 +1,10 @@
+General next planned to-do's.
+
+- Create and refine general parcel world generator framework
+- Create a fy_cs_retro map generator with new framework
+	-> start with parcels respecting general fy_pool_day layout
+- Create 8x8 chunk maps with that new generator
+- If performance of generation is slow, check ways to fix that
+- Add character with vision range of 64 (!) to that map
+- In that testing setup (with fixed seen even maybe), improve performance of vision calculation (/c/68de9312-cce4-8327-9fea-5d8acf7220b8)
+- Start with turn-based-tactics prototype

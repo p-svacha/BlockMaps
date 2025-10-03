@@ -87,11 +87,11 @@ namespace WorldEditor
                 new WorldGenerator_Void(),
                 new WorldGenerator_SimplePerlin(),
                 new WorldGenerator_Forest(),
-                new WorldGenerator_Parcels(),
                 new WorldGenerator_Desert(),
                 new WorldGenerator_Exodus(),
                 new TtcStageGenerator_Forest(),
                 new WorldGenerator_PoolDay(),
+                new ParcelWorldGenerator_Pool(),
             };
 
             // Init tools
