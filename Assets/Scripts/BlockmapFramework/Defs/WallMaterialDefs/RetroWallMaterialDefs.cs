@@ -13,18 +13,41 @@ namespace BlockmapFramework.Defs
         {
             new WallMaterialDef()
             {
-                DefName = "fy_pool_day_tilemini_blue",
-                Label = "tile mini blue",
-                Description = "Mini blue tiles from fy_pool_day",
-                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/fy_pool_day/tilemini_blue"),
+                DefName = "fy_pool_day_TileWhite",
+                Label = "tile (white)",
+                Description = "Default white tile from fy_pool_day",
+                MaterialName = "fy_pool_day/tile",
             },
 
             new WallMaterialDef()
             {
-                DefName = "fy_pool_day_tile",
-                Label = "tile",
-                Description = "Default tile from fy_pool_day",
-                Material = MaterialManager.LoadMaterial("Materials/NodeMaterials/fy_pool_day/tile"),
+                DefName = "fy_pool_day_TileRed",
+                Label = "tile (red)",
+                Description = "Default red tile from fy_pool_day",
+                MaterialName = "fy_pool_day/tile_red",
+            },
+
+            new WallMaterialDef()
+            {
+                DefName = "fy_pool_day_TileBlue",
+                Label = "tile (blue)",
+                Description = "Default blue tile from fy_pool_day",
+                MaterialName = "fy_pool_day/tile_blue",
+            },
+
+            new WallMaterialDef()
+            {
+                DefName = "fy_pool_day_TileMiniRed",
+                Label = "mini tile (red)",
+                Description = "Mini red tile wall from fy_pool_day",
+                MaterialName = "fy_pool_day/tile_red_mini",
+            },
+            new WallMaterialDef()
+            {
+                DefName = "fy_pool_day_TileMiniBlue",
+                Label = "mini tile (blue)",
+                Description = "Mini blue tile wall from fy_pool_day",
+                MaterialName = "fy_pool_day/tile_blue_mini",
             },
         };
     }

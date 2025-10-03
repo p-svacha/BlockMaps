@@ -13,7 +13,7 @@ namespace BlockmapFramework.Defs
         {
             new SurfaceDef()
             {
-                DefName = "fy_pool_day_Tile",
+                DefName = "fy_pool_day_TileWhite",
                 Label = "tile (white)",
                 Description = "White tiles from fy_pool_day",
                 RenderProperties = new SurfaceRenderProperties()
@@ -44,6 +44,30 @@ namespace BlockmapFramework.Defs
                 {
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "fy_pool_day/tile_blue",
+                },
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "fy_pool_day_TileMiniBlue",
+                Label = "tile mini (blue)",
+                Description = "Mini blue tiles from fy_pool_day",
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "fy_pool_day/tile_blue_mini",
+                },
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "fy_pool_day_TileMiniRed",
+                Label = "tile mini (red)",
+                Description = "Mini red tiles from fy_pool_day",
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "fy_pool_day/tile_red_mini",
                 },
             },
         };

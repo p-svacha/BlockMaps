@@ -12,9 +12,9 @@ namespace BlockmapFramework
         public override Sprite UiSprite { get => HelperFunctions.TextureToSprite(Material.mainTexture); }
 
         /// <summary>
-        /// The material that is used to render walls with this material.
+        /// Name of the Unity material used to render this WallMaterial. 
         /// </summary>
-        public Material Material { get; init; } = null;
+        public string MaterialName { get; init; } = null;
 
         /// <summary>
         /// The minimun climbing skill a character needs to be able to climb a wall with this material.
@@ -30,5 +30,12 @@ namespace BlockmapFramework
         /// The cost of climbing down one wall piece with this material. Must be at least 1.
         /// </summary>
         public float ClimbCostDown { get; init; } = 1.5f;
+
+
+
+        /// <summary>
+        /// The material that is used to render walls with this material.
+        /// </summary>
+        public Material Material => MaterialManager.LoadMaterial($"Materials/NodeMaterials/{MaterialName}");
     }
 }

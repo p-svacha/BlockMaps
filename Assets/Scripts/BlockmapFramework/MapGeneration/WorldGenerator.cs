@@ -86,6 +86,10 @@ namespace BlockmapFramework
             OnGenerationStart();
         }
 
+        /// <summary>
+        /// Called once at the start of the world generation to retrieve all steps (actions) that need to be executed for the full generation.
+        /// <br/>Should only contain generator-specific actions.
+        /// </summary>
         protected abstract List<System.Action> GetGenerationSteps();
 
         protected virtual void OnGenerationStart() { }

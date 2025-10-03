@@ -35,6 +35,20 @@ public static class HelperFunctions
 
     #endregion
 
+    #region Bounds
+
+    /// <summary>
+    /// Checks and return if a given coordinate is within a 2-dimensional array.
+    /// </summary>
+    public static bool InBounds<T>(Vector2Int coords, T[,] grid)
+    {
+        return coords.x >= 0 && coords.y >= 0 &&
+               coords.x < grid.GetLength(0) &&
+               coords.y < grid.GetLength(1);
+    }
+
+    #endregion
+
     #region Math
 
     /// <summary>
@@ -366,6 +380,8 @@ public static class HelperFunctions
     }
 
 
+    public static List<Direction> GetAllDirections4() => GetSides();
+
     private static List<Direction> _Directions8 = new List<Direction>() { Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW };
     public static List<Direction> GetAllDirections8() => _Directions8;
     
@@ -380,9 +396,9 @@ public static class HelperFunctions
     public static bool IsCorner(Direction dir) => GetCorners().Contains(dir);
     public static bool IsSide(Direction dir) => GetSides().Contains(dir);
 
-    public static Vector2Int GetCoordinatesInDirection(Vector2Int coordinates, Direction dir)
+    public static Vector2Int GetCoordinatesInDirection(Vector2Int coordinates, Direction dir, int distance = 1)
     {
-        return coordinates + GetDirectionVectorInt(dir);
+        return coordinates + GetDirectionVectorInt(dir, distance);
     }
     public static Vector2Int GetDirectionVectorInt(Direction dir, int distance = 1)
     {
@@ -395,6 +411,16 @@ public static class HelperFunctions
         if (dir == Direction.SE) return new Vector2Int(distance, -distance);
         if (dir == Direction.SW) return new Vector2Int(-distance, -distance);
         return new Vector2Int(0, 0);
+    }
+
+    /// <summary>
+    /// Returns the coordinates of all adjacent (4) tiles of a source coordinate.
+    /// </summary>
+    public static List<Vector2Int> GetAdjacent4Coordinates(Vector2Int sourceCoordinates)
+    {
+        List<Vector2Int> v = new List<Vector2Int>();
+        foreach (Direction dir in GetAllDirections4()) v.Add(sourceCoordinates + GetDirectionVectorInt(dir));
+        return v;
     }
 
     public static Vector2 GetDirectionVectorFloat(Direction dir, float distance = 1f)

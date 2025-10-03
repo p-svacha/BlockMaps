@@ -1186,7 +1186,7 @@ namespace BlockmapFramework
         }
         public void UnsetGroundNodeAsVoid(GroundNode node, int altitude, bool updateWorld)
         {
-            node.UnsetAsVoid(altitude);
+            node.UnsetAsVoid(null, altitude);
 
             // Update world around coordinates
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
@@ -1660,6 +1660,21 @@ namespace BlockmapFramework
             }
 
             return true;
+        }
+        public List<Wall> BuildWalls(Vector3Int globalSourceCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool mirrored, int height, bool updateWorld)
+        {
+            List<Wall> builtWalls = new List<Wall>();
+            for (int y = 0; y < height; y++)
+            {
+                Vector3Int coords = new Vector3Int(globalSourceCellCoordinates.x, globalSourceCellCoordinates.y + y, globalSourceCellCoordinates.z);
+                if (!CanBuildWall(coords, side)) continue;
+                Wall builtWall = BuildWall(coords, side, shape, material, updateWorld: false, mirrored);
+                builtWalls.Add(builtWall);
+            }
+
+            if (updateWorld) UpdateWorldSystems(new Vector2Int(globalSourceCellCoordinates.x, globalSourceCellCoordinates.z));
+
+            return builtWalls;
         }
         public Wall BuildWall(Vector3Int globalCellCoordinates, Direction side, WallShapeDef shape, WallMaterialDef material, bool updateWorld, bool mirrored = false)
         {

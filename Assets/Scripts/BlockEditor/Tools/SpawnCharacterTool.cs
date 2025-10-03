@@ -47,6 +47,7 @@ namespace WorldEditor
             PlayerDropdown.ClearOptions();
             List<string> playerOptions = World.GetAllActors().Select(x => x.Label).ToList();
             PlayerDropdown.AddOptions(playerOptions);
+            PlayerDropdown.value = 1; // Select player 1 by default
         }
 
         public void SelectEntity(EntityDef def)

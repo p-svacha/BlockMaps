@@ -91,6 +91,7 @@ namespace WorldEditor
                 new WorldGenerator_Desert(),
                 new WorldGenerator_Exodus(),
                 new TtcStageGenerator_Forest(),
+                new WorldGenerator_PoolDay(),
             };
 
             // Init tools

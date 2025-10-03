@@ -197,9 +197,10 @@ namespace BlockmapFramework
             SetAltitude(World.MAP_EDGE_ALTITUDE);
         }
 
-        public void UnsetAsVoid(int altitude)
+        public void UnsetAsVoid(SurfaceDef surface, int altitude)
         {
-            SetSurface(SurfaceDefOf.Grass);
+            if (surface == null) surface = SurfaceDefOf.Grass;
+            SetSurface(surface);
             SetAltitude(altitude);
         }
 
