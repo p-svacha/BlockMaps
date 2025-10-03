@@ -13,7 +13,7 @@ namespace BlockmapFramework
     /// Object representing one world with its own node/pathfinding system. One world is a closed system.
     /// <br/> A world is made up of different chunks.
     /// </summary>
-    public class World : ISaveAndLoadable
+    public class World : IWorld, ISaveAndLoadable
     {
         /// <summary>
         /// The Unity GameObject of this world.
@@ -1097,6 +1097,7 @@ namespace BlockmapFramework
         #endregion
 
         #region Actions
+        // All documentation for functions here are in IWorld.
 
         public void RegisterNode(BlockmapNode node, bool registerInWorld = true)
         {

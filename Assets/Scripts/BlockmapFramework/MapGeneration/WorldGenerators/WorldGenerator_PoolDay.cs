@@ -20,7 +20,8 @@ namespace BlockmapFramework.WorldGeneration
         {
             return new List<System.Action>()
             {
-                GenerateLayout,
+                GenerateBasicLayout,
+                GenerateWallLayout,
                 PlaceFloorNodes,
                 PlaceWalls,
             };
@@ -29,9 +30,9 @@ namespace BlockmapFramework.WorldGeneration
         /// <summary>
         /// Creates a 2D grid of the whole map, assigning each tile an id defining what will be on it.
         /// </summary>
-        private void GenerateLayout()
+        private void GenerateBasicLayout()
         {
-            WallHeight = Random.Range(5, 7 + 1);
+            WallHeight = 11;
 
             int showerAreaWidth = Random.Range(4, 7 + 1);
             int miniPoolAreaWidth = Random.Range(6, 10 + 1);
@@ -48,7 +49,7 @@ namespace BlockmapFramework.WorldGeneration
             {
                 for(int z = 0; z < WorldSize; z++)
                 {
-                    TileType type = TileType.Void;
+                    TileType type = TileType.OutOfBounds;
 
                     if (x < showerAreaWidth)
                     {
@@ -70,7 +71,48 @@ namespace BlockmapFramework.WorldGeneration
                         else if (z < wardrobeLength + centralAreaLength + wardrobeLength) type = TileType.WardrobeRed;
                     }
 
+                    
+
                     Layout[x, z] = type;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds walls to the layout for some segmentation.
+        /// </summary>
+        private void GenerateWallLayout()
+        {
+            for (int x = 0; x < WorldSize; x++)
+            {
+                for (int z = 0; z < WorldSize; z++)
+                {
+                    TileType ownType = Layout[x, z];
+                    if (ownType == TileType.OutOfBounds || ownType == TileType.CentralPoolArea) continue;
+
+                    bool isSegmentBorderToCenter = false; // true if we are adjacent to center area
+                    bool isSegmentBorder = false; // true if we are adjacent to another segment (out of bounds doesn't count)
+                    foreach (Vector2Int adjCoords in HelperFunctions.GetAdjacent4Coordinates(new Vector2Int(x,z)))
+                    {
+                        if (!HelperFunctions.InBounds(adjCoords, Layout)) continue;
+                        TileType adjType = Layout[adjCoords.x, adjCoords.y];
+
+                        if (adjType == TileType.CentralPoolArea)
+                        {
+                            isSegmentBorderToCenter = true;
+                        }
+                        if (adjType != TileType.OutOfBounds && adjType != TileType.Wall && adjType != ownType)
+                        {
+                            isSegmentBorder = true;
+                            break;
+                        }
+                    }
+
+                    float wallChance = 0.01f;
+                    if (isSegmentBorderToCenter) wallChance = 0.9f;
+                    else if (isSegmentBorder) wallChance = 0.4f;
+
+                    if (Random.value < wallChance) Layout[x, z] = TileType.Wall;
                 }
             }
         }
@@ -90,7 +132,7 @@ namespace BlockmapFramework.WorldGeneration
                     TileType type = Layout[x, z];
                     GroundNode groundNode = World.GetGroundNode(worldX, worldZ);
 
-                    if (type == TileType.Void) continue;
+                    if (type == TileType.OutOfBounds) continue;
                     else if (type == TileType.ShowerAreaBlue) groundNode.UnsetAsVoid(RetroSurfaceDefOf.fy_pool_day_TileMiniBlue, BASE_ALTITUDE);
                     else if (type == TileType.ShowerAreaRed) groundNode.UnsetAsVoid(RetroSurfaceDefOf.fy_pool_day_TileMiniRed, BASE_ALTITUDE);
                     else if (type == TileType.WardrobeBlue) groundNode.UnsetAsVoid(RetroSurfaceDefOf.fy_pool_day_TileBlue, BASE_ALTITUDE);
@@ -115,15 +157,15 @@ namespace BlockmapFramework.WorldGeneration
 
                     // Check type of each adjacent tile. If void, place an outside wall (on void tile).
                     TileType ownType = Layout[x, z];
-                    if (ownType == TileType.Void) continue;
+                    if (ownType == TileType.OutOfBounds || ownType == TileType.Wall) continue;
 
                     foreach (Direction dir in HelperFunctions.GetSides())
                     {
                         Vector2Int adjCoords = HelperFunctions.GetCoordinatesInDirection(new Vector2Int(x, z), dir);
-                        TileType neighborType = HelperFunctions.InBounds(adjCoords, Layout) ? Layout[adjCoords.x, adjCoords.y] : TileType.Void;
+                        TileType neighborType = HelperFunctions.InBounds(adjCoords, Layout) ? Layout[adjCoords.x, adjCoords.y] : TileType.OutOfBounds;
 
                         // Neighbour is void and we are not --> wall
-                        if (neighborType == TileType.Void)
+                        if (neighborType == TileType.OutOfBounds || neighborType == TileType.Wall)
                         {
                             Vector3Int cellCoords = new Vector3Int(adjCoords.x + WORLD_EDGE_MARGIN, BASE_ALTITUDE, adjCoords.y + WORLD_EDGE_MARGIN);
 
@@ -146,7 +188,7 @@ namespace BlockmapFramework.WorldGeneration
 
         private enum TileType
         {
-            Void,
+            OutOfBounds,
             Pool,
             CentralPoolArea,
             ShowerAreaBlue,
