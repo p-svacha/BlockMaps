@@ -34,7 +34,7 @@ namespace WorldEditor
             SelectionPanel.Clear();
             foreach (SurfaceDef def in DefDatabase<SurfaceDef>.AllDefs.Where(x => x.Paintable))
             {
-                SelectionPanel.AddElement(def.UiSprite, Color.white, def.LabelCap, () => SelectSurface(def));
+                SelectionPanel.AddElement(def.GetPreviewSprite(), Color.white, def.LabelCap, () => SelectSurface(def));
             }
             SelectionPanel.SelectFirstElement();
         }

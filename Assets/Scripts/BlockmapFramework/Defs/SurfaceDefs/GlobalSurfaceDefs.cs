@@ -25,7 +25,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Grass",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Soil"),
             },
 
             new SurfaceDef()
@@ -39,7 +38,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Sand",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "HotSpringSand"),
             },
 
             new SurfaceDef()
@@ -53,7 +51,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "SandSoft",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "SoftSand"),
             },
 
             new SurfaceDef()
@@ -67,7 +64,6 @@ namespace BlockmapFramework.Defs
                     MaterialName = "ConcreteLight",
                     DrawSlopeAsStairs = true,
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Concrete"),
             },
 
             new SurfaceDef()
@@ -107,7 +103,6 @@ namespace BlockmapFramework.Defs
                     MaterialName = "RoofingTiles",
                     UseLongEdges = true,
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "RoofingTiles012B/RoofingTiles012B_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -120,7 +115,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "WoodParquet",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "WoodFloor051/WoodFloor051_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -133,7 +127,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "TilesWhite",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Tiles132A/Tiles133A_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -147,7 +140,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "DirtPath",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "Ground072/Ground072_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -190,7 +182,6 @@ namespace BlockmapFramework.Defs
                     MaterialName = "CorrugatedSteel",
                     Height = 0.1f,
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "CorrugatedSteel005/CorrugatedSteel005_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -204,7 +195,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_Blend,
                     MaterialName = "Sandstone",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceTextureBasePath + "Sandstone"),
             },
 
             new SurfaceDef()
@@ -218,7 +208,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "MetalPlates",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "MetalPlates001/MetalPlates001_1K-JPG_Color"),
             },
 
             new SurfaceDef()
@@ -232,7 +221,6 @@ namespace BlockmapFramework.Defs
                     Type = SurfaceRenderType.Default_NoBlend,
                     MaterialName = "DiamondPlate",
                 },
-                UiSprite = HelperFunctions.TextureToSprite(SurfaceMaterialBasePath + "DiamondPlate001/DiamondPlate001_1K-JPG_Color"),
             },
         };
     }

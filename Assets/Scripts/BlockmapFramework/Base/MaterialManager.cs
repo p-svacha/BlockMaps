@@ -7,7 +7,6 @@ namespace BlockmapFramework
 {
     public static class MaterialManager
     {
-        private static string BlendableSurfaceReferenceMaterialsBasePath = "Materials/BlendSurfaceReferenceMaterials/";
         private static Dictionary<string, Material> CachedMaterials = new Dictionary<string, Material>();
         private static Dictionary<SurfaceDef, int> CachedSurfaceArrayIndices = new Dictionary<SurfaceDef, int>();
 
@@ -21,13 +20,6 @@ namespace BlockmapFramework
             if (newMat == null) throw new System.Exception($"Failed to load material {resourcePath}.");
             CachedMaterials.Add(resourcePath, newMat);
             return newMat;
-        }
-        private static Material LoadBlendableReferenceMaterial(string materialSubpath)
-        {
-            string fullPath = BlendableSurfaceReferenceMaterialsBasePath + materialSubpath;
-            Material mat = Resources.Load<Material>(fullPath);
-            if (mat == null) throw new System.Exception($"Failed to load material {fullPath}.");
-            return mat;
         }
 
         public static int GetBlendableSurfaceShaderIndexFor(SurfaceDef def)
@@ -48,7 +40,7 @@ namespace BlockmapFramework
             for (int i = 0; i < blendableSurfaces.Count; i++) CachedSurfaceArrayIndices.Add(blendableSurfaces[i], i);
 
             // Load materials
-            List<Material> blendableMaterials = blendableSurfaces.Select(x => LoadBlendableReferenceMaterial(x.RenderProperties.MaterialName)).ToList();
+            List<Material> blendableMaterials = blendableSurfaces.Select(x => LoadMaterial(x.GetFullMaterialResourcePath())).ToList();
 
             // Pass terrain colors to surface material
             Color[] terrainColors = new Color[blendableSurfaces.Count];

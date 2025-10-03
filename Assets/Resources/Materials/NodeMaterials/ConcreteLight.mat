@@ -14,7 +14,6 @@ Material:
   - _CANSHOWOVERLAYS_ON
   - _CANSHOWTILEOVERLAY_ON
   - _FULLVISIBILITY_ON
-  - _SHOWGRID_ON
   - _USETEXTURES_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -109,7 +108,7 @@ Material:
     - _OcclusionStrength: 1
     - _Offset: 0
     - _Parallax: 0.02
-    - _ShowGrid: 1
+    - _ShowGrid: 0
     - _ShowTileOverlay: 0
     - _SideOnlySteepness: 0.7
     - _SideStartSteepness: 0.3

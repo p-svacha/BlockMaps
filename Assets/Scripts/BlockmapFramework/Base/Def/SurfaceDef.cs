@@ -31,6 +31,17 @@ namespace BlockmapFramework
         /// </summary>
         public SurfaceRenderProperties RenderProperties { get; init; } = null;
 
+        /// <summary>
+        /// Returns the full path (within Resources) of the main material used for this surface.
+        /// </summary>
+        public string GetFullMaterialResourcePath()
+        {
+            if (RenderProperties.Type == SurfaceRenderType.Default_Blend) return "Materials/BlendSurfaceReferenceMaterials/" + RenderProperties.MaterialName;
+            if (RenderProperties.Type == SurfaceRenderType.Default_NoBlend) return "Materials/NodeMaterials/" + RenderProperties.MaterialName;
+
+            throw new Exception($"Can't call FullMaterialResourcePath() on SurfaceDef {DefName} with Type {RenderProperties.Type} because that type doesn't use a main material.");
+        }
+
         public override bool Validate()
         {
             if ((RenderProperties.Type == SurfaceRenderType.Default_Blend || RenderProperties.Type == SurfaceRenderType.Default_NoBlend)  && RenderProperties.MaterialName == null) ThrowValidationError("SurfaceDefs that have a default RenderType need to have a Material defined.");
@@ -39,5 +50,26 @@ namespace BlockmapFramework
             if (MovementSpeedModifier > 1f) ThrowValidationError("MovementSpeedModifier must not be greater than 1 since that would break pathfinding.");
             return base.Validate();
         }
+
+        /// <summary>
+        /// Returns the texture used on this SurfaceDef as a sprite.
+        /// For SurfaceDefs with simple meshes (Default_Blend & Default_NoBlend) it creates the sprite from the main texture of the material used.
+        /// For complex SurfaceDefs with CustomMeshGeneration it return the UiSprite as defined in the Def.
+        /// </summary>
+        public Sprite GetPreviewSprite()
+        {
+            if (RenderProperties.Type == SurfaceRenderType.Default_Blend || RenderProperties.Type == SurfaceRenderType.Default_NoBlend)
+            {
+                if (cachedSprite == null)
+                {
+                    cachedSprite = HelperFunctions.TextureToSprite(MaterialManager.LoadMaterial(GetFullMaterialResourcePath()).mainTexture);
+                }
+
+                return cachedSprite;
+            }
+
+            return UiSprite;
+        }
+        private Sprite cachedSprite;
     }
 }

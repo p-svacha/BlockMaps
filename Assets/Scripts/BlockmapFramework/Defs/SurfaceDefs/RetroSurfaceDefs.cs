@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BlockmapFramework.Defs
 {
     /// <summary>
-    /// SurfaceDefs forsimple textures from old games.
+    /// SurfaceDefs for simple textures extracted from old games.
     /// </summary>
     public static class RetroSurfaceDefs
     {
@@ -14,14 +14,38 @@ namespace BlockmapFramework.Defs
             new SurfaceDef()
             {
                 DefName = "fy_pool_day_Tile",
-                Label = "Tile",
+                Label = "tile (white)",
                 Description = "White tiles from fy_pool_day",
                 RenderProperties = new SurfaceRenderProperties()
                 {
                     Type = SurfaceRenderType.Default_NoBlend,
-                    MaterialName = "fy_pool_day_Tiles",
+                    MaterialName = "fy_pool_day/tile",
                 },
-            }
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "fy_pool_day_TileRed",
+                Label = "tile (red)",
+                Description = "Red tiles from fy_pool_day",
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "fy_pool_day/tile_red",
+                },
+            },
+
+            new SurfaceDef()
+            {
+                DefName = "fy_pool_day_TileBlue",
+                Label = "tile (blue)",
+                Description = "Blue tiles from fy_pool_day",
+                RenderProperties = new SurfaceRenderProperties()
+                {
+                    Type = SurfaceRenderType.Default_NoBlend,
+                    MaterialName = "fy_pool_day/tile_blue",
+                },
+            },
         };
     }
 }
