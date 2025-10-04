@@ -35,6 +35,11 @@ namespace BlockmapFramework.WorldGeneration
         public int Length { get; init; }
 
         /// <summary>
+        /// Flag if this gateway represents a fully open connection on a parcel border.
+        /// </summary>
+        public bool IsFullyOpenGateway { get; init; }
+
+        /// <summary>
         /// Returns the world-space coordinates of the tiles inside the SourceParcel
         /// that lie directly along this gateway opening (one tile thick).
         /// </summary>

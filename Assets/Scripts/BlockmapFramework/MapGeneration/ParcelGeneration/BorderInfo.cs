@@ -11,6 +11,7 @@ namespace BlockmapFramework.WorldGeneration
     {
         public Parcel SourceParcel { get; init; }
         public Parcel TargetParcel { get; init; }
+        public ParcelGenDef TargetParcelGenDef { get; init; }
         public Direction Side { get; init; }
         public int Offset { get; init; }   // tiles from SourceParcel local origin along Side
         public int Length { get; init; }   // number of tiles on this border segment

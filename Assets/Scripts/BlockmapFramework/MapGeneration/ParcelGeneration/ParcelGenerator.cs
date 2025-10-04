@@ -7,20 +7,22 @@ namespace BlockmapFramework.WorldGeneration
     public abstract class ParcelGenerator
     {
         protected World World { get; private set; }
+        protected ParcelGenDef Def { get; private set; }
         protected Parcel Parcel { get; private set; }
-        protected List<GatewayInfo> Gates { get; private set; }
+        protected List<GatewayInfo> Gateways { get; private set; }
         protected List<BorderInfo> Borders { get; private set; }
         private Dictionary<Vector2Int, List<BorderInfo>> BordersByCoordinate;
 
-        public void FillParcel(World world, Parcel parcel, List<GatewayInfo> gates, List<BorderInfo> borders)
+        public void FillParcel(World world, ParcelGenDef def, Parcel parcel, List<GatewayInfo> gates, List<BorderInfo> borders)
         {
             World = world;
+            Def = def;
             Parcel = parcel;
-            Gates = gates ?? new List<GatewayInfo>();
+            Gateways = gates ?? new List<GatewayInfo>();
             Borders = borders ?? new List<BorderInfo>();
             BuildBorderIndex();
             Generate();
-            MarkGateways(); // debug helper
+            // MarkGateways(); // debug helper
         }
 
         protected abstract void Generate();
@@ -38,12 +40,15 @@ namespace BlockmapFramework.WorldGeneration
 
         protected void MarkGateways()
         {
-            for (int i = 0; i < Gates.Count; i++)
+            for (int i = 0; i < Gateways.Count; i++)
             {
-                List<Vector2Int> coords = Gates[i].GetGatewayCoordinates();
+                List<Vector2Int> coords = Gateways[i].GetGatewayCoordinates();
                 for (int k = 0; k < coords.Count; k++)
                 {
-                    World.GetAirNodes(coords[k]).First().SetSurface(SurfaceDefOf.Sidewalk);
+                    AirNode nodeToMark = World.GetAirNodes(coords[k]).First();
+                    SurfaceDef surface = Gateways[i].IsFullyOpenGateway ? SurfaceDefOf.Grass : SurfaceDefOf.Sidewalk;
+
+                    nodeToMark.SetSurface(surface);
                 }
             }
         }
@@ -71,16 +76,27 @@ namespace BlockmapFramework.WorldGeneration
             }
         }
 
+
+
+        #endregion
+
+        #region Getters
+
         /// <summary>
         /// Returns all border infos that touch this world coordinate from inside the parcel.
         /// Corners yield 2, edges 1, interior 0.
         /// </summary>
-        public List<BorderInfo> GetBorderInfos(Vector2Int coordinate)
+        protected List<BorderInfo> GetBorderInfos(Vector2Int worldCoords)
         {
-            if (BordersByCoordinate != null && BordersByCoordinate.TryGetValue(coordinate, out List<BorderInfo> list))
+            if (BordersByCoordinate != null && BordersByCoordinate.TryGetValue(worldCoords, out List<BorderInfo> list))
                 return list;
             return new List<BorderInfo>(0);
         }
+
+        protected bool IsBorder(Vector2Int worldCoords) => GetBorderInfos(worldCoords).Count > 0;
+
+        protected bool IsGateway(Vector2Int worldCoords) => Gateways.Any(x => x.GetGatewayCoordinates().Contains(worldCoords));
+        protected List<GatewayInfo> GetGateways(Vector2Int worldCoords) => Gateways.Where(x => x.GetGatewayCoordinates().Contains(worldCoords)).ToList();
 
         #endregion
     }

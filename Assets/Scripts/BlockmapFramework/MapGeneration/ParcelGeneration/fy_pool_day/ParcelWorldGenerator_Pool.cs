@@ -11,6 +11,7 @@ namespace BlockmapFramework.WorldGeneration
         public override bool StartAsVoid => true;
 
         public static int BASE_ALTITUDE = 10;
+        public static int WALL_HEIGHT = 10;
 
         // Areas
         private const string WARDROBE = "Wardrobe";
@@ -62,6 +63,8 @@ namespace BlockmapFramework.WorldGeneration
                     ParcelGenDef1 = WARDROBE,
                     ParcelGenDef2 = POOLAREA,
                     MinSize = 3,
+                    MaxSize = 6,
+                    MaxAmount = 3,
                 },
 
                 new GatewayDef()
@@ -69,6 +72,8 @@ namespace BlockmapFramework.WorldGeneration
                     ParcelGenDef1 = WARDROBE,
                     ParcelGenDef2 = SHOWERS,
                     MinSize = 3,
+                    MaxSize = 3,
+                    MaxAmount = 2,
                 },
 
                 new GatewayDef()
@@ -76,6 +81,24 @@ namespace BlockmapFramework.WorldGeneration
                     ParcelGenDef1 = SHOWERS,
                     ParcelGenDef2 = POOLAREA,
                     MinSize = 2,
+                    MaxSize = 2,
+                    MaxAmount = 1,
+                },
+
+                new GatewayDef()
+                {
+                    ParcelGenDef1 = SHOWERS,
+                    ParcelGenDef2 = SHOWERS,
+                    MaxAmount = 0,
+                    FullyOpenChance = 0.5f,
+                },
+
+                new GatewayDef()
+                {
+                    ParcelGenDef1 = POOLAREA,
+                    ParcelGenDef2 = POOLAREA,
+                    MinSize = 3,
+                    FullyOpenChance = 0.2f,
                 },
             };
         }

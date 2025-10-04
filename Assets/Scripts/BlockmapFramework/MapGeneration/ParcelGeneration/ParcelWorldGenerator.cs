@@ -65,8 +65,8 @@ namespace BlockmapFramework.WorldGeneration
             {
                 SplitMapIntoParcels,
                 IdentifyBorders,
-                BuildBorderInfos,
                 AssignParcels,
+                BuildBorderInfos,
                 PlanGateways,
                 FillParcels,
             };
@@ -139,7 +139,7 @@ namespace BlockmapFramework.WorldGeneration
                 ParcelGenerator generator = (ParcelGenerator)System.Activator.CreateInstance(def.GeneratorClass);
                 List<GatewayInfo> gates = GatewaysByParcel[parcel];
                 List<BorderInfo> borders = BorderInfosByParcel[parcel];
-                generator.FillParcel(World, parcel, gates, borders);
+                generator.FillParcel(World, def, parcel, gates, borders);
             }
         }
 
@@ -403,7 +403,7 @@ namespace BlockmapFramework.WorldGeneration
                 if (!BorderInfosByParcel.ContainsKey(p))
                     BorderInfosByParcel[p] = new List<BorderInfo>();
 
-            // Neighbor borders -> two BorderInfos per ParcelBorder
+            // Neighbour borders -> two BorderInfos per ParcelBorder
             for (int i = 0; i < ParcelBorders.Count; i++)
             {
                 ParcelBorder b = ParcelBorders[i];
@@ -412,6 +412,7 @@ namespace BlockmapFramework.WorldGeneration
                 {
                     SourceParcel = b.A,
                     TargetParcel = b.B,
+                    TargetParcelGenDef = Parcels[b.B], // now safe
                     Side = b.SideOnA,
                     Offset = b.SharedStartA,
                     Length = b.SharedLength
@@ -422,6 +423,7 @@ namespace BlockmapFramework.WorldGeneration
                 {
                     SourceParcel = b.B,
                     TargetParcel = b.A,
+                    TargetParcelGenDef = Parcels[b.A], // now safe
                     Side = b.SideOnB,
                     Offset = b.SharedStartB,
                     Length = b.SharedLength
@@ -452,27 +454,124 @@ namespace BlockmapFramework.WorldGeneration
         {
             GatewaysByParcel = Parcels.Keys.ToDictionary(p => p, p => new List<GatewayInfo>());
 
-            // 1) Create gateways that are dictated/allowed by GatewayDefs
-            foreach (ParcelBorder border in ParcelBorders)
+            for (int i = 0; i < ParcelBorders.Count; i++)
             {
+                ParcelBorder border = ParcelBorders[i];
+
                 ParcelGenDef defA = Parcels[border.A];
                 ParcelGenDef defB = Parcels[border.B];
 
-                if (GatewayMap.TryGetValue((defA.DefName, defB.DefName), out GatewayDef gdef))
-                {
-                    // Fit a span of at least MinSize within SharedLength
-                    int len = Mathf.Clamp(gdef.MinSize, 1, border.SharedLength);
-                    int maxStart = border.SharedLength - len;
-                    int startA = (maxStart > 0) ? Random.Range(0, maxStart + 1) : 0;
-                    int startB = startA; // aligned along shared segment
+                GatewayDef gdef;
+                if (!GatewayMap.TryGetValue((defA.DefName, defB.DefName), out gdef))
+                    continue;
 
-                    AddGateway(border.A, border.SideOnA, startA + border.SharedStartA, len, border.B, "GatewayDef");
-                    AddGateway(border.B, border.SideOnB, startB + border.SharedStartB, len, border.A, "GatewayDef");
+                // Corner-safe usable length (excludes both corners)
+                int usableLen = border.SharedLength - 2;
+
+                // ----- Fully-open attempt first, now also excluding corners -----
+                bool placedFullyOpen = false;
+                if (gdef.FullyOpenChance > 0f && Random.value < gdef.FullyOpenChance)
+                {
+                    if (usableLen >= 1)
+                    {
+                        int startA = border.SharedStartA + 1; // skip west/south corner by 1
+                        int startB = border.SharedStartB + 1; // aligned on the opposite side
+                        int length = usableLen;               // stop before east/north corner
+
+                        AddGateway(border.A, border.SideOnA, startA, length, border.B, true);
+                        AddGateway(border.B, border.SideOnB, startB, length, border.A, true);
+                        placedFullyOpen = true;
+                    }
+                }
+
+                if (placedFullyOpen)
+                    continue; // do not place default segments if the fully-open was placed
+
+                // ----- Default segment placement (still corner-safe) -----
+                if (usableLen <= 0)
+                    continue;
+
+                int minLen = gdef.MinSize > 0 ? gdef.MinSize : 1;
+                int maxLen = gdef.MaxSize > 0 ? gdef.MaxSize : usableLen;
+
+                if (minLen > usableLen)
+                    continue;
+                if (maxLen < minLen)
+                    maxLen = minLen;
+                if (maxLen > usableLen)
+                    maxLen = usableLen;
+
+                int maxAmount = gdef.MaxAmount >= 0 ? gdef.MaxAmount : int.MaxValue;
+                if (maxAmount == 0)
+                    continue; // default gateways forbidden
+
+                List<(int startLocal, int length)> segments = PlaceGatewaysAlongBorder(
+                    usableStartInclusive: 1,
+                    usableEndInclusive: border.SharedLength - 2,
+                    minLen: minLen,
+                    maxLen: maxLen,
+                    maxAmount: maxAmount,
+                    placeProbability: 0.5f
+                );
+
+                for (int s = 0; s < segments.Count; s++)
+                {
+                    int startLocal = segments[s].startLocal;
+                    int length = segments[s].length;
+
+                    int startA = border.SharedStartA + startLocal;
+                    int startB = border.SharedStartB + startLocal;
+
+                    AddGateway(border.A, border.SideOnA, startA, length, border.B, false);
+                    AddGateway(border.B, border.SideOnB, startB, length, border.A, false);
                 }
             }
         }
 
-        private void AddGateway(Parcel p, Direction side, int offset, int length, Parcel target, string reason)
+        /// <summary>
+        /// Tiles [usableStartInclusive .. usableEndInclusive] with up to maxAmount segments,
+        /// segment length in [minLen .. maxLen], keeping a 1-tile gap between segments,
+        /// and allowing stochastic skipping so 0 gateways remain possible.
+        /// </summary>
+        private List<(int startLocal, int length)> PlaceGatewaysAlongBorder(
+            int usableStartInclusive,
+            int usableEndInclusive,
+            int minLen,
+            int maxLen,
+            int maxAmount,
+            float placeProbability
+        )
+        {
+            List<(int startLocal, int length)> result = new List<(int startLocal, int length)>();
+
+            int i = usableStartInclusive;
+            while (i <= usableEndInclusive && result.Count < maxAmount)
+            {
+                int remaining = usableEndInclusive - i + 1;
+                if (remaining < minLen)
+                    break;
+
+                bool placeHere = Random.value < placeProbability;
+                if (!placeHere)
+                {
+                    i += 1; // advance to keep variation
+                    continue;
+                }
+
+                int maxLenHere = Mathf.Min(maxLen, remaining);
+                int length = Random.Range(minLen, maxLenHere + 1);
+
+                // Place segment [i .. i+length-1]
+                result.Add((i, length));
+
+                // Enforce one-tile gap after each placed segment
+                i += length + 1;
+            }
+
+            return result;
+        }
+
+        private void AddGateway(Parcel p, Direction side, int offset, int length, Parcel target, bool isFullyOpen)
         {
             GatewaysByParcel[p].Add(new GatewayInfo
             {
@@ -481,6 +580,7 @@ namespace BlockmapFramework.WorldGeneration
                 Side = side,
                 Offset = offset,
                 Length = length,
+                IsFullyOpenGateway = isFullyOpen
             });
         }
 

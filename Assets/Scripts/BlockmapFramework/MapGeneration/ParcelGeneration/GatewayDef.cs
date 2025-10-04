@@ -22,8 +22,23 @@ namespace BlockmapFramework.WorldGeneration
         public string ParcelGenDef2 { get; init; }
 
         /// <summary>
-        /// The gateway bet
+        /// If defined (!= -1), the gateway between the parcels needs to be at least of this length.
         /// </summary>
-        public int MinSize { get; init; } = 1;
+        public int MinSize { get; init; } = -1;
+
+        /// <summary>
+        /// If defined (!= -1), the gateway between the parcels cannot exceed this length.
+        /// </summary>
+        public int MaxSize { get; init; } = -1;
+
+        /// <summary>
+        /// If defined (!= -1), no more than this amount of gateways can be created on a single border of these parcels.
+        /// </summary>
+        public int MaxAmount { get; init; } = -1;
+
+        /// <summary>
+        /// Chance that a full gateway along the whole border (excluding corners) is created.
+        /// </summary>
+        public float FullyOpenChance { get; init; } = 0f;
     }
 }
