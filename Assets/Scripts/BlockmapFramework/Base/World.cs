@@ -168,10 +168,13 @@ namespace BlockmapFramework
         public Direction NodeHoverModeSides { get; private set; }
         private float HoverEdgeSensitivity = 0.3f; // sensitivity for NodeHoverMode
 
+        // Events
         public event System.Action<BlockmapNode, BlockmapNode> OnHoveredNodeChanged;
         public event System.Action<GroundNode, GroundNode> OnHoveredGroundNodeChanged;
         public event System.Action<Chunk, Chunk> OnHoveredChunkChanged;
         public event System.Action<Entity, Entity> OnHoveredEntityChanged;
+
+        public event System.Action OnWorldContentChanged; // Fired whenever something gets added to or removed from the world. Changes to existing content doesn't fire event.
 
         // Cache
         private static readonly List<BlockmapNode> EmptyNodeList = new List<BlockmapNode>();
@@ -1135,6 +1138,8 @@ namespace BlockmapFramework
             Actor newActor = new Actor(this, id, name, color);
             Actors.Add(id, newActor);
 
+            OnWorldContentChanged?.Invoke();
+
             return newActor;
         }
         public void ResetExploration(Actor actor)
@@ -1244,6 +1249,8 @@ namespace BlockmapFramework
             // Update world around coordinates
             if (updateWorld) UpdateWorldSystems(newNode.WorldCoordinates);
 
+            OnWorldContentChanged?.Invoke();
+
             return newNode;
         }
         public bool CanRemoveAirNode(AirNode node)
@@ -1255,6 +1262,8 @@ namespace BlockmapFramework
         public void RemoveAirNode(AirNode node, bool updateWorld)
         {
             DeregisterNode(node);
+
+            OnWorldContentChanged?.Invoke();
 
             // Update world around coordinates
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
@@ -1280,6 +1289,9 @@ namespace BlockmapFramework
 
             // Register new entity
             RegisterEntity(newEntity, updateWorld);
+
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
 
             // Return new instance
             return newEntity;
@@ -1350,6 +1362,9 @@ namespace BlockmapFramework
             if (updateWorld && entityToRemove.Actor == ActiveVisionActor)
                 foreach (Chunk c in chunksAffectedByVision)
                     UpdateVisibility(c);
+
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
 
             // Destroy
             entityToRemove.DestroyGameObject();
@@ -1479,6 +1494,9 @@ namespace BlockmapFramework
             // Register water body
             WaterBodies.Add(newWaterBody.Id, newWaterBody);
 
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
+
             // Update world around water body
             if (updateWorld) UpdateWorldSystems(new Parcel(new Vector2Int(newWaterBody.MinX, newWaterBody.MinY), new Vector2Int(newWaterBody.MaxX - newWaterBody.MinX + 1, newWaterBody.MaxY - newWaterBody.MinY + 1)));
         }
@@ -1553,6 +1571,9 @@ namespace BlockmapFramework
             // Deregister deleted water nodes
             foreach (WaterNode node in water.WaterNodes) DeregisterNode(node);
 
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
+
             // Update world around water body
             if (updateWorld) UpdateWorldSystems(new Parcel(new Vector2Int(water.MinX, water.MinY), new Vector2Int(water.MaxX - water.MinX + 1, water.MaxY - water.MinY + 1)));
         }
@@ -1578,6 +1599,9 @@ namespace BlockmapFramework
             Fence fence = new Fence(this, def, FenceIdCounter++, node, side, height);
             RegisterFence(fence);
 
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
+
             // Update world around coordinates
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
         }
@@ -1597,6 +1621,9 @@ namespace BlockmapFramework
             // Deregister
             BlockmapNode node = fence.Node;
             DeregisterFence(fence);
+
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
 
             // Update world around coordinates
             if (updateWorld) UpdateWorldSystems(node.WorldCoordinates);
@@ -1683,6 +1710,9 @@ namespace BlockmapFramework
             Wall newWall = new Wall(this, WallIdCounter++, globalCellCoordinates, side, shape, material, mirrored);
             RegisterWall(newWall);
 
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
+
             // Update world around cell
             if (updateWorld) UpdateWorldSystems(newWall.WorldCoordinates);
 
@@ -1715,6 +1745,9 @@ namespace BlockmapFramework
 
             // Deregister
             DeregisterWall(wall);
+
+            // Fire content change event
+            OnWorldContentChanged?.Invoke();
 
             // Update world around cell
             if (updateWorld) UpdateWorldSystems(wall.WorldCoordinates);
@@ -2220,6 +2253,13 @@ namespace BlockmapFramework
 
             Chunk chunk = GetChunk(worldCoordinates);
             return chunk.GetWaterNode(chunk.GetLocalCoordinates(worldCoordinates));
+        }
+
+        public List<AirNode> GetAllAirNodes()
+        {
+            List<AirNode> nodes = new List<AirNode>();
+            foreach (Chunk c in Chunks.Values) nodes.AddRange(c.GetAllAirNodes());
+            return nodes;
         }
         public List<AirNode> GetAirNodes(Vector2Int worldCoordinates)
         {

@@ -13,6 +13,11 @@ namespace BlockmapFramework
         protected World World { get; private set; }
         protected Chunk Chunk { get; private set; }
 
+        /// <summary>
+        /// Used for drawing multiple objects with the same material but different properties in a performant way.
+        /// </summary>
+        private MaterialPropertyBlock MaterialPropertyBlock;
+
         public MeshRenderer Renderer { get; private set; }
         private float[] MultiOverlayColorIndices;
 
@@ -30,79 +35,84 @@ namespace BlockmapFramework
         public virtual void OnMeshApplied()
         {
             Renderer = GetComponent<MeshRenderer>();
+            if (MaterialPropertyBlock == null) MaterialPropertyBlock = new MaterialPropertyBlock();
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
             SetChunkShaderValues();
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
         public abstract void SetVisibility(Actor activeVisionActor);
 
         public void ShowTextures(bool show)
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloat("_UseTextures", show ? 1 : 0);
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloat("_UseTextures", show ? 1 : 0);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
         public void ShowGrid(bool show)
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloat("_ShowGrid", show ? 1 : 0);
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloat("_ShowGrid", show ? 1 : 0);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
         public void ShowTileBlending(bool show)
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloat("_BlendThreshhold", show ? 0.4f : 0);
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloat("_BlendThreshhold", show ? 0.4f : 0);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
 
         public void ShowOverlay(bool show)
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-                Renderer.materials[i].SetFloat("_ShowTileOverlay", show ? 1 : 0);
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloat("_ShowTileOverlay", show ? 1 : 0);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
+        public void ShowZoneBorders(float[] zoneBorderArray, float[] zoneBorderColors)
+        {
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloatArray("_ZoneBorders", zoneBorderArray);
+            MaterialPropertyBlock.SetFloatArray("_ZoneBorderColors", zoneBorderColors);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
+        }
+
         public void ShowOverlay(Vector2Int localCoordinates, Texture2D texture, Color color, int size)
         {
             ShowOverlay(true);
 
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetTexture("_TileOverlayTex", texture);
-                Renderer.materials[i].SetFloat("_TileOverlayX", localCoordinates.x);
-                Renderer.materials[i].SetFloat("_TileOverlayY", localCoordinates.y);
-                Renderer.materials[i].SetFloat("_TileOverlaySize", size);
-                Renderer.materials[i].SetColor("_TileOverlayColor", color);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+
+            MaterialPropertyBlock.SetTexture("_TileOverlayTex", texture);
+            MaterialPropertyBlock.SetFloat("_TileOverlayX", localCoordinates.x);
+            MaterialPropertyBlock.SetFloat("_TileOverlayY", localCoordinates.y);
+            MaterialPropertyBlock.SetFloat("_TileOverlaySize", size);
+            MaterialPropertyBlock.SetColor("_TileOverlayColor", color);
+
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
 
         public void SetMultiOverlayTexture(Texture2D texture)
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetTexture("_MultiOverlayTex", texture);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetTexture("_MultiOverlayTex", texture);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
+
         public void ShowMultiOverlayOnNode(Vector2Int localCoordinates, MultiOverlayColor color)
         {
             int index = localCoordinates.x * 16 + localCoordinates.y;
             MultiOverlayColorIndices[index] = (int)color;
 
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
         public void HideMultiOverlayOnNode(Vector2Int localCoordinates)
         {
             MultiOverlayColorIndices[localCoordinates.x * 16 + localCoordinates.y] = -1;
 
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
-            }
-        }
-
-        public void ShowZoneBorders(float[] zoneBorderArray, float[] zoneBorderColors)
-        {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetFloatArray("_ZoneBorders", zoneBorderArray);
-                Renderer.materials[i].SetFloatArray("_ZoneBorderColors", zoneBorderColors);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+            MaterialPropertyBlock.SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
 
         /// <summary>
@@ -110,27 +120,30 @@ namespace BlockmapFramework
         /// </summary>
         public void SetChunkShaderValues()
         {
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                // Static values
-                Renderer.materials[i].SetFloat("_ChunkSize", Chunk.Size);
-                Renderer.materials[i].SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                Renderer.materials[i].SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
-                Renderer.materials[i].SetColorArray("_MultiOverlayColors", new List<Color>() { Color.white, Color.green, Color.yellow }); // Needs to match enum MultiOverlayColor
+            List<Color> multiOverlayColors = new List<Color>() { Color.white, Color.green, Color.yellow }; // Needs to match enum MultiOverlayColor
 
-                // Initial values
-                Renderer.materials[i].SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+
+            // Static values
+            MaterialPropertyBlock.SetFloat("_ChunkSize", Chunk.Size);
+            MaterialPropertyBlock.SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
+            MaterialPropertyBlock.SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
+            MaterialPropertyBlock.SetVectorArray("_MultiOverlayColors", multiOverlayColors.Select(x => HelperFunctions.ColorToVec4(x)).ToArray()); 
+
+            // Initial values
+            MaterialPropertyBlock.SetFloatArray("_MultiOverlayColorIndices", MultiOverlayColorIndices);
+
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
         protected void SetShaderVisibilityData(List<float> visibilityArray)
         {
-            // Set visibility in all surface mesh materials
-            for (int i = 0; i < Renderer.materials.Length; i++)
-            {
-                Renderer.materials[i].SetColorArray("_PlayerColors", World.GetAllActors().Select(x => x.Color).ToArray());
-                Renderer.materials[i].SetFloat("_FullVisibility", 0);
-                Renderer.materials[i].SetFloatArray("_TileVisibility", visibilityArray);
-            }
+            Renderer.GetPropertyBlock(MaterialPropertyBlock);
+
+            MaterialPropertyBlock.SetVectorArray("_PlayerColors", World.GetAllActors().Select(x => HelperFunctions.ColorToVec4(x.Color)).ToArray());
+            MaterialPropertyBlock.SetFloat("_FullVisibility", 0);
+            MaterialPropertyBlock.SetFloatArray("_TileVisibility", visibilityArray);
+
+            Renderer.SetPropertyBlock(MaterialPropertyBlock);
         }
     }
 

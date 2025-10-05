@@ -19,6 +19,13 @@ namespace WorldEditor
         public TMP_InputField CameraAngleInput;
         public TMP_InputField CameraDirectionInput;
 
+        [Header("World Content")]
+        public TextMeshProUGUI NumGroundNodesText;
+        public TextMeshProUGUI NumAirNodesText;
+        public TextMeshProUGUI NumWallsText;
+        public TextMeshProUGUI NumEntitiesText;
+        public TextMeshProUGUI NumFencesText;
+
         [Header("Display Settings")]
         public TMP_Dropdown VisionDropdown;
         public TMP_Dropdown VisionCutoffDropdown;
@@ -58,6 +65,9 @@ namespace WorldEditor
         {
             gameObject.SetActive(true);
 
+            // Hooks
+            World.OnWorldContentChanged += UpdateWorldContent;
+
             // Vision Dropdown
             VisionDropdown.ClearOptions();
             List<string> visionOptions = new List<string>() { "Everything" };
@@ -65,6 +75,8 @@ namespace WorldEditor
             VisionDropdown.AddOptions(visionOptions);
 
             RefreshSettings();
+
+            UpdateWorldContent();
         }
 
         private void Update()
@@ -133,6 +145,19 @@ namespace WorldEditor
             CameraZoomInput.text = BlockmapCamera.Instance.CurrentZoom.ToString("0.#");
             CameraAngleInput.text = BlockmapCamera.Instance.CurrentAngle.ToString("0.#");
             CameraDirectionInput.text = BlockmapCamera.Instance.CurrentFacingDirection.ToString();
+        }
+
+        #endregion
+
+        #region World Content
+
+        private void UpdateWorldContent()
+        {
+            NumGroundNodesText.text = World.GetAllGroundNodes().Count.ToString();
+            NumAirNodesText.text = World.GetAllAirNodes().Count.ToString();
+            NumWallsText.text = World.GetAllWalls().Count.ToString();
+            NumEntitiesText.text = World.GetAllEntities().Count.ToString();
+            NumFencesText.text = World.GetAllFences().Count.ToString();
         }
 
         #endregion

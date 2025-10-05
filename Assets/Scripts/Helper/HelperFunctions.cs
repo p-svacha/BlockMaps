@@ -853,6 +853,8 @@ public static class HelperFunctions
         return t * t * (3f - 2f * t);
     }
 
+    public static Vector4 ColorToVec4(Color c) => new Vector4(c.r, c.g, c.b, c.a);
+
     #endregion
 
     #region Raycast
