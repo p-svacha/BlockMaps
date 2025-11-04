@@ -17,11 +17,12 @@ namespace BlockmapFramework
         private Chunk Chunk;
 
         // Per material, per state -> matrices
-        private readonly Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> VisibleWalls = new();
-        private readonly Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> ExploredWalls = new();
+        private readonly Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> InstancedMeshes_Visible = new();
+        private readonly Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> InstancedMeshes_FogOfWar = new();
 
         // Per material MPB (holds per-chunk arrays & toggles)
-        readonly Dictionary<(Mesh mesh, Material mat), MaterialPropertyBlock> MaterialPropertyBlocks = new();
+        readonly Dictionary<(Mesh mesh, Material mat), MaterialPropertyBlock> MaterialPropertyBlocks_Visible = new();
+        readonly Dictionary<(Mesh mesh, Material mat), MaterialPropertyBlock> MaterialPropertyBlocks_FogOfWar = new();
 
         /// <summary>
         /// Called once on creation.
@@ -35,20 +36,20 @@ namespace BlockmapFramework
         // Draw from LateUpdate (or a central renderer pass)
         private void LateUpdate()
         {
-            DrawBuckets(VisibleWalls);
-            DrawBuckets(ExploredWalls);
+            DrawBuckets(InstancedMeshes_Visible, MaterialPropertyBlocks_Visible);
+            DrawBuckets(InstancedMeshes_FogOfWar, MaterialPropertyBlocks_FogOfWar);
         }
 
         /// <summary>
         /// Draws all buckets in the given dictionary using instanced batch rendering. Needs to be called every frame in LateUpdate.
         /// </summary>
-        private void DrawBuckets(Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> walls)
+        private void DrawBuckets(Dictionary<(Mesh mesh, Material mat), List<Matrix4x4>> walls, Dictionary<(Mesh mesh, Material mat), MaterialPropertyBlock> mpbs)
         {
             foreach (var kvp in walls)
             {
                 (Mesh mesh, Material mat) key = kvp.Key;
                 List<Matrix4x4> matrices = kvp.Value;
-                MaterialPropertyBlock mpb = MaterialPropertyBlocks[key];
+                MaterialPropertyBlock mpb = mpbs[key];
 
                 for (int i = 0; i < matrices.Count; i += BATCH)
                 {
@@ -64,11 +65,12 @@ namespace BlockmapFramework
         /// </summary>
         public void RebuildBuckets(Actor activeVisionActor)
         {
-            VisibleWalls.Clear(); ExploredWalls.Clear();
+            InstancedMeshes_Visible.Clear();
+            InstancedMeshes_FogOfWar.Clear();
 
-            List<Wall> chunkWalls = Chunk.Walls.Values.SelectMany(w => w).ToList();
+            List<Wall> wallsInChunk = Chunk.Walls.Values.SelectMany(w => w).ToList();
 
-            foreach (var w in chunkWalls)
+            foreach (var w in wallsInChunk)
             {
                 VisibilityType vis = w.GetVisibility(activeVisionActor);
                 if (vis == VisibilityType.Unrevealed) continue;
@@ -77,24 +79,21 @@ namespace BlockmapFramework
 
                 foreach(var (mesh, mat, mtx) in instances)
                 {
-                    var target = (vis == VisibilityType.Visible) ? VisibleWalls : ExploredWalls;
+                    var target = (vis == VisibilityType.Visible) ? InstancedMeshes_Visible : InstancedMeshes_FogOfWar;
                     if (!target.TryGetValue((mesh, mat), out var list))
                         target[(mesh, mat)] = list = new List<Matrix4x4>();
                     list.Add(mtx);
 
                     // Ensure MPB exists for this material
-                    if (!MaterialPropertyBlocks.ContainsKey((mesh, mat)))
+                    if (vis == VisibilityType.Visible && !MaterialPropertyBlocks_Visible.ContainsKey((mesh, mat)))
+                    {
+                        MaterialPropertyBlocks_Visible[(mesh, mat)] = new MaterialPropertyBlock();
+                    }
+                    if (vis == VisibilityType.FogOfWar && !MaterialPropertyBlocks_FogOfWar.ContainsKey((mesh, mat)))
                     {
                         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
-
-                        // Set static per-chunk values
-                        mpb.SetFloat("_ChunkSize", Chunk.Size);
-                        mpb.SetFloat("_ChunkCoordinatesX", Chunk.Coordinates.x);
-                        mpb.SetFloat("_ChunkCoordinatesY", Chunk.Coordinates.y);
-                        Color[] playerCols = Chunk.World.GetAllActors().Select(a => a.Color).ToArray();
-                        mpb.SetVectorArray("_PlayerColors", playerCols.Select(HelperFunctions.ColorToVec4).ToArray());
-
-                        MaterialPropertyBlocks[(mesh, mat)] = mpb;
+                        mpb.SetFloat("_FogOfWar", 1f);
+                        MaterialPropertyBlocks_FogOfWar[(mesh, mat)] = mpb;
                     }
                 }
             }
@@ -154,33 +153,19 @@ namespace BlockmapFramework
         /// </summary>
         private static Matrix4x4 BuildWallMatrix(Wall w)
         {
-            float nh = World.NodeHeight;
-            float wallW = w.Shape.Width;
+            float wallWidth = w.Shape.Width;
 
             // position at cell base
-            Vector3 pos = new Vector3(w.GlobalCellCoordinates.x + 0.5f, w.GlobalCellCoordinates.y * nh, w.GlobalCellCoordinates.z + 0.5f);
+            Vector3 pos = new Vector3(w.GlobalCellCoordinates.x + 0.5f, w.GlobalCellCoordinates.y * World.NodeHeight, w.GlobalCellCoordinates.z + 0.5f);
 
-            float rotationAngle;
-            Vector3 offset;
             Vector3 scale;
 
-            switch (w.Side)
-            {
-                case Direction.N: rotationAngle = 0f; offset = new(0f, 0f, 0.5f - wallW * 0.5f); break;
-                case Direction.E: rotationAngle = 90f; offset = new(0.5f - wallW * 0.5f, 0f, 0f); break;
-                case Direction.S: rotationAngle = 180f; offset = new(0f, 0f, -0.5f + wallW * 0.5f); break;
-                case Direction.W: rotationAngle = 270f; offset = new(-0.5f + wallW * 0.5f, 0f, 0f); break;
-                case Direction.NE: rotationAngle = 0f; offset = new((0.5f - wallW * 0.5f), 0f, (0.5f - wallW * 0.5f)); break;
-                case Direction.SE: rotationAngle = 0f; offset = new((0.5f - wallW * 0.5f), 0f, (-0.5f + wallW * 0.5f)); break;
-                case Direction.SW: rotationAngle = 0f; offset = new((-0.5f + wallW * 0.5f), 0f, (-0.5f + wallW * 0.5f)); break;
-                case Direction.NW: rotationAngle = 0f; offset = new((-0.5f + wallW * 0.5f), 0f, (0.5f - wallW * 0.5f)); break;
-                default: rotationAngle = 0f; offset = Vector3.zero; break;
-            }
+            Quaternion rot = Quaternion.Euler(0f, HelperFunctions.GetDirectionAngle(w.Side) - 180f, 0f);
+            Vector3 offset = GetWallMeshOffset(w);
             pos += offset;
 
-            Quaternion rot = Quaternion.Euler(0f, rotationAngle, 0f);
-            if(w.Shape == WallShapeDefOf.Corner) scale = new Vector3(wallW, nh, wallW); // X=wall width, Y=node height, Z=wall width
-            else scale = new Vector3(1f, nh, wallW); // X=1, Y=node height, Z=wall width
+            if (w.Shape == WallShapeDefOf.Corner) scale = new Vector3(wallWidth, World.NodeHeight, wallWidth); // X=wall width, Y=node height, Z=wall width
+            else scale = new Vector3(1f, World.NodeHeight, wallWidth); // X=1, Y=node height, Z=wall width
 
             return Matrix4x4.TRS(pos, rot, scale);
         }

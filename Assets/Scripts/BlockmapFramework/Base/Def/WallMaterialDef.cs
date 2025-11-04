@@ -36,6 +36,6 @@ namespace BlockmapFramework
         /// <summary>
         /// The material that is used to render walls with this material.
         /// </summary>
-        public Material Material => MaterialManager.LoadMaterial($"Materials/NodeMaterials/{MaterialName}");
+        public Material Material => MaterialManager.LoadMaterial($"Materials/WallMaterials/{MaterialName}");
     }
 }

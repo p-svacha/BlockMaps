@@ -235,9 +235,12 @@ namespace BlockmapFramework
             foreach (AirNodeMesh mesh in AirNodeMeshes.Values) mesh.SetVisibility(actor);
             foreach (FenceMesh mesh in FenceMeshes.Values) mesh.SetVisibility(actor);
             foreach (BatchEntityMesh mesh in ProceduralEntityMeshes.Values) mesh.SetVisibility(actor);
+            /*
             foreach (var altitudeLevel in WallMeshes.Values)
                 foreach (WallMesh mesh in altitudeLevel.Values)
                     mesh.SetVisibility(actor);
+            */
+            InstancedWalls?.RebuildBuckets(World.ActiveVisionActor);
 
             // Entity visibility
             foreach (Entity e in Entities) e.SetVisibility(actor);

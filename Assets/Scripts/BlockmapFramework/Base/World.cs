@@ -142,7 +142,7 @@ namespace BlockmapFramework
         public int Layer_WallMesh;
         public int Layer_WallVisionCollider;
 
-        public int Layer_AllMeshLayers;
+        public int Layer_AllMouseHoverLayers;
 
         // Attributes regarding current cursor position
         public bool IsHoveringWorld { get; private set; }
@@ -258,7 +258,7 @@ namespace BlockmapFramework
             Layer_WallMesh = LayerMask.NameToLayer("WallMesh");
             Layer_WallVisionCollider = LayerMask.NameToLayer("WallVisionCollider");
 
-            Layer_AllMeshLayers = (1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallMesh | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
+            Layer_AllMouseHoverLayers = (1 << Layer_GroundNodeMesh | 1 << Layer_AirNodeMesh | 1 << Layer_WaterMesh | 1 << Layer_FenceMesh | 1 << Layer_WallVisionCollider | 1 << Layer_EntityMesh | 1 << Layer_ProceduralEntityMesh);
 
             // Create chunks
             for (int chunkX = 0; chunkX < NumChunksPerSide; chunkX++)
@@ -416,7 +416,7 @@ namespace BlockmapFramework
             Wall newHoveredWall = null;
 
             // Shoot a raycast on all layers that are relevant for detecting hovered objects
-            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, Layer_AllMeshLayers);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, Layer_AllMouseHoverLayers);
             HelperFunctions.OrderRaycastHitsByDistance(hits);
 
             foreach (RaycastHit hit in hits)
@@ -499,9 +499,9 @@ namespace BlockmapFramework
                 }
 
                 // Hit wall
-                else if (objectHit.gameObject.layer == Layer_WallMesh)
+                else if (objectHit.gameObject.layer == Layer_WallVisionCollider)
                 {
-                    Wall hitWall = GetWallFromRaycastHit(hit);
+                    Wall hitWall = (Wall)objectHit.GetComponent<WorldObjectCollider>().Object;
                     
                     if (hitWall != null && hitWall.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
@@ -758,61 +758,6 @@ namespace BlockmapFramework
 
             return null;
         }
-        public Wall GetWallFromRaycastHit(RaycastHit hit)
-        {
-            // Check if there is a wall on the exact HoveredWorldCoordinates in the HovereModeSide direction
-            Vector3 adjustedHitPosition = hit.point + new Vector3(0.001f, 0f, 0.001f); // This fixes the bug where hitting a mesh on a coordinate border sometimes returns 12.9999 instead of 13.
-            Vector2Int hitWorldCoordinate = GetWorldCoordinates(adjustedHitPosition);
-
-            WallMesh hitMesh = hit.transform.GetComponent<WallMesh>();
-            int altitude = hitMesh.Altitude;
-            Vector3Int globalCellCoordinates = new Vector3Int(hitWorldCoordinate.x, altitude, hitWorldCoordinate.y);
-            Direction primaryHitSide = NodeHoverModeSides;
-            List<Direction> otherPossibleHitSides = GetNodeHoverModes8(adjustedHitPosition);
-
-            List<Wall> cellWalls = GetWalls(globalCellCoordinates);
-            if (cellWalls != null)
-            {
-                // Check primary hit side
-                Wall hitWall = cellWalls.FirstOrDefault(x => x.Side == NodeHoverModeSides);
-                if (hitWall != null) return hitWall;
-
-                // Check other possible hit sides
-                foreach (Direction dir in otherPossibleHitSides)
-                {
-                    Wall otherHitWall = cellWalls.FirstOrDefault(x => x.Side == dir);
-                    if (otherHitWall != null) return otherHitWall;
-                }
-            }
-
-            // If we are exactly on a north or east edge we have to adjust the hit position slightly, else we are 1 coordinate off and don't find anything
-            // Do the same detection stuff again with the offset position
-            Vector3 offsetHitPosition = hit.point + new Vector3(-0.01f, 0f, -0.01f);
-            Vector2Int offsetCoordinates = GetWorldCoordinates(offsetHitPosition);
-            Vector3Int offsetCellCoordinates = new Vector3Int(offsetCoordinates.x, altitude, offsetCoordinates.y);
-            Direction primaryOffsetSide = GetNodeHoverMode8(offsetHitPosition);
-            List<Direction> otherPossibleOffsetSides = GetNodeHoverModes8(offsetHitPosition);
-
-            List<Wall> offsetCellWalls = GetWalls(offsetCellCoordinates);
-            if (offsetCellWalls != null)
-            {
-                // Check primary hit side
-                Wall hitWall = offsetCellWalls.FirstOrDefault(x => x.Side == primaryOffsetSide);
-                if (hitWall != null) return hitWall;
-
-                // Check other possible hit sides
-                foreach (Direction dir in otherPossibleOffsetSides)
-                {
-                    Wall otherHitWall = offsetCellWalls.FirstOrDefault(x => x.Side == dir);
-                    if (otherHitWall != null) return otherHitWall;
-                }
-            }
-
-            // Didn't find anything
-            Debug.LogWarning("GetWallFromRaycastHit failed to find a wall at world position: " + hit.point.ToString() + "/" + hitWorldCoordinate.ToString() + " (offset was " + offsetHitPosition.ToString() + "/" + offsetCoordinates.ToString() + ")");
-            return null;
-        }
-
 
         /// <summary>
         /// Returns the exact world position of where the cursor is currently hovering on a specific altitude level.

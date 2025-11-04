@@ -1,13 +1,15 @@
-- walls all shapes gpu instanced
-- fix hover for walls
 - fix altitude vision cutoff for walls
 - fix visibility for walls (visibility no longer needed), just remove from gpu instancing buckets
+	- also fix fog of war
+	- glass fog of war
 	- change wall material to simple triplanar without all the extra stuff
 - port walltool preview to gpu instancing
 - remove WallMeshGenerator
 - remove Chunk.WallMeshes
+- remove WallMaterialDef.RenderFunction
 - adjust readme
 
 next:
+- node material shader performance
 - make walls and fences to entities
 - entities have climbable property for every cell edge
