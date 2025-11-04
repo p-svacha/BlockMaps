@@ -55,7 +55,7 @@ namespace BlockmapFramework
                 {
                     int n = Mathf.Min(BATCH, matrices.Count - i);
                     List<Matrix4x4> slice = matrices.GetRange(i, n);
-                    Graphics.DrawMeshInstanced(key.mesh, 0, key.mat, slice, mpb, ShadowCastingMode.On, false, Chunk.World.Layer_WallMesh);
+                    Graphics.DrawMeshInstanced(key.mesh, 0, key.mat, slice, mpb, ShadowCastingMode.Off, false, Chunk.World.Layer_WallMesh);
                 }
             }
         }

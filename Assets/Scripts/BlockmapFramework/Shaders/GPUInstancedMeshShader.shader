@@ -31,18 +31,29 @@ Shader "Custom/GPUInstancedMeshShader"
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows addshadow
+        #pragma surface surf Standard fullforwardshadows addshadow vertex:vert
         #pragma target 3.5
 
-        // Enable GPU instancing (for walls)
+        // Enable GPU instancing
         #pragma multi_compile_instancing
         #pragma instancing_options assumeuniformscaling
 
-        // Tell the cginc to skip height/normal/roughness/metallic/AO work
-        #define NODEMATERIAL_SIMPLE 1
+        #include "UnityCG.cginc"
 
-        struct Input
+        // ---- Per-instance buffer (exists in all generated passes) ----
+        UNITY_INSTANCING_BUFFER_START(PerInst)
+            UNITY_DEFINE_INSTANCED_PROP(float, _InstanceTag)
+        UNITY_INSTANCING_BUFFER_END(PerInst)
+
+        // Dummy vertex modifier to force instanced variant usage in all passes (GPU instancing fix)
+        void vert(inout appdata_full v)
         {
+            UNITY_SETUP_INSTANCE_ID(v);
+            float tag = UNITY_ACCESS_INSTANCED_PROP(PerInst, _InstanceTag);
+            v.vertex.xyz += tag * 0.0; // no-op but counts as a read in ALL passes
+        }
+
+        struct Input {
             float2 uv_MainTex;
             float2 uv2_TileOverlayTex;
             float2 uv2_MultiOverlayTex;
@@ -52,8 +63,6 @@ Shader "Custom/GPUInstancedMeshShader"
             float3 viewDir;
             INTERNAL_DATA
         };
-
-        
 
         // Texture
         sampler2D _MainTex;
@@ -84,7 +93,7 @@ Shader "Custom/GPUInstancedMeshShader"
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             // ######################################################################### BASE #########################################################################
-
+            
             fixed4 c = _Color;
 
             float dotProduct = dot(WorldNormalVector(IN, o.Normal), float3(0, 1, 0));
@@ -143,5 +152,5 @@ Shader "Custom/GPUInstancedMeshShader"
         ENDCG
     }
 
-    FallBack "Diffuse"
+    FallBack Off
 }

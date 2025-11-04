@@ -1,15 +1,13 @@
-- fix altitude vision cutoff for walls
-- fix visibility for walls (visibility no longer needed), just remove from gpu instancing buckets
-	- also fix fog of war
-	- glass fog of war
-	- change wall material to simple triplanar without all the extra stuff
+- fix glass fog of war (change material shader to gpu instnacing)
 - port walltool preview to gpu instancing
+- change wall instancing to be global for whole world instead of per chunk (compare performace)
 - remove WallMeshGenerator
 - remove Chunk.WallMeshes
 - remove WallMaterialDef.RenderFunction
 - adjust readme
 
 next:
+- find better solution for z fighting (instead of offset)
 - node material shader performance
 - make walls and fences to entities
 - entities have climbable property for every cell edge
