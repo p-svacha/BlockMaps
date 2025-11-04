@@ -128,6 +128,23 @@ namespace BlockmapFramework
                 Matrix4x4 mtx = BuildWallMatrix(wall);
                 result.Add((mesh, mat, mtx));
             }
+            if(wall.Shape == WallShapeDefOf.Window)
+            {
+                // Glass piece
+                {
+                    Mesh mesh = GPUInstancingMeshDatabase.WindowGlassMesh;
+                    Material mat = MaterialManager.LoadMaterial("Materials/NodeMaterials/Glass");
+
+                    Vector3 pos = new Vector3(wall.GlobalCellCoordinates.x + 0.5f, wall.GlobalCellCoordinates.y * World.NodeHeight, wall.GlobalCellCoordinates.z + 0.5f);
+                    pos += GetWallMeshOffset(wall);
+                    Quaternion rot = Quaternion.Euler(0f, HelperFunctions.GetDirectionAngle(wall.Side) - 180f, 0f);
+                    Vector3 scale = Vector3.one;
+
+                    Matrix4x4 mtx = Matrix4x4.TRS(pos, rot, scale);
+
+                    result.Add((mesh, mat, mtx));
+                }
+            }
 
             return result;
         }
@@ -166,6 +183,23 @@ namespace BlockmapFramework
             else scale = new Vector3(1f, nh, wallW); // X=1, Y=node height, Z=wall width
 
             return Matrix4x4.TRS(pos, rot, scale);
+        }
+
+        private static Vector3 GetWallMeshOffset(Wall w)
+        {
+            float wallWidth = w.Shape.Width;
+            switch (w.Side)
+            {
+                case Direction.N: return new Vector3(0f, 0f, 0.5f - wallWidth * 0.5f);
+                case Direction.E: return new Vector3(0.5f - wallWidth * 0.5f, 0f, 0f);
+                case Direction.S: return new Vector3(0f, 0f, -0.5f + wallWidth * 0.5f);
+                case Direction.W: return new Vector3(-0.5f + wallWidth * 0.5f, 0f, 0f);
+                case Direction.NE: return new Vector3((0.5f - wallWidth * 0.5f), 0f, (0.5f - wallWidth * 0.5f));
+                case Direction.SE: return new Vector3((0.5f - wallWidth * 0.5f), 0f, (-0.5f + wallWidth * 0.5f));
+                case Direction.SW: return new Vector3((-0.5f + wallWidth * 0.5f), 0f, (-0.5f + wallWidth * 0.5f));
+                case Direction.NW: return new Vector3((-0.5f + wallWidth * 0.5f), 0f, (0.5f - wallWidth * 0.5f));
+                default: return Vector3.zero;
+            }
         }
     }
 }

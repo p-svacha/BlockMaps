@@ -117,12 +117,24 @@ namespace BlockmapFramework
         /// </summary>
         private static void CreateWindowGlassMesh()
         {
-            float paneWidth = 
+            float paneWidth = 0.05f;
 
             MeshBuilder meshBuilder = new MeshBuilder();
             int submesh = meshBuilder.AddDummySubmesh();
 
-            Vector3 frontPane1 = new Vector3()
+            Vector3 frontPane1 = new Vector3(-0.5f, 0f, -paneWidth / 2);
+            Vector3 frontPane2 = new Vector3(0.5f, 0f, -paneWidth / 2);
+            Vector3 frontPane3 = new Vector3(0.5f, World.NodeHeight, -paneWidth / 2);
+            Vector3 frontPane4 = new Vector3(-0.5f, World.NodeHeight, -paneWidth / 2);
+            meshBuilder.BuildPlane(submesh, frontPane1, frontPane2, frontPane3, frontPane4, Vector2.zero, Vector2.one);
+
+            Vector3 backPane1 = new Vector3(-0.5f, 0f, paneWidth / 2);
+            Vector3 backPane2 = new Vector3(0.5f, 0f, paneWidth / 2);
+            Vector3 backPane3 = new Vector3(0.5f, World.NodeHeight, paneWidth / 2);
+            Vector3 backPane4 = new Vector3(-0.5f, World.NodeHeight, paneWidth / 2);
+            meshBuilder.BuildPlane(submesh, backPane1, backPane2, backPane3, backPane4, Vector2.zero, Vector2.one, mirror: true);
+
+            WindowGlassMesh = meshBuilder.BuildMesh();
         }
     }
 }

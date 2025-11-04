@@ -6,6 +6,7 @@
 - port walltool preview to gpu instancing
 - remove WallMeshGenerator
 - remove Chunk.WallMeshes
+- adjust readme
 
 next:
 - make walls and fences to entities
