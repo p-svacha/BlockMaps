@@ -64,6 +64,9 @@ namespace BlockmapFramework
         static readonly ProfilerMarker pm_GenerateWallMeshes = new ProfilerMarker("GenerateWallMeshes");
         static readonly ProfilerMarker pm_GenerateProcEntityMeshes = new ProfilerMarker("GenerateProcEntityMeshes");
 
+        // GPU instancing
+        private ChunkWallInstancedRenderer InstancedWalls;
+
         public Chunk(World world, Vector2Int coordinates)
         {
             // Init general
@@ -103,6 +106,10 @@ namespace BlockmapFramework
             FenceMeshes = new Dictionary<int, FenceMesh>();
             WallMeshes = new Dictionary<int, Dictionary<Direction, WallMesh>>();
             ProceduralEntityMeshes = new Dictionary<int, BatchEntityMesh>();
+
+            ChunkWallInstancedRenderer instanced = ChunkObject.AddComponent<ChunkWallInstancedRenderer>();
+            instanced.Init(this);
+            InstancedWalls = instanced; // keep a ref in Chunk (add a field)
         }
 
         #region Actions
@@ -167,7 +174,7 @@ namespace BlockmapFramework
         #region Draw
 
         /// <summary>
-        /// Generates all meshes for this chunk
+        /// Draws everything in this chunk, either through mesh generation or through GPU instancing.
         /// </summary>
         public void DrawMeshes()
         {
@@ -193,6 +200,7 @@ namespace BlockmapFramework
             pm_GenerateFenceMeshes.End();
 
             pm_GenerateWallMeshes.Begin();
+            /*
             foreach (var altitudeLevel in WallMeshes.Values)
             {
                 foreach (WallMesh mesh in altitudeLevel.Values)
@@ -201,6 +209,8 @@ namespace BlockmapFramework
                 }
             }
             WallMeshes = WallMeshGenerator.GenerateMeshes(this);
+            */
+            InstancedWalls?.RebuildBuckets(World.ActiveVisionActor);
             pm_GenerateWallMeshes.End();
 
             pm_GenerateProcEntityMeshes.Begin();

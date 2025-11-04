@@ -452,7 +452,7 @@ namespace BlockmapFramework
                 {
                     AirNode hitNode = GetAirNodeFromRaycastHit(hit);
 
-                    if (hitNode != null && hitNode.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitNode != null && hitNode.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
                         newHoveredAirNode = hitNode;
                         newHoveredNode = hitNode;
@@ -489,7 +489,7 @@ namespace BlockmapFramework
                 {
                     Fence hitFence = GetFenceFromRaycastHit(hit);
                     
-                    if (hitFence != null && hitFence.Node.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitFence != null && hitFence.Node.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
                         newHoveredFence = hitFence;
                         HoveredWorldCoordinates = hitFence.Node.WorldCoordinates;
@@ -503,7 +503,7 @@ namespace BlockmapFramework
                 {
                     Wall hitWall = GetWallFromRaycastHit(hit);
                     
-                    if (hitWall != null && hitWall.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitWall != null && hitWall.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
                         newHoveredWall = hitWall;
                         HoveredWorldCoordinates = hitWall.WorldCoordinates;
@@ -517,7 +517,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = (Entity)objectHit.GetComponent<WorldObjectCollider>().Object;
 
-                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);
@@ -531,7 +531,7 @@ namespace BlockmapFramework
                 {
                     Entity hitEntity = GetBatchEntityFromRaycastHit(hit);
 
-                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Hidden)
+                    if (hitEntity != null && hitEntity.GetVisibility(ActiveVisionActor) != VisibilityType.Unrevealed)
                     {
                         newHoveredEntity = hitEntity;
                         newHoveredNode = hitEntity.OccupiedNodes.FirstOrDefault(n => n.WorldCoordinates == HoveredWorldCoordinates);

@@ -36,6 +36,10 @@ Shader "Custom/NodeMaterialShaderSimple"
         #pragma surface surf Standard fullforwardshadows addshadow
         #pragma target 3.5
 
+        // Enable GPU instancing (for walls)
+        #pragma multi_compile_instancing
+        #pragma instancing_options assumeuniformscaling
+
         // Tell the cginc to skip height/normal/roughness/metallic/AO work
         #define NODEMATERIAL_SIMPLE 1
 

@@ -21,7 +21,7 @@ namespace BlockmapFramework
                 foreach (Direction side in HelperFunctions.GetAllDirections8())
                 {
                     // Get walls for altitude level
-                    List<Wall> wallsToDraw = chunk.GetWalls(altitude, side);
+                    List<Wall> wallsToDraw = chunk.GetWalls(altitude, side).Where(w => w.Shape != WallShapeDefOf.Solid).ToList();
                     if (wallsToDraw.Count == 0) continue;
 
                     // Generate mesh

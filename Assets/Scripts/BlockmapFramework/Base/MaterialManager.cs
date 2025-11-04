@@ -18,6 +18,7 @@ namespace BlockmapFramework
             // not yet cached
             Material newMat = Resources.Load<Material>(resourcePath);
             if (newMat == null) throw new System.Exception($"Failed to load material {resourcePath}.");
+            newMat.enableInstancing = true;
             CachedMaterials.Add(resourcePath, newMat);
             return newMat;
         }

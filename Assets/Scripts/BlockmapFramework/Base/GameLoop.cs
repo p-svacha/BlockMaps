@@ -49,6 +49,7 @@ namespace BlockmapFramework
         private void Awake()
         {
             lastFrameTime = Time.realtimeSinceStartup;
+            GPUInstancingMeshDatabase.CreateAllMeshes();
         }
 
         private void Update()

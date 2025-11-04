@@ -1167,7 +1167,7 @@ namespace BlockmapFramework
             // Visibility is based on vision of actor
             if (IsVisibleBy(activeVisionActor)) return VisibilityType.Visible;
             else if (IsExploredBy(activeVisionActor)) return VisibilityType.FogOfWar;
-            return VisibilityType.Hidden;
+            return VisibilityType.Unrevealed;
         }
 
         /// <summary>

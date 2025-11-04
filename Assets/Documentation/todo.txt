@@ -1,7 +1,12 @@
-General next planned to-do's.
+- walls all shapes gpu instanced
+- fix hover for walls
+- fix altitude vision cutoff for walls
+- fix visibility for walls (visibility no longer needed), just remove from gpu instancing buckets
+	- change wall material to simple triplanar without all the extra stuff
+- port walltool preview to gpu instancing
+- remove WallMeshGenerator
+- remove Chunk.WallMeshes
 
-- Create 8x8 chunk maps with that new generator
-- If performance of generation is slow, check ways to fix that
-- Add character with vision range of 64 (!) to that map
-- In that testing setup (with fixed seen even maybe), improve performance of vision calculation (/c/68de9312-cce4-8327-9fea-5d8acf7220b8)
-- Start with turn-based-tactics prototype
+next:
+- make walls and fences to entities
+- entities have climbable property for every cell edge

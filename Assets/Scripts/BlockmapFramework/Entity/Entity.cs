@@ -735,17 +735,17 @@ namespace BlockmapFramework
         {
             if (IsVisibleBy(activeVisionActor))
             {
-                if(IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Hidden;
+                if(IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Unrevealed;
                 else return VisibilityType.Visible;
             }
 
             else if (IsExploredBy(activeVisionActor))
             {
-                if (IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Hidden;
+                if (IsHiddenByVisionCutoff(activeVisionActor)) return VisibilityType.Unrevealed;
                 else return VisibilityType.FogOfWar;
             }
 
-            return VisibilityType.Hidden;
+            return VisibilityType.Unrevealed;
         }
 
         /// <summary>

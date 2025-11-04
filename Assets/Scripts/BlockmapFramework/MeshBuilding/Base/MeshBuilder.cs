@@ -40,25 +40,37 @@ namespace BlockmapFramework
         {
             MeshObject = meshObject;
 
+            Init();
+        }
+
+        /// <summary>
+        /// Create a mesh builder without an associated GameObject to just generate mesh data.
+        /// <br/>Get the constructed Mesh with BuildMesh().
+        /// </summary>
+        public MeshBuilder()
+        {
+            Init();
+        }
+
+        private void Init()
+        {
             Submeshes = new Dictionary<Material, int>();
         }
 
-        public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true, bool castShadows = true)
+        /// <summary>
+        /// Builds and returns the constructed mesh according to all added vertices and triangles.
+        /// </summary>
+        public Mesh BuildMesh()
         {
             // Set index values for all vertices
             for (int i = 0; i < Vertices.Count; i++) Vertices[i].Id = i;
 
-            MeshFilter meshFilter = MeshObject.GetComponent<MeshFilter>();
-            if (meshFilter == null) meshFilter = MeshObject.AddComponent<MeshFilter>();
-
-            MeshRenderer meshRenderer = MeshObject.GetComponent<MeshRenderer>();
-            if (meshRenderer == null) meshRenderer = MeshObject.AddComponent<MeshRenderer>();
-
-            meshFilter.mesh.Clear();
-            meshFilter.mesh.SetVertices(Vertices.Select(x => x.Position).ToArray()); // Set the vertices
-            meshFilter.mesh.SetUVs(0, Vertices.Select(x => x.UV).ToArray()); // Set the UV's
-            meshFilter.mesh.SetUVs(1, Vertices.Select(x => x.UV2).ToArray()); // Set the UV's
-            meshFilter.mesh.subMeshCount = SubmeshTriangles.Count; // Set the submesh count
+            // Create mesh
+            Mesh mesh = new Mesh();
+            mesh.SetVertices(Vertices.Select(x => x.Position).ToArray()); // Set the vertices
+            mesh.SetUVs(0, Vertices.Select(x => x.UV).ToArray()); // Set the UV's
+            mesh.SetUVs(1, Vertices.Select(x => x.UV2).ToArray()); // Set the UV's
+            mesh.subMeshCount = SubmeshTriangles.Count; // Set the submesh count
             for (int i = 0; i < SubmeshTriangles.Count; i++) // Set the triangles for each submesh
             {
                 List<int> triangles = new List<int>();
@@ -68,9 +80,24 @@ namespace BlockmapFramework
                     triangles.Add(triangle.Vertex2.Id);
                     triangles.Add(triangle.Vertex3.Id);
                 }
-                meshFilter.mesh.SetTriangles(triangles, i);
+                mesh.SetTriangles(triangles, i);
             }
-            meshFilter.mesh.RecalculateNormals();
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            return mesh;
+        }
+
+        public GameObject ApplyMesh(bool addCollider = true, bool applyMaterials = true, bool castShadows = true)
+        {
+            MeshFilter meshFilter = MeshObject.GetComponent<MeshFilter>();
+            if (meshFilter == null) meshFilter = MeshObject.AddComponent<MeshFilter>();
+
+            MeshRenderer meshRenderer = MeshObject.GetComponent<MeshRenderer>();
+            if (meshRenderer == null) meshRenderer = MeshObject.AddComponent<MeshRenderer>();
+
+            meshFilter.mesh.Clear();
+            meshFilter.mesh = BuildMesh();
 
             if (applyMaterials) meshRenderer.materials = Materials.ToArray(); // Set the material for each submesh
             if (!castShadows) meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -128,6 +155,16 @@ namespace BlockmapFramework
             Materials.Add(material);
             Submeshes.Add(material, CurrentSubmesh);
 
+            return CurrentSubmesh;
+        }
+
+        /// <summary>
+        /// Adds a submesh without material information. Useful if you only want to build a mesh without an associated GameObject.
+        /// </summary>
+        public int AddDummySubmesh()
+        {
+            SubmeshTriangles.Add(new List<MeshTriangle>());
+            CurrentSubmesh++;
             return CurrentSubmesh;
         }
 

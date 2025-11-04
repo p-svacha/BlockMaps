@@ -121,7 +121,8 @@ namespace BlockmapFramework
 
         private void CreateVisionCollider()
         {
-            VisionColliderObject = new GameObject("visionCollider_" + Shape.Label + "_" + Id);
+            VisionColliderObject = new GameObject("wallVisionCollider_" + Shape.Label + "_" + Id);
+            VisionColliderObject.isStatic = true;
             VisionColliderObject.layer = World.Layer_WallVisionCollider;
             VisionColliderObject.transform.SetParent(Chunk.ChunkObject.transform);
 
@@ -260,13 +261,13 @@ namespace BlockmapFramework
             WorldDisplaySettings displaySettings = Chunk.World.DisplaySettings;
             if (displaySettings.VisionCutoffMode == VisionCutoffMode.AbsoluteCutoff)
             {
-                if (MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+                if (MinAltitude > displaySettings.VisionCutoffAltitude) return VisibilityType.Unrevealed;
             }
 
 
             if (displaySettings.VisionCutoffMode == VisionCutoffMode.RoomPerspectiveCutoff && displaySettings.PerspectiveVisionCutoffTarget != null && MinAltitude > displaySettings.VisionCutoffAltitude)
             {
-                if (MinAltitude > displaySettings.VisionCutoffAltitude + displaySettings.VisionCutoffPerpectiveHeight) return VisibilityType.Hidden;
+                if (MinAltitude > displaySettings.VisionCutoffAltitude + displaySettings.VisionCutoffPerpectiveHeight) return VisibilityType.Unrevealed;
 
                 Room targetRoom = displaySettings.PerspectiveVisionCutoffTarget.OriginNode.Room;
                 if (targetRoom != null)
@@ -277,7 +278,7 @@ namespace BlockmapFramework
                         Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
                         List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(HelperFunctions.GetOppositeDirection(cameraFacingDirection));
 
-                        if (wallSidesToHide.Contains(Side)) return VisibilityType.Hidden;
+                        if (wallSidesToHide.Contains(Side)) return VisibilityType.Unrevealed;
                     }
 
                     else // Wall is not part of target room
@@ -288,7 +289,7 @@ namespace BlockmapFramework
                             Direction cameraFacingDirection = BlockmapCamera.Instance.CurrentFacingDirection;
                             List<Direction> wallSidesToHide = HelperFunctions.GetAffectedDirections(cameraFacingDirection);
 
-                            if (wallSidesToHide.Contains(Side)) return VisibilityType.Hidden;
+                            if (wallSidesToHide.Contains(Side)) return VisibilityType.Unrevealed;
                         }
 
                         // Check if wall is close to target room in the direction the camera is facing
@@ -296,7 +297,7 @@ namespace BlockmapFramework
                         for (int i = 1; i <= maxDistance; i++)
                         {
                             Vector2Int coordinates = WorldCoordinates + HelperFunctions.GetDirectionVectorInt(BlockmapCamera.Instance.CurrentFacingDirection, distance: i);
-                            if (targetRoom.WorldCoordinates.Contains(coordinates)) return VisibilityType.Hidden;
+                            if (targetRoom.WorldCoordinates.Contains(coordinates)) return VisibilityType.Unrevealed;
                         }
                     }
                 }
@@ -305,7 +306,7 @@ namespace BlockmapFramework
             // Else visibility is based on vision of actor
             if (IsVisibleBy(activeVisionActor)) return VisibilityType.Visible;
             else if (IsExploredBy(activeVisionActor)) return VisibilityType.FogOfWar;
-            return VisibilityType.Hidden;
+            return VisibilityType.Unrevealed;
         }
 
         public override string ToString()

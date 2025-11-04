@@ -22,7 +22,7 @@ namespace BlockmapFramework
         public override VisibilityType GetVisibility(Actor activeVisionActor)
         {
             // Check if we need to hide because of vision cutoff
-            if (Chunk.World.DisplaySettings.IsVisionCutoffEnabled && BaseAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude) return VisibilityType.Hidden;
+            if (Chunk.World.DisplaySettings.IsVisionCutoffEnabled && BaseAltitude > Chunk.World.DisplaySettings.VisionCutoffAltitude) return VisibilityType.Unrevealed;
 
             return base.GetVisibility(activeVisionActor);
         }

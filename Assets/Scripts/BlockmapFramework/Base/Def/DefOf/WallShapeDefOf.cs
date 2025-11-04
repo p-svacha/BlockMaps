@@ -10,5 +10,6 @@ namespace BlockmapFramework
         public static WallShapeDef Solid;
         public static WallShapeDef Corner;
         public static WallShapeDef Window;
+        public static WallShapeDef Slope;
     }
 }

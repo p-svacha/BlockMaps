@@ -6,7 +6,7 @@ namespace BlockmapFramework
 {
     public enum VisibilityType
     {
-        Hidden = 0,
+        Unrevealed = 0,
         FogOfWar = 1,
         Visible = 2,
     }
